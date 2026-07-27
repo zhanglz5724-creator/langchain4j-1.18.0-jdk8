@@ -118,7 +118,6 @@ public final class RetryUtils {
                     ++retry;
                     continue;
                 }
-                break;
             }
         }
 

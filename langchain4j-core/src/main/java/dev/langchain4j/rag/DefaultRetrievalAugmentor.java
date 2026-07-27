@@ -1,15 +1,9 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package dev.langchain4j.rag;
 
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.internal.Utils;
 import dev.langchain4j.internal.ValidationUtils;
-import dev.langchain4j.rag.AugmentationRequest;
-import dev.langchain4j.rag.AugmentationResult;
-import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.rag.content.aggregator.ContentAggregator;
 import dev.langchain4j.rag.content.aggregator.DefaultContentAggregator;
@@ -35,20 +29,21 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class DefaultRetrievalAugmentor
-implements RetrievalAugmentor {
+public class DefaultRetrievalAugmentor implements RetrievalAugmentor {
     private final QueryTransformer queryTransformer;
     private final QueryRouter queryRouter;
     private final ContentAggregator contentAggregator;
     private final ContentInjector contentInjector;
     private final Executor executor;
 
-    public DefaultRetrievalAugmentor(QueryTransformer queryTransformer, QueryRouter queryRouter, ContentAggregator contentAggregator, ContentInjector contentInjector, Executor executor) {
-        this.queryTransformer = Utils.getOrDefault(queryTransformer, DefaultQueryTransformer::new);
-        this.queryRouter = ValidationUtils.ensureNotNull(queryRouter, "queryRouter");
-        this.contentAggregator = Utils.getOrDefault(contentAggregator, DefaultContentAggregator::new);
-        this.contentInjector = Utils.getOrDefault(contentInjector, DefaultContentInjector::new);
-        this.executor = Utils.getOrDefault(executor, DefaultRetrievalAugmentor::createDefaultExecutor);
+    public DefaultRetrievalAugmentor(QueryTransformer queryTransformer, QueryRouter queryRouter,
+            ContentAggregator contentAggregator, ContentInjector contentInjector, Executor executor) {
+        this.queryTransformer = (QueryTransformer) Utils.getOrDefault(queryTransformer, DefaultQueryTransformer::new);
+        this.queryRouter = (QueryRouter) ValidationUtils.ensureNotNull(queryRouter, "queryRouter");
+        this.contentAggregator = (ContentAggregator) Utils.getOrDefault(contentAggregator,
+                DefaultContentAggregator::new);
+        this.contentInjector = (ContentInjector) Utils.getOrDefault(contentInjector, DefaultContentInjector::new);
+        this.executor = (Executor) Utils.getOrDefault(executor, DefaultRetrievalAugmentor::createDefaultExecutor);
     }
 
     private static ExecutorService createDefaultExecutor() {
@@ -59,14 +54,14 @@ implements RetrievalAugmentor {
     public AugmentationResult augment(AugmentationRequest augmentationRequest) {
         ChatMessage chatMessage = augmentationRequest.chatMessage();
         if (!(chatMessage instanceof UserMessage)) {
-            throw new IllegalArgumentException("Unsupported message type: " + (Object)((Object)chatMessage.type()));
+            throw new IllegalArgumentException("Unsupported message type: " + chatMessage.type());
         }
-        UserMessage userMessage = (UserMessage)chatMessage;
+        UserMessage userMessage = (UserMessage) chatMessage;
         String queryText = userMessage.singleText();
         Query originalQuery = Query.from(queryText, augmentationRequest.metadata());
-        Collection<Query> queries = this.queryTransformer.transform(originalQuery);
+        Collection<Query> queries = (Collection<Query>) this.queryTransformer.transform(originalQuery);
         Map<Query, Collection<List<Content>>> queryToContents = this.process(queries);
-        List<Content> contents = this.contentAggregator.aggregate(queryToContents);
+        List<Content> contents = (List<Content>) this.contentAggregator.aggregate(queryToContents);
         ChatMessage augmentedChatMessage = this.contentInjector.inject(contents, chatMessage);
         return AugmentationResult.builder().chatMessage(augmentedChatMessage).contents(contents).build();
     }
@@ -74,10 +69,10 @@ implements RetrievalAugmentor {
     private Map<Query, Collection<List<Content>>> process(Collection<Query> queries) {
         if (queries.size() == 1) {
             Query query2 = queries.iterator().next();
-            Collection<ContentRetriever> retrievers = this.queryRouter.route(query2);
+            Collection<ContentRetriever> retrievers = (Collection<ContentRetriever>) this.queryRouter.route(query2);
             if (retrievers.size() == 1) {
-                ContentRetriever contentRetriever = retrievers.iterator().next();
-                List<Content> contents = contentRetriever.retrieve(query2);
+                ContentRetriever contentRetriever = (ContentRetriever) retrievers.iterator().next();
+                List<Content> contents = (List<Content>) contentRetriever.retrieve(query2);
                 return Collections.singletonMap(query2, Collections.singletonList(contents));
             }
             if (retrievers.size() > 1) {
@@ -87,23 +82,41 @@ implements RetrievalAugmentor {
             return Collections.emptyMap();
         }
         if (queries.size() > 1) {
-            ConcurrentHashMap<Query, CompletableFuture<Collection<List<Content>>>> queryToFutureContents = new ConcurrentHashMap<Query, CompletableFuture<Collection<List<Content>>>>();
+            ConcurrentHashMap<Query, CompletableFuture<Collection<List<Content>>>> queryToFutureContents =
+                    new ConcurrentHashMap<Query, CompletableFuture<Collection<List<Content>>>>();
             queries.forEach(query -> {
-                CompletionStage futureContents = CompletableFuture.supplyAsync(() -> this.queryRouter.route((Query)query), this.executor).thenCompose(retrievers -> this.retrieveFromAll((Collection<ContentRetriever>)retrievers, (Query)query));
-                queryToFutureContents.put((Query)query, (CompletableFuture<Collection<List<Content>>>)futureContents);
+                CompletionStage futureContents = CompletableFuture
+                        .supplyAsync(() -> this.queryRouter.route(query), this.executor)
+                        .thenCompose(retrievers -> this.retrieveFromAll(
+                                (Collection<ContentRetriever>) retrievers, query));
+                queryToFutureContents.put(query,
+                        (CompletableFuture<Collection<List<Content>>>) futureContents);
             });
             return DefaultRetrievalAugmentor.join(queryToFutureContents);
         }
         return Collections.emptyMap();
     }
 
-    private CompletableFuture<List<Content>> retrieveFromAll(Collection<ContentRetriever> retrievers, Query query) {
-        List<CompletableFuture<List<Content>>> futureContents = retrievers.stream().map(retriever -> CompletableFuture.supplyAsync(() -> retriever.retrieve(query), this.executor)).collect(Collectors.toList());
-        return CompletableFuture.allOf(futureContents.toArray(new CompletableFuture[0])).thenApply(ignored -> futureContents.stream().map(CompletableFuture::join).flatMap(Collection::stream).collect(Collectors.toList()));
+    @SuppressWarnings("unchecked")
+    private CompletableFuture<Collection<List<Content>>> retrieveFromAll(Collection<ContentRetriever> retrievers,
+            Query query) {
+        List<CompletableFuture<List<Content>>> futureContents = retrievers.stream()
+                .map(retriever -> CompletableFuture.supplyAsync(() -> retriever.retrieve(query), this.executor))
+                .collect(Collectors.toList());
+        return CompletableFuture.allOf(futureContents.toArray(new CompletableFuture[0]))
+                .thenApply(ignored -> futureContents.stream().map(CompletableFuture::join)
+                        .collect(Collectors.toList()));
     }
 
-    private static Map<Query, Collection<List<Content>>> join(Map<Query, CompletableFuture<Collection<List<Content>>>> queryToFutureContents) {
-        return (Map)((CompletableFuture)CompletableFuture.allOf(queryToFutureContents.values().toArray(new CompletableFuture[0])).thenApply(ignored -> queryToFutureContents.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> (Collection)((CompletableFuture)entry.getValue()).join())))).join();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Map<Query, Collection<List<Content>>> join(
+            Map<Query, CompletableFuture<Collection<List<Content>>>> queryToFutureContents) {
+        return (Map) ((CompletableFuture) CompletableFuture
+                .allOf(queryToFutureContents.values().toArray(new CompletableFuture[0]))
+                .thenApply(ignored -> queryToFutureContents.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey,
+                                entry -> (Collection) ((CompletableFuture) entry.getValue()).join()))))
+                .join();
     }
 
     public static DefaultRetrievalAugmentorBuilder builder() {
