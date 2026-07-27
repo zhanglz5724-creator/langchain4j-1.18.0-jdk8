@@ -18,6 +18,7 @@ import dev.langchain4j.store.embedding.listener.EmbeddingStoreListener;
 import dev.langchain4j.store.embedding.listener.EmbeddingStoreRequestContext;
 import dev.langchain4j.store.embedding.listener.EmbeddingStoreResponseContext;
 import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -41,7 +42,7 @@ class EmbeddingStoreListenerTest {
 
         @Override
         public List<String> addAll(List<Embedding> embeddings) {
-            return List.of("id-1", "id-2");
+            return Arrays.asList("id-1", "id-2");
         }
 
         @Override
@@ -58,7 +59,7 @@ class EmbeddingStoreListenerTest {
 
         @Override
         public EmbeddingSearchResult<String> search(EmbeddingSearchRequest request) {
-            return new EmbeddingSearchResult<>(List.of());
+            return new EmbeddingSearchResult<>(Arrays.asList());
         }
     }
 
@@ -98,11 +99,11 @@ class EmbeddingStoreListenerTest {
         EmbeddingStoreListener listener1 = spy(new SuccessfulListener());
         EmbeddingStoreListener listener2 = spy(new SuccessfulListener());
 
-        EmbeddingStore<String> store = new TestEmbeddingStore().addListeners(List.of(listener1, listener2));
+        EmbeddingStore<String> store = new TestEmbeddingStore().addListeners(Arrays.asList(listener1, listener2));
 
         // when
         store.search(EmbeddingSearchRequest.builder()
-                .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                 .build());
 
         // then
@@ -121,12 +122,12 @@ class EmbeddingStoreListenerTest {
         EmbeddingStoreListener failingListener = spy(new FailingListener());
         EmbeddingStoreListener successfulListener = spy(new SuccessfulListener());
         EmbeddingStore<String> store =
-                new TestEmbeddingStore().addListeners(List.of(failingListener, successfulListener));
+                new TestEmbeddingStore().addListeners(Arrays.asList(failingListener, successfulListener));
 
         // when - then
         assertThatNoException()
                 .isThrownBy(() -> store.search(EmbeddingSearchRequest.builder()
-                        .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                        .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                         .build()));
 
         verify(failingListener).onRequest(any());
@@ -154,11 +155,11 @@ class EmbeddingStoreListenerTest {
             }
         });
 
-        EmbeddingStore<String> store = new TestEmbeddingStore().addListeners(List.of(listener1, listener2));
+        EmbeddingStore<String> store = new TestEmbeddingStore().addListeners(Arrays.asList(listener1, listener2));
 
         // when
         store.search(EmbeddingSearchRequest.builder()
-                .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                 .build());
 
         // then
@@ -179,7 +180,7 @@ class EmbeddingStoreListenerTest {
 
         // when
         assertThatThrownBy(() -> store.search(EmbeddingSearchRequest.builder()
-                        .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                        .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                         .build()))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Embedding store failed");
@@ -193,12 +194,12 @@ class EmbeddingStoreListenerTest {
     @Test
     void should_handle_empty_listeners_list() {
         // given
-        EmbeddingStore<String> store = new TestEmbeddingStore().addListeners(List.of());
+        EmbeddingStore<String> store = new TestEmbeddingStore().addListeners(Arrays.asList());
 
         // when/then
         assertThatNoException()
                 .isThrownBy(() -> store.search(EmbeddingSearchRequest.builder()
-                        .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                        .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                         .build()));
     }
 
@@ -210,7 +211,7 @@ class EmbeddingStoreListenerTest {
         // when/then
         assertThatNoException()
                 .isThrownBy(() -> store.search(EmbeddingSearchRequest.builder()
-                        .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                        .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                         .build()));
     }
 
@@ -226,11 +227,11 @@ class EmbeddingStoreListenerTest {
                 throw new RuntimeException("Embedding store failed");
             }
         };
-        EmbeddingStore<String> store = failingStore.addListeners(List.of(failingListener, successfulListener));
+        EmbeddingStore<String> store = failingStore.addListeners(Arrays.asList(failingListener, successfulListener));
 
         // when
         assertThatThrownBy(() -> store.search(EmbeddingSearchRequest.builder()
-                        .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                        .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                         .build()))
                 .hasMessage("Embedding store failed");
 
@@ -264,11 +265,11 @@ class EmbeddingStoreListenerTest {
                 throw new RuntimeException("Test error");
             }
         };
-        EmbeddingStore<String> store = failingStore.addListeners(List.of(listener1, listener2));
+        EmbeddingStore<String> store = failingStore.addListeners(Arrays.asList(listener1, listener2));
 
         // when
         assertThatThrownBy(() -> store.search(EmbeddingSearchRequest.builder()
-                        .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                        .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                         .build()))
                 .hasMessage("Test error");
 
@@ -282,7 +283,7 @@ class EmbeddingStoreListenerTest {
         EmbeddingStoreListener listener = spy(new SuccessfulListener());
         EmbeddingStore<String> store = new TestEmbeddingStore().addListener(listener);
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                 .build();
 
         // when
@@ -342,7 +343,7 @@ class EmbeddingStoreListenerTest {
         };
         EmbeddingStore<String> store = failingStore.addListener(listener);
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                .queryEmbedding(Embedding.from(List.of(1f, 2f, 3f)))
+                .queryEmbedding(Embedding.from(Arrays.asList(1f, 2f, 3f)))
                 .build();
 
         // when
@@ -363,7 +364,7 @@ class EmbeddingStoreListenerTest {
         // given
         EmbeddingStoreListener listener = spy(new SuccessfulListener());
         EmbeddingStore<String> store = new TestEmbeddingStore().addListener(listener);
-        Embedding embedding = Embedding.from(List.of(1f, 2f, 3f));
+        Embedding embedding = Embedding.from(Arrays.asList(1f, 2f, 3f));
 
         // when
         String returnedId = store.add(embedding);
@@ -395,7 +396,7 @@ class EmbeddingStoreListenerTest {
         // given
         EmbeddingStoreListener listener = spy(new SuccessfulListener());
         EmbeddingStore<String> store = new TestEmbeddingStore().addListener(listener);
-        Embedding embedding = Embedding.from(List.of(1f, 2f, 3f));
+        Embedding embedding = Embedding.from(Arrays.asList(1f, 2f, 3f));
 
         // when
         store.add("id-123", embedding);
@@ -424,7 +425,7 @@ class EmbeddingStoreListenerTest {
         // given
         EmbeddingStoreListener listener = spy(new SuccessfulListener());
         EmbeddingStore<String> store = new TestEmbeddingStore().addListener(listener);
-        Embedding embedding = Embedding.from(List.of(1f, 2f, 3f));
+        Embedding embedding = Embedding.from(Arrays.asList(1f, 2f, 3f));
 
         // when
         String returnedId = store.add(embedding, "embedded");
@@ -447,7 +448,7 @@ class EmbeddingStoreListenerTest {
         // given
         EmbeddingStoreListener listener = spy(new SuccessfulListener());
         EmbeddingStore<String> store = new TestEmbeddingStore().addListener(listener);
-        List<Embedding> embeddings = List.of(Embedding.from(List.of(1f)), Embedding.from(List.of(2f)));
+        List<Embedding> embeddings = Arrays.asList(Embedding.from(Arrays.asList(1f)), Embedding.from(Arrays.asList(2f)));
 
         // when
         List<String> ids = store.addAll(embeddings);
@@ -478,9 +479,9 @@ class EmbeddingStoreListenerTest {
         // given
         EmbeddingStoreListener listener = spy(new SuccessfulListener());
         EmbeddingStore<String> store = new TestEmbeddingStore().addListener(listener);
-        List<String> ids = List.of("a", "b");
-        List<Embedding> embeddings = List.of(Embedding.from(List.of(1f)), Embedding.from(List.of(2f)));
-        List<String> embedded = List.of("e1", "e2");
+        List<String> ids = Arrays.asList("a", "b");
+        List<Embedding> embeddings = Arrays.asList(Embedding.from(Arrays.asList(1f)), Embedding.from(Arrays.asList(2f)));
+        List<String> embedded = Arrays.asList("e1", "e2");
 
         // when
         store.addAll(ids, embeddings, embedded);
@@ -512,7 +513,7 @@ class EmbeddingStoreListenerTest {
         EmbeddingStore<String> store = new TestEmbeddingStore().addListener(listener);
 
         // when
-        store.removeAll(List.of("x", "y"));
+        store.removeAll(Arrays.asList("x", "y"));
 
         // then
         ArgumentCaptor<EmbeddingStoreRequestContext> requestCaptor =

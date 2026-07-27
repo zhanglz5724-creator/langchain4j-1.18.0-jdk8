@@ -7,6 +7,7 @@ import dev.langchain4j.data.document.Metadata;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class IsEqualToTest {
@@ -20,14 +21,14 @@ class IsEqualToTest {
     @Test
     void shouldReturnFalseWhenKeyNotFound() {
         IsEqualTo isEqualTo = new IsEqualTo("key", "value");
-        Metadata metadata = new Metadata(Map.of());
+        Metadata metadata = new Metadata(Collections.emptyMap());
         assertThat(isEqualTo.test(metadata)).isFalse();
     }
 
     @Test
     void shouldReturnTrueWhenValuesAreNumbers() {
         IsEqualTo isEqualTo = new IsEqualTo("key", 2);
-        Metadata metadata = new Metadata(Map.of("key", 2));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 2));
         assertThat(isEqualTo.test(metadata)).isTrue();
     }
 
@@ -57,21 +58,21 @@ class IsEqualToTest {
     @Test
     void shouldReturnFalseWhenValuesAreDifferent() {
         IsEqualTo isEqualTo = new IsEqualTo("key", "value1");
-        Metadata metadata = new Metadata(Map.of("key", "value2"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "value2"));
         assertThat(isEqualTo.test(metadata)).isFalse();
     }
 
     @Test
     void shouldReturnTrueWhenComparingDifferentNumberTypes() {
         IsEqualTo isEqualTo = new IsEqualTo("key", 1L);
-        Metadata metadata = new Metadata(Map.of("key", 1));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 1));
         assertThat(isEqualTo.test(metadata)).isTrue();
     }
 
     @Test
     void shouldHandleCaseSensitiveStringComparison() {
         IsEqualTo isEqualTo = new IsEqualTo("key", "Value");
-        Metadata metadata = new Metadata(Map.of("key", "value"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "value"));
         assertThat(isEqualTo.test(metadata)).isFalse();
     }
 
@@ -91,14 +92,14 @@ class IsEqualToTest {
     @Test
     void shouldHandleKeyWithSpecialCharacters() {
         IsEqualTo isEqualTo = new IsEqualTo("key.with.dots", "value");
-        Metadata metadata = new Metadata(Map.of("key.with.dots", "value"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key.with.dots", "value"));
         assertThat(isEqualTo.test(metadata)).isTrue();
     }
 
     @Test
     void shouldHandleFloatingPointComparison() {
         IsEqualTo isEqualTo = new IsEqualTo("key", 0.1);
-        Metadata metadata = new Metadata(Map.of("key", 0.1));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 0.1));
         assertThat(isEqualTo.test(metadata)).isTrue();
     }
 }

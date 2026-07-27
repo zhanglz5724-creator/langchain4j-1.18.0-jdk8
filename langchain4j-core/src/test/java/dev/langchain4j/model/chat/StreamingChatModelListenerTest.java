@@ -18,6 +18,7 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class StreamingChatModelListenerTest {
@@ -69,7 +70,7 @@ class StreamingChatModelListenerTest {
                 verified.complete(true);
             }
         });
-        TestStreamingChatModel model = new TestStreamingChatModel(List.of(listener));
+        TestStreamingChatModel model = new TestStreamingChatModel(Arrays.asList(listener));
         ChatRequestOptions options = ChatRequestOptions.builder()
                 .addListenerAttribute("tenantId", "acme-co")
                 .build();
@@ -103,7 +104,7 @@ class StreamingChatModelListenerTest {
                 verified.complete(true);
             }
         });
-        TestStreamingChatModel model = new TestStreamingChatModel(List.of(listener), true);
+        TestStreamingChatModel model = new TestStreamingChatModel(Arrays.asList(listener), true);
         ChatRequestOptions options = ChatRequestOptions.builder()
                 .addListenerAttribute("key", "value")
                 .build();
@@ -128,7 +129,7 @@ class StreamingChatModelListenerTest {
     void should_handle_null_options() {
 
         // given
-        TestStreamingChatModel model = new TestStreamingChatModel(List.of());
+        TestStreamingChatModel model = new TestStreamingChatModel(Arrays.asList());
 
         // when/then
         assertThatNoException()

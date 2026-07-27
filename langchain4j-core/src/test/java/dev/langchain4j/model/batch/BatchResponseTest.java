@@ -5,6 +5,7 @@ import static dev.langchain4j.model.batch.BatchState.SUCCEEDED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class BatchResponseTest {
@@ -16,11 +17,11 @@ class BatchResponseTest {
 
     @Test
     void responsesAndErrors_shouldBeDerivedFromResults() {
-        var error = new BatchError(400, "Bad request", null);
-        var response = BatchResponse.<String>builder()
+        BatchError error = new BatchError(400, "Bad request", null);
+        BatchResponse<String> response = BatchResponse.<String>builder()
                 .batchId(BATCH_NAME)
                 .state(SUCCEEDED)
-                .results(List.of(
+                .results(Arrays.asList(
                         BatchItemResult.success("response1"),
                         BatchItemResult.success("response2"),
                         BatchItemResult.failure(error)))
@@ -34,17 +35,17 @@ class BatchResponseTest {
 
     @Test
     void results_shouldPreserveOrderAndCorrelateOutcomesWithRequests() {
-        var error = new BatchError(429, "Rate limited", null);
-        var response = BatchResponse.<String>builder()
+        BatchError error = new BatchError(429, "Rate limited", null);
+        BatchResponse<String> response = BatchResponse.<String>builder()
                 .batchId(BATCH_NAME)
                 .state(SUCCEEDED)
-                .results(List.of(
+                .results(Arrays.asList(
                         BatchItemResult.success("first"),
                         BatchItemResult.failure(error),
                         BatchItemResult.success("third")))
                 .build();
 
-        var results = response.results();
+        List<BatchItemResult<String>> results = response.results();
         assertThat(results).hasSize(3);
 
         assertThat(results.get(0).isSuccess()).isTrue();
@@ -61,7 +62,7 @@ class BatchResponseTest {
 
     @Test
     void shouldDefaultNullResultsToEmptyList() {
-        var response = BatchResponse.<String>builder()
+        BatchResponse<String> response = BatchResponse.<String>builder()
                 .batchId(BATCH_NAME)
                 .state(SUCCEEDED)
                 .results(null)
@@ -75,15 +76,15 @@ class BatchResponseTest {
     @Test
     void builder_shouldBuildEquivalentResponse() {
         List<BatchItemResult<String>> results =
-                List.of(BatchItemResult.success("response1"), BatchItemResult.success("response2"));
+                Arrays.asList(BatchItemResult.success("response1"), BatchItemResult.success("response2"));
 
-        var built = BatchResponse.<String>builder()
+        BatchResponse<String> built = BatchResponse.<String>builder()
                 .batchId(BATCH_NAME)
                 .state(SUCCEEDED)
                 .results(results)
                 .build();
 
-        var expected = BatchResponse.<String>builder()
+        BatchResponse<String> expected = BatchResponse.<String>builder()
                 .batchId(BATCH_NAME)
                 .state(SUCCEEDED)
                 .results(results)
@@ -97,7 +98,7 @@ class BatchResponseTest {
 
     @Test
     void builder_shouldDefaultMissingResultsToEmpty() {
-        var built = BatchResponse.<String>builder()
+        BatchResponse<String> built = BatchResponse.<String>builder()
                 .batchId(BATCH_NAME)
                 .state(PENDING)
                 .build();

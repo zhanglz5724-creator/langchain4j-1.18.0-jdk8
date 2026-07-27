@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class WebSearchOrganicResultTest {
@@ -177,7 +178,7 @@ class WebSearchOrganicResultTest {
         String expectedText = "title\nsnippet";
 
         // Expected metadata
-        Metadata expectedMetadata = Metadata.from(Map.of("url", "https://google.com"));
+        Metadata expectedMetadata = Metadata.from(Collections.singletonMap("url", "https://google.com"));
 
         // Assertions
         assertThat(fromWithContentAndMetadata.toTextSegment().text()).isEqualTo(expectedText);

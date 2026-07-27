@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Map;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class ModerationResponseTest {
@@ -40,7 +41,7 @@ class ModerationResponseTest {
     void should_create_response_with_all_fields() {
         // given
         Moderation moderation = Moderation.flagged("bad content");
-        Map<String, Object> metadata = Map.of("key", "value");
+        Map<String, Object> metadata = Collections.singletonMap("key", "value");
 
         // when
         ModerationResponse response = ModerationResponse.builder()
@@ -121,7 +122,7 @@ class ModerationResponseTest {
     void should_create_response_with_metadata() {
         // given
         Moderation moderation = Moderation.notFlagged();
-        Map<String, Object> metadata = Map.of("key", "value");
+        Map<String, Object> metadata = Collections.singletonMap("key", "value");
 
         // when
         ModerationResponse response = ModerationResponse.builder()

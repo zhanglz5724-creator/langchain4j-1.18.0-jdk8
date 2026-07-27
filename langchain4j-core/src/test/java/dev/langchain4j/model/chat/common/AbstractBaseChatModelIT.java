@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -396,7 +398,7 @@ public abstract class AbstractBaseChatModelIT<M> {
     }
 
     protected Set<FinishReason> finishReasonForMaxOutputTokens() {
-        return Set.of(LENGTH);
+        return new HashSet<>(Arrays.asList(LENGTH));
     }
 
     @Test
@@ -481,7 +483,7 @@ public abstract class AbstractBaseChatModelIT<M> {
     protected void should_respect_stopSequences_in_chat_request(M model) {
 
         // given
-        List<String> stopSequences = List.of("World", " World");
+        List<String> stopSequences = Arrays.asList("World", " World");
         ChatRequestParameters parameters =
                 ChatRequestParameters.builder().stopSequences(stopSequences).build();
 
@@ -513,7 +515,7 @@ public abstract class AbstractBaseChatModelIT<M> {
     protected void should_respect_stopSequences_in_default_model_parameters() {
 
         // given
-        List<String> stopSequences = List.of("World", " World");
+        List<String> stopSequences = Arrays.asList("World", " World");
         ChatRequestParameters parameters =
                 ChatRequestParameters.builder().stopSequences(stopSequences).build();
         M model = createModelWith(parameters);
@@ -547,7 +549,7 @@ public abstract class AbstractBaseChatModelIT<M> {
     protected void should_fail_if_stopSequences_parameter_is_not_supported(M model) {
 
         // given
-        List<String> stopSequences = List.of("World");
+        List<String> stopSequences = Arrays.asList("World");
         ChatRequestParameters parameters =
                 ChatRequestParameters.builder().stopSequences(stopSequences).build();
 
@@ -1361,7 +1363,7 @@ public abstract class AbstractBaseChatModelIT<M> {
     @MethodSource("models")
     @EnabledIf("supportsJsonResponseFormatWithRawSchema")
     protected void should_respect_JsonRawSchema_responseFormat(M model) {
-        var rawSchema =
+        String rawSchema =
                 """
             {
                 "$schema": "http://json-schema.org/draft-07/schema#",
@@ -1446,7 +1448,7 @@ public abstract class AbstractBaseChatModelIT<M> {
                 .jsonSchema(JsonSchema.builder()
                         .name("weather")
                         .rootElement(JsonObjectSchema.builder()
-                                .addEnumProperty("weather", List.of("sunny", "rainy"))
+                                .addEnumProperty("weather", Arrays.asList("sunny", "rainy"))
                                 .build())
                         .build())
                 .build();

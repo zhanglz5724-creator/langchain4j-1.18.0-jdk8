@@ -115,7 +115,7 @@ class UserMessageTest implements WithAssertions {
     void findLast_should_return_last_user_message() {
         UserMessage first = UserMessage.from("first");
         UserMessage second = UserMessage.from("second");
-        List<ChatMessage> messages = List.of(first, AiMessage.from("ai"), second);
+        List<ChatMessage> messages = Arrays.asList(first, AiMessage.from("ai"), second);
 
         Optional<UserMessage> result = UserMessage.findLast(messages);
 
@@ -124,7 +124,7 @@ class UserMessageTest implements WithAssertions {
 
     @Test
     void findLast_should_return_empty_when_no_user_messages() {
-        List<ChatMessage> messages = List.of(AiMessage.from("ai"), SystemMessage.from("system"));
+        List<ChatMessage> messages = Arrays.asList(AiMessage.from("ai"), SystemMessage.from("system"));
 
         Optional<UserMessage> result = UserMessage.findLast(messages);
 
@@ -133,7 +133,7 @@ class UserMessageTest implements WithAssertions {
 
     @Test
     void findLast_should_return_empty_for_empty_list() {
-        Optional<UserMessage> result = UserMessage.findLast(List.of());
+        Optional<UserMessage> result = UserMessage.findLast(Arrays.asList());
 
         assertThat(result).isEmpty();
     }
@@ -141,7 +141,7 @@ class UserMessageTest implements WithAssertions {
     @Test
     void findLast_should_return_single_user_message() {
         UserMessage only = UserMessage.from("only");
-        List<ChatMessage> messages = List.of(SystemMessage.from("system"), only, AiMessage.from("ai"));
+        List<ChatMessage> messages = Arrays.asList(SystemMessage.from("system"), only, AiMessage.from("ai"));
 
         Optional<UserMessage> result = UserMessage.findLast(messages);
 
@@ -152,7 +152,7 @@ class UserMessageTest implements WithAssertions {
     void replaceLast_should_replace_last_user_message_when_different() {
         UserMessage original = UserMessage.from("original");
         UserMessage replacement = UserMessage.from("replacement");
-        List<ChatMessage> messages = List.of(SystemMessage.from("system"), original, AiMessage.from("ai"));
+        List<ChatMessage> messages = Arrays.asList(SystemMessage.from("system"), original, AiMessage.from("ai"));
 
         List<ChatMessage> result = UserMessage.replaceLast(messages, replacement);
 
@@ -163,7 +163,7 @@ class UserMessageTest implements WithAssertions {
     @Test
     void replaceLast_should_return_same_list_when_replacement_matches() {
         UserMessage message = UserMessage.from("hello");
-        List<ChatMessage> messages = List.of(SystemMessage.from("system"), message, AiMessage.from("ai"));
+        List<ChatMessage> messages = Arrays.asList(SystemMessage.from("system"), message, AiMessage.from("ai"));
 
         List<ChatMessage> result = UserMessage.replaceLast(messages, UserMessage.from("hello"));
 
@@ -172,7 +172,7 @@ class UserMessageTest implements WithAssertions {
 
     @Test
     void replaceLast_should_return_same_list_when_replacement_is_null() {
-        List<ChatMessage> messages = List.of(UserMessage.from("hello"));
+        List<ChatMessage> messages = Arrays.asList(UserMessage.from("hello"));
 
         List<ChatMessage> result = UserMessage.replaceLast(messages, null);
 
@@ -181,7 +181,7 @@ class UserMessageTest implements WithAssertions {
 
     @Test
     void replaceLast_should_return_same_list_when_no_user_message_found() {
-        List<ChatMessage> messages = List.of(SystemMessage.from("system"), AiMessage.from("ai"));
+        List<ChatMessage> messages = Arrays.asList(SystemMessage.from("system"), AiMessage.from("ai"));
 
         List<ChatMessage> result = UserMessage.replaceLast(messages, UserMessage.from("replacement"));
 
@@ -193,7 +193,7 @@ class UserMessageTest implements WithAssertions {
         UserMessage first = UserMessage.from("first");
         UserMessage second = UserMessage.from("second");
         UserMessage replacement = UserMessage.from("replacement");
-        List<ChatMessage> messages = List.of(first, AiMessage.from("ai"), second);
+        List<ChatMessage> messages = Arrays.asList(first, AiMessage.from("ai"), second);
 
         List<ChatMessage> result = UserMessage.replaceLast(messages, replacement);
 
@@ -202,7 +202,7 @@ class UserMessageTest implements WithAssertions {
 
     @Test
     void replaceLast_should_return_same_list_for_empty_list() {
-        List<ChatMessage> messages = List.of();
+        List<ChatMessage> messages = Arrays.asList();
 
         List<ChatMessage> result = UserMessage.replaceLast(messages, UserMessage.from("replacement"));
 

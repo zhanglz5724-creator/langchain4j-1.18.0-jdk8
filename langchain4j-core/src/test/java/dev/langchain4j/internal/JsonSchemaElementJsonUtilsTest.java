@@ -15,7 +15,11 @@ import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
+import java.util.Collections;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +127,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_fallback_to_raw_schema_for_external_ref() {
-        Map<String, Object> externalRef = Map.of("$ref", "https://example.com/schema.json");
+        Map<String, Object> externalRef = Collections.singletonMap("$ref", "https://example.com/schema.json");
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(externalRef);
         assertThat(element).isInstanceOf(JsonRawSchema.class);
     }
@@ -135,9 +139,7 @@ class JsonSchemaElementJsonUtilsTest {
         JsonObjectSchema nodeSchema = JsonObjectSchema.builder()
                 .addStringProperty("value")
                 .addProperty("child", refSchema)
-                .definitions(Map.of(
-                        "node-id",
-                        JsonObjectSchema.builder().addStringProperty("value").build()))
+                .definitions(Collections.singletonMap("node-id", JsonObjectSchema.builder().addStringProperty("value").build()))
                 .build();
         assertRoundTrip(nodeSchema);
     }
@@ -151,21 +153,21 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_fallback_to_raw_schema_for_unknown_type() {
-        Map<String, Object> unknownMap = Map.of("type", "customType", "format", "special");
+        Map<String, Object> unknownMap = new java.util.HashMap<String,Object>(){{put("type","customType"); put("format","special");}};
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(unknownMap);
         assertThat(element).isInstanceOf(JsonRawSchema.class);
     }
 
     @Test
     void should_fallback_to_raw_schema_when_no_type() {
-        Map<String, Object> noTypeMap = Map.of("oneOf", List.of(Map.of("type", "string")));
+        Map<String, Object> noTypeMap = Collections.singletonMap("oneOf", Arrays.asList(Collections.singletonMap("type", "string")));
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(noTypeMap);
         assertThat(element).isInstanceOf(JsonRawSchema.class);
     }
 
     @Test
     void should_reject_invalid_ref_type() {
-        Map<String, Object> badRef = Map.of("$ref", 42);
+        Map<String, Object> badRef = Collections.singletonMap("$ref", 42);
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badRef))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("$ref");
@@ -173,7 +175,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_invalid_anyof_type() {
-        Map<String, Object> badAnyOf = Map.of("anyOf", "not-a-list");
+        Map<String, Object> badAnyOf = Collections.singletonMap("anyOf", "not-a-list");
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badAnyOf))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("anyOf");
@@ -181,7 +183,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_invalid_enum_type() {
-        Map<String, Object> badEnum = Map.of("enum", "not-a-list");
+        Map<String, Object> badEnum = Collections.singletonMap("enum", "not-a-list");
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badEnum))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("enum");
@@ -190,14 +192,14 @@ class JsonSchemaElementJsonUtilsTest {
     @Test
     void should_fallback_to_raw_schema_when_type_is_array() {
         // JSON Schema allows type: ["string", "null"] — this should fallback to raw
-        Map<String, Object> arrayType = Map.of("type", List.of("string", "null"));
+        Map<String, Object> arrayType = Collections.singletonMap("type", Arrays.asList("string", "null"));
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(arrayType);
         assertThat(element).isInstanceOf(JsonRawSchema.class);
     }
 
     @Test
     void should_reject_non_map_properties() {
-        Map<String, Object> badProps = Map.of("type", "object", "properties", "bad");
+        Map<String, Object> badProps = new java.util.HashMap<String,Object>(){{put("type","object"); put("properties","bad");}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badProps))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("properties");
@@ -205,7 +207,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_map_property_value() {
-        Map<String, Object> badPropValue = Map.of("type", "object", "properties", Map.of("x", "bad"));
+        Map<String, Object> badPropValue = new java.util.HashMap<String,Object>(){{put("type", "object");put("properties", Collections.singletonMap("x", "bad"));}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badPropValue))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("x");
@@ -213,7 +215,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_map_items() {
-        Map<String, Object> badItems = Map.of("type", "array", "items", "bad");
+        Map<String, Object> badItems = new java.util.HashMap<String,Object>(){{put("type","array"); put("items","bad");}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badItems))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("items");
@@ -221,7 +223,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_map_anyof_element() {
-        Map<String, Object> badAnyOfElement = Map.of("anyOf", List.of("bad"));
+        Map<String, Object> badAnyOfElement = Collections.singletonMap("anyOf", Arrays.asList("bad"));
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badAnyOfElement))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("anyOf");
@@ -229,7 +231,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_map_definition_value() {
-        Map<String, Object> badDefValue = Map.of("type", "object", "$defs", Map.of("node", "bad"));
+        Map<String, Object> badDefValue = new java.util.HashMap<String,Object>(){{put("type", "object");put("$defs", Collections.singletonMap("node", "bad"));}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badDefValue))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("node");
@@ -237,14 +239,14 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_fallback_to_raw_for_mixed_enum() {
-        Map<String, Object> mixedEnum = Map.of("enum", List.of("ok", 42));
+        Map<String, Object> mixedEnum = Collections.singletonMap("enum", Arrays.asList("ok", 42));
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(mixedEnum);
         assertThat(element).isInstanceOf(JsonRawSchema.class);
     }
 
     @Test
     void should_reject_non_string_required_element() {
-        Map<String, Object> badRequired = Map.of("type", "object", "required", List.of("ok", 42));
+        Map<String, Object> badRequired = new java.util.HashMap<String,Object>(){{put("type", "object");put("required", Arrays.asList("ok", 42));}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badRequired))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("required");
@@ -252,7 +254,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_list_required() {
-        Map<String, Object> badRequiredType = Map.of("type", "object", "required", "bad");
+        Map<String, Object> badRequiredType = new java.util.HashMap<String,Object>(){{put("type","object"); put("required","bad");}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badRequiredType))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("required");
@@ -260,7 +262,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_map_defs() {
-        Map<String, Object> badDefs = Map.of("type", "object", "$defs", "bad");
+        Map<String, Object> badDefs = new java.util.HashMap<String,Object>(){{put("type","object"); put("$defs","bad");}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(badDefs))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("$defs");
@@ -295,7 +297,7 @@ class JsonSchemaElementJsonUtilsTest {
     @Test
     void should_fallback_to_raw_for_numeric_enum() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("enum", List.of(1, 2, 3));
+        map.put("enum", Arrays.asList(1, 2, 3));
         assertRawFallback(map);
     }
 
@@ -303,7 +305,7 @@ class JsonSchemaElementJsonUtilsTest {
     void should_fallback_to_raw_for_schema_valued_additionalProperties() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("type", "object");
-        map.put("additionalProperties", Map.of("type", "string"));
+        map.put("additionalProperties", Collections.singletonMap("type", "string"));
         assertRawFallback(map);
     }
 
@@ -315,13 +317,13 @@ class JsonSchemaElementJsonUtilsTest {
         childMap.put("format", "date-time");
 
         Map<String, Object> propsMap = new LinkedHashMap<>();
-        propsMap.put("name", Map.of("type", "string"));
+        propsMap.put("name", Collections.singletonMap("type", "string"));
         propsMap.put("timestamp", childMap);
 
         Map<String, Object> objectMap = new LinkedHashMap<>();
         objectMap.put("type", "object");
         objectMap.put("properties", propsMap);
-        objectMap.put("required", List.of("name"));
+        objectMap.put("required", Arrays.asList("name"));
 
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(objectMap);
         assertThat(element).isInstanceOf(JsonObjectSchema.class);
@@ -344,7 +346,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_string_description_in_object() {
-        Map<String, Object> map = Map.of("type", "object", "description", 123);
+        Map<String, Object> map = new java.util.HashMap<String,Object>(){{put("type","object"); put("description",123);}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(map))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("description");
@@ -352,7 +354,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_string_description_in_array() {
-        Map<String, Object> map = Map.of("type", "array", "description", true);
+        Map<String, Object> map = new java.util.HashMap<String,Object>(){{put("type","array"); put("description",true);}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(map))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("description");
@@ -360,7 +362,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_string_description_in_anyof() {
-        Map<String, Object> map = Map.of("anyOf", List.of(Map.of("type", "string")), "description", 42);
+        Map<String, Object> map = new java.util.HashMap<String,Object>(){{put("anyOf", Arrays.asList(Collections.singletonMap("type", "string")));put("description", 42);}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(map))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("description");
@@ -368,7 +370,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_string_description_in_string() {
-        Map<String, Object> map = Map.of("type", "string", "description", 99);
+        Map<String, Object> map = new java.util.HashMap<String,Object>(){{put("type","string"); put("description",99);}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(map))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("description");
@@ -376,7 +378,7 @@ class JsonSchemaElementJsonUtilsTest {
 
     @Test
     void should_reject_non_string_description_in_enum() {
-        Map<String, Object> map = Map.of("enum", List.of("A", "B"), "description", List.of("bad"));
+        Map<String, Object> map = new java.util.HashMap<String,Object>(){{put("enum", Arrays.asList("A", "B"));put("description", Arrays.asList("bad"));}};
         assertThatThrownBy(() -> JsonSchemaElementJsonUtils.fromMap(map))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("description");
@@ -389,7 +391,7 @@ class JsonSchemaElementJsonUtilsTest {
         // {"type":"integer","enum":["A"]} — type is not "string", must fall back to raw
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("type", "integer");
-        map.put("enum", List.of("A", "B"));
+        map.put("enum", Arrays.asList("A", "B"));
         assertRawFallback(map);
     }
 
@@ -398,7 +400,7 @@ class JsonSchemaElementJsonUtilsTest {
         // {"type":null,"enum":["A"]} — type key present but null, must fall back to raw
         Map<String, Object> map = new HashMap<>();
         map.put("type", null);
-        map.put("enum", List.of("A"));
+        map.put("enum", Arrays.asList("A"));
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(map);
         assertThat(element).isInstanceOf(JsonRawSchema.class);
     }
@@ -439,7 +441,7 @@ class JsonSchemaElementJsonUtilsTest {
         // {"type":"string","enum":["A","B"]} — explicit type:"string" is fine
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("type", "string");
-        map.put("enum", List.of("A", "B"));
+        map.put("enum", Arrays.asList("A", "B"));
         JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(map);
         assertThat(element).isInstanceOf(JsonEnumSchema.class);
         Map<String, Object> restored = JsonSchemaElementJsonUtils.toMap(element);

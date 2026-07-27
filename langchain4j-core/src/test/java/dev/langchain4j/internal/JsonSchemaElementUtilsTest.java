@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class JsonSchemaElementUtilsTest {
@@ -149,7 +150,7 @@ class JsonSchemaElementUtilsTest {
                 .addStringProperty("a")
                 .build();
         Map<Class<?>, VisitedClassMetadata> visited =
-                Map.of(CustomClass.class, new VisitedClassMetadata(jsonObjectSchema, "ref-object", false));
+                Collections.singletonMap(CustomClass.class, new VisitedClassMetadata(jsonObjectSchema, "ref-object", false));
 
         JsonSchemaElement result = jsonObjectOrReferenceSchemaFrom(CustomClass.class, "new", false, visited, false);
 
@@ -164,7 +165,7 @@ class JsonSchemaElementUtilsTest {
                 .addStringProperty("a")
                 .build();
         Map<Class<?>, VisitedClassMetadata> visited =
-                Map.of(CustomClass.class, new VisitedClassMetadata(jsonObjectSchema, "ref-object", false));
+                Collections.singletonMap(CustomClass.class, new VisitedClassMetadata(jsonObjectSchema, "ref-object", false));
 
         JsonSchemaElement result =
                 jsonObjectOrReferenceSchemaFrom(CustomClass.class, "same-desc", false, visited, false);
@@ -579,7 +580,7 @@ class JsonSchemaElementUtilsTest {
 
     @Test
     void shouldConvertJsonRawSchemaToMap() {
-        Map<String, Object> rawMap = Map.of("foo", "bar");
+        Map<String, Object> rawMap = Collections.singletonMap("foo", "bar");
         JsonRawSchema schema =
                 JsonRawSchema.builder().schema(Json.toJson(rawMap)).build();
 

@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -56,9 +58,9 @@ class UtilsTest {
     @Test
     void get_or_default_list() {
         List<Integer> nullList = null;
-        List<Integer> emptyList = List.of();
-        List<Integer> list1 = List.of(1);
-        List<Integer> list2 = List.of(2);
+        List<Integer> emptyList = Arrays.asList();
+        List<Integer> list1 = Arrays.asList(1);
+        List<Integer> list2 = Arrays.asList(2);
 
         assertThat(Utils.getOrDefault(nullList, nullList)).isSameAs(nullList);
         assertThat(Utils.getOrDefault(nullList, emptyList)).isSameAs(emptyList);
@@ -75,9 +77,9 @@ class UtilsTest {
     @Test
     void get_or_default_map() {
         Map<String, String> nullMap = null;
-        Map<String, String> emptyMap = Map.of();
-        Map<String, String> map1 = Map.of("one", "1");
-        Map<String, String> map2 = Map.of("two", "2");
+        Map<String, String> emptyMap = Collections.emptyMap();
+        Map<String, String> map1 = Collections.singletonMap("one", "1");
+        Map<String, String> map2 = Collections.singletonMap("two", "2");
 
         assertThat(Utils.getOrDefault(nullMap, nullMap)).isSameAs(nullMap);
         assertThat(Utils.getOrDefault(nullMap, emptyMap)).isSameAs(emptyMap);
@@ -299,16 +301,16 @@ class UtilsTest {
     void copy_if_not_null_set() {
         assertThat(Utils.copyIfNotNull((Set<?>) null)).isNull();
         assertThat(Utils.copyIfNotNull(emptySet())).isEmpty();
-        assertThat(Utils.copyIfNotNull(Set.of("one"))).containsExactly("one");
-        assertThat(Utils.copyIfNotNull(Set.of("one", "two"))).containsExactlyInAnyOrder("one", "two");
+        assertThat(Utils.copyIfNotNull(new HashSet<>(Arrays.asList("one")))).containsExactly("one");
+        assertThat(Utils.copyIfNotNull(new HashSet<>(Arrays.asList("one", "two")))).containsExactlyInAnyOrder("one", "two");
     }
 
     @Test
     void copy_set() {
         assertThat(Utils.copy((Set<?>) null)).isEmpty();
         assertThat(Utils.copy(emptySet())).isEmpty();
-        assertThat(Utils.copy(Set.of("one"))).containsExactly("one");
-        assertThat(Utils.copy(Set.of("one", "two"))).containsExactlyInAnyOrder("one", "two");
+        assertThat(Utils.copy(new HashSet<>(Arrays.asList("one")))).containsExactly("one");
+        assertThat(Utils.copy(new HashSet<>(Arrays.asList("one", "two")))).containsExactlyInAnyOrder("one", "two");
     }
 
     @Test
@@ -337,7 +339,7 @@ class UtilsTest {
         List<String> emptyCopy = Utils.mutableCopy((List<String>) null);
         assertThatNoException().isThrownBy(() -> emptyCopy.add("one"));
 
-        List<String> source = List.of("one");
+        List<String> source = Arrays.asList("one");
         List<String> copy = Utils.mutableCopy(source);
         copy.add("two");
         assertThat(source).containsExactlyInAnyOrder("one");
@@ -483,27 +485,27 @@ class UtilsTest {
 
     @Test
     void test_merge_lists() {
-        assertThat(merge(List.of(1), List.of(2))).isEqualTo(List.of(1, 2));
-        assertThat(merge(List.of(1), List.of())).isEqualTo(List.of(1));
-        assertThat(merge(List.of(), List.of(2))).isEqualTo(List.of(2));
-        assertThat(merge(List.of(), List.of())).isEqualTo(List.of());
+        assertThat(merge(Arrays.asList(1), Arrays.asList(2))).isEqualTo(Arrays.asList(1, 2));
+        assertThat(merge(Arrays.asList(1), Arrays.asList())).isEqualTo(Arrays.asList(1));
+        assertThat(merge(Arrays.asList(), Arrays.asList(2))).isEqualTo(Arrays.asList(2));
+        assertThat(merge(Arrays.asList(), Arrays.asList())).isEqualTo(Arrays.asList());
 
-        assertThatThrownBy(() -> merge(List.of()))
+        assertThatThrownBy(() -> merge(Arrays.asList()))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("at least 2 elements");
     }
 
     @Test
     void test_merge_maps() {
-        assertThat(merge(Map.of("one", 1), Map.of("two", 2))).isEqualTo(Map.of("one", 1, "two", 2));
-        assertThat(merge(Map.of("one", 1), Map.of())).isEqualTo(Map.of("one", 1));
-        assertThat(merge(Map.of(), Map.of("two", 2))).isEqualTo(Map.of("two", 2));
-        assertThat(merge(Map.of(), Map.of())).isEqualTo(Map.of());
+        assertThat(merge(Collections.singletonMap("one", 1), Collections.singletonMap("two", 2))).isEqualTo(new java.util.HashMap<String,Object>(){{put("one", 1);put("two", 2);}});
+        assertThat(merge(Collections.singletonMap("one", 1), Collections.emptyMap())).isEqualTo(Collections.singletonMap("one", 1));
+        assertThat(merge(Collections.emptyMap(), Collections.singletonMap("two", 2))).isEqualTo(Collections.singletonMap("two", 2));
+        assertThat(merge(Collections.emptyMap(), Collections.emptyMap())).isEqualTo(Collections.emptyMap());
 
-        assertThatThrownBy(() -> merge(Map.of()))
+        assertThatThrownBy(() -> merge(Collections.emptyMap()))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("at least 2 elements");
-        assertThatThrownBy(() -> merge(Map.of("one", 1), Map.of("one", 1)))
+        assertThatThrownBy(() -> merge(Collections.singletonMap("one", 1), Collections.singletonMap("one", 1)))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Duplicate key: one");
     }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,7 +52,7 @@ class ChatMemoryTest {
         ChatMessage m1 = UserMessage.from("1");
         ChatMessage m2 = UserMessage.from("2");
 
-        memory.add(List.of(m1, m2));
+        memory.add(Arrays.asList(m1, m2));
 
         assertThat(memory.messages())
                 .containsExactly(m1, m2);
@@ -97,7 +98,7 @@ class ChatMemoryTest {
         ChatMessage m1 = UserMessage.from("1");
         ChatMessage m2 = UserMessage.from("2");
 
-        memory.set(List.of(m1, m2));
+        memory.set(Arrays.asList(m1, m2));
 
         assertThat(memory.clearCalled).isTrue();
         assertThat(memory.messages())

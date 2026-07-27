@@ -22,13 +22,34 @@ import org.junit.jupiter.api.Test;
 
 class ToolSpecificationsTest implements WithAssertions {
 
-    public record Person(
-            @Description("Name of the person") String name,
-            List<String> aliases,
-            boolean active,
-            Person parent,
-            Address currentAddress,
-            List<Address> previousAddresses) {}
+    public static class Person {
+        @Description("Name of the person")
+        private String name;
+        private List<String> aliases;
+        private boolean active;
+        private Person parent;
+        private Address currentAddress;
+        private List<Address> previousAddresses;
+
+        public Person() {}
+
+        public Person(String name, List<String> aliases, boolean active, Person parent,
+                Address currentAddress, List<Address> previousAddresses) {
+            this.name = name;
+            this.aliases = aliases;
+            this.active = active;
+            this.parent = parent;
+            this.currentAddress = currentAddress;
+            this.previousAddresses = previousAddresses;
+        }
+
+        public String name() { return name; }
+        public List<String> aliases() { return aliases; }
+        public boolean active() { return active; }
+        public Person parent() { return parent; }
+        public Address currentAddress() { return currentAddress; }
+        public List<Address> previousAddresses() { return previousAddresses; }
+    }
 
     public static class Address {
         private String street;
@@ -302,7 +323,23 @@ class ToolSpecificationsTest implements WithAssertions {
                         "arg28");
     }
 
-    record Customer(String name, Address billingAddress, Address shippingAddress) {}
+    static class Customer {
+        private String name;
+        private Address billingAddress;
+        private Address shippingAddress;
+
+        public Customer() {}
+
+        public Customer(String name, Address billingAddress, Address shippingAddress) {
+            this.name = name;
+            this.billingAddress = billingAddress;
+            this.shippingAddress = shippingAddress;
+        }
+
+        public String name() { return name; }
+        public Address billingAddress() { return billingAddress; }
+        public Address shippingAddress() { return shippingAddress; }
+    }
 
     public static class CustomerRegistration {
         @Tool("register a new customer")

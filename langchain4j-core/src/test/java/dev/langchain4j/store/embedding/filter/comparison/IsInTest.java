@@ -7,49 +7,51 @@ import dev.langchain4j.data.document.Metadata;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Collections;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class IsInTest {
 
     @Test
     void shouldReturnFalseWhenNotMetadata() {
-        IsIn isIn = new IsIn("key", List.of("value"));
+        IsIn isIn = new IsIn("key", Arrays.asList("value"));
         assertThat(isIn.test("notMetadata")).isFalse();
     }
 
     @Test
     void shouldReturnFalseWhenKeyNotFound() {
-        IsIn isIn = new IsIn("key", List.of("value"));
-        Metadata metadata = new Metadata(Map.of());
+        IsIn isIn = new IsIn("key", Arrays.asList("value"));
+        Metadata metadata = new Metadata(Collections.emptyMap());
         assertThat(isIn.test(metadata)).isFalse();
     }
 
     @Test
     void shouldReturnTrueWhenValueIsInCollection() {
-        IsIn isIn = new IsIn("key", List.of("value1", "value2"));
-        Metadata metadata = new Metadata(Map.of("key", "value2"));
+        IsIn isIn = new IsIn("key", Arrays.asList("value1", "value2"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "value2"));
         assertThat(isIn.test(metadata)).isTrue();
     }
 
     @Test
     void shouldReturnFalseWhenValueIsNotInCollection() {
-        IsIn isIn = new IsIn("key", List.of("value1", "value2"));
-        Metadata metadata = new Metadata(Map.of("key", "value3"));
+        IsIn isIn = new IsIn("key", Arrays.asList("value1", "value2"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "value3"));
         assertThat(isIn.test(metadata)).isFalse();
     }
 
     @Test
     void shouldReturnTrueWhenActualValueIsUUIDAsString() {
         UUID uuid = UUID.randomUUID();
-        IsIn isIn = new IsIn("key", List.of(uuid));
-        Metadata metadata = new Metadata(Map.of("key", uuid.toString()));
+        IsIn isIn = new IsIn("key", Arrays.asList(uuid));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", uuid.toString()));
         assertThat(isIn.test(metadata)).isTrue();
     }
 
     @Test
     void shouldReturnTrueWhenComparingDifferentNumberTypes() {
-        IsIn isIn = new IsIn("key", List.of(1L));
-        Metadata metadata = new Metadata(Map.of("key", 1));
+        IsIn isIn = new IsIn("key", Arrays.asList(1L));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 1));
         assertThat(isIn.test(metadata)).isTrue();
     }
 
@@ -57,8 +59,8 @@ class IsInTest {
     void shouldBeConsistentWithIsEqualToForFloatMetadata() {
         // given: a Float metadata value and a Double comparison value that are numerically equal
         IsEqualTo isEqualTo = new IsEqualTo("key", 1.1);
-        IsIn isIn = new IsIn("key", List.of(1.1));
-        Metadata metadata = new Metadata(Map.of("key", 1.1f));
+        IsIn isIn = new IsIn("key", Arrays.asList(1.1));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 1.1f));
 
         // then: isIn(x) must match whenever isEqualTo(x) matches
         assertThat(isEqualTo.test(metadata)).isTrue();
@@ -67,7 +69,7 @@ class IsInTest {
 
     @Test
     void shouldReturnFalseWhenTestingNullObject() {
-        IsIn isIn = new IsIn("key", List.of("value"));
+        IsIn isIn = new IsIn("key", Arrays.asList("value"));
         assertThat(isIn.test(null)).isFalse();
     }
 
@@ -78,6 +80,6 @@ class IsInTest {
 
     @Test
     void shouldThrowExceptionWhenComparisonValuesIsEmpty() {
-        assertThatThrownBy(() -> new IsIn("key", List.of())).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new IsIn("key", Arrays.asList())).isInstanceOf(IllegalArgumentException.class);
     }
 }

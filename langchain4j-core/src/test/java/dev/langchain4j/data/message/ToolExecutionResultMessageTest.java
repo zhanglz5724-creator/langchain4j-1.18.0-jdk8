@@ -9,6 +9,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
 
 class ToolExecutionResultMessageTest implements WithAssertions {
 
@@ -208,7 +210,7 @@ class ToolExecutionResultMessageTest implements WithAssertions {
 
     @Test
     void builder_contents_with_list() {
-        List<Content> contents = List.of(
+        List<Content> contents = Arrays.asList(
                 TextContent.from("text"),
                 ImageContent.from(Image.builder().base64Data("abc").mimeType("image/png").build()));
 
@@ -269,7 +271,7 @@ class ToolExecutionResultMessageTest implements WithAssertions {
                 .toolName("toolName")
                 .text("result")
                 .isError(true)
-                .attributes(Map.of("key", "value"))
+                .attributes(Collections.singletonMap("key", "value"))
                 .build();
 
         ToolExecutionResultMessage copy = original.toBuilder().build();
@@ -289,11 +291,11 @@ class ToolExecutionResultMessageTest implements WithAssertions {
                 .toolName("toolName")
                 .text("original result")
                 .isError(false)
-                .attributes(Map.of("key", "value"))
+                .attributes(Collections.singletonMap("key", "value"))
                 .build();
 
         ToolExecutionResultMessage modified = original.toBuilder()
-                .contents(List.of(TextContent.from("rolled back")))
+                .contents(Arrays.asList(TextContent.from("rolled back")))
                 .isError(true)
                 .build();
 

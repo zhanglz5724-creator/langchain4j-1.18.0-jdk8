@@ -5,6 +5,7 @@ import static java.util.Collections.singletonMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Collections;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -307,7 +308,7 @@ class MetadataTest implements WithAssertions {
         UUID uuid = UUID.randomUUID();
         assertThatThrownBy(() -> metadata.put(null, uuid))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
-                .hasMessage("The metadata key with the value '%s' cannot be null or blank".formatted(uuid));
+                .hasMessage(String.format("The metadata key with the value '%s' cannot be null or blank", uuid));
 
         assertThatThrownBy(() -> metadata.put(null, 1))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -370,16 +371,16 @@ class MetadataTest implements WithAssertions {
 
     @Test
     void putAll() {
-        assertThat(new Metadata().putAll(Map.of("k1", "v1", "k2", "v2")).toMap())
-                .isEqualTo(Map.of("k1", "v1", "k2", "v2"));
+        assertThat(new Metadata().putAll(new java.util.HashMap<String,Object>(){{put("k1", "v1");put("k2", "v2");}}).toMap())
+                .isEqualTo(new java.util.HashMap<String,Object>(){{put("k1", "v1");put("k2", "v2");}});
 
-        assertThat(new Metadata().put("k1", "v1").putAll(Map.of("k1", "v2")).toMap())
-                .isEqualTo(Map.of("k1", "v2"));
+        assertThat(new Metadata().put("k1", "v1").putAll(Collections.singletonMap("k1", "v2")).toMap())
+                .isEqualTo(Collections.singletonMap("k1", "v2"));
 
         assertThatThrownBy(() -> new Metadata().putAll(new HashMap<>() {{ put("k", null); }}))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
 
-        assertThatThrownBy(() -> new Metadata().putAll(Map.of("k", new Object())))
+        assertThatThrownBy(() -> new Metadata().putAll(Collections.singletonMap("k", new Object())))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 }

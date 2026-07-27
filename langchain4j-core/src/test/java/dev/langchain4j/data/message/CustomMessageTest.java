@@ -2,6 +2,7 @@ package dev.langchain4j.data.message;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.HashMap;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -21,12 +22,8 @@ class CustomMessageTest implements WithAssertions {
 
     @Test
     void equals_hash_code() {
-        Map<String, Object> attributes = Map.of(
-                "content", "The sky is blue.",
-                "myAttribute", "myValue");
-        Map<String, Object> changedAttributes = Map.of(
-                "content", "The sky is blue.",
-                "myAttribute", "foo");
+        Map<String, Object> attributes = new java.util.HashMap<String,Object>(){{put("content", "The sky is blue.");put("myAttribute", "myValue");}};
+        Map<String, Object> changedAttributes = new java.util.HashMap<String,Object>(){{put("content", "The sky is blue.");put("myAttribute", "foo");}};
         CustomMessage c1 = new CustomMessage(attributes);
         CustomMessage c2 = new CustomMessage(attributes);
 
@@ -48,9 +45,7 @@ class CustomMessageTest implements WithAssertions {
 
     @Test
     void builders() {
-        Map<String, Object> attributes = Map.of(
-                "text", "The sky is blue.",
-                "myAttribute", "myValue");
+        Map<String, Object> attributes = new java.util.HashMap<String,Object>(){{put("text", "The sky is blue.");put("myAttribute", "myValue");}};
         assertThat(new CustomMessage(attributes))
                 .isEqualTo(CustomMessage.from(attributes))
                 .isEqualTo(CustomMessage.customMessage(attributes));

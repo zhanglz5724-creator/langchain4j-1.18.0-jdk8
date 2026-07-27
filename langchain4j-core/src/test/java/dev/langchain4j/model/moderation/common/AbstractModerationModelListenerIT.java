@@ -14,6 +14,7 @@ import dev.langchain4j.model.moderation.listener.ModerationModelResponseContext;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -35,13 +36,13 @@ public abstract class AbstractModerationModelListenerIT {
     protected abstract ModerationModel createModel(List<ModerationModelListener> listeners);
 
     protected ModerationModel createModel(ModerationModelListener listener) {
-        return createModel(List.of(listener));
+        return createModel(Arrays.asList(listener));
     }
 
     protected abstract ModerationModel createFailingModel(List<ModerationModelListener> listeners);
 
     protected ModerationModel createFailingModel(ModerationModelListener listener) {
-        return createFailingModel(List.of(listener));
+        return createFailingModel(Arrays.asList(listener));
     }
 
     protected abstract Class<? extends Exception> expectedExceptionClass();
@@ -103,7 +104,7 @@ public abstract class AbstractModerationModelListenerIT {
 
         String textToModerate = "hello";
         ModerationRequest moderationRequest =
-                ModerationRequest.builder().texts(List.of(textToModerate)).build();
+                ModerationRequest.builder().texts(Arrays.asList(textToModerate)).build();
 
         // when
         ModerationResponse moderationResponse = model.moderate(moderationRequest);
@@ -178,7 +179,7 @@ public abstract class AbstractModerationModelListenerIT {
         String textToModerate = "this message will fail";
 
         ModerationRequest moderationRequest =
-                ModerationRequest.builder().texts(List.of(textToModerate)).build();
+                ModerationRequest.builder().texts(Arrays.asList(textToModerate)).build();
 
         // when
         Throwable thrown = catchThrowable(() -> model.moderate(moderationRequest));
@@ -237,11 +238,11 @@ public abstract class AbstractModerationModelListenerIT {
             }
         };
 
-        ModerationModel model = createModel(List.of(failingListener, successfulListener));
+        ModerationModel model = createModel(Arrays.asList(failingListener, successfulListener));
 
         String textToModerate = "hello";
         ModerationRequest moderationRequest =
-                ModerationRequest.builder().texts(List.of(textToModerate)).build();
+                ModerationRequest.builder().texts(Arrays.asList(textToModerate)).build();
 
         // when
         ModerationResponse response = model.moderate(moderationRequest);
@@ -281,10 +282,10 @@ public abstract class AbstractModerationModelListenerIT {
             }
         };
 
-        ModerationModel model = createFailingModel(List.of(failingListener, successfulListener));
+        ModerationModel model = createFailingModel(Arrays.asList(failingListener, successfulListener));
 
         ModerationRequest moderationRequest = ModerationRequest.builder()
-                .texts(List.of("this message will fail"))
+                .texts(Arrays.asList("this message will fail"))
                 .build();
 
         // when

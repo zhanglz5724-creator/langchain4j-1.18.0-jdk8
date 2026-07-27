@@ -19,7 +19,7 @@ class BatchItemResultTest {
 
     @Test
     void failure_shouldExposeErrorAndNoResponse() {
-        var error = new BatchError(500, "Internal error", null);
+        BatchError error = new BatchError(500, "Internal error", null);
         BatchItemResult<String> result = BatchItemResult.failure(error);
 
         assertThat(result).isInstanceOf(BatchItemResult.Failure.class);

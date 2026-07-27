@@ -14,6 +14,7 @@ import dev.langchain4j.model.embedding.response.EmbeddingResponse;
 import dev.langchain4j.model.embedding.response.EmbeddingResponseMetadata;
 import dev.langchain4j.model.output.TokenUsage;
 import java.util.List;
+import java.util.Arrays;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -166,7 +167,7 @@ class EmbeddingRequestResponseTypesTest implements WithAssertions {
                         EmbeddingRequestParameters.MODEL_NAME, EmbeddingRequestParameters.DIMENSIONS);
 
         EmbeddingRequest b = EmbeddingRequest.builder()
-                .inputs(List.of(EmbeddingInput.from("a"), EmbeddingInput.from("b")))
+                .inputs(Arrays.asList(EmbeddingInput.from("a"), EmbeddingInput.from("b")))
                 .modelName("m")
                 .dimensions(128)
                 .build();
@@ -212,7 +213,7 @@ class EmbeddingRequestResponseTypesTest implements WithAssertions {
     void response_defaults_metadata_and_accessors() {
         Embedding embedding = new Embedding(new float[] {1f, 2f});
         EmbeddingResponse withoutMetadata =
-                EmbeddingResponse.builder().embeddings(List.of(embedding)).build();
+                EmbeddingResponse.builder().embeddings(Arrays.asList(embedding)).build();
 
         assertThat(withoutMetadata.embeddings()).containsExactly(embedding);
         assertThat(withoutMetadata.metadata()).isNotNull();
@@ -220,14 +221,14 @@ class EmbeddingRequestResponseTypesTest implements WithAssertions {
         assertThat(withoutMetadata.metadata().tokenUsage()).isNull();
 
         EmbeddingResponse a = EmbeddingResponse.builder()
-                .embeddings(List.of(embedding))
+                .embeddings(Arrays.asList(embedding))
                 .metadata(EmbeddingResponseMetadata.builder()
                         .modelName("m")
                         .tokenUsage(new TokenUsage(3))
                         .build())
                 .build();
         EmbeddingResponse b = EmbeddingResponse.builder()
-                .embeddings(List.of(embedding))
+                .embeddings(Arrays.asList(embedding))
                 .metadata(EmbeddingResponseMetadata.builder()
                         .modelName("m")
                         .tokenUsage(new TokenUsage(3))
@@ -244,7 +245,7 @@ class EmbeddingRequestResponseTypesTest implements WithAssertions {
         Embedding embedding = new Embedding(new float[] {1f, 2f});
 
         EmbeddingResponse response = EmbeddingResponse.builder()
-                .embeddings(List.of(embedding))
+                .embeddings(Arrays.asList(embedding))
                 .modelName("m")
                 .tokenUsage(new TokenUsage(7))
                 .build();
@@ -257,13 +258,13 @@ class EmbeddingRequestResponseTypesTest implements WithAssertions {
 
         // accessors are null-safe when nothing was set
         EmbeddingResponse empty =
-                EmbeddingResponse.builder().embeddings(List.of(embedding)).build();
+                EmbeddingResponse.builder().embeddings(Arrays.asList(embedding)).build();
         assertThat(empty.modelName()).isNull();
         assertThat(empty.tokenUsage()).isNull();
 
         // setting both an explicit metadata and a flattened field is rejected
         assertThatThrownBy(() -> EmbeddingResponse.builder()
-                        .embeddings(List.of(embedding))
+                        .embeddings(Arrays.asList(embedding))
                         .metadata(EmbeddingResponseMetadata.builder().build())
                         .modelName("m")
                         .build())

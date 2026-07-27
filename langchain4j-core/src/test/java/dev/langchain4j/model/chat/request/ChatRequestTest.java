@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Arrays;
 
 class ChatRequestTest {
 
@@ -283,7 +284,7 @@ class ChatRequestTest {
     void should_fail_when_messages_are_empty() {
         assertThatThrownBy(() ->
                 ChatRequest.builder()
-                        .messages(List.of())
+                        .messages(Arrays.asList())
                         .build()
         )
                 .isInstanceOf(IllegalArgumentException.class)
@@ -317,9 +318,9 @@ class ChatRequestTest {
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(UserMessage.from("hello"))
                 .parameters(ChatRequestParameters.builder()
-                        .stopSequences(List.of("STOP"))
+                        .stopSequences(Arrays.asList("STOP"))
                         .build())
-                .stopSequences(List.of("END"))
+                .stopSequences(Arrays.asList("END"))
                 .build();
 
         assertThat(chatRequest.stopSequences()).containsExactly("END");
@@ -339,7 +340,7 @@ class ChatRequestTest {
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(UserMessage.from("hello"))
                 .parameters(ChatRequestParameters.builder()
-                        .toolSpecifications(List.of(paramTool))
+                        .toolSpecifications(Arrays.asList(paramTool))
                         .build())
                 .toolSpecifications(builderTool)
                 .build();
@@ -692,7 +693,8 @@ class ChatRequestTest {
             @Override
             public Builder overrideWith(ChatRequestParameters parameters) {
                 super.overrideWith(parameters);
-                if (parameters instanceof TestProviderChatRequestParameters testParameters) {
+                if (parameters instanceof TestProviderChatRequestParameters) {
+                    TestProviderChatRequestParameters testParameters = (TestProviderChatRequestParameters) parameters;
                     customField(getOrDefault(testParameters.customField(), customField));
                 }
                 return this;

@@ -15,10 +15,10 @@ class DocumentTest implements WithAssertions {
 
     @Test
     void equals_hash_code() {
-        final var document1 = Document.from("foo bar");
-        final var document2 = Document.from("foo bar");
-        final var document3 = Document.from("foo bar", Metadata.from("foo", "bar"));
-        final var document4 = Document.from("foo bar", Metadata.from("foo", "bar"));
+        final Document document1 = Document.from("foo bar");
+        final Document document2 = Document.from("foo bar");
+        final Document document3 = Document.from("foo bar", Metadata.from("foo", "bar"));
+        final Document document4 = Document.from("foo bar", Metadata.from("foo", "bar"));
 
         assertThat(document1).isEqualTo(document2).hasSameHashCodeAs(document2);
 
@@ -30,21 +30,21 @@ class DocumentTest implements WithAssertions {
     @Test
     void no_metadata() {
 
-        final var document = Document.from("foo bar");
+        final Document document = Document.from("foo bar");
         assertThat(document.text()).isEqualTo("foo bar");
         assertThat(document.metadata().toMap()).isEmpty();
 
         assertThat(document)
                 .hasToString("DefaultDocument { text = \"foo bar\", metadata = Metadata { metadata = {} } }");
 
-        final var expectedMetadata = new HashMap<String, Object>();
+        final HashMap<String, Object> expectedMetadata = new HashMap<String, Object>();
         expectedMetadata.put("index", "0");
         assertThat(document.toTextSegment()).isEqualTo(new TextSegment("foo bar", Metadata.from(expectedMetadata)));
     }
 
     @Test
     void with_metadata() {
-        final var document = Document.from("foo bar", Metadata.from("foo", "bar"));
+        final Document document = Document.from("foo bar", Metadata.from("foo", "bar"));
         assertThat(document.text()).isEqualTo("foo bar");
 
         assertThat(document.metadata().toMap()).hasSize(1);
@@ -53,7 +53,7 @@ class DocumentTest implements WithAssertions {
         assertThat(document)
                 .hasToString("DefaultDocument { text = \"foo bar\", metadata = Metadata { metadata = {foo=bar} } }");
 
-        final var expectedMetadata = new HashMap<String, Object>();
+        final HashMap<String, Object> expectedMetadata = new HashMap<String, Object>();
         expectedMetadata.put("index", "0");
         expectedMetadata.put("foo", "bar");
         assertThat(document.toTextSegment()).isEqualTo(new TextSegment("foo bar", Metadata.from(expectedMetadata)));
@@ -61,7 +61,7 @@ class DocumentTest implements WithAssertions {
 
     @Test
     void index_metadata() {
-        final var textSegmentWithIndex =
+        final TextSegment textSegmentWithIndex =
                 Document.from("foo bar", Metadata.from("index", "1")).toTextSegment();
 
         assertThat(textSegmentWithIndex.metadata().toMap()).hasSize(1);
@@ -84,12 +84,12 @@ class DocumentTest implements WithAssertions {
     @ValueSource(strings = {"", " ", "\t"})
     @NullSource
     void constructor_should_fail_on_empty_text(String text) {
-        final var exception = assertThatExceptionOfType(IllegalArgumentException.class)
+        final IllegalArgumentException exception = assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> Document.from(text))
                 .actual();
         assertThat(exception).hasMessage("text cannot be null or blank");
 
-        final var exception2 = assertThatExceptionOfType(IllegalArgumentException.class)
+        final IllegalArgumentException exception2 = assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> Document.from(text, mock(Metadata.class)))
                 .actual();
         assertThat(exception2).hasMessage("text cannot be null or blank");
@@ -97,7 +97,7 @@ class DocumentTest implements WithAssertions {
 
     @Test
     void constructor_should_fail_on_empty_metadata() {
-        final var exception = assertThatExceptionOfType(IllegalArgumentException.class)
+        final IllegalArgumentException exception = assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> Document.from("ok", null))
                 .actual();
         assertThat(exception).hasMessage("metadata cannot be null");

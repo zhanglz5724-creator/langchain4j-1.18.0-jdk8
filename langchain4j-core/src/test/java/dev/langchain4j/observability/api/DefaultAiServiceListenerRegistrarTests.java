@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.Arrays;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
@@ -59,7 +62,7 @@ class DefaultAiServiceListenerRegistrarTests {
     private static final AiServiceRequestIssuedEvent REQUEST_ISSUED_EVENT = AiServiceRequestIssuedEvent.builder()
             .invocationContext(DEFAULT_INVOCATION_CONTEXT)
             .request(ChatRequest.builder()
-                    .messages(List.of(UserMessage.from("Hi!")))
+                    .messages(Arrays.asList(UserMessage.from("Hi!")))
                     .build())
             .build();
 
@@ -67,7 +70,7 @@ class DefaultAiServiceListenerRegistrarTests {
             AiServiceResponseReceivedEvent.builder()
                     .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                     .request(ChatRequest.builder()
-                            .messages(List.of(UserMessage.from("Hi!")))
+                            .messages(Arrays.asList(UserMessage.from("Hi!")))
                             .build())
                     .response(ChatResponse.builder()
                             .aiMessage(AiMessage.from("Message!"))
@@ -98,14 +101,14 @@ class DefaultAiServiceListenerRegistrarTests {
                                     .build())
                             .requestParams(GuardrailRequestParams.builder()
                                     .userMessageTemplate("")
-                                    .variables(Map.of())
+                                    .variables(Collections.emptyMap())
                                     .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                                     .aiServiceListenerRegistrar(REGISTRAR)
                                     .build())
                             .chatExecutor(new ChatExecutor() {
                                 @Override
                                 public ChatResponse execute() {
-                                    return execute(List.of());
+                                    return execute(Arrays.asList());
                                 }
 
                                 @Override
@@ -128,7 +131,7 @@ class DefaultAiServiceListenerRegistrarTests {
                             .userMessage(UserMessage.from("Hello, world!"))
                             .commonParams(GuardrailRequestParams.builder()
                                     .userMessageTemplate("")
-                                    .variables(Map.of())
+                                    .variables(Collections.emptyMap())
                                     .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                                     .aiServiceListenerRegistrar(REGISTRAR)
                                     .build())
@@ -143,7 +146,7 @@ class DefaultAiServiceListenerRegistrarTests {
             .resultText("Success!")
             .build();
 
-    private static final List<AiServiceEvent> ALL_EVENTS = List.of(
+    private static final List<AiServiceEvent> ALL_EVENTS = Arrays.asList(
             REQUEST_ISSUED_EVENT,
             RESPONSE_RECEIVED_EVENT,
             INVOCATION_ERROR_EVENT,
@@ -155,7 +158,7 @@ class DefaultAiServiceListenerRegistrarTests {
 
     // Create 2 instances of each listener
     private static final List<AbstractTestEventListener<?>> ALL_LISTENERS = IntStream.range(0, 2)
-            .mapToObj(i -> List.of(
+            .mapToObj(i -> Arrays.asList(
                     new TestInputGuardrailListener(),
                     new TestOutputGuardrailListener(),
                     new TestInvocationStartedListener(),
@@ -165,12 +168,12 @@ class DefaultAiServiceListenerRegistrarTests {
                     new TestLLMRequestIssuedListener(),
                     new TestToolExecutedListener()))
             .flatMap(List::stream)
-            .toList();
+            .collect(Collectors.toList());
 
     @Test
     void registrarEatsThrownExceptionsDuringFiring() {
         // From https://github.com/langchain4j/langchain4j/issues/4499
-        var registrar = AiServiceListenerRegistrar.newInstance();
+        AiServiceListenerRegistrar registrar = AiServiceListenerRegistrar.newInstance();
 
         registrar.register((AiServiceStartedListener) event -> {
             throw new RuntimeException("Some error");
@@ -183,7 +186,7 @@ class DefaultAiServiceListenerRegistrarTests {
     @Test
     void registrarDoesntEatThrownExceptionsDuringFiring() {
         // From https://github.com/langchain4j/langchain4j/issues/4499
-        var registrar = AiServiceListenerRegistrar.newInstance(true);
+        AiServiceListenerRegistrar registrar = AiServiceListenerRegistrar.newInstance(true);
 
         registrar.register((AiServiceStartedListener) event -> {
             throw new RuntimeException("Some error");
@@ -196,7 +199,7 @@ class DefaultAiServiceListenerRegistrarTests {
 
     @Test
     void hasCorrectListeners() {
-        var registrar = (DefaultAiServiceListenerRegistrar) assertThat(REGISTRAR)
+        DefaultAiServiceListenerRegistrar registrar = (DefaultAiServiceListenerRegistrar) assertThat(REGISTRAR)
                 .isNotNull()
                 .isExactlyInstanceOf(DefaultAiServiceListenerRegistrar.class)
                 .actual();

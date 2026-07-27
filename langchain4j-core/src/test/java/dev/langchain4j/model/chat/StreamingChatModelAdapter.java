@@ -36,9 +36,9 @@ public class StreamingChatModelAdapter implements ChatModel {
             return handler.get();
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof ExecutionException executionException
-                    && executionException.getCause() instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+            if (cause instanceof ExecutionException
+                    && ((ExecutionException) cause).getCause() instanceof RuntimeException) {
+                throw (RuntimeException) ((ExecutionException) cause).getCause();
             }
             throw e;
         }

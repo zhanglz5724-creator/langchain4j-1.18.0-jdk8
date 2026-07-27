@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * An implementation of a {@link ChatModel} useful for unit testing.
@@ -94,7 +96,8 @@ public class ChatModelMock implements ChatModel {
         }
 
         ChatMessage message = messages.get(0);
-        if (message instanceof UserMessage userMessage) {
+        if (message instanceof UserMessage) {
+            UserMessage userMessage = (UserMessage) message;
             return userMessage.singleText();
         } else {
             throw runtime("Expected UserMessage, got: " + message);
@@ -106,7 +109,7 @@ public class ChatModelMock implements ChatModel {
      */
     @Deprecated(since = "1.12.0")
     public List<List<ChatMessage>> getRequests() {
-        return requests.stream().map(ChatRequest::messages).toList();
+        return requests.stream().map(ChatRequest::messages).collect(Collectors.toList());
     }
 
     public List<ChatRequest> requests() {

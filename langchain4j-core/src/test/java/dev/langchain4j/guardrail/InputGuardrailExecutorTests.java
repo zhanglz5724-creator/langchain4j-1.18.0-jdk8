@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,11 +45,11 @@ class InputGuardrailExecutorTests {
             int howManyShouldExecute,
             @AggregateWith(InputGuardrailAggregator.class) InputGuardrail... guardrails) {
 
-        var spiedGuardrails = Stream.of(guardrails).map(Mockito::spy).toArray(InputGuardrail[]::new);
-        var request = from(UserMessage.from("test"));
-        var executor =
+        InputGuardrail[] spiedGuardrails = Stream.of(guardrails).map(Mockito::spy).toArray(InputGuardrail[]::new);
+        InputGuardrailRequest request = from(UserMessage.from("test"));
+        InputGuardrailExecutor executor =
                 InputGuardrailExecutor.builder().guardrails(spiedGuardrails).build();
-        var result = executor.execute(request);
+        InputGuardrailResult result = executor.execute(request);
 
         assertThat(result).isSuccessful();
 
@@ -68,32 +70,32 @@ class InputGuardrailExecutorTests {
 
     @Test
     void noGuardrails() {
-        var request = from(UserMessage.from("test"));
-        var executor = InputGuardrailExecutor.builder().build();
-        var result = executor.execute(request);
+        InputGuardrailRequest request = from(UserMessage.from("test"));
+        InputGuardrailExecutor executor = InputGuardrailExecutor.builder().build();
+        InputGuardrailResult result = executor.execute(request);
 
         assertThat(result).isSuccessful();
     }
 
     @Test
     void wrappedGuardrailShouldUseInnerGuardrailNameInObservabilityEvent() {
-        var eventRef = new AtomicReference<InputGuardrailExecutedEvent>();
-        var registrar = AiServiceListenerRegistrar.newInstance();
+        AtomicReference<InputGuardrailExecutedEvent> eventRef = new AtomicReference<InputGuardrailExecutedEvent>();
+        AiServiceListenerRegistrar registrar = AiServiceListenerRegistrar.newInstance();
         registrar.register((InputGuardrailExecutedListener) eventRef::set);
 
-        var request = InputGuardrailRequest.builder()
+        InputGuardrailRequest request = InputGuardrailRequest.builder()
                 .userMessage(UserMessage.from("test"))
                 .commonParams(GuardrailRequestParams.builder()
                         .chatMemory(null)
                         .augmentationResult(null)
                         .userMessageTemplate("")
-                        .variables(Map.of())
+                        .variables(Collections.emptyMap())
                         .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                         .aiServiceListenerRegistrar(registrar)
                         .build())
                 .build();
 
-        var executor = InputGuardrailExecutor.builder()
+        InputGuardrailExecutor executor = InputGuardrailExecutor.builder()
                 .guardrails(new WrappedInputGuardrail(new InnerFailingInputGuardrail()))
                 .config(InputGuardrailsConfig.builder().build())
                 .build();
@@ -107,28 +109,28 @@ class InputGuardrailExecutorTests {
 
     @Test
     void wrappedGuardrailShouldUseInnerGuardrailNameInObservabilityEventOnSuccess() {
-        var eventRef = new AtomicReference<InputGuardrailExecutedEvent>();
-        var registrar = AiServiceListenerRegistrar.newInstance();
+        AtomicReference<InputGuardrailExecutedEvent> eventRef = new AtomicReference<InputGuardrailExecutedEvent>();
+        AiServiceListenerRegistrar registrar = AiServiceListenerRegistrar.newInstance();
         registrar.register((InputGuardrailExecutedListener) eventRef::set);
 
-        var request = InputGuardrailRequest.builder()
+        InputGuardrailRequest request = InputGuardrailRequest.builder()
                 .userMessage(UserMessage.from("test"))
                 .commonParams(GuardrailRequestParams.builder()
                         .chatMemory(null)
                         .augmentationResult(null)
                         .userMessageTemplate("")
-                        .variables(Map.of())
+                        .variables(Collections.emptyMap())
                         .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                         .aiServiceListenerRegistrar(registrar)
                         .build())
                 .build();
 
-        var executor = InputGuardrailExecutor.builder()
+        InputGuardrailExecutor executor = InputGuardrailExecutor.builder()
                 .guardrails(new WrappedInputGuardrail(new InnerSuccessInputGuardrail()))
                 .config(InputGuardrailsConfig.builder().build())
                 .build();
 
-        var result = executor.execute(request);
+        InputGuardrailResult result = executor.execute(request);
 
         assertThat(result).isSuccessful();
         assertThat(eventRef.get()).isNotNull();
@@ -138,28 +140,28 @@ class InputGuardrailExecutorTests {
 
     @Test
     void shouldFallbackToClassNameWhenNoCustomNameProvided() {
-        var eventRef = new AtomicReference<InputGuardrailExecutedEvent>();
-        var registrar = AiServiceListenerRegistrar.newInstance();
+        AtomicReference<InputGuardrailExecutedEvent> eventRef = new AtomicReference<InputGuardrailExecutedEvent>();
+        AiServiceListenerRegistrar registrar = AiServiceListenerRegistrar.newInstance();
         registrar.register((InputGuardrailExecutedListener) eventRef::set);
 
-        var request = InputGuardrailRequest.builder()
+        InputGuardrailRequest request = InputGuardrailRequest.builder()
                 .userMessage(UserMessage.from("test"))
                 .commonParams(GuardrailRequestParams.builder()
                         .chatMemory(null)
                         .augmentationResult(null)
                         .userMessageTemplate("")
-                        .variables(Map.of())
+                        .variables(Collections.emptyMap())
                         .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                         .aiServiceListenerRegistrar(registrar)
                         .build())
                 .build();
 
-        var executor = InputGuardrailExecutor.builder()
+        InputGuardrailExecutor executor = InputGuardrailExecutor.builder()
                 .guardrails(new InnerSuccessInputGuardrail())
                 .config(InputGuardrailsConfig.builder().build())
                 .build();
 
-        var result = executor.execute(request);
+        InputGuardrailResult result = executor.execute(request);
 
         assertThat(result).isSuccessful();
         assertThat(eventRef.get()).isNotNull();
@@ -175,9 +177,9 @@ class InputGuardrailExecutorTests {
             int howManyFailures,
             @AggregateWith(InputGuardrailAggregator.class) InputGuardrail... guardrails) {
 
-        var spiedGuardrails = Stream.of(guardrails).map(Mockito::spy).toArray(InputGuardrail[]::new);
-        var request = from(UserMessage.from("test"));
-        var executor = InputGuardrailExecutor.builder()
+        InputGuardrail[] spiedGuardrails = Stream.of(guardrails).map(Mockito::spy).toArray(InputGuardrail[]::new);
+        InputGuardrailRequest request = from(UserMessage.from("test"));
+        InputGuardrailExecutor executor = InputGuardrailExecutor.builder()
                 .guardrails(spiedGuardrails)
                 .config(InputGuardrailsConfig.builder().build())
                 .build();
@@ -190,8 +192,8 @@ class InputGuardrailExecutorTests {
         IntStream.range(0, howManyShouldExecute)
                 .mapToObj(i -> spiedGuardrails[i])
                 .forEach(guardrail -> {
-                    var shouldBeExecuted = (guardrail instanceof SuccessInputGuardrail s)
-                            ? s.shouldBeExecuted
+                    boolean shouldBeExecuted = (guardrail instanceof SuccessInputGuardrail)
+                            ? ((SuccessInputGuardrail) guardrail).shouldBeExecuted
                             : ((FailureInputGuardrail) guardrail).shouldBeExecuted;
 
                     assertThat(shouldBeExecuted).isTrue();
@@ -201,15 +203,15 @@ class InputGuardrailExecutorTests {
         IntStream.range(howManyShouldExecute, spiedGuardrails.length)
                 .mapToObj(i -> spiedGuardrails[i])
                 .forEach(guardrail -> {
-                    var shouldBeExecuted = (guardrail instanceof SuccessInputGuardrail s)
-                            ? s.shouldBeExecuted
+                    boolean shouldBeExecuted = (guardrail instanceof SuccessInputGuardrail)
+                            ? ((SuccessInputGuardrail) guardrail).shouldBeExecuted
                             : ((FailureInputGuardrail) guardrail).shouldBeExecuted;
 
                     assertThat(shouldBeExecuted).isFalse();
                     verify(guardrail, never()).validate(request);
                 });
 
-        var numFailedGuardrails = Stream.of(spiedGuardrails)
+        long numFailedGuardrails = Stream.of(spiedGuardrails)
                 .filter(FailureInputGuardrail.class::isInstance)
                 .map(FailureInputGuardrail.class::cast)
                 .filter(guardrail -> guardrail.shouldBeExecuted)
@@ -292,11 +294,11 @@ class InputGuardrailExecutorTests {
     }
 
     public static InputGuardrailRequest from(UserMessage userMessage) {
-        var newCommonParams = GuardrailRequestParams.builder()
+        GuardrailRequestParams newCommonParams = GuardrailRequestParams.builder()
                 .chatMemory(null)
                 .augmentationResult(null)
                 .userMessageTemplate("")
-                .variables(Map.of())
+                .variables(Collections.emptyMap())
                 .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                 .build();
 
@@ -395,7 +397,7 @@ class InputGuardrailExecutorTests {
         public Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context)
                 throws ArgumentsAggregationException {
 
-            return accessor.toList().stream()
+            return accessor.collect(Collectors.toList()).stream()
                     .skip(context.getIndex())
                     .map(InputGuardrail.class::cast)
                     .toArray(InputGuardrail[]::new);

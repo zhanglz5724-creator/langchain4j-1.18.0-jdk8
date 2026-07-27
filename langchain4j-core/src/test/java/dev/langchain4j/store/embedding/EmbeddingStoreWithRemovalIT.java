@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Collections;
 
 import static dev.langchain4j.data.document.Metadata.metadata;
 import static dev.langchain4j.store.embedding.TestUtils.awaitUntilAsserted;

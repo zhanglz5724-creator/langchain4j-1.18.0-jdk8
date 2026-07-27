@@ -8,30 +8,22 @@ class LoggingChatModelListenerTest {
 
     @Test
     void formatArguments() {
-        assertThat(LoggingChatModelListener.formatArguments("""
-                {
-                    "arg0": 0
-                }
-                """)).isEqualTo("0");
+        assertThat(LoggingChatModelListener.formatArguments("{\n" +
+                "    \"arg0\": 0\n" +
+                "}")).isEqualTo("0");
 
-        assertThat(LoggingChatModelListener.formatArguments("""
-                {
-                    "arg0": 0,
-                    "arg1": 1
-                }
-                """)).isEqualTo("0, 1");
+        assertThat(LoggingChatModelListener.formatArguments("{\n" +
+                "    \"arg0\": 0,\n" +
+                "    \"arg1\": 1\n" +
+                "}")).isEqualTo("0, 1");
 
-        assertThat(LoggingChatModelListener.formatArguments("""
-                {
-                    "a": 0
-                }
-                """)).isEqualTo("0");
+        assertThat(LoggingChatModelListener.formatArguments("{\n" +
+                "    \"a\": 0\n" +
+                "}")).isEqualTo("0");
 
-        assertThat(LoggingChatModelListener.formatArguments("""
-                {
-                    "a": 0,
-                    "b": 1
-                }
-                """)).isEqualTo("{\"a\":0,\"b\":1}");
+        assertThat(LoggingChatModelListener.formatArguments("{\n" +
+                "    \"a\": 0,\n" +
+                "    \"b\": 1\n" +
+                "}")).isEqualTo("{\"a\":0,\"b\":1}");
     }
 }

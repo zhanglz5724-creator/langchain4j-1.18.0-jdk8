@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class BatchRequestTest {
@@ -15,7 +16,7 @@ class BatchRequestTest {
 
     @Test
     void requests_shouldReturnCorrectList_whenBatchIsInitialized() {
-        List<String> items = List.of("item1", "item2");
+        List<String> items = Arrays.asList("item1", "item2");
         BatchRequest<String> batch = new BatchRequest<>(items);
 
         assertThat(batch.requests()).hasSize(2).containsExactly("item1", "item2");
@@ -23,8 +24,8 @@ class BatchRequestTest {
 
     @Test
     void equals_shouldReturnTrue_whenRequestsAreIdentical() {
-        List<Integer> list1 = List.of(1, 2);
-        List<Integer> list2 = List.of(1, 2);
+        List<Integer> list1 = Arrays.asList(1, 2);
+        List<Integer> list2 = Arrays.asList(1, 2);
 
         BatchRequest<Integer> batch1 = new BatchRequest<>(list1);
         BatchRequest<Integer> batch2 = new BatchRequest<>(list2);
@@ -34,15 +35,15 @@ class BatchRequestTest {
 
     @Test
     void equals_shouldReturnFalse_whenRequestsAreDifferent() {
-        BatchRequest<Integer> batch1 = new BatchRequest<>(List.of(1));
-        BatchRequest<Integer> batch2 = new BatchRequest<>(List.of(2));
+        BatchRequest<Integer> batch1 = new BatchRequest<>(Arrays.asList(1));
+        BatchRequest<Integer> batch2 = new BatchRequest<>(Arrays.asList(2));
 
         assertThat(batch1).isNotEqualTo(batch2);
     }
 
     @Test
     void hashCode_shouldBeEqual_whenRequestsAreIdentical() {
-        List<String> list = List.of("data");
+        List<String> list = Arrays.asList("data");
         BatchRequest<String> batch1 = new BatchRequest<>(list);
         BatchRequest<String> batch2 = new BatchRequest<>(list);
 
@@ -51,7 +52,7 @@ class BatchRequestTest {
 
     @Test
     void toString_shouldReturnFormattedString_whenCalled() {
-        BatchRequest<String> batch = new BatchRequest<>(List.of("A"));
+        BatchRequest<String> batch = new BatchRequest<>(Arrays.asList("A"));
 
         assertThat(batch).hasToString("BatchRequest{requests=[A]}");
     }

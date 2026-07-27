@@ -6,42 +6,44 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import dev.langchain4j.data.document.Metadata;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class IsNotInTest {
 
     @Test
     void shouldReturnFalseWhenNotMetadata() {
-        IsNotIn isNotIn = new IsNotIn("key", List.of("value"));
+        IsNotIn isNotIn = new IsNotIn("key", Arrays.asList("value"));
         assertThat(isNotIn.test("notMetadata")).isFalse();
     }
 
     @Test
     void shouldReturnTrueWhenKeyNotFound() {
-        IsNotIn isNotIn = new IsNotIn("key", List.of("value"));
-        Metadata metadata = new Metadata(Map.of());
+        IsNotIn isNotIn = new IsNotIn("key", Arrays.asList("value"));
+        Metadata metadata = new Metadata(Collections.emptyMap());
         assertThat(isNotIn.test(metadata)).isTrue();
     }
 
     @Test
     void shouldReturnFalseWhenValueIsInCollection() {
-        IsNotIn isNotIn = new IsNotIn("key", List.of("value1", "value2"));
-        Metadata metadata = new Metadata(Map.of("key", "value2"));
+        IsNotIn isNotIn = new IsNotIn("key", Arrays.asList("value1", "value2"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "value2"));
         assertThat(isNotIn.test(metadata)).isFalse();
     }
 
     @Test
     void shouldReturnTrueWhenValueIsNotInCollection() {
-        IsNotIn isNotIn = new IsNotIn("key", List.of("value1", "value2"));
-        Metadata metadata = new Metadata(Map.of("key", "value3"));
+        IsNotIn isNotIn = new IsNotIn("key", Arrays.asList("value1", "value2"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "value3"));
         assertThat(isNotIn.test(metadata)).isTrue();
     }
 
     @Test
     void shouldBeConsistentWithIsNotEqualToForFloatMetadata() {
         // given: a Float metadata value and a Double comparison value that are numerically equal
-        IsNotIn isNotIn = new IsNotIn("key", List.of(1.1));
-        Metadata metadata = new Metadata(Map.of("key", 1.1f));
+        IsNotIn isNotIn = new IsNotIn("key", Arrays.asList(1.1));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 1.1f));
 
         // then: since isEqualTo(1.1) matches this metadata, isNotIn(1.1) must not match
         assertThat(isNotIn.test(metadata)).isFalse();
@@ -49,7 +51,7 @@ class IsNotInTest {
 
     @Test
     void shouldReturnFalseWhenTestingNullObject() {
-        IsNotIn isNotIn = new IsNotIn("key", List.of("value"));
+        IsNotIn isNotIn = new IsNotIn("key", Arrays.asList("value"));
         assertThat(isNotIn.test(null)).isFalse();
     }
 
@@ -60,6 +62,6 @@ class IsNotInTest {
 
     @Test
     void shouldThrowExceptionWhenComparisonValuesIsEmpty() {
-        assertThatThrownBy(() -> new IsNotIn("key", List.of())).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new IsNotIn("key", Arrays.asList())).isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -8,6 +8,7 @@ import dev.langchain4j.data.document.Metadata;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class WebSearchResultsTest {

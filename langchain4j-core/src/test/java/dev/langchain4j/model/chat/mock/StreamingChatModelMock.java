@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.Arrays;
 
 /**
  * An implementation of a {@link StreamingChatModel} useful for unit testing.
@@ -38,7 +41,7 @@ public class StreamingChatModelMock implements StreamingChatModel {
     private final List<ChatRequest> requests = synchronizedList(new ArrayList<>());
 
     public StreamingChatModelMock(List<String> tokens) {
-        this(List.of(toAiMessage(tokens)));
+        this(Arrays.asList(toAiMessage(tokens)));
     }
 
     public StreamingChatModelMock(Collection<AiMessage> aiMessages) {
@@ -60,7 +63,7 @@ public class StreamingChatModelMock implements StreamingChatModel {
         } else {
             AiMessage aiMessage = ensureNotNull(aiMessages.poll(), "aiMessage");
 
-            var executor = Executors.newSingleThreadExecutor();
+            java.util.concurrent.ExecutorService executor = Executors.newSingleThreadExecutor();
 
             try {
                 executor.execute(() -> {
@@ -112,11 +115,11 @@ public class StreamingChatModelMock implements StreamingChatModel {
 
     static List<String> toTokens(AiMessage aiMessage) {
         if (isNullOrEmpty(aiMessage.text())) {
-            return List.of();
+            return Arrays.asList();
         }
 
         // approximating: each char will become a token
-        return aiMessage.text().chars().mapToObj(c -> String.valueOf((char) c)).toList();
+        return aiMessage.text().chars().mapToObj(c -> String.valueOf((char) c)).collect(Collectors.toList());
     }
 
     private static class SimpleStreamingHandle implements StreamingHandle {
@@ -143,7 +146,7 @@ public class StreamingChatModelMock implements StreamingChatModel {
     }
 
     public static StreamingChatModelMock thatAlwaysStreams(AiMessage aiMessage) {
-        return new StreamingChatModelMock(List.of(aiMessage));
+        return new StreamingChatModelMock(Arrays.asList(aiMessage));
     }
 
     public static StreamingChatModelMock thatAlwaysStreams(AiMessage... aiMessages) {

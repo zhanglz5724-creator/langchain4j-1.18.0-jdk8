@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -1488,10 +1490,10 @@ public abstract class EmbeddingStoreWithFilteringIT extends EmbeddingStoreIT {
     protected void should_filter_by_metadata_contains() {
         should_filter_by_metadata(
                 metadataKey("key").containsString("contains"),
-                List.of(
+                Arrays.asList(
                         new Metadata().put("key", "|contains|"),
                         new Metadata().put("key", "contains").put("key2", "not")),
-                List.of(
+                Arrays.asList(
                         new Metadata().put("key", "ContainsString"),
                         new Metadata().put("key2", "contains"),
                         new Metadata()));
@@ -1502,11 +1504,11 @@ public abstract class EmbeddingStoreWithFilteringIT extends EmbeddingStoreIT {
     protected void should_filter_by_not_metadata_contains() {
         should_filter_by_metadata_not(
                 not(metadataKey("key").containsString("contains")),
-                List.of(
+                Arrays.asList(
                         new Metadata().put("key", "not"),
                         new Metadata().put("key", "not").put("key2", "contains"),
                         new Metadata()),
-                List.of(
+                Arrays.asList(
                         new Metadata().put("key", "|contains|"),
                         new Metadata().put("key", "contains").put("key2", "not")));
     }

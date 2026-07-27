@@ -17,6 +17,7 @@ import dev.langchain4j.rag.content.retriever.listener.ContentRetrieverRequestCon
 import dev.langchain4j.rag.content.retriever.listener.ContentRetrieverResponseContext;
 import dev.langchain4j.rag.query.Query;
 import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
@@ -25,7 +26,7 @@ class ContentRetrieverListenerTest {
     static class TestContentRetriever implements ContentRetriever {
         @Override
         public List<Content> retrieve(Query query) {
-            return List.of();
+            return Arrays.asList();
         }
     }
 
@@ -64,7 +65,7 @@ class ContentRetrieverListenerTest {
         // given
         ContentRetrieverListener listener1 = spy(new SuccessfulListener());
         ContentRetrieverListener listener2 = spy(new SuccessfulListener());
-        ContentRetriever retriever = new TestContentRetriever().addListeners(List.of(listener1, listener2));
+        ContentRetriever retriever = new TestContentRetriever().addListeners(Arrays.asList(listener1, listener2));
 
         // when
         retriever.retrieve(Query.from("q"));
@@ -85,7 +86,7 @@ class ContentRetrieverListenerTest {
         ContentRetrieverListener failingListener = spy(new FailingListener());
         ContentRetrieverListener successfulListener = spy(new SuccessfulListener());
         ContentRetriever retriever =
-                new TestContentRetriever().addListeners(List.of(failingListener, successfulListener));
+                new TestContentRetriever().addListeners(Arrays.asList(failingListener, successfulListener));
 
         // when - then
         assertThatNoException().isThrownBy(() -> retriever.retrieve(Query.from("q")));
@@ -114,7 +115,7 @@ class ContentRetrieverListenerTest {
                 assertThat(responseContext.attributes()).containsExactly(entry("my-attribute", "my-value"));
             }
         });
-        ContentRetriever retriever = new TestContentRetriever().addListeners(List.of(listener1, listener2));
+        ContentRetriever retriever = new TestContentRetriever().addListeners(Arrays.asList(listener1, listener2));
 
         // when
         retriever.retrieve(Query.from("q"));
@@ -149,7 +150,7 @@ class ContentRetrieverListenerTest {
     @Test
     void should_handle_empty_listeners_list() {
         // given
-        ContentRetriever retriever = new TestContentRetriever().addListeners(List.of());
+        ContentRetriever retriever = new TestContentRetriever().addListeners(Arrays.asList());
 
         // when/then
         assertThatNoException().isThrownBy(() -> retriever.retrieve(Query.from("q")));
@@ -175,7 +176,7 @@ class ContentRetrieverListenerTest {
                 throw new RuntimeException("Retriever failed");
             }
         };
-        ContentRetriever retriever = failingRetriever.addListeners(List.of(failingListener, successfulListener));
+        ContentRetriever retriever = failingRetriever.addListeners(Arrays.asList(failingListener, successfulListener));
 
         // when
         assertThatThrownBy(() -> retriever.retrieve(Query.from("q"))).hasMessage("Retriever failed");
@@ -209,7 +210,7 @@ class ContentRetrieverListenerTest {
                 throw new RuntimeException("Test error");
             }
         };
-        ContentRetriever retriever = failingRetriever.addListeners(List.of(listener1, listener2));
+        ContentRetriever retriever = failingRetriever.addListeners(Arrays.asList(listener1, listener2));
 
         // when
         assertThatThrownBy(() -> retriever.retrieve(Query.from("q"))).hasMessage("Test error");

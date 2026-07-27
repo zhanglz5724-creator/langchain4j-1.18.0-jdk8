@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
+import java.util.Collections;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -105,16 +106,15 @@ class DefaultRetrievalAugmentorTest {
         UserMessage augmented = (UserMessage) result.chatMessage();
         assertThat(augmented.singleText())
                 .isEqualTo(
-                        """
-                query
-                content 1
-                content 2
-                content 3
-                content 4
-                content 1
-                content 2
-                content 3
-                content 4""");
+                        "query\n" +
+                "content 1\n" +
+                "content 2\n" +
+                "content 3\n" +
+                "content 4\n" +
+                "content 1\n" +
+                "content 2\n" +
+                "content 3\n" +
+                "content 4");
 
         verify(queryTransformer).transform(Query.from("query", metadata));
         verifyNoMoreInteractions(queryTransformer);
@@ -192,12 +192,11 @@ class DefaultRetrievalAugmentorTest {
         UserMessage augmented = (UserMessage) result.chatMessage();
         assertThat(augmented.singleText())
                 .isEqualTo(
-                        """
-                query
-                content 1
-                content 2
-                content 3
-                content 4""");
+                        "query\n" +
+                "content 1\n" +
+                "content 2\n" +
+                "content 3\n" +
+                "content 4");
 
         Query query = Query.from("query", metadata);
         verify(queryTransformer).transform(query);
@@ -270,10 +269,9 @@ class DefaultRetrievalAugmentorTest {
         // then
         UserMessage augmented = (UserMessage) result.chatMessage();
         assertThat(augmented.singleText())
-                .isEqualTo("""
-                query
-                content 1
-                content 2""");
+                .isEqualTo("query\n" +
+                "content 1\n" +
+                "content 2");
 
         Query query = Query.from("query", metadata);
         verify(queryTransformer).transform(query);

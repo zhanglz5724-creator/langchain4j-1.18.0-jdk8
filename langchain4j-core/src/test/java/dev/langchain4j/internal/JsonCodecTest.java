@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Collections;
+import java.util.Arrays;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,7 +30,7 @@ class JsonCodecTest {
             """;
 
     static List<Json.JsonCodec> codecs() {
-        return List.of(new JacksonJsonCodec());
+        return Arrays.asList(new JacksonJsonCodec());
     }
 
     @ParameterizedTest

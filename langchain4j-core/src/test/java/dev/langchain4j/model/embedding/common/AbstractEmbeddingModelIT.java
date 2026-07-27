@@ -26,6 +26,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.DisabledIf;
@@ -248,7 +249,7 @@ public abstract class AbstractEmbeddingModelIT {
     protected void should_embed_all_text_segments(EmbeddingModel model) {
 
         Response<List<Embedding>> response =
-                model.embedAll(List.of(TextSegment.from("first"), TextSegment.from("second")));
+                model.embedAll(Arrays.asList(TextSegment.from("first"), TextSegment.from("second")));
 
         assertThat(response.content()).hasSize(2);
         assertThat(response.content().get(0).dimension()).isEqualTo(model.dimension());

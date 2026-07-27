@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import dev.langchain4j.data.document.Metadata;
 import java.util.Map;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class ContainsStringTest {
@@ -18,28 +19,28 @@ class ContainsStringTest {
     @Test
     void shouldReturnFalseWhenKeyNotFound() {
         ContainsString containsString = new ContainsString("key", "value");
-        Metadata metadata = new Metadata(Map.of());
+        Metadata metadata = new Metadata(Collections.emptyMap());
         assertThat(containsString.test(metadata)).isFalse();
     }
 
     @Test
     void shouldReturnTrueWhenContains() {
         ContainsString containsString = new ContainsString("key", "value");
-        Metadata metadata = new Metadata(Map.of("key", "foovaluebar"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "foovaluebar"));
         assertThat(containsString.test(metadata)).isTrue();
     }
 
     @Test
     void shouldReturnFalseWhenNotContains() {
         ContainsString containsString = new ContainsString("key", "value");
-        Metadata metadata = new Metadata(Map.of("key", "foobar"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "foobar"));
         assertThat(containsString.test(metadata)).isFalse();
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenTypeMismatch() {
         ContainsString containsString = new ContainsString("key", "value");
-        Metadata metadata = new Metadata(Map.of("key", 42));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 42));
         assertThatThrownBy(() -> containsString.test(metadata))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(
@@ -49,28 +50,28 @@ class ContainsStringTest {
     @Test
     void shouldReturnFalseWhenCaseMismatch() {
         ContainsString containsString = new ContainsString("key", "VALUE");
-        Metadata metadata = new Metadata(Map.of("key", "testvalue123"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "testvalue123"));
         assertThat(containsString.test(metadata)).isFalse();
     }
 
     @Test
     void shouldHandleEmptySearchString() {
         ContainsString containsString = new ContainsString("key", "");
-        Metadata metadata = new Metadata(Map.of("key", "any string"));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", "any string"));
         assertThat(containsString.test(metadata)).isTrue();
     }
 
     @Test
     void shouldHandleBothEmpty() {
         ContainsString containsString = new ContainsString("key", "");
-        Metadata metadata = new Metadata(Map.of("key", ""));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", ""));
         assertThat(containsString.test(metadata)).isTrue();
     }
 
     @Test
     void shouldThrowWhenMetadataValueIsDouble() {
         ContainsString containsString = new ContainsString("key", "value");
-        Metadata metadata = new Metadata(Map.of("key", 3.14));
+        Metadata metadata = new Metadata(Collections.singletonMap("key", 3.14));
         assertThatThrownBy(() -> containsString.test(metadata))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Type mismatch")

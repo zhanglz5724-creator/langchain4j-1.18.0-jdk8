@@ -20,6 +20,7 @@ import dev.langchain4j.model.embedding.request.EmbeddingRequest;
 import dev.langchain4j.model.embedding.response.EmbeddingResponse;
 import dev.langchain4j.model.output.Response;
 import java.util.List;
+import java.util.Arrays;
 import org.mockito.ArgumentCaptor;
 import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
@@ -63,7 +64,7 @@ class EmbeddingStoreContentRetrieverTest {
         // given
         when(EMBEDDING_MODEL.embed(any(EmbeddingRequest.class)))
                 .thenReturn(EmbeddingResponse.builder()
-                        .embeddings(List.of(EMBEDDING))
+                        .embeddings(Arrays.asList(EMBEDDING))
                         .build());
 
         ContentRetriever contentRetriever = EmbeddingStoreContentRetriever.builder()

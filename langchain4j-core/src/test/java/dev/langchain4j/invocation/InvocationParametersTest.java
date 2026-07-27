@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class InvocationParametersTest {
@@ -27,7 +28,7 @@ class InvocationParametersTest {
 
     @Test
     void test3() {
-        InvocationParameters invocationParameters = InvocationParameters.from(Map.of("key", "value"));
+        InvocationParameters invocationParameters = InvocationParameters.from(Collections.singletonMap("key", "value"));
         assertThat(invocationParameters.asMap()).containsOnly(Map.entry("key", "value"));
     }
 
@@ -101,7 +102,7 @@ class InvocationParametersTest {
     @Test
     void testComplexObjectAsValue() {
         InvocationParameters invocationParameters = new InvocationParameters();
-        Map<String, String> complexObject = Map.of("nested", "value");
+        Map<String, String> complexObject = Collections.singletonMap("nested", "value");
         invocationParameters.put("complex", complexObject);
 
         @SuppressWarnings("unchecked")

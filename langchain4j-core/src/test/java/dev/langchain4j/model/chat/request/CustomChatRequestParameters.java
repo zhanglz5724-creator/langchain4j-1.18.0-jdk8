@@ -45,7 +45,8 @@ public class CustomChatRequestParameters extends DefaultChatRequestParameters {
         @Override
         public Builder overrideWith(ChatRequestParameters parameters) {
             super.overrideWith(parameters);
-            if (parameters instanceof CustomChatRequestParameters that) {
+            if (parameters instanceof CustomChatRequestParameters) {
+                CustomChatRequestParameters that = (CustomChatRequestParameters) parameters;
                 customParameter(getOrDefault(that.customParameter(), customParameter));
             }
             return this;

@@ -3,6 +3,8 @@ package dev.langchain4j.model.chat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class ChatRequestOptionsTest {
@@ -29,7 +31,7 @@ class ChatRequestOptionsTest {
 
         // when
         ChatRequestOptions options = ChatRequestOptions.builder()
-                .listenerAttributes(Map.of("a", 1, "b", 2))
+                .listenerAttributes(new java.util.HashMap<String,Object>(){{put("a", 1);put("b", 2);}})
                 .build();
 
         // then
@@ -42,7 +44,7 @@ class ChatRequestOptionsTest {
         // when
         ChatRequestOptions options = ChatRequestOptions.builder()
                 .addListenerAttribute("old", "value")
-                .listenerAttributes(Map.of("new", "value"))
+                .listenerAttributes(Collections.singletonMap("new", "value"))
                 .build();
 
         // then

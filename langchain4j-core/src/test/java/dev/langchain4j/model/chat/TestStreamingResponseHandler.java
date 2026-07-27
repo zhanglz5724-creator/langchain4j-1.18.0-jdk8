@@ -27,7 +27,8 @@ public class TestStreamingResponseHandler<T> implements StreamingResponseHandler
     public void onComplete(Response<T> response) {
 
         String expectedTextContent = textContentBuilder.toString();
-        if (response.content() instanceof AiMessage aiMessage) {
+        if (response.content() instanceof AiMessage) {
+            AiMessage aiMessage = (AiMessage) response.content();
             if (aiMessage.hasToolExecutionRequests()){
                 assertThat(aiMessage.toolExecutionRequests().size()).isGreaterThan(0);
             } else {

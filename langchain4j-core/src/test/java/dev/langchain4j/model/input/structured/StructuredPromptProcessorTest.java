@@ -11,7 +11,19 @@ import org.junit.jupiter.api.Test;
 class StructuredPromptProcessorTest {
 
     @StructuredPrompt("Hello, my name is {{name}}")
-    record Greeting(String name) {}
+    static class Greeting {
+        private String name;
+
+        public Greeting() {}
+
+        public Greeting(String name) {
+            this.name = name;
+        }
+
+        public String name() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getName() { return name; }
+    }
 
     @Test
     void prompt_with_single_variable() {

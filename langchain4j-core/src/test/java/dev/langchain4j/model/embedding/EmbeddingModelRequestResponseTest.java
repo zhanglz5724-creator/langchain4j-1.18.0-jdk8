@@ -20,6 +20,8 @@ import dev.langchain4j.model.output.TokenUsage;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +57,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
 
         @Override
         public Set<EmbeddingParameter<?>> supportedParameters() {
-            return Set.of(EmbeddingRequestParameters.DIMENSIONS);
+            return new HashSet<>(Arrays.asList(EmbeddingRequestParameters.DIMENSIONS));
         }
 
         @Override
@@ -75,7 +77,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
 
         @Override
         public Set<ContentType> supportedContentTypes() {
-            return Set.of(ContentType.TEXT, ContentType.IMAGE);
+            return new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE));
         }
 
         @Override
@@ -145,7 +147,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
             }
         };
 
-        EmbeddingModel model = new ListenableModel(List.of(listener), false);
+        EmbeddingModel model = new ListenableModel(Arrays.asList(listener), false);
         EmbeddingResponse response = model.embed(EmbeddingRequest.builder().input("hello").build());
 
         assertThat(onRequest).hasValue(1);
@@ -165,7 +167,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
             }
         };
 
-        EmbeddingModel model = new ListenableModel(List.of(listener), false);
+        EmbeddingModel model = new ListenableModel(Arrays.asList(listener), false);
         model.embed("hello");
 
         assertThat(onRequest).hasValue(1); // fires exactly once, no double-firing
@@ -181,7 +183,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
             }
         };
 
-        EmbeddingModel model = new ListenableModel(List.of(listener), true);
+        EmbeddingModel model = new ListenableModel(Arrays.asList(listener), true);
 
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> model.embed(EmbeddingRequest.builder().input("hello").build()))
@@ -322,7 +324,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
 
         EmbeddingRequest request = EmbeddingRequest.builder()
                 .textSegment(TextSegment.from("a"))
-                .textSegments(List.of(segmentWithMetadata, TextSegment.from("ccc")))
+                .textSegments(Arrays.asList(segmentWithMetadata, TextSegment.from("ccc")))
                 .build();
 
         // only the text of each segment is carried into the request
@@ -399,9 +401,9 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
             }
         };
 
-        EmbeddingModel model = new CustomOverrideModel(List.of(listener), false);
+        EmbeddingModel model = new CustomOverrideModel(Arrays.asList(listener), false);
         Response<List<Embedding>> response =
-                model.embedAll(List.of(TextSegment.from("a"), TextSegment.from("bb")));
+                model.embedAll(Arrays.asList(TextSegment.from("a"), TextSegment.from("bb")));
 
         assertThat(response.content()).hasSize(2);
         assertThat(onRequest).hasValue(1); // fires exactly once, no double-firing
@@ -425,7 +427,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
             }
         };
 
-        EmbeddingModel model = new CustomOverrideModel(List.of(listener), false);
+        EmbeddingModel model = new CustomOverrideModel(Arrays.asList(listener), false);
 
         // embed(String) -> embed(TextSegment) override -> util fires exactly once
         Response<Embedding> response = model.embed("hello");
@@ -446,10 +448,10 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
             }
         };
 
-        EmbeddingModel model = new CustomOverrideModel(List.of(listener), true);
+        EmbeddingModel model = new CustomOverrideModel(Arrays.asList(listener), true);
 
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> model.embedAll(List.of(TextSegment.from("a"))))
+                .isThrownBy(() -> model.embedAll(Arrays.asList(TextSegment.from("a"))))
                 .withMessage("boom");
         assertThat(error.get()).hasMessage("boom");
     }
@@ -457,10 +459,10 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
     @Test
     void custom_override_util_skips_dispatch_when_no_listeners() {
         // no listeners configured -> util runs the operation directly without building contexts
-        EmbeddingModel model = new CustomOverrideModel(List.of(), false);
+        EmbeddingModel model = new CustomOverrideModel(Arrays.asList(), false);
 
         Response<List<Embedding>> response =
-                model.embedAll(List.of(TextSegment.from("a"), TextSegment.from("bb")));
+                model.embedAll(Arrays.asList(TextSegment.from("a"), TextSegment.from("bb")));
 
         assertThat(response.content()).hasSize(2);
         assertThat(response.tokenUsage()).isEqualTo(new TokenUsage(5));
@@ -487,7 +489,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
         EmbeddingModel model = new EmbeddingModel() {
             @Override
             public List<EmbeddingModelListener> listeners() {
-                return List.of(listener);
+                return Arrays.asList(listener);
             }
 
             @Override
@@ -499,7 +501,7 @@ class EmbeddingModelRequestResponseTest implements WithAssertions {
             }
         };
 
-        Response<List<Embedding>> response = model.embedAll(List.of(TextSegment.from("a"), TextSegment.from("b")));
+        Response<List<Embedding>> response = model.embedAll(Arrays.asList(TextSegment.from("a"), TextSegment.from("b")));
 
         assertThat(response.content()).hasSize(2);
         assertThat(onRequest.get()).isEqualTo(1);

@@ -4,6 +4,7 @@ import dev.langchain4j.data.message.AiMessage;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +43,7 @@ class OutputGuardrailResultTest {
     @Test
     void failure_shouldReturnResultWithFailures() {
         OutputGuardrailResult.Failure failure = new OutputGuardrailResult.Failure("Oops", null, true, "Try again");
-        OutputGuardrailResult result = OutputGuardrailResult.failure(List.of(failure));
+        OutputGuardrailResult result = OutputGuardrailResult.failure(Arrays.asList(failure));
 
         assertThat(result.result()).isEqualTo(OutputGuardrailResult.Result.FAILURE);
         assertThat(result.failures()).containsExactly(failure);

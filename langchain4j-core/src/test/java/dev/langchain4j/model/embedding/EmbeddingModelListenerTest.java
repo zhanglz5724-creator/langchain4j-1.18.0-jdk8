@@ -18,6 +18,8 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelRequestContext;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelResponseContext;
 import dev.langchain4j.model.output.Response;
 import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
@@ -26,7 +28,7 @@ class EmbeddingModelListenerTest {
     static class TestEmbeddingModel implements EmbeddingModel {
         @Override
         public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-            return Response.from(List.of(Embedding.from(List.of(1f, 2f, 3f))));
+            return Response.from(Arrays.asList(Embedding.from(Arrays.asList(1f, 2f, 3f))));
         }
     }
 
@@ -65,10 +67,10 @@ class EmbeddingModelListenerTest {
         // given
         EmbeddingModelListener listener1 = spy(new SuccessfulListener());
         EmbeddingModelListener listener2 = spy(new SuccessfulListener());
-        EmbeddingModel model = new TestEmbeddingModel().addListeners(List.of(listener1, listener2));
+        EmbeddingModel model = new TestEmbeddingModel().addListeners(Arrays.asList(listener1, listener2));
 
         // when
-        model.embedAll(List.of(TextSegment.from("hi")));
+        model.embedAll(Arrays.asList(TextSegment.from("hi")));
 
         // then
         InOrder inOrder = inOrder(listener1, listener2);
@@ -87,12 +89,12 @@ class EmbeddingModelListenerTest {
         EmbeddingModel delegate = new TestEmbeddingModel() {
             @Override
             public Response<Embedding> embed(TextSegment textSegment) {
-                return Response.from(Embedding.from(List.of(9f)));
+                return Response.from(Embedding.from(Arrays.asList(9f)));
             }
 
             @Override
             public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-                return Response.from(List.of(Embedding.from(List.of(1f))));
+                return Response.from(Arrays.asList(Embedding.from(Arrays.asList(1f))));
             }
         };
         EmbeddingModel model = delegate.addListener(listener);
@@ -114,12 +116,12 @@ class EmbeddingModelListenerTest {
         EmbeddingModel delegate = new TestEmbeddingModel() {
             @Override
             public Response<Embedding> embed(String text) {
-                return Response.from(Embedding.from(List.of(7f)));
+                return Response.from(Embedding.from(Arrays.asList(7f)));
             }
 
             @Override
             public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-                return Response.from(List.of(Embedding.from(List.of(1f))));
+                return Response.from(Arrays.asList(Embedding.from(Arrays.asList(1f))));
             }
         };
         EmbeddingModel model = delegate.addListener(listener);
@@ -139,10 +141,10 @@ class EmbeddingModelListenerTest {
         // given
         EmbeddingModelListener failingListener = spy(new FailingListener());
         EmbeddingModelListener successfulListener = spy(new SuccessfulListener());
-        EmbeddingModel model = new TestEmbeddingModel().addListeners(List.of(failingListener, successfulListener));
+        EmbeddingModel model = new TestEmbeddingModel().addListeners(Arrays.asList(failingListener, successfulListener));
 
         // when - then
-        assertThatNoException().isThrownBy(() -> model.embedAll(List.of(TextSegment.from("hi"))));
+        assertThatNoException().isThrownBy(() -> model.embedAll(Arrays.asList(TextSegment.from("hi"))));
 
         verify(failingListener).onRequest(any());
         verify(failingListener).onResponse(any());
@@ -168,10 +170,10 @@ class EmbeddingModelListenerTest {
                 assertThat(responseContext.attributes()).containsExactly(entry("my-attribute", "my-value"));
             }
         });
-        EmbeddingModel model = new TestEmbeddingModel().addListeners(List.of(listener1, listener2));
+        EmbeddingModel model = new TestEmbeddingModel().addListeners(Arrays.asList(listener1, listener2));
 
         // when
-        model.embedAll(List.of(TextSegment.from("hi")));
+        model.embedAll(Arrays.asList(TextSegment.from("hi")));
 
         // then
         verify(listener2).onResponse(any());
@@ -190,7 +192,7 @@ class EmbeddingModelListenerTest {
         EmbeddingModel model = failingModel.addListener(listener);
 
         // when
-        assertThatThrownBy(() -> model.embedAll(List.of(TextSegment.from("hi"))))
+        assertThatThrownBy(() -> model.embedAll(Arrays.asList(TextSegment.from("hi"))))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Embedding model failed");
 
@@ -203,10 +205,10 @@ class EmbeddingModelListenerTest {
     @Test
     void should_handle_empty_listeners_list() {
         // given
-        EmbeddingModel model = new TestEmbeddingModel().addListeners(List.of());
+        EmbeddingModel model = new TestEmbeddingModel().addListeners(Arrays.asList());
 
         // when/then
-        assertThatNoException().isThrownBy(() -> model.embedAll(List.of(TextSegment.from("hi"))));
+        assertThatNoException().isThrownBy(() -> model.embedAll(Arrays.asList(TextSegment.from("hi"))));
     }
 
     @Test
@@ -215,7 +217,7 @@ class EmbeddingModelListenerTest {
         EmbeddingModel model = new TestEmbeddingModel().addListeners(null);
 
         // when/then
-        assertThatNoException().isThrownBy(() -> model.embedAll(List.of(TextSegment.from("hi"))));
+        assertThatNoException().isThrownBy(() -> model.embedAll(Arrays.asList(TextSegment.from("hi"))));
     }
 
     @Test
@@ -229,10 +231,10 @@ class EmbeddingModelListenerTest {
                 throw new RuntimeException("Embedding model failed");
             }
         };
-        EmbeddingModel model = failingModel.addListeners(List.of(failingListener, successfulListener));
+        EmbeddingModel model = failingModel.addListeners(Arrays.asList(failingListener, successfulListener));
 
         // when
-        assertThatThrownBy(() -> model.embedAll(List.of(TextSegment.from("hi"))))
+        assertThatThrownBy(() -> model.embedAll(Arrays.asList(TextSegment.from("hi"))))
                 .hasMessage("Embedding model failed");
 
         // then
@@ -264,10 +266,10 @@ class EmbeddingModelListenerTest {
                 throw new RuntimeException("Test error");
             }
         };
-        EmbeddingModel model = failingModel.addListeners(List.of(listener1, listener2));
+        EmbeddingModel model = failingModel.addListeners(Arrays.asList(listener1, listener2));
 
         // when
-        assertThatThrownBy(() -> model.embedAll(List.of(TextSegment.from("hi"))))
+        assertThatThrownBy(() -> model.embedAll(Arrays.asList(TextSegment.from("hi"))))
                 .hasMessage("Test error");
 
         // then
@@ -279,15 +281,15 @@ class EmbeddingModelListenerTest {
         EmbeddingModel delegate = new TestEmbeddingModel() {
             @Override
             public java.util.Set<dev.langchain4j.data.message.ContentType> supportedContentTypes() {
-                return java.util.Set.of(
+                return java.util.new HashSet<>(Arrays.asList(
                         dev.langchain4j.data.message.ContentType.TEXT,
-                        dev.langchain4j.data.message.ContentType.IMAGE);
+                        dev.langchain4j.data.message.ContentType.IMAGE));
             }
 
             @Override
             public java.util.Set<dev.langchain4j.model.embedding.request.EmbeddingParameter<?>> supportedParameters() {
-                return java.util.Set.of(
-                        dev.langchain4j.model.embedding.request.EmbeddingRequestParameters.DIMENSIONS);
+                return java.util.new HashSet<>(Arrays.asList(
+                        dev.langchain4j.model.embedding.request.EmbeddingRequestParameters.DIMENSIONS));
             }
 
             @Override

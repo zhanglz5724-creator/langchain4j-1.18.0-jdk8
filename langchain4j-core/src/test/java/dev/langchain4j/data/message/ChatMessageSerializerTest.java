@@ -13,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -62,7 +64,7 @@ class ChatMessageSerializerTest {
                                     {
                                         put("name", "Klaus");
                                         put("age", 42);
-                                        put("extra", List.of("one", "two"));
+                                        put("extra", Arrays.asList("one", "two"));
                                     }
                                 })
                                 .build(),
@@ -80,7 +82,7 @@ class ChatMessageSerializerTest {
                         AiMessage.builder()
                                 .text("test-text")
                                 .thinking("test-thinking")
-                                .toolExecutionRequests(List.of(ToolExecutionRequest.builder()
+                                .toolExecutionRequests(Arrays.asList(ToolExecutionRequest.builder()
                                         .name("weather")
                                         .arguments("{\"city\": \"Munich\"}")
                                         .build()))
@@ -88,7 +90,7 @@ class ChatMessageSerializerTest {
                                     {
                                         put("name", "Klaus");
                                         put("age", 42);
-                                        put("extra", List.of("one", "two"));
+                                        put("extra", Arrays.asList("one", "two"));
                                     }
                                 })
                                 .build(),
@@ -117,7 +119,7 @@ class ChatMessageSerializerTest {
                                 .text("Tools found: weather, time")
                                 .attributes(new LinkedHashMap<>() {
                                     {
-                                        put("found_tools", List.of("weather", "time"));
+                                        put("found_tools", Arrays.asList("weather", "time"));
                                     }
                                 })
                                 .build(),
@@ -194,7 +196,7 @@ class ChatMessageSerializerTest {
         assertThat(deserialized.id()).isEqualTo("12345");
         assertThat(deserialized.toolName()).isEqualTo("weather");
         assertThat(deserialized.text()).isEqualTo("sunny");
-        assertThat(deserialized.contents()).isEqualTo(List.of(TextContent.from("sunny")));
+        assertThat(deserialized.contents()).isEqualTo(Arrays.asList(TextContent.from("sunny")));
         assertThat(deserialized.isError()).isNull();
     }
 
@@ -207,7 +209,7 @@ class ChatMessageSerializerTest {
         assertThat(deserialized.id()).isEqualTo("12345");
         assertThat(deserialized.toolName()).isEqualTo("weather");
         assertThat(deserialized.text()).isEqualTo("sunny");
-        assertThat(deserialized.contents()).isEqualTo(List.of(TextContent.from("sunny")));
+        assertThat(deserialized.contents()).isEqualTo(Arrays.asList(TextContent.from("sunny")));
         assertThat(deserialized.attributes()).isEmpty();
     }
 }

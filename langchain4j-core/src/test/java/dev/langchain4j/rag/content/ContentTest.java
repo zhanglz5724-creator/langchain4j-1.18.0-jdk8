@@ -43,7 +43,7 @@ class ContentTest {
 
         // given
         TextSegment segment = TextSegment.from("text");
-        Map<ContentMetadata, Object> metadata = Map.of(SCORE, 0.2d, ContentMetadata.EMBEDDING_ID, "test-eid");
+        Map<ContentMetadata, Object> metadata = new java.util.HashMap<String,Object>(){{put(SCORE, 0.2d);put(ContentMetadata.EMBEDDING_ID, "test-eid");}};
 
         // when
         Content content = Content.from(segment, metadata);
@@ -52,14 +52,14 @@ class ContentTest {
         assertThat(content.textSegment()).isSameAs(segment);
         assertThat(content.metadata()).isNotEmpty();
         assertThat(content.metadata())
-                .containsExactlyEntriesOf(Map.of(SCORE, 0.2, ContentMetadata.EMBEDDING_ID, "test-eid"));
+                .containsExactlyEntriesOf(new java.util.HashMap<String,Object>(){{put(SCORE, 0.2);put(ContentMetadata.EMBEDDING_ID, "test-eid");}});
     }
 
     @Test
     void equals_hash_code() {
 
         // given
-        Content content1 = Content.from(TextSegment.from("content"), Map.of(SCORE, 1.0));
+        Content content1 = Content.from(TextSegment.from("content"), Collections.singletonMap(SCORE, 1.0));
         Content content2 = Content.from("content 2");
         Content content3 = Content.from("content");
 
@@ -75,7 +75,7 @@ class ContentTest {
     void to_string() {
 
         // given
-        final var content = Content.from("content");
+        final Content content = Content.from("content");
 
         // then
         assertThat(content)
@@ -114,7 +114,7 @@ class ContentTest {
     void metadata_returned_is_defensive_copy() {
         // given
         TextSegment segment = TextSegment.from("text");
-        Map<ContentMetadata, Object> metadata = Map.of(SCORE, 0.5);
+        Map<ContentMetadata, Object> metadata = Collections.singletonMap(SCORE, 0.5);
         Content content = Content.from(segment, metadata);
 
         // when/then - attempting to modify returned metadata should fail
@@ -185,9 +185,9 @@ class ContentTest {
         TextSegment segment = TextSegment.from("text");
 
         // when
-        Content contentWithDouble = Content.from(segment, Map.of(SCORE, 0.1));
-        Content contentWithFloat = Content.from(segment, Map.of(SCORE, 0.1f));
-        Content contentWithInteger = Content.from(segment, Map.of(SCORE, 1));
+        Content contentWithDouble = Content.from(segment, Collections.singletonMap(SCORE, 0.1));
+        Content contentWithFloat = Content.from(segment, Collections.singletonMap(SCORE, 0.1f));
+        Content contentWithInteger = Content.from(segment, Collections.singletonMap(SCORE, 1));
 
         // then
         assertThat(contentWithDouble.metadata().get(SCORE)).isEqualTo(0.1);
@@ -199,9 +199,9 @@ class ContentTest {
     void should_ignore_metadata_in_equality_with_different_metadata() {
         // given
         TextSegment segment = TextSegment.from("test");
-        Content content1 = Content.from(segment, Map.of(SCORE, 0.1));
-        Content content2 = Content.from(segment, Map.of(SCORE, 0.1));
-        Content content3 = Content.from(segment, Map.of(ContentMetadata.EMBEDDING_ID, "test"));
+        Content content1 = Content.from(segment, Collections.singletonMap(SCORE, 0.1));
+        Content content2 = Content.from(segment, Collections.singletonMap(SCORE, 0.1));
+        Content content3 = Content.from(segment, Collections.singletonMap(ContentMetadata.EMBEDDING_ID, "test"));
 
         // then
         assertThat(content1).isEqualTo(content2);
@@ -224,7 +224,7 @@ class ContentTest {
     void toString_should_handle_different_content_types() {
         // given
         Content simpleContent = Content.from("simple");
-        Content contentWithMetadata = Content.from(TextSegment.from("with metadata"), Map.of(SCORE, 0.1));
+        Content contentWithMetadata = Content.from(TextSegment.from("with metadata"), Collections.singletonMap(SCORE, 0.1));
 
         // then
         assertThat(simpleContent.toString()).contains("simple");
@@ -247,7 +247,7 @@ class ContentTest {
     void should_handle_concurrent_access_to_metadata() throws Exception {
         // given
         TextSegment segment = TextSegment.from("text");
-        Map<ContentMetadata, Object> metadata = Map.of(SCORE, 0.1);
+        Map<ContentMetadata, Object> metadata = Collections.singletonMap(SCORE, 0.1);
         Content content = Content.from(segment, metadata);
 
         // when - concurrent access to metadata

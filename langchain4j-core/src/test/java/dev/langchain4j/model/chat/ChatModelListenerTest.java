@@ -19,6 +19,7 @@ import dev.langchain4j.model.chat.listener.ChatModelResponseContext;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
@@ -79,7 +80,7 @@ class ChatModelListenerTest {
         // given
         ChatModelListener listener1 = spy(new SuccessfulListener());
         ChatModelListener listener2 = spy(new SuccessfulListener());
-        TestChatModel model = new TestChatModel(List.of(listener1, listener2));
+        TestChatModel model = new TestChatModel(Arrays.asList(listener1, listener2));
 
         // when
         model.chat("hi");
@@ -100,7 +101,7 @@ class ChatModelListenerTest {
         // given
         ChatModelListener failingListener = spy(new FailingListener());
         ChatModelListener successfulListener = spy(new SuccessfulListener());
-        TestChatModel model = new TestChatModel(List.of(failingListener, successfulListener));
+        TestChatModel model = new TestChatModel(Arrays.asList(failingListener, successfulListener));
 
         // when - then
         assertThatNoException().isThrownBy(() -> model.chat("hi"));
@@ -130,7 +131,7 @@ class ChatModelListenerTest {
                 assertThat(responseContext.attributes()).containsExactly(entry("my-attribute", "my-value"));
             }
         });
-        TestChatModel model = new TestChatModel(List.of(listener1, listener2));
+        TestChatModel model = new TestChatModel(Arrays.asList(listener1, listener2));
 
         // when
         model.chat("hi");
@@ -143,7 +144,7 @@ class ChatModelListenerTest {
     void should_call_onError_when_doChat_throws_exception() {
         // given
         ChatModelListener listener = spy(new SuccessfulListener());
-        TestChatModel model = new TestChatModel(List.of(listener)) {
+        TestChatModel model = new TestChatModel(Arrays.asList(listener)) {
             @Override
             public ChatResponse doChat(ChatRequest chatRequest) {
                 throw new RuntimeException("Chat model failed");
@@ -164,7 +165,7 @@ class ChatModelListenerTest {
     @Test
     void should_handle_empty_listeners_list() {
         // given
-        TestChatModel model = new TestChatModel(List.of());
+        TestChatModel model = new TestChatModel(Arrays.asList());
 
         // when/then
         assertThatNoException().isThrownBy(() -> model.chat("hi"));
@@ -184,7 +185,7 @@ class ChatModelListenerTest {
         // given
         ChatModelListener failingListener = spy(new FailingListener());
         ChatModelListener successfulListener = spy(new SuccessfulListener());
-        TestChatModel model = new TestChatModel(List.of(failingListener, successfulListener)) {
+        TestChatModel model = new TestChatModel(Arrays.asList(failingListener, successfulListener)) {
             @Override
             public ChatResponse doChat(ChatRequest chatRequest) {
                 throw new RuntimeException("Chat model failed");
@@ -217,7 +218,7 @@ class ChatModelListenerTest {
                 assertThat(errorContext.attributes()).containsExactly(entry("test-key", "test-value"));
             }
         });
-        TestChatModel model = new TestChatModel(List.of(listener1, listener2)) {
+        TestChatModel model = new TestChatModel(Arrays.asList(listener1, listener2)) {
             @Override
             public ChatResponse doChat(ChatRequest chatRequest) {
                 throw new RuntimeException("Test error");
@@ -241,7 +242,7 @@ class ChatModelListenerTest {
                 assertThat(requestContext.attributes()).containsEntry("tenantId", "acme-co");
             }
         });
-        TestChatModel model = new TestChatModel(List.of(listener));
+        TestChatModel model = new TestChatModel(Arrays.asList(listener));
         ChatRequestOptions options = ChatRequestOptions.builder()
                 .addListenerAttribute("tenantId", "acme-co")
                 .build();
@@ -263,7 +264,7 @@ class ChatModelListenerTest {
                 assertThat(responseContext.attributes()).containsEntry("tenantId", "acme-co");
             }
         });
-        TestChatModel model = new TestChatModel(List.of(listener));
+        TestChatModel model = new TestChatModel(Arrays.asList(listener));
         ChatRequestOptions options = ChatRequestOptions.builder()
                 .addListenerAttribute("tenantId", "acme-co")
                 .build();
@@ -285,7 +286,7 @@ class ChatModelListenerTest {
                 assertThat(errorContext.attributes()).containsEntry("tenantId", "acme-co");
             }
         });
-        TestChatModel model = new TestChatModel(List.of(listener)) {
+        TestChatModel model = new TestChatModel(Arrays.asList(listener)) {
             @Override
             public ChatResponse doChat(ChatRequest chatRequest) {
                 throw new RuntimeException("fail");
@@ -307,7 +308,7 @@ class ChatModelListenerTest {
     void should_handle_null_options() {
 
         // given
-        TestChatModel model = new TestChatModel(List.of());
+        TestChatModel model = new TestChatModel(Arrays.asList());
 
         // when/then
         assertThatNoException()

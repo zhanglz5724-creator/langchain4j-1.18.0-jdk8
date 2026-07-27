@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.Collections;
 import com.fasterxml.jackson.core.type.TypeReference;
 import dev.langchain4j.data.message.AiMessage;
 import org.junit.jupiter.api.Test;
@@ -17,12 +18,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 @Deprecated(forRemoval = true)
 class JsonExtractorOutputGuardrailTests {
-    private static final String JSON =
-            """
-            {
-                "name": "MyObject",
-                "description": "Description of MyObject"
-            }""";
+    private static final String JSON = "{\n" +
+            "    \"name\": \"MyObject\",\n" +
+            "    \"description\": \"Description of MyObject\"\n" +
+            "}";
 
     private static final JsonExtractorOutputGuardrail<MyObject> MY_OBJECT_JSON_OUTPUT_GUARDRAIL =
             new JsonExtractorOutputGuardrail<>(MyObject.class);
@@ -32,8 +31,8 @@ class JsonExtractorOutputGuardrailTests {
     @ParameterizedTest
     @MethodSource("guardrails")
     void successfulValidation(String json, JsonExtractorOutputGuardrail<?> guardrail, Object expectedResult) {
-        var guardrailSpy = spy(guardrail);
-        var result = guardrailSpy.validate(AiMessage.from(json));
+        JsonExtractorOutputGuardrail<?> guardrailSpy = spy(guardrail);
+        OutputGuardrailResult result = guardrailSpy.validate(AiMessage.from(json));
 
         assertThat(result)
                 .isNotNull()
@@ -50,7 +49,7 @@ class JsonExtractorOutputGuardrailTests {
     @MethodSource("guardrails")
     void successfulValidationAfterTrimming(
             String json, JsonExtractorOutputGuardrail<?> guardrail, Object expectedResult) {
-        var input = "abc" + json;
+        String input = "abc" + json;
         parseJsonRequiringTrimming(json, guardrail, expectedResult, input);
     }
 
@@ -58,14 +57,14 @@ class JsonExtractorOutputGuardrailTests {
     @MethodSource("guardrails")
     void successfulValidationAfterTrimmingWithInvalidJson(
             String json, JsonExtractorOutputGuardrail<?> guardrail, Object expectedResult) {
-        var input = "abc [test] {\"key\":\"value\"} " + json + " [another] xyz";
+        String input = "abc [test] {\"key\":\"value\"} " + json + " [another] xyz";
         parseJsonRequiringTrimming(json, guardrail, expectedResult, input);
     }
 
     private void parseJsonRequiringTrimming(
             String json, JsonExtractorOutputGuardrail<?> guardrail, Object expectedResult, String input) {
-        var guardrailSpy = spy(guardrail);
-        var result = guardrailSpy.validate(AiMessage.from(input));
+        JsonExtractorOutputGuardrail<?> guardrailSpy = spy(guardrail);
+        OutputGuardrailResult result = guardrailSpy.validate(AiMessage.from(input));
 
         assertThat(result)
                 .isNotNull()
@@ -80,9 +79,9 @@ class JsonExtractorOutputGuardrailTests {
 
     @Test
     void invalidJson() {
-        var guardrail = spy(MY_OBJECT_JSON_OUTPUT_GUARDRAIL);
-        var input = "{{" + JSON;
-        var result = guardrail.validate(AiMessage.from(input));
+        JsonExtractorOutputGuardrail<?> guardrail = spy(MY_OBJECT_JSON_OUTPUT_GUARDRAIL);
+        String input = "{{" + JSON;
+        OutputGuardrailResult result = guardrail.validate(AiMessage.from(input));
 
         assertThat(result)
                 .hasSingleFailureWithMessageAndReprompt(
@@ -94,15 +93,28 @@ class JsonExtractorOutputGuardrailTests {
     }
 
     static Stream<Arguments> guardrails() {
-        var result = new MyObject("MyObject", "Description of MyObject");
+        MyObject result = new MyObject("MyObject", "Description of MyObject");
 
         return Stream.of(
                 Arguments.of(JSON, MY_OBJECT_JSON_OUTPUT_GUARDRAIL, result),
                 Arguments.of(
-                        "{ \"myObject\": %s}".formatted(JSON),
+                        String.format("{ \"myObject\": %s}", JSON),
                         MAP_OF_MY_OBJECT_JSON_OUTPUT_GUARDRAIL,
-                        Map.of("myObject", result)));
+                        Collections.singletonMap("myObject", result)));
     }
 
-    record MyObject(String name, String description) {}
+    static class MyObject {
+        private String name;
+        private String description;
+
+        public MyObject() {}
+
+        public MyObject(String name, String description) {
+            this.name = name;
+            this.description = description;
+        }
+
+        public String name() { return name; }
+        public String description() { return description; }
+    }
 }

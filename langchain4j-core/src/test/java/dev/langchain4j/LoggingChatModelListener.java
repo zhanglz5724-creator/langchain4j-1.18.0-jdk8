@@ -53,15 +53,13 @@ public class LoggingChatModelListener implements ChatModelListener {
             sb.append("\n");
         });
 
-        log.info("""
-                        >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                        {}TOOLS: {}
-                        ------------------------------------------------------------------------------------------
-                        {}
-                        <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        
-                        
-                        """,
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" +
+                        "{}TOOLS: {}\n" +
+                        "------------------------------------------------------------------------------------------\n" +
+                        "{}\n" +
+                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" +
+                        "\n" +
+                        "\n",
                 sb,
                 chatRequest.toolSpecifications().stream().map(ToolSpecification::name).collect(joining(", ")),
                 "AI: " + format(chatResponse.aiMessage())
@@ -70,13 +68,17 @@ public class LoggingChatModelListener implements ChatModelListener {
 
     private static String format(ChatMessage message) {
         // TODO replace newlines with "\n"
-        if (message instanceof SystemMessage systemMessage) {
+        if (message instanceof SystemMessage) {
+            SystemMessage systemMessage = (SystemMessage) message;
             return "SYSTEM: " + escapeNewlines(systemMessage.text());
-        } else if (message instanceof UserMessage userMessage) {
+        } else if (message instanceof UserMessage) {
+            UserMessage userMessage = (UserMessage) message;
             return "USER: " + escapeNewlines(format(userMessage));
-        } else if (message instanceof AiMessage aiMessage) {
+        } else if (message instanceof AiMessage) {
+            AiMessage aiMessage = (AiMessage) message;
             return "AI: " + escapeNewlines(format(aiMessage));
-        } else if (message instanceof ToolExecutionResultMessage toolExecutionResultMessage) {
+        } else if (message instanceof ToolExecutionResultMessage) {
+            ToolExecutionResultMessage toolExecutionResultMessage = (ToolExecutionResultMessage) message;
             return "TOOL: " + escapeNewlines(toolExecutionResultMessage.text());
         } else {
             throw new IllegalArgumentException("Unknown message type: " + message.getClass());
@@ -89,15 +91,16 @@ public class LoggingChatModelListener implements ChatModelListener {
         }
         return userMessage.contents().stream()
                 .map(content -> {
-                    if (content instanceof TextContent textContent) {
+                    if (content instanceof TextContent) {
+                        TextContent textContent = (TextContent) content;
                         return textContent.text();
-                    } else if (content instanceof ImageContent imageContent) {
+                    } else if (content instanceof ImageContent) {
                         return "[IMAGE]";
-                    } else if (content instanceof AudioContent audioContent) {
+                    } else if (content instanceof AudioContent) {
                         return "[AUDIO]";
-                    } else if (content instanceof VideoContent videoContent) {
+                    } else if (content instanceof VideoContent) {
                         return "[VIDEO]";
-                    } else if (content instanceof PdfFileContent pdfFileContent) {
+                    } else if (content instanceof PdfFileContent) {
                         return "[PDF_FILE]";
                     } else {
                         throw new IllegalArgumentException("Unknown content type: " + content.getClass());

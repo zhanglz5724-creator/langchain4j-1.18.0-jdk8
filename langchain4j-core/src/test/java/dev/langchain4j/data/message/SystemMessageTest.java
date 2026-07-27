@@ -2,6 +2,7 @@ package dev.langchain4j.data.message;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -62,7 +63,7 @@ class SystemMessageTest implements WithAssertions {
     @Test
     void find_with_single_system_message() {
         SystemMessage systemMessage = new SystemMessage("system text");
-        List<ChatMessage> messages = List.of(systemMessage);
+        List<ChatMessage> messages = Arrays.asList(systemMessage);
 
         assertThat(SystemMessage.findFirst(messages)).isPresent().contains(systemMessage);
 
@@ -74,7 +75,7 @@ class SystemMessageTest implements WithAssertions {
     @Test
     void find_with_single_user_message() {
         UserMessage userMessage = new UserMessage("user text");
-        List<ChatMessage> messages = List.of(userMessage);
+        List<ChatMessage> messages = Arrays.asList(userMessage);
 
         assertThat(SystemMessage.findFirst(messages)).isEmpty();
         assertThat(SystemMessage.findLast(messages)).isEmpty();
@@ -91,7 +92,7 @@ class SystemMessageTest implements WithAssertions {
         AiMessage ai2 = new AiMessage("ai 2");
         SystemMessage system3 = new SystemMessage("system 3");
 
-        List<ChatMessage> messages = List.of(user1, system1, ai1, system2, user2, ai2, system3);
+        List<ChatMessage> messages = Arrays.asList(user1, system1, ai1, system2, user2, ai2, system3);
 
         assertThat(SystemMessage.findFirst(messages)).isPresent().contains(system1);
 

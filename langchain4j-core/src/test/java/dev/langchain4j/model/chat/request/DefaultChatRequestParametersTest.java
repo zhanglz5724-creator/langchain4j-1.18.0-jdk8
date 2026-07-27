@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class DefaultChatRequestParametersTest {
@@ -22,7 +23,7 @@ class DefaultChatRequestParametersTest {
                 .presencePenalty(0.3)
                 .maxOutputTokens(100)
                 .stopSequences("stop1", "stop2")
-                .toolSpecifications(List.of(
+                .toolSpecifications(Arrays.asList(
                         ToolSpecification.builder().name("tool1").build(),
                         ToolSpecification.builder().name("tool2").build()))
                 .toolChoice(AUTO)
@@ -60,7 +61,7 @@ class DefaultChatRequestParametersTest {
                 .presencePenalty(0.3)
                 .maxOutputTokens(100)
                 .stopSequences("stop1", "stop2")
-                .toolSpecifications(List.of(
+                .toolSpecifications(Arrays.asList(
                         ToolSpecification.builder().name("tool1").build(),
                         ToolSpecification.builder().name("tool2").build()))
                 .toolChoice(AUTO)

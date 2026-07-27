@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -267,10 +269,10 @@ class ReRankingContentAggregatorTest {
 
     private void assertReRankedContentOrder(List<Content> actual, Content... expectedContents) {
         List<TextSegment> expectedTextSegments =
-                Arrays.stream(expectedContents).map(Content::textSegment).toList();
+                Arrays.stream(expectedContents).map(Content::textSegment).collect(Collectors.toList());
 
         List<TextSegment> actualTextSegments =
-                actual.stream().map(Content::textSegment).toList();
+                actual.stream().map(Content::textSegment).collect(Collectors.toList());
 
         assertThat(actualTextSegments).containsExactlyElementsOf(expectedTextSegments);
     }

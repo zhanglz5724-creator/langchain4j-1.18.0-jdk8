@@ -5,6 +5,7 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.output.Response;
 import java.util.List;
+import java.util.Arrays;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +47,7 @@ class ModerationModelTest implements WithAssertions {
     void moderate_moderation_request_with_text() {
         ModerationModel model = new FlagEverythingModel();
         ModerationRequest request =
-                ModerationRequest.builder().texts(List.of("hello")).build();
+                ModerationRequest.builder().texts(Arrays.asList("hello")).build();
         ModerationResponse response = model.moderate(request);
         assertThat(response.moderation()).isEqualTo(Moderation.flagged("hello"));
     }
@@ -55,7 +56,7 @@ class ModerationModelTest implements WithAssertions {
     void moderate_moderation_request_with_messages() {
         ModerationModel model = new FlagEverythingModel();
         ModerationRequest request =
-                ModerationRequest.builder().texts(List.of("user msg")).build();
+                ModerationRequest.builder().texts(Arrays.asList("user msg")).build();
         ModerationResponse response = model.moderate(request);
         assertThat(response.moderation()).isEqualTo(Moderation.flagged("user msg"));
     }

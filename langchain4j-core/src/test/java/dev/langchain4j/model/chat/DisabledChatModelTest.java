@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Arrays;
 
 class DisabledChatModelTest extends DisabledModelTest<ChatModel> {
 
@@ -21,6 +22,6 @@ class DisabledChatModelTest extends DisabledModelTest<ChatModel> {
         performAssertion(() -> model.chat(ChatRequest.builder().messages(userMessage).build()));
         performAssertion(() -> model.chat(userMessage.singleText()));
         performAssertion(() -> model.chat(userMessage));
-        performAssertion(() -> model.chat(List.of(userMessage)));
+        performAssertion(() -> model.chat(Arrays.asList(userMessage)));
     }
 }

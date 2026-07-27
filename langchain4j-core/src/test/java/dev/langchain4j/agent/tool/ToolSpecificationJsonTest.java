@@ -14,6 +14,8 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class ToolSpecificationJsonTest {
@@ -30,7 +32,7 @@ class ToolSpecificationJsonTest {
                 .description("Gets the weather for a location")
                 .parameters(JsonObjectSchema.builder()
                         .addStringProperty("location", "city name")
-                        .addEnumProperty("unit", java.util.List.of("CELSIUS", "FAHRENHEIT"))
+                        .addEnumProperty("unit", java.util.Arrays.asList("CELSIUS", "FAHRENHEIT"))
                         .required("location")
                         .build())
                 .addMetadata("cache", true)
@@ -221,9 +223,7 @@ class ToolSpecificationJsonTest {
                                 JsonReferenceSchema.builder()
                                         .reference("SharedDef")
                                         .build())
-                        .definitions(Map.of(
-                                "SharedDef",
-                                JsonObjectSchema.builder()
+                        .definitions(Collections.singletonMap("SharedDef", JsonObjectSchema.builder()
                                         .addProperty(
                                                 "id",
                                                 JsonIntegerSchema.builder()
@@ -239,28 +239,27 @@ class ToolSpecificationJsonTest {
 
         String json = original.toJson();
 
-        String expectedJson = """
-                {\
-                "name":"complex_tool",\
-                "description":"A tool exercising every schema element type",\
-                "parameters":{\
-                "type":"object",\
-                "description":"root params",\
-                "properties":{\
-                "stringProp":{"type":"string","description":"a string"},\
-                "intProp":{"type":"integer","description":"an integer"},\
-                "numProp":{"type":"number","description":"a number"},\
-                "boolProp":{"type":"boolean","description":"a boolean"},\
-                "nullProp":{"type":"null"},\
-                "enumProp":{"type":"string","description":"a color","enum":["RED","GREEN","BLUE"]},\
-                "arrayProp":{"type":"array","description":"a list of integers","items":{"type":"integer"}},\
-                "objectProp":{"type":"object","description":"nested object","properties":{"inner":{"type":"string","description":"inner field"}},"required":["inner"],"additionalProperties":false},\
-                "anyOfProp":{"description":"string or number","anyOf":[{"type":"string"},{"type":"number"}]},\
-                "refProp":{"$ref":"#/$defs/SharedDef"}},\
-                "required":["stringProp","enumProp"],\
-                "$defs":{"SharedDef":{"type":"object","properties":{"id":{"type":"integer","description":"identifier"}},"required":["id"]}}},\
-                "metadata":{"cache":true,"version":"2.0"}\
-                }""";
+        String expectedJson = "{" +
+                "\"name\":\"complex_tool\"," +
+                "\"description\":\"A tool exercising every schema element type\"," +
+                "\"parameters\":{" +
+                "\"type\":\"object\"," +
+                "\"description\":\"root params\"," +
+                "\"properties\":{" +
+                "\"stringProp\":{\"type\":\"string\",\"description\":\"a string\"}," +
+                "\"intProp\":{\"type\":\"integer\",\"description\":\"an integer\"}," +
+                "\"numProp\":{\"type\":\"number\",\"description\":\"a number\"}," +
+                "\"boolProp\":{\"type\":\"boolean\",\"description\":\"a boolean\"}," +
+                "\"nullProp\":{\"type\":\"null\"}," +
+                "\"enumProp\":{\"type\":\"string\",\"description\":\"a color\",\"enum\":[\"RED\",\"GREEN\",\"BLUE\"]}," +
+                "\"arrayProp\":{\"type\":\"array\",\"description\":\"a list of integers\",\"items\":{\"type\":\"integer\"}}," +
+                "\"objectProp\":{\"type\":\"object\",\"description\":\"nested object\",\"properties\":{\"inner\":{\"type\":\"string\",\"description\":\"inner field\"}},\"required\":[\"inner\"],\"additionalProperties\":false}," +
+                "\"anyOfProp\":{\"description\":\"string or number\",\"anyOf\":[{\"type\":\"string\"},{\"type\":\"number\"}]}," +
+                "\"refProp\":{\"$ref\":\"#/$defs/SharedDef\"}}," +
+                "\"required\":[\"stringProp\",\"enumProp\"]," +
+                "\"$defs\":{\"SharedDef\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"description\":\"identifier\"}},\"required\":[\"id\"]}}}," +
+                "\"metadata\":{\"cache\":true,\"version\":\"2.0\"}" +
+                "}";
 
         assertThat(json).isEqualTo(expectedJson);
 

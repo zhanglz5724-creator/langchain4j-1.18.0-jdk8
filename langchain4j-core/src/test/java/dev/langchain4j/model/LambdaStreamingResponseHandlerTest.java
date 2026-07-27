@@ -218,9 +218,11 @@ class LambdaStreamingResponseHandlerTest implements WithAssertions {
         @Override
         public void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
             stringsAndError.forEach(obj -> {
-                if (obj instanceof String message) {
+                if (obj instanceof String) {
+                    String message = (String) obj;
                     handler.onPartialResponse(message);
-                } else if (obj instanceof Throwable problem) {
+                } else if (obj instanceof Throwable) {
+                    Throwable problem = (Throwable) obj;
                     handler.onError(problem);
                 }
             });
@@ -246,9 +248,11 @@ class LambdaStreamingResponseHandlerTest implements WithAssertions {
                         try {
                             for (Object obj : stringsAndError) {
                                 Thread.sleep(50); // Simulate network delay
-                                if (obj instanceof String message) {
+                                if (obj instanceof String) {
+                                    String message = (String) obj;
                                     handler.onPartialResponse(message);
-                                } else if (obj instanceof Throwable problem) {
+                                } else if (obj instanceof Throwable) {
+                                    Throwable problem = (Throwable) obj;
                                     handler.onError(problem);
                                     return; // Exit on error
                                 }
@@ -281,7 +285,8 @@ class LambdaStreamingResponseHandlerTest implements WithAssertions {
                         try {
                             for (Object obj : stringsAndError) {
                                 Thread.sleep(50);
-                                if (obj instanceof String message) {
+                                if (obj instanceof String) {
+                                    String message = (String) obj;
                                     handler.onPartialResponse(message);
                                 }
                             }
