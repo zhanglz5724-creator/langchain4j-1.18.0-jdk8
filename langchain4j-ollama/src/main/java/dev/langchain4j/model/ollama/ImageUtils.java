@@ -56,7 +56,7 @@ class ImageUtils {
         try {
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            throw new RuntimeException("Can't read file with path '%s'".formatted(path), e);
+            throw new RuntimeException(String.format("Can't read file with path '%s'", path), e);
         }
     }
 }

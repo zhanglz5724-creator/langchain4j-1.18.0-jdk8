@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Collections;
 
 public class WatsonxChatRequestParameters extends DefaultChatRequestParameters {
 
@@ -316,7 +317,7 @@ public class WatsonxChatRequestParameters extends DefaultChatRequestParameters {
         }
 
         public Builder guidedChoice(String... guidedChoice) {
-            return guidedChoice(Set.of(guidedChoice));
+            return guidedChoice(Collections.singleton(guidedChoice));
         }
 
         public Builder guidedChoice(Set<String> guidedChoices) {

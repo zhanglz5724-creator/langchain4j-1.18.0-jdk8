@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
+import java.util.Collections;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -405,8 +406,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
     }
 
     private void createIndex(String indexName, IndexMapping indexMapping) {
-        collection.createSearchIndexes(List.of(
-                new SearchIndexModel(indexName, fromIndexMapping(indexMapping), SearchIndexType.vectorSearch())));
+        collection.createSearchIndexes(Collections.singletonList(new SearchIndexModel(indexName, fromIndexMapping(indexMapping), SearchIndexType.vectorSearch())));
 
         waitForIndex(collection, indexName);
     }

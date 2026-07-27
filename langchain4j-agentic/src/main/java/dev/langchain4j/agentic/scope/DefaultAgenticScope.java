@@ -41,8 +41,48 @@ import org.slf4j.LoggerFactory;
 public class DefaultAgenticScope implements AgenticScope {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAgenticScope.class);
+    public class AgentMessage {
+        private final String agentName;
+        private final String agentId;
+        private final ChatMessage message;
 
-    public record AgentMessage(String agentName, String agentId, ChatMessage message) {}
+        public AgentMessage(String agentName, String agentId, ChatMessage message) {
+            this.agentName = agentName;
+            this.agentId = agentId;
+            this.message = message;
+        }
+
+        public String getAgentName() {
+            return agentName;
+        }
+
+        public String getAgentId() {
+            return agentId;
+        }
+
+        public ChatMessage getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            AgentMessage that = (AgentMessage) o;
+            return java.util.Objects.equals(this.agentName, that.agentName) && java.util.Objects.equals(this.agentId, that.agentId) && java.util.Objects.equals(this.message, that.message);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(agentName, agentId, message);
+        }
+
+        @Override
+        public String toString() {
+            return "AgentMessage{"agentName=" + agentName + , "agentId=" + agentId + , "message=" + message + "}"";
+        }
+
+    }
 
     private final Object memoryId;
     private final Map<String, Object> state = new ConcurrentHashMap<>();
@@ -172,7 +212,7 @@ public class DefaultAgenticScope implements AgenticScope {
         if (value == null) {
             return false;
         }
-        return value instanceof String s ? !s.isBlank() : true;
+        return value instanceof String s ? !s.trim().isEmpty() : true;
     }
 
     @Override
@@ -293,7 +333,7 @@ public class DefaultAgenticScope implements AgenticScope {
                         .filter(AgentInstance.class::isInstance)
                         .map(AgentInstance.class::cast)
                         .map(AgentInstance::name)
-                        .toList()::contains
+                        .collect(Collectors.toList())::contains
                 : agent -> true;
         return contextAsConversation(agentFilter);
     }
@@ -301,7 +341,7 @@ public class DefaultAgenticScope implements AgenticScope {
     @Override
     public String contextAsConversation(String... agentNames) {
         Predicate<String> agentFilter =
-                agentNames != null && agentNames.length > 0 ? List.of(agentNames)::contains : agent -> true;
+                agentNames != null && agentNames.length > 0 ? Collections.singletonList(agentNames)::contains : agent -> true;
         return contextAsConversation(agentFilter);
     }
 
@@ -336,14 +376,14 @@ public class DefaultAgenticScope implements AgenticScope {
     public List<AgentInvocation> agentInvocations(String agentName) {
         return agentInvocations.stream()
                 .filter(inv -> inv.agentName().equals(agentName))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<AgentInvocation> agentInvocations(Class<?> agentType) {
         return agentInvocations.stream()
                 .filter(inv -> inv.agentType().equals(agentType))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override

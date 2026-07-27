@@ -8,12 +8,14 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
 import com.google.genai.types.BatchJob;
 import com.google.genai.types.BatchJobSource;
+import com.google.genai.types.Blob;
 import com.google.genai.types.CancelBatchJobConfig;
 import com.google.genai.types.Content;
 import com.google.genai.types.CreateBatchJobConfig;
 import com.google.genai.types.DeleteBatchJobConfig;
 import com.google.genai.types.File;
 import com.google.genai.types.GenerateContentConfig;
+import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.GetBatchJobConfig;
 import com.google.genai.types.ImageConfig;
 import com.google.genai.types.InlinedRequest;
@@ -42,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 /**
  * Provides an interface for interacting with the Google GenAI Batch API for Image generation models.
@@ -163,11 +166,11 @@ public final class GoogleGenAiBatchImageModel implements BatchImageModel {
 
     private InlinedRequest createInlinedRequest(ImageGenerationRequest request) {
         Content content = Content.builder()
-                .parts(List.of(Part.fromText(request.prompt())))
+                .parts(Collections.singletonList(Part.fromText(request.prompt())))
                 .build();
 
         GenerateContentConfig.Builder configBuilder =
-                GenerateContentConfig.builder().responseModalities(List.of("IMAGE"));
+                GenerateContentConfig.builder().responseModalities(Collections.singletonList("IMAGE"));
 
         if (safetySettings != null && !safetySettings.isEmpty()) {
             configBuilder.safetySettings(safetySettings);
@@ -192,7 +195,7 @@ public final class GoogleGenAiBatchImageModel implements BatchImageModel {
         }
 
         return InlinedRequest.builder()
-                .contents(List.of(content))
+                .contents(Collections.singletonList(content))
                 .config(configBuilder.build())
                 .build();
     }
@@ -210,15 +213,15 @@ public final class GoogleGenAiBatchImageModel implements BatchImageModel {
             List<BatchItemResult<Response<Image>>> results = new ArrayList<>();
             if (batchJob.dest().isPresent()
                     && batchJob.dest().get().inlinedResponses().isPresent()) {
-                var inlinedResponses = batchJob.dest().get().inlinedResponses().get();
-                for (var inlined : inlinedResponses) {
+                List<InlinedRequest> inlinedResponses = batchJob.dest().get().inlinedResponses().get();
+                for (InlinedRequest inlined : inlinedResponses) {
                     if (inlined.response().isPresent()) {
-                        var response = inlined.response().get();
+                        GenerateContentResponse response = inlined.response().get();
                         boolean imageAdded = false;
                         if (response.parts() != null && !response.parts().isEmpty()) {
                             for (Part part : response.parts()) {
                                 if (part.inlineData().isPresent()) {
-                                    var blob = part.inlineData().get();
+                                    Blob blob = part.inlineData().get();
                                     if (blob.data().isPresent()) {
                                         byte[] bytes = blob.data().get();
                                         String base64Data = Base64.getEncoder().encodeToString(bytes);
@@ -247,14 +250,41 @@ public final class GoogleGenAiBatchImageModel implements BatchImageModel {
             }
             builder.results(results);
         } else if (state == Known.JOB_STATE_FAILED) {
-            builder.results(List.of(BatchItemResult.failure(
+            builder.results(Collections.singletonList(BatchItemResult.failure(
                     GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
         }
 
         return builder.build();
     }
+    public class ImageGenerationRequest {
+        private final String prompt;
 
-    public record ImageGenerationRequest(String prompt) {
+        public ImageGenerationRequest(String prompt) {
+            this.prompt = prompt;
+        }
+
+        public String getPrompt() {
+            return prompt;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ImageGenerationRequest that = (ImageGenerationRequest) o;
+            return java.util.Objects.equals(this.prompt, that.prompt);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(prompt);
+        }
+
+        @Override
+        public String toString() {
+            return "ImageGenerationRequest{"prompt=" + prompt + "}"";
+        }
+
         public ImageGenerationRequest {
             ensureNotBlank(prompt, "prompt");
         }

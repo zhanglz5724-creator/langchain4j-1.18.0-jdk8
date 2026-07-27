@@ -34,6 +34,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 class PartsMapper {
 
@@ -96,14 +97,14 @@ class PartsMapper {
                 List<Part> fnCallReqParts = aiMessage.toolExecutionRequests().stream()
                         .map(FunctionCallHelper::fromToolExecutionRequest)
                         .map(fnCall -> Part.newBuilder().setFunctionCall(fnCall).build())
-                        .toList();
+                        .collect(Collectors.toList());
 
                 parts.addAll(fnCallReqParts);
             }
 
             return parts;
         } else if (message instanceof UserMessage userMessage) {
-            return userMessage.contents().stream().map(PartsMapper::map).toList();
+            return userMessage.contents().stream().map(PartsMapper::map).collect(Collectors.toList());
         } else if (message instanceof SystemMessage systemMessage) {
             return singletonList(
                     Part.newBuilder().setText((systemMessage).text()).build());

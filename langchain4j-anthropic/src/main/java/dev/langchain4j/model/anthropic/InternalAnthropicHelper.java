@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Internal
 class InternalAnthropicHelper {
@@ -58,7 +59,7 @@ class InternalAnthropicHelper {
                 .filter(Objects::nonNull)
                 .distinct()
                 .map(skill -> new AnthropicContainerSkill(ANTHROPIC_SKILL_TYPE, skill.skillId(), SKILL_VERSION_LATEST))
-                .toList();
+                .collect(Collectors.toList());
         return new AnthropicContainer(containerSkills);
     }
 

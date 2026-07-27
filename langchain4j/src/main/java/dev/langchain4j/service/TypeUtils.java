@@ -150,7 +150,7 @@ public class TypeUtils {
                 return TypeUtils.getRawClass(type).getSimpleName();
             }
         }).collect(Collectors.joining("<")));
-        actualDeclaration.append(">".repeat(Math.max(0, typeChain.size() - 1)));
+        actualDeclaration.append(repeat(">", Math.max(0, typeChain.size() - 1)));
         return actualDeclaration.toString();
     }
 
@@ -158,11 +158,19 @@ public class TypeUtils {
         List<Type> rawTypesOnly = typeChain.stream().filter(type -> !(type instanceof WildcardType || type instanceof TypeVariable)).collect(toList());
         StringBuilder declarationExample = new StringBuilder(rawTypesOnly.stream().map(type -> TypeUtils.getRawClass(type).getSimpleName()).collect(Collectors.joining("<")));
         declarationExample.append("<").append(forType);
-        declarationExample.append(">".repeat(rawTypesOnly.size()));
+        declarationExample.append(repeat(">", rawTypesOnly.size()));
         return declarationExample.toString();
     }
 
     public static boolean isImageType(Class<?> rawReturnType) {
         return Image.class.isAssignableFrom(rawReturnType) || ImageContent.class.isAssignableFrom(rawReturnType);
+    }
+
+    private static String repeat(String s, int n) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            sb.append(s);
+        }
+        return sb.toString();
     }
 }

@@ -41,7 +41,7 @@ public class WatsonxTokenCountEstimator implements TokenCountEstimator {
 
     private WatsonxTokenCountEstimator(Builder builder) {
 
-        var tokenizationServiceBuilder = nonNull(builder.authenticator)
+        TokenizationService.Builder tokenizationServiceBuilder = nonNull(builder.authenticator)
                 ? TokenizationService.builder().authenticator(builder.authenticator)
                 : TokenizationService.builder().apiKey(builder.apiKey);
 
@@ -80,11 +80,11 @@ public class WatsonxTokenCountEstimator implements TokenCountEstimator {
     public int estimateTokenCountInMessage(ChatMessage message) {
         return WatsonxExceptionMapper.INSTANCE.withExceptionMapper(() -> switch (message.type()) {
             case SYSTEM -> {
-                var systemMessage = (SystemMessage) message;
+                SystemMessage systemMessage = (SystemMessage) message;
                 yield estimateTokenCountInText(systemMessage.text());
             }
             case AI -> {
-                var aiMessage = (AiMessage) message;
+                AiMessage aiMessage = (AiMessage) message;
 
                 List<CompletableFuture<TokenizationResponse>> futures = new ArrayList<>();
 
@@ -112,7 +112,7 @@ public class WatsonxTokenCountEstimator implements TokenCountEstimator {
                         .sum();
             }
             case USER -> {
-                var userMessage = (UserMessage) message;
+                UserMessage userMessage = (UserMessage) message;
 
                 List<CompletableFuture<TokenizationResponse>> futures = new ArrayList<>();
 
@@ -138,7 +138,7 @@ public class WatsonxTokenCountEstimator implements TokenCountEstimator {
                         .sum();
             }
             case TOOL_EXECUTION_RESULT -> {
-                var toolExecutionResult = (ToolExecutionResultMessage) message;
+                ToolExecutionResultMessage toolExecutionResult = (ToolExecutionResultMessage) message;
                 yield estimateTokenCountInText(toolExecutionResult.text());
             }
             case CUSTOM ->

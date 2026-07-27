@@ -5,6 +5,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 @FunctionalInterface
 public interface UserMessageTransformer extends BiFunction<ChatRequest, Object, ChatRequest> {
@@ -17,7 +18,7 @@ public interface UserMessageTransformer extends BiFunction<ChatRequest, Object, 
                 UserMessage transformedMessage = UserMessage.from(transformUserMessage(userMessage.singleText(), memoryId));
                 List<ChatMessage> modifiedMessages = chatRequest.messages().stream()
                         .map(message -> message == userMessage ? transformedMessage : message)
-                        .toList();
+                        .collect(Collectors.toList());
                 return ChatRequest.builder()
                         .messages(modifiedMessages)
                         .parameters(chatRequest.parameters())

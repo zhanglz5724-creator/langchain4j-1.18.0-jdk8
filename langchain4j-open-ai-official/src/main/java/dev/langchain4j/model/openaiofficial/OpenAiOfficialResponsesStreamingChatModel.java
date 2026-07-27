@@ -206,8 +206,8 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         Future<?> streamingFuture = null;
 
         try {
-            var params = buildRequestParams(chatRequest, parameters);
-            var streamResponse = client.responses().createStreaming(params);
+            ResponseCreateParams params = buildRequestParams(chatRequest, parameters);
+            ResponseStream<ResponseStreamEvent> streamResponse = client.responses().createStreaming(params);
 
             ResponsesStreamingHandle streamingHandle = new ResponsesStreamingHandle(() -> {
                 try {
@@ -217,7 +217,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
                 }
             });
 
-            var eventHandler =
+            ResponsesEventHandler eventHandler =
                     new ResponsesEventHandler(handler, responseIdRef, parameters.modelName(), streamingHandle);
 
             // The forEach call blocks, so it is submitted to the executor service to run asynchronously.
@@ -262,7 +262,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
 
     @Override
     public Set<Capability> supportedCapabilities() {
-        return Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
+        return Collections.singleton(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
     }
 
     static String extractReasoningSummary(com.openai.models.responses.Response response) {
@@ -280,7 +280,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
     static String extractEncryptedReasoning(com.openai.models.responses.Response response) {
         for (ResponseOutputItem item : response.output()) {
             if (item.isReasoning()) {
-                var encrypted = item.asReasoning().encryptedContent();
+                JsonField<String> encrypted = item.asReasoning().encryptedContent();
                 if (encrypted.isPresent() && !encrypted.get().isEmpty()) {
                     return encrypted.get();
                 }
@@ -293,7 +293,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         List<ToolExecutionRequest> requests = new ArrayList<>();
         for (ResponseOutputItem item : response.output()) {
             if (item.isFunctionCall()) {
-                var fn = item.asFunctionCall();
+                ResponseFunctionToolCall fn = item.asFunctionCall();
                 requests.add(ToolExecutionRequest.builder()
                         .id(fn.callId())
                         .name(fn.name())
@@ -323,7 +323,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         AiMessage.Builder builder =
                 AiMessage.builder().text(text).thinking(thinking).toolExecutionRequests(toolExecutionRequests);
         if (encryptedReasoning != null) {
-            builder.attributes(Map.of(ENCRYPTED_REASONING_KEY, encryptedReasoning));
+            builder.attributes(Collections.singletonMap(ENCRYPTED_REASONING_KEY, encryptedReasoning));
         }
         return builder.build();
     }
@@ -334,7 +334,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             com.openai.models.responses.Response response,
             String finishReason,
             OpenAiOfficialTokenUsage tokenUsage) {
-        var builder = OpenAiOfficialResponsesChatResponseMetadata.builder()
+        OpenAiOfficialResponsesChatResponseMetadata.Builder builder = OpenAiOfficialResponsesChatResponseMetadata.builder()
                 .id(responseId)
                 .modelName(modelName)
                 .createdAt((long) response.createdAt())
@@ -380,12 +380,12 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
 
     static ResponseCreateParams buildRequestParams(
             ChatRequest chatRequest, OpenAiOfficialResponsesChatRequestParameters parameters) {
-        var paramsBuilder = ResponseCreateParams.builder()
+        ResponseCreateParams.Builder paramsBuilder = ResponseCreateParams.builder()
                 .model(ResponsesModel.ofChat(ChatModel.of(parameters.modelName())))
                 .store(parameters.store());
 
-        var inputItems = new ArrayList<ResponseInputItem>();
-        for (var msg : chatRequest.messages()) {
+        ArrayList<ResponseInputItem> inputItems = new ArrayList<ResponseInputItem>();
+        for (ChatMessage msg : chatRequest.messages()) {
             inputItems.addAll(toResponseInputItems(msg));
         }
         paramsBuilder.inputOfResponse(inputItems);
@@ -415,8 +415,8 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             paramsBuilder.truncation(ResponseCreateParams.Truncation.of(parameters.truncation()));
         }
         if (parameters.include() != null && !parameters.include().isEmpty()) {
-            var includables = new ArrayList<ResponseIncludable>();
-            for (var item : parameters.include()) {
+            ArrayList<ResponseIncludable> includables = new ArrayList<ResponseIncludable>();
+            for (ResponseIncludable item : parameters.include()) {
                 includables.add(ResponseIncludable.of(item));
             }
             paramsBuilder.include(includables);
@@ -491,11 +491,11 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
 
     private static List<ResponseInputItem> toResponseInputItems(ChatMessage msg) {
         if (msg instanceof SystemMessage systemMessage) {
-            return List.of(createTextMessage(EasyInputMessage.Role.SYSTEM, systemMessage.text()));
+            return Collections.singletonList(createTextMessage(EasyInputMessage.Role.SYSTEM, systemMessage.text()));
         } else if (msg instanceof UserMessage userMessage) {
-            return List.of(createUserMessage(userMessage));
+            return Collections.singletonList(createUserMessage(userMessage));
         } else if (msg instanceof AiMessage aiMessage) {
-            var items = new ArrayList<ResponseInputItem>();
+            ArrayList<ResponseInputItem> items = new ArrayList<ResponseInputItem>();
 
             // Add reasoning item (with encrypted_content and summary) if present
             String encryptedReasoning = aiMessage.attribute(ENCRYPTED_REASONING_KEY, String.class);
@@ -504,7 +504,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             }
 
             // Add text message if present
-            var text = aiMessage.text();
+            String text = aiMessage.text();
             if (text != null && !text.isEmpty()) {
                 items.add(createTextMessage(EasyInputMessage.Role.ASSISTANT, text));
             }
@@ -527,12 +527,12 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
 
             return items;
         } else if (msg instanceof ToolExecutionResultMessage toolResultMessage) {
-            var outputBuilder = ResponseInputItem.FunctionCallOutput.builder().callId(toolResultMessage.id());
+            ResponseInputItem.FunctionCallOutput.Builder outputBuilder = ResponseInputItem.FunctionCallOutput.builder().callId(toolResultMessage.id());
 
             if (toolResultMessage.hasSingleText()) {
                 outputBuilder.output(toolResultMessage.text());
             } else {
-                var outputItems = new ArrayList<ResponseFunctionCallOutputItem>();
+                ArrayList<ResponseFunctionCallOutputItem> outputItems = new ArrayList<ResponseFunctionCallOutputItem>();
                 for (Content content : toolResultMessage.contents()) {
                     if (content instanceof TextContent textContent) {
                         outputItems.add(ResponseFunctionCallOutputItem.ofInputText(ResponseInputTextContent.builder()
@@ -553,9 +553,9 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
                         ResponseInputItem.FunctionCallOutput.Output.ofResponseFunctionCallOutputItemList(outputItems));
             }
 
-            return List.of(ResponseInputItem.ofFunctionCallOutput(outputBuilder.build()));
+            return Collections.singletonList(ResponseInputItem.ofFunctionCallOutput(outputBuilder.build()));
         } else {
-            return List.of(createTextMessage(EasyInputMessage.Role.USER, msg.toString()));
+            return Collections.singletonList(createTextMessage(EasyInputMessage.Role.USER, msg.toString()));
         }
     }
 
@@ -582,7 +582,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
 
     private static ResponseInputItem createUserMessage(UserMessage userMessage) {
         List<Content> contents = userMessage.contents();
-        var contentList = new ArrayList<ResponseInputContent>();
+        ArrayList<ResponseInputContent> contentList = new ArrayList<ResponseInputContent>();
 
         for (Content content : contents) {
             if (content instanceof TextContent textContent) {
@@ -652,7 +652,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
     private static FunctionTool toResponsesTool(ToolSpecification toolSpec, boolean strict) {
         boolean effectiveStrict = ToolSpecificationUtils.isEffectivelyStrict(toolSpec, strict);
         try {
-            var parametersBuilder = FunctionTool.Parameters.builder();
+            FunctionTool.Parameters.Builder parametersBuilder = FunctionTool.Parameters.builder();
             if (toolSpec.parameters() != null) {
                 toMap(toolSpec.parameters(), effectiveStrict)
                         .forEach((key, value) -> parametersBuilder.putAdditionalProperty(key, JsonValue.from(value)));
@@ -1131,7 +1131,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         }
 
         private void handleOutputTextDelta(ResponseTextDeltaEvent event) {
-            var delta = event.delta();
+            JsonValue delta = event.delta();
             if (!delta.isEmpty()) {
                 textBuilder.append(delta);
                 onPartialResponse(handler, delta, streamingHandle);
@@ -1139,10 +1139,10 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         }
 
         private void handleOutputItemAdded(ResponseOutputItemAddedEvent event) {
-            var item = event.item();
+            ResponseOutputItem item = event.item();
             if (item.isFunctionCall()) {
-                var functionCall = item.asFunctionCall();
-                var itemId = functionCall.id().orElse(null);
+                ResponseFunctionToolCall functionCall = item.asFunctionCall();
+                String itemId = functionCall.id().orElse(null);
                 if (itemId != null) {
                     toolCallBuilders.put(
                             itemId,
@@ -1159,8 +1159,8 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
 
         private void handleFunctionCallArgumentsDelta(ResponseFunctionCallArgumentsDeltaEvent event) {
             String itemId = event.itemId();
-            var builder = toolCallBuilders.get(itemId);
-            var index = toolCallIndices.get(itemId);
+            ToolExecutionRequest.Builder builder = toolCallBuilders.get(itemId);
+            Integer index = toolCallIndices.get(itemId);
             if (builder == null || index == null) {
                 return;
             }
@@ -1197,9 +1197,9 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         }
 
         private void handleFunctionCallArgumentsDone(ResponseFunctionCallArgumentsDoneEvent event) {
-            var itemId = event.itemId();
-            var builder = toolCallBuilders.remove(itemId);
-            var index = toolCallIndices.remove(itemId);
+            String itemId = event.itemId();
+            ToolExecutionRequest.Builder builder = toolCallBuilders.remove(itemId);
+            Integer index = toolCallIndices.remove(itemId);
             if (builder != null && index != null) {
                 builder.arguments(event.arguments());
                 ToolExecutionRequest toolExecutionRequest = builder.build();
@@ -1222,7 +1222,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         }
 
         private void handleCompleted(ResponseCompletedEvent event) {
-            var response = event.response();
+            com.openai.models.responses.Response response = event.response();
 
             // Extract status and map to finish reason
             response.status().ifPresent(status -> {
@@ -1234,19 +1234,19 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         }
 
         private void handleError(ResponseErrorEvent event) {
-            var message = event.message();
+            String message = event.message();
             withLoggingExceptions(() -> handler.onError(new RuntimeException("Response error: " + message)));
         }
 
         private void handleFailed(ResponseFailedEvent event) {
-            var response = event.response();
-            var message = response.error().map(this::extractErrorMessage).orElse("Response failed");
+            com.openai.models.responses.Response response = event.response();
+            String message = response.error().map(this::extractErrorMessage).orElse("Response failed");
             withLoggingExceptions(() -> handler.onError(new RuntimeException("Response failed: " + message)));
         }
 
         private String extractErrorMessage(ResponseError error) {
-            var message = error.message();
-            if (message.isBlank()) {
+            String message = error.message();
+            if (message.trim().isEmpty()) {
                 return error.toString();
             }
             return message;
@@ -1262,14 +1262,14 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         }
 
         private void extractTokenUsageAndComplete(com.openai.models.responses.Response response) {
-            var text = !textBuilder.isEmpty() ? textBuilder.toString() : null;
-            var aiMessage = buildAiMessage(
+            String text = !textBuilder.isEmpty() ? textBuilder.toString() : null;
+            AiMessage aiMessage = buildAiMessage(
                     text, extractReasoningSummary(response), completedToolCalls, extractEncryptedReasoning(response));
 
             tokenUsage = extractTokenUsage(response);
-            var metadata = buildResponseMetadata(responseId, modelName, response, finishReason, tokenUsage);
+            OpenAiOfficialResponsesChatResponseMetadata metadata = buildResponseMetadata(responseId, modelName, response, finishReason, tokenUsage);
 
-            var chatResponse = ChatResponse.builder()
+            ChatResponse.Builder chatResponse = ChatResponse.builder()
                     .aiMessage(aiMessage)
                     .metadata(metadata)
                     .build();

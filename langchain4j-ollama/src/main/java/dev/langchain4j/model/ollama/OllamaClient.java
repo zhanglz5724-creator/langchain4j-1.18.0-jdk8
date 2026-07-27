@@ -47,6 +47,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.Collections;
 import org.slf4j.Logger;
 
 class OllamaClient {
@@ -81,7 +82,7 @@ class OllamaClient {
     private Map<String, String> buildRequestHeaders() {
         Map<String, String> dynamicHeaders = customHeadersSupplier.get();
         if (isNullOrEmpty(dynamicHeaders)) {
-            return Map.of();
+            return Collections.emptyMap();
         }
         return dynamicHeaders;
     }

@@ -114,7 +114,7 @@ public class EmbeddingResponse {
     private static void validate(Builder builder, String name) {
         if (builder.metadata != null) {
             throw new IllegalArgumentException(
-                    "Cannot set both 'metadata' and '%s' on EmbeddingResponse".formatted(name));
+                    String.format("Cannot set both 'metadata' and '%s' on EmbeddingResponse", name));
         }
     }
 }

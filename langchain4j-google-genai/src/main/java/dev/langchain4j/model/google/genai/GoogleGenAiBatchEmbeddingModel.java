@@ -9,6 +9,7 @@ import com.google.genai.Client;
 import com.google.genai.types.BatchJob;
 import com.google.genai.types.CancelBatchJobConfig;
 import com.google.genai.types.Content;
+import com.google.genai.types.ContentEmbedding;
 import com.google.genai.types.CreateEmbeddingsBatchJobConfig;
 import com.google.genai.types.DeleteBatchJobConfig;
 import com.google.genai.types.EmbedContentBatch;
@@ -16,6 +17,7 @@ import com.google.genai.types.EmbedContentConfig;
 import com.google.genai.types.EmbeddingsBatchJobSource;
 import com.google.genai.types.File;
 import com.google.genai.types.GetBatchJobConfig;
+import com.google.genai.types.InlinedEmbedContentResponse;
 import com.google.genai.types.JobState;
 import com.google.genai.types.JobState.Known;
 import com.google.genai.types.Part;
@@ -38,7 +40,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 /**
  * Provides an interface for interacting with the Google GenAI Batch API for Embedding models.
@@ -114,7 +118,7 @@ public final class GoogleGenAiBatchEmbeddingModel implements BatchEmbeddingModel
     public BatchResponse<Response<Embedding>> submit(String displayName, List<TextSegment> requests) {
         List<Content> contents = requests.stream()
                 .map(segment -> Content.builder()
-                        .parts(List.of(Part.builder().text(segment.text()).build()))
+                        .parts(Collections.singletonList(Part.builder().text(segment.text()).build()))
                         .build())
                 .collect(Collectors.toList());
 
@@ -191,14 +195,14 @@ public final class GoogleGenAiBatchEmbeddingModel implements BatchEmbeddingModel
             List<BatchItemResult<Response<Embedding>>> results = new ArrayList<>();
             if (batchJob.dest().isPresent()
                     && batchJob.dest().get().inlinedEmbedContentResponses().isPresent()) {
-                var inlinedResponses =
+                List<InlinedEmbedContentResponse> inlinedResponses =
                         batchJob.dest().get().inlinedEmbedContentResponses().get();
-                for (var inlined : inlinedResponses) {
+                for (InlinedEmbedContentResponse inlined : inlinedResponses) {
                     if (inlined.response().isPresent()) {
-                        var embeddingOpt = inlined.response().get().embedding();
+                        Optional<ContentEmbedding> embeddingOpt = inlined.response().get().embedding();
                         if (embeddingOpt.isPresent()
                                 && embeddingOpt.get().values().isPresent()) {
-                            var values = embeddingOpt.get().values().get();
+                            List<Float> values = embeddingOpt.get().values().get();
                             float[] floatArray = new float[values.size()];
                             for (int i = 0; i < values.size(); i++) {
                                 floatArray[i] = values.get(i).floatValue();
@@ -213,7 +217,7 @@ public final class GoogleGenAiBatchEmbeddingModel implements BatchEmbeddingModel
             }
             builder.results(results);
         } else if (state == Known.JOB_STATE_FAILED) {
-            builder.results(List.of(BatchItemResult.failure(
+            builder.results(Collections.singletonList(BatchItemResult.failure(
                     GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
         }
 

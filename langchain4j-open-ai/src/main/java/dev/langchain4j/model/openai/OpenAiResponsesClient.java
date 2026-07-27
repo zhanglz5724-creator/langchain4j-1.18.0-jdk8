@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 class OpenAiResponsesClient {
 
@@ -317,7 +318,7 @@ class OpenAiResponsesClient {
                 } else if (effectiveStrict) {
                     functionParameters = new LinkedHashMap<>();
                     functionParameters.put(FIELD_TYPE, TYPE_OBJECT);
-                    functionParameters.put(FIELD_PROPERTIES, Map.of());
+                    functionParameters.put(FIELD_PROPERTIES, Collections.emptyMap());
                     functionParameters.put(FIELD_ADDITIONAL_PROPERTIES, false);
                 }
 
@@ -367,7 +368,7 @@ class OpenAiResponsesClient {
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", stream ? "text/event-stream" : "application/json");
 
-        if (apiKey != null && !apiKey.isBlank()) {
+        if (apiKey != null && !apiKey.trim().isEmpty()) {
             requestBuilder.addHeader("Authorization", "Bearer " + apiKey);
         }
 
@@ -439,7 +440,7 @@ class OpenAiResponsesClient {
 
     private static List<ToolExecutionRequest> extractToolExecutionRequests(JsonNode output) {
         if (!output.isArray()) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         List<ToolExecutionRequest> toolExecutionRequests = new ArrayList<>();
@@ -449,7 +450,7 @@ class OpenAiResponsesClient {
             }
 
             String id = item.path(FIELD_CALL_ID).asText(null);
-            if (id == null || id.isBlank()) {
+            if (id == null || id.trim().isEmpty()) {
                 id = item.path(FIELD_ID).asText(null);
             }
 
@@ -492,7 +493,7 @@ class OpenAiResponsesClient {
     }
 
     private static FinishReason finishReasonFromStatus(String status, boolean hasToolCalls) {
-        if (status == null || status.isBlank()) {
+        if (status == null || status.trim().isEmpty()) {
             return null;
         }
         return switch (status) {
@@ -515,7 +516,7 @@ class OpenAiResponsesClient {
         AiMessage.Builder aiMessageBuilder =
                 AiMessage.builder().text(text).thinking(thinking).toolExecutionRequests(toolExecutionRequests);
         if (encryptedContent != null) {
-            aiMessageBuilder.attributes(Map.of(ENCRYPTED_REASONING_KEY, encryptedContent));
+            aiMessageBuilder.attributes(Collections.singletonMap(ENCRYPTED_REASONING_KEY, encryptedContent));
         }
         AiMessage aiMessage = aiMessageBuilder.build();
 
@@ -556,7 +557,7 @@ class OpenAiResponsesClient {
 
     private static List<Map<String, Object>> toResponsesMessages(ChatMessage msg) {
         if (msg instanceof SystemMessage systemMessage) {
-            return List.of(createMessageEntry(ROLE_SYSTEM, List.of(createInputTextContent(systemMessage.text()))));
+            return Collections.singletonList(createMessageEntry(ROLE_SYSTEM, Collections.singletonList(createInputTextContent(systemMessage.text()))));
         } else if (msg instanceof UserMessage userMessage) {
             List<Map<String, Object>> contentEntries = new ArrayList<>();
             for (Content content : userMessage.contents()) {
@@ -572,18 +573,18 @@ class OpenAiResponsesClient {
                             + ". Only TextContent, ImageContent, and PdfFileContent are supported.");
                 }
             }
-            return List.of(createMessageEntry(ROLE_USER, contentEntries));
+            return Collections.singletonList(createMessageEntry(ROLE_USER, contentEntries));
         } else if (msg instanceof AiMessage aiMessage) {
             List<Map<String, Object>> items = new ArrayList<>();
 
             String encryptedContent = aiMessage.attribute(ENCRYPTED_REASONING_KEY, String.class);
             if (encryptedContent != null) {
-                var reasoningItem = new LinkedHashMap<String, Object>();
+                LinkedHashMap<String, Object> reasoningItem = new LinkedHashMap<String, Object>();
                 reasoningItem.put(FIELD_TYPE, TYPE_REASONING);
                 reasoningItem.put(FIELD_ENCRYPTED_CONTENT, encryptedContent);
                 List<Map<String, Object>> summaryItems = new ArrayList<>();
                 if (aiMessage.thinking() != null && !aiMessage.thinking().isEmpty()) {
-                    var summaryTextItem = new LinkedHashMap<String, Object>();
+                    LinkedHashMap<String, Object> summaryTextItem = new LinkedHashMap<String, Object>();
                     summaryTextItem.put(FIELD_TYPE, FIELD_SUMMARY_TEXT);
                     summaryTextItem.put(FIELD_TEXT, aiMessage.thinking());
                     summaryItems.add(summaryTextItem);
@@ -592,9 +593,9 @@ class OpenAiResponsesClient {
                 items.add(reasoningItem);
             }
 
-            var text = aiMessage.text();
+            String text = aiMessage.text();
             if (text != null && !text.isEmpty()) {
-                items.add(createMessageEntry(ROLE_ASSISTANT, List.of(createOutputTextContent(text))));
+                items.add(createMessageEntry(ROLE_ASSISTANT, Collections.singletonList(createOutputTextContent(text))));
             }
 
             if (aiMessage.hasToolExecutionRequests()) {
@@ -602,7 +603,7 @@ class OpenAiResponsesClient {
                     String callId = requireNonBlank(toolRequest.id(), "ToolExecutionRequest.id");
                     String name = requireNonBlank(toolRequest.name(), "ToolExecutionRequest.name");
                     String arguments = requireNonBlank(toolRequest.arguments(), "ToolExecutionRequest.arguments");
-                    var functionCall = new LinkedHashMap<String, Object>();
+                    LinkedHashMap<String, Object> functionCall = new LinkedHashMap<String, Object>();
                     functionCall.put(FIELD_TYPE, TYPE_FUNCTION_CALL);
                     functionCall.put(FIELD_CALL_ID, callId);
                     functionCall.put(FIELD_NAME, name);
@@ -613,7 +614,7 @@ class OpenAiResponsesClient {
 
             return items;
         } else if (msg instanceof ToolExecutionResultMessage toolExecutionResultMessage) {
-            var outputEntry = new LinkedHashMap<String, Object>();
+            LinkedHashMap<String, Object> outputEntry = new LinkedHashMap<String, Object>();
             outputEntry.put(FIELD_TYPE, TYPE_FUNCTION_CALL_OUTPUT);
             outputEntry.put(FIELD_CALL_ID, toolExecutionResultMessage.id());
 
@@ -635,7 +636,7 @@ class OpenAiResponsesClient {
                 outputEntry.put(FIELD_OUTPUT, outputContents);
             }
 
-            return List.of(outputEntry);
+            return Collections.singletonList(outputEntry);
         } else {
             throw new UnsupportedFeatureException(
                     "Unsupported message type: " + msg.getClass().getName()
@@ -644,7 +645,7 @@ class OpenAiResponsesClient {
     }
 
     private static Map<String, Object> createMessageEntry(String role, List<Map<String, Object>> contentEntries) {
-        var entry = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> entry = new LinkedHashMap<String, Object>();
         entry.put(FIELD_TYPE, TYPE_MESSAGE);
         entry.put(FIELD_ROLE, role);
         entry.put(FIELD_CONTENT, contentEntries);
@@ -652,21 +653,21 @@ class OpenAiResponsesClient {
     }
 
     private static Map<String, Object> createInputTextContent(String text) {
-        var content = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> content = new LinkedHashMap<String, Object>();
         content.put(FIELD_TYPE, TYPE_INPUT_TEXT);
         content.put(FIELD_TEXT, text);
         return content;
     }
 
     private static Map<String, Object> createOutputTextContent(String text) {
-        var content = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> content = new LinkedHashMap<String, Object>();
         content.put(FIELD_TYPE, TYPE_OUTPUT_TEXT);
         content.put(FIELD_TEXT, text);
         return content;
     }
 
     private static Map<String, Object> createInputImageContent(Image image, ImageContent.DetailLevel detailLevel) {
-        var content = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> content = new LinkedHashMap<String, Object>();
         content.put(FIELD_TYPE, TYPE_INPUT_IMAGE);
         content.put(FIELD_IMAGE_URL, buildImageUrl(image));
         content.put(FIELD_DETAIL, toDetailString(detailLevel));
@@ -674,7 +675,7 @@ class OpenAiResponsesClient {
     }
 
     private static Map<String, Object> createInputPdfContent(PdfFileContent pdfFileContent) {
-        var content = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> content = new LinkedHashMap<String, Object>();
         content.put(FIELD_TYPE, TYPE_INPUT_FILE);
         if (pdfFileContent.pdfFile().url() != null) {
             content.put(FIELD_FILE_URL, pdfFileContent.pdfFile().url().toString());
@@ -730,7 +731,7 @@ class OpenAiResponsesClient {
     }
 
     private static String requireNonBlank(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
+        if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException(fieldName + " must be provided");
         }
         return value;
@@ -741,11 +742,11 @@ class OpenAiResponsesClient {
             return null;
         }
 
-        var textConfig = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> textConfig = new LinkedHashMap<String, Object>();
         JsonSchema jsonSchema = responseFormat.jsonSchema();
 
         if (jsonSchema == null) {
-            var format = new LinkedHashMap<String, Object>();
+            LinkedHashMap<String, Object> format = new LinkedHashMap<String, Object>();
             format.put(FIELD_TYPE, TYPE_JSON_OBJECT);
             textConfig.put(FIELD_FORMAT, format);
         } else {
@@ -756,7 +757,7 @@ class OpenAiResponsesClient {
                                 + jsonSchema.rootElement().getClass());
             }
 
-            var format = new LinkedHashMap<String, Object>();
+            LinkedHashMap<String, Object> format = new LinkedHashMap<String, Object>();
             format.put(FIELD_TYPE, TYPE_JSON_SCHEMA);
             format.put(FIELD_STRICT, strict);
             if (jsonSchema.name() != null) {
@@ -861,7 +862,7 @@ class OpenAiResponsesClient {
                 return;
             }
             rawServerSentEvents.add(event);
-            var data = event.data();
+            String data = event.data();
 
             if (data == null || data.isEmpty()) {
                 return;
@@ -890,23 +891,23 @@ class OpenAiResponsesClient {
             }
 
             try {
-                var node = OBJECT_MAPPER.readTree(data);
-                var type = node.has(FIELD_TYPE) ? node.get(FIELD_TYPE).asText() : "";
+                JsonNode node = OBJECT_MAPPER.readTree(data);
+                String type = node.has(FIELD_TYPE) ? node.get(FIELD_TYPE).asText() : "";
 
                 if (EVENT_OUTPUT_TEXT_DELTA.equals(type)) {
-                    var text = node.path(FIELD_DELTA).asText();
+                    String text = node.path(FIELD_DELTA).asText();
                     if (!text.isEmpty()) {
                         InternalStreamingChatResponseHandlerUtils.onPartialResponse(handler, text, streamingHandle);
                     }
                 } else if (EVENT_REASONING_TEXT_DELTA.equals(type) || EVENT_REASONING_SUMMARY_TEXT_DELTA.equals(type)) {
-                    var thinking = node.path(FIELD_DELTA).asText();
+                    String thinking = node.path(FIELD_DELTA).asText();
                     if (!thinking.isEmpty()) {
                         InternalStreamingChatResponseHandlerUtils.onPartialThinking(handler, thinking, streamingHandle);
                     }
                 } else if (EVENT_OUTPUT_ITEM_ADDED.equals(type)) {
-                    var item = node.path(FIELD_ITEM);
+                    JsonNode item = node.path(FIELD_ITEM);
                     if (TYPE_FUNCTION_CALL.equals(item.path(FIELD_TYPE).asText())) {
-                        var itemId = item.path(FIELD_ID).asText();
+                        String itemId = item.path(FIELD_ID).asText();
                         int outputIndex = node.path(FIELD_OUTPUT_INDEX).asInt(0);
                         toolCallBuilders.put(
                                 itemId,
@@ -917,10 +918,10 @@ class OpenAiResponsesClient {
                         assignIndexIfAbsent(itemId, outputIndex);
                     }
                 } else if (EVENT_FUNCTION_CALL_ARGUMENTS_DELTA.equals(type)) {
-                    var itemId = node.path(FIELD_ITEM_ID).asText();
-                    var builder = toolCallBuilders.get(itemId);
+                    String itemId = node.path(FIELD_ITEM_ID).asText();
+                    ToolExecutionRequest.Builder builder = toolCallBuilders.get(itemId);
                     if (builder != null) {
-                        var currentArgs = builder.build().arguments();
+                        String currentArgs = builder.build().arguments();
                         String delta = node.path(FIELD_DELTA).asText();
                         builder.arguments(currentArgs + delta);
                         Integer index = toolCallIndices.get(itemId);
@@ -936,8 +937,8 @@ class OpenAiResponsesClient {
                         }
                     }
                 } else if (EVENT_FUNCTION_CALL_ARGUMENTS_DONE.equals(type)) {
-                    var itemId = node.path(FIELD_ITEM_ID).asText();
-                    var builder = toolCallBuilders.get(itemId);
+                    String itemId = node.path(FIELD_ITEM_ID).asText();
+                    ToolExecutionRequest.Builder builder = toolCallBuilders.get(itemId);
                     if (builder != null) {
                         builder.arguments(node.path(FIELD_ARGUMENTS).asText());
                         completeToolCall(itemId, builder);
@@ -955,22 +956,22 @@ class OpenAiResponsesClient {
         }
 
         private void handleOutputItemDone(JsonNode node) {
-            var item = node.path(FIELD_ITEM);
+            JsonNode item = node.path(FIELD_ITEM);
             if (TYPE_FUNCTION_CALL.equals(item.path(FIELD_TYPE).asText())) {
-                var itemId = item.path(FIELD_ID).asText();
+                String itemId = item.path(FIELD_ID).asText();
                 int outputIndex = node.path(FIELD_OUTPUT_INDEX).asInt(0);
-                var builder = toolCallBuilders.computeIfAbsent(itemId, ignored -> ToolExecutionRequest.builder());
+                ToolExecutionRequest.Builder builder = toolCallBuilders.computeIfAbsent(itemId, ignored -> ToolExecutionRequest.builder());
                 assignIndexIfAbsent(itemId, outputIndex);
 
-                var callIdNode = item.get(FIELD_CALL_ID);
+                JsonNode callIdNode = item.get(FIELD_CALL_ID);
                 if (callIdNode != null && !callIdNode.isNull()) {
                     builder.id(callIdNode.asText());
                 }
-                var nameNode = item.get(FIELD_NAME);
+                JsonNode nameNode = item.get(FIELD_NAME);
                 if (nameNode != null && !nameNode.isNull()) {
                     builder.name(nameNode.asText());
                 }
-                var argumentsNode = item.get(FIELD_ARGUMENTS);
+                JsonNode argumentsNode = item.get(FIELD_ARGUMENTS);
                 if (argumentsNode != null && !argumentsNode.isNull()) {
                     builder.arguments(argumentsNode.asText());
                 }
@@ -980,7 +981,7 @@ class OpenAiResponsesClient {
         }
 
         private void handleResponseCompleted(JsonNode node) {
-            var responseNode = node.path(FIELD_RESPONSE);
+            JsonNode responseNode = node.path(FIELD_RESPONSE);
 
             JsonNode outputNode = responseNode.path(FIELD_OUTPUT);
             String text = extractText(outputNode);
@@ -990,9 +991,9 @@ class OpenAiResponsesClient {
             AiMessage.Builder aiMessageBuilder =
                     AiMessage.builder().text(text).thinking(thinking).toolExecutionRequests(completedToolCalls);
             if (encryptedContent != null) {
-                aiMessageBuilder.attributes(Map.of(ENCRYPTED_REASONING_KEY, encryptedContent));
+                aiMessageBuilder.attributes(Collections.singletonMap(ENCRYPTED_REASONING_KEY, encryptedContent));
             }
-            var aiMessage = aiMessageBuilder.build();
+            AiMessage aiMessage = aiMessageBuilder.build();
 
             OpenAiResponsesChatResponseMetadata.Builder metadataBuilder = OpenAiResponsesChatResponseMetadata.builder()
                     .id(responseNode.path(FIELD_ID).asText(null))
@@ -1027,7 +1028,7 @@ class OpenAiResponsesClient {
                 metadataBuilder.rawServerSentEvents(new ArrayList<>(rawServerSentEvents));
             }
 
-            var responseBuilder = ChatResponse.builder().aiMessage(aiMessage).metadata(metadataBuilder.build());
+            ChatResponse.Builder responseBuilder = ChatResponse.builder().aiMessage(aiMessage).metadata(metadataBuilder.build());
 
             if (!isCancelled()) {
                 try {
@@ -1052,7 +1053,7 @@ class OpenAiResponsesClient {
                 return "Response failed";
             }
             String message = errorNode.path(FIELD_MESSAGE).asText(null);
-            if (message == null || message.isBlank()) {
+            if (message == null || message.trim().isEmpty()) {
                 message = errorNode.toString();
             }
             return "Response failed: " + message;

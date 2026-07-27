@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +118,7 @@ public abstract class AbstractElasticsearchEmbeddingStore implements EmbeddingSt
 
     public void add(String id, String text) {
         try {
-            bulkIndexText(List.of(id), List.of(TextSegment.from(text)));
+            bulkIndexText(Collections.singletonList(id), Collections.singletonList(TextSegment.from(text)));
         } catch (IOException e) {
             throw new ElasticsearchRequestFailedException(e);
         }
@@ -125,7 +127,7 @@ public abstract class AbstractElasticsearchEmbeddingStore implements EmbeddingSt
     public List<String> addAllText(List<String> texts) {
         List<String> ids = texts.stream().map(ignored -> randomUUID()).collect(toList());
         try {
-            bulkIndexText(ids, texts.stream().map(TextSegment::from).toList());
+            bulkIndexText(ids, texts.stream().map(TextSegment::from).collect(Collectors.toList()));
         } catch (IOException e) {
             throw new ElasticsearchRequestFailedException(e);
         }

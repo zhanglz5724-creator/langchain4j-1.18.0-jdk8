@@ -7,11 +7,13 @@ import static java.util.stream.StreamSupport.stream;
 
 import dev.langchain4j.Experimental;
 import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +59,7 @@ public class FileSystemSkillLoader {
             return entries.filter(Files::isDirectory)
                     .filter(dir -> Files.exists(dir.resolve("SKILL.md")))
                     .map(FileSystemSkillLoader::loadSkill)
-                    .toList();
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Failed to load skills from " + directory, e);
         }
@@ -80,7 +82,7 @@ public class FileSystemSkillLoader {
             throw new IllegalArgumentException("SKILL.md not found in " + skillDirectory);
         }
 
-        String markdown = unchecked(() -> Files.readString(skillFile));
+        String markdown = unchecked(() -> new String(Files.readAllBytes(skillFile), StandardCharsets.UTF_8));
 
         Map<String, List<String>> frontMatter = SkillLoaderCommon.parseFrontMatter(markdown);
         String content = SkillLoaderCommon.extractContent(markdown);
@@ -106,7 +108,7 @@ public class FileSystemSkillLoader {
                     .filter(path -> !skillDirectory.relativize(path).startsWith("scripts"))
                     .map(path -> {
                         try {
-                            String content = Files.readString(path);
+                            String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
                             if (isNullOrBlank(content)) {
                                 return null;
                             }
@@ -126,7 +128,7 @@ public class FileSystemSkillLoader {
                         }
                     })
                     .filter(Objects::nonNull)
-                    .toList();
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Failed to load skill resources from " + skillDirectory, e);
         }

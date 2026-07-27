@@ -3,7 +3,7 @@ package dev.langchain4j.model.bedrock;
 /**
  * Represents a content block within a {@link BedrockSystemMessage}.
  * <p>
- * This is a sealed interface - only library-provided implementations are supported.
+ * This is a interface - only library-provided implementations are supported.
  * Currently, only {@link BedrockSystemTextContent} is available.
  * <p>
  * <b>Implementation Requirements:</b>
@@ -18,7 +18,7 @@ package dev.langchain4j.model.bedrock;
  * @see BedrockSystemMessage
  * @since 1.11.0
  */
-public sealed interface BedrockSystemContent permits BedrockSystemTextContent {
+public interface BedrockSystemContent  {
 
     /**
      * Returns the content type.

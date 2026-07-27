@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 @Internal
 abstract class WatsonxChat {
@@ -50,12 +51,12 @@ abstract class WatsonxChat {
                         ? watsonxChatRequestParameters
                         : WatsonxChatRequestParameters.EMPTY;
 
-        var modelName = getOrDefault(builder.modelName, commonParameters.modelName());
-        var projectId = getOrDefault(builder.projectId, watsonxParameters.projectId());
-        var spaceId = getOrDefault(builder.spaceId, watsonxParameters.spaceId());
-        var timeout = getOrDefault(builder.timeout, watsonxParameters.timeout());
-        var thinking = getOrDefault(builder.thinking, watsonxParameters.thinking());
-        var deploymentId = getOrDefault(builder.deploymentId, watsonxParameters.deploymentId());
+        String modelName = getOrDefault(builder.modelName, commonParameters.modelName());
+        String projectId = getOrDefault(builder.projectId, watsonxParameters.projectId());
+        String spaceId = getOrDefault(builder.spaceId, watsonxParameters.spaceId());
+        Duration timeout = getOrDefault(builder.timeout, watsonxParameters.timeout());
+        Boolean thinking = getOrDefault(builder.thinking, watsonxParameters.thinking());
+        String deploymentId = getOrDefault(builder.deploymentId, watsonxParameters.deploymentId());
 
         defaultRequestParameters = WatsonxChatRequestParameters.builder()
                 // Common parameters
@@ -89,7 +90,7 @@ abstract class WatsonxChat {
 
         if (nonNull(deploymentId)) {
 
-            var deploymentBuilder = nonNull(builder.authenticator)
+            DeploymentService.Builder deploymentBuilder = nonNull(builder.authenticator)
                     ? DeploymentService.builder().authenticator(builder.authenticator)
                     : DeploymentService.builder().apiKey(builder.apiKey);
 
@@ -105,7 +106,7 @@ abstract class WatsonxChat {
 
         } else {
 
-            var chatServiceBuilder = nonNull(builder.authenticator)
+            ChatService.Builder chatServiceBuilder = nonNull(builder.authenticator)
                     ? ChatService.builder().authenticator(builder.authenticator)
                     : ChatService.builder().apiKey(builder.apiKey);
 
@@ -453,7 +454,7 @@ abstract class WatsonxChat {
          * @return {@code this}
          */
         public T guidedChoice(String... guidedChoice) {
-            return guidedChoice(Set.of(guidedChoice));
+            return guidedChoice(Collections.singleton(guidedChoice));
         }
 
         /**

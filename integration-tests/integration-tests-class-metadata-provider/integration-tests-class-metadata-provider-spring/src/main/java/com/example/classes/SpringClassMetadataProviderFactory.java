@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -24,6 +25,6 @@ public class SpringClassMetadataProviderFactory implements ClassMetadataProvider
     public Iterable<Method> getNonStaticMethodsOnClass(Class<?> clazz) {
         return Stream.of(ReflectionUtils.getDeclaredMethods(clazz))
                 .filter(method -> !Modifier.isStatic(method.getModifiers()))
-                .toList();
+                .collect(Collectors.toList());
     }
 }

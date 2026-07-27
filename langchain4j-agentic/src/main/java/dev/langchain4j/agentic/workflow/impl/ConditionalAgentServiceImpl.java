@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class ConditionalAgentServiceImpl<T> extends AbstractServiceBuilder<T, ConditionalAgentService<T>>
         implements ConditionalAgentService<T> {
@@ -51,13 +53,13 @@ public class ConditionalAgentServiceImpl<T> extends AbstractServiceBuilder<T, Co
 
     @Override
     public ConditionalAgentServiceImpl<T> subAgents(Predicate<AgenticScope> condition, Object... agents) {
-        return subAgents("<unknown>", condition, agentsToExecutors(List.of(agents)));
+        return subAgents("<unknown>", condition, agentsToExecutors(Collections.singletonList(agents)));
     }
 
     @Override
     public ConditionalAgentServiceImpl<T> subAgents(
             String conditionDescription, Predicate<AgenticScope> condition, Object... agents) {
-        return subAgents(conditionDescription, condition, agentsToExecutors(List.of(agents)));
+        return subAgents(conditionDescription, condition, agentsToExecutors(Collections.singletonList(agents)));
     }
 
     @Override
@@ -78,19 +80,19 @@ public class ConditionalAgentServiceImpl<T> extends AbstractServiceBuilder<T, Co
         conditionalAgents.add(new ConditionalAgent(
                 conditionDescription,
                 condition,
-                agentExecutors.stream().map(AgentInstance.class::cast).toList()));
+                agentExecutors.stream().map(AgentInstance.class::cast).collect(Collectors.toList())));
         return this;
     }
 
     @Override
     public ConditionalAgentServiceImpl<T> subAgent(Predicate<AgenticScope> condition, AgentExecutor agentExecutor) {
-        return subAgents(condition, List.of(agentExecutor));
+        return subAgents(condition, Collections.singletonList(agentExecutor));
     }
 
     @Override
     public ConditionalAgentServiceImpl<T> subAgent(
             String conditionDescription, Predicate<AgenticScope> condition, AgentExecutor agentExecutor) {
-        return subAgents(conditionDescription, condition, List.of(agentExecutor));
+        return subAgents(conditionDescription, condition, Collections.singletonList(agentExecutor));
     }
 
     @Override

@@ -37,16 +37,16 @@ class RunShellCommandToolExecutor implements ToolExecutor {
             String stdOut = formatStdOut(result.stdOut());
             if (result.isSuccess()) {
                 String resultText;
-                if (result.stdErr().isBlank()) {
+                if (result.stdErr().trim().isEmpty()) {
                     resultText = """
                             <working_dir>%s</working_dir>
-                            <stdout>%s</stdout>""".formatted(workingDir, stdOut);
+                            <stdout>%s</stdout>"String.format("", workingDir, stdOut);
                 } else {
                     String stdErr = formatStdErr(result.stdErr());
                     resultText = """
                             <working_dir>%s</working_dir>
                             <stdout>%s</stdout>
-                            <stderr>%s</stderr>""".formatted(workingDir, stdOut, stdErr);
+                            <stderr>%s</stderr>"String.format("", workingDir, stdOut, stdErr);
                 }
                 return ToolExecutionResult.builder().resultText(resultText).build();
             } else {
@@ -55,7 +55,7 @@ class RunShellCommandToolExecutor implements ToolExecutor {
                         <working_dir>%s</working_dir>
                         <exit_code>%s</exit_code>
                         <stdout>%s</stdout>
-                        <stderr>%s</stderr>""".formatted(workingDir, result.exitCode(), stdOut, stdErr);
+                        <stderr>%s</stderr>"String.format("", workingDir, result.exitCode(), stdOut, stdErr);
                 return ToolExecutionResult.builder()
                         .isError(true)
                         .resultText(resultText)
@@ -68,7 +68,7 @@ class RunShellCommandToolExecutor implements ToolExecutor {
                     <working_dir>%s</working_dir>
                     <error>%s</error>
                     <stdout>%s</stdout>
-                    <stderr>%s</stderr>""".formatted(workingDir, e.getMessage(), stdOut, stdErr);
+                    <stderr>%s</stderr>"String.format("", workingDir, e.getMessage(), stdOut, stdErr);
             return ToolExecutionResult.builder()
                     .isError(true)
                     .resultText(resultText)
@@ -86,7 +86,7 @@ class RunShellCommandToolExecutor implements ToolExecutor {
         try {
             return Json.fromJson(json, Map.class);
         } catch (Exception e) {
-            throwException("Failed to parse tool arguments: '%s'".formatted(json), e);
+            throwException(String.format("Failed to parse tool arguments: '%s'", json), e);
             return null; // unreachable
         }
     }
@@ -94,7 +94,7 @@ class RunShellCommandToolExecutor implements ToolExecutor {
     private String getRequiredArgument(String argumentName, Map<String, Object> arguments) {
         Object value = isNullOrEmpty(arguments) ? null : arguments.get(argumentName);
         if (value == null) {
-            throwException("Missing required tool argument '%s'".formatted(argumentName));
+            throwException(String.format("Missing required tool argument '%s'", argumentName));
         }
         return value.toString();
     }

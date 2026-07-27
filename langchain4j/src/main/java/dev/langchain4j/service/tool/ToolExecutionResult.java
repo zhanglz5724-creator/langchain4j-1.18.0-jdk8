@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.Collections;
 
 import static dev.langchain4j.internal.Utils.copy;
 
@@ -51,7 +52,7 @@ public class ToolExecutionResult {
         boolean hasResultContents = builder.resultContents != null && !builder.resultContents.isEmpty();
         validate(hasResultText, hasResultTextSupplier, hasResultContents);
         if (hasResultText) {
-            this.resultContents = new AtomicReference<>(List.of(TextContent.from(builder.resultText)));
+            this.resultContents = new AtomicReference<>(Collections.singletonList(TextContent.from(builder.resultText)));
             this.resultTextSupplier = null;
         } else if (hasResultTextSupplier) {
             this.resultContents = new AtomicReference<>();
@@ -140,7 +141,7 @@ public class ToolExecutionResult {
                 return current;
             }
             String text = resultTextSupplier.get();
-            return text == null ? List.of() : List.of(TextContent.from(text));
+            return text == null ? Collections.emptyList() : Collections.singletonList(TextContent.from(text));
         });
     }
 

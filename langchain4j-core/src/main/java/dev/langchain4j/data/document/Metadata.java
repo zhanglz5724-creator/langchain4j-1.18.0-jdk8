@@ -104,8 +104,8 @@ public class Metadata {
         }
 
         Object value = metadata.get(key);
-        if (value instanceof String string) {
-            return string;
+        if (value instanceof String) {
+            return ((String) value);
         }
 
         throw runtime(
@@ -128,11 +128,11 @@ public class Metadata {
         }
 
         Object value = metadata.get(key);
-        if (value instanceof UUID iD) {
-            return iD;
+        if (value instanceof UUID) {
+            return ((UUID) value);
         }
-        if (value instanceof String string) {
-            return UUID.fromString(string);
+        if (value instanceof String) {
+            return UUID.fromString(((String) value));
         }
 
         throw runtime(
@@ -166,8 +166,8 @@ public class Metadata {
         Object value = metadata.get(key);
         if (value instanceof String) {
             return Integer.parseInt(value.toString());
-        } else if (value instanceof Number number) {
-            return number.intValue();
+        } else if (value instanceof Number) {
+            return ((Number) value).intValue();
         }
 
         throw runtime(
@@ -201,7 +201,7 @@ public class Metadata {
         Object value = metadata.get(key);
         if (value instanceof String) {
             return Long.parseLong(value.toString());
-        } else if (value instanceof Number number) {
+        } else if (value instanceof Number) {
             return number.longValue();
         }
 
@@ -234,9 +234,9 @@ public class Metadata {
         }
 
         final var value = metadata.get(key);
-        if (value instanceof String str) {
-            return Float.parseFloat(str);
-        } else if (value instanceof Number number) {
+        if (value instanceof String) {
+            return Float.parseFloat(((String) value));
+        } else if (value instanceof Number) {
             return number.floatValue();
         }
 
@@ -271,7 +271,7 @@ public class Metadata {
         Object value = metadata.get(key);
         if (value instanceof String) {
             return Double.parseDouble(value.toString());
-        } else if (value instanceof Number number) {
+        } else if (value instanceof Number) {
             return number.doubleValue();
         }
 

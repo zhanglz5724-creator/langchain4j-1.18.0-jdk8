@@ -33,6 +33,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 
@@ -237,7 +238,7 @@ public class VespaEmbeddingStore implements EmbeddingStore<TextSegment> {
                                 ? new ArrayList<>()
                                 : children.stream()
                                         .map(VespaEmbeddingStore::toEmbeddingMatch)
-                                        .toList());
+                                        .collect(Collectors.toList()));
             } else {
                 throw toException(response);
             }

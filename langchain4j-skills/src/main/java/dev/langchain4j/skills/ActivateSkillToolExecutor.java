@@ -5,6 +5,7 @@ import dev.langchain4j.invocation.InvocationContext;
 import dev.langchain4j.service.tool.ToolExecutionResult;
 
 import java.util.Map;
+import java.util.Collections;
 
 import static dev.langchain4j.internal.Utils.copy;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
@@ -34,13 +35,13 @@ class ActivateSkillToolExecutor extends AbstractSkillToolExecutor {
             String availableSkillNames = skillsByName.keySet().stream()
                     .map(name -> "'" + name + "'")
                     .collect(joining(", "));
-            throwException("There is no skill with name '%s'. Available skills: [%s]".formatted(skillName, availableSkillNames));
+            throwException(String.format("There is no skill with name '%s'. Available skills: [%s]", skillName, availableSkillNames));
         }
 
         return ToolExecutionResult.builder()
                 .result(skill)
                 .resultText(skill.content())
-                .attributes(Map.of(ACTIVATED_SKILL_ATTRIBUTE, skillName))
+                .attributes(Collections.singletonMap(ACTIVATED_SKILL_ATTRIBUTE, skillName))
                 .build();
     }
 }

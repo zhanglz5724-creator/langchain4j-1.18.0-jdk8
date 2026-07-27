@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,7 +120,7 @@ public class QdrantEmbeddingStore implements EmbeddingStore<TextSegment> {
     @Override
     public List<String> addAll(List<Embedding> embeddings) {
 
-        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).toList();
+        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).collect(Collectors.toList());
 
         addAll(ids, embeddings, null);
 
@@ -171,7 +172,7 @@ public class QdrantEmbeddingStore implements EmbeddingStore<TextSegment> {
 
     @Override
     public void remove(String id) {
-        if (id == null || id.isBlank()) {
+        if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("id cannot be null or blank");
         }
         removeAll(Collections.singleton(id));

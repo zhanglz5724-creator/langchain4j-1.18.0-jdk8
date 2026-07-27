@@ -7,6 +7,7 @@ import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Represents a system message, typically defined by a developer.
@@ -91,6 +92,6 @@ public class SystemMessage implements ChatMessage {
         return messages.stream()
                 .filter(message -> message instanceof SystemMessage)
                 .map(message -> (SystemMessage) message)
-                .toList();
+                .collect(Collectors.toList());
     }
 }

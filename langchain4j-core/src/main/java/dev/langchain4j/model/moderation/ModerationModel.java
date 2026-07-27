@@ -19,6 +19,7 @@ import dev.langchain4j.model.output.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Represents a model that can moderate text.
@@ -101,7 +102,7 @@ public interface ModerationModel {
      * @return the moderation {@code Response}.
      */
     default Response<Moderation> moderate(List<ChatMessage> messages) {
-        List<String> texts = messages.stream().map(ModerationModel::toText).toList();
+        List<String> texts = messages.stream().map(ModerationModel::toText).collect(Collectors.toList());
         ModerationRequest request = ModerationRequest.builder().texts(texts).build();
         ModerationResponse response = moderate(request);
         return Response.from(response.moderation(), null, null, response.metadata());
@@ -126,13 +127,13 @@ public interface ModerationModel {
      * @throws IllegalArgumentException if the message type is unsupported
      */
     static String toText(ChatMessage chatMessage) {
-        if (chatMessage instanceof SystemMessage systemMessage) {
-            return systemMessage.text();
-        } else if (chatMessage instanceof UserMessage userMessage) {
+        if (chatMessage instanceof SystemMessage) {
+            return ((SystemMessage) chatMessage).text();
+        } else if (chatMessage instanceof UserMessage) {
             return userMessage.singleText();
-        } else if (chatMessage instanceof AiMessage aiMessage) {
+        } else if (chatMessage instanceof AiMessage) {
             return aiMessage.text();
-        } else if (chatMessage instanceof ToolExecutionResultMessage toolExecutionResultMessage) {
+        } else if (chatMessage instanceof ToolExecutionResultMessage) {
             return toolExecutionResultMessage.text();
         } else {
             throw new IllegalArgumentException("Unsupported message type: " + chatMessage.type());

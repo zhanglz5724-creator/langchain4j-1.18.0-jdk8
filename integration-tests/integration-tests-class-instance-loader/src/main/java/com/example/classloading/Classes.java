@@ -18,7 +18,7 @@ public final class Classes {
             return (T) new Class2();
         }
 
-        throw new IllegalArgumentException("Unknown class: %s".formatted(clazz.getName()));
+        throw new IllegalArgumentException(String.format("Unknown class: %s", clazz.getName()));
     }
 
     public static class Class1 {}

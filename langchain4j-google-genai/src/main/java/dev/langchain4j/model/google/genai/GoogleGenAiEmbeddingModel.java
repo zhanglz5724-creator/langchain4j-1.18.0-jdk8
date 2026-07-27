@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,12 +118,12 @@ public class GoogleGenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
     @Override
     public Set<EmbeddingParameter<?>> supportedParameters() {
-        return Set.of(EmbeddingRequestParameters.INPUT_TYPE, EmbeddingRequestParameters.DIMENSIONS);
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EmbeddingRequestParameters.INPUT_TYPE, EmbeddingRequestParameters.DIMENSIONS)));
     }
 
     @Override
     public Set<ContentType> supportedContentTypes() {
-        return isEmbedding2(modelName) ? Set.of(ContentType.TEXT, ContentType.IMAGE) : Set.of(ContentType.TEXT);
+        return isEmbedding2(modelName) ? Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE))) : Collections.singleton(ContentType.TEXT);
     }
 
     @Override
@@ -206,12 +208,12 @@ public class GoogleGenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
     private Content toContent(EmbeddingInput input, EmbeddingInputType inputType) {
         boolean textOnly = input.contents().stream().allMatch(content -> content instanceof TextContent);
         List<Part> parts = new ArrayList<>();
-        for (var content : input.contents()) {
+        for (dev.langchain4j.data.message.Content content : input.contents()) {
             if (content instanceof TextContent textContent) {
                 String text = textOnly ? applyTaskInstruction(textContent.text(), inputType) : textContent.text();
                 parts.add(Part.fromText(text));
             } else if (content instanceof ImageContent imageContent) {
-                var image = imageContent.image();
+                Image image = imageContent.image();
                 if (image.base64Data() == null) {
                     throw new UnsupportedFeatureException(
                             "Gemini requires base64 image data (a plain URL is not supported)");
@@ -256,7 +258,7 @@ public class GoogleGenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
     @Override
     public Response<Embedding> embed(TextSegment textSegment) {
-        return Response.from(embedAll(List.of(textSegment)).content().get(0));
+        return Response.from(embedAll(Collections.singletonList(textSegment)).content().get(0));
     }
 
     @Override
@@ -325,7 +327,7 @@ public class GoogleGenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
                         GoogleGenAiExceptionMapper.INSTANCE);
 
                 if (response.embeddings().isPresent()) {
-                    var embeddings = response.embeddings().get();
+                    List<ContentEmbedding> embeddings = response.embeddings().get();
                     for (int j = 0; j < batch.size(); j++) {
                         if (j < embeddings.size() && embeddings.get(j).values().isPresent()) {
                             embeddingsArray[batch.get(j).index] =

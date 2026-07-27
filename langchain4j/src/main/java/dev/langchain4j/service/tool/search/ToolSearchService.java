@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Collections;
 
 import static dev.langchain4j.agent.tool.SearchBehavior.ALWAYS_VISIBLE;
 import static dev.langchain4j.agent.tool.ToolSpecification.METADATA_SEARCH_BEHAVIOR;
@@ -136,7 +137,7 @@ public class ToolSearchService {
             }
             ToolSpecification foundTool = availableToolsByName.get(foundToolName);
             if (foundTool == null) {
-                throw new IllegalArgumentException("No tool with name '%s' exists".formatted(foundToolName));
+                throw new IllegalArgumentException(String.format("No tool with name '%s' exists", foundToolName));
             }
             foundTools.add(foundTool);
         }
@@ -171,7 +172,7 @@ public class ToolSearchService {
             return ToolExecutionResult.builder()
                     .result(toolSearchResult)
                     .resultText(toolSearchResult.toolResultMessageText())
-                    .attributes(Map.of(FOUND_TOOLS_ATTRIBUTE, toolSearchResult.foundToolNames()))
+                    .attributes(Collections.singletonMap(FOUND_TOOLS_ATTRIBUTE, toolSearchResult.foundToolNames()))
                     .build();
         }
 

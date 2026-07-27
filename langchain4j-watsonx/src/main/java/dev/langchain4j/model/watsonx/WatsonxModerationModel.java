@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 /**
  * A {@link ModerationModel} implementation that integrates IBM watsonx.ai with LangChain4j.
@@ -50,7 +53,7 @@ public class WatsonxModerationModel implements ModerationModel {
 
         detectors = builder.detectors;
 
-        var detectionServiceBuilder = nonNull(builder.authenticator)
+        DetectionService.Builder detectionServiceBuilder = nonNull(builder.authenticator)
                 ? DetectionService.builder().authenticator(builder.authenticator)
                 : DetectionService.builder().apiKey(builder.apiKey);
 
@@ -85,10 +88,10 @@ public class WatsonxModerationModel implements ModerationModel {
             throw new UnsupportedFeatureException("can't change model name dynamically");
         }
 
-        var futures = moderationRequest.texts().stream()
+        Stream<CompletableFuture<DetectionResult>> futures = moderationRequest.texts().stream()
                 .map(input -> CompletableFuture.supplyAsync(
                         () -> moderateSingleInput(input), DefaultExecutorProvider.getDefaultExecutorService()))
-                .toList();
+                .collect(Collectors.toList());
 
         try {
             return futures.stream()
@@ -107,7 +110,7 @@ public class WatsonxModerationModel implements ModerationModel {
     }
 
     private ModerationResponse moderateSingleInput(String input) {
-        var request =
+        CompletableFuture<DetectionResult> request =
                 DetectionTextRequest.builder().input(input).detectors(detectors).build();
 
         return WatsonxExceptionMapper.INSTANCE.withExceptionMapper(
@@ -141,12 +144,13 @@ public class WatsonxModerationModel implements ModerationModel {
 
     private ModerationResponse createModerationResponse(DetectionTextResponse detectionTextResponse) {
         Moderation moderation = Moderation.flagged(detectionTextResponse.text());
-        Map<String, Object> metadata = Map.of(
-                "detection", detectionTextResponse.detection(),
-                "detection_type", detectionTextResponse.detectionType(),
-                "start", detectionTextResponse.start(),
-                "end", detectionTextResponse.end(),
-                "score", detectionTextResponse.score());
+        Map<String, Object> metadata = Collections.unmodifiableMap(new HashMap<>() {{
+    put("detection", detectionTextResponse.detection());
+    put("detection_type", detectionTextResponse.detectionType());
+    put("start", detectionTextResponse.start());
+    put("end", detectionTextResponse.end());
+    put("score", detectionTextResponse.score());
+}});
         return ModerationResponse.builder()
                 .moderation(moderation)
                 .metadata(metadata)
@@ -178,7 +182,7 @@ public class WatsonxModerationModel implements ModerationModel {
          * @param detectors the list of detectors
          */
         public Builder detectors(BaseDetector... detectors) {
-            return detectors(List.of(detectors));
+            return detectors(Collections.singletonList(detectors));
         }
 
         /**

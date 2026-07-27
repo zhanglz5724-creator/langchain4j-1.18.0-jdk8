@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.Collections;
 
 import static dev.langchain4j.agentic.observability.ComposedAgentListener.composeWithInherited;
 import static dev.langchain4j.agentic.observability.ComposedAgentListener.listenerOfType;
@@ -183,7 +184,7 @@ public class AgentInvocationHandler implements InvocationHandler, InternalAgent 
         LOGGER.warn("Improper invocation of a standalone agent outside of an agentic system, consider using AiServices instead.");
 
         AgenticScope standaloneAgenticScope = ephemeralAgenticScope();
-        LangChain4jManaged.setCurrent(Map.of(AgenticScope.class, standaloneAgenticScope));
+        LangChain4jManaged.setCurrent(Collections.singletonMap(AgenticScope.class, standaloneAgenticScope));
 
         Map<String, Object> namedArgs = argToMap(method, args);
         beforeAgentInvocation(agentListener, standaloneAgenticScope, this, namedArgs);
@@ -209,7 +210,7 @@ public class AgentInvocationHandler implements InvocationHandler, InternalAgent 
             return (Map<String, Object>) args[0];
         }
         if (args == null || args.length == 0) {
-            return Map.of();
+            return Collections.emptyMap();
         }
         Map<String, Object> namedArgs = new HashMap<>();
         for (int i = 0; i < args.length; i++) {
@@ -333,7 +334,7 @@ public class AgentInvocationHandler implements InvocationHandler, InternalAgent 
 
     @Override
     public List<AgentInstance> subagents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override

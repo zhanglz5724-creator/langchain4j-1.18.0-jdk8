@@ -117,7 +117,7 @@ public abstract class AbstractAgentInvoker implements AgentInvoker, InternalAgen
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (AbstractAgentInvoker) obj;
+        AbstractAgentInvoker that = (AbstractAgentInvoker) obj;
         return Objects.equals(this.method, that.method) &&
                 Objects.equals(this.agent, that.agent);
     }

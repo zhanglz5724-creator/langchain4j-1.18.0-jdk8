@@ -85,7 +85,7 @@ public final class ResultWithAgenticScope<T> {
     }
 
     private String singlePendingResponseId() {
-        var ids = agenticScope.pendingResponseIds();
+        Set<String> ids = agenticScope.pendingResponseIds();
         if (ids.size() != 1) {
             throw new IllegalStateException(
                     "Expected exactly 1 pending response, but found " + ids.size() + ": " + ids);

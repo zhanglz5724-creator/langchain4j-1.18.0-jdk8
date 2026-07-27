@@ -22,7 +22,7 @@ abstract class AbstractSkillToolExecutor implements ToolExecutor {
         try {
             return Json.fromJson(json, Map.class);
         } catch (Exception e) {
-            String message = "Failed to parse tool arguments: '%s' (base64: '%s')".formatted(json, toBase64(json));
+            String message = String.format("Failed to parse tool arguments: '%s' (base64: '%s')", json, toBase64(json));
             throwException(message, e);
             return null; // unreachable
         }
@@ -31,7 +31,7 @@ abstract class AbstractSkillToolExecutor implements ToolExecutor {
     protected String getRequiredArgument(String argumentName, Map<String, Object> arguments) {
         Object value = isNullOrEmpty(arguments) ? null : arguments.get(argumentName);
         if (value == null) {
-            throwException("Missing required tool argument '%s'".formatted(argumentName));
+            throwException(String.format("Missing required tool argument '%s'", argumentName));
         }
         return value.toString();
     }

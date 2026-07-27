@@ -90,7 +90,7 @@ public class SchemaHelper {
         } else if (theClass.isEnum()) {
             List<String> enumConstantNames = Arrays.stream(theClass.getEnumConstants())
                     .map(e -> ((Enum<?>) e).name())
-                    .toList();
+                    .collect(Collectors.toList());
             return Schema.newBuilder()
                     .setType(Type.STRING)
                     .addAllEnum(enumConstantNames)
@@ -161,7 +161,7 @@ public class SchemaHelper {
             Schema.Builder builder = Schema.newBuilder()
                     .addAllAnyOf(jsonAnyOfSchema.anyOf().stream()
                             .map(SchemaHelper::from)
-                            .toList());
+                            .collect(Collectors.toList()));
             if (jsonAnyOfSchema.description() != null) {
                 builder.setDescription(jsonAnyOfSchema.description());
             }

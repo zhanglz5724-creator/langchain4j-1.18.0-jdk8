@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 /**
  * SPI for discovering and providing {@link AgentInstance}s by name.
@@ -63,7 +64,7 @@ public interface AgentsRegistry {
             List<AgentsRegistry> registries = ServiceLoader.load(AgentsRegistry.class)
                     .stream()
                     .map(ServiceLoader.Provider::get)
-                    .toList();
+                    .collect(Collectors.toList());
             return switch (registries.size()) {
                 case 0 -> new EmptyAgentsRegistry();
                 case 1 -> registries.get(0);
@@ -108,7 +109,7 @@ public interface AgentsRegistry {
 
         @Override
         public Map<String, AgentInstance> allAgents() {
-            return Map.of();
+            return Collections.emptyMap();
         }
 
         @Override

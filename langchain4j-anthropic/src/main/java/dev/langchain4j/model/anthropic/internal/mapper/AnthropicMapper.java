@@ -70,6 +70,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Internal
 public class AnthropicMapper {
@@ -115,7 +116,7 @@ public class AnthropicMapper {
                         toolContents = new ArrayList<>();
                     }
                     anthropicMessages.add(
-                            new AnthropicMessage(SYSTEM, List.of(new AnthropicTextContent(systemMessage.text()))));
+                            new AnthropicMessage(SYSTEM, Collections.singletonList(new AnthropicTextContent(systemMessage.text()))));
                 }
             } else {
                 conversationStarted = true;
@@ -304,7 +305,7 @@ public class AnthropicMapper {
                     }
                     return new AnthropicTextContent(message.text());
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public static AiMessage toAiMessage(List<AnthropicContent> contents) {
@@ -342,7 +343,7 @@ public class AnthropicMapper {
             List<String> redactedThinkings = contents.stream()
                     .filter(content -> REDACTED_THINKING_KEY.equals(content.type))
                     .map(content -> content.data)
-                    .toList();
+                    .collect(Collectors.toList());
             if (!redactedThinkings.isEmpty()) {
                 attributes.put(REDACTED_THINKING_KEY, redactedThinkings);
             }
@@ -356,7 +357,7 @@ public class AnthropicMapper {
                             .toolUseId(content.toolUseId)
                             .content(content.content)
                             .build())
-                    .toList();
+                    .collect(Collectors.toList());
             if (!serverToolResults.isEmpty()) {
                 attributes.put(SERVER_TOOL_RESULTS_KEY, serverToolResults);
             }
@@ -369,7 +370,7 @@ public class AnthropicMapper {
                         .name(content.name)
                         .arguments(toJson(content.input))
                         .build())
-                .toList();
+                .collect(Collectors.toList());
 
         return AiMessage.builder()
                 .text(isNullOrEmpty(text) ? null : text)
@@ -440,7 +441,7 @@ public class AnthropicMapper {
 
     public static List<AnthropicTool> toAnthropicTools(
             List<ToolSpecification> toolSpecifications, AnthropicCacheType cacheToolsPrompt, Boolean strictTools) {
-        return toAnthropicTools(toolSpecifications, cacheToolsPrompt, Set.of(), strictTools);
+        return toAnthropicTools(toolSpecifications, cacheToolsPrompt, Collections.emptySet(), strictTools);
     }
 
     public static List<AnthropicTool> toAnthropicTools(
@@ -460,12 +461,12 @@ public class AnthropicMapper {
                     return toAnthropicTool(
                             toolSpecification, AnthropicCacheType.NO_CACHE, toolMetadataKeysToSend, strictTools);
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public static AnthropicTool toAnthropicTool(
             ToolSpecification toolSpecification, AnthropicCacheType cacheToolsPrompt) {
-        return toAnthropicTool(toolSpecification, cacheToolsPrompt, Set.of(), null);
+        return toAnthropicTool(toolSpecification, cacheToolsPrompt, Collections.emptySet(), null);
     }
 
     public static AnthropicTool toAnthropicTool(
@@ -513,7 +514,7 @@ public class AnthropicMapper {
     }
 
     public static List<AnthropicTool> toAnthropicTools(List<AnthropicServerTool> serverTools) {
-        return serverTools.stream().map(AnthropicMapper::toAnthropicTool).toList();
+        return serverTools.stream().map(AnthropicMapper::toAnthropicTool).collect(Collectors.toList());
     }
 
     public static AnthropicTool toAnthropicTool(AnthropicServerTool serverTool) {
@@ -581,7 +582,7 @@ public class AnthropicMapper {
 
             List<Map<String, Object>> anyOf = anyOfSchema.anyOf().stream()
                     .map(AnthropicMapper::toAnthropicSchema)
-                    .toList();
+                    .collect(Collectors.toList());
             map.put("anyOf", anyOf);
 
             return map;

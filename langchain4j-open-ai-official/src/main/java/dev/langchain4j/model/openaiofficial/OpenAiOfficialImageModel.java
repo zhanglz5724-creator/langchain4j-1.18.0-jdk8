@@ -15,6 +15,7 @@ import java.net.Proxy;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents an OpenAI image generation model.
@@ -100,7 +101,7 @@ public class OpenAiOfficialImageModel implements ImageModel {
         String mimeType = response.outputFormat().map(of -> "image/" + of).orElse(null);
         return Response.from(response.data().get().stream()
                 .map(img -> fromOpenAiImage(img, mimeType))
-                .toList());
+                .collect(Collectors.toList()));
     }
 
     private ImageGenerateParams.Builder imageGenerateParamsBuilder(String prompt) {

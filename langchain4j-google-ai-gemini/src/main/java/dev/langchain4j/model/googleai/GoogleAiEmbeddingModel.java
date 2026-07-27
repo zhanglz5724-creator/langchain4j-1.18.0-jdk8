@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.slf4j.Logger;
 
 public class GoogleAiEmbeddingModel extends DimensionAwareEmbeddingModel {
@@ -110,7 +112,7 @@ public class GoogleAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
     @Override
     public Set<EmbeddingParameter<?>> supportedParameters() {
-        return Set.of(EmbeddingRequestParameters.INPUT_TYPE);
+        return Collections.singleton(EmbeddingRequestParameters.INPUT_TYPE);
     }
 
     @Override
@@ -133,8 +135,8 @@ public class GoogleAiEmbeddingModel extends DimensionAwareEmbeddingModel {
     @Override
     public Set<ContentType> supportedContentTypes() {
         return isMultimodalModel(modelName)
-                ? Set.of(ContentType.TEXT, ContentType.IMAGE)
-                : Set.of(ContentType.TEXT);
+                ? Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE)))
+                : Collections.singleton(ContentType.TEXT);
     }
 
     private static boolean isMultimodalModel(String modelName) {
@@ -202,7 +204,7 @@ public class GoogleAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
             allEmbeddings.addAll(geminiResponse.embeddings().stream()
                     .map(values -> Embedding.from(values.values()))
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         return allEmbeddings;
@@ -241,7 +243,7 @@ public class GoogleAiEmbeddingModel extends DimensionAwareEmbeddingModel {
                         .text(textContent.text())
                         .build());
             } else if (content instanceof ImageContent imageContent) {
-                var image = imageContent.image();
+                Image image = imageContent.image();
                 if (image.base64Data() == null) {
                     throw new UnsupportedFeatureException(
                             "Gemini requires base64 image data (a plain URL is not supported)");

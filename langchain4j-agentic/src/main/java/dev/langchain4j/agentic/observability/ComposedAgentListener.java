@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 @Internal
@@ -141,7 +142,7 @@ public class ComposedAgentListener implements AgentListener {
             return;
         }
         if (newListener instanceof ComposedAgentListener composed) {
-            existingListeners.addAll(composed.listeners.stream().filter(filter).toList());
+            existingListeners.addAll(composed.listeners.stream().filter(filter).collect(Collectors.toList()));
         } else {
             if (filter.test(newListener)) {
                 existingListeners.add(newListener);

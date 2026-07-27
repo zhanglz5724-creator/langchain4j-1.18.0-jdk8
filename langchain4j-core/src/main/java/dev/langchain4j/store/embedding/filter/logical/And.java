@@ -31,7 +31,7 @@ public class And implements Filter {
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof And other)) return false;
+        if (!(o instanceof And)) return false;
         return Objects.equals(this.left, other.left) && Objects.equals(this.right, other.right);
     }
 

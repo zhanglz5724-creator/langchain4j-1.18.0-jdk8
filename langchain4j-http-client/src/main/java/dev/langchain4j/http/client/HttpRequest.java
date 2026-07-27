@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 public class HttpRequest {
 
@@ -159,7 +160,7 @@ public class HttpRequest {
             if (this.headers == null) {
                 this.headers = new HashMap<>();
             }
-            headers.forEach((name, value) -> this.headers.put(name, List.of(value)));
+            headers.forEach((name, value) -> this.headers.put(name, Collections.singletonList(value)));
             return this;
         }
 

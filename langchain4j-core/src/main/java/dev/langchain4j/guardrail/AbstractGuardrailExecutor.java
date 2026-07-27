@@ -28,14 +28,14 @@ import java.util.Optional;
  *            The type of {@link Failure} to return
  */
 @Internal
-public abstract sealed class AbstractGuardrailExecutor<
+public abstract class AbstractGuardrailExecutor<
                 C extends GuardrailsConfig,
                 P extends GuardrailRequest<P>,
                 R extends GuardrailResult<R>,
                 G extends Guardrail<P, R>,
                 E extends GuardrailExecutedEvent<P, R, G>,
                 F extends Failure>
-        implements GuardrailExecutor<C, P, R, G, E> permits InputGuardrailExecutor, OutputGuardrailExecutor {
+        implements GuardrailExecutor<C, P, R, G, E> {
 
     private final C config;
     private final List<G> guardrails;
@@ -196,15 +196,14 @@ public abstract sealed class AbstractGuardrailExecutor<
      * It provides methods to configure and manage the guardrails and their associated configurations,
      * eventually culminating in the construction of a specific {@link GuardrailExecutor}.
      */
-    public abstract static sealed class GuardrailExecutorBuilder<
+    public abstract static class GuardrailExecutorBuilder<
                     C extends GuardrailsConfig,
                     R extends GuardrailResult<R>,
                     P extends GuardrailRequest<P>,
                     G extends Guardrail<P, R>,
                     E extends GuardrailExecutedEvent<P, R, G>,
                     B extends GuardrailExecutorBuilder<C, R, P, G, E, B>>
-            permits InputGuardrailExecutor.InputGuardrailExecutorBuilder,
-                    OutputGuardrailExecutor.OutputGuardrailExecutorBuilder {
+            {
 
         private final C defaultConfig;
         private C config;

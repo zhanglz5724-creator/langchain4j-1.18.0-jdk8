@@ -10,7 +10,23 @@ public class JsonParsingUtils {
         R apply(T t) throws Exception;
     }
 
-    public record ParsedJson<T>(T value, String json) {}
+    public static class ParsedJson<T> {
+        private final T value;
+        private final String json;
+
+        public ParsedJson(T value, String json) {
+            this.value = value;
+            this.json = json;
+        }
+
+        public T value() {
+            return value;
+        }
+
+        public String json() {
+            return json;
+        }
+    }
 
     public static <T> ParsedJson<T> extractAndParseJson(String text, Class<T> type) throws Exception {
         return extractAndParseJson(text, s -> Json.fromJson(s, type));

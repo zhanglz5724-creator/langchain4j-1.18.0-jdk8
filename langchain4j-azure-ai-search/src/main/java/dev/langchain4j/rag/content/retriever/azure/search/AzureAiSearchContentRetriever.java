@@ -27,6 +27,9 @@ import dev.langchain4j.store.embedding.filter.Filter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -196,10 +199,11 @@ public class AzureAiSearchContentRetriever extends AbstractAzureAiSearchEmbeddin
             return searchResult.stream()
                     .map(embeddingMatch -> Content.from(
                             embeddingMatch.embedded(),
-                            Map.of(
-                                    ContentMetadata.SCORE, embeddingMatch.score(),
-                                    ContentMetadata.EMBEDDING_ID, embeddingMatch.embeddingId())))
-                    .toList();
+                            Collections.unmodifiableMap(new HashMap<>() {{
+    put(ContentMetadata.SCORE, embeddingMatch.score());
+    put(ContentMetadata.EMBEDDING_ID, embeddingMatch.embeddingId());
+}})))
+                    .collect(Collectors.toList());
         } else if (azureAiSearchQueryType == AzureAiSearchQueryType.FULL_TEXT) {
             String content = query.text();
             return findRelevantWithFullText(content, maxResults, minScore);
@@ -265,9 +269,10 @@ public class AzureAiSearchContentRetriever extends AbstractAzureAiSearchEmbeddin
         getEmbeddingMatches(searchResults, minScore, azureAiSearchQueryType).forEach(embeddingMatch -> {
             Content content = Content.from(
                     embeddingMatch.embedded(),
-                    Map.of(
-                            ContentMetadata.SCORE, embeddingMatch.score(),
-                            ContentMetadata.EMBEDDING_ID, embeddingMatch.embeddingId()));
+                    Collections.unmodifiableMap(new HashMap<>() {{
+    put(ContentMetadata.SCORE, embeddingMatch.score());
+    put(ContentMetadata.EMBEDDING_ID, embeddingMatch.embeddingId());
+}}));
             result.add(content);
         });
         return result;

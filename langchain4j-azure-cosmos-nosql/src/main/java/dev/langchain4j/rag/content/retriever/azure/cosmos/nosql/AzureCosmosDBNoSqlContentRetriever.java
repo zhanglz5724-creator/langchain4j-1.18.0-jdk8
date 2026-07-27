@@ -23,6 +23,9 @@ import dev.langchain4j.store.embedding.azure.cosmos.nosql.AzureCosmosDBSearchQue
 import dev.langchain4j.store.embedding.filter.Filter;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class AzureCosmosDBNoSqlContentRetriever extends AbstractAzureCosmosDBNoSqlEmbeddingStore
         implements ContentRetriever {
@@ -191,17 +194,18 @@ public class AzureCosmosDBNoSqlContentRetriever extends AbstractAzureCosmosDBNoS
     private List<Content> mapToContent(List<EmbeddingMatch<TextSegment>> searchResult) {
         return searchResult.stream()
                 .map(embeddingMatch -> Content.from(embeddingMatch.embedded()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private List<Content> mapToContentWithScore(List<EmbeddingMatch<TextSegment>> searchResult) {
         return searchResult.stream()
                 .map(embeddingMatch -> Content.from(
                         embeddingMatch.embedded(),
-                        Map.of(
-                                ContentMetadata.SCORE, embeddingMatch.score(),
-                                ContentMetadata.EMBEDDING_ID, embeddingMatch.embedding())))
-                .toList();
+                        Collections.unmodifiableMap(new HashMap<>() {{
+    put(ContentMetadata.SCORE, embeddingMatch.score());
+    put(ContentMetadata.EMBEDDING_ID, embeddingMatch.embedding());
+}})))
+                .collect(Collectors.toList());
     }
 
     public static Builder builder() {

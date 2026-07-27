@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
-
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-record GeminiGenerationConfig(
+@JsonInclude(JsonInclude.Include.NON_EMPTY) class GeminiGenerationConfig {
+
         @JsonProperty("stopSequences") List<String> stopSequences,
         @JsonProperty("responseMimeType") String responseMimeType,
         @JsonProperty("responseSchema") GeminiSchema responseSchema,

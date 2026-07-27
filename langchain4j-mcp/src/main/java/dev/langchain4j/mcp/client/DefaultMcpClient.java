@@ -62,6 +62,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.Collections;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +136,7 @@ public class DefaultMcpClient implements McpClient {
             reconnectInterval = getOrDefault(builder.reconnectInterval, Duration.ofSeconds(5));
             autoHealthCheck = getOrDefault(builder.autoHealthCheck, Boolean.TRUE);
             autoHealthCheckInterval = getOrDefault(builder.autoHealthCheckInterval, Duration.ofSeconds(30));
-            listeners = List.copyOf(builder.listeners);
+            listeners = Collections.unmodifiableList(new ArrayList<>(builder.listeners);
             metaSupplier = builder.metaSupplier;
             healthCheckScheduler = autoHealthCheck
                     ? Executors.newSingleThreadScheduledExecutor(r -> {
@@ -461,7 +462,7 @@ public class DefaultMcpClient implements McpClient {
         assertNotClosed();
         long operationId = idGenerator.getAndIncrement();
         McpGetPromptRequest operation =
-                new McpGetPromptRequest(operationId, name, arguments == null ? Map.of() : arguments);
+                new McpGetPromptRequest(operationId, name, arguments == null ? Collections.emptyMap() : arguments);
         McpCallContext context = new McpCallContext(null, operation);
         long timeoutMillis = promptsTimeout.toMillis() == 0 ? Integer.MAX_VALUE : promptsTimeout.toMillis();
         JsonNode result = null;

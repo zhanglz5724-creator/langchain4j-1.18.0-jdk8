@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  *     passes all the output guardrails.
  * </p>
  */
-public non-sealed class OutputGuardrailExecutor
+public class OutputGuardrailExecutor
         extends AbstractGuardrailExecutor<
                 OutputGuardrailsConfig,
                 OutputGuardrailRequest,
@@ -34,12 +34,11 @@ public non-sealed class OutputGuardrailExecutor
                 OutputGuardrailExecutedEvent,
                 Failure> {
 
-    public static final String MAX_RETRIES_MESSAGE_TEMPLATE = """
-            Output validation failed. The guardrails have reached the maximum number of retries.
-            Guardrail messages:
-
-            %s
-            """;
+    public static final String MAX_RETRIES_MESSAGE_TEMPLATE =
+            "Output validation failed. The guardrails have reached the maximum number of retries.\n" +
+            "Guardrail messages:\n" +
+            "\n" +
+            "            %s";
 
     protected OutputGuardrailExecutor(OutputGuardrailsConfig config, List<OutputGuardrail> guardrails) {
         super(config, guardrails);
@@ -54,9 +53,9 @@ public non-sealed class OutputGuardrailExecutor
     @Override
     public OutputGuardrailResult execute(OutputGuardrailRequest request) {
         OutputGuardrailResult result = null;
-        var accumulatedRequest = request;
-        var attempt = 0;
-        var maxAttempts = config().maxRetries();
+        OutputGuardrailRequest accumulatedRequest = request;
+        int attempt = 0;
+        int maxAttempts = config().maxRetries();
 
         if (maxAttempts == 0) {
             maxAttempts = 1;
@@ -81,7 +80,7 @@ public non-sealed class OutputGuardrailExecutor
             if (++attempt < maxAttempts) {
                 // If we get here we know it is some kind of retry
                 // We don't want to add intermediary UserMessages to the memory
-                var chatMessages = Optional.ofNullable(
+                List<ChatMessage> chatMessages = Optional.ofNullable(
                                 accumulatedRequest.requestParams().chatMemory())
                         .map(ChatMemory::messages)
                         .orElseGet(ArrayList::new);
@@ -89,7 +88,7 @@ public non-sealed class OutputGuardrailExecutor
 
                 // Re-execute the request with the appended message
                 // But don't add it or the resulting message to the memory
-                var response = accumulatedRequest.chatExecutor().execute(chatMessages);
+                AiMessage response = accumulatedRequest.chatExecutor().execute(chatMessages).aiMessage();
                 accumulatedRequest = OutputGuardrailRequest.builder()
                         .responseFromLLM(response)
                         .chatExecutor(accumulatedRequest.chatExecutor())
@@ -99,12 +98,12 @@ public non-sealed class OutputGuardrailExecutor
         }
 
         if (attempt == maxAttempts) {
-            var failureMessages = result.failures().stream()
+            String failureMessages = result.failures().stream()
                     .map(GuardrailResult.Failure::message)
                     .collect(Collectors.joining(System.lineSeparator()));
 
             removeViolatingMessageIfRequested(result, request);
-            throw new OutputGuardrailException(MAX_RETRIES_MESSAGE_TEMPLATE.formatted(failureMessages), null, result);
+            throw new OutputGuardrailException(String.format(MAX_RETRIES_MESSAGE_TEMPLATE, failureMessages), null, result);
         }
 
         return result;
@@ -119,8 +118,8 @@ public non-sealed class OutputGuardrailExecutor
             return;
         }
         // Remove the last AiMessage — the one that failed the guardrail
-        var messages = new java.util.ArrayList<>(memory.messages());
-        var it = messages.listIterator(messages.size());
+        java.util.ArrayList<ChatMessage> messages = new java.util.ArrayList<>(memory.messages());
+        java.util.ListIterator<ChatMessage> it = messages.listIterator(messages.size());
         while (it.hasPrevious()) {
             ChatMessage msg = it.previous();
             if (msg instanceof AiMessage) {
@@ -190,10 +189,12 @@ public non-sealed class OutputGuardrailExecutor
      * @return A new {@link OutputGuardrailExecutorBuilder} instance.
      */
     public static OutputGuardrailExecutorBuilder builder() {
-        return ServiceLoader.load(OutputGuardrailExecutorBuilderFactory.class)
-                .findFirst()
-                .map(OutputGuardrailExecutorBuilderFactory::getBuilder)
-                .orElseGet(OutputGuardrailExecutorBuilder::new);
+        ServiceLoader<OutputGuardrailExecutorBuilderFactory> loader =
+                ServiceLoader.load(OutputGuardrailExecutorBuilderFactory.class);
+        for (OutputGuardrailExecutorBuilderFactory factory : loader) {
+            return factory.getBuilder();
+        }
+        return new OutputGuardrailExecutorBuilder();
     }
 
     /**
@@ -210,7 +211,7 @@ public non-sealed class OutputGuardrailExecutor
      *
      * Provides the {@code build()} method to create an {@link OutputGuardrailExecutor} instance.
      */
-    public static non-sealed class OutputGuardrailExecutorBuilder
+    public static class OutputGuardrailExecutorBuilder
             extends GuardrailExecutorBuilder<
                     OutputGuardrailsConfig,
                     OutputGuardrailResult,

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,7 @@ public class PatternBasedPromptInjectionGuardrail implements InputGuardrail {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PatternBasedPromptInjectionGuardrail.class);
 
-    private static final List<Pattern> DEFAULT_PATTERNS = List.of(
-            // Instruction override
+    private static final List<Pattern> DEFAULT_PATTERNS = Arrays.asList(// Instruction override
             Pattern.compile(
                     "ignore\\s+(all\\s+|previous\\s+|prior\\s+|the\\s+)*(instructions?|rules?|context|prompt)",
                     CASE_INSENSITIVE),
@@ -121,7 +121,7 @@ public class PatternBasedPromptInjectionGuardrail implements InputGuardrail {
     public InputGuardrailResult validate(UserMessage userMessage) {
         ensureNotNull(userMessage, "userMessage");
         String text = userMessage.singleText();
-        if (text == null || text.isBlank()) {
+        if (text == null || text.trim().isEmpty()) {
             return success();
         }
 

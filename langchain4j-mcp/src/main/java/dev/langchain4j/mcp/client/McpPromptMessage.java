@@ -65,7 +65,7 @@ public class McpPromptMessage {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (McpPromptMessage) obj;
+        McpPromptMessage that = (McpPromptMessage) obj;
         return Objects.equals(this.role, that.role) &&
                 Objects.equals(this.content, that.content);
     }

@@ -173,7 +173,7 @@ public class VertexAiGeminiStreamingChatModel implements StreamingChatModel, Clo
             headers = new HashMap<>(builder.customHeaders);
             headers.putIfAbsent("user-agent", "LangChain4j");
         } else {
-            headers = Map.of("user-agent", "LangChain4j");
+            headers = Collections.singletonMap("user-agent", "LangChain4j");
         }
 
         VertexAI.Builder vertexAiBuilder = new VertexAI.Builder()
@@ -311,7 +311,7 @@ public class VertexAiGeminiStreamingChatModel implements StreamingChatModel, Clo
             headers = new HashMap<>(customHeaders);
             headers.putIfAbsent("user-agent", "LangChain4j");
         } else {
-            headers = Map.of("user-agent", "LangChain4j");
+            headers = Collections.singletonMap("user-agent", "LangChain4j");
         }
 
         this.vertexAI = new VertexAI.Builder()

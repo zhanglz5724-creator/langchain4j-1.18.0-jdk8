@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -63,10 +65,9 @@ import org.slf4j.Logger;
  *     .build();
  *
  * // Submit batch of image generation prompts
- * List<String> prompts = List.of(
- *     "A serene mountain landscape at sunset",
+ * List<String> prompts = Arrays.asList(*     "A serene mountain landscape at sunset",
  *     "A futuristic cityscape at night"
- * );
+ *);
  *
  * BatchResponse<Response<Image>> response = model.submit(new BatchRequest<>(prompts));
  *
@@ -112,7 +113,7 @@ public final class GoogleAiGeminiBatchImageModel implements BatchImageModel {
 
     GoogleAiGeminiBatchImageModel(GoogleAiGeminiBatchImageModelBuilder builder, GeminiService geminiService) {
         this.modelName = getOrDefault(builder.modelName, "gemini-2.5-flash-preview-image-generation");
-        this.responseModalities = List.of(IMAGE);
+        this.responseModalities = Collections.singletonList(IMAGE);
         this.safetySettings = builder.safetySettings;
 
         // Build imageConfig if aspectRatio or imageSize is set
@@ -199,10 +200,9 @@ public final class GoogleAiGeminiBatchImageModel implements BatchImageModel {
      * <pre>{@code
      * Path batchFile = Files.createTempFile("image-batch", ".jsonl");
      * try (JsonLinesWriter writer = JsonLinesWriters.streaming(batchFile)) {
-     *     List<BatchFileRequest<String>> requests = List.of(
-     *         new BatchFileRequest<>("img-1", "A sunset over mountains"),
+     *     List<BatchFileRequest<String>> requests = Arrays.asList(*         new BatchFileRequest<>("img-1", "A sunset over mountains"),
      *         new BatchFileRequest<>("img-2", "A cat wearing a hat")
-     *     );
+     *);
      *     batchModel.writeBatchToFile(writer, requests);
      * }
      * }</pre>
@@ -465,10 +465,10 @@ public final class GoogleAiGeminiBatchImageModel implements BatchImageModel {
 
         @Override
         public GeminiGenerateContentRequest createInlinedRequest(String prompt) {
-            GeminiContent content = new GeminiContent(List.of(GeminiPart.ofText(prompt)), GeminiRole.USER.toString());
+            GeminiContent content = new GeminiContent(Collections.singletonList(GeminiPart.ofText(prompt)), GeminiRole.USER.toString());
 
             return GeminiGenerateContentRequest.builder()
-                    .contents(List.of(content))
+                    .contents(Collections.singletonList(content))
                     .generationConfig(GeminiGenerationConfig.builder()
                             .responseModalities(responseModalities)
                             .imageConfig(imageConfig)
@@ -481,18 +481,18 @@ public final class GoogleAiGeminiBatchImageModel implements BatchImageModel {
         public List<BatchItemResult<Response<@NonNull Image>>> extractResults(
                 @Nullable BatchCreateResponse<GeminiGenerateContentResponse> response) {
             if (response == null || response.inlinedResponses() == null) {
-                return List.of();
+                return Collections.emptyList();
             }
 
             List<BatchItemResult<Response<@NonNull Image>>> results = new ArrayList<>();
 
             for (Object wrapper : response.inlinedResponses().inlinedResponses()) {
-                var typed = Json.convertValue(wrapper, inlinedResponseWrapperType);
+                BatchCreateResponse.InlinedResponseWrapper<InlinedResponse> typed = Json.convertValue(wrapper, inlinedResponseWrapperType);
                 if (typed.response() != null) {
-                    var geminiResponse = Json.convertValue(typed.response(), responseWrapperType);
+                    GeminiGenerateContentResponse geminiResponse = Json.convertValue(typed.response(), responseWrapperType);
                     results.add(BatchItemResult.success(extractImage(geminiResponse)));
                 }
-                var error = typed.error();
+                BatchRequestResponse.Operation.Status error = typed.error();
                 if (error != null) {
                     results.add(BatchItemResult.failure(error.toGenericStatus()));
                 }
@@ -507,7 +507,7 @@ public final class GoogleAiGeminiBatchImageModel implements BatchImageModel {
                 throw new GeminiImageGenerationException("No image generated in responses");
             }
 
-            var candidate = geminiResponse.candidates().get(0);
+            Candidate candidate = geminiResponse.candidates().get(0);
             if (candidate.content() == null || candidate.content().parts() == null) {
                 throw new GeminiImageGenerationException("No content in responses candidate");
             }

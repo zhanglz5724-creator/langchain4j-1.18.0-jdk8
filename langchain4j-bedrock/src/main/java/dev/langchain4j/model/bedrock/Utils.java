@@ -9,6 +9,10 @@ import dev.langchain4j.exception.UnsupportedFeatureException;
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import software.amazon.awssdk.services.bedrockruntime.model.ImageFormat;
 
@@ -46,22 +50,24 @@ class Utils {
         return "";
     }
 
-    private static final Map<String, ImageFormat> MIME_TYPE_MAPPING = Map.of(
-            "image/png", ImageFormat.PNG,
-            "image/jpeg", ImageFormat.JPEG,
-            "image/jpg", ImageFormat.JPEG,
-            "image/gif", ImageFormat.GIF,
-            "image/webp", ImageFormat.WEBP);
+    private static final Map<String, ImageFormat> MIME_TYPE_MAPPING = Collections.unmodifiableMap(new HashMap<>() {{
+    put("image/png", ImageFormat.PNG);
+    put("image/jpeg", ImageFormat.JPEG);
+    put("image/jpg", ImageFormat.JPEG);
+    put("image/gif", ImageFormat.GIF);
+    put("image/webp", ImageFormat.WEBP);
+}});
 
-    private static final Map<String, ImageFormat> EXTENSION_MAPPING = Map.of(
-            "png", ImageFormat.PNG,
-            "jpg", ImageFormat.JPEG,
-            "jpeg", ImageFormat.JPEG,
-            "gif", ImageFormat.GIF,
-            "webp", ImageFormat.WEBP);
+    private static final Map<String, ImageFormat> EXTENSION_MAPPING = Collections.unmodifiableMap(new HashMap<>() {{
+    put("png", ImageFormat.PNG);
+    put("jpg", ImageFormat.JPEG);
+    put("jpeg", ImageFormat.JPEG);
+    put("gif", ImageFormat.GIF);
+    put("webp", ImageFormat.WEBP);
+}});
 
     private static final Set<ImageFormat> SUPPORTED_FORMATS =
-            Set.of(ImageFormat.PNG, ImageFormat.JPEG, ImageFormat.GIF, ImageFormat.WEBP);
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ImageFormat.PNG, ImageFormat.JPEG, ImageFormat.GIF, ImageFormat.WEBP)));
 
     /**
      * Extracts the image format from an Image object using either mime type or URI.
@@ -79,7 +85,7 @@ class Utils {
         ensureNotNull(image, "image");
 
         // First try to extract from mime type
-        if (image.mimeType() != null && !image.mimeType().isBlank()) {
+        if (image.mimeType() != null && !image.mimeType().trim().isEmpty()) {
             ImageFormat format = MIME_TYPE_MAPPING.get(image.mimeType().toLowerCase());
             if (format != null) {
                 return format.toString();

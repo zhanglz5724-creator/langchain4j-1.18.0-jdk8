@@ -47,7 +47,7 @@ class ColumnsMetadataHandler implements MetadataHandler {
                             }
                             return key;
                         })
-                        .toList();
+                        .collect(Collectors.toList());
         this.columnsDefinition = columnsDefinitionList.stream()
                 .map(str -> MetadataColumDefinition.from(str, sqlKeywords))
                 .collect(Collectors.toList());

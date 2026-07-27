@@ -36,6 +36,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -137,13 +139,13 @@ public final class MistralAiBatchChatModel implements BatchChatModel {
                 .timeoutHours(timeoutHours)
                 .build();
         MistralAiBatchJob job = withRetryMappingExceptions(() -> client.createBatchJob(jobRequest), maxRetries);
-        return toBatchResponse(job, List.of());
+        return toBatchResponse(job, Collections.emptyList());
     }
 
     @Override
     public BatchResponse<ChatResponse> retrieve(String batchId) {
         MistralAiBatchJob job = withRetryMappingExceptions(() -> client.retrieveBatchJob(batchId), maxRetries);
-        List<BatchItemResult<ChatResponse>> results = List.of();
+        List<BatchItemResult<ChatResponse>> results = Collections.emptyList();
         if (job.outputFile != null || job.errorFile != null) {
             List<MistralAiBatchResultEntry> entries = new ArrayList<>();
             if (job.outputFile != null) {
@@ -155,7 +157,7 @@ public final class MistralAiBatchChatModel implements BatchChatModel {
                         withRetryMappingExceptions(() -> client.downloadBatchResults(job.errorFile), maxRetries));
             }
             entries.sort(Comparator.comparingInt(this::customIdIndex));
-            results = entries.stream().map(this::toBatchItemResult).toList();
+            results = entries.stream().map(this::toBatchItemResult).collect(Collectors.toList());
         }
         return toBatchResponse(job, results);
     }
@@ -182,7 +184,7 @@ public final class MistralAiBatchChatModel implements BatchChatModel {
         List<BatchResponse<ChatResponse>> batches = new ArrayList<>();
         if (response.data != null) {
             for (MistralAiBatchJob job : response.data) {
-                batches.add(toBatchResponse(job, List.of()));
+                batches.add(toBatchResponse(job, Collections.emptyList()));
             }
         }
         int currentPage = page != null ? page : 0;
@@ -257,7 +259,7 @@ public final class MistralAiBatchChatModel implements BatchChatModel {
             return BatchItemResult.success(toChatResponse(response.body));
         }
         int code = response != null && response.statusCode != null ? response.statusCode : 0;
-        List<Map<String, Object>> details = entry.error != null ? List.of(entry.error) : null;
+        List<Map<String, Object>> details = entry.error != null ? Collections.singletonList(entry.error) : null;
         return BatchItemResult.failure(new BatchError(code, errorMessage(entry), details));
     }
 

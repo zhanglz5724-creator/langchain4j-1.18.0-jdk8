@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Arrays;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 
@@ -22,8 +23,47 @@ class ShellCommandRunner {
     static final int DEFAULT_TIMEOUT_SECONDS = 30;
     private static final int DEFAULT_MAX_TIMEOUT_SECONDS = 5 * 60;
     private static final int DEFAULT_MAX_OUTPUT_BYTES = 10 * 1024 * 1024; // 10 MB
+     class Result {
+        private final int exitCode;
+        private final String stdOut;
+        private final String stdErr;
 
-    record Result(int exitCode, String stdOut, String stdErr) {
+        public Result(int exitCode, String stdOut, String stdErr) {
+            this.exitCode = exitCode;
+            this.stdOut = stdOut;
+            this.stdErr = stdErr;
+        }
+
+        public int getExitCode() {
+            return exitCode;
+        }
+
+        public String getStdOut() {
+            return stdOut;
+        }
+
+        public String getStdErr() {
+            return stdErr;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Result that = (Result) o;
+            return java.util.Objects.equals(this.exitCode, that.exitCode) && java.util.Objects.equals(this.stdOut, that.stdOut) && java.util.Objects.equals(this.stdErr, that.stdErr);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(exitCode, stdOut, stdErr);
+        }
+
+        @Override
+        public String toString() {
+            return "Result{"exitCode=" + exitCode + , "stdOut=" + stdOut + , "stdErr=" + stdErr + "}"";
+        }
+
         boolean isSuccess() {
             return exitCode == 0;
         }
@@ -73,8 +113,8 @@ class ShellCommandRunner {
             throws IOException, InterruptedException {
 
         List<String> shellCommand = isWindows()
-                ? List.of("cmd", "/c", command)
-                : List.of("sh", "-c", command);
+                ? Arrays.asList("cmd", "/c", command)
+                : Arrays.asList("sh", "-c", command);
 
         ProcessBuilder pb = new ProcessBuilder(shellCommand);
         if (workingDirectory != null) {

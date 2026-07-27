@@ -174,7 +174,7 @@ public class MariaDbEmbeddingStore implements EmbeddingStore<TextSegment> {
      */
     @Override
     public List<String> addAll(List<Embedding> embeddings) {
-        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).toList();
+        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).collect(Collectors.toList());
         addAllInternal(ids, embeddings, null);
         return ids;
     }
@@ -188,7 +188,7 @@ public class MariaDbEmbeddingStore implements EmbeddingStore<TextSegment> {
      */
     @Override
     public List<String> addAll(List<Embedding> embeddings, List<TextSegment> embedded) {
-        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).toList();
+        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).collect(Collectors.toList());
         addAllInternal(ids, embeddings, embedded);
         return ids;
     }
@@ -468,7 +468,7 @@ public class MariaDbEmbeddingStore implements EmbeddingStore<TextSegment> {
                     ds.setUser(this.user);
                     ds.setPassword(this.password);
                 } catch (SQLException e) {
-                    throw new IllegalArgumentException("Wrong url configuring builder: '%s'".formatted(url), e);
+                    throw new IllegalArgumentException(String.format("Wrong url configuring builder: '%s'", url), e);
                 }
                 datasource = ds;
             }

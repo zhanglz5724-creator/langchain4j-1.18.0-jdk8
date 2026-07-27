@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
  * @see InputGuardrailResult
  * @see OutputGuardrailResult
  */
-public sealed interface GuardrailResult<GR extends GuardrailResult<GR>>
-        permits InputGuardrailResult, OutputGuardrailResult {
+public interface GuardrailResult<GR extends GuardrailResult<GR>>
+        {
     /**
      * The possible results of a guardrails validation.
      */
@@ -43,7 +43,7 @@ public sealed interface GuardrailResult<GR extends GuardrailResult<GR>>
     /**
      * The message and the cause of the failure of a single validation.
      */
-    sealed interface Failure permits InputGuardrailResult.Failure, OutputGuardrailResult.Failure {
+    interface Failure {
         /**
          * Build a failure from a specific {@link Guardrail} class
          */
@@ -72,7 +72,7 @@ public sealed interface GuardrailResult<GR extends GuardrailResult<GR>>
             var guardrailName =
                     Optional.ofNullable(guardrailClass()).map(Class::getName).orElse("");
 
-            return "The guardrail %s failed with this message: %s".formatted(guardrailName, message());
+            return String.format("The guardrail %s failed with this message: %s", guardrailName, message());
         }
     }
 
@@ -147,7 +147,7 @@ public sealed interface GuardrailResult<GR extends GuardrailResult<GR>>
 
     default String asString() {
         if (isSuccess()) {
-            return hasRewrittenResult() ? "Success with '%s'".formatted(successfulText()) : "Success";
+            return hasRewrittenResult() ? String.format("Success with '%s'", successfulText()) : "Success";
         }
 
         return failures().stream().map(Failure::toString).collect(Collectors.joining(", "));

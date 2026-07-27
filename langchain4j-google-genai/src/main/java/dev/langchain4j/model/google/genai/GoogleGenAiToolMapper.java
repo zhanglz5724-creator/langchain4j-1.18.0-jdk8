@@ -34,7 +34,7 @@ class GoogleGenAiToolMapper {
         }
         FunctionDeclaration functionDeclaration = fdBuilder.build();
 
-        return Tool.builder().functionDeclarations(List.of(functionDeclaration)).build();
+        return Tool.builder().functionDeclarations(Collections.singletonList(functionDeclaration)).build();
     }
 
     static FunctionDeclaration convertToGoogleFunction(ToolSpecification spec) {

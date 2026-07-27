@@ -23,8 +23,8 @@ public class ChatRequestValidationUtils {
 
     public static void validateMessages(List<ChatMessage> messages) {
         for (ChatMessage message : messages) {
-            if (message instanceof UserMessage userMessage) {
-                for (Content content : userMessage.contents()) {
+            if (message instanceof UserMessage) {
+                for (Content content : ((UserMessage) message).contents()) {
                     if (content.type() != TEXT) {
                         throw new UnsupportedFeatureException(String.format(
                                 "Content of type %s is not supported yet by this model provider",

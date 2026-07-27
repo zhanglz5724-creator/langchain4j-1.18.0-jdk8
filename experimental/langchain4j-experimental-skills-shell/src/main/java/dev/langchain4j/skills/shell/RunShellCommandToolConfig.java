@@ -6,6 +6,7 @@ import dev.langchain4j.exception.ToolExecutionException;
 import dev.langchain4j.internal.DefaultExecutorProvider;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
@@ -44,7 +45,7 @@ public class RunShellCommandToolConfig {
         this.timeoutSecondsParameterDescription = getOrDefault(builder.timeoutSecondsParameterDescription, DEFAULT_TIMEOUT_SECONDS_PARAMETER_DESCRIPTION);
         this.maxStdOutChars = getOrDefault(builder.maxStdOutChars, DEFAULT_MAX_STDOUT_CHARS);
         this.maxStdErrChars = getOrDefault(builder.maxStdErrChars, DEFAULT_MAX_STDERR_CHARS);
-        this.workingDirectory = getOrDefault(builder.workingDirectory, () -> Path.of(System.getProperty("user.dir")));
+        this.workingDirectory = getOrDefault(builder.workingDirectory, () -> Paths.get(System.getProperty("user.dir")));
         this.executorService = getOrDefault(builder.executorService, DefaultExecutorProvider::getDefaultExecutorService);
         this.throwToolArgumentsExceptions = getOrDefault(builder.throwToolArgumentsExceptions, false);
     }

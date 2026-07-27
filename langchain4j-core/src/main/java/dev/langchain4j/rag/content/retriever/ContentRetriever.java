@@ -68,11 +68,11 @@ public interface ContentRetriever {
         if (isNullOrEmpty(listeners)) {
             return this;
         }
-        if (this instanceof ListeningContentRetriever listeningContentRetriever) {
-            return listeningContentRetriever.withAdditionalListeners(listeners);
+        if (this instanceof ListeningContentRetriever) {
+            return ((ListeningContentRetriever) this).withAdditionalListeners(listeners);
         }
-        if (listeners instanceof List<ContentRetrieverListener> listenersList) {
-            return new ListeningContentRetriever(this, listenersList);
+        if (listeners instanceof List<ContentRetrieverListener>) {
+            return new ListeningContentRetriever(this, ((List<ContentRetrieverListener>) listeners));
         } else {
             return new ListeningContentRetriever(this, new ArrayList<>(listeners));
         }

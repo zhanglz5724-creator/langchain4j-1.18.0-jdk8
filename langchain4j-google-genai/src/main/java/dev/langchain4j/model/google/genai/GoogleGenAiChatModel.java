@@ -9,6 +9,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentConfig;
+import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.SafetySetting;
 import dev.langchain4j.Experimental;
 import dev.langchain4j.model.ModelProvider;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,7 +138,7 @@ public class GoogleGenAiChatModel implements ChatModel {
                     config);
         }
 
-        var result = withRetryMappingExceptions(
+        GenerateContentResponse result = withRetryMappingExceptions(
                 () -> client.models.generateContent(chatRequest.modelName(), contents, config),
                 maxRetries,
                 GoogleGenAiExceptionMapper.INSTANCE);
@@ -167,7 +169,7 @@ public class GoogleGenAiChatModel implements ChatModel {
 
     @Override
     public Set<Capability> supportedCapabilities() {
-        return Set.of(RESPONSE_FORMAT_JSON_SCHEMA);
+        return Collections.singleton(RESPONSE_FORMAT_JSON_SCHEMA);
     }
 
     public static Builder builder() {

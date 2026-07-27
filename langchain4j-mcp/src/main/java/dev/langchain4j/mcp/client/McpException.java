@@ -11,7 +11,7 @@ public class McpException extends LangChain4jException {
     private final String errorMessage;
 
     public McpException(int errorCode, String errorMessage) {
-        super("Code: %d, message: %s".formatted(errorCode, errorMessage));
+        super(String.format("Code: %d, message: %s", errorCode, errorMessage));
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
     }

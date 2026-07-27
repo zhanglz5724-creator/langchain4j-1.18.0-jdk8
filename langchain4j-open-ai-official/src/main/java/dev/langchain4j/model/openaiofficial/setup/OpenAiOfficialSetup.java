@@ -52,7 +52,7 @@ public class OpenAiOfficialSetup {
             Map<String, String> customHeaders) {
 
         baseUrl = detectBaseUrlFromEnv(baseUrl);
-        var modelProvider = detectModelProvider(
+        OpenAiModelProvider modelProvider = detectModelProvider(
                 isMicrosoftFoundry, isGitHubModels, baseUrl, microsoftFoundryDeploymentName, azureOpenAiServiceVersion);
         if (timeout == null) {
             timeout = DEFAULT_DURATION;
@@ -121,7 +121,7 @@ public class OpenAiOfficialSetup {
             Map<String, String> customHeaders) {
 
         baseUrl = detectBaseUrlFromEnv(baseUrl);
-        var modelProvider = detectModelProvider(
+        OpenAiModelProvider modelProvider = detectModelProvider(
                 isMicrosoftFoundry, isGitHubModels, baseUrl, microsoftFoundryDeploymentName, azureOpenAiServiceVersion);
         if (timeout == null) {
             timeout = DEFAULT_DURATION;
@@ -172,12 +172,12 @@ public class OpenAiOfficialSetup {
 
     static String detectBaseUrlFromEnv(String baseUrl) {
         if (baseUrl == null) {
-            var openAiBaseUrl = System.getenv("OPENAI_BASE_URL");
+            String openAiBaseUrl = System.getenv("OPENAI_BASE_URL");
             if (openAiBaseUrl != null) {
                 baseUrl = openAiBaseUrl;
                 logger.debug("OpenAI Base URL detected from environment variable OPENAI_BASE_URL.");
             }
-            var azureOpenAiBaseUrl = System.getenv("AZURE_OPENAI_BASE_URL");
+            String azureOpenAiBaseUrl = System.getenv("AZURE_OPENAI_BASE_URL");
             if (azureOpenAiBaseUrl != null) {
                 baseUrl = azureOpenAiBaseUrl;
                 logger.debug("Microsoft Foundry Base URL detected from environment variable AZURE_OPENAI_BASE_URL.");
@@ -221,12 +221,12 @@ public class OpenAiOfficialSetup {
             String baseUrl, ModelProvider modelProvider, String modelName, String microsoftFoundryDeploymentName) {
 
         if (modelProvider == ModelProvider.OPEN_AI) {
-            if (baseUrl == null || baseUrl.isBlank()) {
+            if (baseUrl == null || baseUrl.trim().isEmpty()) {
                 return OPENAI_URL;
             }
             return baseUrl;
         } else if (modelProvider == ModelProvider.GITHUB_MODELS) {
-            if (baseUrl == null || baseUrl.isBlank()) {
+            if (baseUrl == null || baseUrl.trim().isEmpty()) {
                 return GITHUB_MODELS_URL;
             }
             if (baseUrl.startsWith(GITHUB_MODELS_URL)) { // To support GitHub Models for specific orgs
@@ -234,7 +234,7 @@ public class OpenAiOfficialSetup {
             }
             return GITHUB_MODELS_URL;
         } else if (modelProvider == ModelProvider.MICROSOFT_FOUNDRY) {
-            if (baseUrl == null || baseUrl.isBlank()) {
+            if (baseUrl == null || baseUrl.trim().isEmpty()) {
                 throw new IllegalArgumentException("Base URL must be provided for Microsoft Foundry.");
             }
             String tmpUrl = baseUrl;

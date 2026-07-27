@@ -8,6 +8,7 @@ import dev.langchain4j.store.embedding.filter.logical.Or;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch._types.FieldValue;
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery;
@@ -100,7 +101,7 @@ class OpenSearchMetadataFilterMapper {
                         .terms(terms -> {
                             List<FieldValue> values = isIn.comparisonValues().stream()
                                     .map(OpenSearchMetadataFilterMapper::toFieldValue)
-                                    .toList();
+                                    .collect(Collectors.toList());
                             return terms.value(values);
                         }))))
                 .build();
@@ -112,7 +113,7 @@ class OpenSearchMetadataFilterMapper {
                         .terms(terms -> {
                             List<FieldValue> values = isNotIn.comparisonValues().stream()
                                     .map(OpenSearchMetadataFilterMapper::toFieldValue)
-                                    .toList();
+                                    .collect(Collectors.toList());
                             return terms.value(values);
                         }))))
                 .build();

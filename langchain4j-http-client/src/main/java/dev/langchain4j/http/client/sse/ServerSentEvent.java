@@ -26,7 +26,7 @@ public class ServerSentEvent {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ServerSentEvent) obj;
+        ServerSentEvent that = (ServerSentEvent) obj;
         return Objects.equals(this.event, that.event) && Objects.equals(this.data, that.data);
     }
 

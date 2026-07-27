@@ -15,6 +15,8 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -136,7 +138,7 @@ public final class GeminiFiles {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         GeminiFilesListResponse listResponse = fromJson(response.body(), GeminiFilesListResponse.class);
 
-        return listResponse.files() != null ? listResponse.files() : List.of();
+        return listResponse.files() != null ? listResponse.files() : Collections.emptyList();
     }
 
     /**
@@ -157,7 +159,7 @@ public final class GeminiFiles {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (!List.of(200, 204).contains(response.statusCode())) {
+        if (!Arrays.asList(200, 204).contains(response.statusCode())) {
             throw new GeminiUploadFailureException(
                     "Failed to delete file: " + name + ". Status code: " + response.statusCode());
         }
@@ -234,20 +236,106 @@ public final class GeminiFiles {
     /**
      * Request body for initiating a resumable upload.
      */
-    private record GeminiFileMetadata(@JsonProperty("file") FileInfo file) {
+    private class GeminiFileMetadata {
+        private final Object @JsonProperty("file";
+
+        public GeminiFileMetadata(Object @JsonProperty("file") {
+            this.@JsonProperty("file" = @JsonProperty("file";
+        }
+
+        public Object get@JsonProperty("file"() {
+            return @JsonProperty("file";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GeminiFileMetadata that = (GeminiFileMetadata) o;
+            return java.util.Objects.equals(this.@JsonProperty("file", that.@JsonProperty("file");
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(@JsonProperty("file");
+        }
+
+        @Override
+        public String toString() {
+            return "GeminiFileMetadata{"@JsonProperty("file"=" + @JsonProperty("file" + "}"";
+        }
+
         record FileInfo(@JsonProperty("display_name") String display_name) {}
     }
 
     /**
      * Response from the file upload containing file information.
      */
-    record GeminiFileResponse(@JsonProperty("file") GeminiFile file) {}
+     class GeminiFileResponse {
+        private final Object @JsonProperty("file";
+
+        public GeminiFileResponse(Object @JsonProperty("file") {
+            this.@JsonProperty("file" = @JsonProperty("file";
+        }
+
+        public Object get@JsonProperty("file"() {
+            return @JsonProperty("file";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GeminiFileResponse that = (GeminiFileResponse) o;
+            return java.util.Objects.equals(this.@JsonProperty("file", that.@JsonProperty("file");
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(@JsonProperty("file");
+        }
+
+        @Override
+        public String toString() {
+            return "GeminiFileResponse{"@JsonProperty("file"=" + @JsonProperty("file" + "}"";
+        }
+
+    }
 
     /**
      * Response from listing files.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record GeminiFilesListResponse(@JsonProperty("files") List<GeminiFile> files) {}
+    @JsonIgnoreProperties(ignoreUnknown = true) class GeminiFilesListResponse {
+        private final Object @JsonProperty("files";
+
+        public GeminiFilesListResponse(Object @JsonProperty("files") {
+            this.@JsonProperty("files" = @JsonProperty("files";
+        }
+
+        public Object get@JsonProperty("files"() {
+            return @JsonProperty("files";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GeminiFilesListResponse that = (GeminiFilesListResponse) o;
+            return java.util.Objects.equals(this.@JsonProperty("files", that.@JsonProperty("files");
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(@JsonProperty("files");
+        }
+
+        @Override
+        public String toString() {
+            return "GeminiFilesListResponse{"@JsonProperty("files"=" + @JsonProperty("files" + "}"";
+        }
+
+    }
 
     static class GeminiUploadFailureException extends RuntimeException {
         GeminiUploadFailureException(String message, Throwable cause) {
@@ -324,7 +412,8 @@ public final class GeminiFiles {
      * @param state          The current state of the file (e.g., active, deleted).
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record GeminiFile(
+    @JsonIgnoreProperties(ignoreUnknown = true) public class GeminiFile {
+
             @JsonProperty("name") String name,
             @JsonProperty("displayName") @Nullable String displayName,
             @JsonProperty("mimeType") String mimeType,

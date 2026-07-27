@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
@@ -84,7 +86,7 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
 
             embeddings.addAll(stream(embeddingResponse.getEmbeddings().getFloatEmbeddings())
                     .map(Embedding::from)
-                    .toList());
+                    .collect(Collectors.toList()));
             inputTokenCount = sum(
                     inputTokenCount,
                     inputTokenCountFrom(invokeModelResponse).orElse(embeddingResponse.getInputTextTokenCount()));
@@ -118,7 +120,7 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         parameters.put("texts", textSegments.stream().map(TextSegment::text).collect(toList()));
         parameters.put("input_type", inputType);
         parameters.put("truncate", truncate);
-        parameters.put("embedding_types", List.of("float"));
+        parameters.put("embedding_types", Collections.singletonList("float"));
         return parameters;
     }
 

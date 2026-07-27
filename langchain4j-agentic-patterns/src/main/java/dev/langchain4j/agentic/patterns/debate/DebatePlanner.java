@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 /**
  * A debate planner that orchestrates iterative adversarial rounds among debater agents.
@@ -125,7 +126,10 @@ public class DebatePlanner implements Planner {
 
     @Override
     public Map<String, Object> executionState() {
-        return Map.of("currentRound", currentRound, "lastDebatersMessages", lastDebatersMessages);
+        return Collections.unmodifiableMap(new HashMap<>() {{
+    put("currentRound", currentRound);
+    put("lastDebatersMessages", lastDebatersMessages);
+}});
     }
 
     @Override

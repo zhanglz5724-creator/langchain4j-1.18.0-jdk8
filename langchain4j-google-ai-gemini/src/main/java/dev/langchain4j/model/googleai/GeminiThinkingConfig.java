@@ -2,12 +2,36 @@ package dev.langchain4j.model.googleai;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public record GeminiThinkingConfig(
-        @JsonProperty("includeThoughts") Boolean includeThoughts,
-        @JsonProperty("thinkingBudget") Integer thinkingBudget,
-        @JsonProperty("thinkingLevel") String thinkingLevel) {
+@JsonInclude(JsonInclude.Include.NON_EMPTY) public class GeminiThinkingConfig {
+    private final Object @JsonProperty("includeThoughts";
+
+    public GeminiThinkingConfig(Object @JsonProperty("includeThoughts") {
+        this.@JsonProperty("includeThoughts" = @JsonProperty("includeThoughts";
+    }
+
+    public Object get@JsonProperty("includeThoughts"() {
+        return @JsonProperty("includeThoughts";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GeminiThinkingConfig that = (GeminiThinkingConfig) o;
+        return java.util.Objects.equals(this.@JsonProperty("includeThoughts", that.@JsonProperty("includeThoughts");
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(@JsonProperty("includeThoughts");
+    }
+
+    @Override
+    public String toString() {
+        return "GeminiThinkingConfig{"@JsonProperty("includeThoughts"=" + @JsonProperty("includeThoughts" + "}"";
+    }
+
 
     public enum GeminiThinkingLevel {
         MINIMAL,

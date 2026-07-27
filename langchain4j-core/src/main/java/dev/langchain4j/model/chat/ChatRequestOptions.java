@@ -42,7 +42,7 @@ public class ChatRequestOptions {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ChatRequestOptions that)) return false;
+        if (!(o instanceof ChatRequestOptions)) return false;
         return Objects.equals(listenerAttributes, that.listenerAttributes);
     }
 

@@ -66,7 +66,7 @@ public class AzureOpenAiAudioTranscriptionModel implements AudioTranscriptionMod
             this.client = createClient(builder);
         }
 
-        if (builder.deploymentName == null || builder.deploymentName.isBlank()) {
+        if (builder.deploymentName == null || builder.deploymentName.trim().isEmpty()) {
             throw new IllegalArgumentException("deploymentName is required");
         }
 
@@ -87,7 +87,7 @@ public class AzureOpenAiAudioTranscriptionModel implements AudioTranscriptionMod
         if (client == null) {
             throw new IllegalArgumentException("client is required");
         }
-        if (deploymentName == null || deploymentName.isBlank()) {
+        if (deploymentName == null || deploymentName.trim().isEmpty()) {
             throw new IllegalArgumentException("deploymentName is required");
         }
 
@@ -183,7 +183,7 @@ public class AzureOpenAiAudioTranscriptionModel implements AudioTranscriptionMod
                     builder.logRequestsAndResponses,
                     builder.userAgentSuffix,
                     builder.customHeaders);
-        } else if (builder.apiKey != null && !builder.apiKey.isBlank()) {
+        } else if (builder.apiKey != null && !builder.apiKey.trim().isEmpty()) {
             return setupSyncClient(
                     builder.endpoint,
                     builder.serviceVersion,

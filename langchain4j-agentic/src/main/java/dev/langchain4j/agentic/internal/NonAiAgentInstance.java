@@ -9,6 +9,7 @@ import dev.langchain4j.agentic.workflow.HumanInTheLoop;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
+import java.util.Collections;
 
 import static dev.langchain4j.agentic.observability.ComposedAgentListener.composeWithInherited;
 
@@ -52,7 +53,7 @@ public class NonAiAgentInstance implements AgentInstance, InternalAgent {
 
     @Override
     public List<AgentInstance> subagents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override
@@ -116,7 +117,7 @@ public class NonAiAgentInstance implements AgentInstance, InternalAgent {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (NonAiAgentInstance) obj;
+        NonAiAgentInstance that = (NonAiAgentInstance) obj;
         return Objects.equals(this.type, that.type) &&
                 Objects.equals(this.name, that.name) &&
                 Objects.equals(this.description, that.description) &&

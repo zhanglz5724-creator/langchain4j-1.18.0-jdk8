@@ -238,7 +238,7 @@ class InternalAzureOpenAiHelper {
     }
 
     static OpenAIServiceVersion getOpenAIServiceVersion(String serviceVersion) {
-        if (serviceVersion == null || serviceVersion.isBlank()) {
+        if (serviceVersion == null || serviceVersion.trim().isEmpty()) {
             return OpenAIServiceVersion.getLatest();
         }
         for (OpenAIServiceVersion version : OpenAIServiceVersion.values()) {

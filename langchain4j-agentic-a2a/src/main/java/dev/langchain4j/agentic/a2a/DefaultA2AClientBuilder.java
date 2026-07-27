@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.Collections;
 import org.a2aproject.sdk.A2A;
 import org.a2aproject.sdk.client.Client;
 import org.a2aproject.sdk.client.ClientBuilder;
@@ -51,9 +52,60 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, InternalAgent, InvocationHandler {
+    private class A2AInvocationResult {
+        private final Object parsedResult;
+        private final String contextIdKey;
+        private final String contextId;
+        private final String taskIdKey;
+        private final String taskId;
 
-    private record A2AInvocationResult(
-            Object parsedResult, String contextIdKey, String contextId, String taskIdKey, String taskId) {}
+        public A2AInvocationResult(Object parsedResult, String contextIdKey, String contextId, String taskIdKey, String taskId) {
+            this.parsedResult = parsedResult;
+            this.contextIdKey = contextIdKey;
+            this.contextId = contextId;
+            this.taskIdKey = taskIdKey;
+            this.taskId = taskId;
+        }
+
+        public Object getParsedResult() {
+            return parsedResult;
+        }
+
+        public String getContextIdKey() {
+            return contextIdKey;
+        }
+
+        public String getContextId() {
+            return contextId;
+        }
+
+        public String getTaskIdKey() {
+            return taskIdKey;
+        }
+
+        public String getTaskId() {
+            return taskId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            A2AInvocationResult that = (A2AInvocationResult) o;
+            return java.util.Objects.equals(this.parsedResult, that.parsedResult) && java.util.Objects.equals(this.contextIdKey, that.contextIdKey) && java.util.Objects.equals(this.contextId, that.contextId) && java.util.Objects.equals(this.taskIdKey, that.taskIdKey) && java.util.Objects.equals(this.taskId, that.taskId);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(parsedResult, contextIdKey, contextId, taskIdKey, taskId);
+        }
+
+        @Override
+        public String toString() {
+            return "A2AInvocationResult{"parsedResult=" + parsedResult + , "contextIdKey=" + contextIdKey + , "contextId=" + contextId + , "taskIdKey=" + taskIdKey + , "taskId=" + taskId + "}"";
+        }
+
+    }
 
     private final ServiceOutputParser serviceOutputParser = new ServiceOutputParser();
 
@@ -215,7 +267,7 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
         AtomicReference<String> responseContextId = new AtomicReference<>();
         AtomicReference<String> responseTaskId = new AtomicReference<>();
 
-        List<BiConsumer<ClientEvent, AgentCard>> consumers = List.of((event, card) -> {
+        List<BiConsumer<ClientEvent, AgentCard>> consumers = Collections.singletonList((event, card) -> {
             if (event instanceof MessageEvent messageEvent) {
                 Message msg = messageEvent.getMessage();
                 responseContextId.set(msg.contextId());
@@ -278,7 +330,7 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
             return;
         }
         messageResponse.complete(extractTextFromParts(
-                task.artifacts().stream().flatMap(a -> a.parts().stream()).toList()));
+                task.artifacts().stream().flatMap(a -> a.parts().stream()).collect(Collectors.toList())));
     }
 
     private static boolean isFailureState(TaskState state) {
@@ -399,7 +451,7 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
 
     @Override
     public List<AgentArgument> arguments() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override
@@ -409,7 +461,7 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
 
     @Override
     public List<AgentInstance> subagents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override

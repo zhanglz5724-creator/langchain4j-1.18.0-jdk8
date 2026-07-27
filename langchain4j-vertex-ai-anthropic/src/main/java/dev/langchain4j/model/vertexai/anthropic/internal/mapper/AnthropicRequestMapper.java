@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class AnthropicRequestMapper {
 
@@ -70,7 +72,7 @@ public class AnthropicRequestMapper {
         // Process tools
         if (toolSpecs != null && !toolSpecs.isEmpty()) {
             request.tools =
-                    toolSpecs.stream().map(AnthropicRequestMapper::toTool).toList();
+                    toolSpecs.stream().map(AnthropicRequestMapper::toTool).collect(Collectors.toList());
             request.toolChoice = toAnthropicToolChoice(toolChoice);
         }
         request.anthropicVersion = Constants.ANTHROPIC_VERSION;
@@ -159,7 +161,7 @@ public class AnthropicRequestMapper {
                             toolExecutionRequest.id(),
                             toolExecutionRequest.name(),
                             toAnthropicInput(toolExecutionRequest)))
-                    .toList();
+                    .collect(Collectors.toList());
             contents.addAll(toolUseContents);
         }
 
@@ -169,14 +171,14 @@ public class AnthropicRequestMapper {
     private static Object toAnthropicInput(ToolExecutionRequest toolExecutionRequest) {
         String arguments = toolExecutionRequest.arguments();
         if (isNullOrBlank(arguments)) {
-            return Map.of(); // Empty map instead of "{}" string
+            return Collections.emptyMap(); // Empty map instead of "{}" string
         }
         try {
             // Parse the JSON string into an Object (Map)
             return Json.fromJson(arguments, Map.class);
         } catch (Exception e) {
             // If parsing fails, return empty map to avoid API errors
-            return Map.of();
+            return Collections.emptyMap();
         }
     }
 

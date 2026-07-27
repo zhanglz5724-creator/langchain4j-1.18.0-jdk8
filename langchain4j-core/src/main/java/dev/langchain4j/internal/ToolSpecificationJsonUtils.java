@@ -72,8 +72,8 @@ public class ToolSpecificationJsonUtils {
         if (parametersObj instanceof Map) {
             Map<String, Object> parametersMap = (Map<String, Object>) parametersObj;
             JsonSchemaElement element = JsonSchemaElementJsonUtils.fromMap(parametersMap);
-            if (element instanceof JsonObjectSchema objectSchema) {
-                builder.parameters(objectSchema);
+            if (element instanceof JsonObjectSchema) {
+                builder.parameters(((JsonObjectSchema) element));
             } else {
                 throw new IllegalArgumentException("\"parameters\" must be a JSON object schema, but was: "
                         + element.getClass().getSimpleName());

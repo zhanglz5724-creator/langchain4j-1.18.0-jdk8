@@ -5,6 +5,7 @@ import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Collections;
 import dev.langchain4j.Internal;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.output.TokenUsage;
@@ -35,7 +36,7 @@ public class ToolServiceResult {
     @Deprecated(since = "1.2.0")
     public ToolServiceResult(ChatResponse chatResponse,
                              List<ToolExecution> toolExecutions) {
-        this.intermediateResponses = List.of();
+        this.intermediateResponses = Collections.emptyList();
         this.finalResponse = ensureNotNull(chatResponse, "chatResponse");
         this.toolExecutions = ensureNotNull(toolExecutions, "toolExecutions");
         this.aggregateTokenUsage = chatResponse.tokenUsage();
@@ -98,7 +99,7 @@ public class ToolServiceResult {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ToolServiceResult) obj;
+        ToolServiceResult that = (ToolServiceResult) obj;
         return Objects.equals(this.intermediateResponses, that.intermediateResponses)
                 && Objects.equals(this.finalResponse, that.finalResponse)
                 && Objects.equals(this.toolExecutions, that.toolExecutions)

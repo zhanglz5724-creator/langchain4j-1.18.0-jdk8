@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the {@link ClassMetadataProviderFactory} interface using Java Reflection.
@@ -27,6 +28,6 @@ public final class ReflectionBasedClassMetadataProviderFactory implements ClassM
     public Iterable<Method> getNonStaticMethodsOnClass(Class<?> clazz) {
         return Stream.of(clazz.getMethods())
                 .filter(method -> !Modifier.isStatic(method.getModifiers()))
-                .toList();
+                .collect(Collectors.toList());
     }
 }

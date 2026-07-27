@@ -70,7 +70,7 @@ public class Context {
         public Summarizer(AgenticScope agenticScope, ChatModel chatModel, String... agentNames) {
             super(agenticScope, c -> {
                 String context = c.contextAsConversation(agentNames);
-                return context.isBlank() ? context : initSummarizer(chatModel).summarize(context).getSummary();
+                return context.trim().isEmpty() ? context : initSummarizer(chatModel).summarize(context).getSummary();
             });
         }
     }

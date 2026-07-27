@@ -15,6 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -118,7 +120,7 @@ public class BlackboardPlanner implements Planner {
     private Action selectAndCall(AgenticScope scope) {
         List<AgentActivator> ready = agentActivators.values().stream()
                 .filter(a -> a.canActivate(scope))
-                .toList();
+                .collect(Collectors.toList());
 
         if (ready.isEmpty()) {
             LOG.info("No agents can fire — blackboard quiescent after {} invocations", invocationCounter);
@@ -138,7 +140,7 @@ public class BlackboardPlanner implements Planner {
     }
 
     private AgentActivator selectActivator(List<AgentActivator> ready, AgenticScope scope) {
-        List<AgentInstance> candidates = ready.stream().map(a -> a.agent).toList();
+        List<AgentInstance> candidates = ready.stream().map(a -> a.agent).collect(Collectors.toList());
         AgentInstance selected = conflictResolutionStrategy.resolve(scope, candidates);
         return selected == null ? null : ready.stream()
                 .filter(a -> a.agent == selected)
@@ -148,7 +150,7 @@ public class BlackboardPlanner implements Planner {
 
     @Override
     public Map<String, Object> executionState() {
-        return Map.of("invocationCounter", invocationCounter);
+        return Collections.singletonMap("invocationCounter", invocationCounter);
     }
 
     @Override
@@ -172,7 +174,7 @@ public class BlackboardPlanner implements Planner {
 
         AgentActivator(AgentInstance agent) {
             this.agent = agent;
-            this.argumentNames = agent.arguments().stream().map(AgentArgument::name).toList();
+            this.argumentNames = agent.arguments().stream().map(AgentArgument::name).collect(Collectors.toList());
         }
 
         private boolean canActivate(AgenticScope agenticScope) {

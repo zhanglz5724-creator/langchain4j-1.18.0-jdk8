@@ -15,6 +15,7 @@ import dev.langchain4j.model.googleai.GeminiGenerateContentRequest.GeminiTool.Ge
 import dev.langchain4j.model.googleai.GeminiGenerateContentRequest.GeminiTool.GeminiUrlContext;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 class FunctionMapper {
     static List<GeminiTool> fromToolSpecsToGTools(
@@ -57,7 +58,7 @@ class FunctionMapper {
                     return fnBuilder.build();
                 })
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toList());
 
         return singletonList(new GeminiTool(
                 functionDeclarations.isEmpty() ? null : functionDeclarations,
@@ -74,6 +75,6 @@ class FunctionMapper {
                         .name(functionCall.name())
                         .arguments(toJsonWithoutIndent(functionCall.args()))
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
 }

@@ -6,11 +6,36 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-record GeminiContent(
-        @JsonProperty("parts") List<GeminiPart> parts,
-        @JsonProperty("role") String role) {
+@JsonIgnoreProperties(ignoreUnknown = true) class GeminiContent {
+    private final Object @JsonProperty("parts";
+
+    public GeminiContent(Object @JsonProperty("parts") {
+        this.@JsonProperty("parts" = @JsonProperty("parts";
+    }
+
+    public Object get@JsonProperty("parts"() {
+        return @JsonProperty("parts";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GeminiContent that = (GeminiContent) o;
+        return java.util.Objects.equals(this.@JsonProperty("parts", that.@JsonProperty("parts");
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(@JsonProperty("parts");
+    }
+
+    @Override
+    public String toString() {
+        return "GeminiContent{"@JsonProperty("parts"=" + @JsonProperty("parts" + "}"";
+    }
+
 
     GeminiContent {
         parts = mutableCopy(parts);

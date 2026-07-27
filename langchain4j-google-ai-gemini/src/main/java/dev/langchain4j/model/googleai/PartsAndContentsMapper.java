@@ -43,6 +43,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 final class PartsAndContentsMapper {
 
@@ -184,7 +185,7 @@ final class PartsAndContentsMapper {
     static AiMessage fromGPartsToAiMessage(
             List<GeminiContent.GeminiPart> parts, boolean includeCodeExecutionOutput, Boolean returnThinking) {
 
-        List<GeminiContent.GeminiPart> safeParts = Objects.requireNonNullElse(parts, List.of());
+        List<GeminiContent.GeminiPart> safeParts = Objects.requireNonNullElse(parts, Collections.emptyList());
         StringBuilder fullText = new StringBuilder();
         List<String> thoughts = new ArrayList<>();
         List<String> thoughtSignatures = new ArrayList<>();
@@ -274,7 +275,7 @@ final class PartsAndContentsMapper {
                 .text(isNullOrEmpty(text) ? null : text)
                 .thinking(isNullOrEmpty(thinking) ? null : thinking)
                 .toolExecutionRequests(toToolExecutionRequests(functionCalls))
-                .attributes(attributes.isEmpty() ? Map.of() : attributes)
+                .attributes(attributes.isEmpty() ? Collections.emptyMap() : attributes)
                 .build();
     }
 
@@ -303,7 +304,7 @@ final class PartsAndContentsMapper {
 
                             if (isNotNullOrEmpty(systemMessage.text())) {
                                 return new GeminiContent(
-                                        List.of(GeminiContent.GeminiPart.builder()
+                                        Collections.singletonList(GeminiContent.GeminiPart.builder()
                                                 .text(systemMessage.text())
                                                 .build()),
                                         GeminiRole.MODEL.toString());
@@ -378,11 +379,11 @@ final class PartsAndContentsMapper {
                             }
 
                             return new GeminiContent(
-                                    List.of(GeminiContent.GeminiPart.builder()
+                                    Collections.singletonList(GeminiContent.GeminiPart.builder()
                                             .functionResponse(new GeminiFunctionResponse(
                                                     toolResultMessage.id(),
                                                     toolResultMessage.toolName(),
-                                                    Map.of("response", toolResultMessage.text())))
+                                                    Collections.singletonMap("response", toolResultMessage.text())))
                                             .build()),
                                     GeminiRole.USER.toString());
                         default:

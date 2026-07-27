@@ -177,13 +177,13 @@ final class GuardrailServiceBuilder implements Builder {
         // Go method-by-method, if there are annotations on the method, then use them
         // Otherwise use the annotations on the class
         // If there aren't any annotations on the class, then use the ones set on this builder
-        var inputGuardrailsByMethod = new HashMap<Object, InputGuardrailExecutor>();
-        var outputGuardrailsByMethod = new HashMap<Object, OutputGuardrailExecutor>();
-        var factory = ClassMetadataProvider.getClassMetadataProviderFactory();
+        HashMap<Object, InputGuardrailExecutor> inputGuardrailsByMethod = new HashMap<Object, InputGuardrailExecutor>();
+        HashMap<Object, OutputGuardrailExecutor> outputGuardrailsByMethod = new HashMap<Object, OutputGuardrailExecutor>();
+        ClassMetadataProviderFactory<?> factory = ClassMetadataProvider.getClassMetadataProviderFactory();
 
         factory.getNonStaticMethodsOnClass(this.aiServiceClass).forEach(method -> {
-            var inputGuardrailsForMethod = computeInputGuardrailsForAiServiceMethod(method, factory);
-            var outputGuardrailsForMethod = computeOutputGuardrailsForAiServiceMethod(method, factory);
+            InputGuardrailExecutor inputGuardrailsForMethod = computeInputGuardrailsForAiServiceMethod(method, factory);
+            OutputGuardrailExecutor outputGuardrailsForMethod = computeOutputGuardrailsForAiServiceMethod(method, factory);
 
             if (!inputGuardrailsForMethod.guardrails().isEmpty()) {
                 inputGuardrailsByMethod.put(method, inputGuardrailsForMethod);
@@ -203,8 +203,8 @@ final class GuardrailServiceBuilder implements Builder {
         ensureNotNull(guardrails, "guardrails");
         ensureNotNull(guardrailClasses, "guardrailClasses");
 
-        var guardrailsSetByBuilderAtClassLevel = guardrails.stream();
-        var guardrailsSetByBuilderAtClassLevelByClassName =
+        Stream<G> guardrailsSetByBuilderAtClassLevel = guardrails.stream();
+        Stream<G> guardrailsSetByBuilderAtClassLevelByClassName =
                 guardrailClasses.stream().map(GuardrailServiceBuilder::getGuardrailClassInstance);
 
         return Stream.concat(guardrailsSetByBuilderAtClassLevel, guardrailsSetByBuilderAtClassLevelByClassName)
@@ -220,13 +220,13 @@ final class GuardrailServiceBuilder implements Builder {
     private static <I extends InputGuardrail> List<I> getGuardrails(InputGuardrails inputGuardrails) {
         return Stream.of(inputGuardrails.value())
                 .map(guardrailClass -> (I) getGuardrailClassInstance(guardrailClass))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private static <O extends OutputGuardrail> List<O> getGuardrails(OutputGuardrails outputGuardrails) {
         return Stream.of(outputGuardrails.value())
                 .map(guardrailClass -> (O) getGuardrailClassInstance(guardrailClass))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private static dev.langchain4j.guardrail.config.InputGuardrailsConfig computeConfig(InputGuardrails annotation) {

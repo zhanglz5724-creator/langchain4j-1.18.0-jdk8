@@ -36,6 +36,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
 import static dev.langchain4j.model.jlama.JlamaLanguageModel.toFinishReason;
@@ -110,7 +112,7 @@ public class JlamaChatModel implements ChatModel {
     }
 
     private Response<AiMessage> generate(List<ChatMessage> messages) {
-        return generate(messages, List.of());
+        return generate(messages, Collections.emptyList());
     }
 
     private Response<AiMessage> generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications) {
@@ -158,7 +160,7 @@ public class JlamaChatModel implements ChatModel {
             }
         }
 
-        List<Tool> tools = toolSpecifications.stream().map(JlamaModel::toTool).toList();
+        List<Tool> tools = toolSpecifications.stream().map(JlamaModel::toTool).collect(Collectors.toList());
 
         PromptContext promptContext = tools.isEmpty() ? promptBuilder.build() : promptBuilder.build(tools);
         Generator.Response r = JlamaExceptionMapper.INSTANCE.withExceptionMapper(
@@ -170,7 +172,7 @@ public class JlamaChatModel implements ChatModel {
                     .name(f.getName())
                     .id(f.getId())
                     .arguments(JsonSupport.toJson(f.getParameters()))
-                    .build()).toList();
+                    .build()).collect(Collectors.toList());
 
             return Response.from(AiMessage.from(toolCalls), new TokenUsage(r.promptTokens, r.generatedTokens), toFinishReason(r.finishReason));
         }

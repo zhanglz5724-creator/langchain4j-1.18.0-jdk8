@@ -410,8 +410,8 @@ public class UserMessage implements ChatMessage {
             return messages;
         }
         for (int i = messages.size() - 1; i >= 0; i--) {
-            if (messages.get(i) instanceof UserMessage existing) {
-                if (existing.equals(replacement)) {
+            if (messages.get(i) instanceof UserMessage) {
+                if (((UserMessage) messages.get(i)).equals(replacement)) {
                     return messages;
                 }
                 List<ChatMessage> result = new ArrayList<>(messages);

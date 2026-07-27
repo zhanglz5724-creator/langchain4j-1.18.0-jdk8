@@ -27,6 +27,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.Collections;
 
 public abstract class AbstractServiceBuilder<T, S> {
 
@@ -115,7 +116,7 @@ public abstract class AbstractServiceBuilder<T, S> {
     }
 
     public S subAgents(Object... agents) {
-        return subAgents(List.of(agents));
+        return subAgents(Collections.singletonList(agents));
     }
 
     public S subAgents(Collection<?> agents) {

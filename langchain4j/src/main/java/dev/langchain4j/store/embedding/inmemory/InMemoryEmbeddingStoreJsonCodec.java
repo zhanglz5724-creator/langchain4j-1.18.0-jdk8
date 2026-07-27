@@ -2,6 +2,7 @@ package dev.langchain4j.store.embedding.inmemory;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.data.segment.TextSegment;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,7 +16,13 @@ public interface InMemoryEmbeddingStoreJsonCodec {
     String toJson(InMemoryEmbeddingStore<?> store);
 
     default InMemoryEmbeddingStore<TextSegment> fromJson(InputStream in) throws IOException {
-        String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int n;
+        byte[] data = new byte[4096];
+        while ((n = in.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, n);
+        }
+        String json = new String(buffer.toByteArray(), StandardCharsets.UTF_8);
         return fromJson(json);
     }
 

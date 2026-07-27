@@ -8,6 +8,7 @@ import dev.langchain4j.agentic.planner.PlanningContext;
 import dev.langchain4j.agentic.planner.Planner;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 public class SequentialPlanner implements Planner {
 
@@ -39,7 +40,7 @@ public class SequentialPlanner implements Planner {
         // Save cursor - 1: the agent that was just scheduled for execution.
         // On recovery, firstAction() delegates to nextAction() which calls agents.get(agentCursor++),
         // so the restored cursor must point to the agent that needs to be (re-)executed.
-        return agentCursor > 0 ? Map.of("cursor", agentCursor - 1) : Map.of();
+        return agentCursor > 0 ? Collections.singletonMap("cursor", agentCursor - 1) : Collections.emptyMap();
     }
 
     @Override

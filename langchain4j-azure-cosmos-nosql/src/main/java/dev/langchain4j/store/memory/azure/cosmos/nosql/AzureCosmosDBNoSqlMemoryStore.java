@@ -28,6 +28,7 @@ import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +117,7 @@ public class AzureCosmosDBNoSqlMemoryStore implements ChatMemoryStore {
         indexingPolicy.setExcludedPaths(singletonList(excludedPath));
         IncludedPath includedPath1 = new IncludedPath("/metadata/?");
         IncludedPath includedPath2 = new IncludedPath("/content/?");
-        indexingPolicy.setIncludedPaths(ImmutableList.of(includedPath1, includedPath2));
+        indexingPolicy.setIncludedPaths(ImmutableArrays.asList(includedPath1, includedPath2));
         return indexingPolicy;
     }
 

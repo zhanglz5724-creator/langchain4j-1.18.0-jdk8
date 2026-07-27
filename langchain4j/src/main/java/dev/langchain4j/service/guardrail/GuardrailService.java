@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Collections;
 
 /**
  * Defines a service for executing guardrails associated with methods in an AI service.
@@ -153,7 +154,7 @@ public interface GuardrailService {
          */
         default <I extends InputGuardrail> Builder inputGuardrailClasses(Class<? extends I>... guardrailClasses) {
             return Optional.ofNullable(guardrailClasses)
-                    .map(g -> inputGuardrailClasses(List.of(g)))
+                    .map(g -> inputGuardrailClasses(Collections.singletonList(g)))
                     .orElse(this);
         }
 
@@ -179,7 +180,7 @@ public interface GuardrailService {
          */
         default <O extends OutputGuardrail> Builder outputGuardrailClasses(Class<? extends O>... guardrailClasses) {
             return Optional.ofNullable(guardrailClasses)
-                    .map(g -> outputGuardrailClasses(List.of(g)))
+                    .map(g -> outputGuardrailClasses(Collections.singletonList(g)))
                     .orElse(this);
         }
 
@@ -202,7 +203,7 @@ public interface GuardrailService {
          */
         default <I extends InputGuardrail> Builder inputGuardrails(I... guardrails) {
             return Optional.ofNullable(guardrails)
-                    .map(ig -> inputGuardrails(List.of(ig)))
+                    .map(ig -> inputGuardrails(Collections.singletonList(ig)))
                     .orElse(this);
         }
 
@@ -225,7 +226,7 @@ public interface GuardrailService {
          */
         default <O extends OutputGuardrail> Builder outputGuardrails(O... guardrails) {
             return Optional.ofNullable(guardrails)
-                    .map(og -> outputGuardrails(List.of(og)))
+                    .map(og -> outputGuardrails(Collections.singletonList(og)))
                     .orElse(this);
         }
 

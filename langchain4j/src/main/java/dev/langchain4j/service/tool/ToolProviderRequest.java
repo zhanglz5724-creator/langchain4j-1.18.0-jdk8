@@ -6,6 +6,7 @@ import dev.langchain4j.invocation.InvocationContext;
 import dev.langchain4j.invocation.InvocationParameters;
 
 import java.util.List;
+import java.util.Collections;
 
 import static dev.langchain4j.internal.Utils.copy;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
@@ -30,7 +31,7 @@ public class ToolProviderRequest {
                 .chatMemoryId(chatMemoryId)
                 .build();
         this.userMessage = ensureNotNull(userMessage, "userMessage");
-        this.messages = List.of();
+        this.messages = Collections.emptyList();
     }
 
     /**

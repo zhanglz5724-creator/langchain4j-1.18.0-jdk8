@@ -3,6 +3,8 @@ package dev.langchain4j.agentic.workflow.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
+import java.util.Collections;
+import java.util.HashMap;
 import dev.langchain4j.agentic.planner.Action;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.planner.AgenticSystemTopology;
@@ -86,7 +88,10 @@ public class LoopPlanner implements Planner {
         // Save the current cursor and iteration counter.
         // LoopPlanner's firstAction() does NOT advance state (it just calls agents.get(agentCursor)),
         // so the saved values can be restored directly.
-        return Map.of("cursor", agentCursor, "iteration", iterationsCounter);
+        return Collections.unmodifiableMap(new HashMap<>() {{
+    put("cursor", agentCursor);
+    put("iteration", iterationsCounter);
+}});
     }
 
     @Override

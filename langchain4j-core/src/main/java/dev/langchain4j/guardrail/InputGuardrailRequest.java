@@ -6,6 +6,7 @@ import dev.langchain4j.data.message.ContentType;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the parameter passed to {@link InputGuardrail#validate(InputGuardrailRequest)}.
@@ -53,7 +54,7 @@ public final class InputGuardrailRequest implements GuardrailRequest<InputGuardr
 
         var rewrittenContent = this.userMessage.contents().stream()
                 .map(c -> (c.type() == ContentType.TEXT) ? new TextContent(text) : c)
-                .toList();
+                .collect(Collectors.toList());
 
         return this.userMessage.toBuilder()
                 .contents(rewrittenContent)

@@ -22,6 +22,7 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 @Experimental
 public class OpenAiResponsesStreamingChatModel implements StreamingChatModel {
@@ -132,7 +133,7 @@ public class OpenAiResponsesStreamingChatModel implements StreamingChatModel {
 
     @Override
     public Set<Capability> supportedCapabilities() {
-        return Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
+        return Collections.singleton(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
     }
 
     public static class Builder {

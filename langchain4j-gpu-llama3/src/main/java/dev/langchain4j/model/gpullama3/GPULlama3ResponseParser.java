@@ -2,6 +2,7 @@ package dev.langchain4j.model.gpullama3;
 
 import dev.langchain4j.model.chat.response.PartialThinking;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import java.util.Collections;
 
 /**
  * Utility class for parsing GPULlama3 model responses that contain thinking content.
@@ -170,7 +171,7 @@ public class GPULlama3ResponseParser {
             }
 
             // Decode the token and add to buffer
-            String tokenStr = model.tokenizer().decode(java.util.List.of(tokenId));
+            String tokenStr = model.tokenizer().decode(java.util.Collections.singletonList(tokenId));
             buffer.append(tokenStr);
 
             String currentText = buffer.toString();

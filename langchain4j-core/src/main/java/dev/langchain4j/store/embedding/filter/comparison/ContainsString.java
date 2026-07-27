@@ -32,7 +32,7 @@ public class ContainsString implements Filter {
 
     @Override
     public boolean test(Object object) {
-        if (!(object instanceof Metadata metadata)) {
+        if (!(object instanceof Metadata)) {
             return false;
         }
 
@@ -42,8 +42,8 @@ public class ContainsString implements Filter {
 
         Object actualValue = metadata.toMap().get(key);
 
-        if (actualValue instanceof String str) {
-            return str.contains(comparisonValue);
+        if (actualValue instanceof String) {
+            return ((String) actualValue).contains(comparisonValue);
         }
 
         throw illegalArgument(
@@ -55,7 +55,7 @@ public class ContainsString implements Filter {
     @Override
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof ContainsString other)) return false;
+        if (!(o instanceof ContainsString)) return false;
 
         return Objects.equals(this.key, other.key) && Objects.equals(this.comparisonValue, other.comparisonValue);
     }

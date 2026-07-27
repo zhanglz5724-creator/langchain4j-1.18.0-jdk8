@@ -62,7 +62,7 @@ public final class OutputGuardrailResult implements GuardrailResult<OutputGuardr
 
     OutputGuardrailResult(Failure failure, boolean fatal) {
         // Using Stream.of().collect() here because we need a mutable list
-        this(Stream.of(failure).collect(Collectors.toList()), fatal);
+        this(Stream.of(failure).collect(Collectors.collect(Collectors.toList())), fatal);
     }
 
     /**

@@ -78,6 +78,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashSet;
 
 @Internal
 class DefaultAiServices<T> extends AiServices<T> {
@@ -86,7 +88,7 @@ class DefaultAiServices<T> extends AiServices<T> {
     private final Collection<TokenStreamAdapter> tokenStreamAdapters = loadFactories(TokenStreamAdapter.class);
 
     private static final Set<Class<? extends Annotation>> VALID_PARAM_ANNOTATIONS =
-            Set.of(dev.langchain4j.service.UserMessage.class, V.class, MemoryId.class, UserName.class);
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(dev.langchain4j.service.UserMessage.class, V.class, MemoryId.class, UserName.class)));
 
     DefaultAiServices(AiServiceContext context) {
         super(context);
@@ -150,7 +152,7 @@ class DefaultAiServices<T> extends AiServices<T> {
                                 .invocationId(UUID.randomUUID())
                                 .interfaceName(context.aiServiceClass.getName())
                                 .methodName(method.getName())
-                                .methodArguments(args != null ? Arrays.asList(args) : List.of())
+                                .methodArguments(args != null ? Arrays.asList(args) : Collections.emptyList())
                                 .chatMemoryId(findMemoryId(method, args).orElse(ChatMemoryService.DEFAULT))
                                 .defaultRequestParameters(determineChatRequestParameters(context))
                                 .modelProvider(determineModelProvider(context))
@@ -200,8 +202,8 @@ class DefaultAiServices<T> extends AiServices<T> {
                                     ? Optional.of(SystemMessage.from(transformedSystemMessage))
                                     : Optional.empty();
                         }
-                        var userMessageTemplate = getUserMessageTemplate(memoryId, method, args);
-                        var variables = InternalReflectionVariableResolver.findTemplateVariables(
+                        String userMessageTemplate = getUserMessageTemplate(memoryId, method, args);
+                        Map<String, Object> variables = InternalReflectionVariableResolver.findTemplateVariables(
                                 userMessageTemplate, method, args);
                         UserMessage originalUserMessage =
                                 prepareUserMessage(method, args, userMessageTemplate, variables);
@@ -231,7 +233,7 @@ class DefaultAiServices<T> extends AiServices<T> {
 
                         UserMessage userMessage = addContentsToUserMessage(method, args, userMessageForAugmentation);
 
-                        var commonGuardrailParam = GuardrailRequestParams.builder()
+                        GuardrailRequestParams commonGuardrailParam = GuardrailRequestParams.builder()
                                 .chatMemory(chatMemory)
                                 .augmentationResult(augmentationResult)
                                 .userMessageTemplate(userMessageTemplate)
@@ -284,7 +286,7 @@ class DefaultAiServices<T> extends AiServices<T> {
                                 context.toolService.createContext(invocationContext, userMessage, messages);
 
                         if (streaming) {
-                            var tokenStreamParameters = AiServiceTokenStreamParameters.builder()
+                            AiServiceTokenStreamParameters tokenStreamParameters = AiServiceTokenStreamParameters.builder()
                                     .messages(messages)
                                     .toolServiceContext(toolServiceContext)
                                     .toolArgumentsErrorHandler(context.toolService.argumentsErrorHandler())
@@ -355,7 +357,7 @@ class DefaultAiServices<T> extends AiServices<T> {
 
                         if (toolServiceResult.immediateToolReturn()) {
                             if (isReturnTypeResult) {
-                                var result = Result.builder()
+                                Result result = Result.builder()
                                         .content(null)
                                         .tokenUsage(toolServiceResult.aggregateTokenUsage())
                                         .sources(augmentationResult == null ? null : augmentationResult.contents())
@@ -414,7 +416,7 @@ class DefaultAiServices<T> extends AiServices<T> {
                                 toolServiceContext,
                                 context.chatModel::chat);
 
-                        var response = invokeOutputGuardrails(
+                        Object response = invokeOutputGuardrails(
                                 context.guardrailService(),
                                 method,
                                 aggregateResponse,
@@ -431,8 +433,8 @@ class DefaultAiServices<T> extends AiServices<T> {
                             }
                         }
 
-                        var parsedResponse = serviceOutputParser.parse((ChatResponse) response, returnType);
-                        var actualResponse = (isReturnTypeResult)
+                        Object parsedResponse = serviceOutputParser.parse((ChatResponse) response, returnType);
+                        Object actualResponse = (isReturnTypeResult)
                                 ? Result.builder()
                                         .content(parsedResponse)
                                         .tokenUsage(toolServiceResult.aggregateTokenUsage())
@@ -494,7 +496,7 @@ class DefaultAiServices<T> extends AiServices<T> {
                     }
 
                     private static List<ImageContent> toImageContents(List<Image> images) {
-                        return images.stream().map(ImageContent::from).toList();
+                        return images.stream().map(ImageContent::from).collect(Collectors.toList());
                     }
 
                     private boolean canAdaptTokenStreamTo(Type returnType) {
@@ -574,7 +576,7 @@ class DefaultAiServices<T> extends AiServices<T> {
 
         // NOTE: This check is cached, so it really only needs to be computed the first time for each method
         if (guardrailService.hasInputGuardrails(method)) {
-            var inputGuardrailRequest = InputGuardrailRequest.builder()
+            InputGuardrailRequest inputGuardrailRequest = InputGuardrailRequest.builder()
                     .userMessage(userMessage)
                     .commonParams(commonGuardrailParams)
                     .build();
@@ -592,7 +594,7 @@ class DefaultAiServices<T> extends AiServices<T> {
             GuardrailRequestParams commonGuardrailParams) {
 
         if (guardrailService.hasOutputGuardrails(method)) {
-            var outputGuardrailRequest = OutputGuardrailRequest.builder()
+            OutputGuardrailRequest outputGuardrailRequest = OutputGuardrailRequest.builder()
                     .responseFromLLM(responseFromLLM)
                     .chatExecutor(chatExecutor)
                     .requestParams(commonGuardrailParams)

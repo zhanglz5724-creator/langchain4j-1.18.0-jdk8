@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * Bedrock Amazon Titan embedding model with support for both versions:
@@ -94,7 +97,7 @@ public class BedrockTitanEmbeddingModel extends AbstractBedrockEmbeddingModel<Be
 
     @Override
     public Set<ContentType> supportedContentTypes() {
-        return isMultimodal() ? Set.of(ContentType.TEXT, ContentType.IMAGE) : Set.of(ContentType.TEXT);
+        return isMultimodal() ? Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE))) : Collections.singleton(ContentType.TEXT);
     }
 
     @Override

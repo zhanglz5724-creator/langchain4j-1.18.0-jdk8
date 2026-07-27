@@ -29,6 +29,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import dev.langchain4j.invocation.InvocationParameters;
 import dev.langchain4j.agentic.UntypedAgent;
 import dev.langchain4j.agentic.agent.ErrorContext;
@@ -119,8 +121,8 @@ public class PlannerBasedInvocationHandler implements InvocationHandler, Interna
         this.allowStreamingOutput = UntypedAgent.class.isAssignableFrom(this.type) ||
                 TokenStream.class.isAssignableFrom(rawType(this.outputType));
         this.outputKey = service.outputKey;
-        this.arguments = service.agenticMethod != null ? argumentsFromMethod(service.agenticMethod) : List.of();
-        this.subagents = service.subagents.stream().map(AgentInstance.class::cast).toList();
+        this.arguments = service.agenticMethod != null ? argumentsFromMethod(service.agenticMethod) : Collections.emptyList();
+        this.subagents = service.subagents.stream().map(AgentInstance.class::cast).collect(Collectors.toList());
         setParent(parent);
     }
 
@@ -247,7 +249,7 @@ public class PlannerBasedInvocationHandler implements InvocationHandler, Interna
             return (Map<String, Object>) args[0];
         }
         if (args == null || args.length == 0) {
-            return Map.of();
+            return Collections.emptyMap();
         }
         Map<String, Object> namedArgs = new HashMap<>();
         for (int i = 0; i < args.length; i++) {
@@ -387,7 +389,7 @@ public class PlannerBasedInvocationHandler implements InvocationHandler, Interna
 
         @SuppressWarnings("unchecked")
         public Object loop() {
-            Map<String, Object> savedState = agenticScope.readState(executionStateId(), Map.of());
+            Map<String, Object> savedState = agenticScope.readState(executionStateId(), Collections.emptyMap());
             if (!savedState.isEmpty()) {
                 restoreCompletedAgents(savedState);
                 planner.restoreExecutionState(savedState);
@@ -435,7 +437,7 @@ public class PlannerBasedInvocationHandler implements InvocationHandler, Interna
             }
             List<AgentExecutor> remaining = aca.agentsToCall().stream()
                     .filter(a -> !completedAgentIds.contains(a.agentId()))
-                    .toList();
+                    .collect(Collectors.toList());
             return remaining.isEmpty() ? planner.done() : new Action.AgentCallAction(remaining);
         }
 
@@ -454,7 +456,7 @@ public class PlannerBasedInvocationHandler implements InvocationHandler, Interna
 
         private void parallelExecution(List<AgentExecutor> agents) {
             Executor exec = executor != null ? executor : DefaultExecutorProvider.getDefaultExecutorService();
-            var tasks = agents.stream()
+            List<CompletableFuture<Object>> tasks = agents.stream()
                     .map(agentExecutor -> CompletableFuture.supplyAsync(() -> agentExecutor.execute(agenticScope, this), exec))
                     .toArray(CompletableFuture[]::new);
             try {

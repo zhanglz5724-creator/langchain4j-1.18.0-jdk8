@@ -2,6 +2,7 @@ package dev.langchain4j.agentic.planner;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 public interface Planner {
 
@@ -20,7 +21,7 @@ public interface Planner {
      * @return a map of state entries to persist, or an empty map if no state needs saving
      */
     default Map<String, Object> executionState() {
-        return Map.of();
+        return Collections.emptyMap();
     }
 
     /**

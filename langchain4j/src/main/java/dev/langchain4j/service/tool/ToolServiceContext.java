@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Collections;
 
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.service.tool.search.ToolSearchStrategy;
@@ -41,8 +42,8 @@ public class ToolServiceContext {
         this.effectiveTools = copy(toolSpecifications);
         this.availableTools = copy(toolSpecifications);
         this.toolExecutors = copy(toolExecutors);
-        this.returnBehaviors = Map.of();
-        this.dynamicToolProviders = List.of();
+        this.returnBehaviors = Collections.emptyMap();
+        this.dynamicToolProviders = Collections.emptyList();
     }
 
     /**
@@ -245,7 +246,7 @@ public class ToolServiceContext {
         public static final Empty INSTANCE = new Empty();
 
         private Empty() {
-            super(List.of(), Map.of());
+            super(Collections.emptyList(), Collections.emptyMap());
         }
     }
 }

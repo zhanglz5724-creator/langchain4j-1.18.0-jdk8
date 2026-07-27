@@ -9,8 +9,10 @@ import dev.langchain4j.agentic.scope.AgenticScope;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.Arrays;
+import java.util.Collections;
+public class HumanInTheLoop {
 
-public record HumanInTheLoop(
         String outputKey,
         String description,
         boolean async,
@@ -63,25 +65,25 @@ public record HumanInTheLoop(
         }
 
         public HumanInTheLoopBuilder inputKey(Class<?> type, String name) {
-            this.arguments = List.of(new AgentArgument(type, name));
+            this.arguments = Collections.singletonList(new AgentArgument(type, name));
             return this;
         }
 
         public HumanInTheLoopBuilder inputKeys(Class<?> type1, String name1, Class<?> type2, String name2) {
-            this.arguments = List.of(new AgentArgument(type1, name1), new AgentArgument(type2, name2));
+            this.arguments = Arrays.asList(new AgentArgument(type1, name1), new AgentArgument(type2, name2));
             return this;
         }
 
         public HumanInTheLoopBuilder inputKeys(Class<?> type1, String name1, Class<?> type2, String name2,
                                                 Class<?> type3, String name3) {
-            this.arguments = List.of(new AgentArgument(type1, name1), new AgentArgument(type2, name2),
+            this.arguments = Arrays.asList(new AgentArgument(type1, name1), new AgentArgument(type2, name2),
                     new AgentArgument(type3, name3));
             return this;
         }
 
         public HumanInTheLoopBuilder inputKeys(Class<?> type1, String name1, Class<?> type2, String name2,
                                                 Class<?> type3, String name3, Class<?> type4, String name4) {
-            this.arguments = List.of(new AgentArgument(type1, name1), new AgentArgument(type2, name2),
+            this.arguments = Arrays.asList(new AgentArgument(type1, name1), new AgentArgument(type2, name2),
                     new AgentArgument(type3, name3), new AgentArgument(type4, name4));
             return this;
         }

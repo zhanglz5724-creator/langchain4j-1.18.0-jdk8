@@ -22,9 +22,9 @@ import org.assertj.core.api.ListAssert;
  * @param <R> The type of {@link GuardrailResult}
  * @param <F> The type of {@link Failure}
  */
-public abstract sealed class GuardrailResultAssert<
+public abstract class GuardrailResultAssert<
                 A extends GuardrailResultAssert<A, R, F>, R extends GuardrailResult<R>, F extends Failure>
-        extends AbstractObjectAssert<A, R> permits InputGuardrailResultAssert, OutputGuardrailResultAssert {
+        extends AbstractObjectAssert<A, R>  {
 
     private final Class<F> failureClass;
 

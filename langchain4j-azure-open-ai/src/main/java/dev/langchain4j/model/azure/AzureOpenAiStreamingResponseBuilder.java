@@ -11,6 +11,7 @@ import dev.langchain4j.internal.ToolCallBuilder;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import java.util.List;
+import java.util.Collections;
 
 /**
  * This class needs to be thread safe because it is called when a streaming result comes back
@@ -104,7 +105,7 @@ class AzureOpenAiStreamingResponseBuilder {
 
         String content = contentBuilder.toString();
 
-        List<ToolExecutionRequest> toolExecutionRequests = List.of();
+        List<ToolExecutionRequest> toolExecutionRequests = Collections.emptyList();
         if (toolCallBuilder != null) {
             toolExecutionRequests = toolCallBuilder.allRequests();
         }

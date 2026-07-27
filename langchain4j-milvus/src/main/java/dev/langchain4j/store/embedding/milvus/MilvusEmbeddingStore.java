@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Represents an <a href="https://milvus.io/">Milvus</a> index as an embedding store.
@@ -132,7 +133,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
                 getOrDefault(textFieldName, DEFAULT_TEXT_FIELD_NAME),
                 getOrDefault(metadataFieldName, DEFAULT_METADATA_FIELD_NAME),
                 getOrDefault(vectorFieldName, DEFAULT_VECTOR_FIELD_NAME));
-        this.extraParameters = Map.of();
+        this.extraParameters = Collections.emptyMap();
 
         if (!hasCollection(this.milvusClient, this.collectionName)) {
             createCollection(
@@ -172,7 +173,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
                 getOrDefault(builder.textFieldName, DEFAULT_TEXT_FIELD_NAME),
                 getOrDefault(builder.metadataFieldName, DEFAULT_METADATA_FIELD_NAME),
                 getOrDefault(builder.vectorFieldName, DEFAULT_VECTOR_FIELD_NAME));
-        this.extraParameters = getOrDefault(builder.extraParameters, Map.of());
+        this.extraParameters = getOrDefault(builder.extraParameters, Collections.emptyMap());
 
         if (!hasCollection(this.milvusClient, this.collectionName)) {
             createCollection(

@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Collections;
 import dev.langchain4j.Internal;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.internal.Json;
@@ -50,7 +51,7 @@ class ToolExecutionRequestUtil {
      */
     static Map<String, Object> argumentsAsMap(String arguments) {
         if (isNullOrBlank(arguments)) {
-            return Map.of();
+            return Collections.emptyMap();
         }
 
         try {

@@ -3,7 +3,8 @@ package dev.langchain4j.store.embedding.infinispan;
 /**
  * Holds configuration for the store
  */
-public record InfinispanStoreConfiguration(
+public class InfinispanStoreConfiguration {
+
         String cacheName,
         Integer dimension,
         Integer distance,

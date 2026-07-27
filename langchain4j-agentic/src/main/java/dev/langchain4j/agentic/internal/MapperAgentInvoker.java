@@ -3,6 +3,7 @@ package dev.langchain4j.agentic.internal;
 import dev.langchain4j.agentic.agent.MissingArgumentException;
 import dev.langchain4j.agentic.scope.AgenticScope;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Wraps an existing {@link AgentInvoker} to inject a specific item from a collection
@@ -26,7 +27,7 @@ public class MapperAgentInvoker extends AbstractAgentInvoker {
         this.instanceName = delegate.name() + "_" + instanceIndex;
         this.instanceAgentId = delegate.agentId() + "_" + instanceIndex;
         this.instanceOutputKey =
-                delegate.outputKey() != null && !delegate.outputKey().isBlank()
+                delegate.outputKey() != null && !delegate.outputKey().trim().isEmpty()
                         ? delegate.outputKey() + "_" + instanceIndex
                         : null;
     }
@@ -51,6 +52,6 @@ public class MapperAgentInvoker extends AbstractAgentInvoker {
         if (injectionKey == null) {
             return AgentUtil.agentInvocationArguments(agenticScope, arguments());
         }
-        return AgentUtil.agentInvocationArguments(agenticScope, arguments(), Map.of(injectionKey, item));
+        return AgentUtil.agentInvocationArguments(agenticScope, arguments(), Collections.singletonMap(injectionKey, item));
     }
 }

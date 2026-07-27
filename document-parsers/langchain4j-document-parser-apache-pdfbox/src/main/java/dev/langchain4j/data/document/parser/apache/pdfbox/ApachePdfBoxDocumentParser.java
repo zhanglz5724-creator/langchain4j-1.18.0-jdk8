@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.text.PDFTextStripper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -31,7 +32,14 @@ public class ApachePdfBoxDocumentParser implements DocumentParser {
 
     @Override
     public Document parse(InputStream inputStream) {
-        try (PDDocument pdfDocument = Loader.loadPDF(inputStream.readAllBytes())) {
+        try {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int n;
+            byte[] data = new byte[4096];
+            while ((n = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, n);
+            }
+            try (PDDocument pdfDocument = Loader.loadPDF(buffer.toByteArray())) {
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(pdfDocument);
             if (isNullOrBlank(text)) {

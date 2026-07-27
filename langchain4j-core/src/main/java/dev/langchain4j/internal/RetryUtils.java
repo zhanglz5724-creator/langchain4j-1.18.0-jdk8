@@ -214,7 +214,7 @@ public final class RetryUtils {
                     }
 
                     if (retry >= maxRetries) {
-                        throw e instanceof RuntimeException re ? re : new LangChain4jException(e);
+                        throw e instanceof RuntimeException ? (RuntimeException) e : new LangChain4jException(e);
                     }
 
                     log.warn(

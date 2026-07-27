@@ -192,7 +192,7 @@ public class OpenAiOfficialTokenUsage extends TokenUsage {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (InputTokensDetails) obj;
+            InputTokensDetails that = (InputTokensDetails) obj;
             return Objects.equals(this.cachedTokens, that.cachedTokens);
         }
 
@@ -248,7 +248,7 @@ public class OpenAiOfficialTokenUsage extends TokenUsage {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (OutputTokensDetails) obj;
+            OutputTokensDetails that = (OutputTokensDetails) obj;
             return Objects.equals(this.reasoningTokens, that.reasoningTokens);
         }
 

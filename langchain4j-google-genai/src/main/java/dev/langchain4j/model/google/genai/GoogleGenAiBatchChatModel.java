@@ -40,8 +40,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Collections;
 
 /**
  * Provides an interface for interacting with the Google GenAI Batch API for
@@ -222,8 +224,8 @@ public final class GoogleGenAiBatchChatModel implements BatchChatModel {
             List<BatchItemResult<ChatResponse>> results = new ArrayList<>();
             if (batchJob.dest().isPresent()
                     && batchJob.dest().get().inlinedResponses().isPresent()) {
-                var inlinedResponses = batchJob.dest().get().inlinedResponses().get();
-                for (var inlined : inlinedResponses) {
+                List<InlinedRequest> inlinedResponses = batchJob.dest().get().inlinedResponses().get();
+                for (InlinedRequest inlined : inlinedResponses) {
                     if (inlined.response().isPresent()) {
                         results.add(BatchItemResult.success(GoogleGenAiContentMapper.toChatResponse(
                                 inlined.response().get(), batchJob.model().orElse(modelName))));
@@ -235,7 +237,7 @@ public final class GoogleGenAiBatchChatModel implements BatchChatModel {
             }
             builder.results(results);
         } else if (state == Known.JOB_STATE_FAILED) {
-            builder.results(List.of(BatchItemResult.failure(
+            builder.results(Collections.singletonList(BatchItemResult.failure(
                     GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
         }
 
@@ -243,7 +245,7 @@ public final class GoogleGenAiBatchChatModel implements BatchChatModel {
     }
 
     private static void validateModelInChatRequests(String modelName, List<ChatRequest> requests) {
-        var modelNames = Stream.concat(requests.stream().map(ChatRequest::modelName), Stream.of(modelName))
+        Set<String> modelNames = Stream.concat(requests.stream().map(ChatRequest::modelName), Stream.of(modelName))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 

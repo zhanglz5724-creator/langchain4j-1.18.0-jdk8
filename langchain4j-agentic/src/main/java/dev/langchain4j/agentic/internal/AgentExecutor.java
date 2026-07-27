@@ -17,10 +17,44 @@ import dev.langchain4j.service.TokenStream;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+public class AgentExecutor implements AgentInstance, InternalAgent {
+    private final AgentInvoker agentInvoker;
+    private final Object agent;
 
-public record AgentExecutor(AgentInvoker agentInvoker, Object agent) implements AgentInstance, InternalAgent {
+    public AgentExecutor(AgentInvoker agentInvoker, Object agent) {
+        this.agentInvoker = agentInvoker;
+        this.agent = agent;
+    }
+
+    public AgentInvoker getAgentInvoker() {
+        return agentInvoker;
+    }
+
+    public Object getAgent() {
+        return agent;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AgentExecutor that = (AgentExecutor) o;
+        return java.util.Objects.equals(this.agentInvoker, that.agentInvoker) && java.util.Objects.equals(this.agent, that.agent);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(agentInvoker, agent);
+    }
+
+    @Override
+    public String toString() {
+        return "AgentExecutor{"agentInvoker=" + agentInvoker + , "agent=" + agent + "}"";
+    }
+
 
     private static final Logger LOG = LoggerFactory.getLogger(AgentExecutor.class);
 
@@ -72,7 +106,7 @@ public record AgentExecutor(AgentInvoker agentInvoker, Object agent) implements 
                             e.argumentName());
                     Object response = agenticScope.readState(agentInvoker.outputKey());
                     if (planner != null) {
-                        planner.onSubagentInvoked(new AgentInvocation(type(), name(), agentId(), Map.of(), response));
+                        planner.onSubagentInvoked(new AgentInvocation(type(), name(), agentId(), Collections.emptyMap(), response));
                     }
                     return response;
                 }
@@ -98,10 +132,10 @@ public record AgentExecutor(AgentInvoker agentInvoker, Object agent) implements 
             PlannerExecutor planner,
             AgentInvocationArguments args) {
         String outputKey = agentInvoker.outputKey();
-        if (outputKey != null && !outputKey.isBlank()) {
+        if (outputKey != null && !outputKey.trim().isEmpty()) {
             agenticScope.writeState(outputKey, response);
         }
-        Map<String, Object> namedArgs = args != null ? args.namedArgs() : Map.of();
+        Map<String, Object> namedArgs = args != null ? args.namedArgs() : Collections.emptyMap();
         AgentInvocation agentInvocation = new AgentInvocation(
                 type(), name(), agentId(), namedArgs, isSerializable(response) ? response : "<unknown>");
         agenticScope.registerAgentInvocation(agentInvocation, invokedAgent);

@@ -42,6 +42,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class JlamaStreamingChatModel implements StreamingChatModel {
     private final AbstractModel model;
@@ -129,7 +131,7 @@ public class JlamaStreamingChatModel implements StreamingChatModel {
     }
 
     private void generate(List<ChatMessage> messages, StreamingResponseHandler<AiMessage> handler) {
-        generate(messages, List.of(), handler);
+        generate(messages, Collections.emptyList(), handler);
     }
 
     private void generate(
@@ -181,7 +183,7 @@ public class JlamaStreamingChatModel implements StreamingChatModel {
             }
         }
 
-        List<Tool> tools = toolSpecifications.stream().map(JlamaModel::toTool).toList();
+        List<Tool> tools = toolSpecifications.stream().map(JlamaModel::toTool).collect(Collectors.toList());
 
         PromptContext promptContext = tools.isEmpty() ? promptBuilder.build() : promptBuilder.build(tools);
 
@@ -197,7 +199,7 @@ public class JlamaStreamingChatModel implements StreamingChatModel {
                                 .id(f.getId())
                                 .arguments(JsonSupport.toJson(f.getParameters()))
                                 .build())
-                        .toList();
+                        .collect(Collectors.toList());
 
                 handler.onComplete(Response.from(
                         AiMessage.from(toolCalls),

@@ -10,6 +10,7 @@ import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.service.tool.ToolExecution;
 import java.util.List;
+import java.util.Collections;
 
 /**
  * Represents the result of an AI Service invocation.
@@ -61,7 +62,7 @@ public class Result<T> {
         this.sources = copy(sources);
         this.finishReason = finishReason;
         this.toolExecutions = copy(toolExecutions);
-        this.intermediateResponses = List.of();
+        this.intermediateResponses = Collections.emptyList();
         this.finalResponse = null;
     }
 

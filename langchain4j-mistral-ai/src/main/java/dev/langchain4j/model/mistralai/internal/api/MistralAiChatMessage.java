@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.Collections;
 
 @JsonInclude(NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -123,11 +124,11 @@ public class MistralAiChatMessage {
         }
 
         public MistralAiChatMessageBuilder content(String content) {
-            return content(List.of(new MistralAiTextContent(content)));
+            return content(Collections.singletonList(new MistralAiTextContent(content)));
         }
 
         public MistralAiChatMessageBuilder content(MistralAiMessageContent... content) {
-            return content(List.of(content));
+            return content(Collections.singletonList(content));
         }
 
         @JsonDeserialize(using = MistralAiMessageContentDeserializer.class)

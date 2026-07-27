@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.Collections;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
@@ -68,7 +69,7 @@ public class HttpMcpTransport implements McpTransport {
         }
         this.logResponses = builder.logResponses;
         sseUrl = ensureNotNull(builder.sseUrl, "Missing SSE endpoint URL");
-        customHeadersSupplier = getOrDefault(builder.customHeadersSupplier, (i) -> Map.of());
+        customHeadersSupplier = getOrDefault(builder.customHeadersSupplier, (i) -> Collections.emptyMap());
         client = httpClientBuilder.build();
     }
 

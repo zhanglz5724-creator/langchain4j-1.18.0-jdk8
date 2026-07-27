@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 class InternalOpenAiOfficialHelper {
 
@@ -402,7 +403,7 @@ class InternalOpenAiOfficialHelper {
 
             return ResponseFormatJsonObject.builder()
                     .type(JsonValue.from("json_schema"))
-                    .putAllAdditionalProperties(Map.of("json_schema", JsonValue.from(properties)))
+                    .putAllAdditionalProperties(Collections.singletonMap("json_schema", JsonValue.from(properties)))
                     .build();
         }
     }

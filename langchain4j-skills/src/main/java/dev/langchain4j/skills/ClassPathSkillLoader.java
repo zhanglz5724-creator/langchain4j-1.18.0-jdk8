@@ -10,14 +10,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +72,7 @@ public class ClassPathSkillLoader {
                     .filter(dir -> Files.exists(dir.resolve("SKILL.md")))
                     .map((Path skillDirectory) ->
                             loadSkillFromPath(new ResolvedDirectory(skillDirectory, resolved.jarFileSystem, false)))
-                    .toList();
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("Failed to load skills from classpath directory: " + directoryOnClasspath, e);
         } finally {
@@ -111,7 +115,7 @@ public class ClassPathSkillLoader {
         }
 
         try {
-            String markdown = Files.readString(skillFile);
+            String markdown = new String(Files.readAllBytes(skillFile), StandardCharsets.UTF_8);
 
             Map<String, List<String>> frontMatter = SkillLoaderCommon.parseFrontMatter(markdown);
             String content = SkillLoaderCommon.extractContent(markdown);
@@ -158,7 +162,7 @@ public class ClassPathSkillLoader {
                     })
                     .map(path -> {
                         try {
-                            String content = Files.readString(path);
+                            String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
                             if (isNullOrBlank(content)) {
                                 return null;
                             }
@@ -178,13 +182,53 @@ public class ClassPathSkillLoader {
                         }
                     })
                     .filter(Objects::nonNull)
-                    .toList();
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("Failed to load skill resources from " + skillDirectory, e);
         }
     }
+    private class ResolvedDirectory {
+        private final Path path;
+        private final FileSystem jarFileSystem;
+        private final boolean shouldCloseFileSystemAfterLoading;
 
-    private record ResolvedDirectory(Path path, FileSystem jarFileSystem, boolean shouldCloseFileSystemAfterLoading) {}
+        public ResolvedDirectory(Path path, FileSystem jarFileSystem, boolean shouldCloseFileSystemAfterLoading) {
+            this.path = path;
+            this.jarFileSystem = jarFileSystem;
+            this.shouldCloseFileSystemAfterLoading = shouldCloseFileSystemAfterLoading;
+        }
+
+        public Path getPath() {
+            return path;
+        }
+
+        public FileSystem getJarFileSystem() {
+            return jarFileSystem;
+        }
+
+        public boolean getShouldCloseFileSystemAfterLoading() {
+            return shouldCloseFileSystemAfterLoading;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ResolvedDirectory that = (ResolvedDirectory) o;
+            return java.util.Objects.equals(this.path, that.path) && java.util.Objects.equals(this.jarFileSystem, that.jarFileSystem) && java.util.Objects.equals(this.shouldCloseFileSystemAfterLoading, that.shouldCloseFileSystemAfterLoading);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(path, jarFileSystem, shouldCloseFileSystemAfterLoading);
+        }
+
+        @Override
+        public String toString() {
+            return "ResolvedDirectory{"path=" + path + , "jarFileSystem=" + jarFileSystem + , "shouldCloseFileSystemAfterLoading=" + shouldCloseFileSystemAfterLoading + "}"";
+        }
+
+    }
 
     private static ResolvedDirectory resolveClasspathDirectory(String pathOnClasspath, ClassLoader classLoader) {
         URL url = classLoader.getResource(pathOnClasspath);
@@ -197,7 +241,7 @@ public class ClassPathSkillLoader {
             if ("jar".equals(uri.getScheme())) {
                 return resolveJarPath(uri);
             }
-            return new ResolvedDirectory(Path.of(uri), null, false);
+            return new ResolvedDirectory(Paths.get(uri), null, false);
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException("Failed to resolve classpath resource: " + pathOnClasspath, e);
         }
@@ -214,7 +258,7 @@ public class ClassPathSkillLoader {
         FileSystem fs;
         boolean created;
         try {
-            fs = FileSystems.newFileSystem(jarUri, Map.of());
+            fs = FileSystems.newFileSystem(jarUri, Collections.emptyMap());
             created = true;
         } catch (FileSystemAlreadyExistsException e) {
             fs = FileSystems.getFileSystem(jarUri);

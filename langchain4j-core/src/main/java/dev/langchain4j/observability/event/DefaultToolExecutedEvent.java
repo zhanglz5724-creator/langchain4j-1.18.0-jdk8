@@ -44,8 +44,8 @@ public class DefaultToolExecutedEvent extends AbstractAiServiceEvent implements 
 
     @Override
     public String resultText() {
-        if (resultContents.size() == 1 && resultContents.get(0) instanceof TextContent textContent) {
-            return textContent.text();
+        if (resultContents.size() == 1 && resultContents.get(0) instanceof TextContent) {
+            return ((TextContent) resultContents.size() == 1 && resultContents.get(0)).text();
         }
         throw new IllegalStateException(
                 "resultText() cannot be called when resultContents contains non-text or multiple content elements. "

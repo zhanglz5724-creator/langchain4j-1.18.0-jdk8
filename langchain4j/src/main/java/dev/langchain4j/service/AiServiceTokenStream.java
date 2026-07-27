@@ -218,7 +218,7 @@ public class AiServiceTokenStream implements TokenStream {
                 .eventListenerRegistrar(context.eventListenerRegistrar)
                 .build();
 
-        var handler = new AiServiceStreamingResponseHandler(
+        AiServiceStreamingResponseHandler handler = new AiServiceStreamingResponseHandler(
                 chatRequest,
                 chatExecutor,
                 context,
@@ -296,7 +296,7 @@ public class AiServiceTokenStream implements TokenStream {
     }
 
     private ChatMemory initTemporaryMemory(AiServiceContext context, List<ChatMessage> messagesToSend) {
-        var chatMemory = MessageWindowChatMemory.withMaxMessages(Integer.MAX_VALUE);
+        ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(Integer.MAX_VALUE);
 
         if (!context.hasChatMemory()) {
             chatMemory.add(messagesToSend);

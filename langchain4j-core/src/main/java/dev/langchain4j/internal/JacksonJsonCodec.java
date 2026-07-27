@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A JSON codec implementation using Jackson for serialization and deserialization.
@@ -239,7 +240,7 @@ class JacksonJsonCodec implements Json.JsonCodec {
             }
             return PolymorphicTypes.findConcreteSubtypes(raw).stream()
                     .map(sub -> new NamedType(sub, PolymorphicTypes.discriminatorValue(raw, sub)))
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         private static boolean shouldHandle(Class<?> raw) {

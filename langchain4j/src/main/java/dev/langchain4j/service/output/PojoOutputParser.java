@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Internal
 class PojoOutputParser<T> implements OutputParser<T> {
@@ -146,7 +147,7 @@ class PojoOutputParser<T> implements OutputParser<T> {
                 return "enum, must be one of "
                         + Arrays.stream(clazz.getEnumConstants())
                                 .map(e -> ((Enum<?>) e).name())
-                                .toList();
+                                .collect(Collectors.toList());
             }
             return simpleNameOrJsonStructure(clazz, visited);
         }

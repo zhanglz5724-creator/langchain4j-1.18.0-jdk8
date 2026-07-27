@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.agentic.patterns.p2p.P2PAgent.P2P_REQUEST_KEY;
 import static java.util.stream.Collectors.toMap;
@@ -74,7 +76,7 @@ public class P2PPlanner implements Planner {
             String request = planningContext.agenticScope().readState(P2P_REQUEST_KEY, "");
             Collection<String> variableNames = this.agentActivators.values().stream()
                     .flatMap(agentActivator -> agentActivator.argumentNames().stream())
-                    .distinct().toList();
+                    .distinct().collect(Collectors.toList());
 
             Map<String, String> vars = createVariablesExtractorAgent(chatModel).extractVariables(request, variableNames);
             LOG.info("Variables extracted from user's prompt: {}", vars);
@@ -122,7 +124,7 @@ public class P2PPlanner implements Planner {
 
         AgentActivator(AgentInstance agent) {
             this.agent = agent;
-            this.argumentNames = agent.arguments().stream().map(AgentArgument::name).toList();
+            this.argumentNames = agent.arguments().stream().map(AgentArgument::name).collect(Collectors.toList());
         }
 
         private AgentInstance agent() {
@@ -164,7 +166,7 @@ public class P2PPlanner implements Planner {
 
     @Override
     public Map<String, Object> executionState() {
-        return Map.of("invocationCounter", invocationCounter);
+        return Collections.singletonMap("invocationCounter", invocationCounter);
     }
 
     @Override

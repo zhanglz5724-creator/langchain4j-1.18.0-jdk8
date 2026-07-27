@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.Collections;
 import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,7 @@ public class StreamableHttpMcpTransport implements McpTransport {
         logResponses = builder.logResponses;
         trafficLog = getOrDefault(builder.logger, McpLoggers.traffic());
         Duration timeout = getOrDefault(builder.timeout, Duration.ofSeconds(60));
-        customHeadersSupplier = getOrDefault(builder.customHeadersSupplier, (i) -> Map.of());
+        customHeadersSupplier = getOrDefault(builder.customHeadersSupplier, (i) -> Collections.emptyMap());
         sslContext = builder.sslContext;
         httpVersion = builder.forceHttpVersion1_1 ? HttpClient.Version.HTTP_1_1 : HttpClient.Version.HTTP_2;
         subsidiaryChannelEnabled = builder.subsidiaryChannelEnabled;

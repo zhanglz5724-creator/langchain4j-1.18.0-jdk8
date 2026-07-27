@@ -14,6 +14,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -133,7 +135,7 @@ public class BDIPlanner implements Planner {
                     currentDesire = desire;
                     currentIntention = desire.agentTypes().stream()
                             .map(agentsByType::get)
-                            .toList();
+                            .collect(Collectors.toList());
                     intentionCursor = desireProgress.getOrDefault(desire.name(), 0);
                     if (intentionCursor >= currentIntention.size()) {
                         throw new IllegalStateException(
@@ -153,7 +155,7 @@ public class BDIPlanner implements Planner {
 
     @Override
     public Map<String, Object> executionState() {
-        return Map.of("invocationCounter", invocationCounter);
+        return Collections.singletonMap("invocationCounter", invocationCounter);
     }
 
     /**

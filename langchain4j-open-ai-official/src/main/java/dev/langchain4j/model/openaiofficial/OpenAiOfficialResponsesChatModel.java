@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import static dev.langchain4j.internal.Utils.copy;
 import static dev.langchain4j.internal.Utils.getOrDefault;
@@ -178,7 +179,7 @@ public class OpenAiOfficialResponsesChatModel implements ChatModel {
 
     @Override
     public Set<Capability> supportedCapabilities() {
-        return Set.of(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
+        return Collections.singleton(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
     }
 
     public static class Builder {

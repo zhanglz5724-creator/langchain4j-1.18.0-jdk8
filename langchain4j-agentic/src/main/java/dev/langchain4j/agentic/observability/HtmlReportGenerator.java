@@ -9,6 +9,7 @@ import dev.langchain4j.agentic.workflow.LoopAgentInstance;
 import dev.langchain4j.service.tool.ToolExecution;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -19,18 +20,59 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 /**
  * Generates HTML reports for agent executions.
  * This class has been vibe-coded and is not expected to be maintainable manually by a human without LLM's help.
  */
-public record HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent, Object memoryId) {
+public class HtmlReportGenerator {
+    private final AgentMonitor monitor;
+    private final AgentInstance rootAgent;
+    private final Object memoryId;
+
+    public HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent, Object memoryId) {
+        this.monitor = monitor;
+        this.rootAgent = rootAgent;
+        this.memoryId = memoryId;
+    }
+
+    public AgentMonitor getMonitor() {
+        return monitor;
+    }
+
+    public AgentInstance getRootAgent() {
+        return rootAgent;
+    }
+
+    public Object getMemoryId() {
+        return memoryId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HtmlReportGenerator that = (HtmlReportGenerator) o;
+        return java.util.Objects.equals(this.monitor, that.monitor) && java.util.Objects.equals(this.rootAgent, that.rootAgent) && java.util.Objects.equals(this.memoryId, that.memoryId);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(monitor, rootAgent, memoryId);
+    }
+
+    @Override
+    public String toString() {
+        return "HtmlReportGenerator{"monitor=" + monitor + , "rootAgent=" + rootAgent + , "memoryId=" + memoryId + "}"";
+    }
+
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     public static void generateTopology(Object rootAgent, Path path) {
         try {
-            Files.writeString(path, generateTopology(rootAgent));
+            Files.write(path, generateTopology(rootAgent).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -42,7 +84,7 @@ public record HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent,
 
     public static void generateReport(AgentMonitor monitor, Path path) {
         try {
-            Files.writeString(path, generateReport(monitor));
+            Files.write(path, generateReport(monitor).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -54,7 +96,7 @@ public record HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent,
 
     public static void generateReport(AgentMonitor monitor, Object memoryId, Path path) {
         try {
-            Files.writeString(path, generateReport(monitor, memoryId));
+            Files.write(path, generateReport(monitor, memoryId).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +108,7 @@ public record HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent,
 
     public static void generateExecution(AgentMonitor monitor, Path path) {
         try {
-            Files.writeString(path, generateExecution(monitor));
+            Files.write(path, generateExecution(monitor).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +120,7 @@ public record HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent,
 
     public static void generateExecution(AgentMonitor monitor, Object memoryId, Path path) {
         try {
-            Files.writeString(path, generateExecution(monitor, memoryId));
+            Files.write(path, generateExecution(monitor, memoryId).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -361,7 +403,7 @@ public record HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent,
 
     private Map<String, String> conditionsOf(AgentInstance agent) {
         if (agent.topology() != AgenticSystemTopology.ROUTER) {
-            return Map.of();
+            return Collections.emptyMap();
         }
         Map<String, String> map = new LinkedHashMap<>();
         for (ConditionalAgent ca : agent.as(ConditionalAgentInstance.class).conditionalSubagents()) {
@@ -382,8 +424,8 @@ public record HtmlReportGenerator(AgentMonitor monitor, AgentInstance rootAgent,
         Set<Object> memoryIds;
         if (memoryId != null) {
             memoryIds = monitor.allMemoryIds().contains(memoryId)
-                    ? Set.of(memoryId)
-                    : Set.of();
+                    ? Collections.singleton(memoryId)
+                    : Collections.emptySet();
         } else {
             memoryIds = monitor.allMemoryIds();
         }

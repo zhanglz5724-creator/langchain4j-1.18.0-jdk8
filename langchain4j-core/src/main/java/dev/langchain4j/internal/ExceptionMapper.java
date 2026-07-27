@@ -40,7 +40,8 @@ public interface ExceptionMapper {
         public RuntimeException mapException(Throwable t) {
             Throwable rootCause = findRoot(t);
 
-            if (rootCause instanceof HttpException httpException) {
+            if (rootCause instanceof HttpException) {
+                HttpException httpException = (HttpException) rootCause;
                 return mapHttpStatusCode(httpException, httpException.statusCode());
             }
 
@@ -48,7 +49,7 @@ public interface ExceptionMapper {
                 return new UnresolvedModelServerException(rootCause);
             }
 
-            return t instanceof RuntimeException re ? re : new LangChain4jException(t);
+            return t instanceof RuntimeException ? (RuntimeException) t : new LangChain4jException(t);
         }
 
         protected RuntimeException mapHttpStatusCode(Throwable cause, int httpStatusCode) {
@@ -70,7 +71,7 @@ public interface ExceptionMapper {
             if (httpStatusCode >= 400 && httpStatusCode < 500) {
                 return new InvalidRequestException(cause);
             }
-            return cause instanceof RuntimeException re ? re : new LangChain4jException(cause);
+            return cause instanceof RuntimeException ? (RuntimeException) cause : new LangChain4jException(cause);
         }
 
         private static Throwable findRoot(Throwable e) {

@@ -6,6 +6,7 @@ import dev.langchain4j.invocation.LangChain4jManaged;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 /**
  * The AgenticScope class represents a common environment where agents belonging to the same
@@ -216,7 +217,7 @@ public interface AgenticScope extends LangChain4jManaged {
      * @return a set of pending response identifiers
      */
     default Set<String> pendingResponseIds() {
-        return Set.of();
+        return Collections.emptySet();
     }
 
     /**

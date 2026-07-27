@@ -3,9 +3,9 @@ package dev.langchain4j.model.googleai;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record GroundingMetadata(
+@JsonIgnoreProperties(ignoreUnknown = true) public class GroundingMetadata {
+
         @JsonProperty("groundingChunks") List<GroundingChunk> groundingChunks,
         @JsonProperty("groundingSupports") List<GroundingSupport> groundingSupports,
         @JsonProperty("webSearchQueries") List<String> webSearchQueries,

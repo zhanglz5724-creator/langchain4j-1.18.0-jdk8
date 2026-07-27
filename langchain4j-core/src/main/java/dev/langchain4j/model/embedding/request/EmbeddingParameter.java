@@ -30,11 +30,21 @@ import java.util.Objects;
  * @since 1.18.0
  */
 @Experimental
-public record EmbeddingParameter<T>(String name, Class<T> type) {
+public class EmbeddingParameter<T> {
+    private final String name;
+    private final Class<T> type;
 
-    public EmbeddingParameter {
-        name = ensureNotBlank(name, "name");
-        type = ensureNotNull(type, "type");
+    public EmbeddingParameter(String name, Class<T> type) {
+        this.name = ensureNotBlank(name, "name");
+        this.type = ensureNotNull(type, "type");
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public Class<T> type() {
+        return type;
     }
 
     /**

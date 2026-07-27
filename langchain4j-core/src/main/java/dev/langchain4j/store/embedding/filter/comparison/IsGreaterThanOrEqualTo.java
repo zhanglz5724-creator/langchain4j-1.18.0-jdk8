@@ -30,7 +30,7 @@ public class IsGreaterThanOrEqualTo implements Filter {
 
     @Override
     public boolean test(Object object) {
-        if (!(object instanceof Metadata metadata)) {
+        if (!(object instanceof Metadata)) {
             return false;
         }
 
@@ -50,7 +50,7 @@ public class IsGreaterThanOrEqualTo implements Filter {
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof IsGreaterThanOrEqualTo other)) return false;
+        if (!(o instanceof IsGreaterThanOrEqualTo)) return false;
 
         return Objects.equals(this.key, other.key)
                 && Objects.equals(this.comparisonValue, other.comparisonValue);

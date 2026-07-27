@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * A {@link TextClassifier} that uses an {@link EmbeddingModel} and predefined examples to perform classification.
@@ -31,11 +33,12 @@ import java.util.Map;
  *     POSITIVE, NEUTRAL, NEGATIVE
  * }
  *
- *  Map<Sentiment, List<String>> examples = Map.of(
- *     POSITIVE, List.of("This is great!", "Wow, awesome!"),
- *     NEUTRAL,  List.of("Well, it's fine", "It's ok"),
- *     NEGATIVE, List.of("It is pretty bad", "Worst experience ever!")
- * );
+ *  Map<Sentiment, List<String>> examples = Collections.unmodifiableMap(new HashMap<>() {{
+    put(*     POSITIVE, Arrays.asList("This is great!", "Wow, awesome!"));
+    put(*     NEUTRAL, Arrays.asList("Well, it's fine", "It's ok"));
+    put(*     NEGATIVE, Arrays.asList("It is pretty bad", "Worst experience ever!")
+ *);
+}});
  *
  * EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
  *

@@ -21,6 +21,8 @@ import dev.langchain4j.model.googleai.jsonl.JsonLinesWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -120,14 +122,13 @@ public final class GoogleAiGeminiBatchChatModel implements BatchChatModel {
      * <pre>{@code
      * Path batchFile = Files.createTempFile("batch", ".jsonl");
      * try (JsonLinesWriter writer = new StreamingJsonLinesWriter(batchFile)) {
-     *     List<BatchFileRequest<ChatRequest>> requests = List.of(
-     *         new BatchFileRequest<>("request-1", ChatRequest.builder()
+     *     List<BatchFileRequest<ChatRequest>> requests = Arrays.asList(*         new BatchFileRequest<>("request-1", ChatRequest.builder()
      *             .messages(UserMessage.from("Question 1"))
      *             .build()),
      *         new BatchFileRequest<>("request-2", ChatRequest.builder()
      *             .messages(UserMessage.from("Question 2"))
      *             .build())
-     *     );
+     *);
      *     batchModel.writeBatchToFile(writer, requests);
      * }
      * }</pre>
@@ -243,17 +244,17 @@ public final class GoogleAiGeminiBatchChatModel implements BatchChatModel {
         public List<BatchItemResult<ChatResponse>> extractResults(
                 @Nullable BatchCreateResponse<GeminiGenerateContentResponse> response) {
             if (response == null || response.inlinedResponses() == null) {
-                return List.of();
+                return Collections.emptyList();
             }
 
             List<BatchItemResult<ChatResponse>> results = new ArrayList<>();
             for (Object wrapper : response.inlinedResponses().inlinedResponses()) {
-                var typed = Json.convertValue(wrapper, responseWrapperType);
-                var typedResponse = typed.response();
+                BatchCreateResponse.InlinedResponseWrapper<GeminiGenerateContentResponse> typed = Json.convertValue(wrapper, responseWrapperType);
+                GeminiGenerateContentResponse typedResponse = typed.response();
                 if (typedResponse != null) {
                     results.add(BatchItemResult.success(chatModel.processResponse(typedResponse)));
                 }
-                var error = typed.error();
+                BatchRequestResponse.Operation.Status error = typed.error();
                 if (error != null) {
                     results.add(BatchItemResult.failure(error.toGenericStatus()));
                 }

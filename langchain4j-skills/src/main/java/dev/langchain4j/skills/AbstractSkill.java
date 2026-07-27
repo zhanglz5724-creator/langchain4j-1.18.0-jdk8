@@ -121,7 +121,7 @@ public abstract class AbstractSkill implements Skill {
         for (SkillResource resource : resources) {
             String path = resource.relativePath();
             if (!seenPaths.add(path)) {
-                throw new IllegalStateException("Duplicate skill resource path detected: '%s'".formatted(path));
+                throw new IllegalStateException(String.format("Duplicate skill resource path detected: '%s'", path));
             }
         }
     }

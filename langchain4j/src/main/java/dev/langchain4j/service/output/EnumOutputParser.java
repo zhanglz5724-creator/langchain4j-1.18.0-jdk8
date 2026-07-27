@@ -9,6 +9,7 @@ import dev.langchain4j.model.output.structured.Description;
 import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
@@ -48,7 +49,7 @@ class EnumOutputParser<E extends Enum<E>> implements OutputParser<E> {
                         .addProperty("value", JsonEnumSchema.builder()
                                 .enumValues(stream(enumClass.getEnumConstants())
                                         .map(e -> ((Enum<?>) e).name())
-                                        .toList())
+                                        .collect(Collectors.toList()))
                                 .build())
                         .required("value")
                         .build())

@@ -9,15 +9,43 @@ import dev.langchain4j.agentic.workflow.ConditionalAgent;
 import dev.langchain4j.agentic.workflow.ConditionalAgentInstance;
 
 import java.util.List;
+import java.util.stream.Collectors;
+public class ConditionalPlanner implements Planner {
+    private final List<ConditionalAgent> conditionalSubagents;
 
-public record ConditionalPlanner(List<ConditionalAgent> conditionalSubagents) implements Planner {
+    public ConditionalPlanner(List<ConditionalAgent> conditionalSubagents) {
+        this.conditionalSubagents = conditionalSubagents;
+    }
+
+    public List<ConditionalAgent> getConditionalSubagents() {
+        return conditionalSubagents;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConditionalPlanner that = (ConditionalPlanner) o;
+        return java.util.Objects.equals(this.conditionalSubagents, that.conditionalSubagents);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(conditionalSubagents);
+    }
+
+    @Override
+    public String toString() {
+        return "ConditionalPlanner{"conditionalSubagents=" + conditionalSubagents + "}"";
+    }
+
 
     @Override
     public Action firstAction(PlanningContext planningContext) {
         List<AgentInstance> agentsToCall = conditionalSubagents.stream()
                 .filter(conditionalAgent -> conditionalAgent.predicate().test(planningContext.agenticScope()))
                 .flatMap(conditionalAgent -> conditionalAgent.agentInstances().stream())
-                .toList();
+                .collect(Collectors.toList());
         return agentsToCall.isEmpty() ? done() : call(agentsToCall);
     }
 

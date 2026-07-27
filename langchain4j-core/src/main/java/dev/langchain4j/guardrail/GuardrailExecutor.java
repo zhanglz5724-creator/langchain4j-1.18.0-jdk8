@@ -19,13 +19,13 @@ import java.util.List;
  *            The type of {@link Guardrail}s being executed
  * @param <E> The type of {@link GuardrailExecutedEvent} to be fired
  */
-public sealed interface GuardrailExecutor<
+public interface GuardrailExecutor<
                 C extends GuardrailsConfig,
                 P extends GuardrailRequest<P>,
                 R extends GuardrailResult<R>,
                 G extends Guardrail<P, R>,
                 E extends GuardrailExecutedEvent<P, R, G>>
-        permits AbstractGuardrailExecutor {
+        {
 
     /**
      * The {@link GuardrailsConfig} to use for configuration of the guardrail execution

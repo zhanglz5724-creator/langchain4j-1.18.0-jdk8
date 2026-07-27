@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
@@ -137,8 +138,8 @@ public class DefaultRetrievalAugmentor implements RetrievalAugmentor {
 
         ChatMessage chatMessage = augmentationRequest.chatMessage();
         String queryText;
-        if (chatMessage instanceof UserMessage userMessage) {
-            queryText = userMessage.singleText();
+        if (chatMessage instanceof UserMessage) {
+            queryText = ((UserMessage) chatMessage).singleText();
         } else {
             throw new IllegalArgumentException("Unsupported message type: " + chatMessage.type());
         }
@@ -190,13 +191,13 @@ public class DefaultRetrievalAugmentor implements RetrievalAugmentor {
                                                                          Query query) {
         List<CompletableFuture<List<Content>>> futureContents = retrievers.stream()
             .map(retriever -> supplyAsync(() -> retriever.retrieve(query), executor))
-            .collect(Collectors.toList());
+            .collect(Collectors.collect(Collectors.toList()));
 
         return allOf(futureContents.toArray(new CompletableFuture[0]))
             .thenApply(ignored ->
                 futureContents.stream()
                     .map(CompletableFuture::join)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.collect(Collectors.toList())));
     }
 
     private static Map<Query, Collection<List<Content>>> join(

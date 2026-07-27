@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +111,7 @@ public class SupervisorPlanner implements Planner, ChatMemoryAccessProvider {
         List<String> agentArguments = agent.arguments().stream()
                 .filter(a -> !a.name().equals("@MemoryId"))
                 .map(SupervisorPlanner::argumentDescription)
-                .toList();
+                .collect(Collectors.toList());
         return "{'" + agent.agentId() + "', '" + agent.description() + "', " + agentArguments + "}";
     }
 
@@ -166,7 +167,7 @@ public class SupervisorPlanner implements Planner, ChatMemoryAccessProvider {
     }
 
     private static <T> T withAgenticScope(AgenticScope agenticScope, Supplier<T> supplier) {
-        LangChain4jManaged.setCurrent(Map.of(AgenticScope.class, agenticScope));
+        LangChain4jManaged.setCurrent(Collections.singletonMap(AgenticScope.class, agenticScope));
         try {
             return supplier.get();
         } finally {
@@ -179,7 +180,7 @@ public class SupervisorPlanner implements Planner, ChatMemoryAccessProvider {
         if (agent == null) {
             List<AgentInstance> candidateAgents = agents.values().stream()
                     .filter(a -> a.name().equals(agentName))
-                    .toList();
+                    .collect(Collectors.toList());
             if (candidateAgents.size() == 1) {
                 agent = candidateAgents.get(0);
             }
@@ -239,7 +240,7 @@ public class SupervisorPlanner implements Planner, ChatMemoryAccessProvider {
     }
 
     private PlannerAgent buildPlannerAgent(AgenticScope agenticScope) {
-        var builder = AiServices.builder(PlannerAgent.class).chatModel(chatModel);
+        AiServices<PlannerAgent> builder = AiServices.builder(PlannerAgent.class).chatModel(chatModel);
         configureMemoryAndContext(agenticScope, builder);
         return builder.build();
     }
@@ -273,7 +274,7 @@ public class SupervisorPlanner implements Planner, ChatMemoryAccessProvider {
 
     @Override
     public Map<String, Object> executionState() {
-        return Map.of("loopCount", loopCount);
+        return Collections.singletonMap("loopCount", loopCount);
     }
 
     @Override

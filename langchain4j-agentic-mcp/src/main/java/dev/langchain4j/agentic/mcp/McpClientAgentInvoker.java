@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class McpClientAgentInvoker implements AgentInvoker {
 
@@ -97,12 +99,12 @@ public class McpClientAgentInvoker implements AgentInvoker {
     public List<AgentArgument> arguments() {
         return Stream.of(inputKeys)
                 .map(input -> new AgentArgument(Object.class, input))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<AgentInstance> subagents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override

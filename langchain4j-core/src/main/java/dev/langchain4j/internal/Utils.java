@@ -23,11 +23,13 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.HashMap;
-import java.util.HexFormat;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -274,8 +276,11 @@ public class Utils {
      */
     public static String generateUUIDFrom(String input) {
         byte[] hashBytes = getSha256Instance().digest(input.getBytes(UTF_8));
-        String hexFormat = HexFormat.of().formatHex(hashBytes);
-        return UUID.nameUUIDFromBytes(hexFormat.getBytes(UTF_8)).toString();
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : hashBytes) {
+            hexString.append(String.format("%02x", b));
+        }
+        return UUID.nameUUIDFromBytes(hexString.toString().getBytes(UTF_8)).toString();
     }
 
     /**
@@ -362,7 +367,7 @@ public class Utils {
                 }
             } else {
                 // Handle files
-                return Files.readAllBytes(Path.of(new URI(url)));
+                return Files.readAllBytes(Paths.get(new URI(url)));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -395,7 +400,7 @@ public class Utils {
      */
     public static <T> Set<T> copy(Set<T> set) {
         if (set == null) {
-            return Set.of();
+            return Collections.emptySet();
         }
 
         return unmodifiableSet(set);
@@ -427,7 +432,7 @@ public class Utils {
      */
     public static <T> List<T> copy(List<? extends T> list) {
         if (list == null) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         return unmodifiableList(list);
@@ -459,10 +464,10 @@ public class Utils {
      */
     public static <T> List<T> copy(Collection<? extends T> collection) {
         if (collection == null) {
-            return List.of();
+            return Collections.emptyList();
         }
 
-        return List.copyOf(collection);
+        return Collections.unmodifiableList(new ArrayList<>(collection));
     }
 
     /**
@@ -489,7 +494,7 @@ public class Utils {
      */
     public static <K, V> Map<K, V> copy(Map<K, V> map) {
         if (map == null) {
-            return Map.of();
+            return Collections.emptyMap();
         }
 
         return unmodifiableMap(map);
@@ -554,7 +559,34 @@ public class Utils {
         return Optional.empty();
     }
 
-    private record MethodSignature(String name, List<Class<?>> params) {}
+    private static class MethodSignature {
+        private final String name;
+        private final List<Class<?>> params;
+
+        MethodSignature(String name, List<Class<?>> params) {
+            this.name = name;
+            this.params = params;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MethodSignature that = (MethodSignature) o;
+            return java.util.Objects.equals(this.name, that.name)
+                    && java.util.Objects.equals(this.params, that.params);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(name, params);
+        }
+
+        @Override
+        public String toString() {
+            return "MethodSignature{name=" + name + ", params=" + params + "}";
+        }
+    }
 
     /**
      * Returns all concrete methods from the given class, its superclasses (excluding {@link Object}),
@@ -585,7 +617,7 @@ public class Utils {
             current = current.getSuperclass();
         }
         collectInterfaceMethods(clazz, seen, allMethods, new HashSet<>(), concreteOnly);
-        return List.copyOf(allMethods);
+        return Collections.unmodifiableList(new ArrayList<>(allMethods));
     }
 
     private static void collectConcreteMethods(Class<?> clazz, Set<MethodSignature> seen, List<Method> result) {
@@ -593,7 +625,7 @@ public class Utils {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
-            MethodSignature sig = new MethodSignature(method.getName(), List.of(method.getParameterTypes()));
+            MethodSignature sig = new MethodSignature(method.getName(), Arrays.asList(method.getParameterTypes()));
             if (seen.add(sig)) {
                 result.add(method);
             }
@@ -615,7 +647,7 @@ public class Utils {
                         (concreteOnly && Modifier.isAbstract(method.getModifiers()))) {
                     continue;
                 }
-                MethodSignature sig = new MethodSignature(method.getName(), List.of(method.getParameterTypes()));
+                MethodSignature sig = new MethodSignature(method.getName(), Arrays.asList(method.getParameterTypes()));
                 if (seen.add(sig)) {
                     result.add(method);
                 }

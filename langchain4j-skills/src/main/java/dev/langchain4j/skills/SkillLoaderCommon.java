@@ -2,6 +2,7 @@ package dev.langchain4j.skills;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import org.commonmark.ext.front.matter.YamlFrontMatterExtension;
 import org.commonmark.ext.front.matter.YamlFrontMatterVisitor;
 import org.commonmark.node.Node;
@@ -13,7 +14,7 @@ import org.commonmark.parser.Parser;
 class SkillLoaderCommon {
 
     static final Parser PARSER = Parser.builder()
-            .extensions(List.of(YamlFrontMatterExtension.create()))
+            .extensions(Collections.singletonList(YamlFrontMatterExtension.create()))
             .build();
 
     private SkillLoaderCommon() {}
@@ -36,6 +37,6 @@ class SkillLoaderCommon {
     }
 
     static String getSingle(Map<String, List<String>> map, String key) {
-        return map.getOrDefault(key, List.of()).stream().findFirst().orElse(null);
+        return map.getOrDefault(key, Collections.emptyList()).stream().findFirst().orElse(null);
     }
 }

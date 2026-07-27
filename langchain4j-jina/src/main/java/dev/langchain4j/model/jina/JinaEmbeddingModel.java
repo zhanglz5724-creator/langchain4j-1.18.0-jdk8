@@ -1,6 +1,7 @@
 package dev.langchain4j.model.jina;
 
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.data.image.Image;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ContentType;
 import dev.langchain4j.data.message.ImageContent;
@@ -27,6 +28,9 @@ import org.slf4j.Logger;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
 import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
 import static dev.langchain4j.internal.Utils.copy;
@@ -69,7 +73,7 @@ public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
         this.modelName = ensureNotBlank(modelName, "modelName");
         this.maxRetries = getOrDefault(maxRetries, 2);
         this.lateChunking = getOrDefault(lateChunking, false);
-        this.listeners = List.of();
+        this.listeners = Collections.emptyList();
     }
 
     public JinaEmbeddingModel(JinaEmbeddingModelBuilder builder) {
@@ -110,8 +114,8 @@ public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
     @Override
     public Set<ContentType> supportedContentTypes() {
         return isMultimodalModel(modelName)
-                ? Set.of(ContentType.TEXT, ContentType.IMAGE)
-                : Set.of(ContentType.TEXT);
+                ? Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE)))
+                : Collections.singleton(ContentType.TEXT);
     }
 
     @Override
@@ -133,7 +137,7 @@ public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
 
         embeddings = response.data == null
-                ? List.of()
+                ? Collections.emptyList()
                 : response.data.stream()
                         .map(jinaEmbedding -> Embedding.from(jinaEmbedding.embedding))
                         .collect(toList());
@@ -164,7 +168,7 @@ public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
                 if (imageValue != null) {
                     throw new UnsupportedFeatureException("Jina embeds one image per input");
                 }
-                var image = imageContent.image();
+                Image image = imageContent.image();
                 if (image.url() != null) {
                     imageValue = image.url().toString();
                 } else if (image.base64Data() != null) {

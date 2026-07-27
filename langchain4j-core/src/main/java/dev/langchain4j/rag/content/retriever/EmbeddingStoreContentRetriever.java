@@ -266,7 +266,7 @@ public class EmbeddingStoreContentRetriever implements ContentRetriever {
                         Map.of(
                                 ContentMetadata.SCORE, embeddingMatch.score(),
                                 ContentMetadata.EMBEDDING_ID, embeddingMatch.embeddingId())))
-                .collect(Collectors.toList());
+                .collect(Collectors.collect(Collectors.toList()));
     }
 
     private Embedding embedQuery(String text) {

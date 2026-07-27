@@ -58,7 +58,7 @@ public final class OracleChatMemoryStore implements ChatMemoryStore {
     }
 
     private static String validateIdentifier(String identifier, String fieldName) {
-        if (identifier == null || identifier.isBlank()) {
+        if (identifier == null || identifier.trim().isEmpty()) {
             throw new IllegalArgumentException(fieldName + " cannot be blank");
         }
         if (SIMPLE_IDENTIFIER.matcher(identifier).matches()) {

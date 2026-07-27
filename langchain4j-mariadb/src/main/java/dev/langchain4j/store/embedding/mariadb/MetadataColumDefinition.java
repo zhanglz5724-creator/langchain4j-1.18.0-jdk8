@@ -9,7 +9,53 @@ import java.util.regex.Pattern;
 /**
  * MetadataColumDefinition used to define column definition from sql String
  */
-public record MetadataColumDefinition(String fullDefinition, String escapedName, String name, String type) {
+public class MetadataColumDefinition {
+    private final String fullDefinition;
+    private final String escapedName;
+    private final String name;
+    private final String type;
+
+    public MetadataColumDefinition(String fullDefinition, String escapedName, String name, String type) {
+        this.fullDefinition = fullDefinition;
+        this.escapedName = escapedName;
+        this.name = name;
+        this.type = type;
+    }
+
+    public String getFullDefinition() {
+        return fullDefinition;
+    }
+
+    public String getEscapedName() {
+        return escapedName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MetadataColumDefinition that = (MetadataColumDefinition) o;
+        return java.util.Objects.equals(this.fullDefinition, that.fullDefinition) && java.util.Objects.equals(this.escapedName, that.escapedName) && java.util.Objects.equals(this.name, that.name) && java.util.Objects.equals(this.type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(fullDefinition, escapedName, name, type);
+    }
+
+    @Override
+    public String toString() {
+        return "MetadataColumDefinition{"fullDefinition=" + fullDefinition + , "escapedName=" + escapedName + , "name=" + name + , "type=" + type + "}"";
+    }
+
     private static final Pattern litteralPattern =
             Pattern.compile("^(([a-zA-Z0-9_]+)|(`((``)|[^`])+`))", Pattern.DOTALL);
 

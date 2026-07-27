@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
+import com.google.genai.types.Blob;
 import com.google.genai.types.Candidate;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentConfig;
@@ -30,6 +31,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,9 +88,9 @@ public class GoogleGenAiImageModel implements ImageModel {
         ensureNotBlank(prompt, "prompt");
 
         Content content =
-                Content.builder().parts(List.of(Part.fromText(prompt))).build();
+                Content.builder().parts(Collections.singletonList(Part.fromText(prompt))).build();
 
-        return generateImageResponse(List.of(content));
+        return generateImageResponse(Collections.singletonList(content));
     }
 
     @Override
@@ -102,7 +104,7 @@ public class GoogleGenAiImageModel implements ImageModel {
 
         Content content = Content.builder().parts(parts).build();
 
-        return generateImageResponse(List.of(content));
+        return generateImageResponse(Collections.singletonList(content));
     }
 
     @Override
@@ -118,7 +120,7 @@ public class GoogleGenAiImageModel implements ImageModel {
 
         Content content = Content.builder().parts(parts).build();
 
-        return generateImageResponse(List.of(content));
+        return generateImageResponse(Collections.singletonList(content));
     }
 
     private Response<Image> generateImageResponse(List<Content> contents) {
@@ -144,15 +146,14 @@ public class GoogleGenAiImageModel implements ImageModel {
 
     private GenerateContentConfig createGenerateContentConfig() {
         GenerateContentConfig.Builder configBuilder =
-                GenerateContentConfig.builder().responseModalities(List.of("IMAGE"));
+                GenerateContentConfig.builder().responseModalities(Collections.singletonList("IMAGE"));
 
         if (!safetySettings.isEmpty()) {
             configBuilder.safetySettings(safetySettings);
         }
 
         if (useGoogleSearchGrounding) {
-            configBuilder.tools(List.of(
-                    Tool.builder().googleSearch(GoogleSearch.builder().build()).build()));
+            configBuilder.tools(Collections.singletonList(Tool.builder().googleSearch(GoogleSearch.builder().build()).build()));
         }
 
         if (aspectRatio != null || imageSize != null || personGeneration != null) {
@@ -179,7 +180,7 @@ public class GoogleGenAiImageModel implements ImageModel {
     private Part createImagePart(Image image) {
         String base64Data = image.base64Data();
         String mimeType = image.mimeType();
-        if (mimeType == null || mimeType.isBlank()) {
+        if (mimeType == null || mimeType.trim().isEmpty()) {
             mimeType = "image/png";
         }
 
@@ -215,7 +216,7 @@ public class GoogleGenAiImageModel implements ImageModel {
 
         for (Part part : response.parts()) {
             if (part.inlineData().isPresent()) {
-                var blob = part.inlineData().get();
+                Blob blob = part.inlineData().get();
                 if (blob.data().isPresent()) {
                     byte[] bytes = blob.data().get();
                     String base64Data = Base64.getEncoder().encodeToString(bytes);

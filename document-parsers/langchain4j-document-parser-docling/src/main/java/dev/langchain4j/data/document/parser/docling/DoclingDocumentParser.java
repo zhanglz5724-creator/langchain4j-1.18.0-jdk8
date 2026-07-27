@@ -13,6 +13,7 @@ import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentParser;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.internal.ValidationUtils;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
@@ -39,7 +40,13 @@ public class DoclingDocumentParser implements DocumentParser {
         ValidationUtils.ensureNotNull(inputStream, "inputStream");
 
         try {
-            byte[] documentBytes = inputStream.readAllBytes();
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int n;
+            byte[] data = new byte[4096];
+            while ((n = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, n);
+            }
+            byte[] documentBytes = buffer.toByteArray();
 
             Metadata metadata = new Metadata();
             metadata.put("document_size_bytes", String.valueOf(documentBytes.length));
@@ -80,7 +87,7 @@ public class DoclingDocumentParser implements DocumentParser {
             }
 
             String parsedText = inBodyResponse.getDocument().getMarkdownContent();
-            if ((parsedText == null) || parsedText.strip().isEmpty()) {
+            if ((parsedText == null) || parsedText.trim().isEmpty()) {
                 throw new BlankDocumentException();
             }
 

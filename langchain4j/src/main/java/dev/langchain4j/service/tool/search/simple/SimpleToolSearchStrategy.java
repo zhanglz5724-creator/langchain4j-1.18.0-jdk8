@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
@@ -88,7 +90,7 @@ public class SimpleToolSearchStrategy implements ToolSearchStrategy {
 
     @Override
     public List<ToolSpecification> getToolSearchTools(InvocationContext context) {
-        return List.of(toolSearchTool);
+        return Collections.singletonList(toolSearchTool);
     }
 
     public ToolSearchResult search(ToolSearchRequest request) {
@@ -99,11 +101,11 @@ public class SimpleToolSearchStrategy implements ToolSearchStrategy {
                 .filter(scoredTool -> scoredTool.score >= minScore)
                 .sorted(comparingInt(ScoredTool::score).reversed())
                 .limit(maxResults)
-                .toList();
+                .collect(Collectors.toList());
 
         List<String> toolNames = scoredTools.stream()
                 .map(st -> st.tool.name())
-                .toList();
+                .collect(Collectors.toList());
 
         String toolResultMessageText = toolResultMessageTextProvider.apply(toolNames);
 
@@ -138,14 +140,14 @@ public class SimpleToolSearchStrategy implements ToolSearchStrategy {
                 .filter(s -> !s.isEmpty())
                 .map(String::toLowerCase)
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
     }
 
     protected List<String> extractTerms(String argumentsJson) {
         Map<String, Object> map = parseMap(argumentsJson);
 
         if (isNullOrEmpty(map) || !map.containsKey(toolArgumentName)) {
-            String message = "Missing required tool argument '%s'".formatted(toolArgumentName);
+            String message = String.format("Missing required tool argument '%s'", toolArgumentName);
             throwArgumentException(message, null);
         }
 
@@ -154,9 +156,9 @@ public class SimpleToolSearchStrategy implements ToolSearchStrategy {
             return list.stream()
                     .filter(Objects::nonNull)
                     .map(Object::toString)
-                    .toList();
+                    .collect(Collectors.toList());
         } else {
-            String message = "Tool argument '%s' must be an array of strings".formatted(toolArgumentName);
+            String message = String.format("Tool argument '%s' must be an array of strings", toolArgumentName);
             throwArgumentException(message, null);
             return null; // unreachable
         }
@@ -166,7 +168,7 @@ public class SimpleToolSearchStrategy implements ToolSearchStrategy {
         try {
             return Json.fromJson(json, Map.class);
         } catch (Exception e) {
-            String message = "Failed to parse tool search arguments: '%s' (base64: '%s')".formatted(json, toBase64(json));
+            String message = String.format("Failed to parse tool search arguments: '%s' (base64: '%s')", json, toBase64(json));
             throwArgumentException(message, e);
             return null; // unreachable
         }
@@ -185,8 +187,41 @@ public class SimpleToolSearchStrategy implements ToolSearchStrategy {
     private static String lower(String value) {
         return value == null ? null : value.toLowerCase();
     }
+    private class ScoredTool {
+        private final ToolSpecification tool;
+        private final int score;
 
-    private record ScoredTool(ToolSpecification tool, int score) {
+        public ScoredTool(ToolSpecification tool, int score) {
+            this.tool = tool;
+            this.score = score;
+        }
+
+        public ToolSpecification getTool() {
+            return tool;
+        }
+
+        public int getScore() {
+            return score;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ScoredTool that = (ScoredTool) o;
+            return java.util.Objects.equals(this.tool, that.tool) && java.util.Objects.equals(this.score, that.score);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(tool, score);
+        }
+
+        @Override
+        public String toString() {
+            return "ScoredTool{"tool=" + tool + , "score=" + score + "}"";
+        }
+
     }
 
     public static Builder builder() {

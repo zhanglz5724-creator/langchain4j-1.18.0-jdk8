@@ -24,6 +24,8 @@ import dev.langchain4j.model.output.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -129,10 +131,9 @@ public final class GoogleAiGeminiBatchEmbeddingModel implements BatchEmbeddingMo
      * <pre>{@code
      * Path batchFile = Files.createTempFile("embeddings", ".jsonl");
      * try (JsonLinesWriter writer = new StreamingJsonLinesWriter(batchFile)) {
-     *     List<BatchFileRequest<TextSegment>> requests = List.of(
-     *         new BatchFileRequest<>("doc-1", TextSegment.from("Content for document 1")),
+     *     List<BatchFileRequest<TextSegment>> requests = Arrays.asList(*         new BatchFileRequest<>("doc-1", TextSegment.from("Content for document 1")),
      *         new BatchFileRequest<>("doc-2", TextSegment.from("Content for document 2"))
-     *     );
+     *);
      *     batchModel.writeBatchToFile(writer, requests);
      * }
      * }</pre>
@@ -235,7 +236,7 @@ public final class GoogleAiGeminiBatchEmbeddingModel implements BatchEmbeddingMo
             GeminiContent.GeminiPart geminiPart =
                     GeminiContent.GeminiPart.builder().text(textSegment.text()).build();
 
-            GeminiContent content = new GeminiContent(List.of(geminiPart), null);
+            GeminiContent content = new GeminiContent(Collections.singletonList(geminiPart), null);
 
             String title = null;
             if (GoogleAiEmbeddingModel.TaskType.RETRIEVAL_DOCUMENT.equals(taskType)
@@ -251,20 +252,20 @@ public final class GoogleAiGeminiBatchEmbeddingModel implements BatchEmbeddingMo
         public List<BatchItemResult<Response<@NonNull Embedding>>> extractResults(
                 @Nullable BatchCreateResponse<GeminiEmbeddingResponse> response) {
             if (response == null || response.inlinedResponses() == null) {
-                return List.of();
+                return Collections.emptyList();
             }
 
             List<BatchItemResult<Response<@NonNull Embedding>>> results = new ArrayList<>();
 
             for (Object wrapper : response.inlinedResponses().inlinedResponses()) {
-                var typed = Json.convertValue(wrapper, responseWrapperType);
-                var typedResponse = typed.response();
+                BatchCreateResponse.InlinedResponseWrapper<GeminiEmbeddingResponse> typed = Json.convertValue(wrapper, responseWrapperType);
+                GeminiEmbeddingResponse typedResponse = typed.response();
                 if (typedResponse != null) {
-                    var embedding = Embedding.from(typedResponse.embedding().values());
+                    Embedding embedding = Embedding.from(typedResponse.embedding().values());
                     // The Gemini batch embedding API does not return token usage for embeddings.
                     results.add(BatchItemResult.success(Response.from(embedding)));
                 }
-                var error = typed.error();
+                BatchRequestResponse.Operation.Status error = typed.error();
                 if (error != null) {
                     results.add(BatchItemResult.failure(error.toGenericStatus()));
                 }

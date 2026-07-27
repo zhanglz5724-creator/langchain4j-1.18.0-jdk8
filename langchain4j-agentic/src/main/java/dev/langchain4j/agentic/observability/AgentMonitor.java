@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Monitors agent executions and provides observability for the LangChain4j Agentic system.
@@ -74,7 +75,7 @@ public class AgentMonitor implements AgentListener {
 
     private static void trimToSize(Map<Object, ?> map, int maxSize) {
         synchronized (map) {
-            var it = map.entrySet().iterator();
+            Iterator<Map.Entry<String, Long>> it = map.entrySet().iterator();
             while (map.size() > maxSize && it.hasNext()) {
                 it.next();
                 it.remove();
@@ -170,7 +171,7 @@ public class AgentMonitor implements AgentListener {
 
     public List<MonitoredExecution> successfulExecutions() {
         synchronized (successfulExecutions) {
-            return successfulExecutions.values().stream().flatMap(List::stream).toList();
+            return successfulExecutions.values().stream().flatMap(List::stream).collect(Collectors.toList());
         }
     }
 
@@ -180,13 +181,13 @@ public class AgentMonitor implements AgentListener {
 
     public List<MonitoredExecution> successfulExecutionsFor(Object memoryId) {
         synchronized (successfulExecutions) {
-            return List.copyOf(successfulExecutions.getOrDefault(memoryId, List.of()));
+            return Collections.unmodifiableList(new ArrayList<>(successfulExecutions.getOrDefault(memoryId, Collections.emptyList()));
         }
     }
 
     public List<MonitoredExecution> failedExecutions() {
         synchronized (failedExecutions) {
-            return failedExecutions.values().stream().flatMap(List::stream).toList();
+            return failedExecutions.values().stream().flatMap(List::stream).collect(Collectors.toList());
         }
     }
 
@@ -196,7 +197,7 @@ public class AgentMonitor implements AgentListener {
 
     public List<MonitoredExecution> failedExecutionsFor(Object memoryId) {
         synchronized (failedExecutions) {
-            return List.copyOf(failedExecutions.getOrDefault(memoryId, List.of()));
+            return Collections.unmodifiableList(new ArrayList<>(failedExecutions.getOrDefault(memoryId, Collections.emptyList()));
         }
     }
 

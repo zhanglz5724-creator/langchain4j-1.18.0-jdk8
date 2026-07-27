@@ -31,6 +31,7 @@ import dev.langchain4j.model.output.TokenUsage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A {@link StreamingChatModel} implementation that integrates IBM watsonx.ai with LangChain4j.
@@ -68,19 +69,19 @@ public class WatsonxStreamingChatModel extends WatsonxChat implements StreamingC
                 chatRequest.messages().stream().map(Converter::toChatMessage).collect(toCollection(ArrayList::new));
 
         List<Tool> tools = nonNull(toolSpecifications) && toolSpecifications.size() > 0
-                ? toolSpecifications.stream().map(Converter::toTool).toList()
+                ? toolSpecifications.stream().map(Converter::toTool).collect(Collectors.toList())
                 : null;
 
         String deploymentId = null;
-        var watsonxChatRequestBuilder = com.ibm.watsonx.ai.chat.ChatRequest.builder();
+        com.ibm.watsonx.ai.chat.ChatRequest.Builder watsonxChatRequestBuilder = com.ibm.watsonx.ai.chat.ChatRequest.builder();
 
         if (chatRequest.parameters() instanceof WatsonxChatRequestParameters wcrp) {
             deploymentId = wcrp.deploymentId();
             if (nonNull(wcrp.thinking())) watsonxChatRequestBuilder.thinking(wcrp.thinking());
         }
 
-        var parameters = Converter.toChatParameters(chatRequest.parameters());
-        var watsonxChatRequest = watsonxChatRequestBuilder
+        com.ibm.watsonx.ai.chat.model.ChatParameters parameters = Converter.toChatParameters(chatRequest.parameters());
+        com.ibm.watsonx.ai.chat.ChatRequest watsonxChatRequest = watsonxChatRequestBuilder
                 .messages(messages)
                 .tools(tools)
                 .parameters(parameters)
@@ -101,8 +102,8 @@ public class WatsonxStreamingChatModel extends WatsonxChat implements StreamingC
                                 completeUsage.totalTokens())
                         : null;
 
-                var assistantMessage = completeResponse.toAssistantMessage();
-                var aiMessage = AiMessage.builder();
+                AssistantMessage assistantMessage = completeResponse.toAssistantMessage();
+                AiMessage.Builder aiMessage = AiMessage.builder();
 
                 if (isNotNullOrBlank(assistantMessage.refusal()))
                     handler.onError(new ContentFilteredException(assistantMessage.refusal()));
@@ -110,7 +111,7 @@ public class WatsonxStreamingChatModel extends WatsonxChat implements StreamingC
                 if (nonNull(assistantMessage.toolCalls())) {
                     aiMessage.toolExecutionRequests(assistantMessage.toolCalls().stream()
                             .map(Converter::toToolExecutionRequest)
-                            .toList());
+                            .collect(Collectors.toList()));
                 }
 
                 aiMessage.thinking(assistantMessage.thinking());

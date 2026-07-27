@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collections;
 
 /**
  * A builder class for constructing streaming responses from Gemini AI model.
@@ -45,8 +46,48 @@ class GeminiStreamingResponseBuilder {
         this.thoughtBuilder = new StringBuilder();
         this.functionCalls = new ArrayList<>();
     }
+     class TextAndTools {
+        private final Optional<String> maybeText;
+        private final Optional<String> maybeThought;
+        private final List<ToolExecutionRequest> tools;
 
-    record TextAndTools(Optional<String> maybeText, Optional<String> maybeThought, List<ToolExecutionRequest> tools) {}
+        public TextAndTools(Optional<String> maybeText, Optional<String> maybeThought, List<ToolExecutionRequest> tools) {
+            this.maybeText = maybeText;
+            this.maybeThought = maybeThought;
+            this.tools = tools;
+        }
+
+        public Optional<String> getMaybeText() {
+            return maybeText;
+        }
+
+        public Optional<String> getMaybeThought() {
+            return maybeThought;
+        }
+
+        public List<ToolExecutionRequest> getTools() {
+            return tools;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TextAndTools that = (TextAndTools) o;
+            return java.util.Objects.equals(this.maybeText, that.maybeText) && java.util.Objects.equals(this.maybeThought, that.maybeThought) && java.util.Objects.equals(this.tools, that.tools);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(maybeText, maybeThought, tools);
+        }
+
+        @Override
+        public String toString() {
+            return "TextAndTools{"maybeText=" + maybeText + , "maybeThought=" + maybeThought + , "tools=" + tools + "}"";
+        }
+
+    }
 
     /**
      * Appends a partial response to the builder.
@@ -56,12 +97,12 @@ class GeminiStreamingResponseBuilder {
      */
     TextAndTools append(GeminiGenerateContentResponse partialResponse) {
         if (partialResponse == null) {
-            return new TextAndTools(Optional.empty(), Optional.empty(), List.of());
+            return new TextAndTools(Optional.empty(), Optional.empty(), Collections.emptyList());
         }
 
         List<GeminiCandidate> candidates = partialResponse.candidates();
         if (candidates == null || candidates.isEmpty()) {
-            return new TextAndTools(Optional.empty(), Optional.empty(), List.of());
+            return new TextAndTools(Optional.empty(), Optional.empty(), Collections.emptyList());
         }
 
         GeminiCandidate firstCandidate = candidates.get(0);
@@ -73,7 +114,7 @@ class GeminiStreamingResponseBuilder {
 
         GeminiContent content = firstCandidate.content();
         if (content == null || content.parts() == null) {
-            return new TextAndTools(Optional.empty(), Optional.empty(), List.of());
+            return new TextAndTools(Optional.empty(), Optional.empty(), Collections.emptyList());
         }
 
         AiMessage message = fromGPartsToAiMessage(content.parts(), includeCodeExecutionOutput, returnThinking);

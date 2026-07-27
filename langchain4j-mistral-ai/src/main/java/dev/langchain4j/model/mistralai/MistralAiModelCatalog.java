@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.model.ModelProvider.MISTRAL_AI;
@@ -55,7 +56,7 @@ public class MistralAiModelCatalog implements ModelCatalog {
         MistralAiModelResponse response = client.listModels();
         List<ModelDescription> models = response.getData().stream()
                 .map(this::mapFromMistralAiModelCard)
-                .toList();
+                .collect(Collectors.toList());
         return models;
     }
 

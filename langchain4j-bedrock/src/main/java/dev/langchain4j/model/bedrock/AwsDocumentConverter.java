@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import software.amazon.awssdk.core.document.Document;
 import software.amazon.awssdk.core.document.internal.MapDocument;
 
@@ -50,7 +51,7 @@ class AwsDocumentConverter {
         } else if (doc.isList()) {
             return doc.asList().stream()
                     .map(AwsDocumentConverter::documentToObject)
-                    .toList();
+                    .collect(Collectors.toList());
         } else if (doc.isMap()) {
             Map<String, Object> innerObject = new HashMap<>();
             doc.asMap().forEach((k, v) -> innerObject.put(k, documentToObject(v)));

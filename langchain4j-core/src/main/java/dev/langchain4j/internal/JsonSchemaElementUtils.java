@@ -25,6 +25,7 @@ import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 import dev.langchain4j.model.output.structured.Description;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -145,18 +146,21 @@ public class JsonSchemaElementUtils {
 
     private static JsonSchemaElement addDiscriminator(
             JsonSchemaElement subtypeSchema, Class<?> baseType, Class<?> subtype, String discriminatorProperty) {
-        if (!(subtypeSchema instanceof JsonObjectSchema obj)) {
+        if (!(subtypeSchema instanceof JsonObjectSchema)) {
             return subtypeSchema;
         }
+        JsonObjectSchema obj = (JsonObjectSchema) subtypeSchema;
 
         String discriminatorValue = discriminatorValue(baseType, subtype);
 
         // Idempotency: a recursive call may have already augmented this subtype.
-        if (obj.properties().get(discriminatorProperty) instanceof JsonEnumSchema existing
-                && existing.enumValues() != null
+        if (obj.properties().get(discriminatorProperty) instanceof JsonEnumSchema) {
+            JsonEnumSchema existing = (JsonEnumSchema) obj.properties().get(discriminatorProperty);
+            if (existing.enumValues() != null
                 && existing.enumValues().size() == 1
                 && discriminatorValue.equals(existing.enumValues().get(0))) {
-            return obj;
+                return obj;
+            }
         }
 
         if (obj.properties().containsKey(discriminatorProperty)) {
@@ -243,7 +247,8 @@ public class JsonSchemaElementUtils {
             if (jsonSchemaElement instanceof JsonReferenceSchema) {
                 visitedClassMetadata.recursionDetected = true;
             }
-            if (jsonSchemaElement instanceof JsonObjectSchema obj) {
+            if (jsonSchemaElement instanceof JsonObjectSchema) {
+                JsonObjectSchema obj = (JsonObjectSchema) jsonSchemaElement;
                 if (Objects.equals(description, obj.description())) {
                     return obj;
                 }
@@ -328,11 +333,49 @@ public class JsonSchemaElementUtils {
      * generic shape so callers can recurse into nested generics like {@code List<List<X>>} or {@code List<Foo<Bar>>}.
      */
     private static Type collectionElementType(Type type) {
-        if (type instanceof final ParameterizedType parameterizedType) {
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
             if (actualTypeArguments.length == 1) {
                 return actualTypeArguments[0];
             }
+        }
+        return null;
+    }
+
+    private static Class<?> rawClassOf(Type type) {
+        if (type == null) {
+            return Object.class;
+        }
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            if (parameterizedType.getRawType() instanceof Class) {
+                return (Class<?>) parameterizedType.getRawType();
+            }
+        }
+        if (type instanceof WildcardType) {
+            WildcardType wildcardType = (WildcardType) type;
+            Type[] upperBounds = wildcardType.getUpperBounds();
+            if (upperBounds.length > 0) {
+                return rawClassOf(upperBounds[0]);
+            }
+        }
+        if (type instanceof TypeVariable) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) type;
+            Type[] bounds = typeVariable.getBounds();
+            if (bounds.length > 0) {
+                return rawClassOf(bounds[0]);
+            }
+        }
+        if (type instanceof GenericArrayType) {
+            GenericArrayType genericArrayType = (GenericArrayType) type;
+            return Array.newInstance(rawClassOf(genericArrayType.getGenericComponentType()), 0).getClass();
+        }
+        return Object.class;
+    }
         }
         return null;
     }

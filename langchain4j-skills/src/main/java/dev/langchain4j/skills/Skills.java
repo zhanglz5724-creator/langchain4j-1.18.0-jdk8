@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import static dev.langchain4j.agent.tool.SearchBehavior.ALWAYS_VISIBLE;
 import static dev.langchain4j.agent.tool.ToolSpecification.METADATA_SEARCH_BEHAVIOR;
@@ -203,7 +204,7 @@ public class Skills {
 
     private static Set<String> getActivatedSkillNames(List<ChatMessage> messages) {
         if (messages == null || messages.isEmpty()) {
-            return Set.of();
+            return Collections.emptySet();
         }
         Set<String> activated = new HashSet<>();
         for (ChatMessage message : messages) {

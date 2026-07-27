@@ -184,7 +184,7 @@ class MistralAiServerSentEventListener implements ServerSentEventListener {
     }
 
     private MistralAiChatResponseMetadata createMetadata() {
-        var metadataBuilder = MistralAiChatResponseMetadata.builder();
+        MistralAiChatResponseMetadata.Builder metadataBuilder = MistralAiChatResponseMetadata.builder();
 
         metadataBuilder
                 .tokenUsage(tokenUsage)

@@ -20,6 +20,9 @@ import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchConfigurationS
 import dev.langchain4j.store.embedding.filter.Filter;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,11 +109,11 @@ public class ElasticsearchContentRetriever extends AbstractElasticsearchEmbeddin
             return this.fullTextSearch(query.text()).stream()
                     .map(t -> Content.from(
                             t,
-                            Map.of(
-                                    ContentMetadata.SCORE, t.metadata().getDouble(ContentMetadata.SCORE.name()),
-                                    ContentMetadata.EMBEDDING_ID,
-                                            t.metadata().getString(ContentMetadata.EMBEDDING_ID.name()))))
-                    .toList();
+                            Collections.unmodifiableMap(new HashMap<>() {{
+    put(ContentMetadata.SCORE, t.metadata().getDouble(ContentMetadata.SCORE.name()));
+    put(ContentMetadata.EMBEDDING_ID, t.metadata().getString(ContentMetadata.EMBEDDING_ID.name()));
+}})))
+                    .collect(Collectors.toList());
         }
         Embedding referenceEmbedding = embeddingModel.embed(query.text()).content();
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
@@ -132,10 +135,11 @@ public class ElasticsearchContentRetriever extends AbstractElasticsearchEmbeddin
                 .filter(f -> f.score() >= minScore)
                 .map(m -> Content.from(
                         m.embedded(),
-                        Map.of(
-                                ContentMetadata.SCORE, m.score(),
-                                ContentMetadata.EMBEDDING_ID, m.embeddingId())))
-                .toList();
+                        Collections.unmodifiableMap(new HashMap<>() {{
+    put(ContentMetadata.SCORE, m.score());
+    put(ContentMetadata.EMBEDDING_ID, m.embeddingId());
+}})))
+                .collect(Collectors.toList());
         log.debug("Found [{}] relevant documents in Elasticsearch index [{}].", result.size(), indexName);
         return result;
     }

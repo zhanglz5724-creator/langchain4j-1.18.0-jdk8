@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Internal
 final class ListeningEmbeddingModel implements EmbeddingModel {
@@ -185,7 +186,7 @@ final class ListeningEmbeddingModel implements EmbeddingModel {
     public EmbeddingResponse embed(EmbeddingRequest request) {
         Map<Object, Object> attributes = new ConcurrentHashMap<>();
         List<TextSegment> textSegmentsForContext =
-                request.inputs().stream().map(input -> TextSegment.from(input.text())).toList();
+                request.inputs().stream().map(input -> TextSegment.from(input.text())).collect(Collectors.toList());
 
         EmbeddingModelRequestContext requestContext = EmbeddingModelRequestContext.builder()
                 .textSegments(textSegmentsForContext)

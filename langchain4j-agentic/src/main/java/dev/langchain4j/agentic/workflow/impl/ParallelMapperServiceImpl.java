@@ -43,7 +43,7 @@ public class ParallelMapperServiceImpl<T> extends AbstractServiceBuilder<T, Para
     }
 
     private String itemsProvider() {
-        if (itemsProvider != null && !itemsProvider.isBlank()) {
+        if (itemsProvider != null && !itemsProvider.trim().isEmpty()) {
             return itemsProvider;
         }
         if (agenticMethod == null) {

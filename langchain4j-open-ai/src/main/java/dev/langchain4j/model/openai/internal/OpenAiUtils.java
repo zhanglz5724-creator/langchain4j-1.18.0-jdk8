@@ -81,6 +81,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 @Internal
 public class OpenAiUtils {
@@ -393,7 +394,7 @@ public class OpenAiUtils {
         }
 
         List<ToolExecutionRequest> toolExecutionRequests =
-                getOrDefault(assistantMessage.toolCalls(), List.of()).stream()
+                getOrDefault(assistantMessage.toolCalls(), Collections.emptyList()).stream()
                         .filter(toolCall -> toolCall.type() == FUNCTION)
                         .map(OpenAiUtils::toToolExecutionRequest)
                         .collect(toList());

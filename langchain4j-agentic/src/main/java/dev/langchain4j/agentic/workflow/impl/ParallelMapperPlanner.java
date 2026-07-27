@@ -90,7 +90,7 @@ public class ParallelMapperPlanner implements Planner {
                 planningContext.agenticScope().writeState(resultKeyPrefix + "_" + i, null);
             }
             Object result = isArrayResult ? copyOf(results.toArray(), results.size(), arrayclass) : results;
-            if (outputKey != null && !outputKey.isBlank()) {
+            if (outputKey != null && !outputKey.trim().isEmpty()) {
                 planningContext.agenticScope().writeState(outputKey, result);
             }
             return done(result);

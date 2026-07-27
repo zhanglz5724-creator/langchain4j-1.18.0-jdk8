@@ -36,7 +36,7 @@ public class McpToolProvider implements ToolProvider {
 
     private static final Logger log = LoggerFactory.getLogger(McpToolProvider.class);
     private static final Map<String, Object> SEARCH_BEHAVIOR_ALWAYS_VISIBLE =
-            Map.of(ToolSpecification.METADATA_SEARCH_BEHAVIOR, ALWAYS_VISIBLE);
+            Collections.singletonMap(ToolSpecification.METADATA_SEARCH_BEHAVIOR, ALWAYS_VISIBLE);
 
     private final CopyOnWriteArrayList<McpClient> mcpClients;
     private final boolean failIfOneServerFails;
@@ -73,7 +73,7 @@ public class McpToolProvider implements ToolProvider {
         this.resourcesAsToolsPresenter = resourcesAsToolsPresenter;
         this.toolNameMapper = new AtomicReference<>(toolNameMapper);
         this.toolSpecificationMapper = new AtomicReference<>(toolSpecificationMapper);
-        this.alwaysVisibleToolNames = Set.of();
+        this.alwaysVisibleToolNames = Collections.emptySet();
     }
 
     /**

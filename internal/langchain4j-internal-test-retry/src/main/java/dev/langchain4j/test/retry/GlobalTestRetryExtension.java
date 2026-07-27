@@ -102,7 +102,7 @@ public class GlobalTestRetryExtension implements InvocationInterceptor {
                                          ExtensionContext extensionContext) throws Throwable {
 
         Method testMethod = invocationContext.getExecutable();
-        Object testObject = invocationContext.getTarget().orElseThrow();
+        Object testObject = invocationContext.getTarget().get();
         Object[] arguments = invocationContext.getArguments().toArray(new Object[0]);
 
         int attempt = 0;
@@ -129,7 +129,7 @@ public class GlobalTestRetryExtension implements InvocationInterceptor {
     }
 
     private static Throwable getActualCause(Throwable t) {
-        if (t instanceof InvocationTargetException ite && ite.getCause() != null) {
+        if (t instanceof InvocationTargetException && t.getCause() != null) {
             return t.getCause();
         } else {
             return t;

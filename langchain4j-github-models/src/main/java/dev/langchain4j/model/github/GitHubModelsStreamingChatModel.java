@@ -189,7 +189,7 @@ public class GitHubModelsStreamingChatModel implements StreamingChatModel {
             if (parameters.toolChoice() == REQUIRED) {
                 if (toolSpecifications.size() != 1) {
                     throw new UnsupportedFeatureException(
-                            "%s.%s is currently supported only when there is a single tool".formatted(
+                            String.format("%s.%s is currently supported only when there is a single tool", 
                                     ToolChoice.class.getSimpleName(), REQUIRED.name()));
                 }
                 generate(request.messages(), toolSpecifications.get(0), legacyHandler);

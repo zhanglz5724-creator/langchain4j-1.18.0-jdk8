@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class LoopAgentServiceImpl<T> extends AbstractServiceBuilder<T, LoopAgentService<T>>
         implements LoopAgentService<T> {
@@ -110,7 +112,10 @@ public class LoopAgentServiceImpl<T> extends AbstractServiceBuilder<T, LoopAgent
                 Object[] args = agentInvocationArguments(
                                 agenticScope,
                                 agentArguments,
-                                Map.of(AGENTIC_SCOPE_ARG_NAME, agenticScope, LOOP_COUNTER_ARG_NAME, loopCounter))
+                                Collections.unmodifiableMap(new HashMap<>() {{
+    put(AGENTIC_SCOPE_ARG_NAME, agenticScope);
+    put(LOOP_COUNTER_ARG_NAME, loopCounter);
+}}))
                         .positionalArgs();
                 return (boolean) predicateMethod.invoke(null, args);
             } catch (Exception e) {

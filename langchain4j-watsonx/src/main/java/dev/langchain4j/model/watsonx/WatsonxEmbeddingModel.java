@@ -12,6 +12,8 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.output.Response;
 import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * A {@link EmbeddingModel} implementation that integrates IBM watsonx.ai with LangChain4j.
@@ -35,7 +37,7 @@ public class WatsonxEmbeddingModel implements EmbeddingModel {
 
     private WatsonxEmbeddingModel(Builder builder) {
 
-        var embeddingServiceBuilder = nonNull(builder.authenticator)
+        EmbeddingService.Builder embeddingServiceBuilder = nonNull(builder.authenticator)
                 ? EmbeddingService.builder().authenticator(builder.authenticator)
                 : EmbeddingService.builder().apiKey(builder.apiKey);
 
@@ -73,9 +75,9 @@ public class WatsonxEmbeddingModel implements EmbeddingModel {
      */
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments, EmbeddingParameters parameters) {
 
-        if (isNull(textSegments) || textSegments.isEmpty()) return Response.from(List.of());
+        if (isNull(textSegments) || textSegments.isEmpty()) return Response.from(Collections.emptyList());
 
-        List<String> inputs = textSegments.stream().map(TextSegment::text).toList();
+        List<String> inputs = textSegments.stream().map(TextSegment::text).collect(Collectors.toList());
 
         EmbeddingResponse response = WatsonxExceptionMapper.INSTANCE.withExceptionMapper(
                 () -> embeddingService.embedding(inputs, parameters));
@@ -83,7 +85,7 @@ public class WatsonxEmbeddingModel implements EmbeddingModel {
         return Response.from(response.results().stream()
                 .map(Result::embedding)
                 .map(Embedding::from)
-                .toList());
+                .collect(Collectors.toList()));
     }
 
     /**

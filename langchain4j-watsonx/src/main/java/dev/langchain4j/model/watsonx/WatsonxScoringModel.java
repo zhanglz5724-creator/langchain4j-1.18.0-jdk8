@@ -13,6 +13,8 @@ import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.model.scoring.ScoringModel;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * A {@link ScoringModel} implementation that integrates IBM watsonx.ai with LangChain4j.
@@ -35,7 +37,7 @@ public class WatsonxScoringModel implements ScoringModel {
 
     private WatsonxScoringModel(Builder builder) {
 
-        var rerankServiceBuilder = nonNull(builder.authenticator)
+        RerankService.Builder rerankServiceBuilder = nonNull(builder.authenticator)
                 ? RerankService.builder().authenticator(builder.authenticator)
                 : RerankService.builder().apiKey(builder.apiKey);
 
@@ -68,16 +70,16 @@ public class WatsonxScoringModel implements ScoringModel {
      */
     public Response<List<Double>> scoreAll(List<TextSegment> segments, String query, RerankParameters parameters) {
 
-        if (isNull(segments) || segments.isEmpty()) return Response.from(List.of());
+        if (isNull(segments) || segments.isEmpty()) return Response.from(Collections.emptyList());
 
-        if (isNull(query) || query.isBlank()) return Response.from(List.of());
+        if (isNull(query) || query.trim().isEmpty()) return Response.from(Collections.emptyList());
 
-        List<String> inputs = segments.stream().map(TextSegment::text).toList();
+        List<String> inputs = segments.stream().map(TextSegment::text).collect(Collectors.toList());
 
         RerankResponse response = WatsonxExceptionMapper.INSTANCE.withExceptionMapper(
                 () -> rerankService.rerank(query, inputs, parameters));
 
-        var content = new Double[response.results().size()];
+        Double[] content = new Double[response.results().size()];
         for (RerankResult rerankResult : response.results()) content[rerankResult.index()] = rerankResult.score();
 
         return Response.from(Arrays.asList(content), new TokenUsage(response.inputTokenCount()));

@@ -29,6 +29,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
         this.logRequests = getOrDefault(builder.logRequests, false);
         this.logResponses = getOrDefault(builder.logResponses, false);
         this.enablePromptCaching = getOrDefault(builder.enablePromptCaching, false);
-        this.listeners = builder.listeners != null ? List.copyOf(builder.listeners) : List.of();
+        this.listeners = builder.listeners != null ? Collections.unmodifiableList(new ArrayList<>(builder.listeners) : Collections.emptyList();
     }
 
     @Override

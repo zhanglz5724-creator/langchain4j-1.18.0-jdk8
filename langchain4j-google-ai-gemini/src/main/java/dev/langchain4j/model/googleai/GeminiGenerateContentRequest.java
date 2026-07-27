@@ -3,9 +3,9 @@ package dev.langchain4j.model.googleai;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-record GeminiGenerateContentRequest(
+@JsonIgnoreProperties(ignoreUnknown = true) class GeminiGenerateContentRequest {
+
         @JsonProperty("model") String model,
         @JsonProperty("contents") List<GeminiContent> contents,
         @JsonProperty("tools") List<GeminiTool> tools,

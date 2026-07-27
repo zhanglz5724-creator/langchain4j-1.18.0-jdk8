@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
 class BaseGeminiChatModel {
@@ -130,7 +132,7 @@ class BaseGeminiChatModel {
         GeminiGenerationConfig.GeminiImageConfig effectiveImageConfig =
                 buildImageConfig(parameters.aspectRatio(), parameters.imageSize());
 
-        GeminiContent systemInstruction = new GeminiContent(List.of(), GeminiRole.MODEL.toString());
+        GeminiContent systemInstruction = new GeminiContent(Collections.emptyList(), GeminiRole.MODEL.toString());
         List<GeminiContent> geminiContentList = fromMessageToGContent(
                 chatRequest.messages(), systemInstruction, sendThinking, mediaResolutionPerPartEnabled);
 
@@ -278,7 +280,7 @@ class BaseGeminiChatModel {
 
     protected AiMessage createAiMessage(GeminiCandidate candidate) {
         if (candidate == null || candidate.content() == null) {
-            return fromGPartsToAiMessage(List.of(), includeCodeExecutionOutput, returnThinking);
+            return fromGPartsToAiMessage(Collections.emptyList(), includeCodeExecutionOutput, returnThinking);
         }
 
         return fromGPartsToAiMessage(candidate.content().parts(), includeCodeExecutionOutput, returnThinking);
@@ -301,7 +303,7 @@ class BaseGeminiChatModel {
         }
         return new UrlContextMetadata(geminiUrlContextMetadata.urlMetadata().stream()
                 .map(this::toUrlMetadata)
-                .toList());
+                .collect(Collectors.toList()));
     }
 
     private UrlContextMetadata.UrlMetadata toUrlMetadata(
@@ -463,7 +465,7 @@ class BaseGeminiChatModel {
         public B safetySettings(Map<GeminiHarmCategory, GeminiHarmBlockThreshold> safetySettingMap) {
             this.safetySettings = safetySettingMap.entrySet().stream()
                     .map(entry -> new GeminiSafetySetting(entry.getKey(), entry.getValue()))
-                    .toList();
+                    .collect(Collectors.toList());
             return builder();
         }
 

@@ -24,6 +24,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,13 +113,13 @@ public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, Internal
 
     private ToolSpecification findTool() {
         List<ToolSpecification> tools = mcpClient.listTools();
-        if (toolName == null || toolName.isBlank()) {
+        if (toolName == null || toolName.trim().isEmpty()) {
             if (tools.size() == 1) {
                 return tools.get(0);
             }
             throw new AgenticSystemConfigurationException(
                     "Tool name is required when there is more than one tool available: " +
-                            tools.stream().map(ToolSpecification::name).toList());
+                            tools.stream().map(ToolSpecification::name).collect(Collectors.toList()));
         }
 
         return tools.stream()
@@ -125,7 +127,7 @@ public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, Internal
                 .findFirst()
                 .orElseThrow(() -> new AgenticSystemConfigurationException(
                         "Tool '" + toolName + "' not found. Available tools: " +
-                                tools.stream().map(ToolSpecification::name).toList()));
+                                tools.stream().map(ToolSpecification::name).collect(Collectors.toList())));
     }
 
     @Override
@@ -257,7 +259,7 @@ public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, Internal
 
     @Override
     public List<AgentArgument> arguments() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override
@@ -267,7 +269,7 @@ public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, Internal
 
     @Override
     public List<AgentInstance> subagents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override

@@ -6,6 +6,7 @@ import dev.langchain4j.service.tool.ToolExecutionResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.Utils.copy;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
@@ -31,12 +32,12 @@ class ReadResourceToolExecutor extends AbstractSkillToolExecutor {
 
         Skill skill = skillsByName.get(skillName);
         if (skill == null) {
-            throwException("There is no skill with name '%s'".formatted(skillName));
+            throwException(String.format("There is no skill with name '%s'", skillName));
         }
 
         List<SkillResource> resources = skill.resources().stream()
                 .filter(resource -> resource.relativePath().equals(relativePath))
-                .toList();
+                .collect(Collectors.toList());
         if (resources.isEmpty()) {
             String availableResources = skill.resources().stream()
                     .map(resource -> "'" + resource.relativePath() + "'")

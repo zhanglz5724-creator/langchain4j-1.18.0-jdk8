@@ -42,6 +42,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class AgentUtil {
 
@@ -89,7 +91,7 @@ public class AgentUtil {
     }
 
     public static List<AgentExecutor> agentsToExecutors(Collection<?> agents) {
-        return agents.stream().map(AgentUtil::agentToExecutor).toList();
+        return agents.stream().map(AgentUtil::agentToExecutor).collect(Collectors.toList());
     }
 
     public static AgentExecutor agentToExecutor(Object agent) {
@@ -169,29 +171,29 @@ public class AgentUtil {
     }
 
     public static List<AgentArgument> argumentsFromMethod(Method method) {
-        return argumentsFromMethod(method, Map.of());
+        return argumentsFromMethod(method, Collections.emptyMap());
     }
 
     public static List<AgentArgument> argumentsFromMethod(Method method, Set<String> optionalArgs) {
-        return argumentsFromMethod(method, Map.of(), optionalArgs);
+        return argumentsFromMethod(method, Collections.emptyMap(), optionalArgs);
     }
 
     public static List<AgentArgument> argumentsFromMethod(Method method, Map<String, Object> defaultValues) {
-        return argumentsFromMethod(method, defaultValues, Set.of());
+        return argumentsFromMethod(method, defaultValues, Collections.emptySet());
     }
 
     public static List<AgentArgument> argumentsFromMethod(
             Method method, Map<String, Object> defaultValues, Set<String> optionalArgs) {
         if (method.getDeclaringClass() == UntypedAgent.class) {
-            return List.of();
+            return Collections.emptyList();
         }
         return Stream.of(method.getParameters())
                 .map(p -> argumentFromParameter(p, defaultValues, optionalArgs))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public static AgentArgument argumentFromParameter(Parameter parameter) {
-        return argumentFromParameter(parameter, Map.of(), Set.of());
+        return argumentFromParameter(parameter, Collections.emptyMap(), Collections.emptySet());
     }
 
     private static AgentArgument argumentFromParameter(
@@ -225,12 +227,12 @@ public class AgentUtil {
 
     public static AgentInvocationArguments agentInvocationArguments(AgenticScope agenticScope, Method method)
             throws MissingArgumentException {
-        return agentInvocationArguments(agenticScope, argumentsFromMethod(method), Map.of());
+        return agentInvocationArguments(agenticScope, argumentsFromMethod(method), Collections.emptyMap());
     }
 
     public static AgentInvocationArguments agentInvocationArguments(
             AgenticScope agenticScope, List<AgentArgument> agentArguments) throws MissingArgumentException {
-        return agentInvocationArguments(agenticScope, agentArguments, Map.of());
+        return agentInvocationArguments(agenticScope, agentArguments, Collections.emptyMap());
     }
 
     public static AgentInvocationArguments agentInvocationArguments(

@@ -88,7 +88,7 @@ class GeminiService {
         this.apiKey = apiKey;
         this.baseUrl = getOrDefault(baseUrl, GeminiService.GEMINI_AI_ENDPOINT);
         this.customHeadersSupplier = customHeadersSupplier;
-        final var builder = getOrDefault(httpClientBuilder, HttpClientBuilderLoader::loadHttpClientBuilder);
+        final HttpClientBuilder builder = getOrDefault(httpClientBuilder, HttpClientBuilderLoader::loadHttpClientBuilder);
         HttpClient httpClient = builder.connectTimeout(
                         firstNotNull("connectTimeout", timeout, builder.connectTimeout(), DEFAULT_CONNECT_TIMEOUT))
                 .readTimeout(firstNotNull("readTimeout", timeout, builder.readTimeout(), DEFAULT_READ_TIMEOUT))
@@ -276,7 +276,7 @@ class GeminiService {
     }
 
     private HttpRequest buildHttpRequest(String url, String apiKey, @Nullable Object body, HttpMethod method) {
-        var builder = HttpRequest.builder()
+        HttpRequest.Builder builder = HttpRequest.builder()
                 .method(method)
                 .url(url)
                 .addHeader("Content-Type", "application/json")
@@ -297,13 +297,47 @@ class GeminiService {
     }
 
     private static String buildUrl(String baseUrl, StringPair... pairs) {
-        var queryParams = Stream.of(pairs)
+        String queryParams = Stream.of(pairs)
                 .filter(pair -> pair.value != null)
                 .map(entry -> entry.key() + "=" + URLEncoder.encode(entry.value(), StandardCharsets.UTF_8))
                 .collect(Collectors.joining("&"));
 
         return queryParams.isEmpty() ? baseUrl : baseUrl + "?" + queryParams;
     }
+    private class StringPair {
+        private final String key;
+        private final @Nullable String value;
 
-    private record StringPair(String key, @Nullable String value) {}
+        public StringPair(String key, @Nullable String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public @Nullable String getValue() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            StringPair that = (StringPair) o;
+            return java.util.Objects.equals(this.key, that.key) && java.util.Objects.equals(this.value, that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(key, value);
+        }
+
+        @Override
+        public String toString() {
+            return "StringPair{"key=" + key + , "value=" + value + "}"";
+        }
+
+    }
 }

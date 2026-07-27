@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,7 +190,7 @@ public class VertexAiGeminiChatModel implements ChatModel, Closeable {
             headers = new HashMap<>(builder.customHeaders);
             headers.putIfAbsent("user-agent", "LangChain4j");
         } else {
-            headers = Map.of("user-agent", "LangChain4j");
+            headers = Collections.singletonMap("user-agent", "LangChain4j");
         }
 
         VertexAI.Builder vertexAiBuilder = new VertexAI.Builder()
@@ -369,7 +370,7 @@ public class VertexAiGeminiChatModel implements ChatModel, Closeable {
         this.logRequests = false;
         this.logResponses = false;
         this.listeners = Collections.emptyList();
-        this.supportedCapabilities = Set.of();
+        this.supportedCapabilities = Collections.emptySet();
         this.labels = Collections.emptyMap();
     }
 
@@ -517,7 +518,7 @@ public class VertexAiGeminiChatModel implements ChatModel, Closeable {
         List<FunctionCall> functionCalls = content.getPartsList().stream()
                 .filter(Part::hasFunctionCall)
                 .map(Part::getFunctionCall)
-                .toList();
+                .collect(Collectors.toList());
 
         final Response<AiMessage> finalResponse;
         final AiMessage aiMessage;

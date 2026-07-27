@@ -7,9 +7,47 @@ import org.jspecify.annotations.NonNull;
 /**
  * Metadata configuration implementation
  */
-public record DefaultMetadataStorageConfig(
-        MetadataStorageMode storageMode, List<String> columnDefinitions, List<String> indexes)
-        implements MetadataStorageConfig {
+public class DefaultMetadataStorageConfig implements MetadataStorageConfig {
+    private final MetadataStorageMode storageMode;
+    private final List<String> columnDefinitions;
+    private final List<String> indexes;
+
+    public DefaultMetadataStorageConfig(MetadataStorageMode storageMode, List<String> columnDefinitions, List<String> indexes) {
+        this.storageMode = storageMode;
+        this.columnDefinitions = columnDefinitions;
+        this.indexes = indexes;
+    }
+
+    public MetadataStorageMode getStorageMode() {
+        return storageMode;
+    }
+
+    public List<String> getColumnDefinitions() {
+        return columnDefinitions;
+    }
+
+    public List<String> getIndexes() {
+        return indexes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultMetadataStorageConfig that = (DefaultMetadataStorageConfig) o;
+        return java.util.Objects.equals(this.storageMode, that.storageMode) && java.util.Objects.equals(this.columnDefinitions, that.columnDefinitions) && java.util.Objects.equals(this.indexes, that.indexes);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(storageMode, columnDefinitions, indexes);
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultMetadataStorageConfig{"storageMode=" + storageMode + , "columnDefinitions=" + columnDefinitions + , "indexes=" + indexes + "}"";
+    }
+
 
     /**
      * Default configuration

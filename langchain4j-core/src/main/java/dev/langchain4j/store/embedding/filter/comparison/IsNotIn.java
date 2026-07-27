@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Collections;
 
 import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
@@ -39,7 +40,7 @@ public class IsNotIn implements Filter {
 
     @Override
     public boolean test(Object object) {
-        if (!(object instanceof Metadata metadata)) {
+        if (!(object instanceof Metadata)) {
             return false;
         }
 
@@ -62,7 +63,7 @@ public class IsNotIn implements Filter {
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof IsNotIn other)) return false;
+        if (!(o instanceof IsNotIn)) return false;
 
         return Objects.equals(this.key, other.key)
                 && Objects.equals(this.comparisonValues, other.comparisonValues);

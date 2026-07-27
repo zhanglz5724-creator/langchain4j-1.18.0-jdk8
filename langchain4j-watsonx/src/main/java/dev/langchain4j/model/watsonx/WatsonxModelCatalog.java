@@ -13,6 +13,7 @@ import dev.langchain4j.model.catalog.ModelType;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A {@link ModelCatalog} implementation that integrates IBM watsonx.ai with LangChain4j.
@@ -48,7 +49,7 @@ public class WatsonxModelCatalog implements ModelCatalog {
     public List<ModelDescription> listModels() {
         return foundationModelService.getModels(parameters).resources().stream()
                 .map(model -> {
-                    var builder = ModelDescription.builder()
+                    ModelDescription.Builder builder = ModelDescription.builder()
                             .description(model.longDescription())
                             .displayName(model.label())
                             .name(model.modelId())
@@ -57,7 +58,7 @@ public class WatsonxModelCatalog implements ModelCatalog {
                             .type(resolveModelType(model.functions()));
 
                     if (nonNull(model.lifecycle())) {
-                        var createdAt = model.lifecycle().stream()
+                        Optional<ZonedDateTime> createdAt = model.lifecycle().stream()
                                 .filter(l -> l.id().equals("available"))
                                 .findFirst()
                                 .map(l -> LocalDate.parse(l.startDate())
@@ -74,7 +75,7 @@ public class WatsonxModelCatalog implements ModelCatalog {
 
                     return builder.build();
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override

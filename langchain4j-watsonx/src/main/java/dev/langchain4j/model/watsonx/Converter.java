@@ -32,6 +32,7 @@ import dev.langchain4j.model.chat.response.CompleteToolCall;
 import dev.langchain4j.model.chat.response.PartialToolCall;
 import dev.langchain4j.model.output.FinishReason;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Internal
 class Converter {
@@ -47,7 +48,7 @@ class Converter {
     }
 
     public static Tool toTool(ToolSpecification toolSpecification) {
-        var parameters = nonNull(toolSpecification.parameters())
+        JsonObjectSchema parameters = nonNull(toolSpecification.parameters())
                 ? JsonSchemaElementUtils.toMap(toolSpecification.parameters())
                 : null;
         return Tool.of(toolSpecification.name(), toolSpecification.description(), parameters);
@@ -69,7 +70,7 @@ class Converter {
             case "stop" -> FinishReason.STOP;
             case "tool_calls" -> FinishReason.TOOL_EXECUTION;
             case "time_limit", "cancelled", "error" -> FinishReason.OTHER;
-            default -> throw new IllegalArgumentException("%s not supported".formatted(finishReason));
+            default -> throw new IllegalArgumentException(String.format("%s not supported", finishReason));
         };
     }
 
@@ -103,8 +104,8 @@ class Converter {
             switch (responseFormat.type()) {
                 case JSON -> {
                     if (nonNull(responseFormat.jsonSchema())) {
-                        var name = responseFormat.jsonSchema().name();
-                        var jsonSchema = JsonSchemaElementUtils.toMap(
+                        String name = responseFormat.jsonSchema().name();
+                        Map<String, Object> jsonSchema = JsonSchemaElementUtils.toMap(
                                 responseFormat.jsonSchema().rootElement());
                         builder.responseAsJsonSchema(name, jsonSchema, true);
                     } else {
@@ -182,7 +183,7 @@ class Converter {
         if (aiMessage.hasToolExecutionRequests()) {
             toolCalls = aiMessage.toolExecutionRequests().stream()
                     .map(Converter::toToolCall)
-                    .toList();
+                    .collect(Collectors.toList());
         }
         return new AssistantMessage(AssistantMessage.ROLE, aiMessage.text(), null, null, null, toolCalls);
     }
@@ -190,20 +191,20 @@ class Converter {
     private static com.ibm.watsonx.ai.chat.model.UserMessage toUserMessage(UserMessage userMessage) {
         return com.ibm.watsonx.ai.chat.model.UserMessage.of(
                 userMessage.name(),
-                userMessage.contents().stream().map(Converter::toUserContent).toList());
+                userMessage.contents().stream().map(Converter::toUserContent).collect(Collectors.toList()));
     }
 
     private static UserContent toUserContent(Content content) {
         return switch (content.type()) {
             case AUDIO, VIDEO, PDF -> throw new RuntimeException("Not implemented");
             case IMAGE -> {
-                var imageContent = (dev.langchain4j.data.message.ImageContent) content;
+                dev.langchain4j.data.message.ImageContent imageContent = (dev.langchain4j.data.message.ImageContent) content;
 
                 if (nonNull(imageContent.image().url()))
                     throw new UnsupportedFeatureException("image URL is not supported");
 
-                var mimeType = imageContent.image().mimeType();
-                var base64Data = requireNonNull(imageContent.image().base64Data(), "The base64Data can not be null");
+                String mimeType = imageContent.image().mimeType();
+                String base64Data = requireNonNull(imageContent.image().base64Data(), "The base64Data can not be null");
                 Detail detailLevel =
                         switch (imageContent.detailLevel()) {
                             case AUTO -> Detail.AUTO;
@@ -214,7 +215,7 @@ class Converter {
                 yield ImageContent.of(mimeType, base64Data, detailLevel);
             }
             case TEXT -> {
-                var textContent = (dev.langchain4j.data.message.TextContent) content;
+                dev.langchain4j.data.message.TextContent textContent = (dev.langchain4j.data.message.TextContent) content;
                 yield TextContent.of(textContent.text());
             }
         };

@@ -50,8 +50,8 @@ public class ToolExecutionRequest {
     @Override
     public boolean equals(Object another) {
         if (this == another) return true;
-        return another instanceof ToolExecutionRequest ter
-                && equalTo(ter);
+        return another instanceof ToolExecutionRequest
+                && equalTo((ToolExecutionRequest) another);
     }
 
     private boolean equalTo(ToolExecutionRequest another) {

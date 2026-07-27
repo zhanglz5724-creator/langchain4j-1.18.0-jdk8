@@ -54,6 +54,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,8 +102,42 @@ class AiServiceStreamingResponseHandler implements StreamingChatResponseHandler 
     private final boolean hasOutputGuardrails;
 
     private int toolCallingRoundTripsLeft;
+    private class ToolRequestResult {
+        private final ToolExecutionRequest request;
+        private final ToolExecutionResult result;
 
-    private record ToolRequestResult(ToolExecutionRequest request, ToolExecutionResult result) {}
+        public ToolRequestResult(ToolExecutionRequest request, ToolExecutionResult result) {
+            this.request = request;
+            this.result = result;
+        }
+
+        public ToolExecutionRequest getRequest() {
+            return request;
+        }
+
+        public ToolExecutionResult getResult() {
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ToolRequestResult that = (ToolRequestResult) o;
+            return java.util.Objects.equals(this.request, that.request) && java.util.Objects.equals(this.result, that.result);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(request, result);
+        }
+
+        @Override
+        public String toString() {
+            return "ToolRequestResult{"request=" + request + , "result=" + result + "}"";
+        }
+
+    }
 
     AiServiceStreamingResponseHandler(
             ChatRequest chatRequest,
@@ -154,7 +189,7 @@ class AiServiceStreamingResponseHandler implements StreamingChatResponseHandler 
         this.commonGuardrailParams = commonGuardrailParams;
 
         this.toolServiceContext = toolServiceContext;
-        this.toolExecutors = toolServiceContext != null ? toolServiceContext.toolExecutors() : Map.of();
+        this.toolExecutors = toolServiceContext != null ? toolServiceContext.toolExecutors() : Collections.emptyMap();
         this.toolArgumentsErrorHandler = ensureNotNull(toolArgumentsErrorHandler, "toolArgumentsErrorHandler");
         this.toolExecutionErrorHandler = ensureNotNull(toolExecutionErrorHandler, "toolExecutionErrorHandler");
         this.toolExecutor = toolExecutor;
@@ -231,7 +266,7 @@ class AiServiceStreamingResponseHandler implements StreamingChatResponseHandler 
     public void onCompleteToolCall(CompleteToolCall completeToolCall) {
         if (toolExecutor != null) {
             ToolExecutionRequest toolRequest = completeToolCall.toolExecutionRequest();
-            var future = CompletableFuture.supplyAsync(
+            CompletableFuture<ToolRequestResult> future = CompletableFuture.supplyAsync(
                     () -> {
                         ToolExecutionResult toolResult = execute(toolRequest);
                         return new ToolRequestResult(toolRequest, toolResult);
@@ -370,7 +405,7 @@ class AiServiceStreamingResponseHandler implements StreamingChatResponseHandler 
                             .build(),
                     invocationContext.chatMemoryId());
 
-            var handler = new AiServiceStreamingResponseHandler(
+            AiServiceStreamingResponseHandler handler = new AiServiceStreamingResponseHandler(
                     nextChatRequest,
                     chatExecutor,
                     context,
@@ -406,11 +441,11 @@ class AiServiceStreamingResponseHandler implements StreamingChatResponseHandler 
                 // Invoke output guardrails
                 if (hasOutputGuardrails) {
                     if (commonGuardrailParams != null) {
-                        var newCommonParams = commonGuardrailParams.toBuilder()
+                        GuardrailRequestParams newCommonParams = commonGuardrailParams.toBuilder()
                                 .chatMemory(getMemory())
                                 .build();
 
-                        var outputGuardrailParams = OutputGuardrailRequest.builder()
+                        OutputGuardrailRequest outputGuardrailParams = OutputGuardrailRequest.builder()
                                 .responseFromLLM(finalChatResponse)
                                 .chatExecutor(ToolAwareRepromptExecutor.wrap(
                                         chatExecutor,

@@ -13,10 +13,13 @@ import dev.langchain4j.data.document.parser.TextDocumentParser;
 import dev.langchain4j.data.document.source.ClassPathSource;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.PathMatcher;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,17 +109,17 @@ public class ClassPathDocumentLoader {
      */
     public static Document loadDocument(
             String pathOnClasspath, DocumentParser documentParser, ClassLoader classLoader) {
-        var classPathSource = ClassPathSource.from(pathOnClasspath, classLoader);
+        ClassPathSource classPathSource = ClassPathSource.from(pathOnClasspath, classLoader);
 
         try {
-            var uri = classPathSource.url().toURI();
+            URI uri = classPathSource.url().toURI();
 
             if (classPathSource.isInsideArchive()) {
-                try (var fs = FileSystems.newFileSystem(uri, Map.of("create", "true"))) {
+                try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.singletonMap("create", "true"))) {
                     return loadDocument(classPathSource, fs.getPath(pathOnClasspath), documentParser);
                 }
             } else {
-                return loadDocument(classPathSource, Path.of(uri), documentParser);
+                return loadDocument(classPathSource, Paths.get(uri), documentParser);
             }
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
@@ -311,13 +316,13 @@ public class ClassPathDocumentLoader {
             DocumentParser documentParser,
             ClassLoader classLoader,
             Function<Path, Stream<Path>> pathStreamFunction) {
-        var classPathSource = ClassPathSource.from(directoryOnClasspath, classLoader);
+        ClassPathSource classPathSource = ClassPathSource.from(directoryOnClasspath, classLoader);
 
         try {
-            var uri = classPathSource.url().toURI();
+            URI uri = classPathSource.url().toURI();
 
             if (classPathSource.isInsideArchive()) {
-                try (var fs = FileSystems.newFileSystem(uri, Map.of("create", "true"))) {
+                try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.singletonMap("create", "true"))) {
                     return loadDocuments(
                             classPathSource,
                             directoryOnClasspath,
@@ -330,7 +335,7 @@ public class ClassPathDocumentLoader {
                 return loadDocuments(
                         classPathSource,
                         directoryOnClasspath,
-                        Path.of(uri),
+                        Paths.get(uri),
                         pathMatcher,
                         documentParser,
                         pathStreamFunction);
@@ -351,7 +356,7 @@ public class ClassPathDocumentLoader {
             throw illegalArgument("'%s' is not a directory", path);
         }
 
-        try (var pathStream = pathStreamFunction.apply(path)) {
+        try (Stream<Path> pathStream = pathStreamFunction.apply(path)) {
             return loadDocuments(
                     pathStream, rootDirectoryClassPathSource, directoryOnClasspath, path, pathMatcher, documentParser);
         }
@@ -369,10 +374,10 @@ public class ClassPathDocumentLoader {
                 // converting absolute pathMatcherRoot into relative before using pathMatcher
                 // because patterns defined in pathMatcher are relative to pathMatcherRoot (directoryPath)
                 .filter(p -> pathMatcher.matches(
-                        Path.of(pathMatcherRoot.relativize(p).toString().replace('/', File.separatorChar))))
+                        Paths.get(pathMatcherRoot.relativize(p).toString().replace('/', File.separatorChar))))
                 .map(p -> {
                     try {
-                        var relativePath = getRelativePath(directoryOnClasspath, rootDirectoryClassPathSource, p);
+                        String relativePath = getRelativePath(directoryOnClasspath, rootDirectoryClassPathSource, p);
 
                         return loadDocument(
                                 ClassPathSource.from(relativePath, rootDirectoryClassPathSource.classLoader()),
@@ -388,7 +393,7 @@ public class ClassPathDocumentLoader {
                     }
                 })
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private static String getRelativePath(
@@ -398,13 +403,13 @@ public class ClassPathDocumentLoader {
         }
 
         try {
-            var rootClasspathPath = Path.of(rootDirectoryClassPathSource.url().toURI());
-            var isClasspathRoot = ".".equals(directoryOnClasspath) || "/".equals(directoryOnClasspath);
+            Path rootClasspathPath = Paths.get(rootDirectoryClassPathSource.url().toURI());
+            boolean isClasspathRoot = ".".equals(directoryOnClasspath) || "/".equals(directoryOnClasspath);
 
             if (!isClasspathRoot) {
-                var withoutLeadingAndTrailingSpaces =
-                        directoryOnClasspath.strip().replaceAll("^/+", "").replaceAll("/+$", "");
-                var numDirs = withoutLeadingAndTrailingSpaces
+                String withoutLeadingAndTrailingSpaces =
+                        directoryOnClasspath.trim().replaceAll("^/+", "").replaceAll("/+$", "");
+                long numDirs = withoutLeadingAndTrailingSpaces
                                 .chars()
                                 .filter(c -> c == '/')
                                 .count()
@@ -416,7 +421,7 @@ public class ClassPathDocumentLoader {
                         .normalize();
             }
 
-            var relativeClasspathPath = rootClasspathPath.relativize(subPath);
+            Path relativeClasspathPath = rootClasspathPath.relativize(subPath);
             return relativeClasspathPath.toString().replace(File.separatorChar, '/');
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);

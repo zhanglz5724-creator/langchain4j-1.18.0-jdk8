@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.Collections;
 import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class WebSocketMcpTransport implements McpTransport {
         this.logRequests = builder.logRequests;
         this.trafficLog = getOrDefault(builder.logger, McpLoggers.traffic());
         this.connectTimeout = getOrDefault(builder.timeout, Duration.ofSeconds(60));
-        this.headersSupplier = getOrDefault(builder.headersSupplier, (i) -> Map.of());
+        this.headersSupplier = getOrDefault(builder.headersSupplier, (i) -> Collections.emptyMap());
         this.executor = builder.executor;
         this.sslContext = builder.sslContext;
         this.httpClient = createHttpClient();

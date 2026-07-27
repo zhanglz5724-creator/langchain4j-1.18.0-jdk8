@@ -22,7 +22,7 @@ class DateOutputParser implements OutputParser<Date> {
             LocalDate localDate = LocalDate.parse(string.trim(), FORMATTER);
             return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
-            throw new OutputParsingException("Cannot parse '%s' into java.util.Date".formatted(string), e);
+            throw new OutputParsingException(String.format("Cannot parse '%s' into java.util.Date", string), e);
         }
     }
 

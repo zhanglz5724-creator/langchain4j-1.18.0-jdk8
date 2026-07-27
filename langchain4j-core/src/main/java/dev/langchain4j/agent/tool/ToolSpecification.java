@@ -95,7 +95,7 @@ public class ToolSpecification {
     @Override
     public boolean equals(Object another) {
         if (this == another) return true;
-        return another instanceof ToolSpecification ts && equalTo(ts);
+        return another instanceof ToolSpecification&& equalTo(((ToolSpecification) another));
     }
 
     private boolean equalTo(ToolSpecification another) {

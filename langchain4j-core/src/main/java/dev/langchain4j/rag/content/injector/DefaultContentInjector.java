@@ -45,11 +45,10 @@ import java.util.Map;
 public class DefaultContentInjector implements ContentInjector {
 
     public static final PromptTemplate DEFAULT_PROMPT_TEMPLATE = PromptTemplate.from(
-            """
-                    {{userMessage}}
-
-                    Answer using the following information:
-                    {{contents}}""");
+            "{{userMessage}}\n" +
+            "\n" +
+            "Answer using the following information:\n" +
+            "{{contents}}");
 
     private final PromptTemplate promptTemplate;
     private final List<String> metadataKeysToInclude;
@@ -82,8 +81,8 @@ public class DefaultContentInjector implements ContentInjector {
         }
 
         Prompt prompt = createPrompt(chatMessage, contents);
-        if (chatMessage instanceof UserMessage userMessage) {
-            return userMessage.toBuilder()
+        if (chatMessage instanceof UserMessage) {
+            return ((UserMessage) chatMessage).toBuilder()
                     .contents(List.of(TextContent.from(prompt.text())))
                     .build();
         } else {

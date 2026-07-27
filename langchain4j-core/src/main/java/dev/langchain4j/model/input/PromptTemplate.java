@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Represents a template of a prompt that can be reused multiple times.

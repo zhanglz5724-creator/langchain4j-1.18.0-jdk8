@@ -10,7 +10,9 @@ import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A registry for managing Jlama models on local disk.
@@ -33,11 +35,11 @@ class JlamaModelRegistry {
     }
 
     public static List<ModelSupport.ModelType> availableModelTypes() {
-        return Arrays.stream(ModelSupport.ModelType.values()).toList();
+        return Arrays.stream(ModelSupport.ModelType.values()).collect(Collectors.toList());
     }
 
     public static JlamaModelRegistry getOrCreate(Path modelCachePath) {
-        return new JlamaModelRegistry(modelCachePath == null ? Path.of(DEFAULT_MODEL_CACHE_PATH) : modelCachePath);
+        return new JlamaModelRegistry(modelCachePath == null ? Paths.get(DEFAULT_MODEL_CACHE_PATH) : modelCachePath);
     }
 
     public Path getModelCachePath() {

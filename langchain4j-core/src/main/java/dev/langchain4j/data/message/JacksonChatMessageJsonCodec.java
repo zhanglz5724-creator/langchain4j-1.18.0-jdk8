@@ -27,6 +27,7 @@ import dev.langchain4j.data.video.Video;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 @Internal
 public class JacksonChatMessageJsonCodec implements ChatMessageJsonCodec {

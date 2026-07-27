@@ -1556,7 +1556,7 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
                         public <S> Collection<S> loadJavaServices(final Class<S> serviceContract) {
                             //noinspection unchecked
                             return serviceContract == AdditionalMappingContributor.class
-                                    ? List.of((S) new DynamicEmbeddingStoreAdditionalMappingContributor(dimension))
+                                    ? Collections.singletonList((S) new DynamicEmbeddingStoreAdditionalMappingContributor(dimension))
                                     // todo: Maybe return an empty list otherwise? Does it make sense to let classes
                                     // creep in?
                                     : super.loadJavaServices(serviceContract);

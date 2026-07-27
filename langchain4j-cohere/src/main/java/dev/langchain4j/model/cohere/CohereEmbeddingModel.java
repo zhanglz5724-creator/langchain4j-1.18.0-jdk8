@@ -34,6 +34,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import org.slf4j.Logger;
 
 /**
@@ -80,7 +83,7 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         this.modelName = modelName;
         this.inputType = inputType;
         this.maxSegmentsPerBatch = getOrDefault(maxSegmentsPerBatch, DEFAULT_MAX_SEGMENTS_PER_BATCH);
-        this.listeners = List.of();
+        this.listeners = Collections.emptyList();
     }
 
     public CohereEmbeddingModel(CohereEmbeddingModelBuilder builder) {
@@ -147,12 +150,12 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
 
     @Override
     public Set<ContentType> supportedContentTypes() {
-        return Set.of(ContentType.TEXT, ContentType.IMAGE);
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE)));
     }
 
     @Override
     public Set<EmbeddingParameter<?>> supportedParameters() {
-        return Set.of(EmbeddingRequestParameters.INPUT_TYPE);
+        return Collections.singleton(EmbeddingRequestParameters.INPUT_TYPE);
     }
 
     /**
@@ -194,7 +197,7 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         return EmbedV2Request.builder()
                 .model(modelName)
                 .inputType(resolvedInputType)
-                .embeddingTypes(List.of("float"))
+                .embeddingTypes(Collections.singletonList("float"))
                 .inputs(inputs.stream().map(this::toV2Input).collect(toList()))
                 .build();
     }
@@ -209,7 +212,7 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
             return EmbedV2Request.V2Content.text(textContent.text());
         }
         if (content instanceof ImageContent imageContent) {
-            var image = imageContent.image();
+            Image image = imageContent.image();
             if (image.url() != null) {
                 return EmbedV2Request.V2Content.imageUrl(image.url().toString());
             }

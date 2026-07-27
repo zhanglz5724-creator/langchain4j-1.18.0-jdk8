@@ -40,7 +40,7 @@ class FunctionCallHelper {
     static List<ToolExecutionRequest> fromFunctionCalls(List<FunctionCall> functionCalls) {
         return IntStream.range(0, functionCalls.size())
                 .mapToObj(index -> fromFunctionCall(index, functionCalls.get(index)))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**

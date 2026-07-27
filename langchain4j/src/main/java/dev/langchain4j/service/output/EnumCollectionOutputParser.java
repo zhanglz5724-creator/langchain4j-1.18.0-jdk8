@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
@@ -50,7 +51,7 @@ abstract class EnumCollectionOutputParser<E extends Enum<E>, CE extends Collecti
                                 .items(JsonEnumSchema.builder()
                                         .enumValues(stream(enumClass.getEnumConstants())
                                                 .map(e -> ((Enum<?>) e).name())
-                                                .toList())
+                                                .collect(Collectors.toList()))
                                         .build())
                                 .build())
                         .required("values")

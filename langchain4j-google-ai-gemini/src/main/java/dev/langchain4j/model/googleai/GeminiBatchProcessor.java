@@ -24,6 +24,8 @@ import dev.langchain4j.model.googleai.jsonl.JsonLinesWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -55,13 +57,13 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
             List<REQUEST> requests,
             String modelName,
             GeminiService.BatchOperationType operationType) {
-        var inlineRequests = requests.stream()
+        List<InlinedRequest<API_REQUEST>> inlineRequests = requests.stream()
                 .map(preparer::prepareRequest)
                 .map(preparer::createInlinedRequest)
-                .map(request -> new InlinedRequest<>(request, Map.of()))
-                .toList();
+                .map(request -> new InlinedRequest<>(request, Collections.emptyMap()))
+                .collect(Collectors.toList());
 
-        var request = new BatchCreateRequest<>(new Batch<>(
+        BatchCreateRequest<API_REQUEST> request = new BatchCreateRequest<>(new Batch<>(
                 displayName, new InputConfig<>(new Requests<>(inlineRequests)), getOrDefault(priority, 0L)));
 
         return processResponse(geminiService.batchCreate(modelName, request, operationType));
@@ -84,8 +86,8 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
      */
     void writeBatch(JsonLinesWriter writer, Iterable<BatchFileRequest<REQUEST>> requests) throws IOException {
         for (var request : requests) {
-            var preparedRequest = preparer.prepareRequest(request.request());
-            var inlinedRequest = preparer.createInlinedRequest(preparedRequest);
+            String preparedRequest = preparer.prepareRequest(request.request());
+            InlinedRequest<API_REQUEST> inlinedRequest = preparer.createInlinedRequest(preparedRequest);
             writer.write(new BatchFileRequest<>(request.key(), inlinedRequest));
         }
     }
@@ -95,7 +97,7 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
      */
     @SuppressWarnings("unchecked")
     BatchResponse<RESPONSE> retrieveBatchResults(String batchId) {
-        var operation = geminiService.batchRetrieveBatch(batchId);
+        Operation operation = geminiService.batchRetrieveBatch(batchId);
         return processResponse((Operation<API_RESPONSE>) operation);
     }
 
@@ -117,36 +119,36 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
      * Lists batch jobs.
      */
     BatchPage<RESPONSE> listBatchJobs(final @Nullable BatchPagination batchPagination) {
-        var pageSize = batchPagination != null ? batchPagination.pageSize() : null;
-        var pageToken = batchPagination != null ? batchPagination.pageToken() : null;
+        Integer pageSize = batchPagination != null ? batchPagination.pageSize() : null;
+        String pageToken = batchPagination != null ? batchPagination.pageToken() : null;
         ListOperationsResponse<API_RESPONSE> response = geminiService.batchListBatches(pageSize, pageToken);
 
-        List<Operation<API_RESPONSE>> operations = getOrDefault(response.operations(), List.of());
-        return new BatchPage<>(operations.stream().map(this::processResponse).toList(), response.nextPageToken());
+        List<Operation<API_RESPONSE>> operations = getOrDefault(response.operations(), Collections.emptyList());
+        return new BatchPage<>(operations.stream().map(this::processResponse).collect(Collectors.toList()), response.nextPageToken());
     }
 
     /**
      * Processes the operation response and returns the appropriate BatchResponse.
      */
     private BatchResponse<RESPONSE> processResponse(Operation<API_RESPONSE> operation) {
-        var state = extractBatchState(operation.metadata());
-        var batchId = operation.name();
+        BatchState state = extractBatchState(operation.metadata());
+        String batchId = operation.name();
 
         if (operation.done()) {
-            var error = operation.error();
+            BatchRequestResponse.Operation.Status error = operation.error();
             if (error != null) {
                 // Batch-level failure: there is no per-request breakdown, so it is surfaced as a
                 // single failed result.
                 return BatchResponse.<RESPONSE>builder()
                         .batchId(batchId)
                         .state(BatchState.FAILED)
-                        .results(List.of(BatchItemResult.failure(error.toGenericStatus())))
+                        .results(Collections.singletonList(BatchItemResult.failure(error.toGenericStatus())))
                         .build();
             }
-            var results = preparer.extractResults(operation.response());
+            List<BatchItemResult<RESPONSE>> results = preparer.extractResults(operation.response());
             // A done operation is SUCCEEDED unless the metadata reports another terminal state
             // (e.g. CANCELLED or EXPIRED), which must be preserved rather than reported as success.
-            var finalState = state.isTerminal() ? state : BatchState.SUCCEEDED;
+            BatchState finalState = state.isTerminal() ? state : BatchState.SUCCEEDED;
             return BatchResponse.<RESPONSE>builder()
                     .batchId(batchId)
                     .state(finalState)
@@ -165,7 +167,7 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
             return BatchState.UNSPECIFIED;
         }
 
-        var stateObj = metadata.get("state");
+        Object stateObj = metadata.get("state");
         if (stateObj == null) {
             return BatchState.UNSPECIFIED;
         }

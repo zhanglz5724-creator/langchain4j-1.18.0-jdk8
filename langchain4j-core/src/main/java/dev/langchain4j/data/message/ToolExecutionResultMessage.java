@@ -91,8 +91,8 @@ public class ToolExecutionResultMessage implements ChatMessage {
      *                               Use {@link #contents()} instead.
      */
     public String text() {
-        if (contents.size() == 1 && contents.get(0) instanceof TextContent textContent) {
-            return textContent.text();
+        if (contents.size() == 1 && contents.get(0) instanceof TextContent) {
+            return ((TextContent) contents.size() == 1 && contents.get(0)).text();
         }
         throw new IllegalStateException(
                 "text() cannot be called when contents contains non-text or multiple content elements. "

@@ -17,6 +17,7 @@ import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Collections;
 
 import static dev.langchain4j.agentic.internal.AgentUtil.AGENTIC_SCOPE_ARG_NAME;
 import static dev.langchain4j.agentic.observability.ListenerNotifierUtil.afterAgentInvocation;
@@ -44,7 +45,7 @@ public interface AgentInvoker extends AgentInstance, InternalAgent {
     }
 
     private Object internalInvoke(DefaultAgenticScope agenticScope, AgentListener listener, Object agent, AgentInvocationArguments args) {
-        LangChain4jManaged.setCurrent(Map.of(AgenticScope.class, agenticScope));
+        LangChain4jManaged.setCurrent(Collections.singletonMap(AgenticScope.class, agenticScope));
         try {
             return method().invoke(agent, args.positionalArgs());
         } catch (Exception e) {
@@ -63,7 +64,7 @@ public interface AgentInvoker extends AgentInstance, InternalAgent {
     static AgentInvoker fromSpec(AgentSpecsProvider spec, Method agenticMethod, String name) {
         List<AgentArgument> arguments = spec.arguments() != null
                 ? spec.arguments()
-                : List.of(new AgentArgument(AgenticScope.class, AGENTIC_SCOPE_ARG_NAME));
+                : Collections.singletonList(new AgentArgument(AgenticScope.class, AGENTIC_SCOPE_ARG_NAME));
         InternalAgent agentInstance = new NonAiAgentInstance(agenticMethod.getDeclaringClass(),
                 name, spec.description(), agenticMethod.getGenericReturnType(), spec.outputKey(), spec.async(), arguments,
                 spec.listener());

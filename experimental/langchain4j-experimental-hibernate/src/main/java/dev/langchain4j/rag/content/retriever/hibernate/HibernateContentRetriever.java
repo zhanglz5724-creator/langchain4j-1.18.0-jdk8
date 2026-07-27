@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.query.SelectionQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.tool.language.internal.MetamodelJsonSerializerImpl;
@@ -187,8 +188,8 @@ public class HibernateContentRetriever implements ContentRetriever {
         return sessionFactory.fromStatelessSession(session -> {
             // We create a selection query, ensuring the generated HQL is a SELECT statement.
             // If not, an exception will be thrown by Hibernate.
-            var query = session.createSelectionQuery(hqlQuery, Object.class);
-            var results = query.getResultList();
+            SelectionQuery<Object> query = session.createSelectionQuery(hqlQuery, Object.class);
+            List<Object> results = query.getResultList();
             try {
                 // We use our own custom serializer to convert the results (which might include lazy/circular
                 // associations)

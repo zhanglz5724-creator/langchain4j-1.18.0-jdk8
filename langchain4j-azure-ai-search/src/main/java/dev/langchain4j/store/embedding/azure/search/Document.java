@@ -2,6 +2,7 @@ package dev.langchain4j.store.embedding.azure.search;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class Document {
 
@@ -75,7 +76,7 @@ public class Document {
                         attribute.setValue(entry.getValue().toString());
                         return attribute;
                     })
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         public static class Attribute {

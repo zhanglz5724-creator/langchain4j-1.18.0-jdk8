@@ -15,7 +15,7 @@ public final class BatchRequestResponse {
      *
      * @param <T> the type of the response payload
      */
-    public sealed interface BatchResponse<T> permits BatchIncomplete, BatchSuccess, BatchError {}
+    public interface BatchResponse<T>  {}
 
     /**
      * Represents a batch operation that is currently pending or in progress.
@@ -24,9 +24,9 @@ public final class BatchRequestResponse {
      * @param batchName the name identifying the batch operation
      * @param state     the current state of the batch job
      */
-    public record BatchIncomplete<T>(
-            @JsonProperty("batchName") BatchName batchName,
-            @JsonProperty("state") BatchJobState state) implements BatchResponse<T> {}
+    public class BatchIncomplete<T> implements BatchResponse<T> {
+
+    }
 
     /**
      * Represents a successful batch operation.
@@ -36,11 +36,9 @@ public final class BatchRequestResponse {
      * @param responses the list of successful responses
      * @param errors    the list of errors that occurred during processing, or {@code null} if none
      */
-    public record BatchSuccess<T>(
-            @JsonProperty("batchName") BatchName batchName,
-            @JsonProperty("responses") List<T> responses,
-            @JsonProperty("errors") @Nullable List<Operation.Status> errors)
-            implements BatchResponse<T> {}
+    public class BatchSuccess<T> implements BatchResponse<T> {
+
+    }
 
     /**
      * Represents an error that occurred during a batch operation.
@@ -52,20 +50,49 @@ public final class BatchRequestResponse {
      * @param state     the state of the batch job when the error occurred
      * @param details   a list of messages that carry the error details
      */
-    public record BatchError<T>(
+    public class BatchError<T> {
+
             @JsonProperty("batchName") BatchName batchName,
             @JsonProperty("code") int code,
             @JsonProperty("message") String message,
             @JsonProperty("state") BatchJobState state,
             @JsonProperty("details") List<Map<String, Object>> details)
-            implements BatchResponse<T> {}
+    }
 
     /**
      * Represents the name of a batch operation.
      *
      * @param value the batch name string, must start with {@code "batches/"}
      */
-    public record BatchName(@JsonProperty("value") String value) {
+    public class BatchName {
+        private final Object @JsonProperty("value";
+
+        public BatchName(Object @JsonProperty("value") {
+            this.@JsonProperty("value" = @JsonProperty("value";
+        }
+
+        public Object get@JsonProperty("value"() {
+            return @JsonProperty("value";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BatchName that = (BatchName) o;
+            return java.util.Objects.equals(this.@JsonProperty("value", that.@JsonProperty("value");
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(@JsonProperty("value");
+        }
+
+        @Override
+        public String toString() {
+            return "BatchName{"@JsonProperty("value"=" + @JsonProperty("value" + "}"";
+        }
+
         public BatchName {
             ensureOperationNameFormat(value);
         }
@@ -99,7 +126,8 @@ public final class BatchRequestResponse {
      * @param <REQ> the type of request (e.g., GeminiGenerateContentRequest, GeminiEmbeddingRequest)
      * @param batch the batch configuration
      */
-    record BatchCreateRequest<REQ>(@JsonProperty("batch") Batch<REQ> batch) {
+     class BatchCreateRequest<REQ> {
+
 
         /**
          * The batch configuration containing display name, input config, and priority.
@@ -148,7 +176,35 @@ public final class BatchRequestResponse {
      *
      * @param batch the file-based batch configuration
      */
-    record BatchCreateFileRequest(@JsonProperty("batch") FileBatch batch) {
+     class BatchCreateFileRequest {
+        private final Object @JsonProperty("batch";
+
+        public BatchCreateFileRequest(Object @JsonProperty("batch") {
+            this.@JsonProperty("batch" = @JsonProperty("batch";
+        }
+
+        public Object get@JsonProperty("batch"() {
+            return @JsonProperty("batch";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BatchCreateFileRequest that = (BatchCreateFileRequest) o;
+            return java.util.Objects.equals(this.@JsonProperty("batch", that.@JsonProperty("batch");
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(@JsonProperty("batch");
+        }
+
+        @Override
+        public String toString() {
+            return "BatchCreateFileRequest{"@JsonProperty("batch"=" + @JsonProperty("batch" + "}"";
+        }
+
 
         /**
          * File-based batch configuration.
@@ -176,9 +232,8 @@ public final class BatchRequestResponse {
      * @param inlinedResponses the wrapper containing the list of inlined responses
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record BatchCreateResponse<RESP>(
-            @JsonProperty("@type") String type,
-            @JsonProperty("inlinedResponses") InlinedResponses<RESP> inlinedResponses) {
+    @JsonIgnoreProperties(ignoreUnknown = true) class BatchCreateResponse<RESP> {
+
 
         /**
          * Wrapper for the list of inlined responses.
@@ -214,7 +269,8 @@ public final class BatchRequestResponse {
      * @param response the normal response of the operation, if successful
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record Operation<RESP>(
+    @JsonIgnoreProperties(ignoreUnknown = true) class Operation<RESP> {
+
             @JsonProperty("name") String name,
             @JsonProperty("metadata") Map<String, Object> metadata,
             @JsonProperty("done") boolean done,
@@ -246,9 +302,9 @@ public final class BatchRequestResponse {
      * @param operations    a list of operations, or {@code null} if none
      * @param nextPageToken a token for retrieving the next page of operations, or {@code null} if there are no more pages
      */
-    record ListOperationsResponse<RESP>(
-            @JsonProperty("operations") @Nullable List<Operation<RESP>> operations,
-            @JsonProperty("nextPageToken") @Nullable String nextPageToken) {}
+     class ListOperationsResponse<RESP> {
+
+    }
 
     /**
      * Represents a batch request for a file operation.
@@ -257,7 +313,7 @@ public final class BatchRequestResponse {
      * @param key     a unique identifier for the request
      * @param request the actual request payload containing the details of the operation
      */
-    public record BatchFileRequest<REQ>(
-            @JsonProperty("key") String key,
-            @JsonProperty("request") REQ request) {}
+    public class BatchFileRequest<REQ> {
+
+    }
 }

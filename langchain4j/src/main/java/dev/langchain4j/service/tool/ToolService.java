@@ -63,6 +63,7 @@ import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.Collections;
 
 @Internal
 public class ToolService {
@@ -706,12 +707,46 @@ public class ToolService {
         String rolledBackText = "Tool '" + original.toolName() + "' was executed successfully"
                 + " but was rolled back due to failure of tool '" + failedToolName + "'";
         return original.toBuilder()
-                .contents(List.of(TextContent.from(rolledBackText)))
+                .contents(Collections.singletonList(TextContent.from(rolledBackText)))
                 .isError(true)
                 .build();
     }
+    private class CompensableToolExecution {
+        private final ToolExecution toolExecution;
+        private final ToolExecutionResultMessage resultMessage;
 
-    private record CompensableToolExecution(ToolExecution toolExecution, ToolExecutionResultMessage resultMessage) {}
+        public CompensableToolExecution(ToolExecution toolExecution, ToolExecutionResultMessage resultMessage) {
+            this.toolExecution = toolExecution;
+            this.resultMessage = resultMessage;
+        }
+
+        public ToolExecution getToolExecution() {
+            return toolExecution;
+        }
+
+        public ToolExecutionResultMessage getResultMessage() {
+            return resultMessage;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CompensableToolExecution that = (CompensableToolExecution) o;
+            return java.util.Objects.equals(this.toolExecution, that.toolExecution) && java.util.Objects.equals(this.resultMessage, that.resultMessage);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(toolExecution, resultMessage);
+        }
+
+        @Override
+        public String toString() {
+            return "CompensableToolExecution{"toolExecution=" + toolExecution + , "resultMessage=" + resultMessage + "}"";
+        }
+
+    }
 
     private void compensateToolsActions(List<CompensableToolExecution> compensableExecutions, InvocationContext invocationContext) {
         for (int i = compensableExecutions.size() - 1; i >= 0; i--) {

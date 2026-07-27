@@ -19,7 +19,7 @@ class UUIDComparator {
     private static UUID toUUID(Object actualUUID) {
         if (actualUUID instanceof String) {
             return UUID.fromString(actualUUID.toString());
-        } else if (actualUUID instanceof UUID iD) {
+        } else if (actualUUID instanceof UUID) {
             return iD;
         }
 

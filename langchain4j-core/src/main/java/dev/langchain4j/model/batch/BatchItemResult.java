@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
  * @see BatchResponse#results()
  */
 @Experimental
-public sealed interface BatchItemResult<T> permits BatchItemResult.Success, BatchItemResult.Failure {
+public interface BatchItemResult<T> {
 
     /**
      * Returns {@code true} if this request succeeded.

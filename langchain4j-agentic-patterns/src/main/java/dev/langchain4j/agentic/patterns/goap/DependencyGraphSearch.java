@@ -75,7 +75,47 @@ public class DependencyGraphSearch {
     /**
      * Represents the state of the search: which nodes have been activated
      */
-    record SearchState(Set<Node> activatedNodes, Node currentNode, int depth) {
+     class SearchState {
+        private final Set<Node> activatedNodes;
+        private final Node currentNode;
+        private final int depth;
+
+        public SearchState(Set<Node> activatedNodes, Node currentNode, int depth) {
+            this.activatedNodes = activatedNodes;
+            this.currentNode = currentNode;
+            this.depth = depth;
+        }
+
+        public Set<Node> getActivatedNodes() {
+            return activatedNodes;
+        }
+
+        public Node getCurrentNode() {
+            return currentNode;
+        }
+
+        public int getDepth() {
+            return depth;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SearchState that = (SearchState) o;
+            return java.util.Objects.equals(this.activatedNodes, that.activatedNodes) && java.util.Objects.equals(this.currentNode, that.currentNode) && java.util.Objects.equals(this.depth, that.depth);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(activatedNodes, currentNode, depth);
+        }
+
+        @Override
+        public String toString() {
+            return "SearchState{"activatedNodes=" + activatedNodes + , "currentNode=" + currentNode + , "depth=" + depth + "}"";
+        }
+
         SearchState activateNode(Node node) {
             Set<Node> newActivated = new HashSet<>(activatedNodes);
             newActivated.add(node);
@@ -91,7 +131,41 @@ public class DependencyGraphSearch {
     /**
      * Wrapper for priority queue with f-score
      */
-    record StateScore(SearchState state, double fScore) implements Comparable<StateScore> {
+     class StateScore implements Comparable<StateScore> {
+        private final SearchState state;
+        private final double fScore;
+
+        public StateScore(SearchState state, double fScore) {
+            this.state = state;
+            this.fScore = fScore;
+        }
+
+        public SearchState getState() {
+            return state;
+        }
+
+        public double getFScore() {
+            return fScore;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            StateScore that = (StateScore) o;
+            return java.util.Objects.equals(this.state, that.state) && java.util.Objects.equals(this.fScore, that.fScore);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(state, fScore);
+        }
+
+        @Override
+        public String toString() {
+            return "StateScore{"state=" + state + , "fScore=" + fScore + "}"";
+        }
+
 
         @Override
         public int compareTo(StateScore other) {

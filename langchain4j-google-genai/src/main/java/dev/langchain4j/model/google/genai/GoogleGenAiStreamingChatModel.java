@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -272,7 +273,7 @@ public class GoogleGenAiStreamingChatModel implements StreamingChatModel {
 
     @Override
     public Set<Capability> supportedCapabilities() {
-        return Set.of(RESPONSE_FORMAT_JSON_SCHEMA);
+        return Collections.singleton(RESPONSE_FORMAT_JSON_SCHEMA);
     }
 
     public static Builder builder() {

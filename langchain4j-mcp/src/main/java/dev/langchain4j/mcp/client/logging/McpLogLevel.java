@@ -14,7 +14,7 @@ public enum McpLogLevel {
     EMERGENCY;
 
     public static McpLogLevel from(String val) {
-        if (val == null || val.isBlank()) {
+        if (val == null || val.trim().isEmpty()) {
             return null;
         }
         try {

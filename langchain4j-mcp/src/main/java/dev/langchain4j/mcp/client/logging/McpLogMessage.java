@@ -50,7 +50,7 @@ public class McpLogMessage {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (McpLogMessage) obj;
+        McpLogMessage that = (McpLogMessage) obj;
         return Objects.equals(this.level, that.level) &&
                 Objects.equals(this.logger, that.logger) &&
                 Objects.equals(this.data, that.data);

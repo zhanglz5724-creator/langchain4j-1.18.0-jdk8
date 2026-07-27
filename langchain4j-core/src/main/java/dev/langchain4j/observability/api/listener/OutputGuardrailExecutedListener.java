@@ -15,7 +15,7 @@ import dev.langchain4j.observability.api.event.OutputGuardrailExecutedEvent;
  * against predefined criteria, encapsulated within the {@code OutputGuardrail}.
  */
 @FunctionalInterface
-public non-sealed interface OutputGuardrailExecutedListener
+public interface OutputGuardrailExecutedListener
         extends GuardrailExecutedListener<
                 OutputGuardrailExecutedEvent, OutputGuardrailRequest, OutputGuardrailResult, OutputGuardrail> {
     @Override

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
 
@@ -92,7 +93,7 @@ public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
         return Response.from(
                 responses.stream()
                         .flatMap(response -> response.content().stream())
-                        .toList(),
+                        .collect(Collectors.toList()),
                 responses.stream()
                         .map(Response::tokenUsage)
                         .filter(Objects::nonNull)
@@ -119,7 +120,7 @@ public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
 
         List<Embedding> embeddings = createEmbeddingResponse.data().stream()
                 .map(embeddingItem -> Embedding.from(embeddingItem.embedding()))
-                .toList();
+                .collect(Collectors.toList());
 
         return Response.from(embeddings, tokenUsageFrom(createEmbeddingResponse.usage()));
     }

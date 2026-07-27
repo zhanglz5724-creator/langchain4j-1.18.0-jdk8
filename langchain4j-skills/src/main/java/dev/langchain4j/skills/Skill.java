@@ -4,6 +4,7 @@ import dev.langchain4j.Experimental;
 import dev.langchain4j.service.tool.ToolProvider;
 
 import java.util.List;
+import java.util.Collections;
 
 /**
  * Represents a skill that can be used by an LLM.
@@ -40,7 +41,7 @@ public interface Skill {
      * @return the list of resources, empty by default
      */
     default List<SkillResource> resources() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**
@@ -50,7 +51,7 @@ public interface Skill {
      * @return the list of tool providers, empty by default
      */
     default List<ToolProvider> toolProviders() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     static DefaultSkill.Builder builder() {

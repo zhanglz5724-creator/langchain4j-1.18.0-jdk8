@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 class GoogleGenAiContentMapper {
 
@@ -214,7 +215,7 @@ class GoogleGenAiContentMapper {
     }
 
     static ChatResponse toChatResponse(GenerateContentResponse response, String modelName) {
-        List<Candidate> candidates = response.candidates().orElse(List.of());
+        List<Candidate> candidates = response.candidates().orElse(Collections.emptyList());
 
         if (candidates.isEmpty()) {
             return ChatResponse.builder()
@@ -235,14 +236,14 @@ class GoogleGenAiContentMapper {
         Map<String, Object> attributes = new HashMap<>();
 
         if (content != null) {
-            List<Part> parts = content.parts().orElse(List.of());
+            List<Part> parts = content.parts().orElse(Collections.emptyList());
             for (Part part : parts) {
                 if (part.text().isPresent()) textBuilder.append(part.text().get());
 
                 if (part.functionCall().isPresent()) {
                     FunctionCall fc = part.functionCall().get();
                     String fnName = fc.name().orElseThrow();
-                    Map<String, Object> args = fc.args().orElse(Map.of());
+                    Map<String, Object> args = fc.args().orElse(Collections.emptyMap());
                     String jsonArgs;
                     try {
                         jsonArgs = OBJECT_MAPPER.writeValueAsString(args);

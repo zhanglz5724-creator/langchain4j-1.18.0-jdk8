@@ -207,13 +207,14 @@ public class ToolSpecifications {
         Type type = parameter.getParameterizedType();
         Class<?> clazz = parameter.getType();
 
-        if (clazz == Optional.class && type instanceof ParameterizedType parameterizedType) {
-            // Use the variable 'parameterizedType' directly without casting
+        if (clazz == Optional.class && type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
             type = parameterizedType.getActualTypeArguments()[0];
 
             if (type instanceof Class) {
                 clazz = (Class<?>) type;
-            } else if (type instanceof ParameterizedType parameterizedType1) {
+            } else if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType1 = (ParameterizedType) type;
                 clazz = (Class<?>) parameterizedType1.getRawType();
             }
         }

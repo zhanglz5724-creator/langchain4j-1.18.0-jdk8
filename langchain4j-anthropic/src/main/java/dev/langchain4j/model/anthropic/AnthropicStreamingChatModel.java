@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.Collections;
 import org.slf4j.Logger;
 
 /**
@@ -619,7 +620,7 @@ public class AnthropicStreamingChatModel implements StreamingChatModel {
          *     .type("web_search_20250305")
          *     .name("web_search")
          *     .addAttribute("max_uses", 5)
-         *     .addAttribute("allowed_domains", List.of("accuweather.com"))
+         *     .addAttribute("allowed_domains", Collections.singletonList("accuweather.com"))
          *     .build();
          * </pre>
          */
@@ -635,7 +636,7 @@ public class AnthropicStreamingChatModel implements StreamingChatModel {
          *     .type("web_search_20250305")
          *     .name("web_search")
          *     .addAttribute("max_uses", 5)
-         *     .addAttribute("allowed_domains", List.of("accuweather.com"))
+         *     .addAttribute("allowed_domains", Collections.singletonList("accuweather.com"))
          *     .build();
          * </pre>
          */

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Collections;
 
 import static dev.langchain4j.agentic.internal.AgentUtil.agentInvocationArguments;
 import static dev.langchain4j.agentic.internal.AgentUtil.argumentsFromMethod;
@@ -50,7 +51,7 @@ public class A2AClientAgentInvoker implements AgentInvoker {
         return isUntyped() ?
                 Stream.of(a2AClientInstance.inputKeys())
                         .map(input -> new AgentArgument(Object.class, input))
-                        .toList() :
+                        .collect(Collectors.toList()) :
                 argumentsFromMethod(method, a2aArgs);
     }
 
@@ -106,7 +107,7 @@ public class A2AClientAgentInvoker implements AgentInvoker {
 
     @Override
     public List<AgentInstance> subagents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override

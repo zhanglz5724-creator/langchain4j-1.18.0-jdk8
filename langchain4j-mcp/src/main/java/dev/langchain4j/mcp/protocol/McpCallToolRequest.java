@@ -3,6 +3,7 @@ package dev.langchain4j.mcp.protocol;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.langchain4j.Internal;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Corresponds to the {@code CallToolRequest} type from the MCP schema.
@@ -18,7 +19,7 @@ public class McpCallToolRequest extends McpClientRequest {
         super(id, McpClientMethod.TOOLS_CALL);
         McpCallToolParams params = new McpCallToolParams(toolName, arguments);
         if (progressToken != null) {
-            params.setMeta(Map.of("progressToken", progressToken));
+            params.setMeta(Collections.singletonMap("progressToken", progressToken));
         }
         setParams(params);
     }

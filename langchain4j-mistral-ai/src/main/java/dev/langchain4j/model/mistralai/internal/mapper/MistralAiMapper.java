@@ -59,6 +59,8 @@ import dev.langchain4j.model.output.TokenUsage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Internal
 public class MistralAiMapper {
@@ -66,7 +68,7 @@ public class MistralAiMapper {
     public static List<MistralAiChatMessage> toMistralAiMessages(List<ChatMessage> messages, boolean sendThinking) {
         return messages.stream()
                 .map(message -> toMistralAiMessage(message, sendThinking))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private static MistralAiChatMessage toMistralAiMessage(ChatMessage message, boolean sendThinking) {
@@ -80,7 +82,7 @@ public class MistralAiMapper {
         if (message instanceof AiMessage aiMessage) {
             List<MistralAiMessageContent> contents = new ArrayList<>(2);
             if (sendThinking && aiMessage.thinking() != null) {
-                var thinkingText = new MistralAiTextContent(aiMessage.thinking());
+                MistralAiTextContent thinkingText = new MistralAiTextContent(aiMessage.thinking());
                 contents.add(new MistralAiThinkingContent(singletonList(thinkingText)));
             }
             if (isNotNullOrBlank(aiMessage.text())) {
@@ -91,7 +93,7 @@ public class MistralAiMapper {
             if (aiMessage.hasToolExecutionRequests()) {
                 toolCalls = aiMessage.toolExecutionRequests().stream()
                         .map(MistralAiMapper::toMistralAiToolCall)
-                        .toList();
+                        .collect(Collectors.toList());
             }
 
             return MistralAiChatMessage.builder()
@@ -169,7 +171,7 @@ public class MistralAiMapper {
 
         List<MistralAiMessageContent> contents = aiMistralMessage.getContent();
         if (contents == null) {
-            contents = List.of();
+            contents = Collections.emptyList();
         }
 
         String text = contents.stream()
@@ -186,7 +188,7 @@ public class MistralAiMapper {
                     .map(MistralAiThinkingContent::getThinking)
                     .flatMap(Collection::stream)
                     .map(MistralAiTextContent::getText)
-                    .toList();
+                    .collect(Collectors.toList());
             if (!thinkingTexts.isEmpty()) {
                 thinking = String.join("\n", thinkingTexts);
             }

@@ -601,7 +601,7 @@ public class DefaultAnthropicClient extends AnthropicClient {
             }
 
             private ChatResponseMetadata createMetadata(AnthropicTokenUsage tokenUsage, FinishReason finishReason) {
-                var metadataBuilder = AnthropicChatResponseMetadata.builder();
+                AnthropicChatResponseMetadata.Builder metadataBuilder = AnthropicChatResponseMetadata.builder();
                 if (responseId.get() != null) {
                     metadataBuilder.id(responseId.get());
                 }

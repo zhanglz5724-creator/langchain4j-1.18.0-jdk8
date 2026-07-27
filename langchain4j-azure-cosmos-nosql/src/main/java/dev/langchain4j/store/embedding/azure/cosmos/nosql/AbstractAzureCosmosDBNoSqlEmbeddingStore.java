@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -275,7 +276,7 @@ public class AbstractAzureCosmosDBNoSqlEmbeddingStore implements EmbeddingStore<
 
                     return new ImmutablePair<>(id, operation);
                 })
-                .toList();
+                .collect(Collectors.toList());
 
         try {
             List<CosmosItemOperation> itemOperations =
@@ -597,7 +598,7 @@ public class AbstractAzureCosmosDBNoSqlEmbeddingStore implements EmbeddingStore<
 
         if (azureCosmosDBSearchQueryType.equals(AzureCosmosDBSearchQueryType.FULL_TEXT_SEARCH)
                 || azureCosmosDBSearchQueryType.equals(AzureCosmosDBSearchQueryType.FULL_TEXT_RANKING)) {
-            return results.stream().map(MappingUtils::toEmbeddingMatch).toList();
+            return results.stream().map(MappingUtils::toEmbeddingMatch).collect(Collectors.toList());
         } else {
             List<EmbeddingMatch<TextSegment>> matches = new ArrayList<>();
             for (AzureCosmosDbNoSqlMatchedDocument result : results) {

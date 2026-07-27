@@ -58,7 +58,8 @@ public class JsonAnyOfSchema implements JsonSchemaElement {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof final JsonAnyOfSchema that)) return false;
+        if (!(o instanceof JsonAnyOfSchema)) return false;
+        JsonAnyOfSchema that = (JsonAnyOfSchema) o;
         return Objects.equals(description, that.description) && Objects.equals(anyOf, that.anyOf);
     }
 

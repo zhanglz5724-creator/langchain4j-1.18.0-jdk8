@@ -7,6 +7,7 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 import software.amazon.awssdk.services.bedrockruntime.model.CacheTTL;
 
 public class BedrockChatRequestParameters extends DefaultChatRequestParameters {
@@ -124,7 +125,10 @@ public class BedrockChatRequestParameters extends DefaultChatRequestParameters {
                     additionalModelRequestFields = new HashMap<>();
                 }
                 Map<?, ?> reasoningConfig =
-                        Map.ofEntries(Map.entry("type", "enabled"), Map.entry("budget_tokens", tokenBudget));
+                        Collections.unmodifiableMap(new HashMap<>() {{
+    put("type", "enabled");
+    put("budget_tokens", tokenBudget);
+}});
                 additionalModelRequestFields.put("reasoning_config", reasoningConfig);
             }
             return this;
@@ -145,11 +149,15 @@ public class BedrockChatRequestParameters extends DefaultChatRequestParameters {
             if (additionalModelRequestFields == null) {
                 additionalModelRequestFields = new HashMap<>();
             }
-            Map<?, ?> reasoningConfig = Map.ofEntries(Map.entry("type", "adaptive"));
+            Map<?, ?> reasoningConfig = Collections.unmodifiableMap(new HashMap<>() {{
+    put("type", "adaptive");
+}});
             additionalModelRequestFields.put("reasoning_config", reasoningConfig);
 
             if (effort != null) {
-                Map<?, ?> outputConfig = Map.ofEntries(Map.entry("effort", effort));
+                Map<?, ?> outputConfig = Collections.unmodifiableMap(new HashMap<>() {{
+    put("effort", effort);
+}});
                 additionalModelRequestFields.put("output_config", outputConfig);
             }
             return this;

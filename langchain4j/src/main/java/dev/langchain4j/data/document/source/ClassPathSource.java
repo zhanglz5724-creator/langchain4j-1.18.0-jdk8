@@ -27,7 +27,7 @@ public class ClassPathSource implements DocumentSource {
         this.url = ensureNotNull(url, "url");
         this.classLoader = ensureNotNull(classLoader, "classLoader");
 
-        var file = this.url.getFile();
+        String file = this.url.getFile();
         this.metadata.put(URL, file);
         this.metadata.put(FILE_NAME, file.substring(file.lastIndexOf('/') + 1));
     }
@@ -54,9 +54,9 @@ public class ClassPathSource implements DocumentSource {
      * @throws IllegalArgumentException If the classpath resource is blank or cannot be found, or if the class loader is null.
      */
     public static ClassPathSource from(String classPathResource, ClassLoader classLoader) {
-        var resource = ensureNotBlank(classPathResource, "classPathResource");
-        var cl = (classLoader != null) ? classLoader : Thread.currentThread().getContextClassLoader();
-        var url = ensureNotNull(
+        String resource = ensureNotBlank(classPathResource, "classPathResource");
+        ClassLoader cl = (classLoader != null) ? classLoader : Thread.currentThread().getContextClassLoader();
+        URL url = ensureNotNull(
                 cl.getResource(resource), "'%s' was not found as a classpath resource", classPathResource);
 
         return new ClassPathSource(url, classLoader);

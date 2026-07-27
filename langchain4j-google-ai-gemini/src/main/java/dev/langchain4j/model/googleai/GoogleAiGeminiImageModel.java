@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 
@@ -110,7 +111,7 @@ public class GoogleAiGeminiImageModel implements ImageModel {
 
         this.modelName = ensureNotNull(builder.modelName, "modelName");
         this.maxRetries = getOrDefault(builder.maxRetries, 2);
-        this.responseModalities = List.of(IMAGE); // TEXT is not supported as an output modality.
+        this.responseModalities = Collections.singletonList(IMAGE); // TEXT is not supported as an output modality.
         this.safetySettings = builder.safetySettings;
 
         if (getOrDefault(builder.useGoogleSearchGrounding, false)) {
@@ -160,8 +161,8 @@ public class GoogleAiGeminiImageModel implements ImageModel {
      */
     @Override
     public Response<@NonNull Image> generate(String prompt) {
-        var request = createGenerateRequest(prompt);
-        var response = withRetryMappingExceptions(() -> geminiService.generateContent(modelName, request), maxRetries);
+        GeminiContent request = createGenerateRequest(prompt);
+        GeminiGenerateContentResponse response = withRetryMappingExceptions(() -> geminiService.generateContent(modelName, request), maxRetries);
 
         return toResponse(response);
     }
@@ -191,8 +192,8 @@ public class GoogleAiGeminiImageModel implements ImageModel {
         ensureNotNull(image, "image");
         ensureNotBlank(prompt, "prompt");
 
-        var request = createEditRequest(prompt, image, null);
-        var response = withRetryMappingExceptions(() -> geminiService.generateContent(modelName, request), maxRetries);
+        GeminiContent request = createEditRequest(prompt, image, null);
+        GeminiGenerateContentResponse response = withRetryMappingExceptions(() -> geminiService.generateContent(modelName, request), maxRetries);
 
         return toResponse(response);
     }
@@ -217,8 +218,8 @@ public class GoogleAiGeminiImageModel implements ImageModel {
         ensureNotNull(mask, "mask");
         ensureNotBlank(prompt, "prompt");
 
-        var request = createEditRequest(prompt, image, mask);
-        var response = withRetryMappingExceptions(() -> geminiService.generateContent(modelName, request), maxRetries);
+        GeminiContent request = createEditRequest(prompt, image, mask);
+        GeminiGenerateContentResponse response = withRetryMappingExceptions(() -> geminiService.generateContent(modelName, request), maxRetries);
 
         return toResponse(response);
     }
@@ -258,13 +259,13 @@ public class GoogleAiGeminiImageModel implements ImageModel {
     }
 
     private GeminiGenerateContentRequest createGenerateRequest(String prompt) {
-        var content = new GeminiContent(List.of(GeminiPart.ofText(prompt)), GeminiRole.USER.toString());
+        GeminiContent content = new GeminiContent(Collections.singletonList(GeminiPart.ofText(prompt)), GeminiRole.USER.toString());
 
         return createGenerateContentRequest(content);
     }
 
     private GeminiGenerateContentRequest createEditRequest(String prompt, Image image, Image mask) {
-        var parts = new ArrayList<GeminiPart>();
+        ArrayList<GeminiPart> parts = new ArrayList<GeminiPart>();
 
         // Add text prompt first
         parts.add(GeminiPart.ofText(prompt));
@@ -277,14 +278,14 @@ public class GoogleAiGeminiImageModel implements ImageModel {
             parts.add(createImagePart(mask));
         }
 
-        var content = new GeminiContent(parts, GeminiRole.USER.toString());
+        GeminiContent content = new GeminiContent(parts, GeminiRole.USER.toString());
 
         return createGenerateContentRequest(content);
     }
 
     private GeminiGenerateContentRequest createGenerateContentRequest(GeminiContent content) {
         return GeminiGenerateContentRequest.builder()
-                .contents(List.of(content))
+                .contents(Collections.singletonList(content))
                 .generationConfig(createGenerationConfig())
                 .safetySettings(safetySettings)
                 .tools(tools)
@@ -294,7 +295,7 @@ public class GoogleAiGeminiImageModel implements ImageModel {
     private GeminiPart createImagePart(Image image) {
         String base64Data = image.base64Data();
         String mimeType = image.mimeType();
-        if (mimeType == null || mimeType.isBlank()) {
+        if (mimeType == null || mimeType.trim().isEmpty()) {
             mimeType = "image/png"; // Default to PNG if not specified
         }
 

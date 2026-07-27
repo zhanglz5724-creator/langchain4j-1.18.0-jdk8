@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.Utils.isNullOrBlank;
@@ -100,7 +102,7 @@ public class VectorToolSearchStrategy implements ToolSearchStrategy {
 
     @Override
     public List<ToolSpecification> getToolSearchTools(InvocationContext context) {
-        return List.of(toolSearchTool);
+        return Collections.singletonList(toolSearchTool);
     }
 
     @Override
@@ -135,7 +137,7 @@ public class VectorToolSearchStrategy implements ToolSearchStrategy {
 
         List<String> toolNames = searchResult.matches().stream()
                 .map(match -> (String) match.embedded().metadata().getString(METADATA_TOOL_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         String toolResultMessageText = toolResultMessageTextProvider.apply(toolNames);
 
@@ -146,7 +148,7 @@ public class VectorToolSearchStrategy implements ToolSearchStrategy {
         Map<String, Object> map = parseMap(argumentsJson);
 
         if (isNullOrEmpty(map) || !map.containsKey(toolArgumentName)) {
-            String message = "Missing required tool argument '%s'".formatted(toolArgumentName);
+            String message = String.format("Missing required tool argument '%s'", toolArgumentName);
             throwException(message, null);
         }
 
@@ -157,7 +159,7 @@ public class VectorToolSearchStrategy implements ToolSearchStrategy {
         try {
             return Json.fromJson(json, Map.class);
         } catch (Exception e) {
-            String message = "Failed to parse tool search arguments: '%s' (base64: '%s')".formatted(json, toBase64(json));
+            String message = String.format("Failed to parse tool search arguments: '%s' (base64: '%s')", json, toBase64(json));
             throwException(message, e);
             return null; // unreachable
         }

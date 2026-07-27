@@ -8,6 +8,7 @@ import dev.langchain4j.internal.Utils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Collections;
 
 /**
  * The 'Resource' object from the MCP protocol schema.
@@ -41,7 +42,7 @@ public class McpResource {
         this.description = description;
         this.mimeType = mimeType;
         this.metadata = copy(metadata);
-        this.icons = icons == null ? List.of() : List.copyOf(icons);
+        this.icons = icons == null ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(icons);
     }
 
     public String uri() {
@@ -72,7 +73,7 @@ public class McpResource {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (McpResource) obj;
+        McpResource that = (McpResource) obj;
         return Objects.equals(this.uri, that.uri)
                 && Objects.equals(this.name, that.name)
                 && Objects.equals(this.description, that.description)

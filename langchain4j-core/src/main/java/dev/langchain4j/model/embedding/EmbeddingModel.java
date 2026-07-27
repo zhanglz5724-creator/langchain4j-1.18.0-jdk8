@@ -87,7 +87,7 @@ public interface EmbeddingModel {
 
         List<TextSegment> textSegments = finalRequest.inputs().stream()
                 .map(input -> TextSegment.from(input.text()))
-                .toList();
+                .collect(Collectors.toList());
         Map<Object, Object> attributes = new java.util.concurrent.ConcurrentHashMap<>();
 
         EmbeddingModelListenerUtils.onRequest(
@@ -171,7 +171,7 @@ public interface EmbeddingModel {
     @Experimental
     default EmbeddingResponse doEmbed(EmbeddingRequest request) {
         Response<List<Embedding>> legacy = embedAll(
-                request.inputs().stream().map(input -> TextSegment.from(input.text())).toList());
+                request.inputs().stream().map(input -> TextSegment.from(input.text())).collect(Collectors.toList()));
         return EmbeddingResponse.builder()
                 .embeddings(legacy.content())
                 .metadata(EmbeddingResponseMetadata.builder()
@@ -322,8 +322,8 @@ public interface EmbeddingModel {
         if (isNullOrEmpty(listeners)) {
             return this;
         }
-        if (this instanceof ListeningEmbeddingModel listeningEmbeddingModel) {
-            return listeningEmbeddingModel.withAdditionalListeners(listeners);
+        if (this instanceof ListeningEmbeddingModel) {
+            return ((ListeningEmbeddingModel) this).withAdditionalListeners(listeners);
         }
         return new ListeningEmbeddingModel(this, listeners);
     }

@@ -4,6 +4,7 @@ import dev.langchain4j.Experimental;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.Utils.copy;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
@@ -70,7 +71,7 @@ public class BatchResponse<T> {
         return results.stream()
                 .filter(BatchItemResult::isSuccess)
                 .map(BatchItemResult::response)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -82,7 +83,7 @@ public class BatchResponse<T> {
         return results.stream()
                 .filter(result -> !result.isSuccess())
                 .map(BatchItemResult::error)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -327,7 +327,7 @@ public class MistralAiStreamingChatModel implements StreamingChatModel {
         }
 
         public MistralAiStreamingChatModelBuilder supportedCapabilities(Set<Capability> supportedCapabilities) {
-            this.supportedCapabilities = Set.copyOf(supportedCapabilities);
+            this.supportedCapabilities = Collections.unmodifiableSet(new HashSet<>(supportedCapabilities);
             return this;
         }
 

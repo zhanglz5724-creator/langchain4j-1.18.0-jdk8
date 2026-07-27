@@ -40,6 +40,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.Collections;
 
 @Internal
 public class DeclarativeUtil {
@@ -394,7 +395,7 @@ public class DeclarativeUtil {
         return agenticScope -> {
             try {
                 Object[] args = agentInvocationArguments(
-                                agenticScope, agentArguments, Map.of(AGENTIC_SCOPE_ARG_NAME, agenticScope))
+                                agenticScope, agentArguments, Collections.singletonMap(AGENTIC_SCOPE_ARG_NAME, agenticScope))
                         .positionalArgs();
                 return (T) functionMethod.invoke(null, args);
             } catch (Exception e) {
@@ -410,8 +411,46 @@ public class DeclarativeUtil {
     public static List<SupplierParameterResolver> getSupplierParameterResolvers() {
         return supplierParameterResolvers;
     }
+    private class DefaultSupplierParameterResolverContext implements SupplierParameterResolver.Context {
+        private final Class<?> declaringAgentClass;
+        private final Method supplierMethod;
+        private final Parameter parameter;
 
-    private record DefaultSupplierParameterResolverContext(
-            Class<?> declaringAgentClass, Method supplierMethod, Parameter parameter)
-            implements SupplierParameterResolver.Context {}
+        public DefaultSupplierParameterResolverContext(Class<?> declaringAgentClass, Method supplierMethod, Parameter parameter) {
+            this.declaringAgentClass = declaringAgentClass;
+            this.supplierMethod = supplierMethod;
+            this.parameter = parameter;
+        }
+
+        public Class<?> getDeclaringAgentClass() {
+            return declaringAgentClass;
+        }
+
+        public Method getSupplierMethod() {
+            return supplierMethod;
+        }
+
+        public Parameter getParameter() {
+            return parameter;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DefaultSupplierParameterResolverContext that = (DefaultSupplierParameterResolverContext) o;
+            return java.util.Objects.equals(this.declaringAgentClass, that.declaringAgentClass) && java.util.Objects.equals(this.supplierMethod, that.supplierMethod) && java.util.Objects.equals(this.parameter, that.parameter);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(declaringAgentClass, supplierMethod, parameter);
+        }
+
+        @Override
+        public String toString() {
+            return "DefaultSupplierParameterResolverContext{"declaringAgentClass=" + declaringAgentClass + , "supplierMethod=" + supplierMethod + , "parameter=" + parameter + "}"";
+        }
+
+    }
 }

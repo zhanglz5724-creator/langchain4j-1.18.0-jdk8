@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Internal
 class InternalOllamaHelper {
@@ -142,7 +143,7 @@ class InternalOllamaHelper {
             thinking = message.getThinking();
         }
 
-        List<ToolCall> toolCalls = getOrDefault(message.getToolCalls(), List.of());
+        List<ToolCall> toolCalls = getOrDefault(message.getToolCalls(), Collections.emptyList());
 
         return AiMessage.builder()
                 .text(isNullOrEmpty(content) ? null : content)
@@ -209,7 +210,7 @@ class InternalOllamaHelper {
 
         String text = concatenateTextContents(userMessage);
 
-        List<ImageContent> imageContents = groupedContents.getOrDefault(IMAGE, List.of()).stream()
+        List<ImageContent> imageContents = groupedContents.getOrDefault(IMAGE, Collections.emptyList()).stream()
                 .map(content -> (ImageContent) content)
                 .collect(Collectors.toList());
 

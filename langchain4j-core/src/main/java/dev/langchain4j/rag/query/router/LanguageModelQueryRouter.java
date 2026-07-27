@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
@@ -42,13 +43,12 @@ import static java.util.stream.Collectors.toList;
 public class LanguageModelQueryRouter implements QueryRouter {
 
     public static final PromptTemplate DEFAULT_PROMPT_TEMPLATE = PromptTemplate.from(
-            """
-                    Based on the user query, determine the most suitable data source(s) \
-                    to retrieve relevant information from the following options:
-                    {{options}}
-                    It is very important that your answer consists of either a single number \
-                    or multiple numbers separated by commas and nothing else!
-                    User query: {{query}}"""
+            "Based on the user query, determine the most suitable data source(s) " +
+            "to retrieve relevant information from the following options:\n" +
+            "{{options}}\n" +
+            "It is very important that your answer consists of either a single number " +
+            "or multiple numbers separated by commas and nothing else!\n" +
+            "User query: {{query}}"
     );
 
     protected final ChatModel chatModel;

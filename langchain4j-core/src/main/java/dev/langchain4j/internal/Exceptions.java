@@ -51,8 +51,8 @@ public class Exceptions {
         try {
             return callable.call();
         } catch (Exception e) {
-            if (e instanceof RuntimeException re) {
-                throw re;
+            if (e instanceof RuntimeException) {
+                throw ((RuntimeException) e);
             } else {
                 throw new RuntimeException(e);
             }

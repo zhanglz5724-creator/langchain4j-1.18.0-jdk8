@@ -103,7 +103,7 @@ class ParsingUtils {
     }
 
     static OutputParsingException outputParsingException(String text, String type, Throwable cause) {
-        return new OutputParsingException("Failed to parse %s (base64: %s) into %s".formatted(
+        return new OutputParsingException(String.format("Failed to parse %s (base64: %s) into %s", 
                 quoted(text), quoted(toBase64(text)), type), cause);
     }
 }

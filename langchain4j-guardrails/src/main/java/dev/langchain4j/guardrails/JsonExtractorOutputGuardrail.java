@@ -60,7 +60,7 @@ public class JsonExtractorOutputGuardrail<T> implements OutputGuardrail {
 
     @Override
     public OutputGuardrailResult validate(AiMessage responseFromLLM) {
-        var llmResponse = ensureNotNull(responseFromLLM, "responseFromLLM").text();
+        String llmResponse = ensureNotNull(responseFromLLM, "responseFromLLM").text();
         LOGGER.debug("LLM output: {}", llmResponse);
 
         return deserialize(llmResponse)

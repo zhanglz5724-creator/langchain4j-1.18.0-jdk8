@@ -6,6 +6,7 @@ import static java.util.Objects.nonNull;
 import dev.langchain4j.Internal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import software.amazon.awssdk.services.bedrockruntime.model.ContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ContentBlockDelta;
 import software.amazon.awssdk.services.bedrockruntime.model.ContentBlockStart;
@@ -121,7 +122,7 @@ class ConverseResponseFromStreamBuilder {
             }
             contents.add(ContentBlock.builder().text(stringBuilder.toString()).build());
             contents.addAll(
-                    toolUseBlocks.stream().map(ContentBlock::fromToolUse).toList());
+                    toolUseBlocks.stream().map(ContentBlock::fromToolUse).collect(Collectors.toList()));
             converseResponseBuilder.output(builder -> builder.message(
                             this.messageBuilder.content(contents).build())
                     .build());

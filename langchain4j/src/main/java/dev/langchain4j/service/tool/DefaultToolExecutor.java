@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class DefaultToolExecutor implements ToolExecutor {
 
@@ -181,15 +183,15 @@ public class DefaultToolExecutor implements ToolExecutor {
             return null;
         }
         if (result instanceof Image image) {
-            return List.of(ImageContent.from(image));
+            return Collections.singletonList(ImageContent.from(image));
         } else if (result instanceof Content content) {
-            return List.of(content);
+            return Collections.singletonList(content);
         } else if (result instanceof Collection<?> collection
                 && !collection.isEmpty()
                 && collection.iterator().next() instanceof Content) {
-            return collection.stream().map(Content.class::cast).toList();
+            return collection.stream().map(Content.class::cast).collect(Collectors.toList());
         } else if (result instanceof Content[] array) {
-            return List.of(array);
+            return Collections.singletonList(array);
         }
         return null;
     }

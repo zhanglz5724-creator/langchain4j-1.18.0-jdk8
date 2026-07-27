@@ -20,9 +20,13 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.mistralai.internal.api.*;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Internal
 public class DefaultMistralAiClient extends MistralAiClient {
@@ -70,7 +74,7 @@ public class DefaultMistralAiClient extends MistralAiClient {
     private java.util.Map<String, String> buildRequestHeaders() {
         Map<String, String> dynamicHeaders = customHeadersSupplier.get();
         if (isNullOrEmpty(dynamicHeaders)) {
-            return Map.of();
+            return Collections.emptyMap();
         }
         return dynamicHeaders;
     }
@@ -304,12 +308,12 @@ public class DefaultMistralAiClient extends MistralAiClient {
         SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
         String body = rawResponse.body();
         if (body == null) {
-            return List.of();
+            return Collections.emptyList();
         }
-        return body.lines()
+        return Arrays.stream(body.split("\\n"))
                 .map(String::trim)
                 .filter(line -> !line.isEmpty())
                 .map(line -> fromJson(line, MistralAiBatchResultEntry.class))
-                .toList();
+                .collect(Collectors.toList());
     }
 }

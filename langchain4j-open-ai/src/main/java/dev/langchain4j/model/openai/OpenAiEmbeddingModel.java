@@ -36,6 +36,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
 /**
@@ -109,12 +113,11 @@ public class OpenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
     @Override
     public Set<EmbeddingParameter<?>> supportedParameters() {
-        return Set.of(
-                EmbeddingRequestParameters.MODEL_NAME,
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EmbeddingRequestParameters.MODEL_NAME,
                 EmbeddingRequestParameters.DIMENSIONS,
                 OpenAiEmbeddingRequestParameters.USER,
                 OpenAiEmbeddingRequestParameters.ENCODING_FORMAT,
-                OpenAiEmbeddingRequestParameters.CUSTOM_PARAMETERS);
+                OpenAiEmbeddingRequestParameters.CUSTOM_PARAMETERS)));
     }
 
     @Override
@@ -135,7 +138,7 @@ public class OpenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
         List<String> texts = request.inputs().stream()
                 .map(EmbeddingInput::text)
-                .toList();
+                .collect(Collectors.toList());
         List<List<String>> textBatches = partition(texts, maxSegmentsPerBatch);
 
         List<EmbeddedBatch> responses = new ArrayList<>();
@@ -144,7 +147,7 @@ public class OpenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
 
         List<Embedding> embeddings =
-                responses.stream().flatMap(batch -> batch.embeddings().stream()).toList();
+                responses.stream().flatMap(batch -> batch.embeddings().stream()).collect(Collectors.toList());
         TokenUsage tokenUsage = responses.stream()
                 .map(EmbeddedBatch::tokenUsage)
                 .filter(Objects::nonNull)
@@ -164,8 +167,48 @@ public class OpenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
                         .build())
                 .build();
     }
+    private class EmbeddedBatch {
+        private final List<Embedding> embeddings;
+        private final TokenUsage tokenUsage;
+        private final String modelName;
 
-    private record EmbeddedBatch(List<Embedding> embeddings, TokenUsage tokenUsage, String modelName) {}
+        public EmbeddedBatch(List<Embedding> embeddings, TokenUsage tokenUsage, String modelName) {
+            this.embeddings = embeddings;
+            this.tokenUsage = tokenUsage;
+            this.modelName = modelName;
+        }
+
+        public List<Embedding> getEmbeddings() {
+            return embeddings;
+        }
+
+        public TokenUsage getTokenUsage() {
+            return tokenUsage;
+        }
+
+        public String getModelName() {
+            return modelName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            EmbeddedBatch that = (EmbeddedBatch) o;
+            return java.util.Objects.equals(this.embeddings, that.embeddings) && java.util.Objects.equals(this.tokenUsage, that.tokenUsage) && java.util.Objects.equals(this.modelName, that.modelName);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(embeddings, tokenUsage, modelName);
+        }
+
+        @Override
+        public String toString() {
+            return "EmbeddedBatch{"embeddings=" + embeddings + , "tokenUsage=" + tokenUsage + , "modelName=" + modelName + "}"";
+        }
+
+    }
 
     private List<List<String>> partition(List<String> inputList, int size) {
         List<List<String>> result = new ArrayList<>();
@@ -195,7 +238,7 @@ public class OpenAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
         List<Embedding> embeddings = response.data().stream()
                 .map(openAiEmbedding -> Embedding.from(openAiEmbedding.embedding()))
-                .toList();
+                .collect(Collectors.toList());
 
         return new EmbeddedBatch(embeddings, tokenUsageFrom(response.usage()), response.model());
     }

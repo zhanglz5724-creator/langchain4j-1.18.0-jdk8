@@ -26,6 +26,7 @@ import dev.langchain4j.model.output.TokenUsage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A {@link ChatModel} implementation that integrates IBM watsonx.ai with LangChain4j.
@@ -62,10 +63,10 @@ public class WatsonxChatModel extends WatsonxChat implements ChatModel {
                 chatRequest.messages().stream().map(Converter::toChatMessage).collect(toCollection(ArrayList::new));
 
         List<Tool> tools = nonNull(toolSpecifications) && !toolSpecifications.isEmpty()
-                ? toolSpecifications.stream().map(Converter::toTool).toList()
+                ? toolSpecifications.stream().map(Converter::toTool).collect(Collectors.toList())
                 : null;
 
-        var watsonxChatRequestBuilder = com.ibm.watsonx.ai.chat.ChatRequest.builder();
+        com.ibm.watsonx.ai.chat.ChatRequest.Builder watsonxChatRequestBuilder = com.ibm.watsonx.ai.chat.ChatRequest.builder();
 
         String deploymentId = null;
 
@@ -74,8 +75,8 @@ public class WatsonxChatModel extends WatsonxChat implements ChatModel {
             if (nonNull(wcrp.thinking())) watsonxChatRequestBuilder.thinking(wcrp.thinking());
         }
 
-        var parameters = Converter.toChatParameters(chatRequest.parameters());
-        var watsonxChatRequest = watsonxChatRequestBuilder
+        com.ibm.watsonx.ai.chat.model.ChatParameters parameters = Converter.toChatParameters(chatRequest.parameters());
+        com.ibm.watsonx.ai.chat.ChatRequest watsonxChatRequest = watsonxChatRequestBuilder
                 .messages(messages)
                 .tools(tools)
                 .parameters(parameters)
@@ -98,7 +99,7 @@ public class WatsonxChatModel extends WatsonxChat implements ChatModel {
                 && !assistantMessage.toolCalls().isEmpty()) {
             aiMessage.toolExecutionRequests(assistantMessage.toolCalls().stream()
                     .map(Converter::toToolExecutionRequest)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         aiMessage.thinking(assistantMessage.thinking());

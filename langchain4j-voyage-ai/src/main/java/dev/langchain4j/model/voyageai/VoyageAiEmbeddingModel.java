@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import org.slf4j.Logger;
 
 /**
@@ -74,7 +77,7 @@ public class VoyageAiEmbeddingModel extends DimensionAwareEmbeddingModel {
         this.inputType = inputType;
         this.encodingFormat = encodingFormat;
         this.multimodal = isMultimodalModel(this.modelName);
-        this.listeners = List.of();
+        this.listeners = Collections.emptyList();
 
         this.client = VoyageAiClient.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -111,12 +114,12 @@ public class VoyageAiEmbeddingModel extends DimensionAwareEmbeddingModel {
 
     @Override
     public Set<ContentType> supportedContentTypes() {
-        return multimodal ? Set.of(ContentType.TEXT, ContentType.IMAGE) : Set.of(ContentType.TEXT);
+        return multimodal ? Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE))) : Collections.singleton(ContentType.TEXT);
     }
 
     @Override
     public Set<EmbeddingParameter<?>> supportedParameters() {
-        return Set.of(EmbeddingRequestParameters.INPUT_TYPE);
+        return Collections.singleton(EmbeddingRequestParameters.INPUT_TYPE);
     }
 
     @Override
@@ -178,7 +181,7 @@ public class VoyageAiEmbeddingModel extends DimensionAwareEmbeddingModel {
             return MultimodalEmbeddingRequest.ContentBlock.text(textContent.text());
         }
         if (content instanceof ImageContent imageContent) {
-            var image = imageContent.image();
+            Image image = imageContent.image();
             if (image.url() != null) {
                 return MultimodalEmbeddingRequest.ContentBlock.imageUrl(image.url().toString());
             }

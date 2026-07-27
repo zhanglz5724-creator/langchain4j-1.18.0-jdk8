@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * A filter that performs full-text search using FullTextContainsAll function.
@@ -26,7 +27,7 @@ public class FullTextContainsAll implements Filter {
     public FullTextContainsAll(String key, Collection<String> searchTerms) {
         this.key = ensureNotBlank(key, "key");
         this.searchTerms = ensureNotNull(searchTerms, "searchTerms with key '" + key + "'").stream()
-                .toList();
+                .collect(Collectors.toList());
         if (this.searchTerms.isEmpty()) {
             throw new IllegalArgumentException("searchTerms cannot be empty");
         }

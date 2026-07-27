@@ -7,6 +7,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,13 +110,13 @@ public class DockerMcpTransport implements McpTransport {
         DockerHttpClient httpClient = buildHttpClient(config);
         this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
 
-        var imageNameWithoutTag = getImageNameWithoutTag(image);
-        var parsedTagFromImage = NameParser.parseRepositoryTag(image);
+        String imageNameWithoutTag = getImageNameWithoutTag(image);
+        NameParser.ReposTag parsedTagFromImage = NameParser.parseRepositoryTag(image);
         // pullImageCmd without the tag (= repository) to avoid being redundant with withTag below
         // and prevent errors with Podman trying to pull "image:tag:tag"
-        try (var pull = dockerClient.pullImageCmd(imageNameWithoutTag)) {
-            var tag = !parsedTagFromImage.tag.isEmpty() ? parsedTagFromImage.tag : "latest";
-            var repository =
+        try (PullImageCmd pull = dockerClient.pullImageCmd(imageNameWithoutTag)) {
+            String tag = !parsedTagFromImage.tag.isEmpty() ? parsedTagFromImage.tag : "latest";
+            String repository =
                     pull.getRepository().contains(":") ? pull.getRepository().split(":")[0] : pull.getRepository();
             pull.withTag(tag).exec(new PullImageResultCallback()).awaitCompletion();
             log.trace("Image pulled [{}:{}]", repository, tag);
@@ -122,7 +125,7 @@ public class DockerMcpTransport implements McpTransport {
         }
 
         HostConfig hostConfig = new HostConfig()
-                .withBinds(binds.stream().map(bind -> Bind.parse(bind)).toList());
+                .withBinds(binds.stream().map(bind -> Bind.parse(bind)).collect(Collectors.toList()));
         CreateContainerCmd container = dockerClient
                 .createContainerCmd(image)
                 .withTty(false)
@@ -133,7 +136,7 @@ public class DockerMcpTransport implements McpTransport {
                 .withCmd(command.toArray(new String[0]))
                 .withEnv(environment.entrySet().stream()
                         .map(r -> r.getKey() + "=" + r.getValue())
-                        .toList())
+                        .collect(Collectors.toList()))
                 .withHostConfig(hostConfig);
         try {
             CreateContainerResponse exec = container.exec();
@@ -398,13 +401,13 @@ public class DockerMcpTransport implements McpTransport {
                 throw new IllegalArgumentException("Missing image");
             }
             if (command == null) {
-                command = List.of();
+                command = Collections.emptyList();
             }
             if (environment == null) {
-                environment = Map.of();
+                environment = Collections.emptyMap();
             }
             if (binds == null) {
-                binds = List.of();
+                binds = Collections.emptyList();
             }
             if (attachTimeout == null) {
                 attachTimeout = Duration.ofSeconds(30);

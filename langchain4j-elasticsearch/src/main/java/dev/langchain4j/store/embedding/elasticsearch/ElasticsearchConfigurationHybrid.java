@@ -11,6 +11,7 @@ import co.elastic.clients.elasticsearch.core.search.SourceConfig;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,8 +128,7 @@ public class ElasticsearchConfigurationHybrid implements ElasticsearchConfigurat
                             return new SourceConfig.Builder().filter(f -> f);
                         })
                         .index(indexName)
-                        .retriever(r -> r.rrf(rf -> rf.retrievers(List.of(
-                                RRFRetrieverEntry.of(rre -> rre.retriever(rt -> rt.standard(standard))),
+                        .retriever(r -> r.rrf(rf -> rf.retrievers(Collections.singletonList(RRFRetrieverEntry.of(rre -> rre.retriever(rt -> rt.standard(standard))),
                                 RRFRetrieverEntry.of(rre -> rre.retriever(rt -> rt.knn(knn)))))))
                         .size(embeddingSearchRequest.maxResults())
                         .minScore(embeddingSearchRequest.minScore()),

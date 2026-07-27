@@ -59,7 +59,7 @@ class DockerResultCallback extends ResultCallback.Adapter<Frame> {
     }
 
     private void send(String line) {
-        if (line != null && !line.isBlank()) {
+        if (line != null && !line.trim().isEmpty()) {
             logAggregator.append(line);
 
             // we aggregate until we have a newline char at then end of the line

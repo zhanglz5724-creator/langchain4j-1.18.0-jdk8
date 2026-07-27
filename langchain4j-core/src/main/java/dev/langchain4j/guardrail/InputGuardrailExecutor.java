@@ -2,17 +2,18 @@ package dev.langchain4j.guardrail;
 
 import static dev.langchain4j.observability.api.event.InputGuardrailExecutedEvent.InputGuardrailExecutedEventBuilder;
 
+import java.util.List;
+import java.util.ServiceLoader;
+
 import dev.langchain4j.guardrail.InputGuardrailResult.Failure;
 import dev.langchain4j.guardrail.config.InputGuardrailsConfig;
 import dev.langchain4j.observability.api.event.InputGuardrailExecutedEvent;
 import dev.langchain4j.spi.guardrail.InputGuardrailExecutorBuilderFactory;
-import java.util.List;
-import java.util.ServiceLoader;
 
 /**
  * The {@link GuardrailExecutor} for {@link InputGuardrail}s.
  */
-public non-sealed class InputGuardrailExecutor
+public class InputGuardrailExecutor
         extends AbstractGuardrailExecutor<
                 InputGuardrailsConfig,
                 InputGuardrailRequest,
@@ -62,7 +63,7 @@ public non-sealed class InputGuardrailExecutor
      */
     @Override
     public InputGuardrailResult execute(InputGuardrailRequest request) {
-        var result = executeGuardrails(request);
+        InputGuardrailResult result = executeGuardrails(request);
 
         if (!result.isSuccess()) {
             throw new InputGuardrailException(result.toString(), result.getFirstFailureException());
@@ -80,10 +81,12 @@ public non-sealed class InputGuardrailExecutor
      * @return An {@link InputGuardrailExecutorBuilder} used to create {@link InputGuardrailExecutor} instances
      */
     public static InputGuardrailExecutorBuilder builder() {
-        return ServiceLoader.load(InputGuardrailExecutorBuilderFactory.class)
-                .findFirst()
-                .map(InputGuardrailExecutorBuilderFactory::getBuilder)
-                .orElseGet(InputGuardrailExecutorBuilder::new);
+        ServiceLoader<InputGuardrailExecutorBuilderFactory> loader =
+                ServiceLoader.load(InputGuardrailExecutorBuilderFactory.class);
+        for (InputGuardrailExecutorBuilderFactory factory : loader) {
+            return factory.getBuilder();
+        }
+        return new InputGuardrailExecutorBuilder();
     }
 
     /**
@@ -100,7 +103,7 @@ public non-sealed class InputGuardrailExecutor
      *
      * Provides the {@code build()} method to create an {@link InputGuardrailExecutor} instance.
      */
-    public static non-sealed class InputGuardrailExecutorBuilder
+    public static class InputGuardrailExecutorBuilder
             extends GuardrailExecutorBuilder<
                     InputGuardrailsConfig,
                     InputGuardrailResult,

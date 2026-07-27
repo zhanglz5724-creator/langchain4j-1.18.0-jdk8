@@ -23,6 +23,7 @@ import dev.langchain4j.model.vertexai.anthropic.internal.mapper.AnthropicRespons
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +87,7 @@ public class VertexAiAnthropicChatModel implements ChatModel, Closeable {
         this.logRequests = getOrDefault(builder.logRequests, false);
         this.logResponses = getOrDefault(builder.logResponses, false);
         this.enablePromptCaching = getOrDefault(builder.enablePromptCaching, false);
-        this.listeners = builder.listeners != null ? List.copyOf(builder.listeners) : List.of();
+        this.listeners = builder.listeners != null ? Collections.unmodifiableList(new ArrayList<>(builder.listeners) : Collections.emptyList();
         this.location = ensureNotBlank(builder.location, "location");
     }
 

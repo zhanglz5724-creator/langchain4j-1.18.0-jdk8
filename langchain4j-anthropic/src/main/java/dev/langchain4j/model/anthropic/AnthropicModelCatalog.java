@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
 /**
@@ -57,7 +58,7 @@ public class AnthropicModelCatalog implements ModelCatalog {
     public List<ModelDescription> listModels() {
         AnthropicModelsListResponse response = client.listModels();
         List<ModelDescription> models =
-                response.data.stream().map(this::mapToModelDescription).toList();
+                response.data.stream().map(this::mapToModelDescription).collect(Collectors.toList());
         return models;
     }
 

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Collections;
 
 /**
  * The 'Prompt' object from the MCP protocol schema.
@@ -39,7 +40,7 @@ public class McpPrompt {
         this.description = description;
         this.arguments = arguments;
         this.metadata = copy(metadata);
-        this.icons = icons == null ? List.of() : List.copyOf(icons);
+        this.icons = icons == null ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(icons);
     }
 
     public String name() {
@@ -66,7 +67,7 @@ public class McpPrompt {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (McpPrompt) obj;
+        McpPrompt that = (McpPrompt) obj;
         return Objects.equals(this.name, that.name)
                 && Objects.equals(this.description, that.description)
                 && Objects.equals(this.arguments, that.arguments)
