@@ -1,9 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.guardrail;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.guardrail.Guardrail;
+import dev.langchain4j.guardrail.GuardrailResult;
+import dev.langchain4j.guardrail.OutputGuardrailRequest;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.Collections;
 import java.util.List;
@@ -12,287 +17,166 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * The result of the validation of an {@link OutputGuardrail}
- */
-public final class OutputGuardrailResult implements GuardrailResult<OutputGuardrailResult> {
+public final class OutputGuardrailResult
+implements GuardrailResult<OutputGuardrailResult> {
     private static final OutputGuardrailResult SUCCESS = new OutputGuardrailResult();
-
-    private final Result result;
+    private final GuardrailResult.Result result;
     private final AiMessage successfulAiMessage;
     private final Object successfulResult;
     private final List<Failure> failures;
 
-    private OutputGuardrailResult(
-            Result result, AiMessage successfulAiMessage, Object successfulResult, List<Failure> failures) {
-        this.result = ensureNotNull(result, "result");
+    private OutputGuardrailResult(GuardrailResult.Result result, AiMessage successfulAiMessage, Object successfulResult, List<Failure> failures) {
+        this.result = ValidationUtils.ensureNotNull(result, "result");
         this.successfulAiMessage = successfulAiMessage;
         this.successfulResult = successfulResult;
-        this.failures = Optional.ofNullable(failures).orElseGet(List::of);
+        this.failures = Optional.ofNullable(failures).orElseGet(Collections::emptyList);
     }
 
-    private OutputGuardrailResult(
-            Result result, String successfulText, Object successfulResult, List<Failure> failures) {
+    private OutputGuardrailResult(GuardrailResult.Result result, String successfulText, Object successfulResult, List<Failure> failures) {
         this(result, successfulText == null ? null : AiMessage.from(successfulText), successfulResult, failures);
     }
 
     private OutputGuardrailResult() {
-        this(Result.SUCCESS, (AiMessage) null, null, Collections.emptyList());
+        this(GuardrailResult.Result.SUCCESS, (AiMessage)null, null, Collections.emptyList());
     }
 
     private OutputGuardrailResult(String successfulText) {
-        this(Result.SUCCESS_WITH_RESULT, successfulText, null, Collections.emptyList());
+        this(GuardrailResult.Result.SUCCESS_WITH_RESULT, successfulText, null, Collections.emptyList());
     }
 
     private OutputGuardrailResult(String successfulText, Object successfulResult) {
-        this(Result.SUCCESS_WITH_RESULT, successfulText, successfulResult, Collections.emptyList());
+        this(GuardrailResult.Result.SUCCESS_WITH_RESULT, successfulText, successfulResult, Collections.emptyList());
     }
 
     private OutputGuardrailResult(AiMessage successfulAiMessage) {
-        this(Result.SUCCESS_WITH_RESULT, successfulAiMessage, null, Collections.emptyList());
+        this(GuardrailResult.Result.SUCCESS_WITH_RESULT, successfulAiMessage, null, Collections.emptyList());
     }
 
     private OutputGuardrailResult(AiMessage successfulAiMessage, Object successfulResult) {
-        this(Result.SUCCESS_WITH_RESULT, successfulAiMessage, successfulResult, Collections.emptyList());
+        this(GuardrailResult.Result.SUCCESS_WITH_RESULT, successfulAiMessage, successfulResult, Collections.emptyList());
     }
 
     OutputGuardrailResult(List<Failure> failures, boolean fatal) {
-        this(fatal ? Result.FATAL : Result.FAILURE, (AiMessage) null, null, failures);
+        this(fatal ? GuardrailResult.Result.FATAL : GuardrailResult.Result.FAILURE, (AiMessage)null, null, failures);
     }
 
     OutputGuardrailResult(Failure failure, boolean fatal) {
-        // Using Stream.of().collect() here because we need a mutable list
-        this(Stream.of(failure).collect(Collectors.collect(Collectors.toList())), fatal);
+        this(Stream.of(failure).collect(Collectors.toList()), fatal);
     }
 
-    /**
-     * Gets a successful output guardrail result
-     */
     public static OutputGuardrailResult success() {
         return SUCCESS;
     }
 
-    /**
-     * Produces a successful result with specific success text
-     *
-     * @return The result of a successful output guardrail validation with a specific text.
-     *
-     * @param successfulText
-     *            The text of the successful result.
-     */
     public static OutputGuardrailResult successWith(String successfulText) {
-        return (successfulText == null) ? success() : new OutputGuardrailResult(successfulText);
+        return successfulText == null ? OutputGuardrailResult.success() : new OutputGuardrailResult(successfulText);
     }
 
-    /**
-     * Produces a successful result with specific success text and result object
-     *
-     * @param successfulText
-     *            The text of the successful result.
-     * @param successfulResult
-     *            The object generated by this successful result.
-     * @return The result of a successful output guardrail validation with a specific text.
-     */
     public static OutputGuardrailResult successWith(String successfulText, Object successfulResult) {
         return new OutputGuardrailResult(successfulText, successfulResult);
     }
 
-    /**
-     * Produces a successful result with specific success text
-     *
-     * @return The result of a successful output guardrail validation with a specific AiMessage.
-     *
-     * @param successfulAiMessage
-     *            The AiMessage successful result.
-     */
     public static OutputGuardrailResult successWith(AiMessage successfulAiMessage) {
-        return (successfulAiMessage == null) ? success() : new OutputGuardrailResult(successfulAiMessage);
+        return successfulAiMessage == null ? OutputGuardrailResult.success() : new OutputGuardrailResult(successfulAiMessage);
     }
 
-    /**
-     * Produces a successful result with specific AiMessage and result object
-     *
-     * @param successfulAiMessage
-     *            The AiMessage successful result.
-     * @param successfulResult
-     *            The object generated by this successful result.
-     * @return The result of a successful output guardrail validation with a specific AiMessage.
-     */
     public static OutputGuardrailResult successWith(AiMessage successfulAiMessage, Object successfulResult) {
         return new OutputGuardrailResult(successfulAiMessage, successfulResult);
     }
 
-    /**
-     * Produces a non-fatal failure
-     *
-     * @param failures A list of {@link Failure}s
-     *
-     * @return The result of a failed output guardrail validation.
-     */
     public static OutputGuardrailResult failure(List<Failure> failures) {
         return new OutputGuardrailResult(failures, false);
     }
 
-    /**
-     * Whether or not the guardrail is forcing a retry
-     */
     public boolean isRetry() {
-        return !isSuccess() && this.failures.stream().anyMatch(Failure::retry);
+        return !this.isSuccess() && this.failures.stream().anyMatch(Failure::retry);
     }
 
-    /**
-     * Whether or not the guardrail is forcing a reprompt
-     */
     public boolean isReprompt() {
-        return !isSuccess()
-                && this.failures.stream()
-                                .map(Failure::reprompt)
-                                .filter(Objects::nonNull)
-                                .count()
-                        > 0;
+        return !this.isSuccess() && this.failures.stream().map(Failure::reprompt).filter(Objects::nonNull).count() > 0L;
     }
 
-    /**
-     * Block all retries for this result
-     */
     public OutputGuardrailResult blockRetry() {
         this.failures.set(0, this.failures.get(0).blockRetry());
         return this;
     }
 
-    /**
-     * Gets the reprompt message
-     */
     public Optional<String> getReprompt() {
-        return !isSuccess()
-                ? this.failures.stream()
-                        .map(Failure::reprompt)
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                : Optional.empty();
+        return !this.isSuccess() ? this.failures.stream().map(Failure::reprompt).filter(Objects::nonNull).findFirst() : Optional.empty();
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return asString();
+        return this.asString();
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OutputGuardrailResult that = (OutputGuardrailResult) o;
-        return result == that.result
-                && Objects.equals(successfulAiMessage, that.successfulAiMessage)
-                && Objects.equals(successfulResult, that.successfulResult)
-                && Objects.equals(failures, that.failures);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        OutputGuardrailResult that = (OutputGuardrailResult)o;
+        return this.result == that.result && Objects.equals(this.successfulAiMessage, that.successfulAiMessage) && Objects.equals(this.successfulResult, that.successfulResult) && Objects.equals(this.failures, that.failures);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
-        return Objects.hash(result, successfulAiMessage, successfulResult, failures);
+        return Objects.hash(new Object[]{this.result, this.successfulAiMessage, this.successfulResult, this.failures});
     }
 
-    /**
-     * Gets the response computed from the combination of the original {@link ChatResponse} in the {@link OutputGuardrailRequest}
-     * and this result
-     * @param request The output guardrail request
-     * @param <T> The type of response
-     * @return A response computed from the combination of the original {@link ChatResponse} in the {@link OutputGuardrailRequest}
-     * and this result
-     */
     public <T> T response(OutputGuardrailRequest request) {
-        return (T) Optional.ofNullable(successfulResult).orElseGet(() -> createResponse(request));
+        return (T)Optional.ofNullable(this.successfulResult).orElseGet(() -> this.createResponse(request));
     }
 
     private ChatResponse createResponse(OutputGuardrailRequest params) {
-        var response = params.responseFromLLM();
-        return response.toBuilder()
-                .aiMessage(hasRewrittenResult() ? successfulAiMessage : response.aiMessage())
-                .build();
+        ChatResponse response = params.responseFromLLM();
+        return response.toBuilder().aiMessage(this.hasRewrittenResult() ? this.successfulAiMessage : response.aiMessage()).build();
     }
 
     @Override
-    public Result result() {
-        return result;
+    public GuardrailResult.Result result() {
+        return this.result;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <F extends GuardrailResult.Failure> List<F> failures() {
-        return (List<F>) failures;
+        return (List<F>) this.failures;
     }
 
     @Override
     public String successfulText() {
-        return successfulAiMessage.text();
+        return this.successfulAiMessage.text();
     }
 
     public Object successfulResult() {
-        return successfulResult;
+        return this.successfulResult;
     }
 
-    /**
-     * Represents an output guardrail failure
-     */
-    /**
-     * Returns {@code true} if any failure in this result requested removal of the violating
-     * {@link AiMessage} from chat memory.
-     */
     public boolean shouldRemoveViolatingMessage() {
-        return !isSuccess() && failures.stream().anyMatch(Failure::removeViolatingMessage);
+        return !this.isSuccess() && this.failures.stream().anyMatch(Failure::removeViolatingMessage);
     }
 
-    /**
-     * Produces a non-fatal failure that also requests removal of the violating {@link AiMessage}
-     * from chat memory after the guardrail chain finishes.
-     *
-     * @param message A message describing the failure.
-     * @return The result of a failed output guardrail validation with memory cleanup requested.
-     */
     public static OutputGuardrailResult failureWithMessageRemoval(String message) {
         return new OutputGuardrailResult(new Failure(message, null, null, false, null, true), false);
     }
 
-    /**
-     * Produces a non-fatal failure that also requests removal of the violating {@link AiMessage}
-     * from chat memory after the guardrail chain finishes.
-     *
-     * @param message A message describing the failure.
-     * @param cause   The exception that caused this failure.
-     * @return The result of a failed output guardrail validation with memory cleanup requested.
-     */
     public static OutputGuardrailResult failureWithMessageRemoval(String message, Throwable cause) {
         return new OutputGuardrailResult(new Failure(message, cause, null, false, null, true), false);
     }
 
-    /**
-     * Produces a fatal failure that also requests removal of the violating {@link AiMessage}
-     * from chat memory after the guardrail chain finishes.
-     *
-     * @param message A message describing the failure.
-     * @return The result of a fatally failed output guardrail validation with memory cleanup requested.
-     */
     public static OutputGuardrailResult fatalWithMessageRemoval(String message) {
         return new OutputGuardrailResult(new Failure(message, null, null, false, null, true), true);
     }
 
-    /**
-     * Produces a fatal failure that also requests removal of the violating {@link AiMessage}
-     * from chat memory after the guardrail chain finishes.
-     *
-     * @param message A message describing the failure.
-     * @param cause   The exception that caused this failure.
-     * @return The result of a fatally failed output guardrail validation with memory cleanup requested.
-     */
     public static OutputGuardrailResult fatalWithMessageRemoval(String message, Throwable cause) {
         return new OutputGuardrailResult(new Failure(message, cause, null, false, null, true), true);
     }
 
-    public static final class Failure implements GuardrailResult.Failure {
+    public static final class Failure
+    implements GuardrailResult.Failure {
         private final String message;
         private final Throwable cause;
         private final Class<? extends Guardrail> guardrailClass;
@@ -300,14 +184,8 @@ public final class OutputGuardrailResult implements GuardrailResult<OutputGuardr
         private final String reprompt;
         private final boolean removeViolatingMessage;
 
-        Failure(
-                String message,
-                Throwable cause,
-                Class<? extends Guardrail> guardrailClass,
-                boolean retry,
-                String reprompt,
-                boolean removeViolatingMessage) {
-            this.message = ensureNotNull(message, "message");
+        Failure(String message, Throwable cause, Class<? extends Guardrail> guardrailClass, boolean retry, String reprompt, boolean removeViolatingMessage) {
+            this.message = ValidationUtils.ensureNotNull(message, "message");
             this.cause = cause;
             this.guardrailClass = guardrailClass;
             this.retry = retry;
@@ -333,59 +211,44 @@ public final class OutputGuardrailResult implements GuardrailResult<OutputGuardr
 
         @Override
         public Failure withGuardrailClass(Class<? extends Guardrail> guardrailClass) {
-            ensureNotNull(guardrailClass, "guardrailClass");
-            return new Failure(
-                    message(), cause(), guardrailClass, this.retry, this.reprompt, this.removeViolatingMessage);
+            ValidationUtils.ensureNotNull(guardrailClass, "guardrailClass");
+            return new Failure(this.message(), this.cause(), guardrailClass, this.retry, this.reprompt, this.removeViolatingMessage);
         }
 
         @Override
         public String message() {
-            return message;
+            return this.message;
         }
 
         @Override
         public Throwable cause() {
-            return cause;
+            return this.cause;
         }
 
         @Override
         public Class<? extends Guardrail> guardrailClass() {
-            return guardrailClass;
+            return this.guardrailClass;
         }
 
-        /**
-         * Create a failure from this failure that blocks retries
-         */
         public Failure blockRetry() {
-            return this.retry
-                    ? new Failure(
-                            "Retry or reprompt is not allowed after a rewritten output",
-                            cause(),
-                            this.guardrailClass,
-                            false,
-                            this.reprompt,
-                            this.removeViolatingMessage)
-                    : this;
+            return this.retry ? new Failure("Retry or reprompt is not allowed after a rewritten output", this.cause(), this.guardrailClass, false, this.reprompt, this.removeViolatingMessage) : this;
         }
 
-        @Override
         public String toString() {
-            return asString();
+            return this.asString();
         }
 
         public boolean retry() {
-            return retry;
+            return this.retry;
         }
 
         public String reprompt() {
-            return reprompt;
+            return this.reprompt;
         }
 
-        /**
-         * Whether this failure requests removal of the violating {@link AiMessage} from chat memory.
-         */
         public boolean removeViolatingMessage() {
-            return removeViolatingMessage;
+            return this.removeViolatingMessage;
         }
     }
 }
+

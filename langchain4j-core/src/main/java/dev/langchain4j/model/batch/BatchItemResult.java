@@ -1,87 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.Nullable
+ */
 package dev.langchain4j.model.batch;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import dev.langchain4j.Experimental;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.batch.BatchError;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Represents the outcome of a single request within a batch operation.
- *
- * <p>Each batch request is processed independently and either succeeds (producing a response) or
- * fails (producing a {@link BatchError}). The results of a batch are returned in the same order as
- * the input requests, so the i-th {@code BatchItemResult} corresponds to the i-th submitted request,
- * allowing the caller to correlate every outcome with its originating request even when only some
- * requests fail.</p>
- *
- * @param <T> the type of a successful response payload (e.g., {@code ChatResponse}, {@code Embedding})
- * @see BatchResponse#results()
- */
 @Experimental
 public interface BatchItemResult<T> {
+    public boolean isSuccess();
 
-    /**
-     * Returns {@code true} if this request succeeded.
-     */
-    boolean isSuccess();
+    public @Nullable T response();
 
-    /**
-     * Returns the successful response, or {@code null} if this request failed.
-     */
-    @Nullable
-    T response();
+    public @Nullable BatchError error();
 
-    /**
-     * Returns the error, or {@code null} if this request succeeded.
-     */
-    @Nullable
-    BatchError error();
-
-    /**
-     * Creates a successful {@link BatchItemResult}.
-     */
-    static <T> BatchItemResult<T> success(T response) {
-        return new Success<>(response);
+    public static <T> BatchItemResult<T> success(T response) {
+        return new Success<T>(response);
     }
 
-    /**
-     * Creates a failed {@link BatchItemResult}.
-     */
-    static <T> BatchItemResult<T> failure(BatchError error) {
-        return new Failure<>(error);
+    public static <T> BatchItemResult<T> failure(BatchError error) {
+        return new Failure(error);
     }
 
-    /**
-     * The successful outcome of a single batch request.
-     *
-     * @param <T>      the type of the response payload
-     * @param response the successful response, never {@code null}
-     */
-    record Success<T>(T response) implements BatchItemResult<T> {
-        public Success {
-            ensureNotNull(response, "response");
+    public static final class Failure<T>
+    implements BatchItemResult<T> {
+        private final BatchError error;
+
+        public Failure(BatchError error) {
+            ValidationUtils.ensureNotNull(error, "error");
+            this.error = error;
         }
 
         @Override
-        public boolean isSuccess() {
-            return true;
-        }
-
-        @Override
-        public @Nullable BatchError error() {
-            return null;
-        }
-    }
-
-    /**
-     * The failed outcome of a single batch request.
-     *
-     * @param <T>   the type of the response payload that would have been produced on success
-     * @param error the error describing the failure, never {@code null}
-     */
-    record Failure<T>(BatchError error) implements BatchItemResult<T> {
-        public Failure {
-            ensureNotNull(error, "error");
+        public BatchError error() {
+            return this.error;
         }
 
         @Override
@@ -94,4 +51,30 @@ public interface BatchItemResult<T> {
             return null;
         }
     }
+
+    public static final class Success<T>
+    implements BatchItemResult<T> {
+        private final T response;
+
+        public Success(T response) {
+            ValidationUtils.ensureNotNull(response, "response");
+            this.response = response;
+        }
+
+        @Override
+        public T response() {
+            return this.response;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return true;
+        }
+
+        @Override
+        public @Nullable BatchError error() {
+            return null;
+        }
+    }
 }
+

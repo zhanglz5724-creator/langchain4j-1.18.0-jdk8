@@ -1,13 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.ModelProvider.OTHER;
-import static dev.langchain4j.model.chat.ChatModelListenerUtils.onRequest;
-import static dev.langchain4j.model.chat.ChatModelListenerUtils.onResponse;
 
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
+import dev.langchain4j.model.chat.Capability;
+import dev.langchain4j.model.chat.ChatModelListenerUtils;
+import dev.langchain4j.model.chat.ChatRequestOptions;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
@@ -21,49 +23,22 @@ import dev.langchain4j.model.chat.response.PartialThinkingContext;
 import dev.langchain4j.model.chat.response.PartialToolCall;
 import dev.langchain4j.model.chat.response.PartialToolCallContext;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Represents a language model that has a chat API and can stream a response one token at a time.
- *
- * @see ChatModel
- */
 public interface StreamingChatModel {
-
-    /**
-     * This is the main API to interact with the chat model.
-     *
-     * @param request a {@link ChatRequest}, containing all the inputs to the LLM
-     * @param handler a {@link StreamingChatResponseHandler} that will handle streaming response from the LLM
-     */
-    default void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-        chat(request, ChatRequestOptions.EMPTY, handler);
+    default public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+        this.chat(request, ChatRequestOptions.EMPTY, handler);
     }
 
-    /**
-     * Sends a streaming chat request with additional invocation options.
-     *
-     * @param request a {@link ChatRequest}, containing all the inputs to the LLM
-     * @param options a {@link ChatRequestOptions} carrying listener attributes and other per-call metadata
-     * @param handler a {@link StreamingChatResponseHandler} that will handle streaming response from the LLM
-     * @since 1.13.0
-     */
-    default void chat(ChatRequest request, ChatRequestOptions options, StreamingChatResponseHandler handler) {
-
-        ChatRequest finalChatRequest = ChatRequest.builder()
-                .messages(request.messages())
-                .parameters(defaultRequestParameters().overrideWith(request.parameters()))
-                .build();
-
-        ChatRequestOptions effectiveOptions = getOrDefault(options, ChatRequestOptions.EMPTY);
-
-        List<ChatModelListener> listeners = listeners();
-        Map<Object, Object> attributes = new ConcurrentHashMap<>(effectiveOptions.listenerAttributes());
-
-        StreamingChatResponseHandler observingHandler = new StreamingChatResponseHandler() {
+    default public void chat(ChatRequest request, ChatRequestOptions options, final StreamingChatResponseHandler handler) {
+        final ChatRequest finalChatRequest = ChatRequest.builder().messages(request.messages()).parameters(this.defaultRequestParameters().overrideWith(request.parameters())).build();
+        ChatRequestOptions effectiveOptions = Utils.getOrDefault(options, ChatRequestOptions.EMPTY);
+        final List<ChatModelListener> listeners = this.listeners();
+        final ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>(effectiveOptions.listenerAttributes());
+        StreamingChatResponseHandler observingHandler = new StreamingChatResponseHandler(){
 
             @Override
             public void onPartialResponse(String partialResponse) {
@@ -107,53 +82,48 @@ public interface StreamingChatModel {
 
             @Override
             public void onCompleteResponse(ChatResponse completeResponse) {
-                onResponse(completeResponse, finalChatRequest, provider(), attributes, listeners);
+                ChatModelListenerUtils.onResponse(completeResponse, finalChatRequest, StreamingChatModel.this.provider(), attributes, listeners);
                 handler.onCompleteResponse(completeResponse);
             }
 
             @Override
             public void onError(Throwable error) {
-                ChatModelListenerUtils.onError(error, finalChatRequest, provider(), attributes, listeners);
+                ChatModelListenerUtils.onError(error, finalChatRequest, StreamingChatModel.this.provider(), attributes, listeners);
                 handler.onError(error);
             }
         };
-
-        onRequest(finalChatRequest, provider(), attributes, listeners);
-        doChat(finalChatRequest, observingHandler);
+        ChatModelListenerUtils.onRequest(finalChatRequest, this.provider(), attributes, listeners);
+        this.doChat(finalChatRequest, observingHandler);
     }
 
-    default void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
+    default public void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
         throw new RuntimeException("Not implemented");
     }
 
-    default ChatRequestParameters defaultRequestParameters() {
+    default public ChatRequestParameters defaultRequestParameters() {
         return DefaultChatRequestParameters.EMPTY;
     }
 
-    default List<ChatModelListener> listeners() {
-        return List.of();
+    default public List<ChatModelListener> listeners() {
+        return Collections.emptyList();
     }
 
-    default ModelProvider provider() {
-        return OTHER;
+    default public ModelProvider provider() {
+        return ModelProvider.OTHER;
     }
 
-    default void chat(String userMessage, StreamingChatResponseHandler handler) {
-
-        ChatRequest chatRequest =
-                ChatRequest.builder().messages(UserMessage.from(userMessage)).build();
-
-        chat(chatRequest, handler);
+    default public void chat(String userMessage, StreamingChatResponseHandler handler) {
+        ChatRequest chatRequest = ChatRequest.builder().messages(UserMessage.from(userMessage)).build();
+        this.chat(chatRequest, handler);
     }
 
-    default void chat(List<ChatMessage> messages, StreamingChatResponseHandler handler) {
-
+    default public void chat(List<ChatMessage> messages, StreamingChatResponseHandler handler) {
         ChatRequest chatRequest = ChatRequest.builder().messages(messages).build();
-
-        chat(chatRequest, handler);
+        this.chat(chatRequest, handler);
     }
 
-    default Set<Capability> supportedCapabilities() {
-        return Set.of();
+    default public Set<Capability> supportedCapabilities() {
+        return Collections.emptySet();
     }
 }
+

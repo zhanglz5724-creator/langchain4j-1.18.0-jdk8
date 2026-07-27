@@ -1,23 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.observability.event;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.observability.api.event.AiServiceErrorEvent;
+import dev.langchain4j.observability.event.AbstractAiServiceEvent;
 
-/**
- * Default implementation of {@link AiServiceErrorEvent}.
- */
-public class DefaultAiServiceErrorEvent extends AbstractAiServiceEvent implements AiServiceErrorEvent {
-
+public class DefaultAiServiceErrorEvent
+extends AbstractAiServiceEvent
+implements AiServiceErrorEvent {
     private final Throwable error;
 
-    public DefaultAiServiceErrorEvent(AiServiceErrorEventBuilder builder) {
+    public DefaultAiServiceErrorEvent(AiServiceErrorEvent.AiServiceErrorEventBuilder builder) {
         super(builder);
-        this.error = ensureNotNull(builder.getError(), "error");
+        this.error = ValidationUtils.ensureNotNull(builder.getError(), "error");
     }
 
     @Override
     public Throwable error() {
-        return error;
+        return this.error;
     }
 }
+

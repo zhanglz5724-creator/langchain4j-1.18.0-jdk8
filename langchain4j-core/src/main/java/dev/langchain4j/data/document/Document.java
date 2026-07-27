@@ -1,97 +1,42 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.data.document;
 
+import dev.langchain4j.data.document.DefaultDocument;
+import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.segment.TextSegment;
 
-/**
- * Represents an unstructured piece of text that usually corresponds to a content of a single file.
- * This text could originate from various sources such as a text file, PDF, DOCX, or a web page (HTML).
- * Each document may have associated {@link Metadata} including its source, owner, creation date, etc.
- */
 public interface Document {
+    public static final String FILE_NAME = "file_name";
+    public static final String ABSOLUTE_DIRECTORY_PATH = "absolute_directory_path";
+    public static final String URL = "url";
 
-    /**
-     * Common metadata key for the name of the file from which the document was loaded.
-     */
-    String FILE_NAME = "file_name";
-    /**
-     * Common metadata key for the absolute path of the directory from which the document was loaded.
-     */
-    String ABSOLUTE_DIRECTORY_PATH = "absolute_directory_path";
-    /**
-     * Common metadata key for the URL from which the document was loaded.
-     */
-    String URL = "url";
+    public String text();
 
-    /**
-     * Returns the text of this document.
-     *
-     * @return the text.
-     */
-    String text();
+    public Metadata metadata();
 
-    /**
-     * Returns the metadata associated with this document.
-     *
-     * @return the metadata.
-     */
-    Metadata metadata();
-
-    /**
-     * Builds a {@link TextSegment} from this document.
-     *
-     * @return a {@link TextSegment}
-     */
-    default TextSegment toTextSegment() {
-        if (metadata().containsKey("index")) {
-            return TextSegment.from(text(), metadata().copy());
-        } else {
-            return TextSegment.from(text(), metadata().copy().put("index", "0"));
+    default public TextSegment toTextSegment() {
+        if (this.metadata().containsKey("index")) {
+            return TextSegment.from(this.text(), this.metadata().copy());
         }
+        return TextSegment.from(this.text(), this.metadata().copy().put("index", "0"));
     }
 
-    /**
-     * Creates a new Document from the given text.
-     *
-     * <p>The created document will have empty metadata.</p>
-     *
-     * @param text the text of the document.
-     * @return a new Document.
-     */
-    static Document from(String text) {
+    public static Document from(String text) {
         return new DefaultDocument(text);
     }
 
-    /**
-     * Creates a new Document from the given text.
-     *
-     * @param text     the text of the document.
-     * @param metadata the metadata of the document.
-     * @return a new Document.
-     */
-    static Document from(String text, Metadata metadata) {
+    public static Document from(String text, Metadata metadata) {
         return new DefaultDocument(text, metadata);
     }
 
-    /**
-     * Creates a new Document from the given text.
-     *
-     * <p>The created document will have empty metadata.</p>
-     *
-     * @param text the text of the document.
-     * @return a new Document.
-     */
-    static Document document(String text) {
-        return from(text);
+    public static Document document(String text) {
+        return Document.from(text);
     }
 
-    /**
-     * Creates a new Document from the given text.
-     *
-     * @param text     the text of the document.
-     * @param metadata the metadata of the document.
-     * @return a new Document.
-     */
-    static Document document(String text, Metadata metadata) {
-        return from(text, metadata);
+    public static Document document(String text, Metadata metadata) {
+        return Document.from(text, metadata);
     }
 }
+

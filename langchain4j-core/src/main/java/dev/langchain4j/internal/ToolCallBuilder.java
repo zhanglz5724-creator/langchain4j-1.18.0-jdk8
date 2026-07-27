@@ -1,34 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.internal;
-
-import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNotNullOrEmpty;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.response.CompleteToolCall;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * Internal helper that helps to build partial and complete tool calls during streaming.
- * <p>
- * Volatile fields, StringBuffer, and ConcurrentLinkedQueue are used to ensure safe access,
- * as incoming SSE events may be processed by different threads depending on the underlying HTTP client implementation.
- *
- * @since 1.2.0
- */
 @Internal
 public class ToolCallBuilder {
-
     private volatile int index;
-
     private volatile String id;
     private volatile String name;
     private final StringBuffer arguments = new StringBuffer();
-
-    private final Queue<ToolExecutionRequest> toolExecutionRequests = new ConcurrentLinkedQueue<>();
+    private final Queue<ToolExecutionRequest> toolExecutionRequests = new ConcurrentLinkedQueue<ToolExecutionRequest>();
 
     public ToolCallBuilder() {
         this(0);
@@ -39,7 +29,7 @@ public class ToolCallBuilder {
     }
 
     public int index() {
-        return index;
+        return this.index;
     }
 
     public void updateIndex(Integer index) {
@@ -49,30 +39,30 @@ public class ToolCallBuilder {
     }
 
     public String id() {
-        return id;
+        return this.id;
     }
 
     public String updateId(String id) {
-        if (isNotNullOrBlank(id)) {
+        if (Utils.isNotNullOrBlank(id)) {
             this.id = id;
         }
         return this.id;
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
     public String updateName(String name) {
-        if (isNotNullOrBlank(name)) {
+        if (Utils.isNotNullOrBlank(name)) {
             this.name = name;
         }
         return this.name;
     }
 
     public void appendArguments(String partialArguments) {
-        if (isNotNullOrEmpty(partialArguments)) {
-            arguments.append(partialArguments);
+        if (Utils.isNotNullOrEmpty(partialArguments)) {
+            this.arguments.append(partialArguments);
         }
     }
 
@@ -81,30 +71,24 @@ public class ToolCallBuilder {
         if (arguments.isEmpty()) {
             arguments = "{}";
         }
-
-        ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                .id(this.id)
-                .name(this.name)
-                .arguments(arguments)
-                .build();
-        toolExecutionRequests.add(toolExecutionRequest);
-
-        reset();
-
+        ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder().id(this.id).name(this.name).arguments(arguments).build();
+        this.toolExecutionRequests.add(toolExecutionRequest);
+        this.reset();
         return new CompleteToolCall(this.index, toolExecutionRequest);
     }
 
     private void reset() {
-        id = null;
-        name = null;
-        arguments.setLength(0);
+        this.id = null;
+        this.name = null;
+        this.arguments.setLength(0);
     }
 
     public boolean hasRequests() {
-        return !toolExecutionRequests.isEmpty() || name != null;
+        return !this.toolExecutionRequests.isEmpty() || this.name != null;
     }
 
     public List<ToolExecutionRequest> allRequests() {
-        return new ArrayList<>(toolExecutionRequests);
+        return new ArrayList<ToolExecutionRequest>(this.toolExecutionRequests);
     }
 }
+

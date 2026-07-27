@@ -1,28 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.filter.comparison;
 
 import dev.langchain4j.Internal;
-
 import java.util.Collection;
 import java.util.UUID;
 
 @Internal
 class UUIDComparator {
+    UUIDComparator() {
+    }
 
     static boolean containsAsUUID(Object actualUUID, Collection<?> comparisonUUIDs) {
-        UUID uuid = toUUID(actualUUID);
-        return comparisonUUIDs.stream()
-                .map(UUIDComparator::toUUID)
-                .anyMatch(comparisonUUID ->
-                        comparisonUUID.compareTo(uuid) == 0);
+        UUID uuid = UUIDComparator.toUUID(actualUUID);
+        return comparisonUUIDs.stream().map(UUIDComparator::toUUID).anyMatch(comparisonUUID -> comparisonUUID.compareTo(uuid) == 0);
     }
 
     private static UUID toUUID(Object actualUUID) {
         if (actualUUID instanceof String) {
             return UUID.fromString(actualUUID.toString());
-        } else if (actualUUID instanceof UUID) {
+        }
+        if (actualUUID instanceof UUID) {
+            UUID iD = (UUID)actualUUID;
             return iD;
         }
-
         throw new IllegalArgumentException("Unsupported type: " + actualUUID.getClass().getName());
     }
 }
+

@@ -1,114 +1,112 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.response;
-
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 import java.util.Objects;
 
 public class ChatResponse {
-
     private final AiMessage aiMessage;
     private final ChatResponseMetadata metadata;
 
     protected ChatResponse(Builder builder) {
-        this.aiMessage = ensureNotNull(builder.aiMessage, "aiMessage");
-
+        this.aiMessage = ValidationUtils.ensureNotNull(builder.aiMessage, "aiMessage");
         ChatResponseMetadata.Builder<?> metadataBuilder = ChatResponseMetadata.builder();
         if (builder.id != null) {
-            validate(builder, "id");
+            ChatResponse.validate(builder, "id");
             metadataBuilder.id(builder.id);
         }
         if (builder.modelName != null) {
-            validate(builder, "modelName");
+            ChatResponse.validate(builder, "modelName");
             metadataBuilder.modelName(builder.modelName);
         }
         if (builder.tokenUsage != null) {
-            validate(builder, "tokenUsage");
+            ChatResponse.validate(builder, "tokenUsage");
             metadataBuilder.tokenUsage(builder.tokenUsage);
         }
         if (builder.finishReason != null) {
-            validate(builder, "finishReason");
+            ChatResponse.validate(builder, "finishReason");
             metadataBuilder.finishReason(builder.finishReason);
         }
-        if (builder.metadata != null) {
-            this.metadata = builder.metadata;
-        } else {
-            this.metadata = metadataBuilder.build();
-        }
+        this.metadata = builder.metadata != null ? builder.metadata : metadataBuilder.build();
     }
 
     public AiMessage aiMessage() {
-        return aiMessage;
+        return this.aiMessage;
     }
 
-    /**
-     * Converts the current instance of {@code ChatResponse} into a {@link Builder},
-     * allowing modifications to the current object's fields.
-     *
-     * @return a new {@link Builder} instance initialized with the current state of this {@code ChatResponse}.
-     */
     public Builder toBuilder() {
         return new Builder(this);
     }
 
     public ChatResponseMetadata metadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public String id() {
-        return metadata.id();
+        return this.metadata.id();
     }
 
     public String modelName() {
-        return metadata.modelName();
+        return this.metadata.modelName();
     }
 
     public TokenUsage tokenUsage() {
-        return metadata.tokenUsage();
+        return this.metadata.tokenUsage();
     }
 
     public FinishReason finishReason() {
-        return metadata.finishReason();
+        return this.metadata.finishReason();
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChatResponse that = (ChatResponse) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        ChatResponse that = (ChatResponse)o;
         return Objects.equals(this.aiMessage, that.aiMessage) && Objects.equals(this.metadata, that.metadata);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
-        return Objects.hash(aiMessage, metadata);
+        return Objects.hash(this.aiMessage, this.metadata);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "ChatResponse {" + " aiMessage = " + aiMessage + ", metadata = " + metadata + " }";
+        return "ChatResponse { aiMessage = " + this.aiMessage + ", metadata = " + this.metadata + " }";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
+    private static void validate(Builder builder, String name) {
+        if (builder.metadata != null) {
+            throw new IllegalArgumentException(String.format("Cannot set both 'metadata' and '%s' on ChatResponse", name));
+        }
+    }
+
     public static class Builder {
         private AiMessage aiMessage;
         private ChatResponseMetadata metadata;
-
         private String id;
         private String modelName;
         private TokenUsage tokenUsage;
         private FinishReason finishReason;
 
-        public Builder() {}
+        public Builder() {
+        }
 
         public Builder(ChatResponse chatResponse) {
             this.aiMessage = chatResponse.aiMessage;
@@ -149,10 +147,5 @@ public class ChatResponse {
             return new ChatResponse(this);
         }
     }
-
-    private static void validate(Builder builder, String name) {
-        if (builder.metadata != null) {
-            throw new IllegalArgumentException(String.format("Cannot set both 'metadata' and '%s' on ChatResponse", name));
-        }
-    }
 }
+

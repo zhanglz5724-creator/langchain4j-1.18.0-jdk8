@@ -1,9 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.model.moderation;
 
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-
 import dev.langchain4j.Internal;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
+import dev.langchain4j.model.moderation.ModerationRequest;
+import dev.langchain4j.model.moderation.ModerationResponse;
 import dev.langchain4j.model.moderation.listener.ModerationModelErrorContext;
 import dev.langchain4j.model.moderation.listener.ModerationModelListener;
 import dev.langchain4j.model.moderation.listener.ModerationModelRequestContext;
@@ -15,82 +23,54 @@ import org.slf4j.LoggerFactory;
 
 @Internal
 class ModerationModelListenerUtils {
-
     private static final Logger LOG = LoggerFactory.getLogger(ModerationModelListenerUtils.class);
 
-    private ModerationModelListenerUtils() {}
+    private ModerationModelListenerUtils() {
+    }
 
-    static void onRequest(
-            ModerationRequest moderationRequest,
-            ModelProvider modelProvider,
-            Map<Object, Object> attributes,
-            List<ModerationModelListener> listeners) {
-        if (isNullOrEmpty(listeners)) {
+    static void onRequest(ModerationRequest moderationRequest, ModelProvider modelProvider, Map<Object, Object> attributes, List<ModerationModelListener> listeners) {
+        if (Utils.isNullOrEmpty(listeners)) {
             return;
         }
-        ModerationModelRequestContext requestContext =
-                new ModerationModelRequestContext(moderationRequest, modelProvider, attributes);
+        ModerationModelRequestContext requestContext = new ModerationModelRequestContext(moderationRequest, modelProvider, attributes);
         listeners.forEach(listener -> {
             try {
                 listener.onRequest(requestContext);
-            } catch (Exception e) {
-                LOG.warn(
-                        "An exception occurred during the invocation of the moderation model listener '{}'"
-                                + " for model provider '{}'. This exception has been ignored.",
-                        listener.getClass().getName(),
-                        modelProvider,
-                        e);
+            }
+            catch (Exception e) {
+                LOG.warn("An exception occurred during the invocation of the moderation model listener '{}' for model provider '{}'. This exception has been ignored.", new Object[]{listener.getClass().getName(), modelProvider, e});
             }
         });
     }
 
-    static void onResponse(
-            ModerationResponse moderationResponse,
-            ModerationRequest moderationRequest,
-            ModelProvider modelProvider,
-            Map<Object, Object> attributes,
-            List<ModerationModelListener> listeners) {
-        if (isNullOrEmpty(listeners)) {
+    static void onResponse(ModerationResponse moderationResponse, ModerationRequest moderationRequest, ModelProvider modelProvider, Map<Object, Object> attributes, List<ModerationModelListener> listeners) {
+        if (Utils.isNullOrEmpty(listeners)) {
             return;
         }
-        ModerationModelResponseContext responseContext =
-                new ModerationModelResponseContext(moderationResponse, moderationRequest, modelProvider, attributes);
+        ModerationModelResponseContext responseContext = new ModerationModelResponseContext(moderationResponse, moderationRequest, modelProvider, attributes);
         listeners.forEach(listener -> {
             try {
                 listener.onResponse(responseContext);
-            } catch (Exception e) {
-                LOG.warn(
-                        "An exception occurred during the invocation of the moderation model listener '{}'"
-                                + " for model provider '{}'. This exception has been ignored.",
-                        listener.getClass().getName(),
-                        modelProvider,
-                        e);
+            }
+            catch (Exception e) {
+                LOG.warn("An exception occurred during the invocation of the moderation model listener '{}' for model provider '{}'. This exception has been ignored.", new Object[]{listener.getClass().getName(), modelProvider, e});
             }
         });
     }
 
-    static void onError(
-            Throwable error,
-            ModerationRequest moderationRequest,
-            ModelProvider modelProvider,
-            Map<Object, Object> attributes,
-            List<ModerationModelListener> listeners) {
-        if (isNullOrEmpty(listeners)) {
+    static void onError(Throwable error, ModerationRequest moderationRequest, ModelProvider modelProvider, Map<Object, Object> attributes, List<ModerationModelListener> listeners) {
+        if (Utils.isNullOrEmpty(listeners)) {
             return;
         }
-        ModerationModelErrorContext errorContext =
-                new ModerationModelErrorContext(error, moderationRequest, modelProvider, attributes);
+        ModerationModelErrorContext errorContext = new ModerationModelErrorContext(error, moderationRequest, modelProvider, attributes);
         listeners.forEach(listener -> {
             try {
                 listener.onError(errorContext);
-            } catch (Exception e) {
-                LOG.warn(
-                        "An exception occurred during the invocation of the moderation model listener '{}'"
-                                + " for model provider '{}'. This exception has been ignored.",
-                        listener.getClass().getName(),
-                        modelProvider,
-                        e);
+            }
+            catch (Exception e) {
+                LOG.warn("An exception occurred during the invocation of the moderation model listener '{}' for model provider '{}'. This exception has been ignored.", new Object[]{listener.getClass().getName(), modelProvider, e});
             }
         });
     }
 }
+

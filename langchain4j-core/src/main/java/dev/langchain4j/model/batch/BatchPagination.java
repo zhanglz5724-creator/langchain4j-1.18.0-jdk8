@@ -1,51 +1,47 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.Nullable
+ */
 package dev.langchain4j.model.batch;
 
 import dev.langchain4j.Experimental;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 @Experimental
 public final class BatchPagination {
-
-    @Nullable
-    private final Integer pageSize;
-
-    @Nullable
-    private final String pageToken;
+    private final @Nullable Integer pageSize;
+    private final @Nullable String pageToken;
 
     public BatchPagination(@Nullable Integer pageSize, @Nullable String pageToken) {
         this.pageSize = pageSize;
         this.pageToken = pageToken;
     }
 
-    @Nullable
-    public Integer pageSize() {
-        return pageSize;
+    public @Nullable Integer pageSize() {
+        return this.pageSize;
     }
 
-    @Nullable
-    public String pageToken() {
-        return pageToken;
+    public @Nullable String pageToken() {
+        return this.pageToken;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        BatchPagination that = (BatchPagination) o;
-        return Objects.equals(pageSize, that.pageSize) && Objects.equals(pageToken, that.pageToken);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        BatchPagination that = (BatchPagination)o;
+        return Objects.equals(this.pageSize, that.pageSize) && Objects.equals(this.pageToken, that.pageToken);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(pageSize, pageToken);
+        return Objects.hash(this.pageSize, this.pageToken);
     }
 
-    @Override
     public String toString() {
-        return "BatchPagination{" +
-                "pageSize=" + pageSize +
-                ", pageToken='" + pageToken + '\'' +
-                '}';
+        return "BatchPagination{pageSize=" + this.pageSize + ", pageToken='" + this.pageToken + '\'' + '}';
     }
 }
+

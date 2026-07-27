@@ -1,46 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.data.message;
 
-/**
- * The type of chat message, e.g. system, user or AI.
- * Maps to implementations of {@link ChatMessage}.
- */
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.CustomMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
+import dev.langchain4j.data.message.UserMessage;
+
 public enum ChatMessageType {
-    /**
-     * A message from the system, typically defined by a developer.
-     */
     SYSTEM(SystemMessage.class),
-
-    /**
-     * A message from the user.
-     */
     USER(UserMessage.class),
-
-    /**
-     * A message from the AI.
-     */
     AI(AiMessage.class),
-
-    /**
-     * A message from a tool.
-     */
     TOOL_EXECUTION_RESULT(ToolExecutionResultMessage.class),
-
-    /**
-     * A custom message.
-     */
     CUSTOM(CustomMessage.class);
 
     private final Class<? extends ChatMessage> messageClass;
 
-    ChatMessageType(Class<? extends ChatMessage> messageClass) {
+    private ChatMessageType(Class<? extends ChatMessage> messageClass) {
         this.messageClass = messageClass;
     }
 
-    /**
-     * Returns the class of the message type.
-     * @return the class of the message type.
-     */
     public Class<? extends ChatMessage> messageClass() {
-        return messageClass;
+        return this.messageClass;
     }
 }
+

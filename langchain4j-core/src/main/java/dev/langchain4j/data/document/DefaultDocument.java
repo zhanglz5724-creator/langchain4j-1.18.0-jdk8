@@ -1,22 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.data.document;
 
+import dev.langchain4j.data.document.Document;
+import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.quoted;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * A default implementation of a {@link Document}.
- */
-public class DefaultDocument implements Document {
-
+public class DefaultDocument
+implements Document {
     private final String text;
     private final Metadata metadata;
 
     public DefaultDocument(String text, Metadata metadata) {
-        this.text = ensureNotBlank(text, "text");
-        this.metadata = ensureNotNull(metadata, "metadata");
+        this.text = ValidationUtils.ensureNotBlank(text, "text");
+        this.metadata = ValidationUtils.ensureNotNull(metadata, "metadata");
     }
 
     public DefaultDocument(String text) {
@@ -25,33 +25,31 @@ public class DefaultDocument implements Document {
 
     @Override
     public String text() {
-        return text;
+        return this.text;
     }
 
     @Override
     public Metadata metadata() {
-        return metadata;
+        return this.metadata;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (DefaultDocument) obj;
-        return Objects.equals(this.text, that.text) &&
-                Objects.equals(this.metadata, that.metadata);
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        DefaultDocument that = (DefaultDocument)obj;
+        return Objects.equals(this.text, that.text) && Objects.equals(this.metadata, that.metadata);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(text, metadata);
+        return Objects.hash(this.text, this.metadata);
     }
 
-    @Override
     public String toString() {
-        return "DefaultDocument {" +
-                " text = " + quoted(text) +
-                ", metadata = " + metadata +
-                " }";
+        return "DefaultDocument { text = " + Utils.quoted(this.text) + ", metadata = " + this.metadata + " }";
     }
 }
+

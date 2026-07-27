@@ -1,38 +1,58 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.request.json;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.quoted;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static java.util.Arrays.asList;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class JsonAnyOfSchema implements JsonSchemaElement {
-
+public class JsonAnyOfSchema
+implements JsonSchemaElement {
     private final String description;
     private final List<JsonSchemaElement> anyOf;
 
     public JsonAnyOfSchema(Builder builder) {
         this.description = builder.description;
-        this.anyOf = copy(ensureNotEmpty(builder.anyOf, "anyOf"));
+        this.anyOf = Utils.copy(ValidationUtils.ensureNotEmpty(builder.anyOf, "anyOf"));
     }
 
     @Override
     public String description() {
-        return description;
+        return this.description;
     }
 
     public List<JsonSchemaElement> anyOf() {
-        return anyOf;
+        return this.anyOf;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof JsonAnyOfSchema)) {
+            return false;
+        }
+        JsonAnyOfSchema that = (JsonAnyOfSchema)o;
+        return Objects.equals(this.description, that.description) && Objects.equals(this.anyOf, that.anyOf);
+    }
 
+    public int hashCode() {
+        return Objects.hash(this.description, this.anyOf);
+    }
+
+    public String toString() {
+        return "JsonAnyOfSchema {description = " + Utils.quoted(this.description) + ", anyOf = " + this.anyOf + " }";
+    }
+
+    public static class Builder {
         private String description;
         private List<JsonSchemaElement> anyOf;
 
@@ -46,30 +66,13 @@ public class JsonAnyOfSchema implements JsonSchemaElement {
             return this;
         }
 
-        public Builder anyOf(JsonSchemaElement... anyOf) {
-            return anyOf(asList(anyOf));
+        public Builder anyOf(JsonSchemaElement ... anyOf) {
+            return this.anyOf(Arrays.asList(anyOf));
         }
 
         public JsonAnyOfSchema build() {
             return new JsonAnyOfSchema(this);
         }
     }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JsonAnyOfSchema)) return false;
-        JsonAnyOfSchema that = (JsonAnyOfSchema) o;
-        return Objects.equals(description, that.description) && Objects.equals(anyOf, that.anyOf);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(description, anyOf);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonAnyOfSchema {" + "description = " + quoted(description) + ", anyOf = " + anyOf + " }";
-    }
 }
+

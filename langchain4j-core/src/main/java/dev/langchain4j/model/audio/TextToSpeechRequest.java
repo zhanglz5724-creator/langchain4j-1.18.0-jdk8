@@ -1,26 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.audio;
 
 import dev.langchain4j.Experimental;
-
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
+import dev.langchain4j.internal.ValidationUtils;
 
 @Experimental
 public class TextToSpeechRequest {
-
     private final String text;
     private final String voice;
 
     private TextToSpeechRequest(Builder builder) {
-        this.text = ensureNotBlank(builder.text, "text");
+        this.text = ValidationUtils.ensureNotBlank(builder.text, "text");
         this.voice = builder.voice;
     }
 
     public String text() {
-        return text;
+        return this.text;
     }
 
     public String voice() {
-        return voice;
+        return this.voice;
     }
 
     public static Builder builder() {
@@ -50,3 +51,4 @@ public class TextToSpeechRequest {
         }
     }
 }
+

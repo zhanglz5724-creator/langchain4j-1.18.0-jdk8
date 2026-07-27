@@ -1,10 +1,7 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.moderation;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.ModelProvider.OTHER;
-import static dev.langchain4j.model.moderation.ModerationModelListenerUtils.onError;
-import static dev.langchain4j.model.moderation.ModerationModelListenerUtils.onRequest;
-import static dev.langchain4j.model.moderation.ModerationModelListenerUtils.onResponse;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
@@ -12,158 +9,97 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.input.Prompt;
+import dev.langchain4j.model.moderation.Moderation;
+import dev.langchain4j.model.moderation.ModerationModelListenerUtils;
+import dev.langchain4j.model.moderation.ModerationRequest;
+import dev.langchain4j.model.moderation.ModerationResponse;
 import dev.langchain4j.model.moderation.listener.ModerationModelListener;
 import dev.langchain4j.model.output.Response;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * Represents a model that can moderate text.
- */
 public interface ModerationModel {
-
-    /**
-     * This is the main API to interact with the moderation model.
-     *
-     * @param moderationRequest a {@link ModerationRequest}, containing all the inputs to the moderation model
-     * @return a {@link ModerationResponse}, containing all the outputs from the moderation model
-     */
-    default ModerationResponse moderate(ModerationRequest moderationRequest) {
-        ModerationRequest finalRequest = moderationRequest.toBuilder()
-                .modelName(getOrDefault(moderationRequest.modelName(), modelName()))
-                .build();
-
-        ModelProvider modelProvider = provider();
-        List<ModerationModelListener> listeners = listeners();
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-
-        onRequest(finalRequest, modelProvider, attributes, listeners);
+    default public ModerationResponse moderate(ModerationRequest moderationRequest) {
+        ModerationRequest finalRequest = moderationRequest.toBuilder().modelName(Utils.getOrDefault(moderationRequest.modelName(), this.modelName())).build();
+        ModelProvider modelProvider = this.provider();
+        List<ModerationModelListener> listeners = this.listeners();
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        ModerationModelListenerUtils.onRequest(finalRequest, modelProvider, attributes, listeners);
         try {
-            ModerationResponse moderationResponse = doModerate(finalRequest);
-            onResponse(moderationResponse, finalRequest, modelProvider, attributes, listeners);
+            ModerationResponse moderationResponse = this.doModerate(finalRequest);
+            ModerationModelListenerUtils.onResponse(moderationResponse, finalRequest, modelProvider, attributes, listeners);
             return moderationResponse;
-        } catch (Exception error) {
-            onError(error, finalRequest, modelProvider, attributes, listeners);
+        }
+        catch (Exception error) {
+            ModerationModelListenerUtils.onError(error, finalRequest, modelProvider, attributes, listeners);
             throw error;
         }
     }
 
-    /**
-     * Performs the actual moderation. This method should be overridden by implementations.
-     *
-     * @param moderationRequest the moderation request.
-     * @return the moderation response.
-     */
-    default ModerationResponse doModerate(ModerationRequest moderationRequest) {
+    default public ModerationResponse doModerate(ModerationRequest moderationRequest) {
         throw new RuntimeException("Not implemented");
     }
 
-    /**
-     * Moderates the given text.
-     *
-     * @param text the text to moderate.
-     * @return the moderation {@code Response}.
-     */
-    default Response<Moderation> moderate(String text) {
-        ModerationRequest request =
-                ModerationRequest.builder().texts(List.of(text)).build();
-        ModerationResponse response = moderate(request);
+    default public Response<Moderation> moderate(String text) {
+        ModerationRequest request = ModerationRequest.builder().texts(Collections.singletonList(text)).build();
+        ModerationResponse response = this.moderate(request);
         return Response.from(response.moderation(), null, null, response.metadata());
     }
 
-    /**
-     * Moderates the given prompt.
-     *
-     * @param prompt the prompt to moderate.
-     * @return the moderation {@code Response}.
-     */
-    default Response<Moderation> moderate(Prompt prompt) {
-        return moderate(prompt.text());
+    default public Response<Moderation> moderate(Prompt prompt) {
+        return this.moderate(prompt.text());
     }
 
-    /**
-     * Moderates the given chat message.
-     *
-     * @param message the chat message to moderate.
-     * @return the moderation {@code Response}.
-     */
-    default Response<Moderation> moderate(ChatMessage message) {
-        return moderate(List.of(message));
+    default public Response<Moderation> moderate(ChatMessage message) {
+        return this.moderate(Collections.singletonList(message));
     }
 
-    /**
-     * Moderates the given list of chat messages.
-     *
-     * @param messages the list of chat messages to moderate.
-     * @return the moderation {@code Response}.
-     */
-    default Response<Moderation> moderate(List<ChatMessage> messages) {
+    default public Response<Moderation> moderate(List<ChatMessage> messages) {
         List<String> texts = messages.stream().map(ModerationModel::toText).collect(Collectors.toList());
         ModerationRequest request = ModerationRequest.builder().texts(texts).build();
-        ModerationResponse response = moderate(request);
+        ModerationResponse response = this.moderate(request);
         return Response.from(response.moderation(), null, null, response.metadata());
     }
 
-    /**
-     * Moderates the given text segment.
-     *
-     * @param textSegment the text segment to moderate.
-     * @return the moderation {@code Response}.
-     */
-    default Response<Moderation> moderate(TextSegment textSegment) {
-        return moderate(textSegment.text());
+    default public Response<Moderation> moderate(TextSegment textSegment) {
+        return this.moderate(textSegment.text());
     }
 
-    /**
-     * Converts a ChatMessage to its text representation.
-     * This is a helper method for implementations.
-     *
-     * @param chatMessage the chat message
-     * @return the text content of the message
-     * @throws IllegalArgumentException if the message type is unsupported
-     */
-    static String toText(ChatMessage chatMessage) {
+    public static String toText(ChatMessage chatMessage) {
         if (chatMessage instanceof SystemMessage) {
-            return ((SystemMessage) chatMessage).text();
-        } else if (chatMessage instanceof UserMessage) {
-            return userMessage.singleText();
-        } else if (chatMessage instanceof AiMessage) {
-            return aiMessage.text();
-        } else if (chatMessage instanceof ToolExecutionResultMessage) {
-            return toolExecutionResultMessage.text();
-        } else {
-            throw new IllegalArgumentException("Unsupported message type: " + chatMessage.type());
+            SystemMessage systemMessage = (SystemMessage)chatMessage;
+            return systemMessage.text();
         }
+        if (chatMessage instanceof UserMessage) {
+            UserMessage userMessage = (UserMessage)chatMessage;
+            return userMessage.singleText();
+        }
+        if (chatMessage instanceof AiMessage) {
+            AiMessage aiMessage = (AiMessage)chatMessage;
+            return aiMessage.text();
+        }
+        if (chatMessage instanceof ToolExecutionResultMessage) {
+            ToolExecutionResultMessage toolExecutionResultMessage = (ToolExecutionResultMessage)chatMessage;
+            return toolExecutionResultMessage.text();
+        }
+        throw new IllegalArgumentException("Unsupported message type: " + (Object)((Object)chatMessage.type()));
     }
 
-    /**
-     * Returns the list of listeners for this moderation model.
-     *
-     * @return the list of listeners, or an empty list if none are registered.
-     */
-    default List<ModerationModelListener> listeners() {
-        return List.of();
+    default public List<ModerationModelListener> listeners() {
+        return Collections.emptyList();
     }
 
-    /**
-     * Returns the model provider for this moderation model.
-     *
-     * @return the model provider.
-     */
-    default ModelProvider provider() {
-        return OTHER;
+    default public ModelProvider provider() {
+        return ModelProvider.OTHER;
     }
 
-    /**
-     * Returns the model name for this moderation model.
-     *
-     * @return the model name, or {@code "unknown"} if not available.
-     */
-    default String modelName() {
+    default public String modelName() {
         return "unknown";
     }
 }
+

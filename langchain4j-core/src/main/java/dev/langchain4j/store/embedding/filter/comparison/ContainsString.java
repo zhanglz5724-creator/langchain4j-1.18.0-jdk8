@@ -1,33 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.filter.comparison;
 
-import static dev.langchain4j.internal.Exceptions.illegalArgument;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.internal.Exceptions;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.embedding.filter.Filter;
 import java.util.Objects;
 
-/**
- * A filter that checks if the value of a metadata key contains a specific string.
- * The value of the metadata key must be a string.
- */
-public class ContainsString implements Filter {
-
+public class ContainsString
+implements Filter {
     private final String key;
     private final String comparisonValue;
 
     public ContainsString(String key, String comparisonValue) {
-        this.key = ensureNotBlank(key, "key");
-        this.comparisonValue = ensureNotNull(comparisonValue, "comparisonValue with key '" + key + "'");
+        this.key = ValidationUtils.ensureNotBlank(key, "key");
+        this.comparisonValue = ValidationUtils.ensureNotNull(comparisonValue, "comparisonValue with key '" + key + "'");
     }
 
     public String key() {
-        return key;
+        return this.key;
     }
 
     public String comparisonValue() {
-        return comparisonValue;
+        return this.comparisonValue;
     }
 
     @Override
@@ -35,38 +32,35 @@ public class ContainsString implements Filter {
         if (!(object instanceof Metadata)) {
             return false;
         }
-
-        if (!metadata.containsKey(key)) {
+        Metadata metadata = (Metadata)object;
+        if (!metadata.containsKey(this.key)) {
             return false;
         }
-
-        Object actualValue = metadata.toMap().get(key);
-
+        Object actualValue = metadata.toMap().get(this.key);
         if (actualValue instanceof String) {
-            return ((String) actualValue).contains(comparisonValue);
+            String str = (String)actualValue;
+            return str.contains(this.comparisonValue);
         }
-
-        throw illegalArgument(
-                "Type mismatch: actual value of metadata key \"%s\" (%s) has type %s, "
-                        + "while it is expected to be a string",
-                key, actualValue, actualValue.getClass().getName());
+        throw Exceptions.illegalArgument("Type mismatch: actual value of metadata key \"%s\" (%s) has type %s, while it is expected to be a string", this.key, actualValue, actualValue.getClass().getName());
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof ContainsString)) return false;
-
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof ContainsString)) {
+            return false;
+        }
+        ContainsString other = (ContainsString)o;
         return Objects.equals(this.key, other.key) && Objects.equals(this.comparisonValue, other.comparisonValue);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(key, comparisonValue);
+        return Objects.hash(this.key, this.comparisonValue);
     }
 
-    @Override
     public String toString() {
         return "ContainsString(key=" + this.key + ", comparisonValue=" + this.comparisonValue + ")";
     }
 }
+

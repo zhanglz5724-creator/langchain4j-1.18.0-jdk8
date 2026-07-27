@@ -1,11 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.request.json;
 
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.quoted;
-
-public class JsonNumberSchema implements JsonSchemaElement {
-
+public class JsonNumberSchema
+implements JsonSchemaElement {
     private final String description;
 
     public JsonNumberSchema() {
@@ -18,15 +21,33 @@ public class JsonNumberSchema implements JsonSchemaElement {
 
     @Override
     public String description() {
-        return description;
+        return this.description;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        JsonNumberSchema that = (JsonNumberSchema)o;
+        return Objects.equals(this.description, that.description);
+    }
 
+    public int hashCode() {
+        return Objects.hash(this.description);
+    }
+
+    public String toString() {
+        return "JsonNumberSchema {description = " + Utils.quoted(this.description) + " }";
+    }
+
+    public static class Builder {
         private String description;
 
         public Builder description(String description) {
@@ -38,24 +59,5 @@ public class JsonNumberSchema implements JsonSchemaElement {
             return new JsonNumberSchema(this);
         }
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JsonNumberSchema that = (JsonNumberSchema) o;
-        return Objects.equals(this.description, that.description);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(description);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonNumberSchema {" +
-                "description = " + quoted(description) +
-                " }";
-    }
 }
+

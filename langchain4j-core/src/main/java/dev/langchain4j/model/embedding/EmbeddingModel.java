@@ -1,15 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.embedding;
-
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.model.ModelProvider.OTHER;
 
 import dev.langchain4j.Experimental;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.message.ContentType;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.ModelProvider;
+import dev.langchain4j.model.embedding.EmbeddingModelListenerUtils;
+import dev.langchain4j.model.embedding.ListeningEmbeddingModel;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelErrorContext;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelRequestContext;
@@ -21,310 +24,123 @@ import dev.langchain4j.model.embedding.request.EmbeddingRequestParameters;
 import dev.langchain4j.model.embedding.response.EmbeddingResponse;
 import dev.langchain4j.model.embedding.response.EmbeddingResponseMetadata;
 import dev.langchain4j.model.output.Response;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * Represents a model that can convert a given text into an embedding (vector representation of the text).
- */
 public interface EmbeddingModel {
-
-    /**
-     * Embeds the inputs of the given {@link EmbeddingRequest} and returns the resulting embeddings.
-     * <p>
-     * An {@link EmbeddingRequest} carries one or more inputs to embed, together with optional per-call
-     * {@link EmbeddingRequestParameters parameters} such as {@code dimensions} or an
-     * {@link dev.langchain4j.model.embedding.request.EmbeddingInputType input type}. A model only honors the
-     * parameters listed in {@link #supportedParameters()} and the content types listed in
-     * {@link #supportedContentTypes()}; a request that uses anything else is rejected with an
-     * {@link UnsupportedFeatureException} rather than being silently ignored.
-     *
-     * @param request the inputs to embed and the per-call parameters.
-     * @return the embeddings and the response metadata.
-     * @since 1.18.0
-     */
     @Experimental
-    default EmbeddingResponse embed(EmbeddingRequest request) {
-
-        EmbeddingRequestParameters finalParameters =
-                defaultRequestParameters().overrideWith(request.parameters());
-
-        Set<EmbeddingParameter<?>> unsupported = new LinkedHashSet<>(finalParameters.presentParameters());
-        unsupported.removeAll(supportedParameters());
+    default public EmbeddingResponse embed(EmbeddingRequest request) {
+        EmbeddingRequestParameters finalParameters = this.defaultRequestParameters().overrideWith(request.parameters());
+        LinkedHashSet<Object> unsupported = new LinkedHashSet<Object>(finalParameters.presentParameters());
+        unsupported.removeAll(this.supportedParameters());
         if (!unsupported.isEmpty()) {
-            String names = unsupported.stream().map(EmbeddingParameter::name).collect(Collectors.joining(", "));
-            throw new UnsupportedFeatureException("EmbeddingModel '" + getClass().getName()
-                    + "' does not support the following per-call parameter(s): " + names
-                    + ". Only the following are supported: "
-                    + supportedParameters().stream()
-                            .map(EmbeddingParameter::name)
-                            .collect(Collectors.joining(", ")));
+            String names = unsupported.stream().map(p -> (String) ((EmbeddingParameter) p).name()).collect(Collectors.joining(", "));
+            throw new UnsupportedFeatureException("EmbeddingModel '" + this.getClass().getName() + "' does not support the following per-call parameter(s): " + names + ". Only the following are supported: " + this.supportedParameters().stream().map(p -> (String) ((EmbeddingParameter) p).name()).collect(Collectors.joining(", ")));
         }
-
-        Set<ContentType> unsupportedContentTypes = new LinkedHashSet<>();
-        for (EmbeddingInput input : request.inputs()) {
-            unsupportedContentTypes.addAll(input.contentTypes());
+        LinkedHashSet<ContentType> unsupportedContentTypes = new LinkedHashSet<ContentType>();
+        for (EmbeddingInput input2 : request.inputs()) {
+            unsupportedContentTypes.addAll(input2.contentTypes());
         }
-        unsupportedContentTypes.removeAll(supportedContentTypes());
+        unsupportedContentTypes.removeAll(this.supportedContentTypes());
         if (!unsupportedContentTypes.isEmpty()) {
-            throw new UnsupportedFeatureException("EmbeddingModel '" + getClass().getName()
-                    + "' does not support the following content type(s): " + unsupportedContentTypes
-                    + ". Only the following are supported: " + supportedContentTypes());
+            throw new UnsupportedFeatureException("EmbeddingModel '" + this.getClass().getName() + "' does not support the following content type(s): " + unsupportedContentTypes + ". Only the following are supported: " + this.supportedContentTypes());
         }
-
-        EmbeddingRequest finalRequest = EmbeddingRequest.builder()
-                .inputs(request.inputs())
-                .parameters(finalParameters)
-                .build();
-
-        List<EmbeddingModelListener> listeners = listeners();
-        if (isNullOrEmpty(listeners)) {
-            return doEmbed(finalRequest);
+        EmbeddingRequest finalRequest = EmbeddingRequest.builder().inputs(request.inputs()).parameters(finalParameters).build();
+        List<EmbeddingModelListener> listeners = this.listeners();
+        if (Utils.isNullOrEmpty(listeners)) {
+            return this.doEmbed(finalRequest);
         }
-
-        List<TextSegment> textSegments = finalRequest.inputs().stream()
-                .map(input -> TextSegment.from(input.text()))
-                .collect(Collectors.toList());
-        Map<Object, Object> attributes = new java.util.concurrent.ConcurrentHashMap<>();
-
-        EmbeddingModelListenerUtils.onRequest(
-                EmbeddingModelRequestContext.builder()
-                        .textSegments(textSegments)
-                        .embeddingRequest(finalRequest)
-                        .embeddingModel(this)
-                        .attributes(attributes)
-                        .build(),
-                listeners);
+        List<TextSegment> textSegments = finalRequest.inputs().stream().map(input -> TextSegment.from(input.text())).collect(Collectors.toList());
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingModelListenerUtils.onRequest(EmbeddingModelRequestContext.builder().textSegments(textSegments).embeddingRequest(finalRequest).embeddingModel(this).attributes(attributes).build(), listeners);
         try {
-            EmbeddingResponse response = doEmbed(finalRequest);
-            Response<List<Embedding>> legacyResponse =
-                    Response.from(response.embeddings(), response.metadata().tokenUsage());
-            EmbeddingModelListenerUtils.onResponse(
-                    EmbeddingModelResponseContext.builder()
-                            .embeddingRequest(finalRequest)
-                            .embeddingResponse(response)
-                            .embeddingModel(this)
-                            .attributes(attributes)
-                            .response(legacyResponse)
-                            .textSegments(textSegments)
-                            .build(),
-                    listeners);
+            EmbeddingResponse response = this.doEmbed(finalRequest);
+            Response<List<Embedding>> legacyResponse = Response.from(response.embeddings(), response.metadata().tokenUsage());
+            EmbeddingModelListenerUtils.onResponse(EmbeddingModelResponseContext.builder().embeddingRequest(finalRequest).embeddingResponse(response).embeddingModel(this).attributes(attributes).response(legacyResponse).textSegments(textSegments).build(), listeners);
             return response;
-        } catch (Exception error) {
-            EmbeddingModelListenerUtils.onError(
-                    EmbeddingModelErrorContext.builder()
-                            .error(error)
-                            .textSegments(textSegments)
-                            .embeddingRequest(finalRequest)
-                            .embeddingModel(this)
-                            .attributes(attributes)
-                            .build(),
-                    listeners);
+        }
+        catch (Exception error) {
+            EmbeddingModelListenerUtils.onError(EmbeddingModelErrorContext.builder().error(error).textSegments(textSegments).embeddingRequest(finalRequest).embeddingModel(this).attributes(attributes).build(), listeners);
             throw error;
         }
     }
 
-    /**
-     * The {@link EmbeddingModelListener}s that are notified around {@link #embed(EmbeddingRequest)}.
-     * Configure them on the model's builder (via {@code listeners(...)}). Defaults to an empty list.
-     *
-     * @since 1.18.0
-     */
     @Experimental
-    default List<EmbeddingModelListener> listeners() {
-        return List.of();
+    default public List<EmbeddingModelListener> listeners() {
+        return Collections.emptyList();
     }
 
-    /**
-     * The {@link ModelProvider} of this embedding model (for example {@link ModelProvider#OPEN_AI}). It is made
-     * available to {@link #listeners() listeners} through the request, response and error contexts.
-     * Defaults to {@link ModelProvider#OTHER}.
-     *
-     * @since 1.18.0
-     */
     @Experimental
-    default ModelProvider provider() {
-        return OTHER;
+    default public ModelProvider provider() {
+        return ModelProvider.OTHER;
     }
 
-    /**
-     * Performs the embedding for {@link #embed(EmbeddingRequest)}. This is the low-level method a provider
-     * overrides to build the actual API call; {@link #embed(EmbeddingRequest)} handles per-call parameter
-     * validation and {@link #listeners() listener} dispatch around it.
-     * <p>
-     * An implementation must override either this method (preferred) or {@link #embedAll(List)} — the two have
-     * mutually-recursive defaults, so overriding neither leads to infinite recursion. The default implementation
-     * embeds the text of each input via {@link #embedAll(List)}, which keeps implementations that only provide
-     * {@link #embedAll(List)} working.
-     * <p>
-     * When this method is called, the request's parameters have already been merged with
-     * {@link #defaultRequestParameters()} and validated against {@link #supportedParameters()} and
-     * {@link #supportedContentTypes()}.
-     *
-     * @param request the request, with parameters already merged and validated.
-     * @return the response.
-     * @since 1.18.0
-     */
     @Experimental
-    default EmbeddingResponse doEmbed(EmbeddingRequest request) {
-        Response<List<Embedding>> legacy = embedAll(
-                request.inputs().stream().map(input -> TextSegment.from(input.text())).collect(Collectors.toList()));
-        return EmbeddingResponse.builder()
-                .embeddings(legacy.content())
-                .metadata(EmbeddingResponseMetadata.builder()
-                        .modelName(modelName())
-                        .tokenUsage(legacy.tokenUsage())
-                        .build())
-                .build();
+    default public EmbeddingResponse doEmbed(EmbeddingRequest request) {
+        Response<List<Embedding>> legacy = this.embedAll(request.inputs().stream().map(input -> TextSegment.from(input.text())).collect(Collectors.toList()));
+        return EmbeddingResponse.builder().embeddings(legacy.content()).metadata(((EmbeddingResponseMetadata.Builder)((EmbeddingResponseMetadata.Builder)EmbeddingResponseMetadata.builder().modelName(this.modelName())).tokenUsage(legacy.tokenUsage())).build()).build();
     }
 
-    /**
-     * The parameters applied to every request unless overridden by the request itself, typically derived from
-     * the model's builder-time configuration. The default is {@link EmbeddingRequestParameters#EMPTY}.
-     *
-     * @since 1.18.0
-     */
     @Experimental
-    default EmbeddingRequestParameters defaultRequestParameters() {
+    default public EmbeddingRequestParameters defaultRequestParameters() {
         return EmbeddingRequestParameters.EMPTY;
     }
 
-    /**
-     * The per-call {@link EmbeddingParameter parameters} this model honors. A request that populates a parameter
-     * outside this set is rejected by {@link #embed(EmbeddingRequest)} with an {@link UnsupportedFeatureException},
-     * so a parameter a model cannot apply is never silently ignored. Defaults to an empty set (the model accepts
-     * no per-call parameters).
-     *
-     * @since 1.18.0
-     */
     @Experimental
-    default Set<EmbeddingParameter<?>> supportedParameters() {
-        return Set.of();
+    default public Set<EmbeddingParameter<?>> supportedParameters() {
+        return Collections.emptySet();
     }
 
-    /**
-     * The input {@link ContentType content types} this model can embed. A request whose inputs use a content
-     * type outside this set is rejected by {@link #embed(EmbeddingRequest)} with an
-     * {@link UnsupportedFeatureException}. Defaults to {@code {TEXT}}; a multimodal model overrides this to also
-     * accept, for example, {@link ContentType#IMAGE images}.
-     *
-     * @since 1.18.0
-     */
     @Experimental
-    default Set<ContentType> supportedContentTypes() {
-        return Set.of(ContentType.TEXT);
+    default public Set<ContentType> supportedContentTypes() {
+        return Collections.singleton(ContentType.TEXT);
     }
 
-    /**
-     * Embed a text.
-     *
-     * @param text the text to embed.
-     * @return the embedding.
-     */
-    default Response<Embedding> embed(String text) {
-        return embed(TextSegment.from(text));
+    default public Response<Embedding> embed(String text) {
+        return this.embed(TextSegment.from(text));
     }
 
-    /**
-     * Embed the text content of a {@link TextSegment}.
-     * <p>
-     * This is a convenience method over {@link #embed(EmbeddingRequest)}, so {@link #listeners() listeners} are
-     * notified and the model's default per-call parameters are applied here too.
-     *
-     * @param textSegment the text segment to embed.
-     * @return the embedding.
-     */
-    default Response<Embedding> embed(TextSegment textSegment) {
-        EmbeddingResponse response = embed(EmbeddingRequest.builder()
-                .textSegment(textSegment)
-                .build());
-        ValidationUtils.ensureEq(
-                response.embeddings().size(),
-                1,
-                "Expected a single embedding, but got %d",
-                response.embeddings().size());
+    default public Response<Embedding> embed(TextSegment textSegment) {
+        EmbeddingResponse response = this.embed(EmbeddingRequest.builder().textSegment(textSegment).build());
+        ValidationUtils.ensureEq(response.embeddings().size(), 1, "Expected a single embedding, but got %d", response.embeddings().size());
         return Response.from(response.embeddings().get(0), response.metadata().tokenUsage());
     }
 
-    /**
-     * Embeds the text content of a list of {@link TextSegment}s.
-     * <p>
-     * This is a convenience method over {@link #embed(EmbeddingRequest)}, so {@link #listeners() listeners} are
-     * notified and the model's default per-call parameters are applied here too. A provider implements its
-     * embedding logic by overriding {@link #doEmbed(EmbeddingRequest)} (preferred); it may still override this
-     * method for batch-specific behavior that the request/response API does not carry (for example applying a
-     * document title from {@link TextSegment} metadata).
-     *
-     * @param textSegments the text segments to embed.
-     * @return the embeddings.
-     */
-    default Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-        if (isNullOrEmpty(textSegments)) {
-            return Response.from(List.of());
+    default public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
+        if (Utils.isNullOrEmpty(textSegments)) {
+            return Response.from(Collections.emptyList());
         }
-        EmbeddingResponse response =
-                embed(EmbeddingRequest.builder().textSegments(textSegments).build());
+        EmbeddingResponse response = this.embed(EmbeddingRequest.builder().textSegments(textSegments).build());
         return Response.from(response.embeddings(), response.metadata().tokenUsage());
     }
 
-    /**
-     * Returns the dimension of the {@link Embedding} produced by this embedding model.
-     *
-     * @return dimension of the embedding
-     */
-    default int dimension() {
-        return embed("test").content().dimension();
+    default public int dimension() {
+        return this.embed("test").content().dimension();
     }
 
-    /**
-     * Returns the name of the underlying embedding model.
-     * <p>
-     * Implementations are encouraged to override this method and provide the actual model name.
-     * The default implementation returns {@code "unknown"}, which indicates
-     * that the model name is unknown.
-     *
-     * @return the model name or a fallback value if not provided
-     */
-    default String modelName() {
+    default public String modelName() {
         return "unknown";
     }
 
-    /**
-     * Returns an {@link EmbeddingModel} that wraps this one and notifies the given listener around each embedding
-     * call. Listeners can also be configured directly on a model's builder via {@code listeners(...)} (see
-     * {@link #listeners()}), which does not require wrapping.
-     *
-     * @param listener The listener to add.
-     * @return An {@link EmbeddingModel} that notifies the given listener.
-     * @since 1.11.0
-     * @see #listeners()
-     */
     @Experimental
-    default EmbeddingModel addListener(EmbeddingModelListener listener) {
-        return addListeners(listener == null ? null : List.of(listener));
+    default public EmbeddingModel addListener(EmbeddingModelListener listener) {
+        return this.addListeners(listener == null ? null : Collections.singletonList(listener));
     }
 
-    /**
-     * Returns an {@link EmbeddingModel} that wraps this one and notifies the given listeners (in iteration order)
-     * around each embedding call. Listeners can also be configured directly on a model's builder via
-     * {@code listeners(...)} (see {@link #listeners()}).
-     *
-     * @param listeners The listeners to add.
-     * @return An {@link EmbeddingModel} that notifies the given listeners.
-     * @since 1.11.0
-     * @see #listeners()
-     */
     @Experimental
-    default EmbeddingModel addListeners(List<EmbeddingModelListener> listeners) {
-        if (isNullOrEmpty(listeners)) {
+    default public EmbeddingModel addListeners(List<EmbeddingModelListener> listeners) {
+        if (Utils.isNullOrEmpty(listeners)) {
             return this;
         }
         if (this instanceof ListeningEmbeddingModel) {
-            return ((ListeningEmbeddingModel) this).withAdditionalListeners(listeners);
+            ListeningEmbeddingModel listeningEmbeddingModel = (ListeningEmbeddingModel)this;
+            return listeningEmbeddingModel.withAdditionalListeners(listeners);
         }
         return new ListeningEmbeddingModel(this, listeners);
     }
 }
+

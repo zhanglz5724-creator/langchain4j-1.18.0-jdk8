@@ -1,79 +1,56 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.data.message;
 
-import dev.langchain4j.model.chat.ChatModel;
-
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.ChatMessageType;
+import dev.langchain4j.internal.Utils;
 import java.util.Map;
 import java.util.Objects;
 
-import static dev.langchain4j.data.message.ChatMessageType.CUSTOM;
-import static dev.langchain4j.internal.Utils.copy;
-
-/**
- * Represents a custom message.
- * Can be used only with {@link ChatModel} implementations that support this type of message.
- */
-public class CustomMessage implements ChatMessage {
-
+public class CustomMessage
+implements ChatMessage {
     private final Map<String, Object> attributes;
 
-    /**
-     * Creates a new custom message.
-     *
-     * @param attributes the message attributes.
-     */
     public CustomMessage(Map<String, Object> attributes) {
-        this.attributes = copy(attributes);
+        this.attributes = Utils.copy(attributes);
     }
 
-    /**
-     * Returns the message attributes.
-     *
-     * @return the message attributes.
-     */
     public Map<String, Object> attributes() {
-        return attributes;
+        return this.attributes;
     }
 
     @Override
     public ChatMessageType type() {
-        return CUSTOM;
+        return ChatMessageType.CUSTOM;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CustomMessage that = (CustomMessage) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        CustomMessage that = (CustomMessage)o;
         return Objects.equals(this.attributes, that.attributes);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(attributes);
+        return Objects.hash(this.attributes);
     }
 
-    @Override
     public String toString() {
-        return "CustomMessage {" + " attributes = " + attributes + " }";
+        return "CustomMessage { attributes = " + this.attributes + " }";
     }
 
-    /**
-     * Creates a new custom message.
-     *
-     * @param attributes the message attributes.
-     * @return the custom message.
-     */
     public static CustomMessage from(Map<String, Object> attributes) {
         return new CustomMessage(attributes);
     }
 
-    /**
-     * Creates a new custom message.
-     *
-     * @param attributes the message attributes.
-     * @return the custom message.
-     */
     public static CustomMessage customMessage(Map<String, Object> attributes) {
-        return from(attributes);
+        return CustomMessage.from(attributes);
     }
 }
+

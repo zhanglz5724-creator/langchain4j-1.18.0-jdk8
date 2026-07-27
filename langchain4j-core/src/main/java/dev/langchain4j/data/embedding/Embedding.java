@@ -1,128 +1,88 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.data.embedding;
 
+import dev.langchain4j.internal.ValidationUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * Represents a dense vector embedding of a text.
- * This class encapsulates a float array that captures the "meaning" or semantic information of the text.
- * Texts with similar meanings will have their vectors located close to each other in the embedding space.
- * The embeddings are typically created by embedding models.
- * @see dev.langchain4j.model.embedding.EmbeddingModel
- */
 public class Embedding {
-
     private final float[] vector;
 
-    /**
-     * Creates a new Embedding.
-     * @param vector the vector, takes ownership of the array.
-     */
     public Embedding(float[] vector) {
-        this.vector = ensureNotNull(vector, "vector");
+        this.vector = ValidationUtils.ensureNotNull(vector, "vector");
     }
 
-    /**
-     * Returns the vector.
-     * @return the vector.
-     */
     public float[] vector() {
-        return vector;
+        return this.vector;
     }
 
-    /**
-     * Returns a copy of the vector as a list.
-     * @return the vector as a list.
-     */
     public List<Float> vectorAsList() {
-        List<Float> list = new ArrayList<>(vector.length);
-        for (float f : vector) {
-            list.add(f);
+        ArrayList<Float> list = new ArrayList<Float>(this.vector.length);
+        for (float f : this.vector) {
+            list.add(Float.valueOf(f));
         }
         return list;
     }
 
-    /**
-     * Returns a copy of the vector as double array.
-     * @return the vector as double array.
-     */
     public double[] vectorAsDoubleArray() {
-        double[] doubles = new double[vector.length];
-
-        for(int i = 0; i < vector.length; i++) {
-            doubles[i] = vector[i];
+        double[] doubles = new double[this.vector.length];
+        for (int i = 0; i < this.vector.length; ++i) {
+            doubles[i] = this.vector[i];
         }
-
         return doubles;
     }
 
-    /**
-     * Normalize vector
-     */
     public void normalize() {
         double norm = 0.0;
-        for (float f : vector) {
-            norm += f * f;
+        for (float f : this.vector) {
+            norm += (double)(f * f);
         }
-        norm = Math.sqrt(norm);
-        if (Math.abs(norm) < 1e-10) {
+        if (Math.abs(norm = Math.sqrt(norm)) < 1.0E-10) {
             return;
         }
-        for (int i = 0; i < vector.length; i++) {
-            vector[i] /= (float) norm;
+        int i = 0;
+        while (i < this.vector.length) {
+            int n = i++;
+            this.vector[n] = this.vector[n] / (float)norm;
         }
     }
 
-    /**
-     * Returns the dimension of the vector.
-     * @return the dimension of the vector.
-     */
     public int dimension() {
-        return vector.length;
+        return this.vector.length;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Embedding that = (Embedding) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        Embedding that = (Embedding)o;
         return Arrays.equals(this.vector, that.vector);
     }
 
-    @Override
     public int hashCode() {
-        return Arrays.hashCode(vector);
+        return Arrays.hashCode(this.vector);
     }
 
-    @Override
     public String toString() {
-        return "Embedding {" +
-                " vector = " + Arrays.toString(vector) +
-                " }";
+        return "Embedding { vector = " + Arrays.toString(this.vector) + " }";
     }
 
-    /**
-     * Creates a new Embedding from the given vector.
-     * @param vector the vector, takes ownership of the array.
-     * @return the new Embedding.
-     */
     public static Embedding from(float[] vector) {
         return new Embedding(vector);
     }
 
-    /**
-     * Creates a new Embedding from the given vector.
-     * @param vector the vector.
-     * @return the new Embedding.
-     */
     public static Embedding from(List<Float> vector) {
         float[] array = new float[vector.size()];
-        for (int i = 0; i < vector.size(); i++) {
-            array[i] = vector.get(i);
+        for (int i = 0; i < vector.size(); ++i) {
+            array[i] = vector.get(i).floatValue();
         }
         return new Embedding(array);
     }
 }
+

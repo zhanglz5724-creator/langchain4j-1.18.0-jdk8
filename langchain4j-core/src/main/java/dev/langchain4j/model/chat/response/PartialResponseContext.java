@@ -1,24 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.response;
 
 import dev.langchain4j.Experimental;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.chat.response.StreamingHandle;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * @since 1.8.0
- */
 @Experimental
 @JacocoIgnoreCoverageGenerated
 public class PartialResponseContext {
-
     private final StreamingHandle streamingHandle;
 
     public PartialResponseContext(StreamingHandle streamingHandle) {
-        this.streamingHandle = ensureNotNull(streamingHandle, "streamingHandle");
+        this.streamingHandle = ValidationUtils.ensureNotNull(streamingHandle, "streamingHandle");
     }
 
     public StreamingHandle streamingHandle() {
-        return streamingHandle;
+        return this.streamingHandle;
     }
 }
+

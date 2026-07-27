@@ -1,13 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.guardrail.config;
 
-/**
- * Builder for {@link GuardrailsConfig} instances.
- * @param <C> The type of configuration being build
- */
+import dev.langchain4j.guardrail.config.GuardrailsConfig;
+
 public interface GuardrailsConfigBuilder<C extends GuardrailsConfig> {
-    /**
-     * Builds the configuration.
-     * @return The configuration
-     */
-    C build();
+    public C build();
 }
+

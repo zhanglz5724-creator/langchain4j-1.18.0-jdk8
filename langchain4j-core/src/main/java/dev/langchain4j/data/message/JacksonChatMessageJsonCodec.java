@@ -1,18 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.annotation.JsonSubTypes
+ *  com.fasterxml.jackson.annotation.JsonSubTypes$Type
+ *  com.fasterxml.jackson.annotation.JsonTypeInfo
+ *  com.fasterxml.jackson.annotation.JsonTypeInfo$As
+ *  com.fasterxml.jackson.annotation.JsonTypeInfo$Id
+ *  com.fasterxml.jackson.annotation.PropertyAccessor
+ *  com.fasterxml.jackson.core.JsonProcessingException
+ *  com.fasterxml.jackson.core.type.TypeReference
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.json.JsonMapper
+ *  com.fasterxml.jackson.databind.json.JsonMapper$Builder
+ */
 package dev.langchain4j.data.message;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.EXISTING_PROPERTY;
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
-import static com.fasterxml.jackson.annotation.PropertyAccessor.FIELD;
-import static java.util.Collections.emptyList;
-
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,48 +38,44 @@ import dev.langchain4j.Internal;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.audio.Audio;
 import dev.langchain4j.data.image.Image;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.AudioContent;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.ChatMessageJsonCodec;
+import dev.langchain4j.data.message.ChatMessageType;
+import dev.langchain4j.data.message.Content;
+import dev.langchain4j.data.message.ContentType;
+import dev.langchain4j.data.message.CustomMessage;
+import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.PdfFileContent;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.TextContent;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.data.message.VideoContent;
 import dev.langchain4j.data.pdf.PdfFile;
 import dev.langchain4j.data.video.Video;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 @Internal
-public class JacksonChatMessageJsonCodec implements ChatMessageJsonCodec {
+public class JacksonChatMessageJsonCodec
+implements ChatMessageJsonCodec {
+    private static final ObjectMapper OBJECT_MAPPER = JacksonChatMessageJsonCodec.chatMessageJsonMapperBuilder().build();
+    private static final Type MESSAGE_LIST_TYPE = new TypeReference<List<ChatMessage>>(){}.getType();
 
     public static JsonMapper.Builder chatMessageJsonMapperBuilder() {
-        return JsonMapper.builder()
-                .visibility(FIELD, ANY)
-                .addMixIn(ChatMessage.class, ChatMessageMixin.class)
-                .addMixIn(SystemMessage.class, SystemMessageMixin.class)
-                .addMixIn(UserMessage.class, UserMessageMixin.class)
-                .addMixIn(AiMessage.class, AiMessageMixin.class)
-                .addMixIn(ToolExecutionRequest.class, ToolExecutionRequestMixin.class)
-                .addMixIn(ToolExecutionResultMessage.class, ToolExecutionResultMessageMixin.class)
-                .addMixIn(CustomMessage.class, CustomMessageMixin.class)
-                .addMixIn(Content.class, ContentMixin.class)
-                .addMixIn(TextContent.class, TextContentMixin.class)
-                .addMixIn(ImageContent.class, ImageContentMixin.class)
-                .addMixIn(Image.class, ImageMixin.class)
-                .addMixIn(AudioContent.class, AudioContentMixin.class)
-                .addMixIn(Audio.class, AudioMixin.class)
-                .addMixIn(VideoContent.class, VideoContentMixin.class)
-                .addMixIn(Video.class, VideoMixin.class)
-                .addMixIn(PdfFileContent.class, PdfFileContentMixin.class)
-                .addMixIn(PdfFile.class, PdfFileMixin.class);
+        return (JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)JsonMapper.builder().visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)).addMixIn(ChatMessage.class, ChatMessageMixin.class)).addMixIn(SystemMessage.class, SystemMessageMixin.class)).addMixIn(UserMessage.class, UserMessageMixin.class)).addMixIn(AiMessage.class, AiMessageMixin.class)).addMixIn(ToolExecutionRequest.class, ToolExecutionRequestMixin.class)).addMixIn(ToolExecutionResultMessage.class, ToolExecutionResultMessageMixin.class)).addMixIn(CustomMessage.class, CustomMessageMixin.class)).addMixIn(Content.class, ContentMixin.class)).addMixIn(TextContent.class, TextContentMixin.class)).addMixIn(ImageContent.class, ImageContentMixin.class)).addMixIn(Image.class, ImageMixin.class)).addMixIn(AudioContent.class, AudioContentMixin.class)).addMixIn(Audio.class, AudioMixin.class)).addMixIn(VideoContent.class, VideoContentMixin.class)).addMixIn(Video.class, VideoMixin.class)).addMixIn(PdfFileContent.class, PdfFileContentMixin.class)).addMixIn(PdfFile.class, PdfFileMixin.class);
     }
-
-    private static final ObjectMapper OBJECT_MAPPER =
-            chatMessageJsonMapperBuilder().build();
-
-    private static final Type MESSAGE_LIST_TYPE = new TypeReference<List<ChatMessage>>() {}.getType();
 
     @Override
     public ChatMessage messageFromJson(String json) {
         try {
-            return OBJECT_MAPPER.readValue(json, ChatMessage.class);
-        } catch (JsonProcessingException e) {
+            return (ChatMessage)OBJECT_MAPPER.readValue(json, ChatMessage.class);
+        }
+        catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -71,12 +83,13 @@ public class JacksonChatMessageJsonCodec implements ChatMessageJsonCodec {
     @Override
     public List<ChatMessage> messagesFromJson(String json) {
         if (json == null) {
-            return List.of();
+            return Collections.emptyList();
         }
         try {
-            List<ChatMessage> messages = OBJECT_MAPPER.readValue(json, OBJECT_MAPPER.constructType(MESSAGE_LIST_TYPE));
-            return messages == null ? emptyList() : messages;
-        } catch (JsonProcessingException e) {
+            List messages = (List)OBJECT_MAPPER.readValue(json, OBJECT_MAPPER.constructType(MESSAGE_LIST_TYPE));
+            return messages == null ? Collections.emptyList() : messages;
+        }
+        catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -84,8 +97,9 @@ public class JacksonChatMessageJsonCodec implements ChatMessageJsonCodec {
     @Override
     public String messageToJson(ChatMessage message) {
         try {
-            return OBJECT_MAPPER.writeValueAsString(message);
-        } catch (JsonProcessingException e) {
+            return OBJECT_MAPPER.writeValueAsString((Object)message);
+        }
+        catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -94,125 +108,140 @@ public class JacksonChatMessageJsonCodec implements ChatMessageJsonCodec {
     public String messagesToJson(List<ChatMessage> messages) {
         try {
             return OBJECT_MAPPER.writeValueAsString(messages);
-        } catch (JsonProcessingException e) {
+        }
+        catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @JsonInclude(NON_NULL)
-    @JsonTypeInfo(use = NAME, include = EXISTING_PROPERTY, property = "type")
-    @JsonSubTypes({
-        @JsonSubTypes.Type(value = SystemMessage.class, name = "SYSTEM"),
-        @JsonSubTypes.Type(value = UserMessage.class, name = "USER"),
-        @JsonSubTypes.Type(value = AiMessage.class, name = "AI"),
-        @JsonSubTypes.Type(value = ToolExecutionResultMessage.class, name = "TOOL_EXECUTION_RESULT"),
-        @JsonSubTypes.Type(value = CustomMessage.class, name = "CUSTOM"),
-    })
-    private abstract static class ChatMessageMixin {
-
-        @JsonProperty
-        public abstract ChatMessageType type();
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(builder=PdfFile.Builder.class)
+    private static abstract class PdfFileMixin {
+        private PdfFileMixin() {
+        }
     }
 
-    @JsonInclude(NON_NULL)
-    private abstract static class SystemMessageMixin {
-
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    private static abstract class PdfFileContentMixin {
         @JsonCreator
-        public SystemMessageMixin(@JsonProperty("text") String text) {}
+        public PdfFileContentMixin(@JsonProperty(value="pdfFile") PdfFile pdfFile) {
+        }
     }
 
-    @JsonInclude(NON_EMPTY)
-    @JsonDeserialize(builder = UserMessage.Builder.class)
-    private abstract static class UserMessageMixin {}
-
-    @JsonInclude(NON_NULL)
-    @JsonDeserialize(builder = AiMessage.Builder.class)
-    private abstract static class AiMessageMixin {}
-
-    @JsonInclude(NON_NULL)
-    @JsonDeserialize(builder = ToolExecutionRequest.Builder.class)
-    private abstract static class ToolExecutionRequestMixin {}
-
-    @JsonInclude(NON_NULL)
-    @JsonDeserialize(builder = ToolExecutionResultMessage.Builder.class)
-    private abstract static class ToolExecutionResultMessageMixin {
-
-        @JsonProperty("isError")
-        abstract Boolean isError();
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(builder=Video.Builder.class)
+    private static abstract class VideoMixin {
+        private VideoMixin() {
+        }
     }
 
-    @JsonInclude(NON_NULL)
-    private static class CustomMessageMixin {
-
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    private static abstract class VideoContentMixin {
         @JsonCreator
-        public CustomMessageMixin(@JsonProperty("attributes") Map<String, Object> attributes) {}
+        public VideoContentMixin(@JsonProperty(value="video") Video video) {
+        }
     }
 
-    @JsonInclude(NON_NULL)
-    @JsonTypeInfo(use = NAME, include = EXISTING_PROPERTY, property = "type")
-    @JsonSubTypes({
-        @JsonSubTypes.Type(value = TextContent.class, name = "TEXT"),
-        @JsonSubTypes.Type(value = ImageContent.class, name = "IMAGE"),
-        @JsonSubTypes.Type(value = AudioContent.class, name = "AUDIO"),
-        @JsonSubTypes.Type(value = VideoContent.class, name = "VIDEO"),
-        @JsonSubTypes.Type(value = PdfFileContent.class, name = "PDF"),
-    })
-    private abstract static class ContentMixin {
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(builder=Audio.Builder.class)
+    private static abstract class AudioMixin {
+        private AudioMixin() {
+        }
+    }
+
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    private static abstract class AudioContentMixin {
+        @JsonCreator
+        public AudioContentMixin(@JsonProperty(value="audio") Audio audio) {
+        }
+    }
+
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(builder=Image.Builder.class)
+    private static abstract class ImageMixin {
+        private ImageMixin() {
+        }
+    }
+
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    private static abstract class ImageContentMixin {
+        @JsonCreator
+        public ImageContentMixin(@JsonProperty(value="image") Image image, @JsonProperty(value="detailLevel") ImageContent.DetailLevel detailLevel) {
+        }
+    }
+
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    private static abstract class TextContentMixin {
+        @JsonCreator
+        public TextContentMixin(@JsonProperty(value="text") String text) {
+        }
+    }
+
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="type")
+    @JsonSubTypes(value={@JsonSubTypes.Type(value=TextContent.class, name="TEXT"), @JsonSubTypes.Type(value=ImageContent.class, name="IMAGE"), @JsonSubTypes.Type(value=AudioContent.class, name="AUDIO"), @JsonSubTypes.Type(value=VideoContent.class, name="VIDEO"), @JsonSubTypes.Type(value=PdfFileContent.class, name="PDF")})
+    private static abstract class ContentMixin {
+        private ContentMixin() {
+        }
 
         @JsonProperty
         public abstract ContentType type();
     }
 
-    @JsonInclude(NON_NULL)
-    private abstract static class TextContentMixin {
-
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    private static class CustomMessageMixin {
         @JsonCreator
-        public TextContentMixin(@JsonProperty("text") String text) {}
+        public CustomMessageMixin(@JsonProperty(value="attributes") Map<String, Object> attributes) {
+        }
     }
 
-    @JsonInclude(NON_NULL)
-    private abstract static class ImageContentMixin {
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(builder=ToolExecutionResultMessage.Builder.class)
+    private static abstract class ToolExecutionResultMessageMixin {
+        private ToolExecutionResultMessageMixin() {
+        }
 
-        @JsonCreator
-        public ImageContentMixin(
-                @JsonProperty("image") Image image,
-                @JsonProperty("detailLevel") ImageContent.DetailLevel detailLevel) {}
+        @JsonProperty(value="isError")
+        abstract Boolean isError();
     }
 
-    @JsonInclude(NON_NULL)
-    @JsonDeserialize(builder = Image.Builder.class)
-    private abstract static class ImageMixin {}
-
-    @JsonInclude(NON_NULL)
-    private abstract static class AudioContentMixin {
-
-        @JsonCreator
-        public AudioContentMixin(@JsonProperty("audio") Audio audio) {}
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(builder=ToolExecutionRequest.Builder.class)
+    private static abstract class ToolExecutionRequestMixin {
+        private ToolExecutionRequestMixin() {
+        }
     }
 
-    @JsonInclude(NON_NULL)
-    @JsonDeserialize(builder = Audio.Builder.class)
-    private abstract static class AudioMixin {}
-
-    @JsonInclude(NON_NULL)
-    private abstract static class VideoContentMixin {
-
-        @JsonCreator
-        public VideoContentMixin(@JsonProperty("video") Video video) {}
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(builder=AiMessage.Builder.class)
+    private static abstract class AiMessageMixin {
+        private AiMessageMixin() {
+        }
     }
 
-    @JsonInclude(NON_NULL)
-    @JsonDeserialize(builder = Video.Builder.class)
-    private abstract static class VideoMixin {}
-
-    @JsonInclude(NON_NULL)
-    private abstract static class PdfFileContentMixin {
-
-        @JsonCreator
-        public PdfFileContentMixin(@JsonProperty("pdfFile") PdfFile pdfFile) {}
+    @JsonInclude(value=JsonInclude.Include.NON_EMPTY)
+    @JsonDeserialize(builder=UserMessage.Builder.class)
+    private static abstract class UserMessageMixin {
+        private UserMessageMixin() {
+        }
     }
 
-    @JsonInclude(NON_NULL)
-    @JsonDeserialize(builder = PdfFile.Builder.class)
-    private abstract static class PdfFileMixin {}
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    private static abstract class SystemMessageMixin {
+        @JsonCreator
+        public SystemMessageMixin(@JsonProperty(value="text") String text) {
+        }
+    }
+
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="type")
+    @JsonSubTypes(value={@JsonSubTypes.Type(value=SystemMessage.class, name="SYSTEM"), @JsonSubTypes.Type(value=UserMessage.class, name="USER"), @JsonSubTypes.Type(value=AiMessage.class, name="AI"), @JsonSubTypes.Type(value=ToolExecutionResultMessage.class, name="TOOL_EXECUTION_RESULT"), @JsonSubTypes.Type(value=CustomMessage.class, name="CUSTOM")})
+    private static abstract class ChatMessageMixin {
+        private ChatMessageMixin() {
+        }
+
+        @JsonProperty
+        public abstract ChatMessageType type();
+    }
 }
+

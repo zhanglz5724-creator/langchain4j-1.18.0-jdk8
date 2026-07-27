@@ -1,88 +1,83 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.embedding.response;
-
-import static dev.langchain4j.internal.Utils.copy;
 
 import dev.langchain4j.Experimental;
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.embedding.response.EmbeddingResponseMetadata;
 import dev.langchain4j.model.output.TokenUsage;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * The result of embedding an {@link dev.langchain4j.model.embedding.request.EmbeddingRequest}: the
- * {@link Embedding}s produced for the request's inputs (in the same order) together with the
- * {@link EmbeddingResponseMetadata} such as the model name and token usage.
- *
- * @since 1.18.0
- */
 @Experimental
 public class EmbeddingResponse {
-
     private final List<Embedding> embeddings;
     private final EmbeddingResponseMetadata metadata;
 
     protected EmbeddingResponse(Builder builder) {
-        this.embeddings = copy(builder.embeddings);
-
+        this.embeddings = Utils.copy(builder.embeddings);
         EmbeddingResponseMetadata.Builder<?> metadataBuilder = EmbeddingResponseMetadata.builder();
         if (builder.modelName != null) {
-            validate(builder, "modelName");
+            EmbeddingResponse.validate(builder, "modelName");
             metadataBuilder.modelName(builder.modelName);
         }
         if (builder.tokenUsage != null) {
-            validate(builder, "tokenUsage");
+            EmbeddingResponse.validate(builder, "tokenUsage");
             metadataBuilder.tokenUsage(builder.tokenUsage);
         }
-        if (builder.metadata != null) {
-            this.metadata = builder.metadata;
-        } else {
-            this.metadata = metadataBuilder.build();
-        }
+        this.metadata = builder.metadata != null ? builder.metadata : metadataBuilder.build();
     }
 
     public List<Embedding> embeddings() {
-        return embeddings;
+        return this.embeddings;
     }
 
     public EmbeddingResponseMetadata metadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public String modelName() {
-        return metadata.modelName();
+        return this.metadata.modelName();
     }
 
     public TokenUsage tokenUsage() {
-        return metadata.tokenUsage();
+        return this.metadata.tokenUsage();
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        EmbeddingResponse that = (EmbeddingResponse) o;
-        return Objects.equals(embeddings, that.embeddings) && Objects.equals(metadata, that.metadata);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        EmbeddingResponse that = (EmbeddingResponse)o;
+        return Objects.equals(this.embeddings, that.embeddings) && Objects.equals(this.metadata, that.metadata);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(embeddings, metadata);
+        return Objects.hash(this.embeddings, this.metadata);
     }
 
-    @Override
     public String toString() {
-        return "EmbeddingResponse{embeddings=" + embeddings + ", metadata=" + metadata + '}';
+        return "EmbeddingResponse{embeddings=" + this.embeddings + ", metadata=" + this.metadata + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    private static void validate(Builder builder, String name) {
+        if (builder.metadata != null) {
+            throw new IllegalArgumentException(String.format("Cannot set both 'metadata' and '%s' on EmbeddingResponse", name));
+        }
+    }
 
+    public static class Builder {
         private List<Embedding> embeddings;
         private EmbeddingResponseMetadata metadata;
-
         private String modelName;
         private TokenUsage tokenUsage;
 
@@ -110,11 +105,5 @@ public class EmbeddingResponse {
             return new EmbeddingResponse(this);
         }
     }
-
-    private static void validate(Builder builder, String name) {
-        if (builder.metadata != null) {
-            throw new IllegalArgumentException(
-                    String.format("Cannot set both 'metadata' and '%s' on EmbeddingResponse", name));
-        }
-    }
 }
+

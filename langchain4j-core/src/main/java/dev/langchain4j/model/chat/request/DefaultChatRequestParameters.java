@@ -1,21 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.request;
-
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.chat.request.ResponseFormatType.JSON;
-import static java.util.Arrays.asList;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
+import dev.langchain4j.model.chat.request.ResponseFormat;
+import dev.langchain4j.model.chat.request.ResponseFormatType;
+import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class DefaultChatRequestParameters implements ChatRequestParameters {
-
-    public static final ChatRequestParameters EMPTY =
-            DefaultChatRequestParameters.builder().build();
-
+public class DefaultChatRequestParameters
+implements ChatRequestParameters {
+    public static final ChatRequestParameters EMPTY = DefaultChatRequestParameters.builder().build();
     private final String modelName;
     private final Double temperature;
     private final Double topP;
@@ -29,167 +31,121 @@ public class DefaultChatRequestParameters implements ChatRequestParameters {
     private final ResponseFormat responseFormat;
 
     protected DefaultChatRequestParameters(Builder<?> builder) {
-        this.modelName = builder.modelName;
-        this.temperature = builder.temperature;
-        this.topP = builder.topP;
-        this.topK = builder.topK;
-        this.frequencyPenalty = builder.frequencyPenalty;
-        this.presencePenalty = builder.presencePenalty;
-        this.maxOutputTokens = builder.maxOutputTokens;
-        this.stopSequences = copy(builder.stopSequences);
-        this.toolSpecifications = copy(builder.toolSpecifications);
-        this.toolChoice = builder.toolChoice;
-        this.responseFormat = builder.responseFormat;
+        this.modelName = ((Builder)builder).modelName;
+        this.temperature = ((Builder)builder).temperature;
+        this.topP = ((Builder)builder).topP;
+        this.topK = ((Builder)builder).topK;
+        this.frequencyPenalty = ((Builder)builder).frequencyPenalty;
+        this.presencePenalty = ((Builder)builder).presencePenalty;
+        this.maxOutputTokens = ((Builder)builder).maxOutputTokens;
+        this.stopSequences = Utils.copy(((Builder)builder).stopSequences);
+        this.toolSpecifications = Utils.copy(((Builder)builder).toolSpecifications);
+        this.toolChoice = ((Builder)builder).toolChoice;
+        this.responseFormat = ((Builder)builder).responseFormat;
     }
 
     @Override
     public String modelName() {
-        return modelName;
+        return this.modelName;
     }
 
     @Override
     public Double temperature() {
-        return temperature;
+        return this.temperature;
     }
 
     @Override
     public Double topP() {
-        return topP;
+        return this.topP;
     }
 
     @Override
     public Integer topK() {
-        return topK;
+        return this.topK;
     }
 
     @Override
     public Double frequencyPenalty() {
-        return frequencyPenalty;
+        return this.frequencyPenalty;
     }
 
     @Override
     public Double presencePenalty() {
-        return presencePenalty;
+        return this.presencePenalty;
     }
 
     @Override
     public Integer maxOutputTokens() {
-        return maxOutputTokens;
+        return this.maxOutputTokens;
     }
 
     @Override
     public List<String> stopSequences() {
-        return stopSequences;
+        return this.stopSequences;
     }
 
     @Override
     public List<ToolSpecification> toolSpecifications() {
-        return toolSpecifications;
+        return this.toolSpecifications;
     }
 
     @Override
     public ToolChoice toolChoice() {
-        return toolChoice;
+        return this.toolChoice;
     }
 
     @Override
     public ResponseFormat responseFormat() {
-        return responseFormat;
+        return this.responseFormat;
     }
 
     @Override
     public ChatRequestParameters overrideWith(ChatRequestParameters that) {
-        if (isSubtypeOfThis(that)) {
+        if (this.isSubtypeOfThis(that)) {
             return that.defaultedBy(this);
         }
-        return DefaultChatRequestParameters.builder()
-                .overrideWith(this)
-                .overrideWith(that)
-                .build();
+        return ((Builder)((Builder)DefaultChatRequestParameters.builder().overrideWith(this)).overrideWith(that)).build();
     }
 
     @Override
     public ChatRequestParameters defaultedBy(ChatRequestParameters that) {
-        if (isSubtypeOfThis(that)) {
+        if (this.isSubtypeOfThis(that)) {
             return that.overrideWith(this);
         }
-        return DefaultChatRequestParameters.builder()
-                .overrideWith(that)
-                .overrideWith(this)
-                .build();
+        return ((Builder)((Builder)DefaultChatRequestParameters.builder().overrideWith(that)).overrideWith(this)).build();
     }
 
-    /**
-     * Checks whether {@code that} is a more specific (provider-specific) type than this one,
-     * for example {@code OpenAiChatRequestParameters} when this is a plain {@code DefaultChatRequestParameters}.
-     * In such a case the merging has to be delegated to {@code that},
-     * otherwise all provider-specific parameters would be silently lost.
-     */
     private boolean isSubtypeOfThis(ChatRequestParameters that) {
-        return that != null
-                && that.getClass() != this.getClass()
-                && this.getClass().isAssignableFrom(that.getClass());
+        return that != null && that.getClass() != this.getClass() && this.getClass().isAssignableFrom(that.getClass());
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DefaultChatRequestParameters that = (DefaultChatRequestParameters) o;
-        return Objects.equals(modelName, that.modelName)
-                && Objects.equals(temperature, that.temperature)
-                && Objects.equals(topP, that.topP)
-                && Objects.equals(topK, that.topK)
-                && Objects.equals(frequencyPenalty, that.frequencyPenalty)
-                && Objects.equals(presencePenalty, that.presencePenalty)
-                && Objects.equals(maxOutputTokens, that.maxOutputTokens)
-                && Objects.equals(stopSequences, that.stopSequences)
-                && Objects.equals(toolSpecifications, that.toolSpecifications)
-                && Objects.equals(toolChoice, that.toolChoice)
-                && Objects.equals(responseFormat, that.responseFormat);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        DefaultChatRequestParameters that = (DefaultChatRequestParameters)o;
+        return Objects.equals(this.modelName, that.modelName) && Objects.equals(this.temperature, that.temperature) && Objects.equals(this.topP, that.topP) && Objects.equals(this.topK, that.topK) && Objects.equals(this.frequencyPenalty, that.frequencyPenalty) && Objects.equals(this.presencePenalty, that.presencePenalty) && Objects.equals(this.maxOutputTokens, that.maxOutputTokens) && Objects.equals(this.stopSequences, that.stopSequences) && Objects.equals(this.toolSpecifications, that.toolSpecifications) && Objects.equals((Object)this.toolChoice, (Object)that.toolChoice) && Objects.equals(this.responseFormat, that.responseFormat);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
-        return Objects.hash(
-                modelName,
-                temperature,
-                topP,
-                topK,
-                frequencyPenalty,
-                presencePenalty,
-                maxOutputTokens,
-                stopSequences,
-                toolSpecifications,
-                toolChoice,
-                responseFormat);
+        return Objects.hash(new Object[]{this.modelName, this.temperature, this.topP, this.topK, this.frequencyPenalty, this.presencePenalty, this.maxOutputTokens, this.stopSequences, this.toolSpecifications, this.toolChoice, this.responseFormat});
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "DefaultChatRequestParameters{" + "modelName='"
-                + modelName + '\'' + ", temperature="
-                + temperature + ", topP="
-                + topP + ", topK="
-                + topK + ", frequencyPenalty="
-                + frequencyPenalty + ", presencePenalty="
-                + presencePenalty + ", maxOutputTokens="
-                + maxOutputTokens + ", stopSequences="
-                + stopSequences + ", toolSpecifications="
-                + toolSpecifications + ", toolChoice="
-                + toolChoice + ", responseFormat="
-                + responseFormat + '}';
+        return "DefaultChatRequestParameters{modelName='" + this.modelName + '\'' + ", temperature=" + this.temperature + ", topP=" + this.topP + ", topK=" + this.topK + ", frequencyPenalty=" + this.frequencyPenalty + ", presencePenalty=" + this.presencePenalty + ", maxOutputTokens=" + this.maxOutputTokens + ", stopSequences=" + this.stopSequences + ", toolSpecifications=" + this.toolSpecifications + ", toolChoice=" + (Object)((Object)this.toolChoice) + ", responseFormat=" + this.responseFormat + '}';
     }
 
     public static Builder<?> builder() {
-        return new Builder<>();
+        return new Builder();
     }
 
     public static class Builder<T extends Builder<T>> {
-
         private String modelName;
         private Double temperature;
         private Double topP;
@@ -203,110 +159,89 @@ public class DefaultChatRequestParameters implements ChatRequestParameters {
         private ResponseFormat responseFormat;
 
         public T overrideWith(ChatRequestParameters parameters) {
-            modelName(getOrDefault(parameters.modelName(), modelName));
-            temperature(getOrDefault(parameters.temperature(), temperature));
-            topP(getOrDefault(parameters.topP(), topP));
-            topK(getOrDefault(parameters.topK(), topK));
-            frequencyPenalty(getOrDefault(parameters.frequencyPenalty(), frequencyPenalty));
-            presencePenalty(getOrDefault(parameters.presencePenalty(), presencePenalty));
-            maxOutputTokens(getOrDefault(parameters.maxOutputTokens(), maxOutputTokens));
-            stopSequences(getOrDefault(parameters.stopSequences(), stopSequences));
-            toolSpecifications(getOrDefault(parameters.toolSpecifications(), toolSpecifications));
-            toolChoice(getOrDefault(parameters.toolChoice(), toolChoice));
-            responseFormat(getOrDefault(parameters.responseFormat(), responseFormat));
-            return (T) this;
+            this.modelName(Utils.getOrDefault(parameters.modelName(), this.modelName));
+            this.temperature(Utils.getOrDefault(parameters.temperature(), this.temperature));
+            this.topP(Utils.getOrDefault(parameters.topP(), this.topP));
+            this.topK(Utils.getOrDefault(parameters.topK(), this.topK));
+            this.frequencyPenalty(Utils.getOrDefault(parameters.frequencyPenalty(), this.frequencyPenalty));
+            this.presencePenalty(Utils.getOrDefault(parameters.presencePenalty(), this.presencePenalty));
+            this.maxOutputTokens(Utils.getOrDefault(parameters.maxOutputTokens(), this.maxOutputTokens));
+            this.stopSequences(Utils.getOrDefault(parameters.stopSequences(), this.stopSequences));
+            this.toolSpecifications(Utils.getOrDefault(parameters.toolSpecifications(), this.toolSpecifications));
+            this.toolChoice(Utils.getOrDefault(parameters.toolChoice(), this.toolChoice));
+            this.responseFormat(Utils.getOrDefault(parameters.responseFormat(), this.responseFormat));
+            return (T)this;
         }
 
         public T modelName(String modelName) {
             this.modelName = modelName;
-            return (T) this;
+            return (T)this;
         }
 
         public T temperature(Double temperature) {
             this.temperature = temperature;
-            return (T) this;
+            return (T)this;
         }
 
         public T topP(Double topP) {
             this.topP = topP;
-            return (T) this;
+            return (T)this;
         }
 
         public T topK(Integer topK) {
             this.topK = topK;
-            return (T) this;
+            return (T)this;
         }
 
         public T frequencyPenalty(Double frequencyPenalty) {
             this.frequencyPenalty = frequencyPenalty;
-            return (T) this;
+            return (T)this;
         }
 
         public T presencePenalty(Double presencePenalty) {
             this.presencePenalty = presencePenalty;
-            return (T) this;
+            return (T)this;
         }
 
         public T maxOutputTokens(Integer maxOutputTokens) {
             this.maxOutputTokens = maxOutputTokens;
-            return (T) this;
+            return (T)this;
         }
 
-        /**
-         * @see #stopSequences(String...)
-         */
         public T stopSequences(List<String> stopSequences) {
             this.stopSequences = stopSequences;
-            return (T) this;
+            return (T)this;
         }
 
-        /**
-         * @see #stopSequences(List)
-         */
-        public T stopSequences(String... stopSequences) {
-            return stopSequences(asList(stopSequences));
+        public T stopSequences(String ... stopSequences) {
+            return this.stopSequences(Arrays.asList(stopSequences));
         }
 
-        /**
-         * @see #toolSpecifications(ToolSpecification...)
-         */
         public T toolSpecifications(List<ToolSpecification> toolSpecifications) {
             this.toolSpecifications = toolSpecifications;
-            return (T) this;
+            return (T)this;
         }
 
-        /**
-         * @see #toolSpecifications(List)
-         */
-        public T toolSpecifications(ToolSpecification... toolSpecifications) {
-            return toolSpecifications(asList(toolSpecifications));
+        public T toolSpecifications(ToolSpecification ... toolSpecifications) {
+            return this.toolSpecifications(Arrays.asList(toolSpecifications));
         }
 
         public T toolChoice(ToolChoice toolChoice) {
             this.toolChoice = toolChoice;
-            return (T) this;
+            return (T)this;
         }
 
-        /**
-         * @see #responseFormat(JsonSchema)
-         */
         public T responseFormat(ResponseFormat responseFormat) {
             this.responseFormat = responseFormat;
-            return (T) this;
+            return (T)this;
         }
 
-        /**
-         * @see #responseFormat(ResponseFormat)
-         */
         public T responseFormat(JsonSchema jsonSchema) {
             if (jsonSchema != null) {
-                ResponseFormat responseFormat = ResponseFormat.builder()
-                        .type(JSON)
-                        .jsonSchema(jsonSchema)
-                        .build();
-                return responseFormat(responseFormat);
+                ResponseFormat responseFormat = ResponseFormat.builder().type(ResponseFormatType.JSON).jsonSchema(jsonSchema).build();
+                return this.responseFormat(responseFormat);
             }
-            return (T) this;
+            return (T)this;
         }
 
         public ChatRequestParameters build() {
@@ -314,3 +249,4 @@ public class DefaultChatRequestParameters implements ChatRequestParameters {
         }
     }
 }
+

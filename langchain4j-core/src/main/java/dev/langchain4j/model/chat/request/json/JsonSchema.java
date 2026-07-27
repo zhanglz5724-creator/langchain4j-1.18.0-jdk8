@@ -1,11 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.request.json;
 
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.quoted;
-
 public class JsonSchema {
-
     private final String name;
     private final JsonSchemaElement rootElement;
 
@@ -15,19 +17,37 @@ public class JsonSchema {
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
     public JsonSchemaElement rootElement() {
-        return rootElement;
+        return this.rootElement;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        JsonSchema that = (JsonSchema)o;
+        return Objects.equals(this.name, that.name) && Objects.equals(this.rootElement, that.rootElement);
+    }
 
+    public int hashCode() {
+        return Objects.hash(this.name, this.rootElement);
+    }
+
+    public String toString() {
+        return "JsonSchema { name = " + Utils.quoted(this.name) + ", rootElement = " + this.rootElement + " }";
+    }
+
+    public static class Builder {
         private String name;
         private JsonSchemaElement rootElement;
 
@@ -45,26 +65,5 @@ public class JsonSchema {
             return new JsonSchema(this);
         }
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JsonSchema that = (JsonSchema) o;
-        return Objects.equals(this.name, that.name)
-                && Objects.equals(this.rootElement, that.rootElement);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, rootElement);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonSchema {" +
-                " name = " + quoted(name) +
-                ", rootElement = " + rootElement +
-                " }";
-    }
 }
+

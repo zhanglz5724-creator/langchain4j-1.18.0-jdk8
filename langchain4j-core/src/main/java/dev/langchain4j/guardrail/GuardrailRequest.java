@@ -1,27 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.guardrail;
 
-/**
- * Represents the parameter passed to {@link Guardrail#validate(GuardrailRequest)}} in order to validate an interaction
- * between a user and the LLM.
- */
-public interface GuardrailRequest<P extends GuardrailRequest<P>>
-        {
+import dev.langchain4j.guardrail.GuardrailRequestParams;
 
-    /**
-     * Retrieves the common parameters that are shared across guardrail checks.
-     *
-     * @return an instance of {@code GuardrailRequestParams} containing shared parameters such as chat memory,
-     *         user message template, and additional variables.
-     */
-    GuardrailRequestParams requestParams();
+public interface GuardrailRequest<P extends GuardrailRequest<P>> {
+    public GuardrailRequestParams requestParams();
 
-    /**
-     * Recreate this guardrail param with the given input or output text.
-     *
-     * @param text
-     *            The text of the rewritten param.
-     *
-     * @return A clone of this guardrail params with the given input or output text.
-     */
-    P withText(String text);
+    public P withText(String var1);
 }
+

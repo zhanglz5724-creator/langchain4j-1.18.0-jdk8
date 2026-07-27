@@ -1,11 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.request.json;
 
-import static dev.langchain4j.internal.Utils.quoted;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import java.util.Objects;
 
-public class JsonArraySchema implements JsonSchemaElement {
-
+public class JsonArraySchema
+implements JsonSchemaElement {
     private final String description;
     private final JsonSchemaElement items;
 
@@ -16,19 +19,37 @@ public class JsonArraySchema implements JsonSchemaElement {
 
     @Override
     public String description() {
-        return description;
+        return this.description;
     }
 
     public JsonSchemaElement items() {
-        return items;
+        return this.items;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        JsonArraySchema that = (JsonArraySchema)o;
+        return Objects.equals(this.description, that.description) && Objects.equals(this.items, that.items);
+    }
 
+    public int hashCode() {
+        return Objects.hash(this.description, this.items);
+    }
+
+    public String toString() {
+        return "JsonArraySchema {description = " + Utils.quoted(this.description) + ", items = " + this.items + " }";
+    }
+
+    public static class Builder {
         private String description;
         private JsonSchemaElement items;
 
@@ -46,22 +67,5 @@ public class JsonArraySchema implements JsonSchemaElement {
             return new JsonArraySchema(this);
         }
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JsonArraySchema that = (JsonArraySchema) o;
-        return Objects.equals(this.description, that.description) && Objects.equals(this.items, that.items);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(description, items);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonArraySchema {" + "description = " + quoted(description) + ", items = " + items + " }";
-    }
 }
+

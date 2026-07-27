@@ -1,16 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.exception;
 
-/**
- * Indicates that something went wrong while executing the tool.
- *
- * @since 1.4.0
- */
-public class ToolExecutionException extends LangChain4jException {
+import dev.langchain4j.exception.LangChain4jException;
 
+public class ToolExecutionException
+extends LangChain4jException {
     private final Integer errorCode;
 
     public ToolExecutionException(String message) {
-        this(message, (Integer) null);
+        this(message, (Integer)null);
     }
 
     public ToolExecutionException(Throwable cause) {
@@ -36,6 +36,7 @@ public class ToolExecutionException extends LangChain4jException {
     }
 
     public Integer errorCode() {
-        return errorCode;
+        return this.errorCode;
     }
 }
+

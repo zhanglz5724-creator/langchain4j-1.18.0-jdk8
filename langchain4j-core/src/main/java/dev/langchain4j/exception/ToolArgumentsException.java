@@ -1,17 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.exception;
 
-/**
- * Indicates that something is wrong with the tool arguments.
- * For example, the JSON cannot be parsed, or an argument is of the wrong type.
- *
- * @since 1.4.0
- */
-public class ToolArgumentsException extends LangChain4jException {
+import dev.langchain4j.exception.LangChain4jException;
 
+public class ToolArgumentsException
+extends LangChain4jException {
     private final Integer errorCode;
 
     public ToolArgumentsException(String message) {
-        this(message, (Integer) null);
+        this(message, (Integer)null);
     }
 
     public ToolArgumentsException(Throwable cause) {
@@ -37,6 +36,7 @@ public class ToolArgumentsException extends LangChain4jException {
     }
 
     public Integer errorCode() {
-        return errorCode;
+        return this.errorCode;
     }
 }
+

@@ -1,18 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.filter;
 
-/**
- * Parses a filter expression string into a {@link Filter} object.
- * <br>
- * Currently, there is only one implementation: {@code SqlFilterParser}
- * in the {@code langchain4j-embedding-store-filter-parser-sql} module.
- */
-public interface FilterParser {
+import dev.langchain4j.store.embedding.filter.Filter;
 
-    /**
-     * Parses a filter expression string into a {@link Filter} object.
-     *
-     * @param filter The filter expression as a string.
-     * @return A {@link Filter} object.
-     */
-    Filter parse(String filter);
+public interface FilterParser {
+    public Filter parse(String var1);
 }
+

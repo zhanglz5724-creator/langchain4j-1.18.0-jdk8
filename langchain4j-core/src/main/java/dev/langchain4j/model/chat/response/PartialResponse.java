@@ -1,43 +1,43 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.response;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-
-import java.util.Objects;
 import dev.langchain4j.Experimental;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.internal.ValidationUtils;
+import java.util.Objects;
 
-/**
- * @since 1.8.0
- */
 @Experimental
 @JacocoIgnoreCoverageGenerated
 public class PartialResponse {
-
     private final String text;
 
     public PartialResponse(String text) {
-        this.text = ensureNotEmpty(text, "text");
+        this.text = ValidationUtils.ensureNotEmpty(text, "text");
     }
 
     public String text() {
-        return text;
+        return this.text;
     }
 
-    @Override
-    public boolean equals(final Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        PartialResponse that = (PartialResponse) object;
-        return Objects.equals(text, that.text);
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+        PartialResponse that = (PartialResponse)object;
+        return Objects.equals(this.text, that.text);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hashCode(text);
+        return Objects.hashCode(this.text);
     }
 
-    @Override
     public String toString() {
-        return "PartialResponse{" + "text='" + text + '\'' + '}';
+        return "PartialResponse{text='" + this.text + '\'' + '}';
     }
 }
+

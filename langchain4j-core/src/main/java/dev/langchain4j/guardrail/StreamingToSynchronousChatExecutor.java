@@ -1,8 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.guardrail;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import dev.langchain4j.Internal;
+import dev.langchain4j.guardrail.AbstractChatExecutor;
+import dev.langchain4j.guardrail.ChatExecutor;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
@@ -14,78 +22,70 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A concrete implementation of the {@link ChatExecutor} interface that executes
- * chat requests using a specified {@link StreamingChatModel}. It then executes the requests as if it were
- * synchronous, essentially transforming a streaming request to a synchronous request
- *
- * This class utilizes a {@link ChatRequest} to encapsulate the input messages
- *  and parameters and delegates the execution of the chat to the provided {@link StreamingChatModel}.
- *
- *  Instances of this class are immutable and are typically instantiated using
- *  the {@link StreamingToSynchronousBuilder}.
- */
 @Internal
-final class StreamingToSynchronousChatExecutor extends AbstractChatExecutor {
+final class StreamingToSynchronousChatExecutor
+extends AbstractChatExecutor {
     private final StreamingChatModel streamingChatModel;
     private final Consumer<Throwable> errorHandler;
 
-    protected StreamingToSynchronousChatExecutor(StreamingToSynchronousBuilder builder) {
+    protected StreamingToSynchronousChatExecutor(ChatExecutor.StreamingToSynchronousBuilder builder) {
         super(builder);
-
-        this.streamingChatModel = ensureNotNull(builder.streamingChatModel, "streamingChatModel");
+        this.streamingChatModel = ValidationUtils.ensureNotNull(builder.streamingChatModel, "streamingChatModel");
         this.errorHandler = builder.errorHandler;
     }
 
     @Override
     protected ChatResponse execute(ChatRequest chatRequest) {
-        var responseHandler = new StreamingToSyncResponseHandler(this.errorHandler);
-        this.streamingChatModel.chat(chatRequest, responseHandler);
-
+        StreamingToSyncResponseHandler responseHandler = new StreamingToSyncResponseHandler(this.errorHandler);
+        this.streamingChatModel.chat(chatRequest, (StreamingChatResponseHandler)responseHandler);
         return Optional.ofNullable(responseHandler.getResponse()).orElseGet(ChatResponse.builder()::build);
     }
 
-    private static class StreamingToSyncResponseHandler implements StreamingChatResponseHandler {
+    private static class StreamingToSyncResponseHandler
+    implements StreamingChatResponseHandler {
         private static final Logger LOG = LoggerFactory.getLogger(StreamingToSyncResponseHandler.class);
         private final Consumer<Throwable> errorHandler;
         private final CountDownLatch latch = new CountDownLatch(1);
-        private AtomicReference<ChatResponse> response = new AtomicReference<>();
+        private AtomicReference<ChatResponse> response = new AtomicReference();
 
         StreamingToSyncResponseHandler(Consumer<Throwable> errorHandler) {
             this.errorHandler = errorHandler;
         }
 
         @Override
-        public void onPartialResponse(String partialResponse) {}
+        public void onPartialResponse(String partialResponse) {
+        }
 
         @Override
         public void onCompleteResponse(ChatResponse completeResponse) {
-            response.set(completeResponse);
+            this.response.set(completeResponse);
             this.latch.countDown();
         }
 
         private void waitForCompletion() {
             try {
                 this.latch.await();
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
         }
 
         ChatResponse getResponse() {
-            waitForCompletion();
+            this.waitForCompletion();
             return this.response.get();
         }
 
         @Override
         public void onError(Throwable error) {
-            if (errorHandler != null) {
+            if (this.errorHandler != null) {
                 try {
-                    errorHandler.accept(error);
-                } catch (Exception e) {
+                    this.errorHandler.accept(error);
+                }
+                catch (Exception e) {
                     LOG.error("While handling the following error...", error);
-                    LOG.error("...the following error happened", e);
+                    LOG.error("...the following error happened", (Throwable)e);
                 }
             } else {
                 LOG.warn("Ignored error", error);
@@ -93,3 +93,4 @@ final class StreamingToSynchronousChatExecutor extends AbstractChatExecutor {
         }
     }
 }
+

@@ -1,155 +1,79 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.guardrail;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.guardrail.Guardrail;
+import dev.langchain4j.internal.ValidationUtils;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * The result of the validation of an interaction between a user and the LLM.
- *
- * @param <GR>
- *            The type of guardrail result to expect
- *
- * @see InputGuardrailResult
- * @see OutputGuardrailResult
- */
-public interface GuardrailResult<GR extends GuardrailResult<GR>>
-        {
-    /**
-     * The possible results of a guardrails validation.
-     */
-    enum Result {
-        /**
-         * A successful validation.
-         */
-        SUCCESS,
-        /**
-         * A successful validation with a specific result.
-         */
-        SUCCESS_WITH_RESULT,
-        /**
-         * A failed validation not preventing the subsequent validations eventually registered to be evaluated.
-         */
-        FAILURE,
-        /**
-         * A fatal failed validation, blocking the evaluation of any other validations eventually registered.
-         */
-        FATAL
+public interface GuardrailResult<GR extends GuardrailResult<GR>> {
+    public Result result();
+
+    public <F extends Failure> List<F> failures();
+
+    public String successfulText();
+
+    default public boolean hasRewrittenResult() {
+        return this.result() == Result.SUCCESS_WITH_RESULT;
     }
 
-    /**
-     * The message and the cause of the failure of a single validation.
-     */
-    interface Failure {
-        /**
-         * Build a failure from a specific {@link Guardrail} class
-         */
-        Failure withGuardrailClass(Class<? extends Guardrail> guardrailClass);
-
-        /**
-         * The failure message
-         */
-        String message();
-
-        /**
-         * The cause of the failure
-         */
-        Throwable cause();
-
-        /**
-         * The {@link Guardrail} class
-         */
-        Class<? extends Guardrail> guardrailClass();
-
-        /**
-         * The string representation of the failure
-         * @return A string representation of the failure
-         */
-        default String asString() {
-            var guardrailName =
-                    Optional.ofNullable(guardrailClass()).map(Class::getName).orElse("");
-
-            return String.format("The guardrail %s failed with this message: %s", guardrailName, message());
-        }
+    default public boolean isFatal() {
+        return this.result() == Result.FATAL;
     }
 
-    /**
-     * The result of the guardrail
-     */
-    Result result();
-
-    /**
-     * @return The list of failures eventually resulting from a set of validations.
-     */
-    <F extends Failure> List<F> failures();
-
-    /**
-     * The message of the successful result
-     */
-    String successfulText();
-
-    /**
-     * Whether or not the result is successful, but the result was re-written, potentially due to re-prompting
-     */
-    default boolean hasRewrittenResult() {
-        return result() == Result.SUCCESS_WITH_RESULT;
+    default public boolean isSuccess() {
+        Result result = this.result();
+        return result == Result.SUCCESS || result == Result.SUCCESS_WITH_RESULT;
     }
 
-    /**
-     * Whether or not the result is considered fatal
-     */
-    default boolean isFatal() {
-        return result() == Result.FATAL;
+    default public Throwable getFirstFailureException() {
+        return !this.isSuccess() ? (Throwable)this.failures().stream().map(Failure::cause).filter(Objects::nonNull).findFirst().orElse(null) : null;
     }
 
-    /**
-     * Whether or not the result is considered successful
-     */
-    default boolean isSuccess() {
-        var result = result();
-        return (result == Result.SUCCESS) || (result == Result.SUCCESS_WITH_RESULT);
-    }
-
-    /**
-     * Gets the exception from the first failure
-     */
-    default Throwable getFirstFailureException() {
-        return !isSuccess()
-                ? failures().stream()
-                        .map(Failure::cause)
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElse(null)
-                : null;
-    }
-
-    /**
-     * The {@link Guardrail} class which performed this validation
-     */
-    default GR validatedBy(Class<? extends Guardrail> guardrailClass) {
-        ensureNotNull(guardrailClass, "guardrailClass");
-
-        if (!isSuccess()) {
-            var failures = failures();
-
+    default public GR validatedBy(Class<? extends Guardrail> guardrailClass) {
+        ValidationUtils.ensureNotNull(guardrailClass, "guardrailClass");
+        if (!this.isSuccess()) {
+            List failures = this.failures();
             if (failures.size() != 1) {
                 throw new IllegalArgumentException();
             }
-
-            failures.set(0, failures.get(0).withGuardrailClass(guardrailClass));
+            failures.set(0, ((Failure)failures.get(0)).withGuardrailClass(guardrailClass));
         }
-
-        return (GR) this;
+        return (GR)this;
     }
 
-    default String asString() {
-        if (isSuccess()) {
-            return hasRewrittenResult() ? String.format("Success with '%s'", successfulText()) : "Success";
+    default public String asString() {
+        if (this.isSuccess()) {
+            return this.hasRewrittenResult() ? String.format("Success with '%s'", this.successfulText()) : "Success";
         }
+        return this.failures().stream().map(Object::toString).collect(Collectors.joining(", "));
+    }
 
-        return failures().stream().map(Failure::toString).collect(Collectors.joining(", "));
+    public static interface Failure {
+        public Failure withGuardrailClass(Class<? extends Guardrail> var1);
+
+        public String message();
+
+        public Throwable cause();
+
+        public Class<? extends Guardrail> guardrailClass();
+
+        default public String asString() {
+            String guardrailName = Optional.ofNullable(this.guardrailClass()).map(Class::getName).orElse("");
+            return String.format("The guardrail %s failed with this message: %s", guardrailName, this.message());
+        }
+    }
+
+    public static enum Result {
+        SUCCESS,
+        SUCCESS_WITH_RESULT,
+        FAILURE,
+        FATAL;
+
     }
 }
+

@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.internal;
 
 import dev.langchain4j.Internal;
@@ -10,46 +13,42 @@ import dev.langchain4j.exception.ModelNotFoundException;
 import dev.langchain4j.exception.RateLimitException;
 import dev.langchain4j.exception.TimeoutException;
 import dev.langchain4j.exception.UnresolvedModelServerException;
-
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.Callable;
 
-@Internal
 @FunctionalInterface
+@Internal
 public interface ExceptionMapper {
+    public static final ExceptionMapper DEFAULT = new DefaultExceptionMapper();
 
-    ExceptionMapper DEFAULT = new DefaultExceptionMapper();
-
-    static <T> T mappingException(Callable<T> action) {
+    public static <T> T mappingException(Callable<T> action) {
         return DEFAULT.withExceptionMapper(action);
     }
 
-    default <T> T withExceptionMapper(Callable<T> action) {
+    default public <T> T withExceptionMapper(Callable<T> action) {
         try {
             return action.call();
-        } catch (Exception e) {
-            throw mapException(e);
+        }
+        catch (Exception e) {
+            throw this.mapException(e);
         }
     }
 
-    RuntimeException mapException(Throwable t);
+    public RuntimeException mapException(Throwable var1);
 
-    class DefaultExceptionMapper implements ExceptionMapper {
-
+    public static class DefaultExceptionMapper
+    implements ExceptionMapper {
         @Override
         public RuntimeException mapException(Throwable t) {
-            Throwable rootCause = findRoot(t);
-
+            Throwable rootCause = DefaultExceptionMapper.findRoot(t);
             if (rootCause instanceof HttpException) {
-                HttpException httpException = (HttpException) rootCause;
-                return mapHttpStatusCode(httpException, httpException.statusCode());
+                HttpException httpException = (HttpException)rootCause;
+                return this.mapHttpStatusCode(httpException, httpException.statusCode());
             }
-
             if (rootCause instanceof UnresolvedAddressException) {
                 return new UnresolvedModelServerException(rootCause);
             }
-
-            return t instanceof RuntimeException ? (RuntimeException) t : new LangChain4jException(t);
+            return t instanceof RuntimeException ? (RuntimeException)t : new LangChain4jException(t);
         }
 
         protected RuntimeException mapHttpStatusCode(Throwable cause, int httpStatusCode) {
@@ -71,12 +70,13 @@ public interface ExceptionMapper {
             if (httpStatusCode >= 400 && httpStatusCode < 500) {
                 return new InvalidRequestException(cause);
             }
-            return cause instanceof RuntimeException ? (RuntimeException) cause : new LangChain4jException(cause);
+            return cause instanceof RuntimeException ? (RuntimeException)cause : new LangChain4jException(cause);
         }
 
         private static Throwable findRoot(Throwable e) {
             Throwable cause = e.getCause();
-            return cause == null || cause == e ? e : findRoot(cause);
+            return cause == null || cause == e ? e : DefaultExceptionMapper.findRoot(cause);
         }
     }
 }
+

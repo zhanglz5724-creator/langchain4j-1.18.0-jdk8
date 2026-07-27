@@ -1,12 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.guardrail;
 
-/**
- * Exception thrown when an input guardrail validation fails.
- * <p>
- *     This class is not intended to be thrown within guardrail implementations. It is for the framework only. It is ok to catch it.
- * </p>
- */
-public final class InputGuardrailException extends GuardrailException {
+import dev.langchain4j.guardrail.GuardrailException;
+
+public final class InputGuardrailException
+extends GuardrailException {
     public InputGuardrailException(String message) {
         super(message);
     }
@@ -15,3 +15,4 @@ public final class InputGuardrailException extends GuardrailException {
         super(message, cause);
     }
 }
+

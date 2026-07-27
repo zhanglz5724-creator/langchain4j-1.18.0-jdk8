@@ -1,13 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.exception;
 
-/**
- * Thrown when the model provider returns a server-side error (HTTP 5xx).
- * <p>
- * This is a {@link RetriableException}: the failure is on the provider's side
- * and the request may succeed after a brief back-off. If the error persists
- * across multiple retries, it likely indicates an ongoing outage with the provider.
- */
-public class InternalServerException extends RetriableException {
+import dev.langchain4j.exception.RetriableException;
+
+public class InternalServerException
+extends RetriableException {
     public InternalServerException(String message) {
         super(message);
     }
@@ -20,3 +19,4 @@ public class InternalServerException extends RetriableException {
         super(message, cause);
     }
 }
+

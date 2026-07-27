@@ -1,37 +1,58 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.chat.request.json;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.quoted;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class JsonEnumSchema implements JsonSchemaElement {
-
+public class JsonEnumSchema
+implements JsonSchemaElement {
     private final String description;
     private final List<String> enumValues;
 
     public JsonEnumSchema(Builder builder) {
         this.description = builder.description;
-        this.enumValues = copy(ensureNotEmpty(builder.enumValues, "enumValues"));
+        this.enumValues = Utils.copy(ValidationUtils.ensureNotEmpty(builder.enumValues, "enumValues"));
     }
 
     @Override
     public String description() {
-        return description;
+        return this.description;
     }
 
     public List<String> enumValues() {
-        return enumValues;
+        return this.enumValues;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        JsonEnumSchema that = (JsonEnumSchema)o;
+        return Objects.equals(this.description, that.description) && Objects.equals(this.enumValues, that.enumValues);
+    }
 
+    public int hashCode() {
+        return Objects.hash(this.description, this.enumValues);
+    }
+
+    public String toString() {
+        return "JsonEnumSchema {description = " + Utils.quoted(this.description) + ", enumValues = " + this.enumValues + " }";
+    }
+
+    public static class Builder {
         private String description;
         private List<String> enumValues;
 
@@ -45,30 +66,13 @@ public class JsonEnumSchema implements JsonSchemaElement {
             return this;
         }
 
-        public Builder enumValues(String... enumValues) {
-            return enumValues(List.of(enumValues));
+        public Builder enumValues(String ... enumValues) {
+            return this.enumValues(Arrays.asList(enumValues));
         }
 
         public JsonEnumSchema build() {
             return new JsonEnumSchema(this);
         }
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JsonEnumSchema that = (JsonEnumSchema) o;
-        return Objects.equals(this.description, that.description) && Objects.equals(this.enumValues, that.enumValues);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(description, enumValues);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonEnumSchema {" + "description = " + quoted(description) + ", enumValues = " + enumValues + " }";
-    }
 }
+

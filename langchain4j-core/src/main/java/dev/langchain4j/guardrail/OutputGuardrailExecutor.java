@@ -1,111 +1,69 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.guardrail;
-
-import static dev.langchain4j.guardrail.OutputGuardrailResult.successWith;
-import static dev.langchain4j.observability.api.event.OutputGuardrailExecutedEvent.OutputGuardrailExecutedEventBuilder;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.guardrail.OutputGuardrailResult.Failure;
+import dev.langchain4j.guardrail.AbstractGuardrailExecutor;
+import dev.langchain4j.guardrail.GuardrailResult;
+import dev.langchain4j.guardrail.OutputGuardrail;
+import dev.langchain4j.guardrail.OutputGuardrailException;
+import dev.langchain4j.guardrail.OutputGuardrailRequest;
+import dev.langchain4j.guardrail.OutputGuardrailResult;
 import dev.langchain4j.guardrail.config.OutputGuardrailsConfig;
 import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.observability.api.event.OutputGuardrailExecutedEvent;
 import dev.langchain4j.spi.guardrail.OutputGuardrailExecutorBuilderFactory;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
-/**
- * The {@link GuardrailExecutor} for {@link OutputGuardrail}s.
- * <p>
- *     When executing output guardrails, if any {@link OutputGuardrail} triggers a reprompt or retry,
- *     the new response has to go back through the entire chain of output guardrails to ensure the new response
- *     passes all the output guardrails.
- * </p>
- */
 public class OutputGuardrailExecutor
-        extends AbstractGuardrailExecutor<
-                OutputGuardrailsConfig,
-                OutputGuardrailRequest,
-                OutputGuardrailResult,
-                OutputGuardrail,
-                OutputGuardrailExecutedEvent,
-                Failure> {
-
-    public static final String MAX_RETRIES_MESSAGE_TEMPLATE =
-            "Output validation failed. The guardrails have reached the maximum number of retries.\n" +
-            "Guardrail messages:\n" +
-            "\n" +
-            "            %s";
+extends AbstractGuardrailExecutor<OutputGuardrailsConfig, OutputGuardrailRequest, OutputGuardrailResult, OutputGuardrail, OutputGuardrailExecutedEvent, OutputGuardrailResult.Failure> {
+    public static final String MAX_RETRIES_MESSAGE_TEMPLATE = "Output validation failed. The guardrails have reached the maximum number of retries.\nGuardrail messages:\n\n%s\n";
 
     protected OutputGuardrailExecutor(OutputGuardrailsConfig config, List<OutputGuardrail> guardrails) {
         super(config, guardrails);
     }
 
-    /**
-     * Executes the {@link OutputGuardrail}s on the given {@link OutputGuardrailRequest}.
-     *
-     * @param request     The {@link OutputGuardrailRequest} to validate
-     * @return The {@link OutputGuardrailResult} of the validation
-     */
     @Override
     public OutputGuardrailResult execute(OutputGuardrailRequest request) {
         OutputGuardrailResult result = null;
         OutputGuardrailRequest accumulatedRequest = request;
         int attempt = 0;
-        int maxAttempts = config().maxRetries();
-
+        int maxAttempts = ((OutputGuardrailsConfig)this.config()).maxRetries();
         if (maxAttempts == 0) {
             maxAttempts = 1;
         } else if (maxAttempts < 0) {
-            maxAttempts = OutputGuardrailsConfig.MAX_RETRIES_DEFAULT;
+            maxAttempts = 2;
         }
-
         while (attempt < maxAttempts) {
-            result = rewriteResult(request, accumulatedRequest, executeGuardrails(accumulatedRequest));
-
+            result = this.rewriteResult(request, accumulatedRequest, (OutputGuardrailResult)this.executeGuardrails(accumulatedRequest));
             if (result.isSuccess()) {
                 return result;
             }
-
-            // Not successful
             if (!result.isRetry()) {
-                // Not any kind of retry, so just stop here
-                removeViolatingMessageIfRequested(result, request);
+                this.removeViolatingMessageIfRequested(result, request);
                 throw new OutputGuardrailException(result.toString(), result.getFirstFailureException(), result);
             }
-
-            if (++attempt < maxAttempts) {
-                // If we get here we know it is some kind of retry
-                // We don't want to add intermediary UserMessages to the memory
-                List<ChatMessage> chatMessages = Optional.ofNullable(
-                                accumulatedRequest.requestParams().chatMemory())
-                        .map(ChatMemory::messages)
-                        .orElseGet(ArrayList::new);
-                result.getReprompt().map(UserMessage::from).ifPresent(chatMessages::add);
-
-                // Re-execute the request with the appended message
-                // But don't add it or the resulting message to the memory
-                AiMessage response = accumulatedRequest.chatExecutor().execute(chatMessages).aiMessage();
-                accumulatedRequest = OutputGuardrailRequest.builder()
-                        .responseFromLLM(response)
-                        .chatExecutor(accumulatedRequest.chatExecutor())
-                        .requestParams(accumulatedRequest.requestParams())
-                        .build();
-            }
+            if (++attempt >= maxAttempts) continue;
+            List chatMessages = Optional.ofNullable(accumulatedRequest.requestParams().chatMemory()).map(ChatMemory::messages).orElseGet(ArrayList::new);
+            result.getReprompt().map(UserMessage::from).ifPresent(chatMessages::add);
+            ChatResponse response = accumulatedRequest.chatExecutor().execute(chatMessages);
+            accumulatedRequest = OutputGuardrailRequest.builder().responseFromLLM(response).chatExecutor(accumulatedRequest.chatExecutor()).requestParams(accumulatedRequest.requestParams()).build();
         }
-
         if (attempt == maxAttempts) {
-            String failureMessages = result.failures().stream()
-                    .map(GuardrailResult.Failure::message)
-                    .collect(Collectors.joining(System.lineSeparator()));
-
-            removeViolatingMessageIfRequested(result, request);
+            String failureMessages = result.failures().stream().map(GuardrailResult.Failure::message).collect(Collectors.joining(System.lineSeparator()));
+            this.removeViolatingMessageIfRequested(result, request);
             throw new OutputGuardrailException(String.format(MAX_RETRIES_MESSAGE_TEMPLATE, failureMessages), null, result);
         }
-
         return result;
     }
 
@@ -117,51 +75,32 @@ public class OutputGuardrailExecutor
         if (memory == null) {
             return;
         }
-        // Remove the last AiMessage — the one that failed the guardrail
-        java.util.ArrayList<ChatMessage> messages = new java.util.ArrayList<>(memory.messages());
-        java.util.ListIterator<ChatMessage> it = messages.listIterator(messages.size());
+        ArrayList<ChatMessage> messages = new ArrayList<ChatMessage>(memory.messages());
+        ListIterator it = messages.listIterator(messages.size());
         while (it.hasPrevious()) {
-            ChatMessage msg = it.previous();
-            if (msg instanceof AiMessage) {
-                it.remove();
-                break;
-            }
+            ChatMessage msg = (ChatMessage)it.previous();
+            if (!(msg instanceof AiMessage)) continue;
+            it.remove();
+            break;
         }
         memory.clear();
         messages.forEach(memory::add);
     }
 
-    private OutputGuardrailResult rewriteResult(
-            OutputGuardrailRequest originalRequest,
-            OutputGuardrailRequest validatedRequest,
-            OutputGuardrailResult result) {
-        if (result.isSuccess() && !result.hasRewrittenResult()) {
-            String originalText = originalRequest.responseFromLLM().aiMessage().text();
-            String validatedText =
-                    validatedRequest.responseFromLLM().aiMessage().text();
-            if (!originalText.equals(validatedText)) {
-                // The text validated by the output guardrail is different form the original one because of a
-                // successful reprompt, so we need to create a new success result with the new text
-                return successWith(originalRequest.responseFromLLM().aiMessage().withText(validatedText));
-            }
+    private OutputGuardrailResult rewriteResult(OutputGuardrailRequest originalRequest, OutputGuardrailRequest validatedRequest, OutputGuardrailResult result) {
+        String validatedText;
+        String originalText;
+        if (result.isSuccess() && !result.hasRewrittenResult() && !(originalText = originalRequest.responseFromLLM().aiMessage().text()).equals(validatedText = validatedRequest.responseFromLLM().aiMessage().text())) {
+            return OutputGuardrailResult.successWith(originalRequest.responseFromLLM().aiMessage().withText(validatedText));
         }
         return result;
     }
 
-    /**
-     * Creates a failure result from some {@link Failure}s.
-     * @param failures The failures
-     * @return A {@link OutputGuardrailResult} containing the failures
-     */
     @Override
-    protected OutputGuardrailResult createFailure(List<Failure> failures) {
+    protected OutputGuardrailResult createFailure(List<OutputGuardrailResult.Failure> failures) {
         return OutputGuardrailResult.failure(failures);
     }
 
-    /**
-     * Creates a success result.
-     * @return A {@link OutputGuardrailResult} representing success
-     */
     @Override
     protected OutputGuardrailResult createSuccess() {
         return OutputGuardrailResult.success();
@@ -173,60 +112,32 @@ public class OutputGuardrailExecutor
     }
 
     @Override
-    protected OutputGuardrailResult handleFatalResult(
-            OutputGuardrailResult accumulatedResult, OutputGuardrailResult result) {
+    protected OutputGuardrailResult handleFatalResult(OutputGuardrailResult accumulatedResult, OutputGuardrailResult result) {
         return accumulatedResult.hasRewrittenResult() ? result.blockRetry() : result;
     }
 
-    @Override
-    protected OutputGuardrailExecutedEventBuilder createEmptyObservabilityEventBuilderInstance() {
+    protected OutputGuardrailExecutedEvent.OutputGuardrailExecutedEventBuilder createEmptyObservabilityEventBuilderInstance() {
         return OutputGuardrailExecutedEvent.builder();
     }
 
-    /**
-     * Creates a new instance of {@link OutputGuardrailExecutorBuilder}.
-     * The builder is used to construct and configure instances of {@link OutputGuardrailExecutorBuilder}.
-     * @return A new {@link OutputGuardrailExecutorBuilder} instance.
-     */
     public static OutputGuardrailExecutorBuilder builder() {
-        ServiceLoader<OutputGuardrailExecutorBuilderFactory> loader =
-                ServiceLoader.load(OutputGuardrailExecutorBuilderFactory.class);
-        for (OutputGuardrailExecutorBuilderFactory factory : loader) {
-            return factory.getBuilder();
+        Iterator<OutputGuardrailExecutorBuilderFactory> iterator = ServiceLoader.load(OutputGuardrailExecutorBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OutputGuardrailExecutorBuilderFactory factory = iterator.next();
+            return (OutputGuardrailExecutorBuilder)factory.getBuilder();
         }
         return new OutputGuardrailExecutorBuilder();
     }
 
-    /**
-     * Builder class for constructing instances of {@link OutputGuardrailExecutor}.
-     *
-     * This builder allows configuration of an {@link OutputGuardrailExecutor} by specifying the associated configuration
-     * type ({@link OutputGuardrailsConfig}) and the output guardrails to be executed.
-     *
-     * Extends {@link GuardrailExecutorBuilder} for the specific types:
-     * - Configuration type: {@link OutputGuardrailsConfig}
-     * - Result type: {@link OutputGuardrailResult}
-     * - Parameter type: {@link OutputGuardrailRequest}
-     * - Guardrail type: {@link OutputGuardrail}
-     *
-     * Provides the {@code build()} method to create an {@link OutputGuardrailExecutor} instance.
-     */
     public static class OutputGuardrailExecutorBuilder
-            extends GuardrailExecutorBuilder<
-                    OutputGuardrailsConfig,
-                    OutputGuardrailResult,
-                    OutputGuardrailRequest,
-                    OutputGuardrail,
-                    OutputGuardrailExecutedEvent,
-                    OutputGuardrailExecutorBuilder> {
-
+    extends AbstractGuardrailExecutor.GuardrailExecutorBuilder<OutputGuardrailsConfig, OutputGuardrailResult, OutputGuardrailRequest, OutputGuardrail, OutputGuardrailExecutedEvent, OutputGuardrailExecutorBuilder> {
         protected OutputGuardrailExecutorBuilder() {
             super(OutputGuardrailsConfig.builder().build());
         }
 
-        @Override
         public OutputGuardrailExecutor build() {
-            return new OutputGuardrailExecutor(config(), guardrails());
+            return new OutputGuardrailExecutor((OutputGuardrailsConfig)this.config(), this.guardrails());
         }
     }
 }
+

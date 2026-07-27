@@ -1,189 +1,104 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.input;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.util.Collections.singletonMap;
-
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.input.DefaultPromptTemplateFactory;
+import dev.langchain4j.model.input.Prompt;
+import dev.langchain4j.spi.ServiceHelper;
 import dev.langchain4j.spi.prompt.PromptTemplateFactory;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-/**
- * Represents a template of a prompt that can be reused multiple times.
- * A template typically contains one or more variables (placeholders) defined as {{variable_name}} that are
- * replaced with actual values to produce a Prompt.
- * Special variables {{current_date}}, {{current_time}}, and {{current_date_time}} are automatically
- * filled with LocalDate.now(), LocalTime.now(), and LocalDateTime.now() respectively.
- */
 public class PromptTemplate {
-
-    private static final PromptTemplateFactory FACTORY = factory();
+    private static final PromptTemplateFactory FACTORY = PromptTemplate.factory();
+    static final String CURRENT_DATE = "current_date";
+    static final String CURRENT_TIME = "current_time";
+    static final String CURRENT_DATE_TIME = "current_date_time";
+    private final String templateString;
+    private final PromptTemplateFactory.Template template;
+    private final Clock clock;
 
     private static PromptTemplateFactory factory() {
-        for (PromptTemplateFactory factory : loadFactories(PromptTemplateFactory.class)) {
+        Iterator<PromptTemplateFactory> iterator = ServiceHelper.loadFactories(PromptTemplateFactory.class).iterator();
+        if (iterator.hasNext()) {
+            PromptTemplateFactory factory = iterator.next();
             return factory;
         }
         return new DefaultPromptTemplateFactory();
     }
 
-    static final String CURRENT_DATE = "current_date";
-    static final String CURRENT_TIME = "current_time";
-    static final String CURRENT_DATE_TIME = "current_date_time";
-
-    private final String templateString;
-    private final PromptTemplateFactory.Template template;
-    private final Clock clock;
-
-    /**
-     * Create a new PromptTemplate.
-     *
-     * <p>The {@code Clock} will be the system clock.</p>
-     *
-     * @param template the template string of the prompt.
-     */
     public PromptTemplate(String template) {
-        this(template, (String) null);
+        this(template, (String)null);
     }
 
-    /**
-     * Create a new PromptTemplate.
-     *
-     * <p>The {@code Clock} will be the system clock.</p>
-     *
-     * @param template the template string of the prompt.
-     * @param name the template name of the prompt.
-     */
     public PromptTemplate(String template, String name) {
         this(template, name, Clock.systemDefaultZone());
     }
 
-    /**
-     * Create a new PromptTemplate.
-     *
-     * @param template the template string of the prompt.
-     * @param clock    the clock to use for the special variables.
-     */
     public PromptTemplate(String template, Clock clock) {
         this(template, null, clock);
     }
 
-    /**
-     * Create a new PromptTemplate.
-     *
-     * @param template the template string of the prompt.
-     * @param name the template name of the prompt.
-     * @param clock    the clock to use for the special variables.
-     */
-    public PromptTemplate(String template, String name, Clock clock) {
-        this.templateString = ensureNotBlank(template, "template");
-        if (name == null) {
-            this.template = FACTORY.create(() -> template);
-        } else {
-            this.template = FACTORY.create(new PromptTemplateFactory.Input() {
+    public PromptTemplate(final String template, final String name, Clock clock) {
+        this.templateString = ValidationUtils.ensureNotBlank(template, "template");
+        this.template = name == null ? FACTORY.create(() -> template) : FACTORY.create(new PromptTemplateFactory.Input(){
 
-                @Override
-                public String getTemplate() {
-                    return template;
-                }
+            @Override
+            public String getTemplate() {
+                return template;
+            }
 
-                @Override
-                public String getName() {
-                    return name;
-                }
-            });
-        }
-        this.clock = ensureNotNull(clock, "clock");
+            @Override
+            public String getName() {
+                return name;
+            }
+        });
+        this.clock = ValidationUtils.ensureNotNull(clock, "clock");
     }
 
-    /**
-     * @return A prompt template string.
-     */
     public String template() {
-        return templateString;
+        return this.templateString;
     }
 
-    /**
-     * Applies a value to a template containing a single variable. The single variable should have the name {{it}}.
-     *
-     * @param value The value that will be injected in place of the {{it}} placeholder in the template.
-     * @return A Prompt object where the {{it}} placeholder in the template has been replaced by the provided value.
-     */
     public Prompt apply(Object value) {
-        return apply(singletonMap("it", value));
+        return this.apply(Collections.singletonMap("it", value));
     }
 
-    /**
-     * Applies multiple values to a template containing multiple variables.
-     *
-     * @param variables A map of variable names to values that will be injected in place of the corresponding placeholders in the template.
-     * @return A Prompt object where the placeholders in the template have been replaced by the provided values.
-     */
     public Prompt apply(Map<String, Object> variables) {
-        ensureNotNull(variables, "variables");
-        return Prompt.from(template.render(injectDateTimeVariables(variables)));
+        ValidationUtils.ensureNotNull(variables, "variables");
+        return Prompt.from(this.template.render(this.injectDateTimeVariables(variables)));
     }
 
-    /**
-     * Injects the special variables {{current_date}}, {{current_time}}, and {{current_date_time}} into the given map.
-     *
-     * @param variables the map to inject the variables into.
-     * @return a copy of the map with the variables injected.
-     */
     private Map<String, Object> injectDateTimeVariables(Map<String, Object> variables) {
-        Map<String, Object> variablesCopy = new HashMap<>(variables);
-        variablesCopy.put(CURRENT_DATE, LocalDate.now(clock));
-        variablesCopy.put(CURRENT_TIME, LocalTime.now(clock));
-        variablesCopy.put(CURRENT_DATE_TIME, LocalDateTime.now(clock));
+        HashMap<String, Object> variablesCopy = new HashMap<String, Object>(variables);
+        variablesCopy.put(CURRENT_DATE, LocalDate.now(this.clock));
+        variablesCopy.put(CURRENT_TIME, LocalTime.now(this.clock));
+        variablesCopy.put(CURRENT_DATE_TIME, LocalDateTime.now(this.clock));
         return variablesCopy;
     }
 
-    /**
-     * Create a new PromptTemplate.
-     *
-     * @param template the template string of the prompt.
-     * @return the PromptTemplate.
-     */
     public static PromptTemplate from(String template) {
-        return from(template, null, null);
+        return PromptTemplate.from(template, null, null);
     }
 
-    /**
-     * Create a new PromptTemplate.
-     *
-     * @param template the template string of the prompt.
-     * @param name the template name of the prompt.
-     * @return the PromptTemplate.
-     */
     public static PromptTemplate from(String template, String name) {
-        return from(template, name, null);
+        return PromptTemplate.from(template, name, null);
     }
 
-    /**
-     * Create a new PromptTemplate.
-     *
-     * @param template the template string of the prompt.
-     * @param clock    the clock to use for the special variables.
-     * @return the PromptTemplate.
-     */
     public static PromptTemplate from(String template, Clock clock) {
-        return from(template, null, clock);
+        return PromptTemplate.from(template, null, clock);
     }
 
-    /**
-     * Create a new PromptTemplate.
-     *
-     * @param template the template string of the prompt.
-     * @param name the template name of the prompt.
-     * @param clock    the clock to use for the special variables.
-     * @return the PromptTemplate.
-     */
     public static PromptTemplate from(String template, String name, Clock clock) {
         return new PromptTemplate(template, name, clock != null ? clock : Clock.systemDefaultZone());
     }
 }
+

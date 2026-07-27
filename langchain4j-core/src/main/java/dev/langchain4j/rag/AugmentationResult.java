@@ -1,31 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.rag;
 
 import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.rag.content.Content;
-
 import java.util.List;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * Represents the result of a {@link ChatMessage} augmentation.
- */
 public class AugmentationResult {
-
-    /**
-     * The augmented chat message.
-     */
     private final ChatMessage chatMessage;
-
-    /**
-     * A list of content used to augment the original chat message.
-     */
     private final List<Content> contents;
 
     public AugmentationResult(ChatMessage chatMessage, List<Content> contents) {
-        this.chatMessage = ensureNotNull(chatMessage, "chatMessage");
-        this.contents = copy(contents);
+        this.chatMessage = ValidationUtils.ensureNotNull(chatMessage, "chatMessage");
+        this.contents = Utils.copy(contents);
     }
 
     public static AugmentationResultBuilder builder() {
@@ -33,15 +23,14 @@ public class AugmentationResult {
     }
 
     public ChatMessage chatMessage() {
-        return chatMessage;
+        return this.chatMessage;
     }
 
     public List<Content> contents() {
-        return contents;
+        return this.contents;
     }
 
     public static class AugmentationResultBuilder {
-
         private ChatMessage chatMessage;
         private List<Content> contents;
 
@@ -63,3 +52,4 @@ public class AugmentationResult {
         }
     }
 }
+

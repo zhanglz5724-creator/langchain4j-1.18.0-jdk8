@@ -1,32 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.filter.comparison;
 
 import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.embedding.filter.Filter;
-
+import dev.langchain4j.store.embedding.filter.comparison.NumberComparator;
+import dev.langchain4j.store.embedding.filter.comparison.TypeChecker;
 import java.util.Objects;
 import java.util.UUID;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.store.embedding.filter.comparison.NumberComparator.compareAsBigDecimals;
-import static dev.langchain4j.store.embedding.filter.comparison.TypeChecker.ensureTypesAreCompatible;
-
-public class IsEqualTo implements Filter {
-
+public class IsEqualTo
+implements Filter {
     private final String key;
     private final Object comparisonValue;
 
     public IsEqualTo(String key, Object comparisonValue) {
-        this.key = ensureNotBlank(key, "key");
-        this.comparisonValue = ensureNotNull(comparisonValue, "comparisonValue with key '" + key + "'");
+        this.key = ValidationUtils.ensureNotBlank(key, "key");
+        this.comparisonValue = ValidationUtils.ensureNotNull(comparisonValue, "comparisonValue with key '" + key + "'");
     }
 
     public String key() {
-        return key;
+        return this.key;
     }
 
     public Object comparisonValue() {
-        return comparisonValue;
+        return this.comparisonValue;
     }
 
     @Override
@@ -34,38 +34,38 @@ public class IsEqualTo implements Filter {
         if (!(object instanceof Metadata)) {
             return false;
         }
-
-        if (!metadata.containsKey(key)) {
+        Metadata metadata = (Metadata)object;
+        if (!metadata.containsKey(this.key)) {
             return false;
         }
-
-        Object actualValue = metadata.toMap().get(key);
-        ensureTypesAreCompatible(actualValue, comparisonValue, key);
-
+        Object actualValue = metadata.toMap().get(this.key);
+        TypeChecker.ensureTypesAreCompatible(actualValue, this.comparisonValue, this.key);
         if (actualValue instanceof Number) {
-            return compareAsBigDecimals(actualValue, comparisonValue) == 0;
+            return NumberComparator.compareAsBigDecimals(actualValue, this.comparisonValue) == 0;
         }
-
-        if (comparisonValue instanceof UUID && actualValue instanceof String) {
-            return actualValue.equals(comparisonValue.toString());
+        if (this.comparisonValue instanceof UUID && actualValue instanceof String) {
+            return actualValue.equals(this.comparisonValue.toString());
         }
-
-        return actualValue.equals(comparisonValue);
+        return actualValue.equals(this.comparisonValue);
     }
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof IsEqualTo)) return false;
-
-        return Objects.equals(this.key, other.key)
-                && Objects.equals(this.comparisonValue, other.comparisonValue);
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof IsEqualTo)) {
+            return false;
+        }
+        IsEqualTo other = (IsEqualTo)o;
+        return Objects.equals(this.key, other.key) && Objects.equals(this.comparisonValue, other.comparisonValue);
     }
 
     public int hashCode() {
-        return Objects.hash(key, comparisonValue);
+        return Objects.hash(this.key, this.comparisonValue);
     }
 
     public String toString() {
         return "IsEqualTo(key=" + this.key + ", comparisonValue=" + this.comparisonValue + ")";
     }
 }
+

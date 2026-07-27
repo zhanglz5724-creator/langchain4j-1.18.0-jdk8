@@ -1,65 +1,52 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.data.message;
 
+import dev.langchain4j.data.message.Content;
+import dev.langchain4j.data.message.ContentType;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import java.util.Objects;
 
-import static dev.langchain4j.data.message.ContentType.TEXT;
-import static dev.langchain4j.internal.Utils.quoted;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * Represents a text content.
- */
-public class TextContent implements Content {
-
+public class TextContent
+implements Content {
     private final String text;
 
-    /**
-     * Creates a new text content.
-     * @param text the text.
-     */
     public TextContent(String text) {
-        this.text = ensureNotNull(text, "text");
+        this.text = ValidationUtils.ensureNotNull(text, "text");
     }
 
-    /**
-     * Returns the text.
-     * @return the text.
-     */
     public String text() {
-        return text;
+        return this.text;
     }
 
     @Override
     public ContentType type() {
-        return TEXT;
+        return ContentType.TEXT;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TextContent that = (TextContent) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        TextContent that = (TextContent)o;
         return Objects.equals(this.text, that.text);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(text);
+        return Objects.hash(this.text);
     }
 
-    @Override
     public String toString() {
-        return "TextContent {" +
-                " text = " + quoted(text) +
-                " }";
+        return "TextContent { text = " + Utils.quoted(this.text) + " }";
     }
 
-    /**
-     * Creates a new text content.
-     * @param text the text.
-     * @return the text content.
-     */
     public static TextContent from(String text) {
         return new TextContent(text);
     }
 }
+

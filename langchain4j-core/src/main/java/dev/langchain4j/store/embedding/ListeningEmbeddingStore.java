@@ -1,13 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding;
-
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.store.embedding.EmbeddingStoreListenerUtils.onError;
-import static dev.langchain4j.store.embedding.EmbeddingStoreListenerUtils.onRequest;
-import static dev.langchain4j.store.embedding.EmbeddingStoreListenerUtils.onResponse;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
+import dev.langchain4j.store.embedding.EmbeddingSearchResult;
+import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.EmbeddingStoreListenerUtils;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.listener.EmbeddingStoreErrorContext;
 import dev.langchain4j.store.embedding.listener.EmbeddingStoreListener;
@@ -20,215 +23,205 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Internal
-final class ListeningEmbeddingStore<Embedded> implements EmbeddingStore<Embedded> {
-
+final class ListeningEmbeddingStore<Embedded>
+implements EmbeddingStore<Embedded> {
     private final EmbeddingStore<Embedded> delegate;
     private final List<EmbeddingStoreListener> listeners;
 
     ListeningEmbeddingStore(EmbeddingStore<Embedded> delegate, List<EmbeddingStoreListener> listeners) {
-        this.delegate = ensureNotNull(delegate, "delegate");
-        this.listeners = copy(listeners);
+        this.delegate = ValidationUtils.ensureNotNull(delegate, "delegate");
+        this.listeners = Utils.copy(listeners);
     }
 
     EmbeddingStore<Embedded> withAdditionalListeners(List<EmbeddingStoreListener> additionalListeners) {
         if (additionalListeners == null || additionalListeners.isEmpty()) {
             return this;
         }
-        List<EmbeddingStoreListener> merged = new ArrayList<>(listeners);
+        ArrayList<EmbeddingStoreListener> merged = new ArrayList<EmbeddingStoreListener>(this.listeners);
         merged.addAll(additionalListeners);
-        return new ListeningEmbeddingStore<>(delegate, merged);
+        return new ListeningEmbeddingStore<Embedded>(this.delegate, merged);
     }
 
     @Override
     public String add(Embedding embedding) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.Add<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.Add<>(this, attributes, embedding);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.Add requestContext = new EmbeddingStoreRequestContext.Add(this, attributes, embedding);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            String id = delegate.add(embedding);
-            EmbeddingStoreResponseContext.Add<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.Add<>(requestContext, attributes, id);
-            onResponse(responseContext, listeners);
+            String id = this.delegate.add(embedding);
+            EmbeddingStoreResponseContext.Add responseContext = new EmbeddingStoreResponseContext.Add(requestContext, attributes, id);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
             return id;
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public void add(String id, Embedding embedding) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.Add<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.Add<>(this, attributes, id, embedding);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.Add requestContext = new EmbeddingStoreRequestContext.Add(this, attributes, id, embedding);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            delegate.add(id, embedding);
-            EmbeddingStoreResponseContext.Add<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.Add<>(requestContext, attributes, id);
-            onResponse(responseContext, listeners);
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+            this.delegate.add(id, embedding);
+            EmbeddingStoreResponseContext.Add responseContext = new EmbeddingStoreResponseContext.Add(requestContext, attributes, id);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public String add(Embedding embedding, Embedded embedded) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.Add<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.Add<>(this, attributes, null, embedding, embedded);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.Add<Embedded> requestContext = new EmbeddingStoreRequestContext.Add<Embedded>(this, attributes, null, embedding, embedded);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            String id = delegate.add(embedding, embedded);
-            EmbeddingStoreResponseContext.Add<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.Add<>(requestContext, attributes, id);
-            onResponse(responseContext, listeners);
+            String id = this.delegate.add(embedding, embedded);
+            EmbeddingStoreResponseContext.Add<Embedded> responseContext = new EmbeddingStoreResponseContext.Add<Embedded>(requestContext, attributes, id);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
             return id;
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext<Embedded>(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public List<String> addAll(List<Embedding> embeddings) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.AddAll<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.AddAll<>(this, attributes, null, embeddings, null);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.AddAll requestContext = new EmbeddingStoreRequestContext.AddAll(this, attributes, null, embeddings, null);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            List<String> ids = delegate.addAll(embeddings);
-            EmbeddingStoreResponseContext.AddAll<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.AddAll<>(requestContext, attributes, ids);
-            onResponse(responseContext, listeners);
+            List<String> ids = this.delegate.addAll(embeddings);
+            EmbeddingStoreResponseContext.AddAll responseContext = new EmbeddingStoreResponseContext.AddAll(requestContext, attributes, ids);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
             return ids;
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public List<String> addAll(List<Embedding> embeddings, List<Embedded> embedded) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.AddAll<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.AddAll<>(this, attributes, null, embeddings, embedded);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.AddAll<Embedded> requestContext = new EmbeddingStoreRequestContext.AddAll<Embedded>(this, attributes, null, embeddings, embedded);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            List<String> ids = delegate.addAll(embeddings, embedded);
-            EmbeddingStoreResponseContext.AddAll<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.AddAll<>(requestContext, attributes, ids);
-            onResponse(responseContext, listeners);
+            List<String> ids = this.delegate.addAll(embeddings, embedded);
+            EmbeddingStoreResponseContext.AddAll<Embedded> responseContext = new EmbeddingStoreResponseContext.AddAll<Embedded>(requestContext, attributes, ids);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
             return ids;
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext<Embedded>(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public void addAll(List<String> ids, List<Embedding> embeddings, List<Embedded> embedded) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.AddAll<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.AddAll<>(this, attributes, ids, embeddings, embedded);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.AddAll<Embedded> requestContext = new EmbeddingStoreRequestContext.AddAll<Embedded>(this, attributes, ids, embeddings, embedded);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            delegate.addAll(ids, embeddings, embedded);
-            EmbeddingStoreResponseContext.AddAll<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.AddAll<>(requestContext, attributes, ids);
-            onResponse(responseContext, listeners);
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+            this.delegate.addAll(ids, embeddings, embedded);
+            EmbeddingStoreResponseContext.AddAll<Embedded> responseContext = new EmbeddingStoreResponseContext.AddAll<Embedded>(requestContext, attributes, ids);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext<Embedded>(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public void remove(String id) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.Remove<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.Remove<>(this, attributes, id);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.Remove requestContext = new EmbeddingStoreRequestContext.Remove(this, attributes, id);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            delegate.remove(id);
-            EmbeddingStoreResponseContext.Remove<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.Remove<>(requestContext, attributes);
-            onResponse(responseContext, listeners);
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+            this.delegate.remove(id);
+            EmbeddingStoreResponseContext.Remove responseContext = new EmbeddingStoreResponseContext.Remove(requestContext, (Map<Object, Object>)attributes);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public void removeAll(Collection<String> ids) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        List<String> idsAsList = (ids == null) ? null : new ArrayList<>(ids);
-        EmbeddingStoreRequestContext.RemoveAllIds<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.RemoveAllIds<>(this, attributes, idsAsList);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        ArrayList<String> idsAsList = ids == null ? null : new ArrayList<String>(ids);
+        EmbeddingStoreRequestContext.RemoveAllIds requestContext = new EmbeddingStoreRequestContext.RemoveAllIds(this, attributes, idsAsList);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            delegate.removeAll(ids);
-            EmbeddingStoreResponseContext.RemoveAllIds<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.RemoveAllIds<>(requestContext, attributes);
-            onResponse(responseContext, listeners);
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+            this.delegate.removeAll(ids);
+            EmbeddingStoreResponseContext.RemoveAllIds responseContext = new EmbeddingStoreResponseContext.RemoveAllIds(requestContext, (Map<Object, Object>)attributes);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public void removeAll(Filter filter) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.RemoveAllFilter<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.RemoveAllFilter<>(this, attributes, filter);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.RemoveAllFilter requestContext = new EmbeddingStoreRequestContext.RemoveAllFilter(this, attributes, filter);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            delegate.removeAll(filter);
-            EmbeddingStoreResponseContext.RemoveAllFilter<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.RemoveAllFilter<>(requestContext, attributes);
-            onResponse(responseContext, listeners);
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+            this.delegate.removeAll(filter);
+            EmbeddingStoreResponseContext.RemoveAllFilter responseContext = new EmbeddingStoreResponseContext.RemoveAllFilter(requestContext, (Map<Object, Object>)attributes);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public void removeAll() {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.RemoveAll<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.RemoveAll<>(this, attributes);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.RemoveAll requestContext = new EmbeddingStoreRequestContext.RemoveAll(this, attributes);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            delegate.removeAll();
-            EmbeddingStoreResponseContext.RemoveAll<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.RemoveAll<>(requestContext, attributes);
-            onResponse(responseContext, listeners);
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+            this.delegate.removeAll();
+            EmbeddingStoreResponseContext.RemoveAll responseContext = new EmbeddingStoreResponseContext.RemoveAll(requestContext, (Map<Object, Object>)attributes);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 
     @Override
     public EmbeddingSearchResult<Embedded> search(EmbeddingSearchRequest request) {
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        EmbeddingStoreRequestContext.Search<Embedded> requestContext =
-                new EmbeddingStoreRequestContext.Search<>(this, attributes, request);
-        onRequest(requestContext, listeners);
+        ConcurrentHashMap<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
+        EmbeddingStoreRequestContext.Search requestContext = new EmbeddingStoreRequestContext.Search(this, attributes, request);
+        EmbeddingStoreListenerUtils.onRequest(requestContext, this.listeners);
         try {
-            EmbeddingSearchResult<Embedded> result = delegate.search(request);
-            EmbeddingStoreResponseContext.Search<Embedded> responseContext =
-                    new EmbeddingStoreResponseContext.Search<>(requestContext, attributes, result);
-            onResponse(responseContext, listeners);
+            EmbeddingSearchResult<Embedded> result = this.delegate.search(request);
+            EmbeddingStoreResponseContext.Search responseContext = new EmbeddingStoreResponseContext.Search(requestContext, attributes, result);
+            EmbeddingStoreListenerUtils.onResponse(responseContext, this.listeners);
             return result;
-        } catch (Exception error) {
-            onError(new EmbeddingStoreErrorContext<>(error, requestContext, attributes), listeners);
+        }
+        catch (Exception error) {
+            EmbeddingStoreListenerUtils.onError(new EmbeddingStoreErrorContext(error, requestContext, attributes), this.listeners);
             throw error;
         }
     }
 }
+

@@ -1,21 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding;
 
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.store.embedding.EmbeddingMatch;
 import java.util.List;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * Represents a result of a search in an {@link EmbeddingStore}.
- */
 public class EmbeddingSearchResult<Embedded> {
-
     private final List<EmbeddingMatch<Embedded>> matches;
 
     public EmbeddingSearchResult(List<EmbeddingMatch<Embedded>> matches) {
-        this.matches = ensureNotNull(matches, "matches");
+        this.matches = ValidationUtils.ensureNotNull(matches, "matches");
     }
 
     public List<EmbeddingMatch<Embedded>> matches() {
-        return matches;
+        return this.matches;
     }
 }
+

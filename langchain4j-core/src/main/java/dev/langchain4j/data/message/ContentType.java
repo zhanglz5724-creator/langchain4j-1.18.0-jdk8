@@ -1,48 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.data.message;
 
-/**
- * The type of content, e.g. text or image.
- * Maps to implementations of {@link Content}.
- */
+import dev.langchain4j.data.message.AudioContent;
+import dev.langchain4j.data.message.Content;
+import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.PdfFileContent;
+import dev.langchain4j.data.message.TextContent;
+import dev.langchain4j.data.message.VideoContent;
+
 public enum ContentType {
-
-    /**
-     * Text content.
-     */
     TEXT(TextContent.class),
-
-    /**
-     * Image content.
-     */
     IMAGE(ImageContent.class),
-
-    /**
-     * Audio content.
-     */
     AUDIO(AudioContent.class),
-
-    /**
-     * Video content.
-     */
     VIDEO(VideoContent.class),
-
-    /**
-     * PDF file content.
-     */
     PDF(PdfFileContent.class);
 
     private final Class<? extends Content> contentClass;
 
-    ContentType(Class<? extends Content> contentClass) {
+    private ContentType(Class<? extends Content> contentClass) {
         this.contentClass = contentClass;
     }
 
-    /**
-     * Returns the class of the content type.
-     *
-     * @return The class of the content type.
-     */
     public Class<? extends Content> getContentClass() {
-        return contentClass;
+        return this.contentClass;
     }
 }
+

@@ -1,107 +1,67 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.observability.api.event;
 
 import dev.langchain4j.guardrail.Guardrail;
 import dev.langchain4j.guardrail.GuardrailRequest;
 import dev.langchain4j.guardrail.GuardrailResult;
 import dev.langchain4j.invocation.InvocationContext;
+import dev.langchain4j.observability.api.event.AiServiceEvent;
 import java.time.Duration;
 
-/**
- * Represents an event that is executed when a guardrail validation occurs.
- * This interface serves as a marker for events that contain both parameters
- * and results associated with guardrail validation.
- *
- * @param <P> the type of guardrail parameters used in the validation process
- * @param <R> the type of guardrail result produced by the validation process
- * @param <G> the type of guardrail class used in the validation process
- */
-public interface GuardrailExecutedEvent<
-                P extends GuardrailRequest<P>, R extends GuardrailResult<R>, G extends Guardrail<P, R>>
-        extends AiServiceEvent {
+public interface GuardrailExecutedEvent<P extends GuardrailRequest<P>, R extends GuardrailResult<R>, G extends Guardrail<P, R>>
+extends AiServiceEvent {
+    public P request();
 
-    /**
-     * Retrieves the request used for input guardrail validation.
-     *
-     * @return the parameters containing user message, memory, augmentation result, user message template,
-     *         and associated variables for input guardrail validation.
-     */
-    P request();
+    public R result();
 
-    /**
-     * Retrieves the result of the input guardrail validation process.
-     *
-     * @return the result of the input guardrail validation, including the validation outcome
-     *         and any associated failures, if present.
-     */
-    R result();
+    public Class<G> guardrailClass();
 
-    /**
-     * Retrieves the guardrail class associated with the validation process.
-     *
-     * @return the guardrail class that implements the logic for validating
-     *         the interaction between user and LLM, represented as an instance
-     *         of the type extending {@code Guardrail<P, R>}.
-     */
-    Class<G> guardrailClass();
-
-    /**
-     * Retrieves the guardrail name associated with the validation process.
-     *
-     * @return the guardrail name. Defaults to {@code guardrailClass().getSimpleName()} when not explicitly set.
-     */
-    default String guardrailName() {
-        return guardrailClass().getSimpleName();
+    default public String guardrailName() {
+        return this.guardrailClass().getSimpleName();
     }
 
-    /**
-     * Retrieves the duration of the guardrail execution.
-     *
-     * @return the duration of the guardrail validation process.
-     */
-    Duration duration();
+    public Duration duration();
 
-    abstract class GuardrailExecutedEventBuilder<
-                    P extends GuardrailRequest<P>,
-                    R extends GuardrailResult<R>,
-                    G extends Guardrail<P, R>,
-                    T extends GuardrailExecutedEvent<P, R, G>>
-            extends Builder<T> {
-
+    public static abstract class GuardrailExecutedEventBuilder<P extends GuardrailRequest<P>, R extends GuardrailResult<R>, G extends Guardrail<P, R>, T extends GuardrailExecutedEvent<P, R, G>>
+    extends AiServiceEvent.Builder<T> {
         private P request;
         private R result;
         private Class<G> guardrailClass;
         private String guardrailName;
         private Duration duration;
 
-        protected GuardrailExecutedEventBuilder() {}
+        protected GuardrailExecutedEventBuilder() {
+        }
 
         protected GuardrailExecutedEventBuilder(T src) {
             super(src);
-            request(src.request());
-            result(src.result());
-            guardrailClass(src.guardrailClass());
-            guardrailName(src.guardrailName());
-            duration(src.duration());
+            this.request(src.request());
+            this.result(src.result());
+            this.guardrailClass(src.guardrailClass());
+            this.guardrailName(src.guardrailName());
+            this.duration(src.duration());
         }
 
         public Class<G> guardrailClass() {
-            return guardrailClass;
+            return this.guardrailClass;
         }
 
         public P request() {
-            return request;
+            return this.request;
         }
 
         public String guardrailName() {
-            return guardrailName;
+            return this.guardrailName;
         }
 
         public R result() {
-            return result;
+            return this.result;
         }
 
         public Duration duration() {
-            return duration;
+            return this.duration;
         }
 
         public GuardrailExecutedEventBuilder<P, R, G, T> request(P request) {
@@ -115,7 +75,7 @@ public interface GuardrailExecutedEvent<
         }
 
         public GuardrailExecutedEventBuilder<P, R, G, T> invocationContext(InvocationContext invocationContext) {
-            return (GuardrailExecutedEventBuilder<P, R, G, T>) super.invocationContext(invocationContext);
+            return (GuardrailExecutedEventBuilder)super.invocationContext(invocationContext);
         }
 
         public <C extends G> GuardrailExecutedEventBuilder<P, R, G, T> guardrailClass(Class<C> guardrailClass) {
@@ -134,3 +94,4 @@ public interface GuardrailExecutedEvent<
         }
     }
 }
+

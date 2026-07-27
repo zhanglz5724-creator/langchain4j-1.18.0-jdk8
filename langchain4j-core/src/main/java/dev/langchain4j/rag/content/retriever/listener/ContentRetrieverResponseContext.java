@@ -1,56 +1,60 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.rag.content.retriever.listener;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import dev.langchain4j.Experimental;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.query.Query;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The content retriever response context.
- * It contains retrieved {@link Content}s, corresponding {@link Query}, {@link ContentRetriever} and attributes.
- * The attributes can be used to pass data between methods of a {@link ContentRetrieverListener}
- * or between multiple {@link ContentRetrieverListener}s.
- *
- * @since 1.11.0
- */
 @Experimental
 public class ContentRetrieverResponseContext {
-
     private final List<Content> contents;
     private final Query query;
     private final ContentRetriever contentRetriever;
     private final Map<Object, Object> attributes;
 
     public ContentRetrieverResponseContext(Builder builder) {
-        this.contents = copy(ensureNotNull(builder.contents, "contents"));
-        this.query = ensureNotNull(builder.query, "query");
-        this.contentRetriever = ensureNotNull(builder.contentRetriever, "contentRetriever");
-        this.attributes = ensureNotNull(builder.attributes, "attributes");
+        this.contents = Utils.copy(ValidationUtils.ensureNotNull(builder.contents, "contents"));
+        this.query = ValidationUtils.ensureNotNull(builder.query, "query");
+        this.contentRetriever = ValidationUtils.ensureNotNull(builder.contentRetriever, "contentRetriever");
+        this.attributes = ValidationUtils.ensureNotNull(builder.attributes, "attributes");
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Builder for {@link ContentRetrieverResponseContext}.
-     *
-     * @since 1.11.0
-     */
+    public List<Content> contents() {
+        return this.contents;
+    }
+
+    public Query query() {
+        return this.query;
+    }
+
+    public ContentRetriever contentRetriever() {
+        return this.contentRetriever;
+    }
+
+    public Map<Object, Object> attributes() {
+        return this.attributes;
+    }
+
     @Experimental
     public static class Builder {
-
         private List<Content> contents;
         private Query query;
         private ContentRetriever contentRetriever;
         private Map<Object, Object> attributes;
 
-        Builder() {}
+        Builder() {
+        }
 
         public Builder contents(List<Content> contents) {
             this.contents = contents;
@@ -76,24 +80,5 @@ public class ContentRetrieverResponseContext {
             return new ContentRetrieverResponseContext(this);
         }
     }
-
-    public List<Content> contents() {
-        return contents;
-    }
-
-    public Query query() {
-        return query;
-    }
-
-    public ContentRetriever contentRetriever() {
-        return contentRetriever;
-    }
-
-    /**
-     * @return The attributes map. It can be used to pass data between methods of a {@link ContentRetrieverListener}
-     * or between multiple {@link ContentRetrieverListener}s.
-     */
-    public Map<Object, Object> attributes() {
-        return attributes;
-    }
 }
+
