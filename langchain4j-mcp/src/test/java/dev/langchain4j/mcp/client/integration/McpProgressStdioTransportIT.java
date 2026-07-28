@@ -7,6 +7,7 @@ import dev.langchain4j.mcp.client.DefaultMcpClient;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,7 +18,7 @@ class McpProgressStdioTransportIT extends McpProgressTestBase {
     static void setup() {
         McpServerHelper.skipTestsIfJbangNotAvailable();
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(), "--quiet", "--fresh", "run", getPathToScript("progress_mcp_server.java")))
                 .logEvents(true)
                 .build();

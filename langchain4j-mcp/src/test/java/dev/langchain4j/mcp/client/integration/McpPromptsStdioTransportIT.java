@@ -6,6 +6,7 @@ import dev.langchain4j.mcp.client.DefaultMcpClient;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,7 +17,7 @@ class McpPromptsStdioTransportIT extends McpPromptsTestBase {
     static void setup() {
         skipTestsIfJbangNotAvailable();
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(), "--quiet", "--fresh", "run", getPathToScript("prompts_mcp_server.java")))
                 .logEvents(true)
                 .build();

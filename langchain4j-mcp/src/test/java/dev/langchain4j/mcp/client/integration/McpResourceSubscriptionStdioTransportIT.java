@@ -13,6 +13,7 @@ import dev.langchain4j.mcp.client.McpTextResourceContents;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.awaitility.Awaitility;
@@ -34,7 +35,7 @@ class McpResourceSubscriptionStdioTransportIT {
     static void setup() {
         skipTestsIfJbangNotAvailable();
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(),
                         "--quiet",
                         "--fresh",

@@ -10,6 +10,7 @@ import static dev.langchain4j.mcp.client.integration.McpServerHelper.getPathToSc
 import static dev.langchain4j.mcp.client.integration.McpServerHelper.skipTestsIfJbangNotAvailable;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -29,7 +30,7 @@ public class McpToolMetadataIT {
     static void setup() {
         skipTestsIfJbangNotAvailable();
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(),
                         "--quiet",
                         "--fresh",

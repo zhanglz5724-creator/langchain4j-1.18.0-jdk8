@@ -33,7 +33,7 @@ public abstract class McpProgressTestBase {
                 .resultText();
         assertThat(result).isEqualTo("done");
 
-        List<TestProgressHandler.ProgressEvent> events = progressHandler.waitForMessages(3, Duration.ofSeconds(10));
+        List<ProgressEvent> events = progressHandler.waitForMessages(3, Duration.ofSeconds(10));
         assertThat(events).hasSize(3);
 
         assertThat(events.get(0).progress()).isEqualTo(1);
@@ -45,7 +45,48 @@ public abstract class McpProgressTestBase {
 
     public static class TestProgressHandler implements McpProgressHandler {
 
-        public record ProgressEvent(double progress, double total, String message) {}
+        public static final class ProgressEvent {
+            private final double progress;
+            private final double total;
+            private final String message;
+
+            public ProgressEvent(double progress, double total, String message) {
+                this.progress = progress;
+                this.total = total;
+                this.message = message;
+            }
+
+            public double progress() { return progress; }
+            public double total() { return total; }
+            public String message() { return message; }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof ProgressEvent)) return false;
+                ProgressEvent that = (ProgressEvent) o;
+                return Double.compare(that.progress, progress) == 0
+                        && Double.compare(that.total, total) == 0
+                        && (message != null ? message.equals(that.message) : that.message == null);
+            }
+
+            @Override
+            public int hashCode() {
+                int result;
+                long temp;
+                temp = Double.doubleToLongBits(progress);
+                result = (int) (temp ^ (temp >>> 32));
+                temp = Double.doubleToLongBits(total);
+                result = 31 * result + (int) (temp ^ (temp >>> 32));
+                result = 31 * result + (message != null ? message.hashCode() : 0);
+                return result;
+            }
+
+            @Override
+            public String toString() {
+                return "ProgressEvent{progress=" + progress + ", total=" + total + ", message='" + message + "'}";
+            }
+        }
 
         private final List<ProgressEvent> events = new CopyOnWriteArrayList<>();
 

@@ -58,11 +58,11 @@ implements ToolProvider {
     private McpToolProvider(Builder builder) {
         this.mcpClients = new CopyOnWriteArrayList(builder.mcpClients);
         this.failIfOneServerFails = (Boolean)Utils.getOrDefault((Object)builder.failIfOneServerFails, (Object)false);
-        this.mcpToolsFilter = new AtomicReference<BiPredicate>(builder.mcpToolsFilter);
+        this.mcpToolsFilter = new AtomicReference<BiPredicate<McpClient, ToolSpecification>>(builder.mcpToolsFilter);
         this.toolWrapper = builder.toolWrapper;
         this.resourcesAsToolsPresenter = builder.resourcesAsToolsPresenter;
-        this.toolNameMapper = new AtomicReference<BiFunction>(builder.toolNameMapper);
-        this.toolSpecificationMapper = new AtomicReference<BiFunction>(builder.toolSpecificationMapper);
+        this.toolNameMapper = new AtomicReference<BiFunction<McpClient, ToolSpecification, String>>(builder.toolNameMapper);
+        this.toolSpecificationMapper = new AtomicReference<BiFunction<McpClient, ToolSpecification, ToolSpecification>>(builder.toolSpecificationMapper);
         this.alwaysVisibleToolNames = Utils.copy((Set)builder.alwaysVisibleToolNames);
     }
 

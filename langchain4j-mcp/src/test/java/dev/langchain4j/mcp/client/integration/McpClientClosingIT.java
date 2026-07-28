@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.mcp.client.DefaultMcpClient;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +31,7 @@ class McpClientClosingIT {
     @Test
     void stdioClosesProcess() throws InterruptedException {
         StdioMcpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(), "--quiet", "--fresh", "run", getPathToScript("tools_mcp_server.java")))
                 .build();
         DefaultMcpClient mcpClient =
@@ -48,7 +49,7 @@ class McpClientClosingIT {
     @Test
     void closedClientThrowsIllegalStateException() {
         StdioMcpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(), "--quiet", "--fresh", "run", getPathToScript("tools_mcp_server.java")))
                 .build();
         DefaultMcpClient mcpClient;

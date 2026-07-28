@@ -9,6 +9,9 @@ import dev.langchain4j.service.tool.ToolProviderResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,14 +26,14 @@ class McpToolProviderTest {
 
     @BeforeEach
     void setUp() {
-        when(mcpClient.listTools()).thenReturn(List.of(
+        when(mcpClient.listTools()).thenReturn(Arrays.asList(
                 ToolSpecification.builder()
                         .name("tool_1")
-                        .metadata(Map.of("one", 1))
+                        .metadata(Collections.singletonMap("one", 1))
                         .build(),
                 ToolSpecification.builder()
                         .name("tool_2")
-                        .metadata(Map.of("two", 2))
+                        .metadata(Collections.singletonMap("two", 2))
                         .build()
         ));
     }
@@ -53,11 +56,11 @@ class McpToolProviderTest {
                 .containsKeys(
                         ToolSpecification.builder()
                                 .name("tool_1")
-                                .metadata(Map.of("one", 1, "searchBehavior", ALWAYS_VISIBLE))
+                                .metadata(buildMap("one", 1, "searchBehavior", ALWAYS_VISIBLE))
                                 .build(),
                         ToolSpecification.builder()
                                 .name("tool_2")
-                                .metadata(Map.of("two", 2))
+                                .metadata(Collections.singletonMap("two", 2))
                                 .build()
                 );
     }
@@ -81,11 +84,11 @@ class McpToolProviderTest {
                 .containsKeys(
                         ToolSpecification.builder()
                                 .name("my_tool_1")
-                                .metadata(Map.of("one", 1, "searchBehavior", ALWAYS_VISIBLE))
+                                .metadata(buildMap("one", 1, "searchBehavior", ALWAYS_VISIBLE))
                                 .build(),
                         ToolSpecification.builder()
                                 .name("my_tool_2")
-                                .metadata(Map.of("two", 2))
+                                .metadata(Collections.singletonMap("two", 2))
                                 .build()
                 );
     }
@@ -95,5 +98,13 @@ class McpToolProviderTest {
                 .invocationContext(InvocationContext.builder().build())
                 .userMessage(UserMessage.from("does not matter"))
                 .build();
+    }
+
+    private static Map<String, Object> buildMap(Object... keysAndValues) {
+        Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            map.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+        return map;
     }
 }

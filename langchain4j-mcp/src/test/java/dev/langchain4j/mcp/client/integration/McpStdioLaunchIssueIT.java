@@ -8,6 +8,7 @@ import dev.langchain4j.mcp.client.DefaultMcpClient;
 import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class McpStdioLaunchIssueIT {
     void failingJBangScript() throws Exception {
         McpServerHelper.skipTestsIfJbangNotAvailable();
         StdioMcpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(McpServerHelper.getJBangCommand(), "nonexistent"))
+                .command(Arrays.asList(McpServerHelper.getJBangCommand(), "nonexistent"))
                 .build();
         assertThatThrownBy(() -> {
                     assertTimeout(Duration.ofSeconds(20), () -> {

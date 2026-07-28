@@ -14,21 +14,24 @@ import dev.langchain4j.mcp.protocol.McpClientMessage;
 import dev.langchain4j.mcp.protocol.McpInitializationNotification;
 import dev.langchain4j.mcp.protocol.McpInitializeRequest;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.WebSocket;
+import java.security.KeyStore;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.Collections;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+import okhttp3.Dispatcher;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +47,7 @@ public class WebSocketMcpTransport implements McpTransport {
     private volatile McpInitializeRequest initializeRequest;
     private final Duration connectTimeout;
     private volatile SSLContext sslContext;
-    private volatile HttpClient httpClient;
+    private volatile OkHttpClient httpClient;
     private final Executor executor;
     private final AtomicReference<CompletableFuture<WebSocket>> webSocketRef = new AtomicReference<>();
     private volatile boolean closed = false;
@@ -62,13 +65,21 @@ public class WebSocketMcpTransport implements McpTransport {
         this.httpClient = createHttpClient();
     }
 
-    private HttpClient createHttpClient() {
-        HttpClient.Builder clientBuilder = HttpClient.newBuilder().connectTimeout(connectTimeout);
+    private OkHttpClient createHttpClient() {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                .connectTimeout(connectTimeout);
         if (sslContext != null) {
-            clientBuilder.sslContext(sslContext);
+            try {
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init((KeyStore) null);
+                X509TrustManager trustManager = (X509TrustManager) tmf.getTrustManagers()[0];
+                clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to configure SSL", e);
+            }
         }
-        if (executor != null) {
-            clientBuilder.executor(executor);
+        if (executor instanceof ExecutorService) {
+            clientBuilder.dispatcher(new Dispatcher((ExecutorService) executor));
         }
         return clientBuilder.build();
     }
@@ -84,14 +95,12 @@ public class WebSocketMcpTransport implements McpTransport {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
-            // if websocket initialization failed, try again once
             try {
                 return startWebSocket().get();
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException(ex);
             } catch (ExecutionException ex) {
-                // if it failed again, bail out
                 throw new RuntimeException(ex);
             }
         }
@@ -104,34 +113,34 @@ public class WebSocketMcpTransport implements McpTransport {
     }
 
     private synchronized CompletableFuture<WebSocket> startWebSocket() {
-        // if one is already initializing, just return its future
         CompletableFuture<WebSocket> current = this.webSocketRef.get();
         if (current != null && !current.isDone()) {
             return current;
         }
 
-        // if there is no initialization in progress (this means either the current one is broken
-        // or we are initializing for the first time) -> start a new one
-        WebSocket.Builder builder = this.httpClient.newWebSocketBuilder();
-        headersSupplier.apply(null).forEach((key, value) -> builder.header(key, value));
-        builder.connectTimeout(connectTimeout);
-        CompletableFuture<WebSocket> newWebSocketFuture = builder.buildAsync(
-                URI.create(url),
-                new WebSocketMcpListener(
-                        operationHandler,
-                        trafficLog,
-                        logResponses,
-                        () -> {
-                            // On close callback: clear the webSocketRef so that a new connection can be created when
-                            // needed.
-                            // Don't eagerly re-create it because the WebSocket transport does not have proper recovery
-                            // capabilities,
-                            // so all running operations were lost anyway.
-                            webSocketRef.set(null);
-                        },
-                        actionOnFailure));
-        // if the initialize method was already called and we know the necessary data for initialization, schedule
-        // a new initialization right away
+        CompletableFuture<WebSocket> newWebSocketFuture = new CompletableFuture<>();
+
+        Request.Builder requestBuilder = new Request.Builder().url(url);
+        headersSupplier.apply(null).forEach(requestBuilder::header);
+        Request request = requestBuilder.build();
+
+        try {
+            WebSocket ws = httpClient.newWebSocket(
+                    request,
+                    new WebSocketMcpListener(
+                            operationHandler,
+                            trafficLog,
+                            logResponses,
+                            () -> {
+                                webSocketRef.set(null);
+                            },
+                            actionOnFailure,
+                            newWebSocketFuture));
+        } catch (Exception e) {
+            newWebSocketFuture.completeExceptionally(e);
+            return newWebSocketFuture;
+        }
+
         if (this.initializeRequest != null) {
             newWebSocketFuture = newWebSocketFuture.thenCompose(webSocket -> execute(
                             new McpCallContext(null, this.initializeRequest),
@@ -183,7 +192,6 @@ public class WebSocketMcpTransport implements McpTransport {
 
     @Override
     public void checkHealth() {
-        // no transport-specific checks right now
     }
 
     @Override
@@ -199,26 +207,19 @@ public class WebSocketMcpTransport implements McpTransport {
             if (future.isDone()) {
                 try {
                     WebSocket webSocket = future.get();
-                    webSocket
-                            .sendClose(WebSocket.NORMAL_CLOSURE, "Client closing")
-                            .thenRun(() -> LOG.info("WebSocket connection closed"));
+                    webSocket.close(1000, "Client closing");
+                    LOG.info("WebSocket connection closed");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
                 } catch (ExecutionException e) {
-                    if (e.getCause() != null && e.getCause() instanceof ConnectException) {
-                        // this means the connection was previously attempted but failed, so nothing to close
-                    } else {
-                        LOG.warn("Failed to close WebSocket connection", e);
-                    }
+                    LOG.warn("Failed to close WebSocket connection", e);
                 }
             }
         }
-        // The httpClient.close() method only exists on JDK 21+, so invoke it only if we can.
-        // Replace this with a normal method call when switching the base to JDK 21+.
-        try {
-            httpClient.getClass().getMethod("close").invoke(httpClient);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+        if (httpClient != null) {
+            httpClient.dispatcher().executorService().shutdown();
+            httpClient.connectionPool().evictAll();
         }
     }
 
@@ -238,12 +239,12 @@ public class WebSocketMcpTransport implements McpTransport {
                 trafficLog.info("> " + messageJson);
             }
             synchronized (wsToUse) {
-                wsToUse.sendText(messageJson, true).thenAccept(ws -> {
-                    if (id == null) {
-                        // for operations without an ID, consider them done immediately after the message was sent
-                        future.complete(null);
-                    }
-                });
+                boolean sent = wsToUse.send(messageJson);
+                if (sent && id == null) {
+                    future.complete(null);
+                } else if (!sent) {
+                    future.completeExceptionally(new IOException("Failed to send WebSocket message"));
+                }
             }
         } catch (Exception e) {
             future.completeExceptionally(e);
@@ -251,12 +252,6 @@ public class WebSocketMcpTransport implements McpTransport {
         return future;
     }
 
-    /**
-     * Reloads the SSL context used by the transport.
-     * From this point on, new websocket connections will use the updated SSL context.
-     * This does NOT cancel or restart the existing connection, so this takes effect only
-     * after the existing connection stops working.
-     */
     public void reloadSslContext(SSLContext sslContext) {
         ensureNotNull(sslContext, "sslContext");
 

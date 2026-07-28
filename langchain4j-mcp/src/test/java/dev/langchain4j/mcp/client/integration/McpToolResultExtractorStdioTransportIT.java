@@ -16,6 +16,9 @@ import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import dev.langchain4j.service.tool.ToolExecutionResult;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -67,7 +70,7 @@ class McpToolResultExtractorStdioTransportIT {
                 if ("image".equals(type)) {
                     return ToolExecutionResult.builder()
                             .isError(isError)
-                            .resultContents(List.of(ImageContent.from(
+                            .resultContents(Arrays.asList(ImageContent.from(
                                     content.get(0).get("data").asText(),
                                     content.get(0).get("mimeType").asText())))
                             .build();
@@ -75,7 +78,7 @@ class McpToolResultExtractorStdioTransportIT {
 
                 return ToolExecutionResult.builder()
                         .isError(isError)
-                        .resultContents(List.of(
+                        .resultContents(Arrays.asList(
                                 TextContent.from(content.get(0).get("text").asText()),
                                 ImageContent.from(
                                         content.get(1).get("data").asText(),
@@ -85,7 +88,7 @@ class McpToolResultExtractorStdioTransportIT {
         };
 
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(),
                         "--quiet",
                         "--fresh",
@@ -115,7 +118,7 @@ class McpToolResultExtractorStdioTransportIT {
                 .arguments("{}")
                 .build());
 
-        assertThat(result.result()).isEqualTo(Map.of("value", 42, "status", "ok"));
+        assertThat(result.result()).isEqualTo(buildMap("value", 42, "status", "ok"));
         assertThat(result.resultText()).isEqualTo("{\"value\":42,\"status\":\"ok\"}");
     }
 
@@ -151,7 +154,7 @@ class McpToolResultExtractorStdioTransportIT {
         AtomicBoolean extractorCalled = new AtomicBoolean(false);
 
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(),
                         "--quiet",
                         "--fresh",
@@ -178,10 +181,18 @@ class McpToolResultExtractorStdioTransportIT {
                     .build());
 
             assertThat(extractorCalled).isFalse();
-            assertThat(result.result()).isEqualTo(Map.of("value", 7, "status", "structured"));
+            assertThat(result.result()).isEqualTo(buildMap("value", 7, "status", "structured"));
             assertThat(result.resultText()).isEqualTo("{\"value\":7,\"status\":\"structured\"}");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Map<String, Object> buildMap(Object... keysAndValues) {
+        Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            map.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+        return map;
     }
 }

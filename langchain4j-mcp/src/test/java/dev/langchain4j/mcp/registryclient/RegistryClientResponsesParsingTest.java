@@ -15,104 +15,101 @@ public class RegistryClientResponsesParsingTest {
 
     @Test
     public void serverWithMultiplePackages() throws JsonProcessingException {
-        // taken from https://github.com/modelcontextprotocol/registry/blob/fadbba2364009b9226070f94dd5ed802766a0afa/docs/reference/server-json/generic-server-json.md#filesystem-server-with-multiple-packages
-        String json = """
-                {
-                  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
-                  "name": "io.github.modelcontextprotocol/filesystem",
-                  "description": "Node.js server implementing Model Context Protocol (MCP) for filesystem operations.",
-                  "title": "Filesystem",
-                  "repository": {
-                    "url": "https://github.com/modelcontextprotocol/servers",
-                    "source": "github",
-                    "id": "b94b5f7e-c7c6-d760-2c78-a5e9b8a5b8c9"
-                  },
-                  "version": "1.0.2",
-                  "packages": [
-                    {
-                      "registryType": "npm",
-                      "registryBaseUrl": "https://registry.npmjs.org",
-                      "identifier": "@modelcontextprotocol/server-filesystem",
-                      "version": "1.0.2",
-                      "transport": {
-                        "type": "stdio"
-                      },
-                      "packageArguments": [
-                        {
-                          "type": "positional",
-                          "valueHint": "target_dir",
-                          "description": "Path to access",
-                          "default": "/Users/username/Desktop",
-                          "isRequired": true,
-                          "isRepeated": true
-                        }
-                      ],
-                      "environmentVariables": [
-                        {
-                          "name": "LOG_LEVEL",
-                          "description": "Logging level (debug, info, warn, error)",
-                          "default": "info"
-                        }
-                      ]
-                    },
-                    {
-                      "registryType": "oci",
-                      "identifier": "docker.io/mcp/filesystem:1.0.2",
-                      "transport": {
-                        "type": "stdio"
-                      },
-                      "runtimeArguments": [
-                        {
-                          "type": "named",
-                          "description": "Mount a volume into the container",
-                          "name": "--mount",
-                          "value": "type=bind,src={source_path},dst={target_path}",
-                          "isRequired": true,
-                          "isRepeated": true,
-                          "variables": {
-                            "source_path": {
-                              "description": "Source path on host",
-                              "format": "filepath",
-                              "isRequired": true
-                            },
-                            "target_path": {
-                              "description": "Path to mount in the container. It should be rooted in `/project` directory.",
-                              "isRequired": true,
-                              "default": "/project"
-                            }
-                          }
-                        }
-                      ],
-                      "packageArguments": [
-                        {
-                          "type": "positional",
-                          "valueHint": "target_dir",
-                          "value": "/project"
-                        }
-                      ],
-                      "environmentVariables": [
-                        {
-                          "name": "LOG_LEVEL",
-                          "description": "Logging level (debug, info, warn, error)",
-                          "default": "info"
-                        }
-                      ]
-                    }
-                  ],
-                  "_meta": {
-                    "io.modelcontextprotocol.registry/publisher-provided": {
-                      "tool": "ci-publisher",
-                      "version": "3.2.1",
-                      "build_info": {
-                        "commit": "a1b2c3d4e5f6789",
-                        "timestamp": "2023-12-01T10:30:00Z",
-                        "pipeline_id": "filesystem-build-789",
-                        "environment": "production"
-                      }
-                    }
-                  }
-                }
-                """;
+        String json = "{\n" +
+                "  \"$schema\": \"https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json\",\n" +
+                "  \"name\": \"io.github.modelcontextprotocol/filesystem\",\n" +
+                "  \"description\": \"Node.js server implementing Model Context Protocol (MCP) for filesystem operations.\",\n" +
+                "  \"title\": \"Filesystem\",\n" +
+                "  \"repository\": {\n" +
+                "    \"url\": \"https://github.com/modelcontextprotocol/servers\",\n" +
+                "    \"source\": \"github\",\n" +
+                "    \"id\": \"b94b5f7e-c7c6-d760-2c78-a5e9b8a5b8c9\"\n" +
+                "  },\n" +
+                "  \"version\": \"1.0.2\",\n" +
+                "  \"packages\": [\n" +
+                "    {\n" +
+                "      \"registryType\": \"npm\",\n" +
+                "      \"registryBaseUrl\": \"https://registry.npmjs.org\",\n" +
+                "      \"identifier\": \"@modelcontextprotocol/server-filesystem\",\n" +
+                "      \"version\": \"1.0.2\",\n" +
+                "      \"transport\": {\n" +
+                "        \"type\": \"stdio\"\n" +
+                "      },\n" +
+                "      \"packageArguments\": [\n" +
+                "        {\n" +
+                "          \"type\": \"positional\",\n" +
+                "          \"valueHint\": \"target_dir\",\n" +
+                "          \"description\": \"Path to access\",\n" +
+                "          \"default\": \"/Users/username/Desktop\",\n" +
+                "          \"isRequired\": true,\n" +
+                "          \"isRepeated\": true\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"environmentVariables\": [\n" +
+                "        {\n" +
+                "          \"name\": \"LOG_LEVEL\",\n" +
+                "          \"description\": \"Logging level (debug, info, warn, error)\",\n" +
+                "          \"default\": \"info\"\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"registryType\": \"oci\",\n" +
+                "      \"identifier\": \"docker.io/mcp/filesystem:1.0.2\",\n" +
+                "      \"transport\": {\n" +
+                "        \"type\": \"stdio\"\n" +
+                "      },\n" +
+                "      \"runtimeArguments\": [\n" +
+                "        {\n" +
+                "          \"type\": \"named\",\n" +
+                "          \"description\": \"Mount a volume into the container\",\n" +
+                "          \"name\": \"--mount\",\n" +
+                "          \"value\": \"type=bind,src={source_path},dst={target_path}\",\n" +
+                "          \"isRequired\": true,\n" +
+                "          \"isRepeated\": true,\n" +
+                "          \"variables\": {\n" +
+                "            \"source_path\": {\n" +
+                "              \"description\": \"Source path on host\",\n" +
+                "              \"format\": \"filepath\",\n" +
+                "              \"isRequired\": true\n" +
+                "            },\n" +
+                "            \"target_path\": {\n" +
+                "              \"description\": \"Path to mount in the container. It should be rooted in `/project` directory.\",\n" +
+                "              \"isRequired\": true,\n" +
+                "              \"default\": \"/project\"\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"packageArguments\": [\n" +
+                "        {\n" +
+                "          \"type\": \"positional\",\n" +
+                "          \"valueHint\": \"target_dir\",\n" +
+                "          \"value\": \"/project\"\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"environmentVariables\": [\n" +
+                "        {\n" +
+                "          \"name\": \"LOG_LEVEL\",\n" +
+                "          \"description\": \"Logging level (debug, info, warn, error)\",\n" +
+                "          \"default\": \"info\"\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"_meta\": {\n" +
+                "    \"io.modelcontextprotocol.registry/publisher-provided\": {\n" +
+                "      \"tool\": \"ci-publisher\",\n" +
+                "      \"version\": \"3.2.1\",\n" +
+                "      \"build_info\": {\n" +
+                "        \"commit\": \"a1b2c3d4e5f6789\",\n" +
+                "        \"timestamp\": \"2023-12-01T10:30:00Z\",\n" +
+                "        \"pipeline_id\": \"filesystem-build-789\",\n" +
+                "        \"environment\": \"production\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
         McpServer server = DefaultMcpRegistryClient.OBJECT_MAPPER.readValue(json, McpServer.class);
 
         // Verify server is not null

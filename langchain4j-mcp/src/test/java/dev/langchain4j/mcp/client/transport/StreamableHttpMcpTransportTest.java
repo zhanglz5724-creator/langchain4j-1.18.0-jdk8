@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.langchain4j.mcp.client.transport.http.StreamableHttpMcpTransport;
 import java.lang.reflect.Field;
-import java.net.http.HttpClient;
 import javax.net.ssl.SSLContext;
+import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.Test;
 
 class StreamableHttpMcpTransportTest {
@@ -28,7 +28,8 @@ class StreamableHttpMcpTransportTest {
         StreamableHttpMcpTransport transport =
                 StreamableHttpMcpTransport.builder().url("http://localhost/mcp").build();
 
-        assertThat(extractHttpClient(transport).version()).isEqualTo(HttpClient.Version.HTTP_2);
+        OkHttpClient client = extractHttpClient(transport);
+        assertThat(client.protocols()).contains(okhttp3.Protocol.HTTP_2);
     }
 
     @Test
@@ -36,7 +37,7 @@ class StreamableHttpMcpTransportTest {
         StreamableHttpMcpTransport transport =
                 StreamableHttpMcpTransport.builder().url("http://localhost/mcp").build();
 
-        assertThat(extractHttpClient(transport).followRedirects()).isEqualTo(HttpClient.Redirect.NEVER);
+        assertThat(extractHttpClient(transport).followRedirects()).isFalse();
     }
 
     @Test
@@ -46,7 +47,7 @@ class StreamableHttpMcpTransportTest {
                 .followRedirects(true)
                 .build();
 
-        assertThat(extractHttpClient(transport).followRedirects()).isEqualTo(HttpClient.Redirect.NORMAL);
+        assertThat(extractHttpClient(transport).followRedirects()).isTrue();
     }
 
     @Test
@@ -56,7 +57,8 @@ class StreamableHttpMcpTransportTest {
                 .setHttpVersion1_1()
                 .build();
 
-        assertThat(extractHttpClient(transport).version()).isEqualTo(HttpClient.Version.HTTP_1_1);
+        OkHttpClient client = extractHttpClient(transport);
+        assertThat(client.protocols()).containsExactly(okhttp3.Protocol.HTTP_1_1);
     }
 
     @Test
@@ -85,9 +87,9 @@ class StreamableHttpMcpTransportTest {
         return (SSLContext) field.get(transport);
     }
 
-    private static HttpClient extractHttpClient(StreamableHttpMcpTransport transport) throws Exception {
+    private static OkHttpClient extractHttpClient(StreamableHttpMcpTransport transport) throws Exception {
         Field field = StreamableHttpMcpTransport.class.getDeclaredField("httpClient");
         field.setAccessible(true);
-        return (HttpClient) field.get(transport);
+        return (OkHttpClient) field.get(transport);
     }
 }

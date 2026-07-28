@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.service.tool.ToolExecutionResult;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -19,24 +22,22 @@ public class StructuredContentParsingTest {
     @Test
     public void testComplexObject() throws JsonProcessingException {
         // JSON
-        String response = """
-                {
-                  "jsonrpc": "2.0",
-                  "id": 2,
-                  "result": {
-                    "isError": false,
-                    "structuredContent": {
-                      "integer": 1,
-                      "string": "hello",
-                      "boolean": true,
-                      "innerObject": {
-                        "double": 1.0,
-                        "null": null
-                      }
-                    }
-                  }
-                }
-                """;
+        String response = "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"id\": 2,\n" +
+                "  \"result\": {\n" +
+                "    \"isError\": false,\n" +
+                "    \"structuredContent\": {\n" +
+                "      \"integer\": 1,\n" +
+                "      \"string\": \"hello\",\n" +
+                "      \"boolean\": true,\n" +
+                "      \"innerObject\": {\n" +
+                "        \"double\": 1.0,\n" +
+                "        \"null\": null\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
         JsonNode responseNode = objectMapper.readTree(response);
         McpToolResultExtractor extractor = mock(McpToolResultExtractor.class);
         ToolExecutionResult toolExecutionResult = ToolExecutionHelper.extractResult(responseNode, false, extractor);
@@ -57,20 +58,18 @@ public class StructuredContentParsingTest {
 
     @Test
     public void testStructuredContentWithArrays() throws JsonProcessingException {
-        String response = """
-                {
-                  "jsonrpc": "2.0",
-                  "id": 3,
-                  "result": {
-                    "structuredContent": {
-                      "items": [1, 2, 3],
-                      "nested": {
-                        "labels": ["a", "b"]
-                      }
-                    }
-                  }
-                }
-                """;
+        String response = "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"id\": 3,\n" +
+                "  \"result\": {\n" +
+                "    \"structuredContent\": {\n" +
+                "      \"items\": [1, 2, 3],\n" +
+                "      \"nested\": {\n" +
+                "        \"labels\": [\"a\", \"b\"]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
         JsonNode responseNode = objectMapper.readTree(response);
         McpToolResultExtractor extractor = mock(McpToolResultExtractor.class);
@@ -79,9 +78,9 @@ public class StructuredContentParsingTest {
 
         assertThat(toolExecutionResult.result()).isInstanceOf(Map.class);
         Map<String, Object> map = (Map<String, Object>) toolExecutionResult.result();
-        assertThat(map.get("items")).isEqualTo(java.util.List.of(1, 2, 3));
+        assertThat(map.get("items")).isEqualTo(Arrays.asList(1, 2, 3));
         assertThat(map.get("nested")).isInstanceOf(Map.class);
-        assertThat(((Map<String, Object>) map.get("nested")).get("labels")).isEqualTo(java.util.List.of("a", "b"));
+        assertThat(((Map<String, Object>) map.get("nested")).get("labels")).isEqualTo(Arrays.asList("a", "b"));
         verifyNoInteractions(extractor);
     }
 
@@ -89,17 +88,15 @@ public class StructuredContentParsingTest {
     public void should_preserve_integer_larger_than_long_max_value() throws JsonProcessingException {
         // 9223372036854775808 = Long.MAX_VALUE + 1, parsed by Jackson as a BigIntegerNode.
         // Converting it via asLong() silently truncates to Long.MIN_VALUE, so the value must be kept as BigInteger.
-        String response = """
-                {
-                  "jsonrpc": "2.0",
-                  "id": 5,
-                  "result": {
-                    "structuredContent": {
-                      "bigValue": 9223372036854775808
-                    }
-                  }
-                }
-                """;
+        String response = "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"id\": 5,\n" +
+                "  \"result\": {\n" +
+                "    \"structuredContent\": {\n" +
+                "      \"bigValue\": 9223372036854775808\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
         JsonNode responseNode = objectMapper.readTree(response);
         McpToolResultExtractor extractor = mock(McpToolResultExtractor.class);
@@ -115,17 +112,15 @@ public class StructuredContentParsingTest {
     @Test
     public void should_preserve_long_max_value_as_long() throws JsonProcessingException {
         // Long.MAX_VALUE must still be parsed as a Long (no regression for INT/LONG number types).
-        String response = """
-                {
-                  "jsonrpc": "2.0",
-                  "id": 6,
-                  "result": {
-                    "structuredContent": {
-                      "longValue": 9223372036854775807
-                    }
-                  }
-                }
-                """;
+        String response = "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"id\": 6,\n" +
+                "  \"result\": {\n" +
+                "    \"structuredContent\": {\n" +
+                "      \"longValue\": 9223372036854775807\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
         JsonNode responseNode = objectMapper.readTree(response);
         McpToolResultExtractor extractor = mock(McpToolResultExtractor.class);
@@ -140,30 +135,28 @@ public class StructuredContentParsingTest {
 
     @Test
     public void should_prefer_structured_content_over_content_array() throws JsonProcessingException {
-        String response = """
-                {
-                  "jsonrpc": "2.0",
-                  "id": 4,
-                  "result": {
-                    "structuredContent": {
-                      "source": "structured"
-                    },
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "{\\"source\\":\\"text\\"}"
-                      }
-                    ]
-                  }
-                }
-                """;
+        String response = "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"id\": 4,\n" +
+                "  \"result\": {\n" +
+                "    \"structuredContent\": {\n" +
+                "      \"source\": \"structured\"\n" +
+                "    },\n" +
+                "    \"content\": [\n" +
+                "      {\n" +
+                "        \"type\": \"text\",\n" +
+                "        \"text\": \"{\\\"source\\\":\\\"text\\\"}\"\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
 
         JsonNode responseNode = objectMapper.readTree(response);
         McpToolResultExtractor extractor = mock(McpToolResultExtractor.class);
 
         ToolExecutionResult toolExecutionResult = ToolExecutionHelper.extractResult(responseNode, false, extractor);
 
-        assertThat(toolExecutionResult.result()).isEqualTo(Map.of("source", "structured"));
+        assertThat(toolExecutionResult.result()).isEqualTo(Collections.singletonMap("source", "structured"));
         assertThat(toolExecutionResult.resultText()).isEqualTo("{\"source\":\"structured\"}");
         verifyNoInteractions(extractor);
     }

@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -34,7 +36,7 @@ class McpProtocolSerializationTest {
     void should_serialize_call_tool_result_omitting_null_fields() throws Exception {
         // given
         McpCallToolResult response = new McpCallToolResult(
-                7L, new McpCallToolResult.Result(List.of(new McpCallToolResult.Content("text", "ok")), null, null));
+                7L, new McpCallToolResult.Result(Arrays.asList(new McpCallToolResult.Content("text", "ok")), null, null));
 
         // when
         JsonNode json = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(response));
@@ -88,7 +90,7 @@ class McpProtocolSerializationTest {
         ObjectNode args = OBJECT_MAPPER.createObjectNode();
         args.put("location", "Prague");
         McpCallToolRequest request = new McpCallToolRequest(2L, "get_weather", args);
-        request.getParams().setMeta(Map.of("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01"));
+        request.getParams().setMeta(Collections.singletonMap("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01"));
 
         JsonNode json = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(request));
 
@@ -121,7 +123,7 @@ class McpProtocolSerializationTest {
 
     @Test
     void should_serialize_get_prompt_request() throws Exception {
-        McpGetPromptRequest request = new McpGetPromptRequest(3L, "summarize", Map.of("text", "hello"));
+        McpGetPromptRequest request = new McpGetPromptRequest(3L, "summarize", Collections.singletonMap("text", "hello"));
 
         JsonNode json = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(request));
 

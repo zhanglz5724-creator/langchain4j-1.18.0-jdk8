@@ -10,6 +10,7 @@ import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.AfterAll;
@@ -25,7 +26,7 @@ class McpHealthStdioTransportIT {
     @BeforeAll
     static void setup() {
         StdioMcpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(), "--quiet", "--fresh", "run", getPathToScript("logging_mcp_server.java")))
                 .logEvents(true)
                 .build();

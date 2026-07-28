@@ -42,16 +42,15 @@ class McpOperationHandlerTest {
                     cancelledReason.set(reason);
                 });
 
-        JsonNode notification = OBJECT_MAPPER.readTree("""
-                {
-                  "jsonrpc": "2.0",
-                  "method": "notifications/cancelled",
-                  "params": {
-                    "requestId": 42,
-                    "reason": "user aborted"
-                  }
-                }
-                """);
+        JsonNode notification = OBJECT_MAPPER.readTree(
+                "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"method\": \"notifications/cancelled\",\n" +
+                "  \"params\": {\n" +
+                "    \"requestId\": 42,\n" +
+                "    \"reason\": \"user aborted\"\n" +
+                "  }\n" +
+                "}");
 
         handler.handle(notification);
 
@@ -92,15 +91,14 @@ class McpOperationHandlerTest {
                     cancelledReason.set(reason);
                 });
 
-        JsonNode notification = OBJECT_MAPPER.readTree("""
-                {
-                  "jsonrpc": "2.0",
-                  "method": "notifications/cancelled",
-                  "params": {
-                    "requestId": 7
-                  }
-                }
-                """);
+        JsonNode notification = OBJECT_MAPPER.readTree(
+                "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"method\": \"notifications/cancelled\",\n" +
+                "  \"params\": {\n" +
+                "    \"requestId\": 7\n" +
+                "  }\n" +
+                "}");
 
         handler.handle(notification);
 
@@ -129,13 +127,12 @@ class McpOperationHandlerTest {
                 () -> {},
                 (id, reason) -> cancelledId.set(id));
 
-        JsonNode notification = OBJECT_MAPPER.readTree("""
-                {
-                  "jsonrpc": "2.0",
-                  "method": "notifications/cancelled",
-                  "params": {}
-                }
-                """);
+        JsonNode notification = OBJECT_MAPPER.readTree(
+                "{\n" +
+                "  \"jsonrpc\": \"2.0\",\n" +
+                "  \"method\": \"notifications/cancelled\",\n" +
+                "  \"params\": {}\n" +
+                "}");
 
         handler.handle(notification);
 

@@ -5,6 +5,7 @@ import static dev.langchain4j.mcp.client.integration.McpServerHelper.*;
 import dev.langchain4j.mcp.client.DefaultMcpClient;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,7 +18,7 @@ class McpResourcesAsToolsStdioTransportIT extends McpResourcesAsToolsTestBase {
     static void setup() {
         skipTestsIfJbangNotAvailable();
         McpTransport transportAlice = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(),
                         "--quiet",
                         "--fresh",
@@ -31,7 +32,7 @@ class McpResourcesAsToolsStdioTransportIT extends McpResourcesAsToolsTestBase {
                 .key("alice")
                 .build();
         McpTransport transportBob = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(),
                         "--quiet",
                         "--fresh",

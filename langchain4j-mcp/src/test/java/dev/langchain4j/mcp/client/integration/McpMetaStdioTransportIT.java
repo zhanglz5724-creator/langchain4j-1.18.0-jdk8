@@ -10,6 +10,8 @@ import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
@@ -23,16 +25,22 @@ class McpMetaStdioTransportIT {
     @BeforeAll
     static void setup() {
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(), "--quiet", "--fresh", "run", getPathToScript("meta_mcp_server.java")))
                 .logEvents(true)
                 .build();
         mcpClient = new DefaultMcpClient.Builder()
                 .transport(transport)
                 .toolExecutionTimeout(Duration.ofSeconds(10))
-                .metaSupplier(ctx -> Map.of(
-                        "traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01",
-                        "custom-key", "custom-value"))
+                .metaSupplier(new dev.langchain4j.mcp.client.McpMetaSupplier() {
+                    @Override
+                    public Map<String, Object> apply(dev.langchain4j.mcp.client.McpCallContext ctx) {
+                        Map<String, Object> meta = new HashMap<>();
+                        meta.put("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+                        meta.put("custom-key", "custom-value");
+                        return meta;
+                    }
+                })
                 .build();
     }
 

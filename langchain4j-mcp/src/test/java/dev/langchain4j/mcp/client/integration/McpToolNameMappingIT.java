@@ -14,6 +14,7 @@ import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import dev.langchain4j.service.tool.ToolExecutor;
 import dev.langchain4j.service.tool.ToolProviderResult;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.AfterAll;
@@ -34,7 +35,7 @@ public class McpToolNameMappingIT {
     static void setup() throws IOException, InterruptedException, TimeoutException {
         skipTestsIfJbangNotAvailable();
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(), "--quiet", "--fresh", "run", getPathToScript("tools_mcp_server.java")))
                 .logEvents(true)
                 .build();

@@ -25,6 +25,7 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -36,52 +37,49 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithSimpleParams() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [ {
-                      "name" : "operation",
-                      "description" : "Super operation",
-                      "inputSchema" : {
-                        "type" : "object",
-                        "properties" : {
-                          "stringParameter" : {
-                            "type" : "string",
-                            "description" : "Message to echo"
-                          },
-                          "enumParameter" : {
-                            "type" : "string",
-                            "description" : "The protocol to use",
-                            "enum": [
-                                "http",
-                                "https"
-                            ]
-                          },
-                          "numberParameter": {
-                            "type": "number",
-                            "description": "A number"
-                          },
-                          "integerParameter": {
-                            "type": "integer",
-                            "description": "An integer"
-                          },
-                          "booleanParameter": {
-                            "type": "boolean",
-                            "description": "A boolean"
-                          },
-                          "arrayParameter": {
-                              "type": "array",
-                              "description": "An array of strings",
-                              "items": {
-                                "type": "string"
-                              }
-                          }
-                        },
-                        "required" : [ "stringParameter" ],
-                        "additionalProperties" : false,
-                        "$schema" : "http://json-schema.org/draft-07/schema#"
-                      }
-                    } ]
-                """;
+                "[ {\n" +
+                "      \"name\" : \"operation\",\n" +
+                "      \"description\" : \"Super operation\",\n" +
+                "      \"inputSchema\" : {\n" +
+                "        \"type\" : \"object\",\n" +
+                "        \"properties\" : {\n" +
+                "          \"stringParameter\" : {\n" +
+                "            \"type\" : \"string\",\n" +
+                "            \"description\" : \"Message to echo\"\n" +
+                "          },\n" +
+                "          \"enumParameter\" : {\n" +
+                "            \"type\" : \"string\",\n" +
+                "            \"description\" : \"The protocol to use\",\n" +
+                "            \"enum\": [\n" +
+                "                \"http\",\n" +
+                "                \"https\"\n" +
+                "            ]\n" +
+                "          },\n" +
+                "          \"numberParameter\": {\n" +
+                "            \"type\": \"number\",\n" +
+                "            \"description\": \"A number\"\n" +
+                "          },\n" +
+                "          \"integerParameter\": {\n" +
+                "            \"type\": \"integer\",\n" +
+                "            \"description\": \"An integer\"\n" +
+                "          },\n" +
+                "          \"booleanParameter\": {\n" +
+                "            \"type\": \"boolean\",\n" +
+                "            \"description\": \"A boolean\"\n" +
+                "          },\n" +
+                "          \"arrayParameter\": {\n" +
+                "              \"type\": \"array\",\n" +
+                "              \"description\": \"An array of strings\",\n" +
+                "              \"items\": {\n" +
+                "                \"type\": \"string\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"required\" : [ \"stringParameter\" ],\n" +
+                "        \"additionalProperties\" : false,\n" +
+                "        \"$schema\" : \"http://json-schema.org/draft-07/schema#\"\n" +
+                "      }\n" +
+                "    } ]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications).hasSize(1);
@@ -123,35 +121,32 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithObjectParam() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [
-                  {
-                    "name": "operation",
-                    "description": "Super operation",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "complexParameter": {
-                          "type": "object",
-                          "description": "A complex parameter",
-                          "properties": {
-                            "nestedString": {
-                              "type": "string",
-                              "description": "A nested string"
-                            },
-                            "nestedNumber": {
-                              "type": "number",
-                              "description": "A nested number"
-                            }
-                          }
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  }
-                ]
-                """;
+                "[\n" +
+                "  {\n" +
+                "    \"name\": \"operation\",\n" +
+                "    \"description\": \"Super operation\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"complexParameter\": {\n" +
+                "          \"type\": \"object\",\n" +
+                "          \"description\": \"A complex parameter\",\n" +
+                "          \"properties\": {\n" +
+                "            \"nestedString\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"description\": \"A nested string\"\n" +
+                "            },\n" +
+                "            \"nestedNumber\": {\n" +
+                "              \"type\": \"number\",\n" +
+                "              \"description\": \"A nested number\"\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"additionalProperties\": false\n" +
+                "    }\n" +
+                "  }\n" +
+                "]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications).hasSize(1);
@@ -180,19 +175,16 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithNoParams() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name" : "getTinyImage",
-                    "description" : "Returns the MCP_TINY_IMAGE",
-                    "inputSchema" : {
-                        "type" : "object",
-                        "properties" : { },
-                        "additionalProperties" : false,
-                        "$schema" : "http://json-schema.org/draft-07/schema#"
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\" : \"getTinyImage\",\n" +
+                "    \"description\" : \"Returns the MCP_TINY_IMAGE\",\n" +
+                "    \"inputSchema\" : {\n" +
+                "        \"type\" : \"object\",\n" +
+                "        \"properties\" : { },\n" +
+                "        \"additionalProperties\" : false,\n" +
+                "        \"$schema\" : \"http://json-schema.org/draft-07/schema#\"\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications).hasSize(1);
@@ -205,37 +197,36 @@ class ToolSpecificationHelperTest {
 
     @Test
     void arrayWithMultipleAllowedTypes() throws JsonProcessingException {
-        String text = """
-                        [{
-                          "name": "query",
-                          "description": "Execute a SELECT query",
-                          "inputSchema": {
-                            "type": "object",
-                            "properties": {
-                              "sql": {
-                                "type": "string",
-                                "description": "SQL SELECT query"
-                              },
-                              "params": {
-                                "type": "array",
-                                "items": {
-                                  "type": [
-                                    "string",
-                                    "number",
-                                    "boolean",
-                                    "null",
-                                    "integer"
-                                  ]
-                                },
-                                "description": "Query parameters (optional)"
-                              }
-                            },
-                            "required": [
-                              "sql"
-                            ]
-                          }
-                        }]
-                        """;
+        String text =
+                        "[{\n" +
+                        "  \"name\": \"query\",\n" +
+                        "  \"description\": \"Execute a SELECT query\",\n" +
+                        "  \"inputSchema\": {\n" +
+                        "    \"type\": \"object\",\n" +
+                        "    \"properties\": {\n" +
+                        "      \"sql\": {\n" +
+                        "        \"type\": \"string\",\n" +
+                        "        \"description\": \"SQL SELECT query\"\n" +
+                        "      },\n" +
+                        "      \"params\": {\n" +
+                        "        \"type\": \"array\",\n" +
+                        "        \"items\": {\n" +
+                        "          \"type\": [\n" +
+                        "            \"string\",\n" +
+                        "            \"number\",\n" +
+                        "            \"boolean\",\n" +
+                        "            \"null\",\n" +
+                        "            \"integer\"\n" +
+                        "          ]\n" +
+                        "        },\n" +
+                        "        \"description\": \"Query parameters (optional)\"\n" +
+                        "      }\n" +
+                        "    },\n" +
+                        "    \"required\": [\n" +
+                        "      \"sql\"\n" +
+                        "    ]\n" +
+                        "  }\n" +
+                        "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications).hasSize(1);
@@ -254,75 +245,71 @@ class ToolSpecificationHelperTest {
 
     @Test
     void arrayWithAnyOf() throws JsonProcessingException {
-        // trimmed version of the tool from @modelcontextprotocol/server-github
         String text =
-                // language=json
-                """
-                [{
-                    "name": "create_pull_request_review",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "comments": {
-                          "type": "array",
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "path": {
-                                    "type": "string",
-                                    "description": "The relative path to the file being commented on"
-                                  },
-                                  "position": {
-                                    "type": "number",
-                                    "description": "The position in the diff where you want to add a review comment"
-                                  },
-                                  "body": {
-                                    "type": "string",
-                                    "description": "Text of the review comment"
-                                  }
-                                },
-                                "required": [
-                                  "path",
-                                  "position",
-                                  "body"
-                                ],
-                                "additionalProperties": false
-                              },
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "path": {
-                                    "type": "string",
-                                    "description": "The relative path to the file being commented on"
-                                  },
-                                  "line": {
-                                    "type": "number",
-                                    "description": "The line number in the file where you want to add a review comment"
-                                  },
-                                  "body": {
-                                    "type": "string",
-                                    "description": "Text of the review comment"
-                                  }
-                                },
-                                "required": [
-                                  "path",
-                                  "line",
-                                  "body"
-                                ],
-                                "additionalProperties": false
-                              }
-                            ]
-                          },
-                          "description": "Comments to post as part of the review (specify either position or line, not both)"
-                        }
-                      },
-                      "additionalProperties": false,
-                      "$schema": "http://json-schema.org/draft-07/schema#"
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"create_pull_request_review\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"comments\": {\n" +
+                "          \"type\": \"array\",\n" +
+                "          \"items\": {\n" +
+                "            \"anyOf\": [\n" +
+                "              {\n" +
+                "                \"type\": \"object\",\n" +
+                "                \"properties\": {\n" +
+                "                  \"path\": {\n" +
+                "                    \"type\": \"string\",\n" +
+                "                    \"description\": \"The relative path to the file being commented on\"\n" +
+                "                  },\n" +
+                "                  \"position\": {\n" +
+                "                    \"type\": \"number\",\n" +
+                "                    \"description\": \"The position in the diff where you want to add a review comment\"\n" +
+                "                  },\n" +
+                "                  \"body\": {\n" +
+                "                    \"type\": \"string\",\n" +
+                "                    \"description\": \"Text of the review comment\"\n" +
+                "                  }\n" +
+                "                },\n" +
+                "                \"required\": [\n" +
+                "                  \"path\",\n" +
+                "                  \"position\",\n" +
+                "                  \"body\"\n" +
+                "                ],\n" +
+                "                \"additionalProperties\": false\n" +
+                "              },\n" +
+                "              {\n" +
+                "                \"type\": \"object\",\n" +
+                "                \"properties\": {\n" +
+                "                  \"path\": {\n" +
+                "                    \"type\": \"string\",\n" +
+                "                    \"description\": \"The relative path to the file being commented on\"\n" +
+                "                  },\n" +
+                "                  \"line\": {\n" +
+                "                    \"type\": \"number\",\n" +
+                "                    \"description\": \"The line number in the file where you want to add a review comment\"\n" +
+                "                  },\n" +
+                "                  \"body\": {\n" +
+                "                    \"type\": \"string\",\n" +
+                "                    \"description\": \"Text of the review comment\"\n" +
+                "                  }\n" +
+                "                },\n" +
+                "                \"required\": [\n" +
+                "                  \"path\",\n" +
+                "                  \"line\",\n" +
+                "                  \"body\"\n" +
+                "                ],\n" +
+                "                \"additionalProperties\": false\n" +
+                "              }\n" +
+                "            ]\n" +
+                "          },\n" +
+                "          \"description\": \"Comments to post as part of the review (specify either position or line, not both)\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"additionalProperties\": false,\n" +
+                "      \"$schema\": \"http://json-schema.org/draft-07/schema#\"\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
 
@@ -346,38 +333,35 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithAnyOfAlongsideObjectTypeAtRoot() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "fetch_artifacts",
-                    "description": "Fetch build artifacts",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "version": {
-                          "type": "string",
-                          "description": "Version identifier. Provide this, run_url, or both."
-                        },
-                        "run_url": {
-                          "type": "string",
-                          "description": "Execution run URL. Provide this, version, or both."
-                        },
-                        "filter": {
-                          "type": "string",
-                          "description": "Comma-separated list of names to fetch."
-                        },
-                        "signed": {
-                          "type": "boolean",
-                          "description": "If true, returns signed URLs."
-                        }
-                      },
-                      "anyOf": [
-                        { "required": ["version"] },
-                        { "required": ["run_url"] }
-                      ]
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"fetch_artifacts\",\n" +
+                "    \"description\": \"Fetch build artifacts\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"version\": {\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"description\": \"Version identifier. Provide this, run_url, or both.\"\n" +
+                "        },\n" +
+                "        \"run_url\": {\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"description\": \"Execution run URL. Provide this, version, or both.\"\n" +
+                "        },\n" +
+                "        \"filter\": {\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"description\": \"Comma-separated list of names to fetch.\"\n" +
+                "        },\n" +
+                "        \"signed\": {\n" +
+                "          \"type\": \"boolean\",\n" +
+                "          \"description\": \"If true, returns signed URLs.\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"anyOf\": [\n" +
+                "        { \"required\": [\"version\"] },\n" +
+                "        { \"required\": [\"run_url\"] }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
 
@@ -393,25 +377,22 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithAnyOfAlongsideObjectTypeAndPropertiesInBranches() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "fetch_by_key",
-                    "inputSchema": {
-                      "type": "object",
-                      "anyOf": [
-                        {
-                          "properties": { "version": { "type": "string" } },
-                          "required": ["version"]
-                        },
-                        {
-                          "properties": { "run_url": { "type": "string" } },
-                          "required": ["run_url"]
-                        }
-                      ]
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"fetch_by_key\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"anyOf\": [\n" +
+                "        {\n" +
+                "          \"properties\": { \"version\": { \"type\": \"string\" } },\n" +
+                "          \"required\": [\"version\"]\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"properties\": { \"run_url\": { \"type\": \"string\" } },\n" +
+                "          \"required\": [\"run_url\"]\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
 
@@ -421,27 +402,25 @@ class ToolSpecificationHelperTest {
 
     @Test
     void nullTypeName() throws JsonProcessingException {
-        // the 'value' parameter has an empty definition, so it can be anything
-        String text = """
-                [{
-                   "name": "set_config_value",
-                   "description": "Set a specific configuration value by key",
-                   "inputSchema": {
-                     "type": "object",
-                     "properties": {
-                       "key": {
-                         "type": "string"
-                       },
-                       "value": {}
-                     },
-                     "required": [
-                       "key"
-                     ],
-                     "additionalProperties": false,
-                     "$schema": "http://json-schema.org/draft-07/schema#"
-                   }
-                 }]
-                """;
+        String text =
+                "[{\n" +
+                "   \"name\": \"set_config_value\",\n" +
+                "   \"description\": \"Set a specific configuration value by key\",\n" +
+                "   \"inputSchema\": {\n" +
+                "     \"type\": \"object\",\n" +
+                "     \"properties\": {\n" +
+                "       \"key\": {\n" +
+                "         \"type\": \"string\"\n" +
+                "       },\n" +
+                "       \"value\": {}\n" +
+                "     },\n" +
+                "     \"required\": [\n" +
+                "       \"key\"\n" +
+                "     ],\n" +
+                "     \"additionalProperties\": false,\n" +
+                "     \"$schema\": \"http://json-schema.org/draft-07/schema#\"\n" +
+                "   }\n" +
+                " }]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications.get(0).parameters().properties().get("value"))
@@ -450,43 +429,40 @@ class ToolSpecificationHelperTest {
 
     @Test
     void nullType() throws JsonProcessingException {
-        // the 'type' parameter is "null" and so most not be present
-        // trimmed version from Atalassian's MCP server
-        String text = """
-                [{
-                  "name": "createCompassCustomFieldDefinition",
-                  "description": "Create a new Compass custom field definition",
-                  "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                      "cloudId": {
-                        "type": "string",
-                        "description": "Unique identifier for an Atlassian Cloud instance in the form of a UUID. Can also be a site URL. If not working, use the 'getAccessibleAtlassianResources' tool to find accessible Cloud IDs."
-                      },
-                      "fieldSelections": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "additionalProperties": {
-                              "type": "null"
-                            },
-                            "description": "An list of options for the custom field definition, expressed as maps. The keys should be the options, and the values should all be null. Only used for SingleSelect and MultiSelect custom field definitions."
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "An list of options for the custom field definition, expressed as maps. The keys should be the options, and the values should all be null. Only used for SingleSelect and MultiSelect custom field definitions."
-                      }
-                    },
-                    "required": [
-                      "cloudId"
-                    ],
-                    "additionalProperties": false,
-                    "$schema": "http://json-schema.org/draft-07/schema#"
-                  }
-                }]
-                """;
+        String text =
+                "[{\n" +
+                "  \"name\": \"createCompassCustomFieldDefinition\",\n" +
+                "  \"description\": \"Create a new Compass custom field definition\",\n" +
+                "  \"inputSchema\": {\n" +
+                "    \"type\": \"object\",\n" +
+                "    \"properties\": {\n" +
+                "      \"cloudId\": {\n" +
+                "        \"type\": \"string\",\n" +
+                "        \"description\": \"Unique identifier for an Atlassian Cloud instance in the form of a UUID. Can also be a site URL. If not working, use the \\\"getAccessibleAtlassianResources\\\" tool to find accessible Cloud IDs.\"\n" +
+                "      },\n" +
+                "      \"fieldSelections\": {\n" +
+                "        \"anyOf\": [\n" +
+                "          {\n" +
+                "            \"type\": \"object\",\n" +
+                "            \"additionalProperties\": {\n" +
+                "              \"type\": \"null\"\n" +
+                "            },\n" +
+                "            \"description\": \"An list of options for the custom field definition, expressed as maps. The keys should be the options, and the values should all be null. Only used for SingleSelect and MultiSelect custom field definitions.\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"type\": \"null\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"description\": \"An list of options for the custom field definition, expressed as maps. The keys should be the options, and the values should all be null. Only used for SingleSelect and MultiSelect custom field definitions.\"\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"required\": [\n" +
+                "      \"cloudId\"\n" +
+                "    ],\n" +
+                "    \"additionalProperties\": false,\n" +
+                "    \"$schema\": \"http://json-schema.org/draft-07/schema#\"\n" +
+                "  }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications.get(0).parameters().properties().get("fieldSelections"))
@@ -505,23 +481,20 @@ class ToolSpecificationHelperTest {
     @Test
     void arrayWithoutSpecifiedType() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "something",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "arrayparam": {
-                          "type": "array",
-                          "description": "An array of whatever you like"
-                        }
-                      },
-                      "additionalProperties": false,
-                      "$schema": "http://json-schema.org/draft-07/schema#"
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"something\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"arrayparam\": {\n" +
+                "          \"type\": \"array\",\n" +
+                "          \"description\": \"An array of whatever you like\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"additionalProperties\": false,\n" +
+                "      \"$schema\": \"http://json-schema.org/draft-07/schema#\"\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
 
@@ -535,22 +508,19 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithAnnotations() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "something",
-                    "inputSchema": {
-                    },
-                    "annotations": {
-                      "destructiveHint": true,
-                      "idempotentHint": false,
-                      "openWorldHint": true,
-                      "readOnlyHint": false,
-                      "title": "A tool with annotations"
-                    },
-                    "title": "A title in the root tool object"
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"something\",\n" +
+                "    \"inputSchema\": {\n" +
+                "    },\n" +
+                "    \"annotations\": {\n" +
+                "      \"destructiveHint\": true,\n" +
+                "      \"idempotentHint\": false,\n" +
+                "      \"openWorldHint\": true,\n" +
+                "      \"readOnlyHint\": false,\n" +
+                "      \"title\": \"A tool with annotations\"\n" +
+                "    },\n" +
+                "    \"title\": \"A title in the root tool object\"\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         Map<String, Object> metadata = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json)
                 .get(0)
@@ -566,33 +536,30 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithOutputSchema() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "get_weather",
-                    "description": "Get the weather for a location",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "location": { "type": "string" }
-                      },
-                      "required": ["location"]
-                    },
-                    "outputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "temperature": {
-                          "type": "number",
-                          "description": "Temperature in Celsius"
-                        },
-                        "conditions": {
-                          "type": "string"
-                        }
-                      },
-                      "required": ["temperature", "conditions"]
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"get_weather\",\n" +
+                "    \"description\": \"Get the weather for a location\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"location\": { \"type\": \"string\" }\n" +
+                "      },\n" +
+                "      \"required\": [\"location\"]\n" +
+                "    },\n" +
+                "    \"outputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"temperature\": {\n" +
+                "          \"type\": \"number\",\n" +
+                "          \"description\": \"Temperature in Celsius\"\n" +
+                "        },\n" +
+                "        \"conditions\": {\n" +
+                "          \"type\": \"string\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"required\": [\"temperature\", \"conditions\"]\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         Map<String, Object> metadata = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json)
                 .get(0)
@@ -601,7 +568,7 @@ class ToolSpecificationHelperTest {
         assertThat(metadata.get(OUTPUT_SCHEMA)).isInstanceOf(Map.class);
         Map<String, Object> outputSchema = (Map<String, Object>) metadata.get(OUTPUT_SCHEMA);
         assertThat(outputSchema.get("type")).isEqualTo("object");
-        assertThat(outputSchema.get("required")).isEqualTo(List.of("temperature", "conditions"));
+        assertThat(outputSchema.get("required")).isEqualTo(Arrays.asList("temperature", "conditions"));
         assertThat(outputSchema.get("properties")).isInstanceOf(Map.class);
         Map<String, Object> properties = (Map<String, Object>) outputSchema.get("properties");
         assertThat(properties).containsOnlyKeys("temperature", "conditions");
@@ -610,42 +577,36 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithIcons() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "get_weather",
-                    "inputSchema": {
-                    },
-                    "icons": [
-                      {
-                        "src": "https://example.org/weather.png",
-                        "mimeType": "image/png",
-                        "sizes": ["64x64"],
-                        "theme": "dark"
-                      }
-                    ]
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"get_weather\",\n" +
+                "    \"inputSchema\": {\n" +
+                "    },\n" +
+                "    \"icons\": [\n" +
+                "      {\n" +
+                "        \"src\": \"https://example.org/weather.png\",\n" +
+                "        \"mimeType\": \"image/png\",\n" +
+                "        \"sizes\": [\"64x64\"],\n" +
+                "        \"theme\": \"dark\"\n" +
+                "      }\n" +
+                "    ]\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         Map<String, Object> metadata = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json)
                 .get(0)
                 .metadata();
 
         assertThat(metadata.get(ICONS))
-                .isEqualTo(List.of(new McpIcon(
-                        "image/png", List.of("64x64"), "https://example.org/weather.png", McpIconTheme.DARK)));
+                .isEqualTo(Arrays.asList(new McpIcon(
+                        "image/png", Arrays.asList("64x64"), "https://example.org/weather.png", McpIconTheme.DARK)));
     }
 
     @Test
     void toolWithoutOutputSchema() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "noop",
-                    "inputSchema": {}
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"noop\",\n" +
+                "    \"inputSchema\": {}\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         Map<String, Object> metadata = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json)
                 .get(0)
@@ -657,27 +618,24 @@ class ToolSpecificationHelperTest {
     @Test
     void toolWithMetadata() throws JsonProcessingException {
         String text =
-                // language=json
-                """
-                [{
-                    "name": "something",
-                    "inputSchema": {
-                    },
-                    "_meta": {
-                      "example.org/array": [1, 2, 3],
-                      "example.org/string": "hello",
-                      "complex": {
-                        "a": true
-                      }
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"something\",\n" +
+                "    \"inputSchema\": {\n" +
+                "    },\n" +
+                "    \"_meta\": {\n" +
+                "      \"example.org/array\": [1, 2, 3],\n" +
+                "      \"example.org/string\": \"hello\",\n" +
+                "      \"complex\": {\n" +
+                "        \"a\": true\n" +
+                "      }\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         Map<String, Object> metadata = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json)
                 .get(0)
                 .metadata();
 
-        assertThat(metadata.get("example.org/array")).isEqualTo(List.of(1, 2, 3));
+        assertThat(metadata.get("example.org/array")).isEqualTo(Arrays.asList(1, 2, 3));
         assertThat(metadata.get("example.org/string")).isEqualTo("hello");
         assertThat(metadata.get("complex")).isInstanceOf(Map.class);
         Map<String, Object> complex = (Map<String, Object>) metadata.get("complex");
@@ -686,42 +644,38 @@ class ToolSpecificationHelperTest {
 
     @Test
     void toolWithRefAndDefs() throws JsonProcessingException {
-        // a tool whose inputSchema uses $defs and $ref for a recursive/shared type
         String text =
-                // language=json
-                """
-                [{
-                    "name": "create_node",
-                    "description": "Creates a tree node",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "node": {
-                          "$ref": "#/$defs/TreeNode"
-                        }
-                      },
-                      "required": ["node"],
-                      "$defs": {
-                        "TreeNode": {
-                          "type": "object",
-                          "properties": {
-                            "value": {
-                              "type": "string",
-                              "description": "Node value"
-                            },
-                            "children": {
-                              "type": "array",
-                              "items": {
-                                "$ref": "#/$defs/TreeNode"
-                              }
-                            }
-                          },
-                          "required": ["value"]
-                        }
-                      }
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"create_node\",\n" +
+                "    \"description\": \"Creates a tree node\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"node\": {\n" +
+                "          \"$ref\": \"#/$defs/TreeNode\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"required\": [\"node\"],\n" +
+                "      \"$defs\": {\n" +
+                "        \"TreeNode\": {\n" +
+                "          \"type\": \"object\",\n" +
+                "          \"properties\": {\n" +
+                "            \"value\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"description\": \"Node value\"\n" +
+                "            },\n" +
+                "            \"children\": {\n" +
+                "              \"type\": \"array\",\n" +
+                "              \"items\": {\n" +
+                "                \"$ref\": \"#/$defs/TreeNode\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          },\n" +
+                "          \"required\": [\"value\"]\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications).hasSize(1);
@@ -750,37 +704,33 @@ class ToolSpecificationHelperTest {
 
     @Test
     void toolWithDraft07Definitions() throws JsonProcessingException {
-        // uses "definitions" (draft-07) instead of "$defs" (draft 2019-09+)
         String text =
-                // language=json
-                """
-                [{
-                    "name": "send_message",
-                    "description": "Sends a message",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "recipient": {
-                          "$ref": "#/definitions/Contact"
-                        }
-                      },
-                      "definitions": {
-                        "Contact": {
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            },
-                            "email": {
-                              "type": "string"
-                            }
-                          },
-                          "required": ["name", "email"]
-                        }
-                      }
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"send_message\",\n" +
+                "    \"description\": \"Sends a message\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"recipient\": {\n" +
+                "          \"$ref\": \"#/definitions/Contact\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"definitions\": {\n" +
+                "        \"Contact\": {\n" +
+                "          \"type\": \"object\",\n" +
+                "          \"properties\": {\n" +
+                "            \"name\": {\n" +
+                "              \"type\": \"string\"\n" +
+                "            },\n" +
+                "            \"email\": {\n" +
+                "              \"type\": \"string\"\n" +
+                "            }\n" +
+                "          },\n" +
+                "          \"required\": [\"name\", \"email\"]\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications).hasSize(1);
@@ -802,35 +752,31 @@ class ToolSpecificationHelperTest {
 
     @Test
     void toolWithRefInAnyOf() throws JsonProcessingException {
-        // $ref used inside an anyOf
         String text =
-                // language=json
-                """
-                [{
-                    "name": "process",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "input": {
-                          "anyOf": [
-                            { "$ref": "#/$defs/TextInput" },
-                            { "type": "string" }
-                          ],
-                          "description": "The input to process"
-                        }
-                      },
-                      "$defs": {
-                        "TextInput": {
-                          "type": "object",
-                          "properties": {
-                            "text": { "type": "string" },
-                            "language": { "type": "string" }
-                          }
-                        }
-                      }
-                    }
-                }]
-                """;
+                "[{\n" +
+                "    \"name\": \"process\",\n" +
+                "    \"inputSchema\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"input\": {\n" +
+                "          \"anyOf\": [\n" +
+                "            { \"$ref\": \"#/$defs/TextInput\" },\n" +
+                "            { \"type\": \"string\" }\n" +
+                "          ],\n" +
+                "          \"description\": \"The input to process\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"$defs\": {\n" +
+                "        \"TextInput\": {\n" +
+                "          \"type\": \"object\",\n" +
+                "          \"properties\": {\n" +
+                "            \"text\": { \"type\": \"string\" },\n" +
+                "            \"language\": { \"type\": \"string\" }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "}]";
         ArrayNode json = OBJECT_MAPPER.readValue(text, ArrayNode.class);
         List<ToolSpecification> toolSpecifications = ToolSpecificationHelper.toolSpecificationListFromMcpResponse(json);
         assertThat(toolSpecifications).hasSize(1);

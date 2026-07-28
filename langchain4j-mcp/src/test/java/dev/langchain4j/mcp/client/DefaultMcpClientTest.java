@@ -25,6 +25,9 @@ import dev.langchain4j.mcp.protocol.McpListToolsParams;
 import dev.langchain4j.mcp.protocol.McpListToolsRequest;
 import dev.langchain4j.service.tool.ToolExecutionResult;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -119,7 +122,7 @@ public class DefaultMcpClientTest {
     public void should_throw_from_build_when_transport_initialize_throws() throws Exception {
         // given
         final McpTransport transport = getMinimalMcpTransportMock();
-        final var exception = new RuntimeException("apples");
+        final RuntimeException exception = new RuntimeException("apples");
         doThrow(exception).when(transport).initialize(any());
         final DefaultMcpClient.Builder clientBuilder = new DefaultMcpClient.Builder().transport(transport);
 
@@ -140,7 +143,7 @@ public class DefaultMcpClientTest {
     public void should_not_react_to_transport_callbacks_if_there_is_no_object() throws Exception {
         // given
         final McpTransport transport = getMinimalMcpTransportMock();
-        final var exception = new RuntimeException("apples");
+        final RuntimeException exception = new RuntimeException("apples");
         final ArgumentCaptor<Runnable> onFailureCaptor = ArgumentCaptor.forClass(Runnable.class);
         doNothing().when(transport).onFailure(onFailureCaptor.capture());
         doThrow(exception).when(transport).initialize(any());
@@ -304,9 +307,12 @@ public class DefaultMcpClientTest {
                 callOrder.add("listener");
             }
         };
-        McpMetaSupplier metaSupplier = ctx -> {
-            callOrder.add("meta");
-            return Map.of("key", "value");
+        McpMetaSupplier metaSupplier = new McpMetaSupplier() {
+            @Override
+            public Map<String, Object> apply(McpCallContext ctx) {
+                callOrder.add("meta");
+                return Collections.singletonMap("key", "value");
+            }
         };
 
         DefaultMcpClient client = new DefaultMcpClient.Builder()
@@ -340,11 +346,18 @@ public class DefaultMcpClientTest {
         when(transport.executeOperationWithResponse(any(McpCallContext.class)))
                 .thenReturn(CompletableFuture.completedFuture(toolResult));
 
-        McpToolResultExtractor extractor = (content, isError) -> ToolExecutionResult.builder()
-                .result(Map.of("value", content.get(0).get("text").asText()))
-                .resultText("custom:" + content.get(0).get("text").asText())
-                .isError(isError)
-                .build();
+        McpToolResultExtractor extractor = new McpToolResultExtractor() {
+            @Override
+            public ToolExecutionResult extract(com.fasterxml.jackson.databind.JsonNode content, boolean isError) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("value", content.get(0).get("text").asText());
+                return ToolExecutionResult.builder()
+                        .result(map)
+                        .resultText("custom:" + content.get(0).get("text").asText())
+                        .isError(isError)
+                        .build();
+            }
+        };
 
         DefaultMcpClient client = new DefaultMcpClient.Builder()
                 .transport(transport)
@@ -355,7 +368,9 @@ public class DefaultMcpClientTest {
                 ToolExecutionRequest.builder().name("test").arguments("{}").build());
 
         assertThat(result.resultText()).isEqualTo("custom:ok");
-        assertThat(result.result()).isEqualTo(Map.of("value", "ok"));
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("value", "ok");
+        assertThat(result.result()).isEqualTo(expectedMap);
     }
 
     @Test
@@ -363,10 +378,15 @@ public class DefaultMcpClientTest {
         final McpTransport transport = getMinimalMcpTransportMock();
         when(transport.executeOperationWithResponse(any(McpCallContext.class))).thenReturn(new CompletableFuture<>());
 
-        McpToolResultExtractor extractor = (content, isError) -> ToolExecutionResult.builder()
-                .resultText("custom-timeout:" + content.get(0).get("text").asText())
-                .isError(isError)
-                .build();
+        McpToolResultExtractor extractor = new McpToolResultExtractor() {
+            @Override
+            public ToolExecutionResult extract(com.fasterxml.jackson.databind.JsonNode content, boolean isError) {
+                return ToolExecutionResult.builder()
+                        .resultText("custom-timeout:" + content.get(0).get("text").asText())
+                        .isError(isError)
+                        .build();
+            }
+        };
 
         DefaultMcpClient client = new DefaultMcpClient.Builder()
                 .transport(transport)
@@ -400,11 +420,18 @@ public class DefaultMcpClientTest {
         }
 
         CapturingListener listener = new CapturingListener();
-        McpToolResultExtractor extractor = (content, isError) -> ToolExecutionResult.builder()
-                .result(Map.of("message", content.get(0).get("text").asText()))
-                .resultText("custom-error")
-                .isError(isError)
-                .build();
+        McpToolResultExtractor extractor = new McpToolResultExtractor() {
+            @Override
+            public ToolExecutionResult extract(com.fasterxml.jackson.databind.JsonNode content, boolean isError) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("message", content.get(0).get("text").asText());
+                return ToolExecutionResult.builder()
+                        .result(map)
+                        .resultText("custom-error")
+                        .isError(isError)
+                        .build();
+            }
+        };
 
         DefaultMcpClient client = new DefaultMcpClient.Builder()
                 .transport(transport)
@@ -421,7 +448,9 @@ public class DefaultMcpClientTest {
 
         assertThat(listener.toolResult).isNotNull();
         assertThat(listener.toolResult.resultText()).isEqualTo("custom-error");
-        assertThat(listener.toolResult.result()).isEqualTo(Map.of("message", "bad"));
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("message", "bad");
+        assertThat(listener.toolResult.result()).isEqualTo(expectedMap);
         assertThat(listener.toolResult.isError()).isTrue();
     }
 
@@ -436,10 +465,15 @@ public class DefaultMcpClientTest {
         when(transport.executeOperationWithResponse(any(McpCallContext.class)))
                 .thenReturn(CompletableFuture.completedFuture(toolResult));
 
-        McpToolResultExtractor extractor = (content, isError) -> ToolExecutionResult.builder()
-                .resultText(content.get(0).get("text").asText())
-                .isError(false)
-                .build();
+        McpToolResultExtractor extractor = new McpToolResultExtractor() {
+            @Override
+            public ToolExecutionResult extract(com.fasterxml.jackson.databind.JsonNode content, boolean isError) {
+                return ToolExecutionResult.builder()
+                        .resultText(content.get(0).get("text").asText())
+                        .isError(false)
+                        .build();
+            }
+        };
 
         DefaultMcpClient client = new DefaultMcpClient.Builder()
                 .transport(transport)
@@ -465,10 +499,15 @@ public class DefaultMcpClientTest {
         when(transport.executeOperationWithResponse(any(McpCallContext.class)))
                 .thenReturn(CompletableFuture.completedFuture(toolResult));
 
-        McpToolResultExtractor extractor = (content, isError) -> ToolExecutionResult.builder()
-                .resultContents(List.of(TextContent.from("bad"), TextContent.from("details")))
-                .isError(isError)
-                .build();
+        McpToolResultExtractor extractor = new McpToolResultExtractor() {
+            @Override
+            public ToolExecutionResult extract(com.fasterxml.jackson.databind.JsonNode content, boolean isError) {
+                return ToolExecutionResult.builder()
+                        .resultContents(Arrays.asList(TextContent.from("bad"), TextContent.from("details")))
+                        .isError(isError)
+                        .build();
+            }
+        };
 
         DefaultMcpClient client = new DefaultMcpClient.Builder()
                 .transport(transport)
@@ -561,7 +600,35 @@ public class DefaultMcpClientTest {
         return rootNode;
     }
 
-    private static record ToolDefinition(String name, String description, ToolArg... args) {}
+    private static final class ToolDefinition {
+        private final String name;
+        private final String description;
+        private final ToolArg[] args;
 
-    private static record ToolArg(String name, String type, String description) {}
+        ToolDefinition(String name, String description, ToolArg... args) {
+            this.name = name;
+            this.description = description;
+            this.args = args;
+        }
+
+        public String name() { return name; }
+        public String description() { return description; }
+        public ToolArg[] args() { return args; }
+    }
+
+    private static final class ToolArg {
+        private final String name;
+        private final String type;
+        private final String description;
+
+        ToolArg(String name, String type, String description) {
+            this.name = name;
+            this.type = type;
+            this.description = description;
+        }
+
+        public String name() { return name; }
+        public String type() { return type; }
+        public String description() { return description; }
+    }
 }

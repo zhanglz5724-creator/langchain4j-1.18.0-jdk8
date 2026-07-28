@@ -22,6 +22,8 @@ import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import dev.langchain4j.mcp.protocol.McpClientMethod;
 import dev.langchain4j.service.tool.ToolExecutionResult;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.Assertions;
@@ -38,7 +40,7 @@ public class McpClientListenerIT {
     static void setup() {
         skipTestsIfJbangNotAvailable();
         McpTransport transport = new StdioMcpTransport.Builder()
-                .command(List.of(
+                .command(Arrays.asList(
                         getJBangCommand(),
                         "--quiet",
                         "--fresh",
@@ -170,7 +172,7 @@ public class McpClientListenerIT {
 
     @Test
     public void promptGet() {
-        McpGetPromptResult result = mcpClient.getPrompt("testPrompt", Map.of());
+        McpGetPromptResult result = mcpClient.getPrompt("testPrompt", Collections.<String, String>emptyMap());
         assertThat(result).isNotNull();
 
         // check that the beforePromptGet callback was invoked
@@ -186,7 +188,7 @@ public class McpClientListenerIT {
     @Test
     public void promptGetError() {
         try {
-            mcpClient.getPrompt("testPromptFailing", Map.of());
+            mcpClient.getPrompt("testPromptFailing", Collections.<String, String>emptyMap());
             Assertions.fail("Should have thrown an exception");
         } catch (Exception e) {
             // check that the beforePromptGet callback was invoked

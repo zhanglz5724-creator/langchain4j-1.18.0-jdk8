@@ -11,19 +11,12 @@ import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.UserMessage;
 import org.junit.jupiter.api.Test;
 
-/**
- * Test for converting PromptMessage as returned from MCP servers to instances
- * of ChatMessage from the core langchain4j API.
- */
 class PromptContentConversionTest {
 
     @Test
     void userMessageWithText() throws JsonProcessingException {
-        // language=JSON
         String response =
-                """
-                {"jsonrpc":"2.0","id":111,"result":{"messages":[{"role":"user","content":{"text":"Hello","type":"text"}}]}}
-                """;
+                "{\"jsonrpc\":\"2.0\",\"id\":111,\"result\":{\"messages\":[{\"role\":\"user\",\"content\":{\"text\":\"Hello\",\"type\":\"text\"}}]}}";
         JsonNode responseJsonNode = DefaultMcpClient.OBJECT_MAPPER.readTree(response);
         McpGetPromptResult promptResponse = PromptsHelper.parsePromptContents(responseJsonNode);
 
@@ -34,11 +27,8 @@ class PromptContentConversionTest {
 
     @Test
     void aiMessageWithText() throws JsonProcessingException {
-        // language=JSON
         String response =
-                """
-                {"jsonrpc":"2.0","id":123,"result":{"messages":[{"role":"assistant","content":{"text":"Hello","type":"text"}}]}}
-                """;
+                "{\"jsonrpc\":\"2.0\",\"id\":123,\"result\":{\"messages\":[{\"role\":\"assistant\",\"content\":{\"text\":\"Hello\",\"type\":\"text\"}}]}}";
         JsonNode responseJsonNode = DefaultMcpClient.OBJECT_MAPPER.readTree(response);
         McpGetPromptResult promptResponse = PromptsHelper.parsePromptContents(responseJsonNode);
 
@@ -49,11 +39,8 @@ class PromptContentConversionTest {
 
     @Test
     void userMessageWithImage() throws JsonProcessingException {
-        // language=JSON
         String response =
-                """
-                {"jsonrpc":"2.0","id":1,"result":{"messages":[{"role":"user","content":{"data":"aaa","mimeType":"image/png","type":"image"}}]}}
-                """;
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"messages\":[{\"role\":\"user\",\"content\":{\"data\":\"aaa\",\"mimeType\":\"image/png\",\"type\":\"image\"}}]}}";
         JsonNode responseJsonNode = DefaultMcpClient.OBJECT_MAPPER.readTree(response);
         McpGetPromptResult promptResponse = PromptsHelper.parsePromptContents(responseJsonNode);
 

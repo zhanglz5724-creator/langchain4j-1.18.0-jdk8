@@ -20,6 +20,7 @@ import dev.langchain4j.model.chat.mock.ChatModelMock;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.UserMessage;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -61,9 +62,9 @@ public abstract class McpHeadersTestBase {
                     if (ctx.invocationContext() != null) {
                         capturedInvocationContext = ctx.invocationContext();
                     }
-                    return Map.of("X-Test-Header", "12345");
+                    return Collections.singletonMap("X-Test-Header", "12345");
                 } else {
-                    return Map.of();
+                    return Collections.emptyMap();
                 }
             } else {
                 return headersMap;

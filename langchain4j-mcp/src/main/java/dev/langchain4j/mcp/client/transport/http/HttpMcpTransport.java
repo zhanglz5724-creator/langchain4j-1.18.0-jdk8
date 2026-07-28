@@ -92,7 +92,7 @@ implements McpTransport {
         }
         this.logResponses = builder.logResponses;
         this.sseUrl = (String)ValidationUtils.ensureNotNull((Object)builder.sseUrl, (String)"Missing SSE endpoint URL");
-        this.customHeadersSupplier = (McpHeadersSupplier)Utils.getOrDefault((Object)builder.customHeadersSupplier, i -> Collections.emptyMap());
+        this.customHeadersSupplier = (McpHeadersSupplier)Utils.getOrDefault((Object)builder.customHeadersSupplier, (McpHeadersSupplier)(i -> Collections.emptyMap()));
         this.client = httpClientBuilder.build();
     }
 
@@ -223,7 +223,7 @@ implements McpTransport {
         Headers.Builder headerBuilder = new Headers.Builder();
         Map headers = (Map)this.customHeadersSupplier.apply(callContext);
         if (headers != null) {
-            headers.forEach((arg_0, arg_1) -> ((Headers.Builder)headerBuilder).add(arg_0, arg_1));
+            headers.forEach((arg_0, arg_1) -> headerBuilder.add((String)arg_0, (String)arg_1));
         }
         return headerBuilder.build();
     }
@@ -232,7 +232,7 @@ implements McpTransport {
         Headers.Builder headerBuilder = new Headers.Builder().add(CONTENT_TYPE, CONTENT_TYPE_JSON);
         Map headers = (Map)this.customHeadersSupplier.apply(callContext);
         if (headers != null) {
-            headers.forEach((arg_0, arg_1) -> ((Headers.Builder)headerBuilder).add(arg_0, arg_1));
+            headers.forEach((arg_0, arg_1) -> headerBuilder.add((String)arg_0, (String)arg_1));
         }
         return new Request.Builder().url(this.postUrl).headers(headerBuilder.build()).post(RequestBody.create((byte[])OBJECT_MAPPER.writeValueAsBytes((Object)callContext.message()))).build();
     }

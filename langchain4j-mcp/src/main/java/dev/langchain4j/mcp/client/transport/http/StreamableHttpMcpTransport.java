@@ -16,42 +16,54 @@ import dev.langchain4j.mcp.protocol.McpClientMessage;
 import dev.langchain4j.mcp.protocol.McpInitializationNotification;
 import dev.langchain4j.mcp.protocol.McpInitializeRequest;
 import dev.langchain4j.mcp.protocol.McpJsonRpcMessage;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.Collections;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Dispatcher;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSourceListener;
+import okhttp3.sse.EventSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StreamableHttpMcpTransport implements McpTransport {
     private static final Logger LOG = LoggerFactory.getLogger(StreamableHttpMcpTransport.class);
     private static final long DEFAULT_SUBSIDIARY_RETRY_MS = 5000;
+    private static final X509TrustManager DEFAULT_TRUST_MANAGER = getDefaultTrustManager();
+    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final String url;
     private final McpHeadersSupplier customHeadersSupplier;
     private final boolean logResponses;
     private final boolean logRequests;
     private final Logger trafficLog;
-    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final AtomicReference<CompletableFuture<JsonNode>> initializeInProgress = new AtomicReference<>(null);
     private volatile McpOperationHandler operationHandler;
-    private final HttpClient httpClient;
+    private final OkHttpClient httpClient;
     private final SSLContext sslContext;
-    private final HttpClient.Version httpVersion;
     private McpInitializeRequest initializeRequest;
     private final AtomicReference<String> mcpSessionId = new AtomicReference<>();
 
@@ -63,6 +75,7 @@ public class StreamableHttpMcpTransport implements McpTransport {
     private final AtomicLong subsidiaryRetryMs = new AtomicLong(DEFAULT_SUBSIDIARY_RETRY_MS);
     private final Executor executor;
     private AtomicBoolean closed = new AtomicBoolean(false);
+    private volatile EventSource subsidiaryEventSource;
 
     public StreamableHttpMcpTransport(StreamableHttpMcpTransport.Builder builder) {
         url = ensureNotNull(builder.url, "Missing server endpoint URL");
@@ -72,19 +85,21 @@ public class StreamableHttpMcpTransport implements McpTransport {
         Duration timeout = getOrDefault(builder.timeout, Duration.ofSeconds(60));
         customHeadersSupplier = getOrDefault(builder.customHeadersSupplier, (i) -> Collections.emptyMap());
         sslContext = builder.sslContext;
-        httpVersion = builder.forceHttpVersion1_1 ? HttpClient.Version.HTTP_1_1 : HttpClient.Version.HTTP_2;
         subsidiaryChannelEnabled = builder.subsidiaryChannelEnabled;
         executor = getOrDefault(builder.executor, DefaultExecutorProvider.getDefaultExecutorService());
-        HttpClient.Builder clientBuilder =
-                HttpClient.newBuilder().connectTimeout(timeout).version(httpVersion);
-        if (builder.followRedirects) {
-            clientBuilder.followRedirects(HttpClient.Redirect.NORMAL);
+        OkHttpClient.Builder clientBuilder =
+                new OkHttpClient.Builder().connectTimeout(timeout).readTimeout(Duration.ZERO);
+        if (builder.forceHttpVersion1_1) {
+            clientBuilder.protocols(Collections.singletonList(Protocol.HTTP_1_1));
         }
-        if (builder.executor != null) {
-            clientBuilder.executor(builder.executor);
+        if (builder.followRedirects) {
+            clientBuilder.followRedirects(true);
         }
         if (sslContext != null) {
-            clientBuilder.sslContext(sslContext);
+            clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), DEFAULT_TRUST_MANAGER);
+        }
+        if (executor instanceof ExecutorService) {
+            clientBuilder.dispatcher(new Dispatcher((ExecutorService) executor));
         }
         httpClient = clientBuilder.build();
     }
@@ -116,26 +131,25 @@ public class StreamableHttpMcpTransport implements McpTransport {
                 });
     }
 
-    private HttpRequest createRequest(McpJsonRpcMessage message, McpCallContext callContext)
+    private Request createRequest(McpJsonRpcMessage message, McpCallContext callContext)
             throws JsonProcessingException {
         String body = OBJECT_MAPPER.writeValueAsString(message);
-        HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(body);
         if (logRequests) {
             trafficLog.info("Request: {}", body);
         }
-        final HttpRequest.Builder builder = HttpRequest.newBuilder();
+        final Request.Builder builder = new Request.Builder();
         String sessionId = mcpSessionId.get();
         if (sessionId != null && !(message instanceof McpInitializeRequest)) {
-            builder.header("Mcp-Session-Id", sessionId);
+            builder.addHeader("Mcp-Session-Id", sessionId);
         }
         Map<String, String> headers = customHeadersSupplier.apply(callContext);
         if (headers != null) {
-            headers.forEach(builder::header);
+            headers.forEach(builder::addHeader);
         }
-        return builder.uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json,text/event-stream")
-                .POST(bodyPublisher)
+        return builder.url(url)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json,text/event-stream")
+                .post(RequestBody.create(MediaType.parse("application/json"), body))
                 .build();
     }
 
@@ -197,81 +211,108 @@ public class StreamableHttpMcpTransport implements McpTransport {
                 reinitializeInProgress.join();
             }
         }
-        HttpRequest request = null;
+        Request request = null;
         try {
             request = createRequest(
                     context.message(), new McpCallContext(context.invocationContext(), context.message()));
         } catch (JsonProcessingException e) {
-            return CompletableFuture.failedFuture(e);
+            CompletableFuture<JsonNode> f = new CompletableFuture<>();
+            f.completeExceptionally(e);
+            return f;
         }
         CompletableFuture<JsonNode> future = new CompletableFuture<>();
         if (id != null) {
             operationHandler.startOperation(id, future);
         }
 
-        httpClient
-                .sendAsync(request, responseInfo -> {
-                    if (!isExpectedStatusCode(responseInfo.statusCode())) {
-                        if (!(context.message() instanceof McpInitializeRequest) && responseInfo.statusCode() == 404) {
-                            if (!isRetry) {
-                                initialize(StreamableHttpMcpTransport.this.initializeRequest)
-                                        .thenAccept(node -> {
-                                            execute(context, true)
-                                                    .thenAccept(future::complete)
-                                                    .exceptionally(t -> {
-                                                        future.completeExceptionally(t);
-                                                        return null;
-                                                    });
-                                        })
-                                        .exceptionally(t -> {
-                                            future.completeExceptionally(t);
-                                            return null;
-                                        });
-                            }
-                        } else {
-                            future.completeExceptionally(
-                                    new RuntimeException("Unexpected status code: " + responseInfo.statusCode()));
-                        }
-                        return HttpResponse.BodySubscribers.discarding();
-                    } else {
-                        Optional<String> contentType = responseInfo.headers().firstValue("Content-Type");
-                        Optional<String> mcpSessionId = responseInfo.headers().firstValue("Mcp-Session-Id");
-                        if (mcpSessionId.isPresent()) {
-                            LOG.debug("Assigned MCP session ID: {}", mcpSessionId);
-                            StreamableHttpMcpTransport.this.mcpSessionId.set(mcpSessionId.get());
-                        }
-                        if (id != null
-                                && contentType.isPresent()
-                                && contentType.get().contains("text/event-stream")) {
-                            // the server has started an SSE stream
-                            return HttpResponse.BodySubscribers.fromLineSubscriber(
-                                    new SseSubscriber(future, logResponses, operationHandler, trafficLog));
-                        } else {
-                            // the server has returned a regular HTTP response
-                            return HttpResponse.BodySubscribers.mapping(
-                                    HttpResponse.BodySubscribers.ofString(StandardCharsets.UTF_8), responseBody -> {
-                                        if (logResponses) {
-                                            trafficLog.info("Response: {}", responseBody);
-                                        }
-                                        if (id == null) {
-                                            future.complete(null);
-                                        }
-                                        try {
-                                            JsonNode node = OBJECT_MAPPER.readTree(responseBody);
-                                            operationHandler.handle(node);
-                                            return null;
-                                        } catch (IOException e) {
-                                            future.completeExceptionally(e);
-                                            return null;
-                                        }
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                future.completeExceptionally(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                int statusCode = response.code();
+                if (!isExpectedStatusCode(statusCode)) {
+                    if (!(context.message() instanceof McpInitializeRequest) && statusCode == 404) {
+                        if (!isRetry) {
+                            response.close();
+                            initialize(StreamableHttpMcpTransport.this.initializeRequest)
+                                    .thenAccept(node -> {
+                                        execute(context, true)
+                                                .thenAccept(future::complete)
+                                                .exceptionally(t -> {
+                                                    future.completeExceptionally(t);
+                                                    return null;
+                                                });
+                                    })
+                                    .exceptionally(t -> {
+                                        future.completeExceptionally(t);
+                                        return null;
                                     });
+                            return;
                         }
                     }
-                })
-                .exceptionally(t -> {
-                    future.completeExceptionally(t);
-                    return null;
-                });
+                    future.completeExceptionally(
+                            new RuntimeException("Unexpected status code: " + statusCode));
+                    response.close();
+                    return;
+                }
+
+                String contentType = response.header("Content-Type");
+                String sessionId = response.header("Mcp-Session-Id");
+                if (sessionId != null) {
+                    LOG.debug("Assigned MCP session ID: {}", sessionId);
+                    StreamableHttpMcpTransport.this.mcpSessionId.set(sessionId);
+                }
+                if (id != null
+                        && contentType != null
+                        && contentType.contains("text/event-stream")) {
+                    // the server has started an SSE stream
+                    executor.execute(() -> {
+                        try {
+                            BufferedReader reader = new BufferedReader(
+                                    new InputStreamReader(response.body().byteStream(), StandardCharsets.UTF_8));
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                if (logResponses && !line.trim().isEmpty()) {
+                                    trafficLog.info("SSE event received: {}", line);
+                                }
+                                if (line.startsWith("data:")) {
+                                    try {
+                                        operationHandler.handle(OBJECT_MAPPER.readTree(line.substring(5)));
+                                    } catch (JsonProcessingException e) {
+                                        LOG.warn("Failed to parse SSE event: {}", line, e);
+                                    }
+                                }
+                            }
+                        } catch (IOException e) {
+                            future.completeExceptionally(e);
+                        } finally {
+                            response.close();
+                        }
+                    });
+                } else {
+                    // the server has returned a regular HTTP response
+                    try {
+                        String responseBody = response.body().string();
+                        if (logResponses) {
+                            trafficLog.info("Response: {}", responseBody);
+                        }
+                        if (id == null) {
+                            future.complete(null);
+                        }
+                        JsonNode node = OBJECT_MAPPER.readTree(responseBody);
+                        operationHandler.handle(node);
+                    } catch (IOException e) {
+                        future.completeExceptionally(e);
+                    } finally {
+                        response.close();
+                    }
+                }
+            }
+        });
         return future;
     }
 
@@ -287,76 +328,94 @@ public class StreamableHttpMcpTransport implements McpTransport {
         if (closed.get()) {
             return CompletableFuture.completedFuture(null);
         }
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Accept", "text/event-stream")
-                .GET();
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .addHeader("Accept", "text/event-stream")
+                .get();
         String sessionId = mcpSessionId.get();
         if (sessionId != null) {
-            requestBuilder.header("Mcp-Session-Id", sessionId);
+            requestBuilder.addHeader("Mcp-Session-Id", sessionId);
         }
         String lastId = subsidiaryLastEventId.get();
         if (lastId != null) {
-            requestBuilder.header("Last-Event-ID", lastId);
+            requestBuilder.addHeader("Last-Event-ID", lastId);
         }
         Map<String, String> headers = customHeadersSupplier.apply(null);
         if (headers != null) {
-            headers.forEach(requestBuilder::header);
+            headers.forEach(requestBuilder::addHeader);
         }
-        HttpRequest request = requestBuilder.build();
+        Request request = requestBuilder.build();
 
         CompletableFuture<Void> result = new CompletableFuture<>();
-        SseSubscriber subscriber = new SseSubscriber(
-                logResponses,
-                operationHandler,
-                trafficLog,
-                subsidiaryLastEventId,
-                subsidiaryRetryMs,
-                this::scheduleSubsidiaryReconnect,
-                closed);
 
-        httpClient
-                .sendAsync(request, responseInfo -> {
-                    int statusCode = responseInfo.statusCode();
-                    Optional<String> contentType = responseInfo.headers().firstValue("Content-Type");
-                    if (isExpectedStatusCode(statusCode)
-                            && contentType.isPresent()
-                            && contentType.get().contains("text/event-stream")) {
-                        subsidiaryChannelEstablished = true;
-                        LOG.debug("Subsidiary SSE channel established");
-                        result.complete(null);
-                        return HttpResponse.BodySubscribers.fromLineSubscriber(subscriber);
-                    } else {
-                        if (firstAttempt) {
-                            LOG.warn(
-                                    "Failed to open subsidiary SSE channel (status={}, contentType={}), will not re-attempt",
-                                    statusCode,
-                                    contentType.orElse("absent"));
-                        } else {
-                            LOG.debug(
-                                    "Failed to reconnect subsidiary SSE channel (status={}, contentType={}), scheduling retry",
-                                    statusCode,
-                                    contentType.orElse("absent"));
-                            if (!closed.get()) {
-                                scheduleSubsidiaryReconnect();
-                            }
-                        }
-                        result.complete(null);
-                        return HttpResponse.BodySubscribers.discarding();
+        EventSourceListener listener = new EventSourceListener() {
+            @Override
+            public void onOpen(EventSource eventSource, Response response) {
+                subsidiaryChannelEstablished = true;
+                LOG.debug("Subsidiary SSE channel established");
+                result.complete(null);
+            }
+
+            @Override
+            public void onEvent(EventSource eventSource, String id, String type, String data) {
+                if (id != null) {
+                    subsidiaryLastEventId.set(id);
+                }
+                if (logResponses && data != null && !data.trim().isEmpty()) {
+                    trafficLog.info("SSE event received: data:{}", data);
+                }
+                if (data != null) {
+                    try {
+                        operationHandler.handle(OBJECT_MAPPER.readTree(data));
+                    } catch (JsonProcessingException e) {
+                        LOG.warn("Failed to parse SSE event: {}", data, e);
                     }
-                })
-                .exceptionally(t -> {
-                    if (!closed.get()) {
-                        if (firstAttempt) {
-                            LOG.warn("Failed to open subsidiary SSE channel", t);
-                        } else {
-                            LOG.debug("Subsidiary SSE channel connection failed, scheduling retry", t);
+                }
+            }
+
+            @Override
+            public void onFailure(EventSource eventSource, Throwable t, Response response) {
+                if (!subsidiaryChannelEstablished) {
+                    int statusCode = response != null ? response.code() : 0;
+                    String contentType = response != null ? response.header("Content-Type") : null;
+                    if (firstAttempt) {
+                        LOG.warn(
+                                "Failed to open subsidiary SSE channel (status={}, contentType={}), will not re-attempt",
+                                statusCode,
+                                contentType != null ? contentType : "absent");
+                    } else {
+                        LOG.debug(
+                                "Failed to reconnect subsidiary SSE channel (status={}, contentType={}), scheduling retry",
+                                statusCode,
+                                contentType != null ? contentType : "absent");
+                        if (!closed.get()) {
                             scheduleSubsidiaryReconnect();
                         }
                     }
                     result.complete(null);
-                    return null;
-                });
+                } else {
+                    // Established stream failure
+                    if (response != null && t == null) {
+                        // Non-2xx on reconnect, EventSource won't auto-retry
+                        if (!closed.get()) {
+                            scheduleSubsidiaryReconnect();
+                        }
+                    }
+                    // I/O errors are handled by EventSource's auto-retry
+                }
+            }
+
+            @Override
+            public void onClosed(EventSource eventSource) {
+                LOG.debug("Subsidiary SSE channel closed");
+                if (!closed.get() && subsidiaryChannelEstablished) {
+                    scheduleSubsidiaryReconnect();
+                }
+            }
+        };
+
+        subsidiaryEventSource =
+                EventSources.createFactory(httpClient).newEventSource(request, listener);
         return result;
     }
 
@@ -366,29 +425,47 @@ public class StreamableHttpMcpTransport implements McpTransport {
         }
         long delayMs = subsidiaryRetryMs.get();
         LOG.debug("Scheduling subsidiary SSE channel reconnect in {} ms", delayMs);
-        Executor delayedExecutor = CompletableFuture.delayedExecutor(delayMs, TimeUnit.MILLISECONDS, executor);
-        CompletableFuture.runAsync(
-                () -> {
-                    if (!closed.get()) {
-                        startSubsidiaryChannel(false);
-                    }
-                },
-                delayedExecutor);
+        executor.execute(() -> {
+            try {
+                Thread.sleep(delayMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            if (!closed.get()) {
+                startSubsidiaryChannel(false);
+            }
+        });
     }
 
     private boolean isExpectedStatusCode(int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
 
+    private static X509TrustManager getDefaultTrustManager() {
+        try {
+            TrustManagerFactory tmf =
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init((KeyStore) null);
+            for (TrustManager tm : tmf.getTrustManagers()) {
+                if (tm instanceof X509TrustManager) {
+                    return (X509TrustManager) tm;
+                }
+            }
+            throw new IllegalStateException("No X509TrustManager found");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get default X509TrustManager", e);
+        }
+    }
+
     @Override
     public void close() throws IOException {
         closed.set(true);
-        // The httpClient.close() method only exists on JDK 21+, so invoke it only if we can.
-        // Replace this with a normal method call when switching the base to JDK 21+.
-        try {
-            httpClient.getClass().getMethod("close").invoke(httpClient);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+        if (subsidiaryEventSource != null) {
+            subsidiaryEventSource.cancel();
         }
+        httpClient.dispatcher().executorService().shutdown();
+        httpClient.connectionPool().evictAll();
     }
 
     public static Builder builder() {

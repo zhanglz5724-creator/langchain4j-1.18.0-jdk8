@@ -12,16 +12,14 @@ class McpLogMessageTest {
     @Test
     void logMessageWithoutLogger() {
         String json =
-                """
-                {
-                  "method" : "notifications/message",
-                  "params" : {
-                    "level" : "info",
-                    "data" : "Searching DuckDuckGo for: length of pont des arts in meters"
-                  },
-                  "jsonrpc" : "2.0"
-                }
-                """;
+                "{\n" +
+                "  \"method\" : \"notifications/message\",\n" +
+                "  \"params\" : {\n" +
+                "    \"level\" : \"info\",\n" +
+                "    \"data\" : \"Searching DuckDuckGo for: length of pont des arts in meters\"\n" +
+                "  },\n" +
+                "  \"jsonrpc\" : \"2.0\"\n" +
+                "}";
 
         JsonNode jsonNode = toJsonNode(json);
 
