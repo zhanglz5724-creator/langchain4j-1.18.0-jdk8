@@ -22,6 +22,7 @@ import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.TokenStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -113,7 +114,20 @@ class ReturnBehaviorCombinationsTest {
         REPROCESS
     }
 
-    record ToolStep(ReturnBehavior behavior, boolean errors, Optional<String> toolName) {
+    static final class ToolStep {
+        private final ReturnBehavior behavior;
+        private final boolean errors;
+        private final Optional<String> toolName;
+
+        public ToolStep(ReturnBehavior behavior, boolean errors, Optional<String> toolName) {
+            this.behavior = behavior;
+            this.errors = errors;
+            this.toolName = toolName;
+        }
+
+        public ReturnBehavior behavior() { return behavior; }
+        public boolean errors() { return errors; }
+        public Optional<String> toolName() { return toolName; }
 
         static ToolStep ok(ReturnBehavior behavior) {
             return new ToolStep(behavior, false, Optional.empty());
@@ -136,61 +150,61 @@ class ReturnBehaviorCombinationsTest {
     static Stream<Arguments> combinations() {
         return Stream.of(
                 // --- TO_LLM ---
-                arguments(List.of(ok(TO_LLM)), REPROCESS),
-                arguments(List.of(ok(TO_LLM), ok(TO_LLM)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(TO_LLM)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(TO_LLM), ok(TO_LLM)), REPROCESS),
 
                 // --- IMMEDIATE / TO_LLM ---
-                arguments(List.of(ok(IMMEDIATE)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(IMMEDIATE), ok(IMMEDIATE)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(TO_LLM), ok(IMMEDIATE)), REPROCESS),
-                arguments(List.of(ok(IMMEDIATE), ok(TO_LLM)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE), ok(IMMEDIATE)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(TO_LLM), ok(IMMEDIATE)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE), ok(TO_LLM)), REPROCESS),
 
                 // --- IMMEDIATE_IF_LAST / TO_LLM ---
-                arguments(List.of(ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(TO_LLM), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(IMMEDIATE_IF_LAST), ok(TO_LLM)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(TO_LLM), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE_IF_LAST), ok(TO_LLM)), REPROCESS),
 
                 // --- IMMEDIATE / IMMEDIATE_IF_LAST ---
-                arguments(List.of(ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE)), RETURN_IMMEDIATELY),
 
                 // --- IMMEDIATE / IMMEDIATE_IF_LAST / TO_LLM ---
-                arguments(List.of(ok(TO_LLM), ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(TO_LLM), ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE)), REPROCESS),
-                arguments(List.of(ok(IMMEDIATE), ok(TO_LLM), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
-                arguments(List.of(ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST), ok(TO_LLM)), REPROCESS),
-                arguments(List.of(ok(IMMEDIATE_IF_LAST), ok(TO_LLM), ok(IMMEDIATE)), REPROCESS),
-                arguments(List.of(ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE), ok(TO_LLM)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(TO_LLM), ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(TO_LLM), ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE), ok(TO_LLM), ok(IMMEDIATE_IF_LAST)), RETURN_IMMEDIATELY),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST), ok(TO_LLM)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE_IF_LAST), ok(TO_LLM), ok(IMMEDIATE)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE_IF_LAST), ok(IMMEDIATE), ok(TO_LLM)), REPROCESS),
 
                 // --- ERRORS: any error in any tool => REPROCESS ---
 
                 // single tool errors (the only call in the response errors)
-                arguments(List.of(err(TO_LLM)), REPROCESS),
-                arguments(List.of(err(IMMEDIATE)), REPROCESS), // would return immediately without error
-                arguments(List.of(err(IMMEDIATE_IF_LAST)), REPROCESS), // would return immediately without error
+                arguments(java.util.Arrays.asList(err(TO_LLM)), REPROCESS),
+                arguments(java.util.Arrays.asList(err(IMMEDIATE)), REPROCESS), // would return immediately without error
+                arguments(java.util.Arrays.asList(err(IMMEDIATE_IF_LAST)), REPROCESS), // would return immediately without error
 
                 // two tools, one errors — covers both first-errors and last-errors positions
-                arguments(List.of(err(IMMEDIATE), ok(IMMEDIATE)), REPROCESS), // would return immediately without error
-                arguments(List.of(ok(IMMEDIATE), err(IMMEDIATE)), REPROCESS), // would return immediately without error
+                arguments(java.util.Arrays.asList(err(IMMEDIATE), ok(IMMEDIATE)), REPROCESS), // would return immediately without error
+                arguments(java.util.Arrays.asList(ok(IMMEDIATE), err(IMMEDIATE)), REPROCESS), // would return immediately without error
                 arguments(
-                        List.of(err(TO_LLM), ok(IMMEDIATE_IF_LAST)),
+                        java.util.Arrays.asList(err(TO_LLM), ok(IMMEDIATE_IF_LAST)),
                         REPROCESS), // would return immediately without error
                 arguments(
-                        List.of(ok(TO_LLM), err(IMMEDIATE_IF_LAST)),
+                        java.util.Arrays.asList(ok(TO_LLM), err(IMMEDIATE_IF_LAST)),
                         REPROCESS), // would return immediately without error (last itself errors)
-                arguments(List.of(err(IMMEDIATE_IF_LAST), ok(TO_LLM)), REPROCESS), // already REPROCESS without error
+                arguments(java.util.Arrays.asList(err(IMMEDIATE_IF_LAST), ok(TO_LLM)), REPROCESS), // already REPROCESS without error
                 arguments(
-                        List.of(err(IMMEDIATE), ok(IMMEDIATE_IF_LAST)),
+                        java.util.Arrays.asList(err(IMMEDIATE), ok(IMMEDIATE_IF_LAST)),
                         REPROCESS), // would return immediately without error
                 arguments(
-                        List.of(ok(IMMEDIATE), err(IMMEDIATE_IF_LAST)),
+                        java.util.Arrays.asList(ok(IMMEDIATE), err(IMMEDIATE_IF_LAST)),
                         REPROCESS), // would return immediately without error (last itself errors)
 
                 // three tools, error in any position — would-return-immediately mixes
-                arguments(List.of(err(TO_LLM), ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), REPROCESS),
-                arguments(List.of(ok(TO_LLM), err(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), REPROCESS),
-                arguments(List.of(ok(TO_LLM), ok(IMMEDIATE), err(IMMEDIATE_IF_LAST)), REPROCESS));
+                arguments(java.util.Arrays.asList(err(TO_LLM), ok(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(TO_LLM), err(IMMEDIATE), ok(IMMEDIATE_IF_LAST)), REPROCESS),
+                arguments(java.util.Arrays.asList(ok(TO_LLM), ok(IMMEDIATE), err(IMMEDIATE_IF_LAST)), REPROCESS));
     }
 
     @ParameterizedTest(name = "{0} -> {1}")
@@ -274,13 +288,13 @@ class ReturnBehaviorCombinationsTest {
     @Test
     public void testImmediateWithoutResultReturnType() {
         // test single tool execution that returns void
-        List<ToolStep> steps = List.of(ToolStep.withToolName(IMMEDIATE, "immediateVoid"));
+        List<ToolStep> steps = java.util.Arrays.asList(ToolStep.withToolName(IMMEDIATE, "immediateVoid"));
         testImmediateWithoutResultReturnType(steps, assistant -> assistant.chatVoid("go"));
         testImmediateWithoutResultReturnType(
                 steps, assistant -> assertThat(assistant.chatString("go")).isNull());
 
         // test multiple tool executions all null.  Should be ok.
-        steps = List.of(
+        steps = java.util.Arrays.asList(
                 ToolStep.withToolName(IMMEDIATE, "immediateVoid"), ToolStep.withToolName(IMMEDIATE, "immediateNull"));
         testImmediateWithoutResultReturnType(steps, assistant -> assistant.chatVoid("go"));
         testImmediateWithoutResultReturnType(
@@ -288,7 +302,7 @@ class ReturnBehaviorCombinationsTest {
 
         // test multiple tool executions with only one that has a non-null tool result
         // this should be ok.
-        steps = List.of(
+        steps = java.util.Arrays.asList(
                 ToolStep.withToolName(IMMEDIATE, "immediateVoid"),
                 ToolStep.ok(IMMEDIATE),
                 ToolStep.withToolName(IMMEDIATE, "immediateNull"));
@@ -296,7 +310,7 @@ class ReturnBehaviorCombinationsTest {
         testImmediateWithoutResultReturnType(
                 steps, assistant -> assertThat(assistant.chatString("go")).isEqualTo("immediate"));
 
-        steps = List.of(ToolStep.withToolName(IMMEDIATE, "immediate2"), ToolStep.ok(IMMEDIATE));
+        steps = java.util.Arrays.asList(ToolStep.withToolName(IMMEDIATE, "immediate2"), ToolStep.ok(IMMEDIATE));
         // void return types should just return null
         testImmediateWithoutResultReturnType(steps, assistant -> assistant.chatVoid("go"));
 
@@ -308,7 +322,7 @@ class ReturnBehaviorCombinationsTest {
         }
 
         // tool execution integer result object cannot resolve to String so exception should be thrown
-        steps = List.of(ToolStep.withToolName(IMMEDIATE, "immediateInteger"));
+        steps = java.util.Arrays.asList(ToolStep.withToolName(IMMEDIATE, "immediateInteger"));
         try {
             testImmediateWithoutResultReturnType(steps, assistant -> assistant.chatString("go"));
         } catch (IllegalConfigurationException ex) {
@@ -348,13 +362,17 @@ class ReturnBehaviorCombinationsTest {
     }
 
     private static String toolNameFor(ToolStep step) {
-        String prefix = step.toolName().isPresent()
-                ? step.toolName.get()
-                : switch (step.behavior()) {
-                    case TO_LLM -> "to_llm";
-                    case IMMEDIATE -> "immediate";
-                    case IMMEDIATE_IF_LAST -> "immediate_if_last";
-                };
+        String prefix;
+        if (step.toolName().isPresent()) {
+            prefix = step.toolName.get();
+        } else {
+            switch (step.behavior()) {
+                case TO_LLM: prefix = "to_llm"; break;
+                case IMMEDIATE: prefix = "immediate"; break;
+                case IMMEDIATE_IF_LAST: prefix = "immediate_if_last"; break;
+                default: throw new IllegalStateException("Unexpected behavior: " + step.behavior());
+            }
+        }
         return prefix + (step.errors() ? "_err" : "_ok");
     }
 }

@@ -111,6 +111,12 @@ class StreamingAiServicesWithToolsIT {
         TokenStream chat(String userMessage);
     }
 
+    interface AssistantWithInvocationParams {
+
+        TokenStream chat(
+                @dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
+    }
+
     static class TransactionService {
 
         final Queue<Thread> threads = new ConcurrentLinkedQueue<>();
@@ -127,11 +133,13 @@ class StreamingAiServicesWithToolsIT {
         @Tool("returns amount of a given transaction")
         Double getTransactionAmount(@P("ID of a transaction") String id) {
             threads.add(Thread.currentThread());
-            return switch (id) {
-                case "T001" -> 11.1;
-                case "T002" -> 22.2;
-                default -> throw new IllegalArgumentException("Unknown transaction ID: " + id);
-            };
+            double result;
+            switch (id) {
+                case "T001": result = 11.1; break;
+                case "T002": result = 22.2; break;
+                default: throw new IllegalArgumentException("Unknown transaction ID: " + id);
+            }
+            return result;
         }
     }
 
@@ -854,9 +862,8 @@ class StreamingAiServicesWithToolsIT {
                 .chat(
                         argThat((ChatRequest chatRequest) ->
                                 chatRequest.messages().size() == 3
-                                        && chatRequest.messages().get(2)
-                                                instanceof ToolExecutionResultMessage toolResult
-                                        && toolResult.text().equals(errorMessage)),
+                                        && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                                        && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals(errorMessage)),
                         any());
         verifyNoMoreInteractionsFor(spyModel);
 
@@ -926,9 +933,8 @@ class StreamingAiServicesWithToolsIT {
                 .chat(
                         argThat((ChatRequest chatRequest) ->
                                 chatRequest.messages().size() == 3
-                                        && chatRequest.messages().get(2)
-                                                instanceof ToolExecutionResultMessage toolResult
-                                        && toolResult.text().equals("java.lang.RuntimeException")),
+                                        && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                                        && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals("java.lang.RuntimeException")),
                         any());
         verifyNoMoreInteractionsFor(spyModel);
 
@@ -1012,9 +1018,8 @@ class StreamingAiServicesWithToolsIT {
                 .chat(
                         argThat((ChatRequest chatRequest) ->
                                 chatRequest.messages().size() == 3
-                                        && chatRequest.messages().get(2)
-                                                instanceof ToolExecutionResultMessage toolResult
-                                        && toolResult.text().equals(customizedErrorMessage)),
+                                        && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                                        && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals(customizedErrorMessage)),
                         any());
         verifyNoMoreInteractionsFor(spyModel);
 
@@ -1253,9 +1258,8 @@ class StreamingAiServicesWithToolsIT {
                 .chat(
                         argThat((ChatRequest chatRequest) ->
                                 chatRequest.messages().size() == 3
-                                        && chatRequest.messages().get(2)
-                                                instanceof ToolExecutionResultMessage toolResult
-                                        && toolResult.text().equals(customizedErrorMessage)),
+                                        && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                                        && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals(customizedErrorMessage)),
                         any());
         verify(spyModel)
                 .chat(
@@ -1358,22 +1362,18 @@ class StreamingAiServicesWithToolsIT {
             @Tool
             String getWeather(InvocationParameters invocationParameters) {
                 String city = invocationParameters.get("city");
-                return switch (city) {
-                    case "Munich" -> "rainy";
-                    default -> "sunny";
-                };
+                String weather;
+                switch (city) {
+                    case "Munich": weather = "rainy"; break;
+                    default: weather = "sunny"; break;
+                }
+                return weather;
             }
-        }
-
-        interface Assistant {
-
-            TokenStream chat(
-                    @dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
         }
 
         Tools spyTools = spy(new Tools());
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        AssistantWithInvocationParams assistant = AiServices.builder(AssistantWithInvocationParams.class)
                 .streamingChatModel(models().findFirst().get())
                 .tools(spyTools)
                 .build();

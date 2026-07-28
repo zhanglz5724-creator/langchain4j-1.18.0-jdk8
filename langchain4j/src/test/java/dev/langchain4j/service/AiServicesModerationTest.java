@@ -24,10 +24,10 @@ class AiServicesModerationTest {
     void should_throw_ModerationException_when_content_is_flagged() {
         // Given
         String flaggedText = "inappropriate content";
-        final var flaggedModeration = Moderation.flagged(flaggedText);
+        final Moderation flaggedModeration = Moderation.flagged(flaggedText);
 
         // Create a Future that will return the flagged moderation
-        final var moderationFuture = CompletableFuture.completedFuture(flaggedModeration);
+        final CompletableFuture<Moderation> moderationFuture = CompletableFuture.completedFuture(flaggedModeration);
 
         // When/Then
         assertThatThrownBy(() -> AiServices.verifyModerationIfNeeded(moderationFuture))
@@ -41,8 +41,8 @@ class AiServicesModerationTest {
     @Test
     void should_NOT_throw_ModerationException_when_content_is_NOT_flagged() {
         // Given
-        final var safeModeration = Moderation.notFlagged();
-        final var moderationFuture = CompletableFuture.completedFuture(safeModeration);
+        final Moderation safeModeration = Moderation.notFlagged();
+        final CompletableFuture<Moderation> moderationFuture = CompletableFuture.completedFuture(safeModeration);
 
         // When/Then - should not throw an exception
         assertDoesNotThrow(() -> AiServices.verifyModerationIfNeeded(moderationFuture));
@@ -57,8 +57,8 @@ class AiServicesModerationTest {
     void should_preserve_moderation_object_in_exception() {
         // Given
         String flaggedText = "test content";
-        final var originalModeration = Moderation.flagged(flaggedText);
-        final var moderationFuture = CompletableFuture.completedFuture(originalModeration);
+        final Moderation originalModeration = Moderation.flagged(flaggedText);
+        final CompletableFuture<Moderation> moderationFuture = CompletableFuture.completedFuture(originalModeration);
 
         // When/Then
         assertThatThrownBy(() -> AiServices.verifyModerationIfNeeded(moderationFuture))
@@ -73,8 +73,8 @@ class AiServicesModerationTest {
     @Test
     void should_handle_whitespace_only_flagged_text() {
         // Given
-        final var flaggedModeration = Moderation.flagged("   ");
-        final var moderationFuture = CompletableFuture.completedFuture(flaggedModeration);
+        final Moderation flaggedModeration = Moderation.flagged("   ");
+        final CompletableFuture<Moderation> moderationFuture = CompletableFuture.completedFuture(flaggedModeration);
 
         // When/Then
         assertThatThrownBy(() -> AiServices.verifyModerationIfNeeded(moderationFuture))
@@ -84,8 +84,8 @@ class AiServicesModerationTest {
     @Test
     void should_handle_completed_future_multiple_times() {
         // Given
-        final var safeModeration = Moderation.notFlagged();
-        final var moderationFuture = CompletableFuture.completedFuture(safeModeration);
+        final Moderation safeModeration = Moderation.notFlagged();
+        final CompletableFuture<Moderation> moderationFuture = CompletableFuture.completedFuture(safeModeration);
 
         // When/Then - same future can be checked multiple times
         assertDoesNotThrow(() -> AiServices.verifyModerationIfNeeded(moderationFuture));

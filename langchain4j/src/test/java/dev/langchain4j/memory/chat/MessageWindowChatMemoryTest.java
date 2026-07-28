@@ -11,6 +11,7 @@ import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.HitCountChatMemoryStore.HitCounts;
+import dev.langchain4j.data.message.ChatMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -424,18 +425,18 @@ class MessageWindowChatMemoryTest implements WithAssertions {
             return 3;
         };
 
-        var msgA = userMessage("a");
-        var msgB = userMessage("b");
-        var msgC = userMessage("c");
-        var msg1 = userMessage("1");
-        var msg2 = userMessage("2");
-        var msg3 = userMessage("3");
-        var msg4 = userMessage("4");
-        var msg5 = userMessage("5");
-        var msgX = userMessage("x");
-        var msgY = userMessage("y");
-        var msgZ = userMessage("z");
-        var msgW = userMessage("w");
+        UserMessage msgA = userMessage("a");
+        UserMessage msgB = userMessage("b");
+        UserMessage msgC = userMessage("c");
+        UserMessage msg1 = userMessage("1");
+        UserMessage msg2 = userMessage("2");
+        UserMessage msg3 = userMessage("3");
+        UserMessage msg4 = userMessage("4");
+        UserMessage msg5 = userMessage("5");
+        UserMessage msgX = userMessage("x");
+        UserMessage msgY = userMessage("y");
+        UserMessage msgZ = userMessage("z");
+        UserMessage msgW = userMessage("w");
 
         // Create shortMemory with ID "short" (window size 2)
         MessageWindowChatMemory shortMemory = MessageWindowChatMemory.builder()
@@ -496,11 +497,11 @@ class MessageWindowChatMemoryTest implements WithAssertions {
                 .dynamicMaxMessages(dynamicMaxMessages)
                 .build();
 
-        var msgA = userMessage("A");
-        var msgB = userMessage("B");
-        var msgC = userMessage("C");
-        var msgD = userMessage("D");
-        var msgE = userMessage("E");
+        UserMessage msgA = userMessage("A");
+        UserMessage msgB = userMessage("B");
+        UserMessage msgC = userMessage("C");
+        UserMessage msgD = userMessage("D");
+        UserMessage msgE = userMessage("E");
 
         memory.add(msgA);
         memory.add(msgB);
@@ -522,7 +523,7 @@ class MessageWindowChatMemoryTest implements WithAssertions {
         currentMax[0] = 2;
 
         // Fetch messages list; excess messages are automatically evicted
-        var msgsAfterShrink = memory.messages();
+        List<ChatMessage> msgsAfterShrink = memory.messages();
         assertThat(msgsAfterShrink).containsExactly(msgD, msgE); // Keep the most recent two messages
     }
 
@@ -619,13 +620,13 @@ class MessageWindowChatMemoryTest implements WithAssertions {
     @Test
     void chat_memory_set_uses_reduced_store_ops() {
 
-        var store = new HitCountChatMemoryStore();
-        var chatMemory = MessageWindowChatMemory.builder()
+        HitCountChatMemoryStore store = new HitCountChatMemoryStore();
+        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .maxMessages(3)
                 .chatMemoryStore(store)
                 .build();
 
-        var counts = store.measureHitCounts(() -> {
+        HitCounts counts = store.measureHitCounts(() -> {
             chatMemory.add(userMessage("first"), aiMessage("second"), aiMessage("3rd"));
         });
         assertThat(counts).isEqualTo(new HitCounts(3, 3, 0));

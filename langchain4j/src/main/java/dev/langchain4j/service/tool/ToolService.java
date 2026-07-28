@@ -424,7 +424,7 @@ public class ToolService {
             }
             if (!aiMessage.hasToolExecutionRequests()) break;
             intermediateResponses.add(chatResponse);
-            List toolExecutionRequests = aiMessage.toolExecutionRequests();
+            List<ToolExecutionRequest> toolExecutionRequests = aiMessage.toolExecutionRequests();
             Map<ToolExecutionRequest, ToolExecutionResult> toolResults = this.execute(toolExecutionRequests, toolServiceContext.toolExecutors(), invocationContext);
             boolean anyToolErrored = false;
             String failedToolName = null;
@@ -492,7 +492,7 @@ public class ToolService {
     }
 
     private static void rewriteChatMemoryForCompensatedTools(List<ChatMessage> messages, ChatMemory chatMemory, List<CompensableToolExecution> compensableExecutions, String failedToolName) {
-        ArrayList<ToolExecutionResultMessage> memoryMessages = chatMemory != null ? new ArrayList<ToolExecutionResultMessage>(chatMemory.messages()) : messages;
+        List<ChatMessage> memoryMessages = chatMemory != null ? new ArrayList<ChatMessage>(chatMemory.messages()) : messages;
         block0: for (CompensableToolExecution entry : compensableExecutions) {
             ToolExecutionResultMessage originalMsg = entry.resultMessage();
             ToolExecutionResultMessage replacementMsg = ToolService.rolledBackResultMessage(originalMsg, failedToolName);
@@ -504,7 +504,7 @@ public class ToolService {
             }
         }
         if (chatMemory != null) {
-            chatMemory.set(memoryMessages);
+            chatMemory.set(new ArrayList<ChatMessage>(memoryMessages));
         }
     }
 

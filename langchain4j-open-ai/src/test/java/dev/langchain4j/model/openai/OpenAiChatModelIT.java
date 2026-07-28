@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -188,9 +189,6 @@ class OpenAiChatModelIT {
     void should_generate_valid_json() throws JsonProcessingException {
 
         // given
-        @JsonIgnoreProperties(ignoreUnknown = true) // to ignore the "joke" field
-        record Person(String name, String surname) {}
-
         String userMessage = "Return JSON with two fields: name and surname of Klaus Heisler. "
                 + "Before returning, tell me a joke."; // nudging it to say something additionally to json
 
@@ -328,14 +326,9 @@ class OpenAiChatModelIT {
         // given
         String city = "Munich";
 
-        record ApproximateLocation(String city) {}
-        record UserLocation(String type, ApproximateLocation approximate) {}
-        record WebSearchOptions(
-                @JsonProperty("user_location") UserLocation userLocation) {}
-
         WebSearchOptions webSearchOptions =
                 new WebSearchOptions(new UserLocation("approximate", new ApproximateLocation(city)));
-        Map<String, Object> customParameters = Map.of("web_search_options", webSearchOptions);
+        Map<String, Object> customParameters = Collections.singletonMap("web_search_options", webSearchOptions);
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(UserMessage.from("Where can I buy good coffee?"))
@@ -345,44 +338,43 @@ class OpenAiChatModelIT {
                 .build();
 
         SuccessfulHttpResponse httpResponse =
-                SuccessfulHttpResponse.builder().statusCode(200).body("""
-                        {
-                          "id": "chatcmpl-C9QWFjhlUn7vBERtBTMFbbgoKqTDh",
-                          "object": "chat.completion",
-                          "created": 1756362927,
-                          "model": "gpt-4o-mini-2024-07-18",
-                          "choices": [
-                            {
-                              "index": 0,
-                              "message": {
-                                "role": "assistant",
-                                "content": "Bla bla bla",
-                                "refusal": null,
-                                "annotations": []
-                              },
-                              "logprobs": null,
-                              "finish_reason": "stop"
-                            }
-                          ],
-                          "usage": {
-                            "prompt_tokens": 14,
-                            "completion_tokens": 7,
-                            "total_tokens": 21,
-                            "prompt_tokens_details": {
-                              "cached_tokens": 0,
-                              "audio_tokens": 0
-                            },
-                            "completion_tokens_details": {
-                              "reasoning_tokens": 0,
-                              "audio_tokens": 0,
-                              "accepted_prediction_tokens": 0,
-                              "rejected_prediction_tokens": 0
-                            }
-                          },
-                          "service_tier": "default",
-                          "system_fingerprint": "fp_560af6e559"
-                        }
-                        """).build();
+                SuccessfulHttpResponse.builder().statusCode(200).body("{\n"
+                        + "  \"id\": \"chatcmpl-C9QWFjhlUn7vBERtBTMFbbgoKqTDh\",\n"
+                        + "  \"object\": \"chat.completion\",\n"
+                        + "  \"created\": 1756362927,\n"
+                        + "  \"model\": \"gpt-4o-mini-2024-07-18\",\n"
+                        + "  \"choices\": [\n"
+                        + "    {\n"
+                        + "      \"index\": 0,\n"
+                        + "      \"message\": {\n"
+                        + "        \"role\": \"assistant\",\n"
+                        + "        \"content\": \"Bla bla bla\",\n"
+                        + "        \"refusal\": null,\n"
+                        + "        \"annotations\": []\n"
+                        + "      },\n"
+                        + "      \"logprobs\": null,\n"
+                        + "      \"finish_reason\": \"stop\"\n"
+                        + "    }\n"
+                        + "  ],\n"
+                        + "  \"usage\": {\n"
+                        + "    \"prompt_tokens\": 14,\n"
+                        + "    \"completion_tokens\": 7,\n"
+                        + "    \"total_tokens\": 21,\n"
+                        + "    \"prompt_tokens_details\": {\n"
+                        + "      \"cached_tokens\": 0,\n"
+                        + "      \"audio_tokens\": 0\n"
+                        + "    },\n"
+                        + "    \"completion_tokens_details\": {\n"
+                        + "      \"reasoning_tokens\": 0,\n"
+                        + "      \"audio_tokens\": 0,\n"
+                        + "      \"accepted_prediction_tokens\": 0,\n"
+                        + "      \"rejected_prediction_tokens\": 0\n"
+                        + "    }\n"
+                        + "  },\n"
+                        + "  \"service_tier\": \"default\",\n"
+                        + "  \"system_fingerprint\": \"fp_560af6e559\"\n"
+                        + "}"
+                        ).build();
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(httpResponse);
 
@@ -394,23 +386,22 @@ class OpenAiChatModelIT {
         ChatResponse chatResponse = model.chat(chatRequest);
 
         // then
-        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace("""
-                {
-                  "messages" : [ {
-                    "role" : "user",
-                    "content" : "Where can I buy good coffee?"
-                  } ],
-                  "stream" : false,
-                  "web_search_options" : {
-                    "user_location" : {
-                      "type" : "approximate",
-                      "approximate" : {
-                        "city" : "Munich"
-                      }
-                    }
-                  }
-                }
-                """);
+        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace("{\n"
+                + "  \"messages\" : [ {\n"
+                + "    \"role\" : \"user\",\n"
+                + "    \"content\" : \"Where can I buy good coffee?\"\n"
+                + "  } ],\n"
+                + "  \"stream\" : false,\n"
+                + "  \"web_search_options\" : {\n"
+                + "    \"user_location\" : {\n"
+                + "      \"type\" : \"approximate\",\n"
+                + "      \"approximate\" : {\n"
+                + "        \"city\" : \"Munich\"\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}"
+                );
 
         SuccessfulHttpResponse rawResponse = ((OpenAiChatResponseMetadata) chatResponse.metadata()).rawHttpResponse();
         assertThat(rawResponse).isEqualTo(httpResponse);
@@ -453,5 +444,38 @@ class OpenAiChatModelIT {
         assertThat(firstToken.token()).isNotBlank();
         assertThat(firstToken.logprob()).isNotNull();
         assertThat(firstToken.topLogprobs()).isNotNull().hasSize(2);
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Person {
+        public String name;
+        public String surname;
+    }
+
+    public static class ApproximateLocation {
+        public final String city;
+
+        public ApproximateLocation(String city) {
+            this.city = city;
+        }
+    }
+
+    public static class UserLocation {
+        public final String type;
+        public final ApproximateLocation approximate;
+
+        public UserLocation(String type, ApproximateLocation approximate) {
+            this.type = type;
+            this.approximate = approximate;
+        }
+    }
+
+    public static class WebSearchOptions {
+        @JsonProperty("user_location")
+        public final UserLocation userLocation;
+
+        public WebSearchOptions(UserLocation userLocation) {
+            this.userLocation = userLocation;
+        }
     }
 }

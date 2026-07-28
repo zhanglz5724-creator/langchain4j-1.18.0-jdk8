@@ -88,7 +88,7 @@ public class TestUtils {
     }
 
     public static List<String> repeat(String s, int n) {
-        final var result = new ArrayList<String>();
+        final ArrayList<String> result = new ArrayList<String>();
         for (int i = 0; i < n; i++) {
             result.add(s);
         }

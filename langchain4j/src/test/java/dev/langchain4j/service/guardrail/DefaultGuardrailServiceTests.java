@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class DefaultGuardrailServiceTests {
     @Test
     void noGuardrails() {
-        var guardrailService = (DefaultGuardrailService)
+        DefaultGuardrailService guardrailService = (DefaultGuardrailService)
                 GuardrailService.builder(NoGuardrailAssistant.class).build();
 
         assertThat(guardrailService.getInputGuardrailMethodCount()).isEqualTo(0);
@@ -34,9 +34,9 @@ class DefaultGuardrailServiceTests {
 
     @Test
     void classLevelGuardrailsNoBuilders() {
-        var gs = GuardrailService.builder(ClassLevelAssistant.class).build();
+        GuardrailService gs = GuardrailService.builder(ClassLevelAssistant.class).build();
         assertThat(gs).isInstanceOf(DefaultGuardrailService.class);
-        var guardrailService = (DefaultGuardrailService) gs;
+        DefaultGuardrailService guardrailService = (DefaultGuardrailService) gs;
 
         assertThat(guardrailService.getInputGuardrailMethodCount()).isEqualTo(2);
         assertThat(guardrailService.getOutputGuardrailMethodCount()).isEqualTo(2);
@@ -69,7 +69,7 @@ class DefaultGuardrailServiceTests {
     @MethodSource("classLevelGuardrailBuilders")
     void classLevelGuardrails(String testDescription, GuardrailService gs) {
         assertThat(gs).isInstanceOf(DefaultGuardrailService.class);
-        var guardrailService = (DefaultGuardrailService) gs;
+        DefaultGuardrailService guardrailService = (DefaultGuardrailService) gs;
 
         assertThat(guardrailService.getInputGuardrailMethodCount()).isEqualTo(2);
         assertThat(guardrailService.getOutputGuardrailMethodCount()).isEqualTo(2);
@@ -100,7 +100,7 @@ class DefaultGuardrailServiceTests {
 
     @Test
     void methodLevelGuardrails() {
-        var guardrailService = (DefaultGuardrailService)
+        DefaultGuardrailService guardrailService = (DefaultGuardrailService)
                 GuardrailService.builder(MethodLevelAssistant.class).build();
 
         assertThat(guardrailService.getInputGuardrailMethodCount()).isEqualTo(2);
@@ -132,9 +132,9 @@ class DefaultGuardrailServiceTests {
 
     @Test
     void classAndMethodLevelGuardrailsNoBuilders() {
-        var gs = GuardrailService.builder(ClassAndMethodLevelAssistant.class).build();
+        GuardrailService gs = GuardrailService.builder(ClassAndMethodLevelAssistant.class).build();
         assertThat(gs).isInstanceOf(DefaultGuardrailService.class);
-        var guardrailService = (DefaultGuardrailService) gs;
+        DefaultGuardrailService guardrailService = (DefaultGuardrailService) gs;
 
         assertThat(guardrailService.getInputGuardrailMethodCount()).isEqualTo(2);
         assertThat(guardrailService.getOutputGuardrailMethodCount()).isEqualTo(2);
@@ -175,7 +175,7 @@ class DefaultGuardrailServiceTests {
     @MethodSource("classAndMethodLevelGuardrailBuilders")
     void classAndMethodLevelGuardrails(String testDescription, GuardrailService gs) {
         assertThat(gs).isInstanceOf(DefaultGuardrailService.class);
-        var guardrailService = (DefaultGuardrailService) gs;
+        DefaultGuardrailService guardrailService = (DefaultGuardrailService) gs;
 
         assertThat(guardrailService.getInputGuardrailMethodCount()).isEqualTo(2);
         assertThat(guardrailService.getOutputGuardrailMethodCount()).isEqualTo(2);

@@ -4,6 +4,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.common.AbstractEmbeddingModelIT;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -12,7 +13,7 @@ class OpenAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(OpenAiEmbeddingModel.builder()
+        return Arrays.asList(OpenAiEmbeddingModel.builder()
                 .apiKey(System.getenv("OPENAI_API_KEY"))
                 .modelName("text-embedding-3-small")
                 .logRequests(true)
@@ -25,7 +26,7 @@ class OpenAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return OpenAiEmbeddingModel.builder()
                 .apiKey(System.getenv("OPENAI_API_KEY"))
                 .modelName("text-embedding-3-small")
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -35,7 +36,7 @@ class OpenAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
                 .apiKey("banana") // invalid key -> the request fails
                 .modelName("text-embedding-3-small")
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

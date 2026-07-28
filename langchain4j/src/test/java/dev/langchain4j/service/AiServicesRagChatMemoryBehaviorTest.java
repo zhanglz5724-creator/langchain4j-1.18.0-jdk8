@@ -45,9 +45,9 @@ class AiServicesRagChatMemoryBehaviorTest {
 
         private static final ToolExecutionRequest TOOL_CALL = ToolExecutionRequest.builder()
                 .name("lookup")
-                .arguments("""
-                        {"arg0":"hello"}
-                        """)
+                .arguments("{"
+                        + "\"arg0\":\"hello\""
+                        + "}")
                 .build();
 
         @Tool

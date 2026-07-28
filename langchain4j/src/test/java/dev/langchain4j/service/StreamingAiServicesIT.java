@@ -70,6 +70,23 @@ class StreamingAiServicesIT {
         TokenStream chat(String userMessage);
     }
 
+    interface ThinkingTokenStreamHandler {
+        void onPartialThinking(PartialThinking partialThinking);
+        void onPartialResponse(String partialResponse);
+        void onError(Throwable error);
+        void onCompleteResponse(ChatResponse completeResponse);
+    }
+
+    interface CancellationTokenStreamHandler {
+        void onPartialThinking(PartialThinking partialThinking, PartialThinkingContext context);
+
+        void onPartialResponse(String partialResponse);
+
+        void onError(Throwable error);
+
+        void onCompleteResponse(ChatResponse completeResponse);
+    }
+
     @ParameterizedTest
     @MethodSource("models")
     void should_stream_answer(StreamingChatModel model) throws Exception {
@@ -501,14 +518,7 @@ class StreamingAiServicesIT {
 
         Assistant assistant = AiServices.create(Assistant.class, streamingChatModel);
 
-        interface TokenStreamHandler {
-            void onPartialThinking(PartialThinking partialThinking);
-            void onPartialResponse(String partialResponse);
-            void onError(Throwable error);
-            void onCompleteResponse(ChatResponse completeResponse);
-        }
-
-        TokenStreamHandler tokenStreamHandler = mock(TokenStreamHandler.class);
+        ThinkingTokenStreamHandler tokenStreamHandler = mock(ThinkingTokenStreamHandler.class);
         CompletableFuture<ChatResponse> futureResponse = new CompletableFuture<>();
 
         // when
@@ -592,17 +602,7 @@ class StreamingAiServicesIT {
 
         Assistant assistant = AiServices.create(Assistant.class, streamingChatModel);
 
-        interface TokenStreamHandler {
-            void onPartialThinking(PartialThinking partialThinking, PartialThinkingContext context);
-
-            void onPartialResponse(String partialResponse);
-
-            void onError(Throwable error);
-
-            void onCompleteResponse(ChatResponse completeResponse);
-        }
-
-        TokenStreamHandler tokenStreamHandler = mock(TokenStreamHandler.class);
+        CancellationTokenStreamHandler tokenStreamHandler = mock(CancellationTokenStreamHandler.class);
         CompletableFuture<ChatResponse> futureResponse = new CompletableFuture<>();
 
         // when

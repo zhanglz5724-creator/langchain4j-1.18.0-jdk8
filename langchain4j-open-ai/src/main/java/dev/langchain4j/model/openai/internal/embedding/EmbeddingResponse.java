@@ -22,13 +22,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest;
 import dev.langchain4j.model.openai.internal.embedding.Embedding;
 import dev.langchain4j.model.openai.internal.shared.Usage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder = EmbeddingResponse.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class EmbeddingResponse {

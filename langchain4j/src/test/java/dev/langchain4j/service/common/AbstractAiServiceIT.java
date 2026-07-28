@@ -15,6 +15,7 @@ import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +37,10 @@ public abstract class AbstractAiServiceIT {
     interface Assistant {
 
         Result<String> chat(String userMessage);
+    }
+
+    interface WeatherAssistant {
+        Result<WeatherReport> chat(String city);
     }
 
     @ParameterizedTest
@@ -77,6 +82,40 @@ public abstract class AbstractAiServiceIT {
     // TODO more tests for tools
     // TODO more tests for str outputs
 
+    enum Weather {
+        SUNNY,
+        RAINY
+    }
+    static class WeatherReport {
+        private final String city;
+        private final Weather weather;
+
+        WeatherReport(String city, Weather weather) {
+            this.city = city;
+            this.weather = weather;
+        }
+
+        String city() { return city; }
+        Weather weather() { return weather; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            WeatherReport that = (WeatherReport) o;
+            return Objects.equals(city, that.city) && Objects.equals(weather, that.weather);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(city, weather);
+        }
+
+        @Override
+        public String toString() {
+            return "WeatherReport[city=" + city + ", weather=" + weather + "]";
+        }
+    }
     @ParameterizedTest
     @MethodSource("modelsSupportingToolsAndJsonResponseFormatWithSchema")
     @EnabledIf("supportsToolsAndJsonResponseFormatWithSchema")
@@ -87,16 +126,7 @@ public abstract class AbstractAiServiceIT {
         // given
         model = spy(model);
 
-        enum Weather {
-            SUNNY,
-            RAINY
-        }
 
-        record WeatherReport(String city, Weather weather) {}
-
-        interface WeatherAssistant {
-            Result<WeatherReport> chat(String city);
-        }
 
         class WeatherTools {
 

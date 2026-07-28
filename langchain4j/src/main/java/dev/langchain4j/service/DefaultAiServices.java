@@ -139,7 +139,7 @@ class DefaultAiServices<T>
 extends AiServices<T> {
     private final ServiceOutputParser serviceOutputParser = new ServiceOutputParser();
     private final Collection<TokenStreamAdapter> tokenStreamAdapters = ServiceHelper.loadFactories(TokenStreamAdapter.class);
-    private static final Set<Class<? extends Annotation>> VALID_PARAM_ANNOTATIONS = new HashSet<Class>(Arrays.asList(UserMessage.class, V.class, MemoryId.class, UserName.class));
+    private static final Set<Class<? extends Annotation>> VALID_PARAM_ANNOTATIONS = new HashSet<Class<? extends Annotation>>(Arrays.asList(UserMessage.class, V.class, MemoryId.class, UserName.class));
 
     DefaultAiServices(AiServiceContext context) {
         super(context);
@@ -238,10 +238,10 @@ extends AiServices<T> {
                 dev.langchain4j.data.message.UserMessage userMessage = DefaultAiServices.addContentsToUserMessage(method, args, userMessageForAugmentation);
                 GuardrailRequestParams commonGuardrailParam = GuardrailRequestParams.builder().chatMemory(chatMemory).augmentationResult(augmentationResult).userMessageTemplate(userMessageTemplate).invocationContext(invocationContext).aiServiceListenerRegistrar(DefaultAiServices.this.context.eventListenerRegistrar).variables(variables).build();
                 userMessage = DefaultAiServices.this.invokeInputGuardrails(DefaultAiServices.this.context.guardrailService(), method, userMessage, commonGuardrailParam);
-                Class<?> returnType = DefaultAiServices.this.context.returnType != null ? DefaultAiServices.this.context.returnType : method.getGenericReturnType();
+                Type returnType = DefaultAiServices.this.context.returnType != null ? DefaultAiServices.this.context.returnType : method.getGenericReturnType();
                 boolean streaming = returnType == TokenStream.class || this.canAdaptTokenStreamTo(returnType);
                 boolean supportsJsonSchema = this.supportsJsonSchema();
-                Optional<Object> jsonSchema = Optional.empty();
+                Optional<?> jsonSchema = Optional.empty();
                 boolean returnsImage = this.isImage(returnType);
                 if (supportsJsonSchema && !streaming && !returnsImage) {
                     jsonSchema = DefaultAiServices.this.serviceOutputParser.jsonSchema(returnType);
@@ -326,7 +326,7 @@ extends AiServices<T> {
                         return this.fireEventAndReturn(invocationContext, response);
                     }
                 }
-                Result<Object> parsedResponse = DefaultAiServices.this.serviceOutputParser.parse((ChatResponse)response, returnType);
+                Result<Object> parsedResponse = (Result<Object>) (Object) DefaultAiServices.this.serviceOutputParser.parse((ChatResponse)response, returnType);
                 Result<Object> actualResponse = isReturnTypeResult ? Result.builder().content(parsedResponse).tokenUsage(toolServiceResult.aggregateTokenUsage()).sources(augmentationResult == null ? null : augmentationResult.contents()).finishReason(toolServiceResult.finalResponse().finishReason()).toolExecutions(toolServiceResult.toolExecutions()).intermediateResponses(toolServiceResult.intermediateResponses()).finalResponse(toolServiceResult.finalResponse()).build() : parsedResponse;
                 return this.fireEventAndReturn(invocationContext, actualResponse);
             }
@@ -401,7 +401,7 @@ extends AiServices<T> {
                 if (Utils.isNullOrEmpty((String)outputFormatInstructions)) {
                     return userMessage;
                 }
-                ArrayList<TextContent> contents = new ArrayList<TextContent>(userMessage.contents());
+                ArrayList<Content> contents = new ArrayList<Content>(userMessage.contents());
                 boolean appended = false;
                 for (int i = contents.size() - 1; i >= 0; --i) {
                     if (!(contents.get(i) instanceof TextContent)) continue;
@@ -480,7 +480,7 @@ extends AiServices<T> {
                 contents.addAll((List)arg);
             }
             if (!contents.isEmpty()) {
-                return maybeUserName.map(userName -> dev.langchain4j.data.message.UserMessage.from((String)userName, (List)contents)).orElseGet(() -> dev.langchain4j.data.message.UserMessage.from((List)contents));
+                return maybeUserName.map(userName -> dev.langchain4j.data.message.UserMessage.from((String)userName, contents)).orElseGet(() ->  dev.langchain4j.data.message.UserMessage.from(contents));
             }
             throw IllegalConfigurationException.illegalConfiguration("Error: The method '%s' does not have a user message defined.", method.getName());
         }

@@ -18,7 +18,9 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -29,11 +31,56 @@ class OpenAiChatModelWithJsonSchemaIT {
     @JsonSubTypes({@JsonSubTypes.Type(Circle.class), @JsonSubTypes.Type(Rectangle.class)})
     interface Shape {}
 
-    record Circle(double radius) implements Shape {}
+    static class Circle implements Shape {
+        public double radius;
 
-    record Rectangle(double width, double height) implements Shape {}
+        public Circle() {}
 
-    record Shapes(List<Shape> shapes) {}
+        public Circle(double radius) { this.radius = radius; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Circle)) return false;
+            Circle circle = (Circle) o;
+            return Double.compare(circle.radius, radius) == 0;
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(radius); }
+    }
+
+    static class Rectangle implements Shape {
+        public double width;
+        public double height;
+
+        public Rectangle() {}
+
+        public Rectangle(double width, double height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Rectangle)) return false;
+            Rectangle rectangle = (Rectangle) o;
+            return Double.compare(rectangle.width, width) == 0
+                    && Double.compare(rectangle.height, height) == 0;
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(width, height); }
+    }
+
+    static class Shapes {
+        public List<Shape> shapes;
+
+        public Shapes() {}
+
+        public List<Shape> shapes() { return shapes; }
+    }
 
     // TODO move to common tests
     @Test
@@ -61,7 +108,7 @@ class OpenAiChatModelWithJsonSchemaIT {
                                                 .anyOf(circleSchema, rectangleSchema)
                                                 .build())
                                         .build())
-                        .required(List.of("shapes"))
+                        .required(Collections.singletonList("shapes"))
                         .build())
                 .build();
 
@@ -69,11 +116,9 @@ class OpenAiChatModelWithJsonSchemaIT {
                 ResponseFormat.builder().type(JSON).jsonSchema(jsonSchema).build();
 
         UserMessage userMessage = UserMessage.from(
-                """
-                Extract information from the following text:
-                1. A circle with a radius of 5
-                2. A rectangle with a width of 10 and a height of 20
-                """);
+                "Extract information from the following text:\n"
+                + "1. A circle with a radius of 5\n"
+                + "2. A rectangle with a width of 10 and a height of 20");
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(userMessage)
@@ -106,7 +151,7 @@ class OpenAiChatModelWithJsonSchemaIT {
                                                 .anyOf(circleSchema, rectangleSchema)
                                                 .build())
                                         .build())
-                        .required(List.of("shapes"))
+                        .required(Collections.singletonList("shapes"))
                         .build())
                 .build();
 
@@ -122,11 +167,9 @@ class OpenAiChatModelWithJsonSchemaIT {
                 .build();
 
         UserMessage userMessage = UserMessage.from(
-                """
-                Extract information from the following text:
-                1. A circle with a radius of 5
-                2. A rectangle with a width of 10 and a height of 20
-                """);
+                "Extract information from the following text:\n"
+                + "1. A circle with a radius of 5\n"
+                + "2. A rectangle with a width of 10 and a height of 20");
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(userMessage)

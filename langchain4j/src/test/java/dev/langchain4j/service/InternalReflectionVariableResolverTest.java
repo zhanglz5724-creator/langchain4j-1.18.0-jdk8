@@ -3,6 +3,9 @@ package dev.langchain4j.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 class InternalReflectionVariableResolverTest {
@@ -50,8 +53,8 @@ class InternalReflectionVariableResolverTest {
 
     @Test
     void returnsParameterNamesWhenNoAnnotations() throws Exception {
-        final var m = getClass().getMethod("noAnnotation", String.class, int.class);
-        final var result = InternalReflectionVariableResolver.findTemplateVariables(
+        final Method m = getClass().getMethod("noAnnotation", String.class, int.class);
+        final Map<String, Object> result = InternalReflectionVariableResolver.findTemplateVariables(
                 "Hi {{name}}, Age {{age}}", m, new Object[] {"Alex", 42});
 
         // names are erased because code is compiled without the `-parameters` flag
@@ -60,23 +63,23 @@ class InternalReflectionVariableResolverTest {
 
     @Test
     void usesVAnnotationValueAsKey() throws Exception {
-        final var m = getClass().getMethod("vAnnotation", String.class, int.class);
-        final var result = InternalReflectionVariableResolver.findTemplateVariables(
+        final Method m = getClass().getMethod("vAnnotation", String.class, int.class);
+        final Map<String, Object> result = InternalReflectionVariableResolver.findTemplateVariables(
                 "Hello {{customName}} Age {{age}}", m, new Object[] {"Sam", 23});
         assertThat(result).containsEntry("customName", "Sam").containsEntry("arg1", 23);
     }
 
     @Test
     void injectsItWhenTemplateHasItAndArgCountIsOne() throws Exception {
-        final var m = getClass().getMethod("singleItParameter", String.class);
-        final var result =
+        final Method m = getClass().getMethod("singleItParameter", String.class);
+        final Map<String, Object> result =
                 InternalReflectionVariableResolver.findTemplateVariables("Hi {{it}}", m, new Object[] {"VALUE"});
         assertThat(result).containsEntry("it", "VALUE");
     }
 
     @Test
     void skipsAnnotationsThatAreMemoryIdUserMessageUserNameForIt() throws Exception {
-        final var m = getClass().getMethod("withMemoryId", String.class, String.class);
+        final Method m = getClass().getMethod("withMemoryId", String.class, String.class);
         Throwable thrown = catchThrowable(() ->
                 InternalReflectionVariableResolver.findTemplateVariables("Hi {{it}}", m, new Object[] {"foo", "bar"}));
         assertThat(thrown)
@@ -86,16 +89,16 @@ class InternalReflectionVariableResolverTest {
 
     @Test
     void findsItWhenParameterHasVAnnotationWithItValue() throws Exception {
-        final var m = getClass().getMethod("vItName", String.class);
-        final var result =
+        final Method m = getClass().getMethod("vItName", String.class);
+        final Map<String, Object> result =
                 InternalReflectionVariableResolver.findTemplateVariables("Hi {{it}}", m, new Object[] {"SOMETHING"});
         assertThat(result).containsEntry("it", "SOMETHING");
     }
 
     @Test
     void arrayParametersGetStringified() throws Exception {
-        final var m = getClass().getMethod("arrayParameter", String[].class);
-        final var result = InternalReflectionVariableResolver.findTemplateVariables(
+        final Method m = getClass().getMethod("arrayParameter", String[].class);
+        final Map<String, Object> result = InternalReflectionVariableResolver.findTemplateVariables(
                 "values={{arg0}}", m, new Object[] {new String[] {"a", "b"}});
 
         assertThat(InternalReflectionVariableResolver.asString(result.get("arg0")))
@@ -104,8 +107,8 @@ class InternalReflectionVariableResolverTest {
 
     @Test
     void returnsEmptyMapIfArgsNull() throws Exception {
-        final var m = getClass().getMethod("noAnnotation", String.class, int.class);
-        final var result = InternalReflectionVariableResolver.findTemplateVariables("test", m, null);
+        final Method m = getClass().getMethod("noAnnotation", String.class, int.class);
+        final Map<String, Object> result = InternalReflectionVariableResolver.findTemplateVariables("test", m, null);
         assertThat(result).isEmpty();
     }
 

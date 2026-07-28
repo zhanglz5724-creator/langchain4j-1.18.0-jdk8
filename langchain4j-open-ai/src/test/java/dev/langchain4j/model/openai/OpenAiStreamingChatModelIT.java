@@ -4,7 +4,6 @@ import static dev.langchain4j.internal.Utils.repeat;
 import static dev.langchain4j.model.openai.OpenAiChatModelName.GPT_4_O_MINI;
 import static dev.langchain4j.model.openai.OpenAiChatModelName.GPT_5_MINI;
 import static dev.langchain4j.model.output.FinishReason.LENGTH;
-import static java.util.Map.entry;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
@@ -26,6 +25,9 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,60 +134,16 @@ class OpenAiStreamingChatModelIT {
         // given
         String tenSpaces = repeat(" ", 10);
 
-        MockHttpClient mockHttpClient = new MockHttpClient(List.of(
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{"role":"assistant","content":null,\
-                                "tool_calls":[{"index":0,"id":"call_h7RLhFE8hDHmFLGqKR4QiXLn","type":"function",\
-                                "function":{"name":"append_to_file","arguments":""}}]},"finish_reason":null}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{"tool_calls":[{"index":0,\
-                                "function":{"arguments":"{\\""}}]},"finish_reason":null}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{"tool_calls":[{"index":0,\
-                                "function":{"arguments":"text"}}]},"finish_reason":null}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{"tool_calls":[{"index":0,\
-                                "function":{"arguments":"\\":\\""}}]},"finish_reason":null}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{"tool_calls":[{"index":0,\
-                                "function":{"arguments":"    "}}]},"finish_reason":null}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{"tool_calls":[{"index":0,\
-                                "function":{"arguments":"     "}}]},"finish_reason":null}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{"tool_calls":[{"index":0,\
-                                "function":{"arguments":" \\"}"}}]},"finish_reason":null}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}"""),
-                new ServerSentEvent(
-                        null,
-                        """
-                                {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1,"model":"gpt-5-mini",\
-                                "choices":[],"usage":{"prompt_tokens":128,"completion_tokens":88,"total_tokens":216}}"""),
+        MockHttpClient mockHttpClient = new MockHttpClient(Arrays.asList(
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"index\":0,\"id\":\"call_h7RLhFE8hDHmFLGqKR4QiXLn\",\"type\":\"function\",\"function\":{\"name\":\"append_to_file\",\"arguments\":\"\"}}]},\"finish_reason\":null}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"{\\\"\"}}]},\"finish_reason\":null}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"text\"}}]},\"finish_reason\":null}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"\\\":\\\"\"}}]},\"finish_reason\":null}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"    \"}}]},\"finish_reason\":null}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"     \"}}]},\"finish_reason\":null}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\" \\\"}\"}}]},\"finish_reason\":null}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"tool_calls\"}]}"),
+                new ServerSentEvent(null, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5-mini\",\"choices\":[],\"usage\":{\"prompt_tokens\":128,\"completion_tokens\":88,\"total_tokens\":216}}"),
                 new ServerSentEvent(null, "[DONE]")));
 
         OpenAiStreamingChatModel model = OpenAiStreamingChatModel.builder()
@@ -200,7 +158,7 @@ class OpenAiStreamingChatModelIT {
                         .build())
                 .build();
 
-        UserMessage userMessage = UserMessage.from("Append to file the following text: '%s'".formatted(tenSpaces));
+        UserMessage userMessage = UserMessage.from(String.format("Append to file the following text: '%s'", tenSpaces));
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(userMessage)
@@ -219,16 +177,13 @@ class OpenAiStreamingChatModelIT {
         assertThat(toolExecutionRequest.name()).isEqualTo("append_to_file");
 
         Map<String, Object> argumentsMap = new ObjectMapper().readValue(toolExecutionRequest.arguments(), Map.class);
-        assertThat(argumentsMap).containsOnly(entry("text", tenSpaces));
+        assertThat(argumentsMap).containsOnly(new AbstractMap.SimpleEntry<>("text", tenSpaces));
     }
 
     @Test
     void should_stream_valid_json() throws JsonProcessingException {
 
         // given
-        @JsonIgnoreProperties(ignoreUnknown = true) // to ignore the "joke" field
-        record Person(String name, String surname) {}
-
         String responseFormat = "json_object";
 
         String userMessage = "Return JSON with two fields: name and surname of Klaus Heisler. "
@@ -297,13 +252,13 @@ class OpenAiStreamingChatModelIT {
         // given
         String city = "Munich";
 
-        Map<String, Object> customParameters = Map.of("web_search_options", Map.of("user_location", new LinkedHashMap() {
-                    {
-                        put("type", "approximate");
-                        put("approximate", Map.of("city", city));
-                    }
-                }
-        ));
+        Map<String, Object> innerMap = new LinkedHashMap() {
+            {
+                put("type", "approximate");
+                put("approximate", Collections.singletonMap("city", city));
+            }
+        };
+        Map<String, Object> customParameters = Collections.singletonMap("web_search_options", Collections.singletonMap("user_location", innerMap));
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(UserMessage.from("Where can I buy good coffee?"))
@@ -314,10 +269,10 @@ class OpenAiStreamingChatModelIT {
 
         SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                 .statusCode(200)
-                .headers(Map.of("test-header", List.of("test-value")))
+                .headers(Collections.singletonMap("test-header", Collections.singletonList("test-value")))
                 .build();
 
-        List<ServerSentEvent> events = List.of(
+        List<ServerSentEvent> events = Arrays.asList(
                 new ServerSentEvent(null, "{\"id\":\"chatcmpl-C9nlEVdwuKXDiM5yuGpixoJZCj4v5\",\"object\":\"chat.completion.chunk\",\"created\":1756452268,\"model\":\"gpt-4.1-nano-2025-04-14\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_e91a518ddb\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null},\"logprobs\":null,\"finish_reason\":null}],\"usage\":null,\"obfuscation\":\"QK00Z4Pe\"}"),
                 new ServerSentEvent(null, "{\"id\":\"chatcmpl-C9nlEVdwuKXDiM5yuGpixoJZCj4v5\",\"object\":\"chat.completion.chunk\",\"created\":1756452268,\"model\":\"gpt-4.1-nano-2025-04-14\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_e91a518ddb\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"The\"},\"logprobs\":null,\"finish_reason\":null}],\"usage\":null,\"obfuscation\":\"R9qgEHA\"}"),
                 new ServerSentEvent(null, "{\"id\":\"chatcmpl-C9nlEVdwuKXDiM5yuGpixoJZCj4v5\",\"object\":\"chat.completion.chunk\",\"created\":1756452268,\"model\":\"gpt-4.1-nano-2025-04-14\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_e91a518ddb\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" capital\"},\"logprobs\":null,\"finish_reason\":null}],\"usage\":null,\"obfuscation\":\"qL\"}"),
@@ -340,31 +295,37 @@ class OpenAiStreamingChatModelIT {
         ChatResponse chatResponse = handler.get();
 
         // then
-        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace("""
-                {
-                  "messages" : [ {
-                    "role" : "user",
-                    "content" : "Where can I buy good coffee?"
-                  } ],
-                  "stream" : true,
-                  "stream_options" : {
-                    "include_usage" : true
-                  },
-                  "web_search_options" : {
-                    "user_location" : {
-                      "type" : "approximate",
-                      "approximate" : {
-                        "city" : "Munich"
-                      }
-                    }
-                  }
-                }
-                """);
+        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace(
+                "{\n"
+                + "  \"messages\" : [ {\n"
+                + "    \"role\" : \"user\",\n"
+                + "    \"content\" : \"Where can I buy good coffee?\"\n"
+                + "  } ],\n"
+                + "  \"stream\" : true,\n"
+                + "  \"stream_options\" : {\n"
+                + "    \"include_usage\" : true\n"
+                + "  },\n"
+                + "  \"web_search_options\" : {\n"
+                + "    \"user_location\" : {\n"
+                + "      \"type\" : \"approximate\",\n"
+                + "      \"approximate\" : {\n"
+                + "        \"city\" : \"Munich\"\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}"
+        );
 
         List<ServerSentEvent> rawEvents = ((OpenAiChatResponseMetadata) chatResponse.metadata()).rawServerSentEvents();
         assertThat(rawEvents).isEqualTo(events.subList(0, events.size() - 1)); // without [DONE]
 
         SuccessfulHttpResponse rawResponse = ((OpenAiChatResponseMetadata) chatResponse.metadata()).rawHttpResponse();
         assertThat(rawResponse).isEqualTo(response);
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Person {
+        public String name;
+        public String surname;
     }
 }

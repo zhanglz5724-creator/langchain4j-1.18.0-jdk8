@@ -29,10 +29,10 @@ class ClassPathSourceTests {
                 "classPathSourceTestsInJar/folderInsideJar/file4.txt"
             })
     void findFile(String classPathResource) throws IOException {
-        var classPathSource = ClassPathSource.from(classPathResource);
-        var urlString = classPathSource.url().getFile();
-        var filename = urlString.substring(urlString.lastIndexOf('/') + 1);
-        var expectedMetaData = new Metadata().put(Document.URL, urlString).put(Document.FILE_NAME, filename);
+        ClassPathSource classPathSource = ClassPathSource.from(classPathResource);
+        String urlString = classPathSource.url().getFile();
+        String filename = urlString.substring(urlString.lastIndexOf('/') + 1);
+        Metadata expectedMetaData = new Metadata().put(Document.URL, urlString).put(Document.FILE_NAME, filename);
 
         assertThat(classPathSource)
                 .isNotNull()
@@ -40,22 +40,22 @@ class ClassPathSourceTests {
                 .isEqualTo(expectedMetaData);
 
         assertThat(new String(classPathSource.inputStream().readAllBytes()).trim())
-                .isEqualTo("This is %s".formatted(filename));
+                .isEqualTo(String.format("This is %s", filename));
     }
 
     @ParameterizedTest
-    @CsvSource(delimiter = '|', textBlock = """
-      classPathSourceTests                               | false
-      classPathSourceTests/file1.txt                      | false
-      classPathSourceTests/anotherDir                    | false
-      classPathSourceTests/anotherDir/file2.txt           | false
-      classPathSourceTestsInJar                          | true
-      classPathSourceTestsInJar/file3.txt                 | true
-      classPathSourceTestsInJar/folderInsideJar          | true
-      classPathSourceTestsInJar/folderInsideJar/file4.txt | true
-      """)
+    @CsvSource(delimiter = '|', value = {
+        "classPathSourceTests                               | false",
+        "classPathSourceTests/file1.txt                      | false",
+        "classPathSourceTests/anotherDir                    | false",
+        "classPathSourceTests/anotherDir/file2.txt           | false",
+        "classPathSourceTestsInJar                          | true",
+        "classPathSourceTestsInJar/file3.txt                 | true",
+        "classPathSourceTestsInJar/folderInsideJar          | true",
+        "classPathSourceTestsInJar/folderInsideJar/file4.txt | true"
+    })
     void isInsideArchive(String classPathResource, boolean shouldBeInsideArchive) {
-        var classPathSource = ClassPathSource.from(classPathResource);
+        ClassPathSource classPathSource = ClassPathSource.from(classPathResource);
 
         assertThat(classPathSource)
                 .isNotNull()

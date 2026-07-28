@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Arrays;
@@ -113,10 +114,10 @@ class ChatMemoryTest {
 
     @Test
     void set_iterable_should_fail_on_empty_iterable() {
-        Iterable<ChatMessage> emptyIterable = new Iterable<>() {
+        Iterable<ChatMessage> emptyIterable = new Iterable<ChatMessage>() {
             @Override
             public Iterator<ChatMessage> iterator() {
-                return List.<ChatMessage>of().iterator();
+                return Collections.<ChatMessage>emptyList().iterator();
             }
         };
 

@@ -20,12 +20,12 @@ public class MockHttpClient implements HttpClient {
 
     public MockHttpClient() {
         this.response = null;
-        this.events = List.of();
+        this.events = Collections.emptyList();
     }
 
     public MockHttpClient(SuccessfulHttpResponse response) {
         this.response = ensureNotNull(response, "response");
-        this.events = List.of();
+        this.events = Collections.emptyList();
     }
 
     public MockHttpClient(List<ServerSentEvent> events) {

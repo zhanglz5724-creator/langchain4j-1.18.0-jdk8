@@ -14,6 +14,7 @@ import dev.langchain4j.model.chat.request.json.JsonIntegerSchema;
 import dev.langchain4j.model.chat.request.json.JsonNullSchema;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -56,15 +57,13 @@ class OpenAiToolSpecificationIT {
         JsonObjectSchema params = JsonObjectSchema.builder()
                 .addProperty(
                         "param1", JsonArraySchema.builder().items(arrayItems).build())
-                .required(List.of("param1"))
+                .required(Arrays.asList("param1"))
                 .build();
         ToolSpecification toolSpecification =
                 ToolSpecification.builder().name("function1").parameters(params).build();
 
         UserMessage userMessage = UserMessage.from(
-                """
-                        Call function1 with param1=[3, null, true].
-                        """);
+                "Call function1 with param1=[3, null, true].");
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(userMessage)
@@ -93,9 +92,7 @@ class OpenAiToolSpecificationIT {
                 ToolSpecification.builder().name("function1").parameters(params).build();
 
         UserMessage userMessage = UserMessage.from(
-                """
-                        Call function1 with param1=[3, null, true].
-                        """);
+                "Call function1 with param1=[3, null, true].");
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(userMessage)

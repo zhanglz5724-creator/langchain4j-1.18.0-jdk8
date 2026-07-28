@@ -179,9 +179,9 @@ implements ToolExecutor {
             return Collections.singletonList(content);
         }
         if (result instanceof Collection) {
-            Collection collection = (Collection)result;
+            Collection<?> collection = (Collection<?>) result;
             if (!collection.isEmpty() && collection.iterator().next() instanceof Content) {
-                return collection.stream().map(Content.class::cast).collect(Collectors.toList());
+                return ((Collection<?>) result).stream().map(Content.class::cast).collect(Collectors.toList());
             }
         } else if (result instanceof Content[]) {
             Content[] array = (Content[])result;
@@ -304,10 +304,10 @@ implements ToolExecutor {
             try {
                 Class<?> enumClass = parameterClass;
                 try {
-                    return Enum.valueOf(enumClass, Objects.requireNonNull(argument).toString());
+                    return Enum.valueOf((Class) enumClass, Objects.requireNonNull(argument).toString());
                 }
                 catch (IllegalArgumentException e) {
-                    return Enum.valueOf(enumClass, Objects.requireNonNull(argument).toString().toUpperCase(Locale.ROOT));
+                    return Enum.valueOf((Class) enumClass, Objects.requireNonNull(argument).toString().toUpperCase(Locale.ROOT));
                 }
             }
             catch (Error | Exception e) {

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.openai.internal.chat.*;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -247,9 +248,9 @@ class OpenAiStreamingResponseBuilderTest {
         ChatCompletionResponse partial = ChatCompletionResponse.builder()
                 .id("resp_1")
                 .model("openai-compatible-model")
-                .choices(List.of(ChatCompletionChoice.builder()
+                .choices(Arrays.asList(ChatCompletionChoice.builder()
                         .index(0)
-                        .delta(Delta.builder().toolCalls(List.of(tc1, tc2)).build())
+                        .delta(Delta.builder().toolCalls(Arrays.asList(tc1, tc2)).build())
                         .build()))
                 .build();
 
@@ -271,12 +272,12 @@ class OpenAiStreamingResponseBuilderTest {
         builder.append(chatCompletionResponseWithLogProb(dev.langchain4j.model.openai.internal.chat.LogProb.builder()
                 .token("Hello")
                 .logprob(-0.1)
-                .bytes(List.of(72, 101, 108, 108, 111))
+                .bytes(Arrays.asList(72, 101, 108, 108, 111))
                 .build()));
         builder.append(chatCompletionResponseWithLogProb(dev.langchain4j.model.openai.internal.chat.LogProb.builder()
                 .token("!")
                 .logprob(-0.2)
-                .bytes(List.of(33))
+                .bytes(Arrays.asList(33))
                 .build()));
 
         // When
@@ -298,7 +299,7 @@ class OpenAiStreamingResponseBuilderTest {
         builder.append(ChatCompletionResponse.builder()
                 .id("resp_1")
                 .model("gpt-4o")
-                .choices(List.of(ChatCompletionChoice.builder()
+                .choices(Arrays.asList(ChatCompletionChoice.builder()
                         .index(0)
                         .delta(Delta.builder().content("Hello").build())
                         .build()))
@@ -317,10 +318,10 @@ class OpenAiStreamingResponseBuilderTest {
         return ChatCompletionResponse.builder()
                 .id("resp_1")
                 .model("gpt-4o")
-                .choices(List.of(ChatCompletionChoice.builder()
+                .choices(Arrays.asList(ChatCompletionChoice.builder()
                         .index(0)
                         .delta(Delta.builder().content(logProb.token()).build())
-                        .logprobs(LogProbs.builder().content(List.of(logProb)).build())
+                        .logprobs(LogProbs.builder().content(Arrays.asList(logProb)).build())
                         .build()))
                 .build();
     }
@@ -329,9 +330,9 @@ class OpenAiStreamingResponseBuilderTest {
         return ChatCompletionResponse.builder()
                 .id("resp_1")
                 .model("gemini-2.0-flash")
-                .choices(List.of(ChatCompletionChoice.builder()
+                .choices(Arrays.asList(ChatCompletionChoice.builder()
                         .index(0)
-                        .delta(Delta.builder().toolCalls(List.of(toolCall)).build())
+                        .delta(Delta.builder().toolCalls(Arrays.asList(toolCall)).build())
                         .build()))
                 .build();
     }

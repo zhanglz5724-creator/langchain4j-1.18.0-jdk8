@@ -48,7 +48,7 @@ class AiServiceGuardrailTests {
 
     @Test
     void noGuardrails() {
-        var noGuardrails = Assistant.create();
+        Assistant noGuardrails = Assistant.create();
 
         assertThat(noGuardrails.chat("Hello!")).isEqualTo("Request: Hello!; Response: Hi!");
         assertThat(noGuardrails.chat2("Hello!")).isEqualTo("Request: Hello!; Response: Hi!");
@@ -75,7 +75,7 @@ class AiServiceGuardrailTests {
 
     @Test
     void methodLevelAssistant() {
-        var assistant = MethodLevelAssistant.create();
+        Assistant assistant = MethodLevelAssistant.create();
 
         assertThat(assistant.chat("Hello!"))
                 .isEqualTo(
@@ -90,7 +90,7 @@ class AiServiceGuardrailTests {
 
     @Test
     void anotherMethodLevelAssistant() {
-        var assistant = MethodLevelAssistant1.create();
+        Assistant assistant = MethodLevelAssistant1.create();
 
         assertThatExceptionOfType(GuardrailException.class)
                 .isThrownBy(() -> assistant.chat("Hello!"))
@@ -105,7 +105,7 @@ class AiServiceGuardrailTests {
 
     @Test
     void classAndMethodLevelAssistant() {
-        var assistant = ClassAndMethodLevelAssistant.create();
+        Assistant assistant = ClassAndMethodLevelAssistant.create();
 
         assertThatExceptionOfType(GuardrailException.class)
                 .isThrownBy(() -> assistant.chat("Hello!"))
@@ -375,13 +375,41 @@ class AiServiceGuardrailTests {
         }
     }
 
+    interface RepromptAssistantWithToolLoop {
+        String chat(String message);
+    }
+
+    interface RepromptAssistantWithMultiReprompt {
+        String chat(String message);
+    }
+
+    interface RepromptAssistantWithFailingTool {
+        String chat(String message);
+    }
+
+    interface StreamingRepromptAssistantWithToolLoop {
+        TokenStream chat(String message);
+    }
+
+    interface StreamingRepromptAssistantWithMultiReprompt {
+        TokenStream chat(String message);
+    }
+
+    interface StreamingRepromptAssistantWithFailingTool {
+        TokenStream chat(String message);
+    }
+
+    interface StreamingRepromptAssistantWithToolEvent {
+        TokenStream chat(String message);
+    }
+
     // --- non-streaming: reprompt + tool loop ---
 
     @Test
     void output_guardrail_reprompt_should_execute_tool_loop_before_revalidating() {
-        var toolCallCount = new AtomicInteger(0);
+        AtomicInteger toolCallCount = new AtomicInteger(0);
 
-        var toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
+        AiMessage toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
                 .id("call-1")
                 .name("verify")
                 .arguments("{}")
@@ -390,7 +418,7 @@ class AiServiceGuardrailTests {
         ChatModelMock model = ChatModelMock.thatAlwaysResponds(
                 AiMessage.from("bad response"), toolCallResponse, AiMessage.from("good response"));
 
-        var tools = new Object() {
+        Object tools = new Object() {
             @Tool("verify something")
             public String verify() {
                 toolCallCount.incrementAndGet();
@@ -408,11 +436,7 @@ class AiServiceGuardrailTests {
             }
         };
 
-        interface RepromptAssistant {
-            String chat(String message);
-        }
-
-        RepromptAssistant assistant = AiServices.builder(RepromptAssistant.class)
+        RepromptAssistantWithToolLoop assistant = AiServices.builder(RepromptAssistantWithToolLoop.class)
                 .chatModel(model)
                 .tools(tools)
                 .outputGuardrails(repromptOnBad)
@@ -426,10 +450,10 @@ class AiServiceGuardrailTests {
 
     @Test
     void output_guardrail_multi_reprompt_with_tool_loop_should_work() {
-        var toolCallCount = new AtomicInteger(0);
-        var repromptCount = new AtomicInteger(0);
+        AtomicInteger toolCallCount = new AtomicInteger(0);
+        AtomicInteger repromptCount = new AtomicInteger(0);
 
-        var toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
+        AiMessage toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
                 .id("call-1")
                 .name("verify")
                 .arguments("{}")
@@ -441,7 +465,7 @@ class AiServiceGuardrailTests {
                 AiMessage.from("still bad"),
                 AiMessage.from("good response"));
 
-        var tools = new Object() {
+        Object tools = new Object() {
             @Tool("verify something")
             public String verify() {
                 toolCallCount.incrementAndGet();
@@ -461,11 +485,7 @@ class AiServiceGuardrailTests {
             }
         };
 
-        interface RepromptAssistant {
-            String chat(String message);
-        }
-
-        RepromptAssistant assistant = AiServices.builder(RepromptAssistant.class)
+        RepromptAssistantWithMultiReprompt assistant = AiServices.builder(RepromptAssistantWithMultiReprompt.class)
                 .chatModel(model)
                 .tools(tools)
                 .outputGuardrails(repromptOnBad)
@@ -482,9 +502,9 @@ class AiServiceGuardrailTests {
 
     @Test
     void output_guardrail_reprompt_with_failing_tool_should_send_error_to_llm() {
-        var toolCallCount = new AtomicInteger(0);
+        AtomicInteger toolCallCount = new AtomicInteger(0);
 
-        var toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
+        AiMessage toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
                 .id("call-1")
                 .name("verify")
                 .arguments("{}")
@@ -493,7 +513,7 @@ class AiServiceGuardrailTests {
         ChatModelMock model = ChatModelMock.thatAlwaysResponds(
                 AiMessage.from("bad response"), toolCallResponse, AiMessage.from("recovered"));
 
-        var tools = new Object() {
+        Object tools = new Object() {
             @Tool("verify something")
             public String verify() {
                 toolCallCount.incrementAndGet();
@@ -511,11 +531,7 @@ class AiServiceGuardrailTests {
             }
         };
 
-        interface RepromptAssistant {
-            String chat(String message);
-        }
-
-        RepromptAssistant assistant = AiServices.builder(RepromptAssistant.class)
+        RepromptAssistantWithFailingTool assistant = AiServices.builder(RepromptAssistantWithFailingTool.class)
                 .chatModel(model)
                 .tools(tools)
                 .outputGuardrails(repromptOnBad)
@@ -531,9 +547,9 @@ class AiServiceGuardrailTests {
 
     @Test
     void streaming_output_guardrail_reprompt_should_execute_tool_loop_before_revalidating() throws Exception {
-        var toolCallCount = new AtomicInteger(0);
+        AtomicInteger toolCallCount = new AtomicInteger(0);
 
-        var toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
+        AiMessage toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
                 .id("call-1")
                 .name("verify")
                 .arguments("{}")
@@ -542,7 +558,7 @@ class AiServiceGuardrailTests {
         StreamingChatModelMock model = StreamingChatModelMock.thatAlwaysStreams(
                 AiMessage.from("bad response"), toolCallResponse, AiMessage.from("good response"));
 
-        var tools = new Object() {
+        Object tools = new Object() {
             @Tool("verify something")
             public String verify() {
                 toolCallCount.incrementAndGet();
@@ -560,11 +576,7 @@ class AiServiceGuardrailTests {
             }
         };
 
-        interface StreamingRepromptAssistant {
-            TokenStream chat(String message);
-        }
-
-        StreamingRepromptAssistant assistant = AiServices.builder(StreamingRepromptAssistant.class)
+        StreamingRepromptAssistantWithToolLoop assistant = AiServices.builder(StreamingRepromptAssistantWithToolLoop.class)
                 .streamingChatModel(model)
                 .tools(tools)
                 .outputGuardrails(repromptOnBad)
@@ -584,10 +596,10 @@ class AiServiceGuardrailTests {
 
     @Test
     void streaming_output_guardrail_multi_reprompt_with_tool_loop_should_work() throws Exception {
-        var toolCallCount = new AtomicInteger(0);
-        var repromptCount = new AtomicInteger(0);
+        AtomicInteger toolCallCount = new AtomicInteger(0);
+        AtomicInteger repromptCount = new AtomicInteger(0);
 
-        var toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
+        AiMessage toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
                 .id("call-1")
                 .name("verify")
                 .arguments("{}")
@@ -599,7 +611,7 @@ class AiServiceGuardrailTests {
                 AiMessage.from("still bad"),
                 AiMessage.from("good response"));
 
-        var tools = new Object() {
+        Object tools = new Object() {
             @Tool("verify something")
             public String verify() {
                 toolCallCount.incrementAndGet();
@@ -619,11 +631,7 @@ class AiServiceGuardrailTests {
             }
         };
 
-        interface StreamingRepromptAssistant {
-            TokenStream chat(String message);
-        }
-
-        StreamingRepromptAssistant assistant = AiServices.builder(StreamingRepromptAssistant.class)
+        StreamingRepromptAssistantWithMultiReprompt assistant = AiServices.builder(StreamingRepromptAssistantWithMultiReprompt.class)
                 .streamingChatModel(model)
                 .tools(tools)
                 .outputGuardrails(repromptOnBad)
@@ -646,9 +654,9 @@ class AiServiceGuardrailTests {
 
     @Test
     void streaming_output_guardrail_reprompt_with_failing_tool_should_send_error_to_llm() throws Exception {
-        var toolCallCount = new AtomicInteger(0);
+        AtomicInteger toolCallCount = new AtomicInteger(0);
 
-        var toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
+        AiMessage toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
                 .id("call-1")
                 .name("verify")
                 .arguments("{}")
@@ -657,7 +665,7 @@ class AiServiceGuardrailTests {
         StreamingChatModelMock model = StreamingChatModelMock.thatAlwaysStreams(
                 AiMessage.from("bad response"), toolCallResponse, AiMessage.from("recovered"));
 
-        var tools = new Object() {
+        Object tools = new Object() {
             @Tool("verify something")
             public String verify() {
                 toolCallCount.incrementAndGet();
@@ -675,11 +683,7 @@ class AiServiceGuardrailTests {
             }
         };
 
-        interface StreamingRepromptAssistant {
-            TokenStream chat(String message);
-        }
-
-        StreamingRepromptAssistant assistant = AiServices.builder(StreamingRepromptAssistant.class)
+        StreamingRepromptAssistantWithFailingTool assistant = AiServices.builder(StreamingRepromptAssistantWithFailingTool.class)
                 .streamingChatModel(model)
                 .tools(tools)
                 .outputGuardrails(repromptOnBad)
@@ -703,7 +707,7 @@ class AiServiceGuardrailTests {
         // reprompt must still fire ToolExecutedEvent, exactly like the synchronous path.
         List<ToolExecutedEvent> toolExecutedEvents = new CopyOnWriteArrayList<>();
 
-        var toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
+        AiMessage toolCallResponse = AiMessage.from(ToolExecutionRequest.builder()
                 .id("call-1")
                 .name("verify")
                 .arguments("{}")
@@ -712,7 +716,7 @@ class AiServiceGuardrailTests {
         StreamingChatModelMock model = StreamingChatModelMock.thatAlwaysStreams(
                 AiMessage.from("bad response"), toolCallResponse, AiMessage.from("good response"));
 
-        var tools = new Object() {
+        Object tools = new Object() {
             @Tool("verify something")
             public String verify() {
                 return "verified";
@@ -729,13 +733,9 @@ class AiServiceGuardrailTests {
             }
         };
 
-        interface StreamingRepromptAssistant {
-            TokenStream chat(String message);
-        }
-
         ToolExecutedEventListener listener = toolExecutedEvents::add;
 
-        StreamingRepromptAssistant assistant = AiServices.builder(StreamingRepromptAssistant.class)
+        StreamingRepromptAssistantWithToolEvent assistant = AiServices.builder(StreamingRepromptAssistantWithToolEvent.class)
                 .streamingChatModel(model)
                 .tools(tools)
                 .outputGuardrails(repromptOnBad)
@@ -768,7 +768,7 @@ class AiServiceGuardrailTests {
         @Override
         public ChatResponse doChat(ChatRequest chatRequest) {
             return ChatResponse.builder()
-                    .aiMessage(AiMessage.from("Request: %s; Response: Hi!".formatted(getUserMessage(chatRequest))))
+                    .aiMessage(AiMessage.from(String.format("Request: %s; Response: Hi!", getUserMessage(chatRequest))))
                     .build();
         }
     }

@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.mockito.InOrder;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
@@ -57,7 +58,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 .logResponses(true)
                 .build();
 
-        return List.of(model);
+        return Arrays.asList(model);
     }
 
     @Override
@@ -124,7 +125,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 toolCall.index() == 0
                         && toolCall.id().equals(id)
                         && toolCall.name().equals("getWeather")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -143,7 +144,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 toolCall.index() == 0
                         && toolCall.id().equals(id1)
                         && toolCall.name().equals("getWeather")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -159,7 +160,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 toolCall.index() == 1
                         && toolCall.id().equals(id2)
                         && toolCall.name().equals("getTime")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -264,7 +265,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 .build();
 
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage), handler);
+        model.chat(Arrays.asList(userMessage), handler);
 
         assertThat(handler.get().aiMessage().text()).containsIgnoringCase("Whitehorse");
     }
@@ -285,7 +286,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 .parallelToolCalls(false)
                 .topLogprobs(5)
                 .truncation("auto")
-                .include(List.of("message.output_text.logprobs", "reasoning.encrypted_content"))
+                .include(Arrays.asList("message.output_text.logprobs", "reasoning.encrypted_content"))
                 .serviceTier("default")
                 .reasoningEffort("low")
                 .promptCacheRetention("24h")
@@ -370,7 +371,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Test
     void should_surface_response_failed_message_from_error_node() {
-        MockHttpClient mockHttpClient = new MockHttpClient(List.of(
+        MockHttpClient mockHttpClient = new MockHttpClient(Arrays.asList(
                 new ServerSentEvent(
                         null,
                         "{\"type\":\"response.failed\",\"response\":{\"error\":{\"message\":\"tokens exceeded\"}}}"),
@@ -390,7 +391,7 @@ class OpenAiResponsesStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Test
     void should_surface_response_error_message_from_error_node() {
-        MockHttpClient mockHttpClient = new MockHttpClient(List.of(
+        MockHttpClient mockHttpClient = new MockHttpClient(Arrays.asList(
                 new ServerSentEvent(null, "{\"type\":\"response.error\",\"error\":{\"message\":\"request rejected\"}}"),
                 new ServerSentEvent(null, "[DONE]")));
 

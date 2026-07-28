@@ -431,7 +431,7 @@ public class OpenAiUtils {
     }
 
     public static Response<AiMessage> convertResponse(ChatResponse chatResponse) {
-        return Response.from((Object)chatResponse.aiMessage(), (TokenUsage)chatResponse.metadata().tokenUsage(), (FinishReason)chatResponse.metadata().finishReason());
+        return Response.from(chatResponse.aiMessage(), (TokenUsage)chatResponse.metadata().tokenUsage(), (FinishReason)chatResponse.metadata().finishReason());
     }
 
     public static void validate(ChatRequestParameters parameters) {

@@ -41,6 +41,11 @@ class AiServicesWithToolsWithoutMemoryIT {
         Result<String> chat(String userMessage);
     }
 
+    interface LegacyAssistant {
+
+        Response<AiMessage> chat(String userMessage);
+    }
+
     static class Calculator {
 
         @Tool("calculates the square root of the provided number")
@@ -126,10 +131,6 @@ class AiServicesWithToolsWithoutMemoryIT {
     void should_execute_multiple_tools_sequentially_then_return_legacy_response_with_accumulated_token_usage() {
 
         // given
-        interface Assistant {
-
-            Response<AiMessage> chat(String userMessage);
-        }
 
         ChatModel chatModel = spy(OpenAiChatModel.builder()
                 .baseUrl(System.getenv("OPENAI_BASE_URL"))
@@ -144,7 +145,7 @@ class AiServicesWithToolsWithoutMemoryIT {
 
         Calculator calculator = spy(new Calculator());
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        LegacyAssistant assistant = AiServices.builder(LegacyAssistant.class)
                 .chatModel(chatModel)
                 .tools(calculator)
                 .build();

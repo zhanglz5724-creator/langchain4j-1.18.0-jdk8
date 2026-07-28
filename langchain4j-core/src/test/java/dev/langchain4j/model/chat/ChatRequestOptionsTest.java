@@ -30,8 +30,11 @@ class ChatRequestOptionsTest {
     void should_build_with_bulk_attributes() {
 
         // when
+        Map<Object, Object> attrs = new HashMap<>();
+        attrs.put("a", 1);
+        attrs.put("b", 2);
         ChatRequestOptions options = ChatRequestOptions.builder()
-                .listenerAttributes(new java.util.HashMap<String,Object>(){{put("a", 1);put("b", 2);}})
+                .listenerAttributes(attrs)
                 .build();
 
         // then

@@ -17,6 +17,7 @@ import dev.langchain4j.model.openai.OpenAiChatRequestParameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -70,10 +71,10 @@ class OpenAiListenableChatModelIT { // TODO extract to ListenableChatModelIT
                 .temperature(0.5)
                 .user("user1")
                 .store(true)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
 
-        List<ChatMessage> messages = List.of(UserMessage.from("hello"));
+        List<ChatMessage> messages = Arrays.asList(UserMessage.from("hello"));
 
         ChatRequestParameters parameters = OpenAiChatRequestParameters.builder()
                 .temperature(0.6)
@@ -119,7 +120,7 @@ class OpenAiListenableChatModelIT { // TODO extract to ListenableChatModelIT
         ChatModel model = OpenAiChatModel.builder()
                 .apiKey(incorrectApiKey)
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
 
         ChatRequest chatRequest = ChatRequest.builder()

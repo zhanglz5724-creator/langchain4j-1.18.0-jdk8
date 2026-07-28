@@ -22,14 +22,13 @@ implements ServerSentEventParser {
         DefaultServerSentEventParsingHandle parsingHandle = new DefaultServerSentEventParsingHandle(httpResponseBody);
         ServerSentEventContext context = new ServerSentEventContext(parsingHandle);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponseBody, StandardCharsets.UTF_8));){
-            ServerSentEvent sse;
             String line;
             String event = null;
             StringBuilder data = new StringBuilder();
             while (!parsingHandle.isCancelled() && (line = reader.readLine()) != null) {
                 if (line.isEmpty()) {
                     if (data.length() == 0) continue;
-                    sse = new ServerSentEvent(event, data.toString());
+                    final ServerSentEvent sse = new ServerSentEvent(event, data.toString());
                     ServerSentEventListenerUtils.ignoringExceptions(() -> listener.onEvent(sse, context));
                     event = null;
                     data.setLength(0);
@@ -47,7 +46,7 @@ implements ServerSentEventParser {
                 data.append(content.trim());
             }
             if (!parsingHandle.isCancelled() && data.length() != 0) {
-                sse = new ServerSentEvent(event, data.toString());
+                final ServerSentEvent sse = new ServerSentEvent(event, data.toString());
                 ServerSentEventListenerUtils.ignoringExceptions(() -> listener.onEvent(sse, context));
             }
         }

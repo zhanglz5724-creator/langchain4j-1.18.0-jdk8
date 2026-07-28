@@ -13,7 +13,9 @@ class OpenAiTextToSpeechModelTest {
                 .modelName(OpenAiTextToSpeechModelName.TTS_1)
                 .build();
 
-        String tooLong = "a".repeat(4097);
+        char[] chars = new char[4097];
+        java.util.Arrays.fill(chars, 'a');
+        String tooLong = new String(chars);
 
         assertThatThrownBy(() -> model.synthesize(tooLong))
                 .isInstanceOf(IllegalArgumentException.class)

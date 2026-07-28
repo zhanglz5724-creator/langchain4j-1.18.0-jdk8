@@ -100,13 +100,17 @@ public class HuggingFaceTokenCountEstimator implements TokenCountEstimator {
 
     @Override
     public int estimateTokenCountInMessage(ChatMessage message) {
-        if (message instanceof SystemMessage systemMessage) {
+        if (message instanceof SystemMessage) {
+            SystemMessage systemMessage = (SystemMessage) message;
             return estimateTokenCountInText(systemMessage.text());
-        } else if (message instanceof UserMessage userMessage) {
+        } else if (message instanceof UserMessage) {
+            UserMessage userMessage = (UserMessage) message;
             return estimateTokenCountInText(userMessage.singleText());
-        } else if (message instanceof AiMessage aiMessage) {
+        } else if (message instanceof AiMessage) {
+            AiMessage aiMessage = (AiMessage) message;
             return aiMessage.text() == null ? 0 : estimateTokenCountInText(aiMessage.text());
-        } else if (message instanceof ToolExecutionResultMessage toolExecutionResultMessage) {
+        } else if (message instanceof ToolExecutionResultMessage) {
+            ToolExecutionResultMessage toolExecutionResultMessage = (ToolExecutionResultMessage) message;
             return estimateTokenCountInText(toolExecutionResultMessage.text());
         } else {
             throw new IllegalArgumentException("Unknown message type: " + message);

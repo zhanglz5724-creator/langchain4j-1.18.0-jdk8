@@ -1,12 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  dev.langchain4j.agent.tool.ToolSpecification
- *  dev.langchain4j.internal.ValidationUtils
- *  dev.langchain4j.model.chat.request.ChatRequestParameters
- *  dev.langchain4j.model.chat.request.ResponseFormat
- */
 package dev.langchain4j.service;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -37,7 +28,7 @@ class AiServiceParamsUtil {
             if (!paramType.isAssignableFrom(parameter.getType())) continue;
             Object param = args[i];
             ValidationUtils.ensureNotNull((Object)param, (String)paramType.getSimpleName());
-            return Optional.of(param);
+            return Optional.of(paramType.cast(param));
         }
         return Optional.empty();
     }
@@ -55,9 +46,8 @@ class AiServiceParamsUtil {
             if (object == null || !paramType.isAssignableFrom(object.getClass())) continue;
             Object param = object;
             ValidationUtils.ensureNotNull((Object)param, (String)paramType.getSimpleName());
-            return Optional.of(param);
+            return Optional.of(paramType.cast(param));
         }
         return Optional.empty();
     }
 }
-

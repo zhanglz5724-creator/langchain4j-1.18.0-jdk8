@@ -23,6 +23,7 @@ import dev.langchain4j.model.openai.internal.chat.FunctionCall;
 import dev.langchain4j.model.openai.internal.chat.Tool;
 import dev.langchain4j.model.openai.internal.chat.ToolCall;
 import dev.langchain4j.model.openai.internal.chat.ToolChoiceMode;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -324,7 +325,7 @@ class OpenAiUtilsTest {
                 .build();
 
         // when - model-level strict is false
-        List<Tool> tools = toTools(List.of(toolSpec), false);
+        List<Tool> tools = toTools(Arrays.asList(toolSpec), false);
 
         // then
         assertThat(tools).hasSize(1);
@@ -345,7 +346,7 @@ class OpenAiUtilsTest {
                 .build();
 
         // when - model-level strict is true
-        List<Tool> tools = toTools(List.of(toolSpec), true);
+        List<Tool> tools = toTools(Arrays.asList(toolSpec), true);
 
         // then
         assertThat(tools).hasSize(1);
@@ -365,7 +366,7 @@ class OpenAiUtilsTest {
                 .build();
 
         // when - model-level strict is true
-        List<Tool> tools = toTools(List.of(toolSpec), true);
+        List<Tool> tools = toTools(Arrays.asList(toolSpec), true);
 
         // then - falls back to model-level
         assertThat(tools).hasSize(1);

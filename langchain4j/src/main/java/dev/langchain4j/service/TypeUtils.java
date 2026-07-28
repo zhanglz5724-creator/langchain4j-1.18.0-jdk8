@@ -77,7 +77,7 @@ public class TypeUtils {
         ParameterizedType parameterizedType = (ParameterizedType)type;
         Object[] typeArguments = parameterizedType.getActualTypeArguments();
         ValidationUtils.ensureNotEmpty((Object[])typeArguments, (String)"%s", (Object[])new Object[]{"Parameterized type has no type arguments."});
-        return typeArguments;
+        return (Type[]) typeArguments;
     }
 
     public static void validateReturnTypesAreProperlyParametrized(String methodName, Type type) {
@@ -130,7 +130,7 @@ public class TypeUtils {
     }
 
     private static String getExemplarDeclaration(List<Type> typeChain, String forType) {
-        List rawTypesOnly = typeChain.stream().filter(type -> !(type instanceof WildcardType) && !(type instanceof TypeVariable)).collect(Collectors.toList());
+        List<Type> rawTypesOnly = typeChain.stream().filter(type -> !(type instanceof WildcardType) && !(type instanceof TypeVariable)).collect(Collectors.<Type>toList());
         StringBuilder declarationExample = new StringBuilder(rawTypesOnly.stream().map(type -> TypeUtils.getRawClass(type).getSimpleName()).collect(Collectors.joining("<")));
         declarationExample.append("<").append(forType);
         declarationExample.append(String.join((CharSequence)"", Collections.nCopies(rawTypesOnly.size(), ">")));

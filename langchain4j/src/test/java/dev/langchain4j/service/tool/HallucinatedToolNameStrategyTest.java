@@ -18,6 +18,7 @@ import dev.langchain4j.service.TokenStream;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -72,7 +73,7 @@ public class HallucinatedToolNameStrategyTest {
             List<ToolExecutionResultMessage> toolResults = chatRequest.messages().stream()
                     .filter(ToolExecutionResultMessage.class::isInstance)
                     .map(ToolExecutionResultMessage.class::cast)
-                    .toList();
+                    .collect(java.util.stream.Collectors.toList());
             if (toolResults.isEmpty()) {
                 return AiMessage.from(
                         ToolExecutionRequest.builder().id("id").name("unknown").build());
@@ -118,7 +119,8 @@ public class HallucinatedToolNameStrategyTest {
     private static Class<?> nextExpectedMessageType(ChatMessage message) {
         if (message instanceof dev.langchain4j.data.message.UserMessage) {
             return AiMessage.class;
-        } else if (message instanceof AiMessage aiMessage) {
+        } else if (message instanceof AiMessage) {
+            AiMessage aiMessage = (AiMessage) message;
             if (aiMessage.hasToolExecutionRequests()) {
                 return ToolExecutionResultMessage.class;
             } else {
@@ -146,7 +148,7 @@ public class HallucinatedToolNameStrategyTest {
                 .name("browser_use") // Mock the wrong tool name and arguments
                 .arguments("{\"arg0\":\"mock_action\"}")
                 .build();
-        AiMessage aiMessage = AiMessage.from("does not matter", List.of(toolExecutionRequest));
+        AiMessage aiMessage = AiMessage.from("does not matter", Arrays.asList(toolExecutionRequest));
         StreamingChatModelMock model = StreamingChatModelMock.thatAlwaysStreams(aiMessage);
 
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);

@@ -105,7 +105,6 @@ public abstract class HttpClientTimeoutIT {
                     .build();
 
             // when
-            record StreamingResult(Throwable throwable, Set<Thread> threads) {}
 
             CompletableFuture<StreamingResult> completableFuture = new CompletableFuture<>();
 
@@ -157,5 +156,18 @@ public abstract class HttpClientTimeoutIT {
 
     protected void assertCause(Throwable throwable) {
         assertThat(throwable).hasRootCauseExactlyInstanceOf(expectedReadTimeoutRootCauseExceptionType());
+    }
+
+    private static class StreamingResult {
+        final Throwable throwable;
+        final Set<Thread> threads;
+
+        StreamingResult(Throwable throwable, Set<Thread> threads) {
+            this.throwable = throwable;
+            this.threads = threads;
+        }
+
+        Throwable throwable() { return throwable; }
+        Set<Thread> threads() { return threads; }
     }
 }

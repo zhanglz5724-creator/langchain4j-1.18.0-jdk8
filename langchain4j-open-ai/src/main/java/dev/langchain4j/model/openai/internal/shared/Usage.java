@@ -26,7 +26,7 @@ import dev.langchain4j.model.openai.internal.shared.CompletionTokensDetails;
 import dev.langchain4j.model.openai.internal.shared.PromptTokensDetails;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=Usage.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Usage {

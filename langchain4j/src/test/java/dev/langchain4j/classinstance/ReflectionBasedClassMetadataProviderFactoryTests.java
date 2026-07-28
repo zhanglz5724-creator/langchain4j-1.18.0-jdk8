@@ -17,7 +17,7 @@ class ReflectionBasedClassMetadataProviderFactoryTests {
     ReflectionBasedClassMetadataProviderFactory factory = new ReflectionBasedClassMetadataProviderFactory();
 
     private Map<String, Method> getMethodsOnClass() {
-        var nonStaticMethodsOnClass = StreamSupport.stream(
+        Map<String, Method> nonStaticMethodsOnClass = StreamSupport.stream(
                         factory.getNonStaticMethodsOnClass(Assistant.class).spliterator(), false)
                 .collect(Collectors.toMap(Method::getName, Function.identity()));
 
@@ -42,7 +42,7 @@ class ReflectionBasedClassMetadataProviderFactoryTests {
 
     @Test
     void annotationOnMethod() {
-        var nonStaticMethodsOnClass = getMethodsOnClass();
+        Map<String, Method> nonStaticMethodsOnClass = getMethodsOnClass();
 
         assertThat(factory.getAnnotation(nonStaticMethodsOnClass.get("hello"), Experimental.class))
                 .get()
@@ -57,7 +57,7 @@ class ReflectionBasedClassMetadataProviderFactoryTests {
 
     @Test
     void annotationsOnMethodNotFound() {
-        var nonStaticMethodsOnClass = getMethodsOnClass();
+        Map<String, Method> nonStaticMethodsOnClass = getMethodsOnClass();
 
         assertThat(factory.getAnnotation(nonStaticMethodsOnClass.get("hello"), InputGuardrails.class))
                 .isEmpty();

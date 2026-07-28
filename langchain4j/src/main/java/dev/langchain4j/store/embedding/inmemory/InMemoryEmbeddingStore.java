@@ -89,7 +89,7 @@ implements EmbeddingStore<Embedded> {
     }
 
     public List<String> addAll(List<Embedding> embeddings) {
-        List<Entry<Embedded>> newEntries = embeddings.stream().map(embedding -> new Entry(Utils.randomUUID(), (Embedding)embedding)).collect(Collectors.toList());
+        List<Entry<Embedded>> newEntries = embeddings.stream().map(embedding -> new Entry<Embedded>(Utils.randomUUID(), embedding)).collect(Collectors.toList());
         return this.add(newEntries);
     }
 
@@ -111,7 +111,7 @@ implements EmbeddingStore<Embedded> {
 
     public void removeAll(Collection<String> ids) {
         ValidationUtils.ensureNotEmpty(ids, (String)"ids");
-        Set<Object> idSet = ids instanceof Set ? (Set<Object>)ids : new HashSet<String>(ids);
+        Set<String> idSet = ids instanceof Set ? (Set<String>) ids : new HashSet<String>(ids);
         this.entries.removeIf(entry -> idSet.contains(entry.id));
     }
 

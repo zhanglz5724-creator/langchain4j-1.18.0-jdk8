@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +20,7 @@ class OpenAiAudioTranscriptionModelIT {
     void should_support_all_model_names(OpenAiAudioTranscriptionModelName modelName) throws Exception {
 
         // given
-        var model = OpenAiAudioTranscriptionModel.builder()
+        OpenAiAudioTranscriptionModel model = OpenAiAudioTranscriptionModel.builder()
                 .apiKey(System.getenv("OPENAI_API_KEY"))
                 .organizationId(System.getenv("OPENAI_ORGANIZATION_ID"))
                 .modelName(modelName)
@@ -27,7 +28,7 @@ class OpenAiAudioTranscriptionModelIT {
                 .logResponses(true)
                 .build();
 
-        Path audioPath = Path.of(getClass().getClassLoader().getResource("sample.wav").toURI());
+        Path audioPath = Paths.get(getClass().getClassLoader().getResource("sample.wav").toURI());
 
         Audio audio = Audio.builder()
                 .binaryData(Files.readAllBytes(audioPath))

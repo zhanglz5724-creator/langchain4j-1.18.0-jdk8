@@ -29,7 +29,7 @@ import dev.langchain4j.model.openai.internal.chat.ToolType;
 import java.util.Locale;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=ToolCall.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ToolCall {

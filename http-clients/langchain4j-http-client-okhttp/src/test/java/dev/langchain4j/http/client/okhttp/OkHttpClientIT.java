@@ -2,6 +2,7 @@ package dev.langchain4j.http.client.okhttp;
 
 import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpClientIT;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -10,6 +11,6 @@ class OkHttpClientIT extends HttpClientIT {
 
     @Override
     protected List<HttpClient> clients() {
-        return List.of(OkHttpClient.builder().build());
+        return Collections.<HttpClient>singletonList(OkHttpClient.builder().build());
     }
 }

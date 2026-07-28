@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.ktor.http.HttpStatusCode;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -21,29 +22,27 @@ class OpenAiCustomHeadersSupplierTest {
     private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
     private static final String MOCK_RESPONSE =
-            """
-            {
-              "id": "chatcmpl-test",
-              "object": "chat.completion",
-              "created": 1721596428,
-              "model": "gpt-4o-mini",
-              "choices": [
-                {
-                  "index": 0,
-                  "message": {
-                    "role": "assistant",
-                    "content": "Hello!"
-                  },
-                  "finish_reason": "stop"
-                }
-              ],
-              "usage": {
-                "prompt_tokens": 10,
-                "completion_tokens": 5,
-                "total_tokens": 15
-              }
-            }
-            """;
+            "{\n"
+            + "  \"id\": \"chatcmpl-test\",\n"
+            + "  \"object\": \"chat.completion\",\n"
+            + "  \"created\": 1721596428,\n"
+            + "  \"model\": \"gpt-4o-mini\",\n"
+            + "  \"choices\": [\n"
+            + "    {\n"
+            + "      \"index\": 0,\n"
+            + "      \"message\": {\n"
+            + "        \"role\": \"assistant\",\n"
+            + "        \"content\": \"Hello!\"\n"
+            + "      },\n"
+            + "      \"finish_reason\": \"stop\"\n"
+            + "    }\n"
+            + "  ],\n"
+            + "  \"usage\": {\n"
+            + "    \"prompt_tokens\": 10,\n"
+            + "    \"completion_tokens\": 5,\n"
+            + "    \"total_tokens\": 15\n"
+            + "  }\n"
+            + "}";
 
     @Test
     void should_call_supplier_for_each_request_with_chat_model() {
@@ -52,7 +51,7 @@ class OpenAiCustomHeadersSupplierTest {
 
         Supplier<Map<String, String>> headerSupplier = () -> {
             callCount.incrementAndGet();
-            return Map.of("X-Custom-Token", "token-" + callCount.get());
+            return Collections.singletonMap("X-Custom-Token", "token-" + callCount.get());
         };
 
         OpenAiChatModel model = OpenAiChatModel.builder()
@@ -86,7 +85,7 @@ class OpenAiCustomHeadersSupplierTest {
     @Test
     void should_work_with_static_map_for_backwards_compatibility() {
         // given
-        Map<String, String> staticHeaders = Map.of("X-Static-Header", "static-value");
+        Map<String, String> staticHeaders = Collections.singletonMap("X-Static-Header", "static-value");
 
         OpenAiChatModel model = OpenAiChatModel.builder()
                 .baseUrl(MOCK.baseUrl())

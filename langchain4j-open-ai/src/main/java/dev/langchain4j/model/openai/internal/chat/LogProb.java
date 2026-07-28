@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=LogProb.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class LogProb {

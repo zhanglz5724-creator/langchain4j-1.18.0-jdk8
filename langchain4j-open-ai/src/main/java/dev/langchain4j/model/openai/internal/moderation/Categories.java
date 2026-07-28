@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=Categories.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Categories {

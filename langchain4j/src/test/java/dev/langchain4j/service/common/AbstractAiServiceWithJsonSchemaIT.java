@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.TestInstance;
@@ -56,6 +57,289 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
         }
 
         Person extractPersonFrom(String text);
+    }
+
+    interface MissingDataPersonExtractor {
+
+        class Address {
+            private final String street;
+            public Address(String street) { this.street = street; }
+            public String street() { return street; }
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Address address = (Address) o;
+                return Objects.equals(street, address.street);
+            }
+            @Override
+            public int hashCode() { return Objects.hash(street); }
+            @Override
+            public String toString() { return "Address[street=" + street + "]"; }
+        }
+
+        class Person {
+
+            String name;
+            int age;
+            Double height;
+            boolean married;
+            Map<String, Object> map;
+            List<String> list;
+            String[] array;
+            Address address;
+            MaritalStatus2 maritalStatus;
+            LocalDate localDate;
+        }
+
+        Person extractPersonFrom(String text);
+    }
+
+    interface PojoSetPersonExtractor {
+        PojoSetPerson extractPersonFrom(String text);
+    }
+
+    interface ResultPersonExtractor {
+
+        class Person {
+
+            String name;
+        }
+
+        Result<Person> extractPersonFrom(String text);
+    }
+
+    interface RecursionPersonExtractor {
+        RecursionPerson extractPersonFrom(String text);
+    }
+
+    interface BooleanPrimitiveExtractor {
+
+        @UserMessage("Extract if the person from the following text is a man: {{it}}")
+        boolean isPersonAMan(String text);
+    }
+
+    interface BooleanBoxedExtractor {
+
+        @UserMessage("Extract if the person from the following text is a man: {{it}}")
+        Boolean isPersonAMan(String text);
+    }
+
+    interface IntPrimitiveExtractor {
+
+        @UserMessage("Extract number of people mentioned in the following text: {{it}}")
+        int extractNumberOfPeople(String text);
+    }
+
+    interface IntegerBoxedExtractor {
+
+        @UserMessage("Extract number of people mentioned in the following text: {{it}}")
+        Integer extractNumberOfPeople(String text);
+    }
+
+    interface LongPrimitiveExtractor {
+
+        @UserMessage("Extract number of people mentioned in the following text: {{it}}")
+        long extractNumberOfPeople(String text);
+    }
+
+    interface LongBoxedExtractor {
+
+        @UserMessage("Extract number of people mentioned in the following text: {{it}}")
+        Long extractNumberOfPeople(String text);
+    }
+
+    interface FloatPrimitiveExtractor {
+
+        @UserMessage("Extract temperature in Munich from the following text: {{it}}")
+        float extractTemperatureInMunich(String text);
+    }
+
+    interface FloatBoxedExtractor {
+
+        @UserMessage("Extract temperature in Munich from the following text: {{it}}")
+        Float extractTemperatureInMunich(String text);
+    }
+
+    interface DoublePrimitiveExtractor {
+
+        @UserMessage("Extract temperature in Munich from the following text: {{it}}")
+        double extractTemperatureInMunich(String text);
+    }
+
+    interface DoubleBoxedExtractor {
+
+        @UserMessage("Extract temperature in Munich from the following text: {{it}}")
+        Double extractTemperatureInMunich(String text);
+    }
+
+    interface PeopleListExtractor {
+
+        class Person {
+
+            String name;
+            int age;
+            Double height;
+            boolean married;
+        }
+
+        List<Person> extractPeopleFrom(String text);
+    }
+
+    interface PeopleResultListExtractor {
+
+        class Person {
+
+            String name;
+        }
+
+        Result<List<Person>> extractPeopleFrom(String text);
+    }
+
+    interface ListOfStringsPrimitiveExtractor {
+
+        @UserMessage("Extract names of people from the following text: {{it}}")
+        List<String> extractPeopleNames(String text);
+    }
+
+    interface SetOfStringsPrimitiveExtractor {
+
+        @UserMessage("Extract names of people from the following text: {{it}}")
+        Set<String> extractSetOfPeopleNames(String text);
+    }
+
+    interface PojoSetPrimitiveExtractor {
+
+        class Person {
+
+            String name;
+            int age;
+            Double height;
+            boolean married;
+        }
+
+        Set<Person> extractSetOfPojoFrom(String text);
+    }
+
+    interface EnumPrimitiveExtractor {
+
+        MaritalStatus2 extractEnumFrom(String text);
+    }
+
+    interface EnumListPrimitiveExtractor {
+
+        List<MaritalStatus2> extractListOfEnumsFrom(String text);
+    }
+
+    interface EnumSetPrimitiveExtractor {
+
+        Set<Weather> extractSetOfEnumsFrom(String text);
+    }
+
+    interface AnimalPolymorphicExtractor {
+        Animal extractAnimalFrom(String text);
+    }
+
+    interface AnimalsPolymorphicExtractor {
+        List<Animal> extractAnimalsFrom(String text);
+    }
+
+    interface OwnerPolymorphicExtractor {
+        PolymorphicOwner extractOwnerFrom(String text);
+    }
+
+    interface ExpressionRecursiveExtractor {
+        ArithmeticExpression extractFrom(String text);
+    }
+
+    static class PojoSetPet {
+        private final String name;
+        PojoSetPet(String name) { this.name = name; }
+        String name() { return name; }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PojoSetPet pet = (PojoSetPet) o;
+            return Objects.equals(name, pet.name);
+        }
+        @Override
+        public int hashCode() { return Objects.hash(name); }
+        @Override
+        public String toString() { return "PojoSetPet[name=" + name + "]"; }
+    }
+
+    static class PojoSetPerson {
+        private final String name;
+        private final Set<PojoSetPet> pets;
+        PojoSetPerson(String name, Set<PojoSetPet> pets) { this.name = name; this.pets = pets; }
+        String name() { return name; }
+        Set<PojoSetPet> pets() { return pets; }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PojoSetPerson person = (PojoSetPerson) o;
+            return Objects.equals(name, person.name) && Objects.equals(pets, person.pets);
+        }
+        @Override
+        public int hashCode() { return Objects.hash(name, pets); }
+        @Override
+        public String toString() { return "PojoSetPerson[name=" + name + ", pets=" + pets + "]"; }
+    }
+
+    static class RecursionPerson {
+        private final String name;
+        private final List<RecursionPerson> children;
+
+        RecursionPerson(String name, List<RecursionPerson> children) {
+            this.name = name;
+            this.children = copy(children);
+        }
+
+        String name() { return name; }
+        List<RecursionPerson> children() { return children; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RecursionPerson person = (RecursionPerson) o;
+            return Objects.equals(name, person.name) && Objects.equals(children, person.children);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(name, children); }
+
+        @Override
+        public String toString() { return "RecursionPerson[name=" + name + ", children=" + children + "]"; }
+    }
+
+    static class PolymorphicOwner {
+        private final String name;
+        private final Animal pet;
+
+        PolymorphicOwner(String name, Animal pet) {
+            this.name = name;
+            this.pet = pet;
+        }
+
+        String name() { return name; }
+        Animal pet() { return pet; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PolymorphicOwner owner = (PolymorphicOwner) o;
+            return Objects.equals(name, owner.name) && Objects.equals(pet, owner.pet);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(name, pet); }
+
+        @Override
+        public String toString() { return "PolymorphicOwner[name=" + name + ", pet=" + pet + "]"; }
     }
 
     @ParameterizedTest
@@ -102,42 +386,16 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     @MethodSource("models")
     protected void should_extract_pojo_with_missing_data(ChatModel model) {
 
-        interface PersonExtractor {
-
-            enum MaritalStatus {
-                SINGLE,
-                MARRIED
-            }
-
-            record Address(String street) {}
-
-            class Person {
-
-                String name;
-                int age;
-                Double height;
-                boolean married;
-                Map<String, Object> map;
-                List<String> list;
-                String[] array;
-                Address address;
-                MaritalStatus maritalStatus;
-                LocalDate localDate;
-            }
-
-            Person extractPersonFrom(String text);
-        }
-
         // given
         ChatModel spyModel = spy(model);
 
-        PersonExtractor personExtractor = AiServices.create(PersonExtractor.class, spyModel);
+        MissingDataPersonExtractor personExtractor = AiServices.create(MissingDataPersonExtractor.class, spyModel);
 
         String text = "Extract the person's information from the following text. Do not include missing fields! "
                 + "Text: 'Klaus'";
 
         // when
-        PersonExtractor.Person person = personExtractor.extractPersonFrom(text);
+        MissingDataPersonExtractor.Person person = personExtractor.extractPersonFrom(text);
 
         // then
         assertThat(person.name).isEqualTo("Klaus");
@@ -592,27 +850,18 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     @MethodSource("models")
     protected void should_extract_pojo_with_set_of_pojos(ChatModel model) {
 
-        record Pet(String name) {}
-
-        record Person(String name, Set<Pet> pets) {}
-
-        interface PersonExtractor {
-
-            Person extractPersonFrom(String text);
-        }
-
         // given
         model = spy(model);
 
-        PersonExtractor personExtractor = AiServices.create(PersonExtractor.class, model);
+        PojoSetPersonExtractor personExtractor = AiServices.create(PojoSetPersonExtractor.class, model);
 
         String text = "Extract the person's information from the following text: Klaus has 2 pets: Peanut and Muffin";
 
         // when
-        Person person = personExtractor.extractPersonFrom(text);
+        PojoSetPerson person = personExtractor.extractPersonFrom(text);
 
         // then
-        assertThat(person).isEqualTo(new Person("Klaus", Set.of(new Pet("Peanut"), new Pet("Muffin"))));
+        assertThat(person).isEqualTo(new PojoSetPerson("Klaus", Set.of(new PojoSetPet("Peanut"), new PojoSetPet("Muffin"))));
 
         verify(model)
                 .chat(ChatRequest.builder()
@@ -954,25 +1203,15 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_return_result_with_pojo(ChatModel model) {
 
         // given
-        interface PersonExtractor {
-
-            class Person {
-
-                String name;
-            }
-
-            Result<Person> extractPersonFrom(String text);
-        }
-
         model = spy(model);
 
-        PersonExtractor personExtractor = AiServices.create(PersonExtractor.class, model);
+        ResultPersonExtractor personExtractor = AiServices.create(ResultPersonExtractor.class, model);
 
         String text = "Extract the person's information from the following text: Klaus";
 
         // when
-        Result<PersonExtractor.Person> result = personExtractor.extractPersonFrom(text);
-        PersonExtractor.Person person = result.content();
+        Result<ResultPersonExtractor.Person> result = personExtractor.extractPersonFrom(text);
+        ResultPersonExtractor.Person person = result.content();
 
         // then
         assertThat(person.name).isEqualTo("Klaus");
@@ -1005,31 +1244,20 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
         // given
         model = spy(model);
 
-        record Person(String name, List<Person> children) {
-            Person(String name, List<Person> children) {
-                this.name = name;
-                this.children = copy(children);
-            }
-        }
-
-        interface PersonExtractor {
-            Person extractPersonFrom(String text);
-        }
-
-        PersonExtractor personExtractor = AiServices.create(PersonExtractor.class, model);
+        RecursionPersonExtractor personExtractor = AiServices.create(RecursionPersonExtractor.class, model);
 
         String text = "Extract the person's information from the following text: "
                 + "Francine has 2 children: Steve and Hayley";
 
         // when
-        Person person = personExtractor.extractPersonFrom(text);
+        RecursionPerson person = personExtractor.extractPersonFrom(text);
 
         // then
-        assertThat(person.name).isEqualTo("Francine");
-        assertThat(person.children).contains(new Person("Steve", List.of()));
-        assertThat(person.children).contains(new Person("Hayley", List.of()));
+        assertThat(person.name()).isEqualTo("Francine");
+        assertThat(person.children()).contains(new RecursionPerson("Steve", List.of()));
+        assertThat(person.children()).contains(new RecursionPerson("Hayley", List.of()));
 
-        String reference = generateUUIDFrom(Person.class.getName());
+        String reference = generateUUIDFrom(RecursionPerson.class.getName());
 
         verify(model)
                 .chat(ChatRequest.builder()
@@ -1086,9 +1314,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
 
         PersonExtractor16 personExtractor = AiServices.create(PersonExtractor16.class, model);
 
-        String text = """
-                Klaus can be identified by the following ID: 567b229a-6b0a-4f1e-9006-448cd9dfbfda
-                """;
+        String text = "Klaus can be identified by the following ID: 567b229a-6b0a-4f1e-9006-448cd9dfbfda\n";
 
         // when
         PersonExtractor16.Person person = personExtractor.extractPersonFrom(text);
@@ -1121,15 +1347,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_boolean_primitive(ChatModel model) {
 
         // given
-        interface BooleanExtractor {
-
-            @UserMessage("Extract if the person from the following text is a man: {{it}}")
-            boolean isPersonAMan(String text);
-        }
-
         model = spy(model);
 
-        BooleanExtractor booleanExtractor = AiServices.create(BooleanExtractor.class, model);
+        BooleanPrimitiveExtractor booleanExtractor = AiServices.create(BooleanPrimitiveExtractor.class, model);
 
         String text = "Klaus is a 37-year-old man, 1.78 meters tall, and single.";
 
@@ -1162,15 +1382,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_boolean_boxed(ChatModel model) {
 
         // given
-        interface BooleanExtractor {
-
-            @UserMessage("Extract if the person from the following text is a man: {{it}}")
-            Boolean isPersonAMan(String text);
-        }
-
         model = spy(model);
 
-        BooleanExtractor booleanExtractor = AiServices.create(BooleanExtractor.class, model);
+        BooleanBoxedExtractor booleanExtractor = AiServices.create(BooleanBoxedExtractor.class, model);
 
         String text = "Klaus is a 37-year-old man, 1.78 meters tall, and single.";
 
@@ -1203,15 +1417,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_int_primitive(ChatModel model) {
 
         // given
-        interface IntExtractor {
-
-            @UserMessage("Extract number of people mentioned in the following text: {{it}}")
-            int extractNumberOfPeople(String text);
-        }
-
         model = spy(model);
 
-        IntExtractor intExtractor = AiServices.create(IntExtractor.class, model);
+        IntPrimitiveExtractor intExtractor = AiServices.create(IntPrimitiveExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
@@ -1245,15 +1453,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_int_boxed(ChatModel model) {
 
         // given
-        interface IntegerExtractor {
-
-            @UserMessage("Extract number of people mentioned in the following text: {{it}}")
-            Integer extractNumberOfPeople(String text);
-        }
-
         model = spy(model);
 
-        IntegerExtractor intExtractor = AiServices.create(IntegerExtractor.class, model);
+        IntegerBoxedExtractor intExtractor = AiServices.create(IntegerBoxedExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
@@ -1287,15 +1489,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_long_primitive(ChatModel model) {
 
         // given
-        interface LongExtractor {
-
-            @UserMessage("Extract number of people mentioned in the following text: {{it}}")
-            long extractNumberOfPeople(String text);
-        }
-
         model = spy(model);
 
-        LongExtractor intExtractor = AiServices.create(LongExtractor.class, model);
+        LongPrimitiveExtractor intExtractor = AiServices.create(LongPrimitiveExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
@@ -1329,15 +1525,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_long_boxed(ChatModel model) {
 
         // given
-        interface LongExtractor {
-
-            @UserMessage("Extract number of people mentioned in the following text: {{it}}")
-            Long extractNumberOfPeople(String text);
-        }
-
         model = spy(model);
 
-        LongExtractor intExtractor = AiServices.create(LongExtractor.class, model);
+        LongBoxedExtractor intExtractor = AiServices.create(LongBoxedExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
@@ -1371,15 +1561,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_float_primitive(ChatModel model) {
 
         // given
-        interface FloatExtractor {
-
-            @UserMessage("Extract temperature in Munich from the following text: {{it}}")
-            float extractTemperatureInMunich(String text);
-        }
-
         model = spy(model);
 
-        FloatExtractor doubleExtractor = AiServices.create(FloatExtractor.class, model);
+        FloatPrimitiveExtractor doubleExtractor = AiServices.create(FloatPrimitiveExtractor.class, model);
 
         String text = "The average temperature of the coldest month is of -0.5 °C";
 
@@ -1412,15 +1596,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_float_boxed(ChatModel model) {
 
         // given
-        interface FloatExtractor {
-
-            @UserMessage("Extract temperature in Munich from the following text: {{it}}")
-            Float extractTemperatureInMunich(String text);
-        }
-
         model = spy(model);
 
-        FloatExtractor doubleExtractor = AiServices.create(FloatExtractor.class, model);
+        FloatBoxedExtractor doubleExtractor = AiServices.create(FloatBoxedExtractor.class, model);
 
         String text = "The average temperature of the coldest month is of -0.5 °C";
 
@@ -1453,15 +1631,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_double_primitive(ChatModel model) {
 
         // given
-        interface DoubleExtractor {
-
-            @UserMessage("Extract temperature in Munich from the following text: {{it}}")
-            double extractTemperatureInMunich(String text);
-        }
-
         model = spy(model);
 
-        DoubleExtractor doubleExtractor = AiServices.create(DoubleExtractor.class, model);
+        DoublePrimitiveExtractor doubleExtractor = AiServices.create(DoublePrimitiveExtractor.class, model);
 
         String text = "The average temperature of the coldest month is of -0.5 °C";
 
@@ -1494,15 +1666,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_double_boxed(ChatModel model) {
 
         // given
-        interface DoubleExtractor {
-
-            @UserMessage("Extract temperature in Munich from the following text: {{it}}")
-            Double extractTemperatureInMunich(String text);
-        }
-
         model = spy(model);
 
-        DoubleExtractor doubleExtractor = AiServices.create(DoubleExtractor.class, model);
+        DoubleBoxedExtractor doubleExtractor = AiServices.create(DoubleBoxedExtractor.class, model);
 
         String text = "The average temperature of the coldest month is of -0.5 °C";
 
@@ -1537,28 +1703,15 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_list_of_pojo(ChatModel model) {
 
         // given
-        interface PeopleExtractor {
-
-            class Person {
-
-                String name;
-                int age;
-                Double height;
-                boolean married;
-            }
-
-            List<Person> extractPeopleFrom(String text);
-        }
-
         model = spy(model);
 
-        PeopleExtractor peopleExtractor = AiServices.create(PeopleExtractor.class, model);
+        PeopleListExtractor peopleExtractor = AiServices.create(PeopleListExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
 
         // when
-        List<PeopleExtractor.Person> people = peopleExtractor.extractPeopleFrom(text);
+        List<PeopleListExtractor.Person> people = peopleExtractor.extractPeopleFrom(text);
 
         // then
         assertThat(people.get(0).name).isEqualTo("Klaus");
@@ -1602,25 +1755,15 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_return_result_with_list_of_pojo(ChatModel model) {
 
         // given
-        interface PeopleExtractor {
-
-            class Person {
-
-                String name;
-            }
-
-            Result<List<Person>> extractPeopleFrom(String text);
-        }
-
         model = spy(model);
 
-        PeopleExtractor personExtractor = AiServices.create(PeopleExtractor.class, model);
+        PeopleResultListExtractor personExtractor = AiServices.create(PeopleResultListExtractor.class, model);
 
         String text = "Extract the person's information from the following text: Klaus and Francine";
 
         // when
-        Result<List<PeopleExtractor.Person>> result = personExtractor.extractPeopleFrom(text);
-        List<PeopleExtractor.Person> people = result.content();
+        Result<List<PeopleResultListExtractor.Person>> result = personExtractor.extractPeopleFrom(text);
+        List<PeopleResultListExtractor.Person> people = result.content();
 
         // then
         assertThat(people).hasSize(2);
@@ -1655,15 +1798,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_list_of_strings(ChatModel model) {
 
         // given
-        interface ListOfStringsExtractor {
-
-            @UserMessage("Extract names of people from the following text: {{it}}")
-            List<String> extractPeopleNames(String text);
-        }
-
         model = spy(model);
 
-        ListOfStringsExtractor listOfStringsExtractor = AiServices.create(ListOfStringsExtractor.class, model);
+        ListOfStringsPrimitiveExtractor listOfStringsExtractor = AiServices.create(ListOfStringsPrimitiveExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
@@ -1706,15 +1843,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_set_of_strings(ChatModel model) {
 
         // given
-        interface SetOfStringsExtractor {
-
-            @UserMessage("Extract names of people from the following text: {{it}}")
-            Set<String> extractSetOfPeopleNames(String text);
-        }
-
         model = spy(model);
 
-        SetOfStringsExtractor setOfStringsExtractor = AiServices.create(SetOfStringsExtractor.class, model);
+        SetOfStringsPrimitiveExtractor setOfStringsExtractor = AiServices.create(SetOfStringsPrimitiveExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
@@ -1753,28 +1884,15 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_set_of_pojo(ChatModel model) {
 
         // given
-        interface PojoSetExtractor {
-
-            class Person {
-
-                String name;
-                int age;
-                Double height;
-                boolean married;
-            }
-
-            Set<Person> extractSetOfPojoFrom(String text);
-        }
-
         model = spy(model);
 
-        PojoSetExtractor pojoSetExtractor = AiServices.create(PojoSetExtractor.class, model);
+        PojoSetPrimitiveExtractor pojoSetExtractor = AiServices.create(PojoSetPrimitiveExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single. "
                 + "Franny is 35 years old, 1.65m height and married.";
 
         // when
-        Set<PojoSetExtractor.Person> people = pojoSetExtractor.extractSetOfPojoFrom(text);
+        Set<PojoSetPrimitiveExtractor.Person> people = pojoSetExtractor.extractSetOfPojoFrom(text);
 
         // then
         assertThat(people)
@@ -1816,32 +1934,27 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
 
     // Enums
 
+    enum MaritalStatus2 {
+        SINGLE,
+        MARRIED
+    }
+
     @ParameterizedTest
     @MethodSource("models")
     protected void should_extract_enum(ChatModel model) {
 
         // given
-        enum MaritalStatus {
-            SINGLE,
-            MARRIED
-        }
-
-        interface EnumExtractor {
-
-            MaritalStatus extractEnumFrom(String text);
-        }
-
         model = spy(model);
 
-        EnumExtractor enumExtractor = AiServices.create(EnumExtractor.class, model);
+        EnumPrimitiveExtractor enumExtractor = AiServices.create(EnumPrimitiveExtractor.class, model);
 
         String text = "Klaus is 37 years old, 1.78m height and single.";
 
         // when
-        MaritalStatus maritalStatus = enumExtractor.extractEnumFrom(text);
+        MaritalStatus2 maritalStatus = enumExtractor.extractEnumFrom(text);
 
         // then
-        assertThat(maritalStatus).isEqualTo(MaritalStatus.SINGLE);
+        assertThat(maritalStatus).isEqualTo(MaritalStatus2.SINGLE);
 
         verify(model)
                 .chat(ChatRequest.builder()
@@ -1865,29 +1978,20 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_list_of_enums(ChatModel model) {
 
         // given
-        enum MaritalStatus {
-            SINGLE,
-            MARRIED
-        }
-
-        interface EnumListExtractor {
-
-            List<MaritalStatus> extractListOfEnumsFrom(String text);
-        }
 
         model = spy(model);
 
-        EnumListExtractor enumListExtractor = AiServices.create(EnumListExtractor.class, model);
+        EnumListPrimitiveExtractor enumListExtractor = AiServices.create(EnumListPrimitiveExtractor.class, model);
 
         String text =
                 "Klaus is 37 years old, 1.78m height and single. " + "Franny is 35 years old, 1.65m height and married."
                         + "Staniel is 33 years old, 1.70m height and married.";
 
         // when
-        List<MaritalStatus> maritalStatuses = enumListExtractor.extractListOfEnumsFrom(text);
+        List<MaritalStatus2> maritalStatuses = enumListExtractor.extractListOfEnumsFrom(text);
 
         // then
-        assertThat(maritalStatuses).containsExactly(MaritalStatus.SINGLE, MaritalStatus.MARRIED, MaritalStatus.MARRIED);
+        assertThat(maritalStatuses).containsExactly(MaritalStatus2.SINGLE, MaritalStatus2.MARRIED, MaritalStatus2.MARRIED);
 
         verify(model)
                 .chat(ChatRequest.builder()
@@ -1912,26 +2016,22 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
         verify(model).supportedCapabilities();
     }
 
+    enum Weather {
+        SUNNY,
+        RAINY,
+        CLOUDY,
+        WINDY
+    }
+
     @ParameterizedTest
     @MethodSource("models")
     protected void should_extract_set_of_enums(ChatModel model) {
 
         // given
-        enum Weather {
-            SUNNY,
-            RAINY,
-            CLOUDY,
-            WINDY
-        }
-
-        interface EnumSetExtractor {
-
-            Set<Weather> extractSetOfEnumsFrom(String text);
-        }
 
         model = spy(model);
 
-        EnumSetExtractor enumSetExtractor = AiServices.create(EnumSetExtractor.class, model);
+        EnumSetPrimitiveExtractor enumSetExtractor = AiServices.create(EnumSetPrimitiveExtractor.class, model);
 
         String text = "The weather in Berlin was sunny and windy." + " Paris experienced rainy and cloudy weather."
                 + " New York had cloudy and windy weather.";
@@ -1972,24 +2072,70 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
 
     // Polymorphic types
 
-    sealed interface Animal permits Dog, Cat {}
+    interface Animal {}
 
-    record Dog(String name, String breed) implements Animal {}
+    static class Dog implements Animal {
+        private final String name;
+        private final String breed;
 
-    record Cat(String name, boolean indoor) implements Animal {}
+        public Dog(String name, String breed) {
+            this.name = name;
+            this.breed = breed;
+        }
+
+        public String name() { return name; }
+        public String breed() { return breed; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Dog dog = (Dog) o;
+            return Objects.equals(name, dog.name) && Objects.equals(breed, dog.breed);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(name, breed); }
+
+        @Override
+        public String toString() { return "Dog[name=" + name + ", breed=" + breed + "]"; }
+    }
+
+    static class Cat implements Animal {
+        private final String name;
+        private final boolean indoor;
+
+        public Cat(String name, boolean indoor) {
+            this.name = name;
+            this.indoor = indoor;
+        }
+
+        public String name() { return name; }
+        public boolean indoor() { return indoor; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Cat cat = (Cat) o;
+            return indoor == cat.indoor && Objects.equals(name, cat.name);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(name, indoor); }
+
+        @Override
+        public String toString() { return "Cat[name=" + name + ", indoor=" + indoor + "]"; }
+    }
 
     @ParameterizedTest
     @MethodSource("models")
     protected void should_extract_polymorphic_type(ChatModel model) {
 
         // given
-        interface AnimalExtractor {
-            Animal extractAnimalFrom(String text);
-        }
-
         model = spy(model);
 
-        AnimalExtractor extractor = AiServices.create(AnimalExtractor.class, model);
+        AnimalPolymorphicExtractor extractor = AiServices.create(AnimalPolymorphicExtractor.class, model);
 
         String text = "Rex is a Labrador dog";
 
@@ -2051,13 +2197,9 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_list_of_polymorphic_types(ChatModel model) {
 
         // given
-        interface AnimalsExtractor {
-            List<Animal> extractAnimalsFrom(String text);
-        }
-
         model = spy(model);
 
-        AnimalsExtractor extractor = AiServices.create(AnimalsExtractor.class, model);
+        AnimalsPolymorphicExtractor extractor = AiServices.create(AnimalsPolymorphicExtractor.class, model);
 
         String text = "Rex is a Labrador. Whiskers is an indoor cat.";
 
@@ -2122,20 +2264,14 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_pojo_with_nested_polymorphic_field(ChatModel model) {
 
         // given
-        record Owner(String name, Animal pet) {}
-
-        interface OwnerExtractor {
-            Owner extractOwnerFrom(String text);
-        }
-
         model = spy(model);
 
-        OwnerExtractor extractor = AiServices.create(OwnerExtractor.class, model);
+        OwnerPolymorphicExtractor extractor = AiServices.create(OwnerPolymorphicExtractor.class, model);
 
         String text = "Alice owns a Labrador dog named Rex.";
 
         // when
-        Owner owner = extractor.extractOwnerFrom(text);
+        PolymorphicOwner owner = extractor.extractOwnerFrom(text);
 
         // then
         assertThat(owner.name()).isEqualToIgnoringCase("Alice");
@@ -2188,11 +2324,58 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
         verify(model).supportedCapabilities();
     }
 
-    sealed interface ArithmeticExpression permits Constant, Addition {}
+    interface ArithmeticExpression {}
 
-    record Constant(int value) implements ArithmeticExpression {}
+    static class Constant implements ArithmeticExpression {
+        private final int value;
 
-    record Addition(ArithmeticExpression left, ArithmeticExpression right) implements ArithmeticExpression {}
+        public Constant(int value) {
+            this.value = value;
+        }
+
+        public int value() { return value; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Constant constant = (Constant) o;
+            return value == constant.value;
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(value); }
+
+        @Override
+        public String toString() { return "Constant[value=" + value + "]"; }
+    }
+
+    static class Addition implements ArithmeticExpression {
+        private final ArithmeticExpression left;
+        private final ArithmeticExpression right;
+
+        public Addition(ArithmeticExpression left, ArithmeticExpression right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        public ArithmeticExpression left() { return left; }
+        public ArithmeticExpression right() { return right; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Addition addition = (Addition) o;
+            return Objects.equals(left, addition.left) && Objects.equals(right, addition.right);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(left, right); }
+
+        @Override
+        public String toString() { return "Addition[left=" + left + ", right=" + right + "]"; }
+    }
 
     @ParameterizedTest
     @MethodSource("models")
@@ -2200,11 +2383,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     protected void should_extract_recursive_polymorphic_type(ChatModel model) {
 
         // given
-        interface ExpressionExtractor {
-            ArithmeticExpression extractFrom(String text);
-        }
-
-        ExpressionExtractor extractor = AiServices.create(ExpressionExtractor.class, model);
+        ExpressionRecursiveExtractor extractor = AiServices.create(ExpressionRecursiveExtractor.class, model);
 
         // when
         ArithmeticExpression expression = extractor.extractFrom(
@@ -2219,9 +2398,11 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
     }
 
     private static void collectLeaves(ArithmeticExpression expr, List<Integer> leaves) {
-        if (expr instanceof Constant c) {
+        if (expr instanceof Constant) {
+            Constant c = (Constant) expr;
             leaves.add(c.value());
-        } else if (expr instanceof Addition a) {
+        } else if (expr instanceof Addition) {
+            Addition a = (Addition) expr;
             collectLeaves(a.left(), leaves);
             collectLeaves(a.right(), leaves);
         }

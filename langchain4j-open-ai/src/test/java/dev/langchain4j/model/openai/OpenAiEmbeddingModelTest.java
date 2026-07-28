@@ -10,6 +10,7 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelRequestContext;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelResponseContext;
 import dev.langchain4j.model.embedding.request.EmbeddingRequest;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ class OpenAiEmbeddingModelTest {
         EmbeddingModel model = OpenAiEmbeddingModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .modelName("text-embedding-3-small")
-                .listeners(List.of(listener))
+                .listeners(Collections.singletonList(listener))
                 .build();
 
         model.embed(EmbeddingRequest.builder().input("hello").dimensions(256).build());
@@ -65,22 +66,22 @@ class OpenAiEmbeddingModelTest {
         EmbeddingModel model = OpenAiEmbeddingModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .modelName("nvidia/nv-embedqa-e5-v5")
-                .customParameters(Map.<String, Object>of("input_type", "passage"))
+                .customParameters(Collections.<String, Object>singletonMap("input_type", "passage"))
                 .build();
 
         // when
         model.embed("hello");
 
         // then
-        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace("""
-                {
-                  "model": "nvidia/nv-embedqa-e5-v5",
-                  "input": [
-                    "hello"
-                  ],
-                  "input_type": "passage"
-                }
-                """);
+        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace(
+                "{\n"
+                + "  \"model\": \"nvidia/nv-embedqa-e5-v5\",\n"
+                + "  \"input\": [\n"
+                + "    \"hello\"\n"
+                + "  ],\n"
+                + "  \"input_type\": \"passage\"\n"
+                + "}"
+        );
     }
 
     @Test
@@ -97,14 +98,14 @@ class OpenAiEmbeddingModelTest {
         model.embed("hello");
 
         // then
-        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace("""
-                {
-                  "model": "text-embedding-3-small",
-                  "input": [
-                    "hello"
-                  ]
-                }
-                """);
+        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace(
+                "{\n"
+                + "  \"model\": \"text-embedding-3-small\",\n"
+                + "  \"input\": [\n"
+                + "    \"hello\"\n"
+                + "  ]\n"
+                + "}"
+        );
     }
 
     @Test
@@ -127,32 +128,32 @@ class OpenAiEmbeddingModelTest {
         model.embed("hello");
 
         // then
-        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace("""
-                {
-                  "model": "nvidia/nv-embedqa-e5-v5",
-                  "input": [
-                    "hello"
-                  ],
-                  "input_type": "passage"
-                }
-                """);
+        assertThat(mockHttpClient.request().body()).isEqualToIgnoringWhitespace(
+                "{\n"
+                + "  \"model\": \"nvidia/nv-embedqa-e5-v5\",\n"
+                + "  \"input\": [\n"
+                + "    \"hello\"\n"
+                + "  ],\n"
+                + "  \"input_type\": \"passage\"\n"
+                + "}"
+        );
     }
 
     private static SuccessfulHttpResponse embeddingResponse() {
-        return SuccessfulHttpResponse.builder().statusCode(200).body("""
-                        {
-                          "model": "text-embedding-3-small",
-                          "data": [
-                            {
-                              "index": 0,
-                              "embedding": [0.1, 0.2]
-                            }
-                          ],
-                          "usage": {
-                            "prompt_tokens": 1,
-                            "total_tokens": 1
-                          }
-                        }
-                        """).build();
+        return SuccessfulHttpResponse.builder().statusCode(200).body(
+                "{\n"
+                + "  \"model\": \"text-embedding-3-small\",\n"
+                + "  \"data\": [\n"
+                + "    {\n"
+                + "      \"index\": 0,\n"
+                + "      \"embedding\": [0.1, 0.2]\n"
+                + "    }\n"
+                + "  ],\n"
+                + "  \"usage\": {\n"
+                + "    \"prompt_tokens\": 1,\n"
+                + "    \"total_tokens\": 1\n"
+                + "  }\n"
+                + "}"
+        ).build();
     }
 }

@@ -21,7 +21,7 @@ public final class ClassMetadataProvider {
             if (DEFAULT_CLASS_METADATA_PROVIDER_FACTORY.getClass().equals(factory.getClass())) continue;
             return factory;
         }
-        return DEFAULT_CLASS_METADATA_PROVIDER_FACTORY;
+        return (ClassMetadataProviderFactory<MethodKey>) DEFAULT_CLASS_METADATA_PROVIDER_FACTORY;
     }
 }
 

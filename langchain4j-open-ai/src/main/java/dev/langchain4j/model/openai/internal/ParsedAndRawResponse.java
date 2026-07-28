@@ -22,10 +22,10 @@ public class ParsedAndRawResponse<R> {
     private final StreamingHandle streamingHandle;
 
     protected ParsedAndRawResponse(Builder<R> builder) {
-        this.parsedResponse = ((Builder)builder).parsedResponse;
-        this.rawHttpResponse = ((Builder)builder).rawHttpResponse;
-        this.rawServerSentEvent = ((Builder)builder).rawServerSentEvent;
-        this.streamingHandle = ((Builder)builder).streamingHandle;
+        this.parsedResponse = (builder).parsedResponse;
+        this.rawHttpResponse = (builder).rawHttpResponse;
+        this.rawServerSentEvent = (builder).rawServerSentEvent;
+        this.streamingHandle = (builder).streamingHandle;
     }
 
     protected ParsedAndRawResponse(R parsedResponse, SuccessfulHttpResponse rawHttpResponse) {

@@ -47,8 +47,8 @@ import java.util.stream.Stream;
 
 final class GuardrailServiceBuilder
 implements GuardrailService.Builder {
-    private final Supplier<InputGuardrailExecutor> defaultInputGuardrailSupplier = () -> ((InputGuardrailExecutor.InputGuardrailExecutorBuilder)((InputGuardrailExecutor.InputGuardrailExecutorBuilder)InputGuardrailExecutor.builder().config((GuardrailsConfig)this.inputGuardrailsConfig)).guardrails(GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.inputGuardrails, this.inputGuardrailClasses))).build();
-    private final Supplier<OutputGuardrailExecutor> defaultOutputGuardrailSupplier = () -> ((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)OutputGuardrailExecutor.builder().config((GuardrailsConfig)this.outputGuardrailsConfig)).guardrails(GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.outputGuardrails, this.outputGuardrailClasses))).build();
+    private final Supplier<InputGuardrailExecutor> defaultInputGuardrailSupplier = () -> ((InputGuardrailExecutor.InputGuardrailExecutorBuilder)((InputGuardrailExecutor.InputGuardrailExecutorBuilder)InputGuardrailExecutor.builder().config((InputGuardrailsConfig)this.inputGuardrailsConfig)).guardrails(GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.inputGuardrails, this.inputGuardrailClasses))).build();
+    private final Supplier<OutputGuardrailExecutor> defaultOutputGuardrailSupplier = () -> ((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)OutputGuardrailExecutor.builder().config((OutputGuardrailsConfig)this.outputGuardrailsConfig)).guardrails(GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.outputGuardrails, this.outputGuardrailClasses))).build();
     private final Class<?> aiServiceClass;
     private InputGuardrailsConfig inputGuardrailsConfig;
     private OutputGuardrailsConfig outputGuardrailsConfig;
@@ -131,8 +131,8 @@ implements GuardrailService.Builder {
     private static <P extends GuardrailRequest, R extends GuardrailResult<R>, G extends Guardrail<P, R>> List<G> getNonAnnotationBasedClassLevelGuardrails(List<G> guardrails, List<Class<? extends G>> guardrailClasses) {
         ValidationUtils.ensureNotNull(guardrails, (String)"guardrails");
         ValidationUtils.ensureNotNull(guardrailClasses, (String)"guardrailClasses");
-        Stream guardrailsSetByBuilderAtClassLevel = guardrails.stream();
-        Stream<Guardrail> guardrailsSetByBuilderAtClassLevelByClassName = guardrailClasses.stream().map(GuardrailServiceBuilder::getGuardrailClassInstance);
+        Stream<G> guardrailsSetByBuilderAtClassLevel = guardrails.stream();
+        Stream<G> guardrailsSetByBuilderAtClassLevelByClassName = guardrailClasses.stream().map(cls -> (G) GuardrailServiceBuilder.getGuardrailClassInstance(cls));
         return Stream.concat(guardrailsSetByBuilderAtClassLevel, guardrailsSetByBuilderAtClassLevelByClassName).collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -142,11 +142,11 @@ implements GuardrailService.Builder {
     }
 
     private static <I extends InputGuardrail> List<I> getGuardrails(InputGuardrails inputGuardrails) {
-        return Stream.of(inputGuardrails.value()).map(guardrailClass -> (InputGuardrail)GuardrailServiceBuilder.getGuardrailClassInstance(guardrailClass)).collect(Collectors.toList());
+        return (List<I>) Stream.of(inputGuardrails.value()).map(guardrailClass -> (InputGuardrail)GuardrailServiceBuilder.getGuardrailClassInstance(guardrailClass)).collect(Collectors.toList());
     }
 
     private static <O extends OutputGuardrail> List<O> getGuardrails(OutputGuardrails outputGuardrails) {
-        return Stream.of(outputGuardrails.value()).map(guardrailClass -> (OutputGuardrail)GuardrailServiceBuilder.getGuardrailClassInstance(guardrailClass)).collect(Collectors.toList());
+        return (List<O>) Stream.of(outputGuardrails.value()).map(guardrailClass -> (OutputGuardrail)GuardrailServiceBuilder.getGuardrailClassInstance(guardrailClass)).collect(Collectors.toList());
     }
 
     private static InputGuardrailsConfig computeConfig(InputGuardrails annotation) {
@@ -158,11 +158,11 @@ implements GuardrailService.Builder {
     }
 
     private InputGuardrailExecutor computeInputGuardrails(InputGuardrails annotation) {
-        return ((InputGuardrailExecutor.InputGuardrailExecutorBuilder)((InputGuardrailExecutor.InputGuardrailExecutorBuilder)InputGuardrailExecutor.builder().config((GuardrailsConfig)(this.hasInputGuardrailConfigSetOnBuilder() ? this.inputGuardrailsConfig : GuardrailServiceBuilder.computeConfig(annotation)))).guardrails(this.hasInputGuardrailsSetOnBuilder() ? GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.inputGuardrails, this.inputGuardrailClasses) : GuardrailServiceBuilder.getGuardrails(annotation))).build();
+        return ((InputGuardrailExecutor.InputGuardrailExecutorBuilder)((InputGuardrailExecutor.InputGuardrailExecutorBuilder)InputGuardrailExecutor.builder().config((InputGuardrailsConfig)(this.hasInputGuardrailConfigSetOnBuilder() ? this.inputGuardrailsConfig : GuardrailServiceBuilder.computeConfig(annotation)))).guardrails(this.hasInputGuardrailsSetOnBuilder() ? GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.inputGuardrails, this.inputGuardrailClasses) : GuardrailServiceBuilder.getGuardrails(annotation))).build();
     }
 
     private OutputGuardrailExecutor computeOutputGuardrails(OutputGuardrails annotation) {
-        return ((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)OutputGuardrailExecutor.builder().config((GuardrailsConfig)(this.hasOutputGuardrailConfigSetOnBuilder() ? this.outputGuardrailsConfig : GuardrailServiceBuilder.computeConfig(annotation)))).guardrails(this.hasOutputGuardrailsSetOnBuilder() ? GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.outputGuardrails, this.outputGuardrailClasses) : GuardrailServiceBuilder.getGuardrails(annotation))).build();
+        return ((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)((OutputGuardrailExecutor.OutputGuardrailExecutorBuilder)OutputGuardrailExecutor.builder().config((OutputGuardrailsConfig)(this.hasOutputGuardrailConfigSetOnBuilder() ? this.outputGuardrailsConfig : GuardrailServiceBuilder.computeConfig(annotation)))).guardrails(this.hasOutputGuardrailsSetOnBuilder() ? GuardrailServiceBuilder.getNonAnnotationBasedClassLevelGuardrails(this.outputGuardrails, this.outputGuardrailClasses) : GuardrailServiceBuilder.getGuardrails(annotation))).build();
     }
 
     private <MethodKey> InputGuardrailExecutor computeInputGuardrailsForAiServiceMethod(MethodKey method, ClassMetadataProviderFactory<MethodKey> factory) {

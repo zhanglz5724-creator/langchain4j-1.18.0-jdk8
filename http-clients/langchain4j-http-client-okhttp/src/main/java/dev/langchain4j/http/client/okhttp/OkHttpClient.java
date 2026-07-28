@@ -70,7 +70,7 @@ public class OkHttpClient implements HttpClient {
         client.newCall(okRequest).enqueue(new Callback() {
             @Override
             public void onResponse(Call call, Response response) {
-                try (response) {
+                try {
                     if (!response.isSuccessful()) {
                         HttpException exception = new HttpException(response.code(), readBody(response));
                         ignoringExceptions(() -> listener.onError(exception));
@@ -149,15 +149,19 @@ public class OkHttpClient implements HttpClient {
         RequestBody body = buildRequestBody(request);
 
         switch (request.method()) {
-            case GET -> builder.get();
-            case POST -> builder.post(body != null ? body : RequestBody.create(new byte[0]));
-            case DELETE -> {
+            case GET:
+                builder.get();
+                break;
+            case POST:
+                builder.post(body != null ? body : RequestBody.create(new byte[0]));
+                break;
+            case DELETE:
                 if (body != null) {
                     builder.delete(body);
                 } else {
                     builder.delete();
                 }
-            }
+                break;
         }
 
         return builder.build();

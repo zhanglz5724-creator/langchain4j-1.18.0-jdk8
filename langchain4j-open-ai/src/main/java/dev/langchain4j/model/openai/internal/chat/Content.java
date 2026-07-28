@@ -33,7 +33,7 @@ import dev.langchain4j.model.openai.internal.chat.VideoUrl;
 import java.util.Locale;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=Content.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Content {

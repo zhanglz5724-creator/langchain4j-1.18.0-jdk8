@@ -57,7 +57,7 @@ class OpenAiResponsesAiServicesWithJsonSchemaIT extends AbstractAiServiceWithJso
 
     @Override
     protected boolean isStrictJsonSchemaEnabled(ChatModel model) {
-        return model.defaultRequestParameters() instanceof OpenAiResponsesChatRequestParameters parameters
-                && Boolean.TRUE.equals(parameters.strictJsonSchema());
+        return model.defaultRequestParameters() instanceof OpenAiResponsesChatRequestParameters
+                && Boolean.TRUE.equals(((OpenAiResponsesChatRequestParameters) model.defaultRequestParameters()).strictJsonSchema());
     }
 }

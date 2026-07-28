@@ -638,11 +638,11 @@ class TokenWindowChatMemoryTest implements WithAssertions {
         };
 
         // Define messages with token counts
-        var msgA = userMessageWithTokens(10);
-        var msgB = aiMessageWithTokens(10);
-        var msgC = userMessageWithTokens(10);
-        var msgD = aiMessageWithTokens(10);
-        var msgE = userMessageWithTokens(10);
+        UserMessage msgA = userMessageWithTokens(10);
+        AiMessage msgB = aiMessageWithTokens(10);
+        UserMessage msgC = userMessageWithTokens(10);
+        AiMessage msgD = aiMessageWithTokens(10);
+        UserMessage msgE = userMessageWithTokens(10);
 
         // shortMemory: maxTokens = 33
         TokenWindowChatMemory shortMemory = TokenWindowChatMemory.builder()
@@ -702,11 +702,11 @@ class TokenWindowChatMemoryTest implements WithAssertions {
                 .build();
 
         // Define messages with token counts
-        var msgA = userMessageWithTokens(10);
-        var msgB = aiMessageWithTokens(10);
-        var msgC = userMessageWithTokens(10);
-        var msgD = aiMessageWithTokens(10);
-        var msgE = userMessageWithTokens(10);
+        UserMessage msgA = userMessageWithTokens(10);
+        AiMessage msgB = aiMessageWithTokens(10);
+        UserMessage msgC = userMessageWithTokens(10);
+        AiMessage msgD = aiMessageWithTokens(10);
+        UserMessage msgE = userMessageWithTokens(10);
 
         // Add the first three messages
         memory.add(msgA);
@@ -726,7 +726,7 @@ class TokenWindowChatMemoryTest implements WithAssertions {
 
         // Decrease maxTokens = 33, which automatically evicts the oldest messages
         currentMaxTokens[0] = 33;
-        var messagesAfterShrink = memory.messages();
+        List<ChatMessage> messagesAfterShrink = memory.messages();
         assertThat(messagesAfterShrink)
                 .containsExactly(msgC, msgD, msgE); // Keep the most recent messages within token limit
     }
@@ -824,13 +824,13 @@ class TokenWindowChatMemoryTest implements WithAssertions {
     @Test
     void chat_memory_set_uses_reduced_store_ops() {
 
-        var store = new HitCountChatMemoryStore();
-        var chatMemory = TokenWindowChatMemory.builder()
+        HitCountChatMemoryStore store = new HitCountChatMemoryStore();
+        TokenWindowChatMemory chatMemory = TokenWindowChatMemory.builder()
                 .maxTokens(35, TOKEN_COUNT_ESTIMATOR)
                 .chatMemoryStore(store)
                 .build();
 
-        var counts = store.measureHitCounts(() -> {
+        HitCountChatMemoryStore.HitCounts counts = store.measureHitCounts(() -> {
             chatMemory.add(userMessage("first"), aiMessage("second"), aiMessage("3rd"));
         });
         assertThat(counts).isEqualTo(new HitCountChatMemoryStore.HitCounts(3, 3, 0));

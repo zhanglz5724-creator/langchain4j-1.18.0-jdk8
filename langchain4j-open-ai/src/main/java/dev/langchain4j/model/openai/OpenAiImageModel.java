@@ -72,7 +72,7 @@ implements ImageModel {
     public Response<Image> generate(String prompt) {
         GenerateImagesRequest request = this.requestBuilder(prompt).build();
         GenerateImagesResponse response = (GenerateImagesResponse)((SyncOrAsync)RetryUtils.withRetryMappingExceptions(() -> this.client.imagesGeneration(request), (int)this.maxRetries)).execute();
-        return Response.from((Object)OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
+        return Response.from(OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
     }
 
     public Response<List<Image>> generate(String prompt, int n) {
@@ -85,13 +85,13 @@ implements ImageModel {
     public Response<Image> edit(Image image, String prompt) {
         EditImageRequest request = this.editRequestBuilder(image, prompt).build();
         GenerateImagesResponse response = (GenerateImagesResponse)((SyncOrAsync)RetryUtils.withRetryMappingExceptions(() -> this.client.imagesEdit(request), (int)this.maxRetries)).execute();
-        return Response.from((Object)OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
+        return Response.from(OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
     }
 
     public Response<Image> edit(Image image, Image mask, String prompt) {
         EditImageRequest request = this.editRequestBuilder(image, prompt).mask(ImageFile.from(mask)).build();
         GenerateImagesResponse response = (GenerateImagesResponse)((SyncOrAsync)RetryUtils.withRetryMappingExceptions(() -> this.client.imagesEdit(request), (int)this.maxRetries)).execute();
-        return Response.from((Object)OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
+        return Response.from(OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
     }
 
     public static OpenAiImageModelBuilder builder() {

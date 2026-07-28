@@ -16,6 +16,8 @@ import dev.langchain4j.model.output.TokenUsage;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.mockito.InOrder;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +45,7 @@ class OpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 defaultStreamingModelBuilder()
                         .build(),
                 defaultStreamingModelBuilder()
@@ -59,7 +61,7 @@ class OpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected List<StreamingChatModel> modelsSupportingTools() {
-        return List.of(
+        return Arrays.asList(
                 defaultStreamingModelBuilder()
                         .modelName(GPT_5_MINI)
                         .build(),
@@ -106,7 +108,7 @@ class OpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected Set<FinishReason> finishReasonForMaxOutputTokens() {
-        return Set.of(LENGTH, STOP); // It is hard to make GPT-5 to hit LENGTH because of unpredictable reasoning
+        return new HashSet<>(Arrays.asList(LENGTH, STOP)); // It is hard to make GPT-5 to hit LENGTH because of unpredictable reasoning
     }
 
     @Override
@@ -159,7 +161,7 @@ class OpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
     @Override
     public StreamingChatModel createModelWith(ChatModelListener listener) {
         return defaultStreamingModelBuilder()
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -169,7 +171,7 @@ class OpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 toolCall.index() == 0
                         && toolCall.id().equals(id)
                         && toolCall.name().equals("getWeather")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -188,7 +190,7 @@ class OpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 toolCall.index() == 0
                         && toolCall.id().equals(id1)
                         && toolCall.name().equals("getWeather")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -204,7 +206,7 @@ class OpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 toolCall.index() == 1
                         && toolCall.id().equals(id2)
                         && toolCall.name().equals("getTime")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {

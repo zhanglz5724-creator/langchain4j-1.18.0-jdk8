@@ -11,6 +11,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.util.Arrays;
 import java.util.List;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -60,7 +61,7 @@ class OpenAiStreamingChatModelDeepSeekThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -84,7 +85,7 @@ class OpenAiStreamingChatModelDeepSeekThinkingIT {
 
         // when
         TestStreamingChatResponseHandler handler2 = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), handler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), handler2);
 
         // then
         AiMessage aiMessage2 = handler2.get().aiMessage();
@@ -123,7 +124,7 @@ class OpenAiStreamingChatModelDeepSeekThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -135,7 +136,7 @@ class OpenAiStreamingChatModelDeepSeekThinkingIT {
 
         // when
         TestStreamingChatResponseHandler handler2 = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), handler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), handler2);
 
         // then
         List<HttpRequest> httpRequests = spyingHttpClient.requests();
@@ -170,7 +171,7 @@ class OpenAiStreamingChatModelDeepSeekThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -182,7 +183,7 @@ class OpenAiStreamingChatModelDeepSeekThinkingIT {
 
         // when
         TestStreamingChatResponseHandler handler2 = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), handler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), handler2);
 
         // then
         List<HttpRequest> httpRequests = spyingHttpClient.requests();

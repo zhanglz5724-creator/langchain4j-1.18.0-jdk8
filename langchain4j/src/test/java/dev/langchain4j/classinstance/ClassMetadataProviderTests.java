@@ -7,6 +7,7 @@ import dev.langchain4j.classloading.ClassMetadataProvider;
 import dev.langchain4j.classloading.ReflectionBasedClassMetadataProviderFactory;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class ClassMetadataProviderTests {
     @Test
     void loadsThingsCorrectly() {
-        var factory = ClassMetadataProvider.<Method>getClassMetadataProviderFactory();
+        ReflectionBasedClassMetadataProviderFactory factory = ClassMetadataProvider.<Method>getClassMetadataProviderFactory();
 
         assertThat(factory).isNotNull().isExactlyInstanceOf(ReflectionBasedClassMetadataProviderFactory.class);
 
@@ -25,15 +26,15 @@ class ClassMetadataProviderTests {
 
         assertThat(factory.getAnnotation(SomeInterface.class, Target.class)).isEmpty();
 
-        var methods = factory.getNonStaticMethodsOnClass(SomeInterface.class);
+        Iterable<Method> methods = factory.getNonStaticMethodsOnClass(SomeInterface.class);
 
         assertThat(methods).hasSize(2).extracting(Method::getName).containsExactlyInAnyOrder("hello", "goodbye");
 
-        var methodsByName = StreamSupport.stream(methods.spliterator(), false)
+        Map<String, Method> methodsByName = StreamSupport.stream(methods.spliterator(), false)
                 .collect(Collectors.toMap(Method::getName, method -> method));
 
-        var helloMethod = methodsByName.get("hello");
-        var goodbyeMethod = methodsByName.get("goodbye");
+        Method helloMethod = methodsByName.get("hello");
+        Method goodbyeMethod = methodsByName.get("goodbye");
 
         assertThat(helloMethod).isNotNull();
 

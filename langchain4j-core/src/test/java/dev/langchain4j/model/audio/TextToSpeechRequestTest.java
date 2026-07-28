@@ -2,6 +2,7 @@ package dev.langchain4j.model.audio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 class TextToSpeechRequestTest {
@@ -31,7 +32,7 @@ class TextToSpeechRequestTest {
     @Test
     void should_not_enforce_provider_specific_length_limit() {
         // Length limits are provider-specific and enforced by the provider, not by the core request.
-        String longText = "a".repeat(10_000);
+        String longText = String.join("", Collections.nCopies(10_000, "a"));
 
         TextToSpeechRequest request =
                 TextToSpeechRequest.builder().text(longText).build();

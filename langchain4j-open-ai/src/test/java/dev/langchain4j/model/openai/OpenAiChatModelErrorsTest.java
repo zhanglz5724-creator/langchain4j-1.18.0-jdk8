@@ -58,7 +58,7 @@ class OpenAiChatModelErrorsTest {
     void should_handle_error_responses(int httpStatusCode, Class<LangChain4jException> exception) {
 
         // given
-        final var question = "Return error: " + httpStatusCode;
+        final String question = "Return error: " + httpStatusCode;
         MOCK.completion(req -> req.userMessageContains(question)).respondsError(res -> {
             res.setHttpStatus(HttpStatusCode.Companion.fromValue(httpStatusCode));
             res.setBody("");
@@ -88,7 +88,7 @@ class OpenAiChatModelErrorsTest {
                 .logResponses(true)
                 .build();
 
-        final var question = "Simulate timeout";
+        final String question = "Simulate timeout";
         MOCK.completion(req -> req.userMessageContains(question)).respondsError(res -> {
             res.delayMillis(TIMEOUT.multipliedBy(2).toMillis());
             res.setHttpStatus(HttpStatusCode.Companion.getNoContent());
@@ -104,41 +104,40 @@ class OpenAiChatModelErrorsTest {
     void should_handle_refusal() {
 
         // given
-        final var userMessage = "does not matter";
+        final String userMessage = "does not matter";
         MOCK.completion(req -> req.userMessageContains(userMessage)).respondsError(res -> {
             res.setHttpStatus(HttpStatusCode.Companion.fromValue(200));
             // copied from https://platform.openai.com/docs/guides/structured-outputs/refusals?api-mode=chat#refusals
             // language=json
-            res.setBody("""
-                    {
-                      "id": "chatcmpl-9nYAG9LPNonX8DAyrkwYfemr3C8HC",
-                      "object": "chat.completion",
-                      "created": 1721596428,
-                      "model": "gpt-4o-2024-08-06",
-                      "choices": [
-                        {
-                          "index": 0,
-                          "message": {
-                            "role": "assistant",
-                            "refusal": "I'm sorry, I cannot assist with that request."
-                          },
-                          "logprobs": null,
-                          "finish_reason": "stop"
-                        }
-                      ],
-                      "usage": {
-                        "prompt_tokens": 81,
-                        "completion_tokens": 11,
-                        "total_tokens": 92,
-                        "completion_tokens_details": {
-                          "reasoning_tokens": 0,
-                          "accepted_prediction_tokens": 0,
-                          "rejected_prediction_tokens": 0
-                        }
-                      },
-                      "system_fingerprint": "fp_3407719c7f"
-                    }
-                    """);
+            res.setBody("{\n"
+                    + "  \"id\": \"chatcmpl-9nYAG9LPNonX8DAyrkwYfemr3C8HC\",\n"
+                    + "  \"object\": \"chat.completion\",\n"
+                    + "  \"created\": 1721596428,\n"
+                    + "  \"model\": \"gpt-4o-2024-08-06\",\n"
+                    + "  \"choices\": [\n"
+                    + "    {\n"
+                    + "      \"index\": 0,\n"
+                    + "      \"message\": {\n"
+                    + "        \"role\": \"assistant\",\n"
+                    + "        \"refusal\": \"I'm sorry, I cannot assist with that request.\"\n"
+                    + "      },\n"
+                    + "      \"logprobs\": null,\n"
+                    + "      \"finish_reason\": \"stop\"\n"
+                    + "    }\n"
+                    + "  ],\n"
+                    + "  \"usage\": {\n"
+                    + "    \"prompt_tokens\": 81,\n"
+                    + "    \"completion_tokens\": 11,\n"
+                    + "    \"total_tokens\": 92,\n"
+                    + "    \"completion_tokens_details\": {\n"
+                    + "      \"reasoning_tokens\": 0,\n"
+                    + "      \"accepted_prediction_tokens\": 0,\n"
+                    + "      \"rejected_prediction_tokens\": 0\n"
+                    + "    }\n"
+                    + "  },\n"
+                    + "  \"system_fingerprint\": \"fp_3407719c7f\"\n"
+                    + "}"
+                    );
         });
 
         // when-then

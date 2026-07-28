@@ -43,7 +43,9 @@ class ContentTest {
 
         // given
         TextSegment segment = TextSegment.from("text");
-        Map<ContentMetadata, Object> metadata = new java.util.HashMap<String,Object>(){{put(SCORE, 0.2d);put(ContentMetadata.EMBEDDING_ID, "test-eid");}};
+        Map<ContentMetadata, Object> metadata = new HashMap<>();
+        metadata.put(SCORE, 0.2d);
+        metadata.put(ContentMetadata.EMBEDDING_ID, "test-eid");
 
         // when
         Content content = Content.from(segment, metadata);
@@ -51,8 +53,11 @@ class ContentTest {
         // then
         assertThat(content.textSegment()).isSameAs(segment);
         assertThat(content.metadata()).isNotEmpty();
+        Map<ContentMetadata, Object> expectedMetadata = new HashMap<>();
+        expectedMetadata.put(SCORE, 0.2);
+        expectedMetadata.put(ContentMetadata.EMBEDDING_ID, "test-eid");
         assertThat(content.metadata())
-                .containsExactlyEntriesOf(new java.util.HashMap<String,Object>(){{put(SCORE, 0.2);put(ContentMetadata.EMBEDDING_ID, "test-eid");}});
+                .containsExactlyEntriesOf(expectedMetadata);
     }
 
     @Test

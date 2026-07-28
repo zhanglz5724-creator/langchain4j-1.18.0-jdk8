@@ -18,6 +18,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.model.openai.internal.chat.Content;
 import dev.langchain4j.model.openai.internal.chat.UserMessage;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,7 @@ class OpenAiImageContentFormatTest {
 
         // when
         UserMessage openAiMessage =
-                (UserMessage) toOpenAiMessages(List.of(userMessage)).get(0);
+                (UserMessage)                 toOpenAiMessages(Arrays.asList(userMessage)).get(0);
 
         // then
         @SuppressWarnings("unchecked")
@@ -60,7 +61,7 @@ class OpenAiImageContentFormatTest {
 
         // when
         UserMessage openAiMessage = (UserMessage)
-                toOpenAiMessages(List.of(userMessage), false, null, true).get(0);
+                toOpenAiMessages(Arrays.asList(userMessage), false, null, true).get(0);
 
         // then
         @SuppressWarnings("unchecked")
@@ -186,59 +187,55 @@ class OpenAiImageContentFormatTest {
     }
 
     private static SuccessfulHttpResponse successfulChatCompletionResponse() {
-        return SuccessfulHttpResponse.builder().statusCode(200).body("""
-                        {
-                          "id": "chatcmpl-test",
-                          "object": "chat.completion",
-                          "created": 1,
-                          "model": "gpt-4o-mini",
-                          "choices": [
-                            {
-                              "index": 0,
-                              "message": {
-                                "role": "assistant",
-                                "content": "ok"
-                              },
-                              "finish_reason": "stop"
-                            }
-                          ]
-                        }
-                        """).build();
+        return SuccessfulHttpResponse.builder().statusCode(200).body(
+                "{\n"
+                + "  \"id\": \"chatcmpl-test\",\n"
+                + "  \"object\": \"chat.completion\",\n"
+                + "  \"created\": 1,\n"
+                + "  \"model\": \"gpt-4o-mini\",\n"
+                + "  \"choices\": [\n"
+                + "    {\n"
+                + "      \"index\": 0,\n"
+                + "      \"message\": {\n"
+                + "        \"role\": \"assistant\",\n"
+                + "        \"content\": \"ok\"\n"
+                + "      },\n"
+                + "      \"finish_reason\": \"stop\"\n"
+                + "    }\n"
+                + "  ]\n"
+                + "}"
+        ).build();
     }
 
     private static List<ServerSentEvent> successfulStreamingChatCompletionEvents() {
-        return List.of(
-                new ServerSentEvent(null, """
-                                {
-                                  "id": "chatcmpl-test",
-                                  "object": "chat.completion.chunk",
-                                  "created": 1,
-                                  "model": "gpt-4o-mini",
-                                  "choices": [
-                                    {
-                                      "index": 0,
-                                      "delta": {
-                                        "role": "assistant",
-                                        "content": "ok"
-                                      },
-                                      "finish_reason": null
-                                    }
-                                  ]
-                                }
-                                """), new ServerSentEvent(null, """
-                                {
-                                  "id": "chatcmpl-test",
-                                  "object": "chat.completion.chunk",
-                                  "created": 1,
-                                  "model": "gpt-4o-mini",
-                                  "choices": [
-                                    {
-                                      "index": 0,
-                                      "delta": {},
-                                      "finish_reason": "stop"
-                                    }
-                                  ]
-                                }
-                                """), new ServerSentEvent(null, "[DONE]"));
+        return Arrays.asList(
+                new ServerSentEvent(null, "{\n"
+                        + "  \"id\": \"chatcmpl-test\",\n"
+                        + "  \"object\": \"chat.completion.chunk\",\n"
+                        + "  \"created\": 1,\n"
+                        + "  \"model\": \"gpt-4o-mini\",\n"
+                        + "  \"choices\": [\n"
+                        + "    {\n"
+                        + "      \"index\": 0,\n"
+                        + "      \"delta\": {\n"
+                        + "        \"role\": \"assistant\",\n"
+                        + "        \"content\": \"ok\"\n"
+                        + "      },\n"
+                        + "      \"finish_reason\": null\n"
+                        + "    }\n"
+                        + "  ]\n"
+                        + "}"), new ServerSentEvent(null, "{\n"
+                        + "  \"id\": \"chatcmpl-test\",\n"
+                        + "  \"object\": \"chat.completion.chunk\",\n"
+                        + "  \"created\": 1,\n"
+                        + "  \"model\": \"gpt-4o-mini\",\n"
+                        + "  \"choices\": [\n"
+                        + "    {\n"
+                        + "      \"index\": 0,\n"
+                        + "      \"delta\": {},\n"
+                        + "      \"finish_reason\": \"stop\"\n"
+                        + "    }\n"
+                        + "  ]\n"
+                        + "}"), new ServerSentEvent(null, "[DONE]"));
     }
 }

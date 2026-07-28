@@ -26,7 +26,7 @@ import dev.langchain4j.model.openai.internal.moderation.Categories;
 import dev.langchain4j.model.openai.internal.moderation.CategoryScores;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=ModerationResult.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class ModerationResult {

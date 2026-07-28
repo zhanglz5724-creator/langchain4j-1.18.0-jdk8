@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder = OpenAiTextToSpeechRequest.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_EMPTY)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OpenAiTextToSpeechRequest {

@@ -15,6 +15,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.assertj.core.api.WithAssertions;
@@ -58,10 +59,10 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
                 "classPathSourceTestsInJar/folderInsideJar/file4.txt"
             })
     void should_load_text_document(String path) {
-        var filename = path.substring(path.lastIndexOf('/') + 1);
-        var document = loadDocument(path, new TextDocumentParser());
+        String filename = path.substring(path.lastIndexOf('/') + 1);
+        Document document = loadDocument(path, new TextDocumentParser());
 
-        assertThat(document.text()).startsWithIgnoringCase("This is %s".formatted(filename));
+        assertThat(document.text()).startsWithIgnoringCase(String.format("This is %s", filename));
         assertThat(document.metadata().getString(Document.FILE_NAME)).isEqualTo(filename);
 
         assertThat(document.metadata().getString(Document.URL))
@@ -88,13 +89,13 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
     @Test
     void should_load_documents_from_multiple_subdirs() {
         // given
-        var resourceDirectory = "%s/anotherDir/".formatted(CLASSPATH_CHECK_DIRECTORY);
+        String resourceDirectory = String.format("%s/anotherDir/", CLASSPATH_CHECK_DIRECTORY);
 
         // when
-        var documents = loadDocuments(resourceDirectory, new TextDocumentParser());
+        List<Document> documents = loadDocuments(resourceDirectory, new TextDocumentParser());
 
         // then
-        var fileNames = documents.stream()
+        List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
                 .toList();
 
@@ -108,13 +109,13 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
     @Test
     void should_load_documents_including_unknown_document_types_from_filesystem() {
         // given
-        var resourceDirectory = CLASSPATH_ROOT;
+        String resourceDirectory = CLASSPATH_ROOT;
 
         // when
-        var documents = loadDocuments(resourceDirectory, new TextDocumentParser());
+        List<Document> documents = loadDocuments(resourceDirectory, new TextDocumentParser());
 
         // then
-        var fileNames = documents.stream()
+        List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
                 .toList();
 
@@ -139,13 +140,13 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
     @Test
     void should_load_documents_including_unknown_document_types_from_inside_archive() {
         // given
-        var resourceDirectory = CLASSPATH_IN_ARCHIVE_CHECK_DIRECTORY;
+        String resourceDirectory = CLASSPATH_IN_ARCHIVE_CHECK_DIRECTORY;
 
         // when
-        var documents = loadDocuments(resourceDirectory, new TextDocumentParser());
+        List<Document> documents = loadDocuments(resourceDirectory, new TextDocumentParser());
 
         // then
-        var fileNames = documents.stream()
+        List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
                 .toList();
 
@@ -163,13 +164,12 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
     @ParameterizedTest
     @CsvSource(
             delimiter = '|',
-            textBlock =
-                    """
-		glob:*.banana  | classPathSourceTests      | test-file-3.banana
-		glob:**.banana | classPathSourceTests      | test-file-3.banana
-		glob:*.banana  | classPathSourceTestsInJar | test-file-5.banana
-		glob:**.banana | classPathSourceTestsInJar | test-file-5.banana
-		""")
+            value = {
+                    "glob:*.banana  | classPathSourceTests      | test-file-3.banana",
+                    "glob:**.banana | classPathSourceTests      | test-file-3.banana",
+                    "glob:*.banana  | classPathSourceTestsInJar | test-file-5.banana",
+                    "glob:**.banana | classPathSourceTestsInJar | test-file-5.banana"
+            })
     void should_load_matching_documents(String syntaxAndPattern, String path, String expectedFile) {
 
         // given
@@ -215,20 +215,19 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         return Stream.of(
                 Arguments.of(
                         CLASSPATH_CHECK_DIRECTORY,
-                        List.of("test-file-3.banana", "test-file-4.banana", "file1.txt", "file2.txt")),
+                        Arrays.asList("test-file-3.banana", "test-file-4.banana", "file1.txt", "file2.txt")),
                 Arguments.of(
                         CLASSPATH_IN_ARCHIVE_CHECK_DIRECTORY,
-                        List.of("test-file-5.banana", "test-file-6.banana", "file3.txt", "file4.txt")));
+                        Arrays.asList("test-file-5.banana", "test-file-6.banana", "file3.txt", "file4.txt")));
     }
 
     @ParameterizedTest
     @CsvSource(
             delimiter = '|',
-            textBlock =
-                    """
-		classPathSourceTestsInJar | test-file-5.banana
-		classPathSourceTests | test-file-3.banana
-		""")
+            value = {
+                    "classPathSourceTestsInJar | test-file-5.banana",
+                    "classPathSourceTests | test-file-3.banana"
+            })
     void should_recursively_load_matching_documents(String path, String expectedFileName) {
 
         // given
@@ -279,19 +278,18 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
     static Stream<Arguments>
             should_recursively_load_matching_documents_with_glob_crossing_directory_boundaries_arguments() {
         return Stream.of(
-                Arguments.of(CLASSPATH_CHECK_DIRECTORY, List.of("test-file-3.banana", "test-file-4.banana")),
+                Arguments.of(CLASSPATH_CHECK_DIRECTORY, Arrays.asList("test-file-3.banana", "test-file-4.banana")),
                 Arguments.of(
-                        CLASSPATH_IN_ARCHIVE_CHECK_DIRECTORY, List.of("test-file-5.banana", "test-file-6.banana")));
+                        CLASSPATH_IN_ARCHIVE_CHECK_DIRECTORY, Arrays.asList("test-file-5.banana", "test-file-6.banana")));
     }
 
     @ParameterizedTest
     @CsvSource(
             delimiter = '|',
-            textBlock =
-                    """
-		classPathSourceTests | test-file-4.banana
-		classPathSourceTestsInJar | test-file-6.banana
-		""")
+            value = {
+                    "classPathSourceTests | test-file-4.banana",
+                    "classPathSourceTestsInJar | test-file-6.banana"
+            })
     void should_recursively_load_matching_documents_with_glob_specifying_concrete_directory(
             String path, String expectedFileName) {
 

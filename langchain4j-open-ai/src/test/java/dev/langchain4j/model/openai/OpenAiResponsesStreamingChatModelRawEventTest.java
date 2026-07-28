@@ -7,6 +7,7 @@ import dev.langchain4j.http.client.MockHttpClientBuilder;
 import dev.langchain4j.http.client.sse.ServerSentEvent;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -26,7 +27,7 @@ class OpenAiResponsesStreamingChatModelRawEventTest {
         ServerSentEvent completedEvent = new ServerSentEvent(
                 null,
                 "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"model\":\"gpt-5.4-mini\",\"status\":\"completed\",\"output\":[]}}");
-        List<ServerSentEvent> events = List.of(textEvent, webSearchEvent, completedEvent);
+        List<ServerSentEvent> events = Arrays.asList(textEvent, webSearchEvent, completedEvent);
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
         OpenAiResponsesStreamingChatModel model = OpenAiResponsesStreamingChatModel.builder()

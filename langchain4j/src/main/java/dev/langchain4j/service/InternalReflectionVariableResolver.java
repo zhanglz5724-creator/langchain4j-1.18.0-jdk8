@@ -43,8 +43,8 @@ public class InternalReflectionVariableResolver {
             Object variableValue = args[i];
             variables.put(ParameterNameResolver.name(parameter), variableValue);
             if (!(variableValue instanceof Map)) continue;
-            Map variablesMap = (Map)variableValue;
-            variablesMap.entrySet().stream().filter(e -> e.getKey().getClass() == String.class).forEach(e -> variables.put((String)e.getKey(), e.getValue()));
+            Map<?, ?> variablesMap = (Map<?, ?>) variableValue;
+            variablesMap.entrySet().stream().filter(e -> e.getKey() instanceof String).forEach(e -> variables.put((String) e.getKey(), e.getValue()));
         }
         if (template.contains("{{it}}") && !variables.containsKey("it")) {
             String itValue = InternalReflectionVariableResolver.getValueOfVariableIt(parameters, args);

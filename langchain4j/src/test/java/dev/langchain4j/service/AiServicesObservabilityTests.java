@@ -39,9 +39,12 @@ import dev.langchain4j.observability.api.listener.ToolExecutedEventListener;
 import dev.langchain4j.service.guardrail.InputGuardrails;
 import dev.langchain4j.service.guardrail.OutputGuardrails;
 import dev.langchain4j.service.memory.ChatMemoryService;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -105,14 +108,14 @@ class AiServicesObservabilityTests {
 
         assertNoEventsReceived(
                 noEventsReceivedClasses.size(),
-                noEventsReceivedClasses.stream().map(listeners::get).toList());
+                noEventsReceivedClasses.stream().map(listeners::get).collect(Collectors.toList()));
 
         assertEventsReceived(
                 hasTools,
                 expectedEventsReceivedClasses.size(),
                 expectedUserMessage,
                 expectedMethodName,
-                expectedEventsReceivedClasses.stream().map(listeners::get).toList(),
+                expectedEventsReceivedClasses.stream().map(listeners::get).collect(Collectors.toList()),
                 expectedEventsReceivedAssertion);
 
         // No additional events should fire when invoking the operation again
@@ -122,7 +125,7 @@ class AiServicesObservabilityTests {
                 expectedEventsReceivedClasses.size(),
                 expectedUserMessage,
                 expectedMethodName,
-                expectedEventsReceivedClasses.stream().map(listeners::get).toList(),
+                expectedEventsReceivedClasses.stream().map(listeners::get).collect(Collectors.toList()),
                 expectedEventsReceivedAssertion);
     }
 
@@ -132,7 +135,7 @@ class AiServicesObservabilityTests {
                 () -> Assistant.createFailingService(true),
                 () -> Assistant.createFailingService(true, listeners.values()),
                 assistant -> {
-                    var latch = new CountDownLatch(1);
+                    CountDownLatch latch = new CountDownLatch(1);
 
                     try {
                         assistant
@@ -167,14 +170,14 @@ class AiServicesObservabilityTests {
                 },
                 "streamingChat",
                 false,
-                List.of(
+                Arrays.asList(
                         AiServiceCompletedEvent.class,
                         InputGuardrailExecutedEvent.class,
                         OutputGuardrailExecutedEvent.class,
                         AiServiceResponseReceivedEvent.class,
                         ToolExecutedEvent.class),
                 "Hello!",
-                List.of(AiServiceStartedEvent.class, AiServiceErrorEvent.class));
+                Arrays.asList(AiServiceStartedEvent.class, AiServiceErrorEvent.class));
     }
 
     @Test
@@ -186,14 +189,14 @@ class AiServicesObservabilityTests {
                         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> assistant.chat("Hello!")),
                 "chat",
                 false,
-                List.of(
+                Arrays.asList(
                         AiServiceCompletedEvent.class,
                         InputGuardrailExecutedEvent.class,
                         OutputGuardrailExecutedEvent.class,
                         AiServiceResponseReceivedEvent.class,
                         ToolExecutedEvent.class),
                 "Hello!",
-                List.of(AiServiceStartedEvent.class, AiServiceRequestIssuedEvent.class, AiServiceErrorEvent.class));
+                Arrays.asList(AiServiceStartedEvent.class, AiServiceRequestIssuedEvent.class, AiServiceErrorEvent.class));
     }
 
     @Test
@@ -202,7 +205,7 @@ class AiServicesObservabilityTests {
                 () -> Assistant.create(false, true),
                 () -> Assistant.create(false, true, listeners.values()),
                 assistant -> {
-                    var latch = new CountDownLatch(1);
+                    CountDownLatch latch = new CountDownLatch(1);
 
                     try {
                         assistant
@@ -237,13 +240,13 @@ class AiServicesObservabilityTests {
                 },
                 "streamingChat",
                 false,
-                List.of(
+                Arrays.asList(
                         AiServiceErrorEvent.class,
                         InputGuardrailExecutedEvent.class,
                         OutputGuardrailExecutedEvent.class,
                         ToolExecutedEvent.class),
                 "Hello!",
-                List.of(
+                Arrays.asList(
                         AiServiceStartedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         AiServiceCompletedEvent.class,
@@ -258,13 +261,13 @@ class AiServicesObservabilityTests {
                 assistant -> assertThat(assistant.chat("Hello!")).isEqualTo(DEFAULT_EXPECTED_RESPONSE),
                 "chat",
                 false,
-                List.of(
+                Arrays.asList(
                         AiServiceErrorEvent.class,
                         InputGuardrailExecutedEvent.class,
                         OutputGuardrailExecutedEvent.class,
                         ToolExecutedEvent.class),
                 "Hello!",
-                List.of(
+                Arrays.asList(
                         AiServiceStartedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         AiServiceCompletedEvent.class,
@@ -279,22 +282,24 @@ class AiServicesObservabilityTests {
                 assistant -> assertThat(assistant.chat(TOOL_USER_MESSAGE)).isEqualTo(TOOL_EXPECTED_RESPONSE),
                 "chat",
                 true,
-                List.of(
+                Arrays.asList(
                         AiServiceErrorEvent.class,
                         InputGuardrailExecutedEvent.class,
                         OutputGuardrailExecutedEvent.class),
                 TOOL_USER_MESSAGE,
-                List.of(
+                Arrays.asList(
                         AiServiceStartedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         AiServiceCompletedEvent.class,
                         AiServiceResponseReceivedEvent.class,
                         ToolExecutedEvent.class),
                 aiServiceEvent -> {
-                    if (aiServiceEvent instanceof AiServiceResponseReceivedEvent aiServiceResponseReceivedEvent) {
+                    if (aiServiceEvent instanceof AiServiceResponseReceivedEvent) {
+                        AiServiceResponseReceivedEvent aiServiceResponseReceivedEvent = (AiServiceResponseReceivedEvent) aiServiceEvent;
                         assertThat(aiServiceResponseReceivedEvent.response()).isNotNull();
                         assertThat(aiServiceResponseReceivedEvent.request()).isNotNull();
-                    } else if (aiServiceEvent instanceof AiServiceRequestIssuedEvent aiServiceRequestIssuedEvent) {
+                    } else if (aiServiceEvent instanceof AiServiceRequestIssuedEvent) {
+                        AiServiceRequestIssuedEvent aiServiceRequestIssuedEvent = (AiServiceRequestIssuedEvent) aiServiceEvent;
                         assertThat(aiServiceRequestIssuedEvent.request()).isNotNull();
                     }
                 });
@@ -306,7 +311,7 @@ class AiServicesObservabilityTests {
                 () -> Assistant.create(true, true),
                 () -> Assistant.create(true, true, listeners.values()),
                 assistant -> {
-                    var latch = new CountDownLatch(1);
+                    CountDownLatch latch = new CountDownLatch(1);
 
                     try {
                         assistant
@@ -344,12 +349,12 @@ class AiServicesObservabilityTests {
                 },
                 "streamingChat",
                 true,
-                List.of(
+                Arrays.asList(
                         AiServiceErrorEvent.class,
                         InputGuardrailExecutedEvent.class,
                         OutputGuardrailExecutedEvent.class),
                 TOOL_USER_MESSAGE,
-                List.of(
+                Arrays.asList(
                         AiServiceStartedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         AiServiceCompletedEvent.class,
@@ -371,14 +376,14 @@ class AiServicesObservabilityTests {
                                 FailureInputGuardrail.class.getName()),
                 "streamingChatWithInputGuardrails",
                 false,
-                List.of(
+                Arrays.asList(
                         AiServiceCompletedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         OutputGuardrailExecutedEvent.class,
                         ToolExecutedEvent.class,
                         AiServiceResponseReceivedEvent.class),
                 "Hello!",
-                List.of(AiServiceStartedEvent.class, AiServiceErrorEvent.class, InputGuardrailExecutedEvent.class));
+                Arrays.asList(AiServiceStartedEvent.class, AiServiceErrorEvent.class, InputGuardrailExecutedEvent.class));
     }
 
     @Test
@@ -393,14 +398,14 @@ class AiServicesObservabilityTests {
                                 FailureInputGuardrail.class.getName()),
                 "chatWithInputGuardrails",
                 false,
-                List.of(
+                Arrays.asList(
                         AiServiceCompletedEvent.class,
                         OutputGuardrailExecutedEvent.class,
                         ToolExecutedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         AiServiceResponseReceivedEvent.class),
                 "Hello!",
-                List.of(AiServiceStartedEvent.class, AiServiceErrorEvent.class, InputGuardrailExecutedEvent.class));
+                Arrays.asList(AiServiceStartedEvent.class, AiServiceErrorEvent.class, InputGuardrailExecutedEvent.class));
     }
 
     @Test
@@ -409,7 +414,7 @@ class AiServicesObservabilityTests {
                 () -> Assistant.create(false, true),
                 () -> Assistant.create(false, true, listeners.values()),
                 assistant -> {
-                    var latch = new CountDownLatch(1);
+                    CountDownLatch latch = new CountDownLatch(1);
 
                     try {
                         assistant
@@ -446,9 +451,9 @@ class AiServicesObservabilityTests {
                 },
                 "streamingChatWithOutputGuardrails",
                 false,
-                List.of(AiServiceCompletedEvent.class, InputGuardrailExecutedEvent.class, ToolExecutedEvent.class),
+                Arrays.asList(AiServiceCompletedEvent.class, InputGuardrailExecutedEvent.class, ToolExecutedEvent.class),
                 "Hello!",
-                List.of(
+                Arrays.asList(
                         AiServiceStartedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         AiServiceErrorEvent.class,
@@ -468,9 +473,9 @@ class AiServicesObservabilityTests {
                                 FailureOutputGuardrail.class.getName()),
                 "chatWithOutputGuardrails",
                 false,
-                List.of(AiServiceCompletedEvent.class, InputGuardrailExecutedEvent.class, ToolExecutedEvent.class),
+                Arrays.asList(AiServiceCompletedEvent.class, InputGuardrailExecutedEvent.class, ToolExecutedEvent.class),
                 "Hello!",
-                List.of(
+                Arrays.asList(
                         AiServiceStartedEvent.class,
                         AiServiceRequestIssuedEvent.class,
                         AiServiceErrorEvent.class,
@@ -513,12 +518,12 @@ class AiServicesObservabilityTests {
             assertThat(l).isNotNull().extracting(MyListener::event).isNotNull();
         });
 
-        var firstInvocationContext = listeners.stream()
+        Optional<InvocationContext> firstInvocationContext = listeners.stream()
                 .map(MyListener::event)
                 .map(AiServiceEvent::invocationContext)
                 .findFirst();
 
-        var ic = assertThat(firstInvocationContext).get().actual();
+        InvocationContext ic = assertThat(firstInvocationContext).get().actual();
 
         // Verify that all the listeners have the same invocationContext()
         assertThat(listeners)
@@ -537,7 +542,7 @@ class AiServicesObservabilityTests {
                 .containsExactly(
                         Assistant.class.getName(),
                         expectedMethodName,
-                        List.of(expectedUserMessage),
+                        Arrays.asList(expectedUserMessage),
                         ChatMemoryService.DEFAULT);
 
         assertThat(ic.invocationId()).isNotNull();
@@ -580,20 +585,20 @@ class AiServicesObservabilityTests {
         TokenStream streamingChatWithOutputGuardrails(String message);
 
         static Assistant create(boolean shouldHaveToolAccess, boolean streaming) {
-            return create(shouldHaveToolAccess, streaming, List.of());
+            return create(shouldHaveToolAccess, streaming, Collections.emptyList());
         }
 
         static Assistant create(
                 boolean shouldHaveToolAccess,
                 boolean streaming,
                 Collection<? extends AiServiceListener<? extends AiServiceEvent>> listeners) {
-            var builder = AiServices.builder(Assistant.class).registerListeners(listeners);
+            AiServices<Assistant> builder = AiServices.builder(Assistant.class).registerListeners(listeners);
 
-            var toolRequestMessage = AiMessage.from(ToolExecutionRequest.builder()
+            AiMessage toolRequestMessage = AiMessage.from(ToolExecutionRequest.builder()
                     .name("squareRoot")
                     .arguments("{\n  \"arg0\": 485906798473894056\n}")
                     .build());
-            var toolResponseMessage = AiMessage.from(TOOL_EXPECTED_RESPONSE);
+            AiMessage toolResponseMessage = AiMessage.from(TOOL_EXPECTED_RESPONSE);
 
             if (shouldHaveToolAccess) {
                 if (streaming) {
@@ -619,12 +624,12 @@ class AiServicesObservabilityTests {
         }
 
         static Assistant createFailingService(boolean streaming) {
-            return createFailingService(streaming, List.of());
+            return createFailingService(streaming, Collections.emptyList());
         }
 
         static Assistant createFailingService(
                 boolean streaming, Collection<? extends AiServiceListener<? extends AiServiceEvent>> listeners) {
-            var builder = AiServices.builder(Assistant.class).registerListeners(listeners);
+            AiServices<Assistant> builder = AiServices.builder(Assistant.class).registerListeners(listeners);
 
             return streaming
                     ? builder.streamingChatModel(StreamingChatModelMock.thatAlwaysThrowsExceptionWithMessage(

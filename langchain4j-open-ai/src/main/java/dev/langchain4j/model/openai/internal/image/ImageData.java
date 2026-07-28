@@ -25,7 +25,7 @@ import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
 import java.net.URI;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=ImageData.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ImageData {

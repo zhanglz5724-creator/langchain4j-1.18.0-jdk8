@@ -51,23 +51,23 @@ class AiServicesWithJsonSchemaWithRequiredIT {
      * This is different from "tools" (see {@link AiServicesWithToolsWithRequiredIT}),
      * where all fields and sub-fields are considered <b>required</b> by default.
      */
+    interface PersonExtractor {
+
+        class Person {
+
+            @JsonProperty(required = true)
+            String name;
+
+            Integer age;
+        }
+
+        Person extractPersonFrom(String text);
+    }
+
     @Test
     void should_extract_pojo_with_required_field() {
 
         // given
-        interface PersonExtractor {
-
-            class Person {
-
-                @JsonProperty(required = true)
-                String name;
-
-                Integer age;
-            }
-
-            Person extractPersonFrom(String text);
-        }
-
         PersonExtractor personExtractor = AiServices.create(PersonExtractor.class, model);
 
         String text = "Klaus is 37 years old";

@@ -32,7 +32,7 @@ class OpenAiStreamingLanguageModelIT {
         CompletableFuture<String> futureAnswer = new CompletableFuture<>();
         CompletableFuture<Response<String>> futureResponse = new CompletableFuture<>();
 
-        model.generate("What is the capital of Germany?", new StreamingResponseHandler<>() {
+        model.generate("What is the capital of Germany?", new StreamingResponseHandler<String>() {
 
             private final StringBuilder answerBuilder = new StringBuilder();
 

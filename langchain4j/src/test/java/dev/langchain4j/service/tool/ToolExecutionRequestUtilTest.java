@@ -55,9 +55,7 @@ class ToolExecutionRequestUtilTest implements WithAssertions {
     void argumentsAsMap_should_parse_arguments_containing_escaped_double_quotes_1() {
 
         // given JSON containing escaped double quotes (\")
-        String arguments = """
-                {"arg0":"SELECT COUNT(A) FROM \\"Samples\\".\\"samples.example.com\\".\\"zip_lookup.csv\\""}
-                """;
+        String arguments = "{\"arg0\":\"SELECT COUNT(A) FROM \\\"Samples\\\".\\\"samples.example.com\\\".\\\"zip_lookup.csv\\\"\"}";
 
         ToolExecutionRequest request = ToolExecutionRequest.builder()
                 .id("id")
@@ -69,24 +67,20 @@ class ToolExecutionRequestUtilTest implements WithAssertions {
         Map<String, Object> argumentsMap = ToolExecutionRequestUtil.argumentsAsMap(request.arguments());
 
         // then result does not contain escaping
-        assertThat(argumentsMap).containsEntry("arg0", """
-                SELECT COUNT(A) FROM "Samples"."samples.example.com"."zip_lookup.csv"
-                """.trim());
+        assertThat(argumentsMap).containsEntry("arg0", "SELECT COUNT(A) FROM \"Samples\".\"samples.example.com\".\"zip_lookup.csv\"");
     }
 
     @Test
     void argumentsAsMap_should_parse_arguments_containing_escaped_double_quotes_2() {
 
         // given JSON containing escaped double quotes (\")
-        String arguments = """
-                {
-                    "conditionalTaskCreation":{
-                        "firstNameInput":"${$context.personal_info.first_name}",
-                        "lastNameInput":"${$context.personal_info.last_name}",
-                        "conditionInput":"${($context.personal_info.first_name | startswith(\\"d\\"))}"
-                    }
-                }
-                """;
+        String arguments = "{"
+                + "\"conditionalTaskCreation\":{"
+                + "\"firstNameInput\":\"${$context.personal_info.first_name}\","
+                + "\"lastNameInput\":\"${$context.personal_info.last_name}\","
+                + "\"conditionInput\":\"${($context.personal_info.first_name | startswith(\\\"d\\\"))}\""
+                + "}"
+                + "}";
 
         ToolExecutionRequest request = ToolExecutionRequest.builder()
                 .id("id")
@@ -98,13 +92,11 @@ class ToolExecutionRequestUtilTest implements WithAssertions {
         Map<String, Object> argumentsMap = ToolExecutionRequestUtil.argumentsAsMap(request.arguments());
 
         // then result does not contain escaping
-        assertThat(argumentsMap).containsEntry("conditionalTaskCreation", Map.of(
-                "firstNameInput", "${$context.personal_info.first_name}",
-                "lastNameInput", "${$context.personal_info.last_name}",
-                "conditionInput", """
-                        ${($context.personal_info.first_name | startswith("d"))}
-                        """.trim()
-        ));
+        java.util.Map<String, String> innerMap = new java.util.LinkedHashMap<>();
+        innerMap.put("firstNameInput", "${$context.personal_info.first_name}");
+        innerMap.put("lastNameInput", "${$context.personal_info.last_name}");
+        innerMap.put("conditionInput", "${($context.personal_info.first_name | startswith(\"d\"))}");
+        assertThat(argumentsMap).containsEntry("conditionalTaskCreation", innerMap);
     }
 
     @Test

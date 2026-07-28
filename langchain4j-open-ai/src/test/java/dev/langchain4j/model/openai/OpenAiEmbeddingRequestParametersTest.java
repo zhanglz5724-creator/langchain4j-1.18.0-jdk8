@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.langchain4j.model.embedding.request.EmbeddingInputType;
 import dev.langchain4j.model.embedding.request.EmbeddingRequestParameters;
+import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class OpenAiEmbeddingRequestParametersTest {
                 .dimensions(256)
                 .user("user-1")
                 .encodingFormat("float")
-                .customParameters(Map.of("input_type", "passage"))
+                .customParameters(Collections.singletonMap("input_type", "passage"))
                 .build();
 
         assertThat(params.modelName()).isEqualTo("text-embedding-3-small");

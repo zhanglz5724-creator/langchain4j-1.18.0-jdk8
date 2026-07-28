@@ -26,7 +26,7 @@ import dev.langchain4j.model.openai.internal.chat.Function;
 import dev.langchain4j.model.openai.internal.chat.ToolType;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=Tool.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Tool {

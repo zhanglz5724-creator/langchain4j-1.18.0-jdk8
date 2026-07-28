@@ -11,6 +11,8 @@ import dev.langchain4j.http.client.MockHttpClientBuilder;
 import dev.langchain4j.model.chat.TestStreamingChatResponseHandler;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +36,16 @@ class OpenAiResponsesStreamingChatModelPayloadTest {
         MockHttpClient mockHttpClient = new MockHttpClient();
         Map<String, Object> webSearchTool = new LinkedHashMap<>();
         webSearchTool.put("type", "web_search");
-        webSearchTool.put("user_location", Map.of("type", "approximate", "country", "US"));
+        webSearchTool.put("user_location", new LinkedHashMap<String, Object>() {{
+            put("type", "approximate");
+            put("country", "US");
+        }});
 
         OpenAiResponsesStreamingChatModel model = OpenAiResponsesStreamingChatModel.builder()
                 .apiKey("test-key")
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .modelName(MODEL_NAME)
-                .serverTools(List.of(webSearchTool))
+                .serverTools(Arrays.asList(webSearchTool))
                 .build();
 
         try {
@@ -70,7 +75,7 @@ class OpenAiResponsesStreamingChatModelPayloadTest {
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .modelName(MODEL_NAME)
                 .toolSpecifications(WEATHER_TOOL)
-                .serverTools(List.of(webSearchTool))
+                .serverTools(Arrays.asList(webSearchTool))
                 .toolChoice(REQUIRED)
                 .build();
 
@@ -94,21 +99,21 @@ class OpenAiResponsesStreamingChatModelPayloadTest {
         defaultTool.put("type", "web_search");
         Map<String, Object> requestTool = new LinkedHashMap<>();
         requestTool.put("type", "file_search");
-        requestTool.put("vector_store_ids", List.of("vs_1"));
+        requestTool.put("vector_store_ids", Arrays.asList("vs_1"));
 
         OpenAiResponsesStreamingChatModel model = OpenAiResponsesStreamingChatModel.builder()
                 .apiKey("test-key")
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .defaultRequestParameters(OpenAiResponsesChatRequestParameters.builder()
                         .modelName(MODEL_NAME)
-                        .serverTools(List.of(defaultTool))
+                        .serverTools(Arrays.asList(defaultTool))
                         .build())
                 .build();
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(dev.langchain4j.data.message.UserMessage.from("Hello"))
                 .parameters(OpenAiResponsesChatRequestParameters.builder()
-                        .serverTools(List.of(requestTool))
+                        .serverTools(Arrays.asList(requestTool))
                         .build())
                 .build();
 

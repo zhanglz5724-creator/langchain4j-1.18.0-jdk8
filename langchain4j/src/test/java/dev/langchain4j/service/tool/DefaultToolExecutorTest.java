@@ -149,7 +149,35 @@ class DefaultToolExecutorTest implements WithAssertions {
         }
     }
 
-    record Person(String name, int age) {}
+    static class Person {
+        String name;
+        int age;
+
+        Person() {}
+
+        Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Person)) return false;
+            Person person = (Person) o;
+            return age == person.age && java.util.Objects.equals(name, person.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(name, age);
+        }
+
+        @Override
+        public String toString() {
+            return "Person[name=" + name + ", age=" + age + "]";
+        }
+    }
 
     @Test
     void coerce_argument() {
@@ -530,17 +558,8 @@ class DefaultToolExecutorTest implements WithAssertions {
                 .build();
         DefaultToolExecutor toolExecutor2 = new DefaultToolExecutor(new PersonTool(), request2);
         String result2 = toolExecutor2.execute(request2, "DEFAULT");
-        assertThat(result2).isEqualToIgnoringWhitespace("""
-                [
-                  {
-                    "name": "Klaus",
-                    "age": 42
-                  },
-                  {
-                    "name": "Peter",
-                    "age": 43
-                  }
-                ]""");
+        assertThat(result2).isEqualToIgnoringWhitespace(
+                "[{\"name\":\"Klaus\",\"age\":42},{\"name\":\"Peter\",\"age\":43}]");
 
         ToolExecutionRequest request3 = ToolExecutionRequest.builder()
                 .id("3")
@@ -549,17 +568,8 @@ class DefaultToolExecutorTest implements WithAssertions {
                 .build();
         DefaultToolExecutor toolExecutor3 = new DefaultToolExecutor(new PersonTool(), request3);
         String result3 = toolExecutor3.execute(request3, "DEFAULT");
-        assertThat(result3).isEqualToIgnoringWhitespace("""
-                [
-                  {
-                    "name": "Peter",
-                    "age": 43
-                  },
-                  {
-                    "name": "Klaus",
-                    "age": 42
-                  }
-                ]""");
+        assertThat(result3).isEqualToIgnoringWhitespace(
+                "[{\"name\":\"Peter\",\"age\":43},{\"name\":\"Klaus\",\"age\":42}]");
 
         ToolExecutionRequest request4 = ToolExecutionRequest.builder()
                 .id("4")
@@ -569,17 +579,8 @@ class DefaultToolExecutorTest implements WithAssertions {
                 .build();
         DefaultToolExecutor toolExecutor4 = new DefaultToolExecutor(new PersonTool(), request4);
         String result4 = toolExecutor4.execute(request4, "DEFAULT");
-        assertThat(result4).isEqualToIgnoringWhitespace("""
-                {
-                  "p1": {
-                    "name": "Klaus",
-                    "age": 42
-                  },
-                  "p2": {
-                    "name": "Peter",
-                    "age": 43
-                  }
-                }""");
+        assertThat(result4).isEqualToIgnoringWhitespace(
+                "{\"p1\":{\"name\":\"Klaus\",\"age\":42},\"p2\":{\"name\":\"Peter\",\"age\":43}}");
 
         ToolExecutionRequest request5 = ToolExecutionRequest.builder()
                 .id("5")
@@ -588,17 +589,8 @@ class DefaultToolExecutorTest implements WithAssertions {
                 .build();
         DefaultToolExecutor toolExecutor5 = new DefaultToolExecutor(new PersonTool(), request5);
         String result5 = toolExecutor5.execute(request5, "DEFAULT");
-        assertThat(result5).isEqualToIgnoringWhitespace("""
-                [
-                  {
-                    "name": "Klaus",
-                    "age": 42
-                  },
-                  {
-                    "name": "Peter",
-                    "age": 43
-                  }
-                ]""");
+        assertThat(result5).isEqualToIgnoringWhitespace(
+                "[{\"name\":\"Klaus\",\"age\":42},{\"name\":\"Peter\",\"age\":43}]");
     }
 
     @Test

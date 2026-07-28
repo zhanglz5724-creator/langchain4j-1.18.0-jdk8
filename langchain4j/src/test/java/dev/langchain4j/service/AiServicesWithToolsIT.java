@@ -62,7 +62,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -72,6 +74,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -510,7 +513,7 @@ class AiServicesWithToolsIT {
     }
 
     static List<Executor> executors() {
-        return List.of(Executors.newFixedThreadPool(2));
+        return Arrays.asList(Executors.newFixedThreadPool(2));
     }
 
     @ParameterizedTest
@@ -928,22 +931,16 @@ class AiServicesWithToolsIT {
             @Tool
             String getWeather(InvocationParameters invocationParameters) {
                 String city = invocationParameters.get("city");
-                return switch (city) {
-                    case "Munich" -> "rainy";
-                    default -> "sunny";
-                };
+                switch (city) {
+                    case "Munich": return "rainy";
+                    default: return "sunny";
+                }
             }
-        }
-
-        interface Assistant {
-
-            String chat(
-                    @dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
         }
 
         Tools spyTools = spy(new Tools());
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        InvocationParametersAssistant assistant = AiServices.builder(InvocationParametersAssistant.class)
                 .chatModel(models().findFirst().get())
                 .tools(spyTools)
                 .build();
@@ -972,40 +969,26 @@ class AiServicesWithToolsIT {
     void should_propagate_custom_invocation_parameters_into_tool() {
 
         // given
-        class CustomInvocationParameters extends InvocationParameters {
-
-            public CustomInvocationParameters(Map<String, Object> map) {
-                super(map);
-            }
-        }
-
         class Tools {
 
             @Tool
             String getWeather(CustomInvocationParameters invocationParameters) {
                 String city = invocationParameters.get("city");
-                return switch (city) {
-                    case "Munich" -> "rainy";
-                    default -> "sunny";
-                };
+                switch (city) {
+                    case "Munich": return "rainy";
+                    default: return "sunny";
+                }
             }
-        }
-
-        interface Assistant {
-
-            String chat(
-                    @dev.langchain4j.service.UserMessage String userMessage,
-                    CustomInvocationParameters invocationParameters);
         }
 
         Tools spyTools = spy(new Tools());
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        CustomInvocationParametersAssistant assistant = AiServices.builder(CustomInvocationParametersAssistant.class)
                 .chatModel(models().findFirst().get())
                 .tools(spyTools)
                 .build();
 
-        CustomInvocationParameters invocationParameters = new CustomInvocationParameters(Map.of("city", "Munich"));
+        CustomInvocationParameters invocationParameters = new CustomInvocationParameters(Collections.singletonMap("city", "Munich"));
 
         // when
         String answer = assistant.chat("What is the weather?", invocationParameters);
@@ -1024,22 +1007,16 @@ class AiServicesWithToolsIT {
             @Tool
             String getWeather(InvocationContext invocationContext) {
                 String city = invocationContext.invocationParameters().get("city");
-                return switch (city) {
-                    case "Munich" -> "rainy";
-                    default -> "sunny";
-                };
+                switch (city) {
+                    case "Munich": return "rainy";
+                    default: return "sunny";
+                }
             }
-        }
-
-        interface Assistant {
-
-            String chat(
-                    @dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
         }
 
         Tools spyTools = spy(new Tools());
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        InvocationContextAssistant assistant = AiServices.builder(InvocationContextAssistant.class)
                 .chatModel(models().findFirst().get())
                 .tools(spyTools)
                 .build();
@@ -1065,61 +1042,9 @@ class AiServicesWithToolsIT {
     }
 
     @Test
-    void should_propagate_invocation_parameters_between_tools() {
-
-        // given
-        class Tools {
-
-            static final LocalTime CURRENT_TIME = LocalTime.of(12, 34, 56);
-
-            @Tool
-            String getWeather(InvocationParameters invocationParameters) {
-                assertThat(invocationParameters.asMap()).isEmpty();
-                invocationParameters.put("calledGetWeather", true);
-
-                return "sunny";
-            }
-
-            @Tool
-            LocalTime getTime(InvocationParameters invocationParameters) {
-                assertThat(invocationParameters.asMap()).containsOnly(Map.entry("calledGetWeather", true));
-                return CURRENT_TIME;
-            }
-        }
-
-        Tools spyTools = spy(new Tools());
-
-        Assistant assistant = AiServices.builder(Assistant.class)
-                .chatModel(models().findFirst().get())
-                .tools(spyTools)
-                .build();
-
-        // when
-        Result<String> result = assistant.chat("What is the weather and time?");
-
-        // then
-        assertThat(result.content()).contains("sun", "12", "34");
-        assertThat(result.toolExecutions()).hasSize(2);
-        assertThat(result.toolExecutions().get(0).result()).isEqualTo("sunny");
-        assertThat(result.toolExecutions().get(0).resultObject()).isEqualTo("sunny");
-        assertThat(result.toolExecutions().get(1).result()).isEqualTo(Json.toJson(Tools.CURRENT_TIME));
-        assertThat(result.toolExecutions().get(1).resultObject()).isEqualTo(Tools.CURRENT_TIME);
-
-        verify(spyTools).getWeather(any());
-        verify(spyTools).getTime(any());
-        verifyNoMoreInteractions(spyTools);
-    }
-
-    @Test
     void should_propagate_invocation_parameters_into_tool_provider() {
 
         // given
-        interface Assistant {
-
-            String chat(
-                    @dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
-        }
-
         String includeToolsKey = "includeTools";
 
         ToolProvider toolProvider = request -> {
@@ -1160,7 +1085,7 @@ class AiServicesWithToolsIT {
 
         ChatModel spyModel = spy(ChatModelMock.thatAlwaysResponds("does not matter"));
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        ToolProviderAssistant assistant = AiServices.builder(ToolProviderAssistant.class)
                 .chatModel(spyModel)
                 .toolProvider(toolProvider)
                 .build();
@@ -1200,6 +1125,98 @@ class AiServicesWithToolsIT {
     interface AssistantReturningResult {
 
         Result<AiMessage> chat(String userMessage);
+    }
+
+    interface InvocationParametersAssistant {
+        String chat(@dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
+    }
+
+    static class CustomInvocationParameters extends InvocationParameters {
+        public CustomInvocationParameters(Map<String, Object> map) {
+            super(map);
+        }
+    }
+
+    interface CustomInvocationParametersAssistant {
+        String chat(@dev.langchain4j.service.UserMessage String userMessage, CustomInvocationParameters invocationParameters);
+    }
+
+    interface InvocationContextAssistant {
+        String chat(@dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
+    }
+
+    interface ToolProviderAssistant {
+        String chat(@dev.langchain4j.service.UserMessage String userMessage, InvocationParameters invocationParameters);
+    }
+
+    interface SimpleAssistantStaticProv {
+        String chat(String userMessage);
+    }
+
+    interface SimpleAssistantDynamicNew {
+        String chat(String userMessage);
+    }
+
+    interface SimpleAssistantDynamicMissing {
+        String chat(String userMessage);
+    }
+
+    interface RollbackBankAssistant {
+        String chat(String userMessage);
+    }
+
+    interface NoRollbackBankAssistant {
+        String chat(String userMessage);
+    }
+
+    interface RollbackWithExecBankAssistant {
+        String chat(String userMessage);
+    }
+
+    interface RollbackReverseTravelAssistant {
+        String chat(String userMessage);
+    }
+
+    interface RollbackMiddleTravelAssistant {
+        String chat(String userMessage);
+    }
+
+    interface RollbackFirstTravelAssistant {
+        String chat(String userMessage);
+    }
+
+    interface NoDoubleCompBankAssistant {
+        String chat(String userMessage);
+    }
+
+    interface InformRollbackTravelAssistant {
+        String chat(String userMessage);
+    }
+
+    interface PriorRoundTripBankAssistant {
+        String chat(String userMessage);
+    }
+
+    interface InheritedRollbackBankAssistant {
+        String chat(String userMessage);
+    }
+
+    interface FaultyCompTravelAssistant {
+        String chat(String userMessage);
+    }
+
+    static class LocalDateToolResult {
+        private final LocalDate localDate;
+        public LocalDateToolResult(LocalDate localDate) { this.localDate = localDate; }
+        public LocalDate localDate() { return localDate; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof LocalDateToolResult)) return false;
+            LocalDateToolResult that = (LocalDateToolResult) o;
+            return java.util.Objects.equals(localDate, that.localDate);
+        }
+        @Override public int hashCode() { return java.util.Objects.hash(localDate); }
+        @Override public String toString() { return "LocalDateToolResult[localDate=" + localDate + "]"; }
     }
 
     @ParameterizedTest
@@ -1341,13 +1358,11 @@ class AiServicesWithToolsIT {
 
         LocalDate now = LocalDate.of(2025, 2, 24);
 
-        record ToolResult(LocalDate localDate) {}
-
         class Tools {
 
             @Tool
-            ToolResult currentDate() {
-                return new ToolResult(now);
+            LocalDateToolResult currentDate() {
+                return new LocalDateToolResult(now);
             }
         }
 
@@ -1415,45 +1430,37 @@ class AiServicesWithToolsIT {
 
     interface RouterAgent {
 
-        @dev.langchain4j.service.UserMessage("""
-                        Analyze the following user request and categorize it as 'legal', 'medical' or 'technical',
-                        then forward the request as it is to the corresponding expert provided as a tool.
-                        Finally return the answer that you received from the expert without any modification.
-
-                        The user request is: '{{it}}'.
-                        """)
+        @dev.langchain4j.service.UserMessage("Analyze the following user request and categorize it as 'legal', 'medical' or 'technical',\n"
+                        + "then forward the request as it is to the corresponding expert provided as a tool.\n"
+                        + "Finally return the answer that you received from the expert without any modification.\n"
+                        + "\n"
+                        + "The user request is: '{{it}}'.\n")
         String askToExpert(String request);
     }
 
     interface MedicalExpert {
 
-        @dev.langchain4j.service.UserMessage("""
-                        You are a medical expert.
-                        Analyze the following user request under a medical point of view and provide the best possible answer.
-                        The user request is {{it}}.
-                        """)
+        @dev.langchain4j.service.UserMessage("You are a medical expert.\n"
+                        + "Analyze the following user request under a medical point of view and provide the best possible answer.\n"
+                        + "The user request is {{it}}.\n")
         @Tool("A medical expert")
         String medicalRequest(String request);
     }
 
     interface LegalExpert {
 
-        @dev.langchain4j.service.UserMessage("""
-                        You are a legal expert.
-                        Analyze the following user request under a legal point of view and provide the best possible answer.
-                        The user request is {{it}}.
-                        """)
+        @dev.langchain4j.service.UserMessage("You are a legal expert.\n"
+                        + "Analyze the following user request under a legal point of view and provide the best possible answer.\n"
+                        + "The user request is {{it}}.\n")
         @Tool("A legal expert")
         String legalRequest(String request);
     }
 
     interface TechnicalExpert {
 
-        @dev.langchain4j.service.UserMessage("""
-                        You are a technical expert.
-                        Analyze the following user request under a technical point of view and provide the best possible answer.
-                        The user request is {{it}}.
-                        """)
+        @dev.langchain4j.service.UserMessage("You are a technical expert.\n"
+                        + "Analyze the following user request under a technical point of view and provide the best possible answer.\n"
+                        + "The user request is {{it}}.\n")
         @Tool("A technical expert")
         String technicalRequest(String request);
     }
@@ -1498,13 +1505,11 @@ class AiServicesWithToolsIT {
 
         LocalDate now = LocalDate.of(2025, 2, 24);
 
-        record ToolResult(LocalDate localDate) {}
-
         class Tools {
 
             @Tool
-            ToolResult currentDate() {
-                return new ToolResult(now);
+            LocalDateToolResult currentDate() {
+                return new LocalDateToolResult(now);
             }
         }
 
@@ -1536,13 +1541,11 @@ class AiServicesWithToolsIT {
 
         LocalDate now = LocalDate.of(2025, 2, 24);
 
-        record ToolResult(LocalDate localDate) {}
-
         class Tools {
 
             @Tool
-            ToolResult currentDate() {
-                return new ToolResult(now);
+            LocalDateToolResult currentDate() {
+                return new LocalDateToolResult(now);
             }
         }
 
@@ -1560,7 +1563,7 @@ class AiServicesWithToolsIT {
         Result<Void> result = assistant.chat(userMessage);
         assertThat(result.content()).isNull();
         assertThat(result.toolExecutions()).hasSize(1);
-        assertThat(result.toolExecutions().get(0).resultObject()).isEqualTo(new ToolResult(now));
+        assertThat(result.toolExecutions().get(0).resultObject()).isEqualTo(new LocalDateToolResult(now));
 
         verify(tools).currentDate();
         verifyNoMoreInteractions(tools);
@@ -1669,11 +1672,7 @@ class AiServicesWithToolsIT {
                 AiMessage.from("It is sunny in London"));
         ChatModel spyChatModel = spy(chatModel);
 
-        interface SimpleAssistant {
-            String chat(String userMessage);
-        }
-
-        SimpleAssistant assistant = AiServices.builder(SimpleAssistant.class)
+        SimpleAssistantStaticProv assistant = AiServices.builder(SimpleAssistantStaticProv.class)
                 .chatModel(spyChatModel)
                 .toolProviders(spyStaticProvider, spyDynamicProvider)
                 .build();
@@ -1737,11 +1736,7 @@ class AiServicesWithToolsIT {
                 AiMessage.from("It is sunny and the time is 12:00"));
         ChatModel spyChatModel = spy(chatModel);
 
-        interface SimpleAssistant {
-            String chat(String userMessage);
-        }
-
-        SimpleAssistant assistant = AiServices.builder(SimpleAssistant.class)
+        SimpleAssistantDynamicNew assistant = AiServices.builder(SimpleAssistantDynamicNew.class)
                 .chatModel(spyChatModel)
                 .toolProviders(spyDynamicProvider)
                 .build();
@@ -1809,11 +1804,7 @@ class AiServicesWithToolsIT {
                 AiMessage.from("It is sunny and the time is 12:00"));
         ChatModel spyChatModel = spy(chatModel);
 
-        interface SimpleAssistant {
-            String chat(String userMessage);
-        }
-
-        SimpleAssistant assistant = AiServices.builder(SimpleAssistant.class)
+        SimpleAssistantDynamicMissing assistant = AiServices.builder(SimpleAssistantDynamicMissing.class)
                 .chatModel(spyChatModel)
                 .toolProviders(spyDynamicProvider)
                 .build();
@@ -2068,11 +2059,39 @@ class AiServicesWithToolsIT {
         }));
     }
 
-    sealed interface Animal permits Dog, Cat {}
+    interface Animal {}
 
-    record Dog(String name, String breed) implements Animal {}
+    static final class Dog implements Animal {
+        private final String name;
+        private final String breed;
+        public Dog(String name, String breed) { this.name = name; this.breed = breed; }
+        public String name() { return name; }
+        public String breed() { return breed; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Dog)) return false;
+            Dog dog = (Dog) o;
+            return java.util.Objects.equals(name, dog.name) && java.util.Objects.equals(breed, dog.breed);
+        }
+        @Override public int hashCode() { return java.util.Objects.hash(name, breed); }
+        @Override public String toString() { return "Dog[name=" + name + ", breed=" + breed + "]"; }
+    }
 
-    record Cat(String name, boolean indoor) implements Animal {}
+    static final class Cat implements Animal {
+        private final String name;
+        private final boolean indoor;
+        public Cat(String name, boolean indoor) { this.name = name; this.indoor = indoor; }
+        public String name() { return name; }
+        public boolean indoor() { return indoor; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Cat)) return false;
+            Cat cat = (Cat) o;
+            return java.util.Objects.equals(name, cat.name) && indoor == cat.indoor;
+        }
+        @Override public int hashCode() { return java.util.Objects.hash(name, indoor); }
+        @Override public String toString() { return "Cat[name=" + name + ", indoor=" + indoor + "]"; }
+    }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
     @JsonSubTypes({
@@ -2093,7 +2112,21 @@ class AiServicesWithToolsIT {
         Circle() {}
     }
 
-    record Owner(String name, Animal pet) {}
+    static final class Owner {
+        private final String name;
+        private final Animal pet;
+        public Owner(String name, Animal pet) { this.name = name; this.pet = pet; }
+        public String name() { return name; }
+        public Animal pet() { return pet; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Owner)) return false;
+            Owner owner = (Owner) o;
+            return java.util.Objects.equals(name, owner.name) && java.util.Objects.equals(pet, owner.pet);
+        }
+        @Override public int hashCode() { return java.util.Objects.hash(name, pet); }
+        @Override public String toString() { return "Owner[name=" + name + ", pet=" + pet + "]"; }
+    }
 
     static class AnimalRegistry {
 
@@ -2128,9 +2161,9 @@ class AiServicesWithToolsIT {
         assistant.chat("Please register a Labrador dog named Rex.");
 
         verify(registry)
-                .registerAnimal(argThat(animal -> animal instanceof Dog dog
-                        && dog.name().equalsIgnoreCase("Rex")
-                        && dog.breed().toLowerCase().contains("labrador")));
+                .registerAnimal(argThat(animal -> animal instanceof Dog
+                        && ((Dog)animal).name().equalsIgnoreCase("Rex")
+                        && ((Dog)animal).breed().toLowerCase().contains("labrador")));
     }
 
     @ParameterizedTest
@@ -2168,9 +2201,9 @@ class AiServicesWithToolsIT {
 
         verify(registry)
                 .registerOwner(argThat(owner -> owner.name().equalsIgnoreCase("Alice")
-                        && owner.pet() instanceof Dog dog
-                        && dog.name().equalsIgnoreCase("Rex")
-                        && dog.breed().toLowerCase().contains("labrador")));
+                        && owner.pet() instanceof Dog
+                        && ((Dog)owner.pet()).name().equalsIgnoreCase("Rex")
+                        && ((Dog)owner.pet()).breed().toLowerCase().contains("labrador")));
     }
 
     @ParameterizedTest
@@ -2186,7 +2219,7 @@ class AiServicesWithToolsIT {
 
         assistant.chat("Please register a circle shape with radius 4.");
 
-        verify(registry).registerShape(argThat(shape -> shape instanceof Circle circle && circle.radius == 4.0));
+        verify(registry).registerShape(argThat(shape -> shape instanceof Circle && ((Circle)shape).radius == 4.0));
     }
 
     static class BankAccountService {
@@ -2245,11 +2278,7 @@ class AiServicesWithToolsIT {
                         .build()),
                 AiMessage.from("Transfer complete"));
 
-        interface BankAssistant {
-            String chat(String userMessage);
-        }
-
-        BankAssistant assistant = AiServices.builder(BankAssistant.class)
+        RollbackBankAssistant assistant = AiServices.builder(RollbackBankAssistant.class)
                 .chatModel(chatModel)
                 .tools(bankService)
                 .compensateOnToolErrors(true)
@@ -2290,11 +2319,7 @@ class AiServicesWithToolsIT {
                         .build()),
                 AiMessage.from("Transfer failed, Mario has insufficient funds"));
 
-        interface BankAssistant {
-            String chat(String userMessage);
-        }
-
-        BankAssistant assistant = AiServices.builder(BankAssistant.class)
+        NoRollbackBankAssistant assistant = AiServices.builder(NoRollbackBankAssistant.class)
                 .chatModel(chatModel)
                 .tools(bankService)
                 .build();
@@ -2365,11 +2390,7 @@ class AiServicesWithToolsIT {
                         .build()),
                 AiMessage.from("Transfer complete"));
 
-        interface BankAssistant {
-            String chat(String userMessage);
-        }
-
-        BankAssistant assistant = AiServices.builder(BankAssistant.class)
+        RollbackWithExecBankAssistant assistant = AiServices.builder(RollbackWithExecBankAssistant.class)
                 .chatModel(chatModel)
                 .tools(bankService)
                 .compensateOnToolErrors(true)
@@ -2394,7 +2415,7 @@ class AiServicesWithToolsIT {
         final Set<String> failingTools;
 
         TravelBookingService(String... failingTools) {
-            this.failingTools = Set.of(failingTools);
+            this.failingTools = new HashSet<>(Arrays.asList(failingTools));
         }
 
         @Tool("books a flight")
@@ -2456,11 +2477,7 @@ class AiServicesWithToolsIT {
                                 .arguments("{\"destination\": \"Paris\"}").build()),
                 AiMessage.from("Trip booked"));
 
-        interface TravelAssistant {
-            String chat(String userMessage);
-        }
-
-        TravelAssistant assistant = AiServices.builder(TravelAssistant.class)
+        RollbackReverseTravelAssistant assistant = AiServices.builder(RollbackReverseTravelAssistant.class)
                 .chatModel(chatModel)
                 .tools(travelService)
                 .compensateOnToolErrors(true)
@@ -2492,11 +2509,7 @@ class AiServicesWithToolsIT {
                                 .arguments("{\"destination\": \"Rome\"}").build()),
                 AiMessage.from("Trip booked"));
 
-        interface TravelAssistant {
-            String chat(String userMessage);
-        }
-
-        TravelAssistant assistant = AiServices.builder(TravelAssistant.class)
+        RollbackMiddleTravelAssistant assistant = AiServices.builder(RollbackMiddleTravelAssistant.class)
                 .chatModel(chatModel)
                 .tools(travelService)
                 .compensateOnToolErrors(true)
@@ -2528,11 +2541,7 @@ class AiServicesWithToolsIT {
                                 .arguments("{\"destination\": \"Tokyo\"}").build()),
                 AiMessage.from("Trip booked"));
 
-        interface TravelAssistant {
-            String chat(String userMessage);
-        }
-
-        TravelAssistant assistant = AiServices.builder(TravelAssistant.class)
+        RollbackFirstTravelAssistant assistant = AiServices.builder(RollbackFirstTravelAssistant.class)
                 .chatModel(chatModel)
                 .tools(travelService)
                 .compensateOnToolErrors(true)
@@ -2581,11 +2590,7 @@ class AiServicesWithToolsIT {
                         .build()),
                 AiMessage.from("Transfer failed"));
 
-        interface BankAssistant {
-            String chat(String userMessage);
-        }
-
-        BankAssistant assistant = AiServices.builder(BankAssistant.class)
+        NoDoubleCompBankAssistant assistant = AiServices.builder(NoDoubleCompBankAssistant.class)
                 .chatModel(chatModel)
                 .tools(bankService)
                 .compensateOnToolErrors(true)
@@ -2624,11 +2629,7 @@ class AiServicesWithToolsIT {
                                 .arguments("{\"destination\": \"Berlin\"}").build()),
                 AiMessage.from("Sorry, I could not complete the booking because no hotels are available in Berlin."));
 
-        interface TravelAssistant {
-            String chat(String userMessage);
-        }
-
-        TravelAssistant assistant = AiServices.builder(TravelAssistant.class)
+        InformRollbackTravelAssistant assistant = AiServices.builder(InformRollbackTravelAssistant.class)
                 .chatModel(chatModel)
                 .tools(travelService)
                 .chatMemory(chatMemory)
@@ -2645,7 +2646,7 @@ class AiServicesWithToolsIT {
         List<ToolExecutionResultMessage> toolResultMessages = chatMemory.messages().stream()
                 .filter(m -> m instanceof ToolExecutionResultMessage)
                 .map(m -> (ToolExecutionResultMessage) m)
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(toolResultMessages).hasSize(3);
 
@@ -2691,11 +2692,7 @@ class AiServicesWithToolsIT {
                         .build()),
                 AiMessage.from("Transfer failed"));
 
-        interface BankAssistant {
-            String chat(String userMessage);
-        }
-
-        BankAssistant assistant = AiServices.builder(BankAssistant.class)
+        PriorRoundTripBankAssistant assistant = AiServices.builder(PriorRoundTripBankAssistant.class)
                 .chatModel(chatModel)
                 .tools(bankService)
                 .chatMemory(chatMemory)
@@ -2718,7 +2715,7 @@ class AiServicesWithToolsIT {
         List<ToolExecutionResultMessage> toolResultMessages = chatMemory.messages().stream()
                 .filter(m -> m instanceof ToolExecutionResultMessage)
                 .map(m -> (ToolExecutionResultMessage) m)
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(toolResultMessages).hasSize(2);
 
@@ -2845,11 +2842,7 @@ class AiServicesWithToolsIT {
                         .build()),
                 AiMessage.from("Transfer complete"));
 
-        interface BankAssistant {
-            String chat(String userMessage);
-        }
-
-        BankAssistant assistant = AiServices.builder(BankAssistant.class)
+        InheritedRollbackBankAssistant assistant = AiServices.builder(InheritedRollbackBankAssistant.class)
                 .chatModel(chatModel)
                 .tools(bankService)
                 .compensateOnToolErrors(true)
@@ -2916,11 +2909,7 @@ class AiServicesWithToolsIT {
                                 .arguments("{\"destination\": \"Paris\"}").build()),
                 AiMessage.from("Trip booking failed"));
 
-        interface TravelAssistant {
-            String chat(String userMessage);
-        }
-
-        TravelAssistant assistant = AiServices.builder(TravelAssistant.class)
+        FaultyCompTravelAssistant assistant = AiServices.builder(FaultyCompTravelAssistant.class)
                 .chatModel(chatModel)
                 .tools(travelService)
                 .compensateOnToolErrors(true)

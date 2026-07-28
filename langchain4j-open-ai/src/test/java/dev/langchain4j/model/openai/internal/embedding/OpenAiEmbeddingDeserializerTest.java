@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class OpenAiEmbeddingDeserializerTest {
         DeserializationContext context = mock(DeserializationContext.class);
 
         when(parser.currentToken()).thenReturn(JsonToken.START_ARRAY);
-        List<Float> expected = List.of(1.0f, 2.0f, 3.0f);
+        List<Float> expected = Arrays.asList(1.0f, 2.0f, 3.0f);
         when(parser.readValueAs(any(TypeReference.class))).thenReturn(expected);
 
         List<Float> result = deserializer.deserialize(parser, context);
@@ -41,7 +42,7 @@ class OpenAiEmbeddingDeserializerTest {
 
     @Test
     void testDeserializeBase64String() throws Exception {
-        List<Float> original = List.of(4.2f, -1.5f, 0.0f);
+        List<Float> original = Arrays.asList(4.2f, -1.5f, 0.0f);
         ByteBuffer buffer = ByteBuffer.allocate(original.size() * Float.BYTES);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         for (float v : original) {
@@ -73,34 +74,27 @@ class OpenAiEmbeddingDeserializerTest {
 
     @Test
     void testDeserializeEmbeddingWithFloatArray() throws Exception {
-        String json =
-                """
-                {
-                  "index": 1,
-                  "embedding": [1.0, 2.0, 3.0]
-                }
-                """;
+        String json = "{\n"
+                + "  \"index\": 1,\n"
+                + "  \"embedding\": [1.0, 2.0, 3.0]\n"
+                + "}";
         Embedding embedding = mapper.readValue(json, Embedding.class);
         assertEquals(1, embedding.index());
-        assertListFloatEquals(List.of(1.0f, 2.0f, 3.0f), embedding.embedding(), 0.0001f);
+        assertListFloatEquals(Arrays.asList(1.0f, 2.0f, 3.0f), embedding.embedding(), 0.0001f);
     }
 
     @Test
     void testDeserializeEmbeddingWithBase64String() throws Exception {
-        List<Float> original = List.of(4.2f, -1.5f, 0.0f);
+        List<Float> original = Arrays.asList(4.2f, -1.5f, 0.0f);
         ByteBuffer buffer = ByteBuffer.allocate(original.size() * Float.BYTES);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         for (float v : original) buffer.putFloat(v);
         String base64 = Base64.getEncoder().encodeToString(buffer.array());
 
-        String json =
-                """
-                {
-                  "index": 2,
-                  "embedding": "%s"
-                }
-                """
-                        .formatted(base64);
+        String json = String.format("{\n"
+                + "  \"index\": 2,\n"
+                + "  \"embedding\": \"%s\"\n"
+                + "}", base64);
 
         Embedding embedding = mapper.readValue(json, Embedding.class);
         assertEquals(2, embedding.index());
@@ -109,13 +103,10 @@ class OpenAiEmbeddingDeserializerTest {
 
     @Test
     void testDeserializeEmbeddingWithWrongType() {
-        String json =
-                """
-                {
-                  "index": 3,
-                  "embedding": 123
-                }
-                """;
+        String json = "{\n"
+                + "  \"index\": 3,\n"
+                + "  \"embedding\": 123\n"
+                + "}";
         JsonProcessingException ex = assertThrows(JsonProcessingException.class, () -> {
             mapper.readValue(json, Embedding.class);
         });

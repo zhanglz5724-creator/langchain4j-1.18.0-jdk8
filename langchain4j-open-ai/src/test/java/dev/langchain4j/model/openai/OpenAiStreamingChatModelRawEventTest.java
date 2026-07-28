@@ -9,6 +9,7 @@ import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,7 @@ class OpenAiStreamingChatModelRawEventTest {
                 new ServerSentEvent(null, "{\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"}}]}");
         // The "[DONE]" sentinel is consumed by the SSE parser and must not be forwarded as a raw event.
         ServerSentEvent doneEvent = new ServerSentEvent(null, "[DONE]");
-        List<ServerSentEvent> events = List.of(roleEvent, contentEvent, doneEvent);
+        List<ServerSentEvent> events = Arrays.asList(roleEvent, contentEvent, doneEvent);
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
         StreamingChatModel model = OpenAiStreamingChatModel.builder()
@@ -83,7 +84,7 @@ class OpenAiStreamingChatModelRawEventTest {
                 "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":"
                         + "[{\"index\":0,\"function\":{\"name\":\"getWeather\",\"arguments\":\"{}\"}}]}}]}");
         ServerSentEvent doneEvent = new ServerSentEvent(null, "[DONE]");
-        List<ServerSentEvent> events = List.of(headerChunk, functionChunk, doneEvent);
+        List<ServerSentEvent> events = Arrays.asList(headerChunk, functionChunk, doneEvent);
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
         StreamingChatModel model = OpenAiStreamingChatModel.builder()

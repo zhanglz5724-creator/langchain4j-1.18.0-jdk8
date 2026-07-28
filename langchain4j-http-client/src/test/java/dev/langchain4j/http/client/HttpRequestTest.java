@@ -5,6 +5,8 @@ import static dev.langchain4j.http.client.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +80,7 @@ class HttpRequestTest {
         builder.addHeader("Content-Type", "application/json");
 
         // then
-        assertThat(builder.build().headers()).containsEntry("Content-Type", List.of("application/json"));
+        assertThat(builder.build().headers()).containsEntry("Content-Type", Arrays.asList("application/json"));
     }
 
     @Test
@@ -91,7 +93,7 @@ class HttpRequestTest {
         builder.addHeader("Accept", "application/json", "application/xml");
 
         // then
-        assertThat(builder.build().headers()).containsEntry("Accept", List.of("application/json", "application/xml"));
+        assertThat(builder.build().headers()).containsEntry("Accept", Arrays.asList("application/json", "application/xml"));
     }
 
     @Test
@@ -117,17 +119,17 @@ class HttpRequestTest {
 
         // given
         HttpRequest.Builder builder = HttpRequest.builder().method(GET).url("http://example.com");
-        Map<String, String> headers = Map.of(
-                "Content-Type", "application/json",
-                "Accept", "text/plain");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Accept", "text/plain");
 
         // when
         builder.addHeaders(headers);
 
         // then
         assertThat(builder.build().headers())
-                .containsEntry("Content-Type", List.of("application/json"))
-                .containsEntry("Accept", List.of("text/plain"));
+                .containsEntry("Content-Type", Arrays.asList("application/json"))
+                .containsEntry("Accept", Arrays.asList("text/plain"));
     }
 
     @Test
@@ -151,7 +153,7 @@ class HttpRequestTest {
         HttpRequest.Builder builder = HttpRequest.builder().method(GET).url("http://example.com");
 
         // when
-        HttpRequest.Builder result = builder.addHeaders(Map.of());
+        HttpRequest.Builder result = builder.addHeaders(Collections.emptyMap());
 
         // then
         assertThat(result).isSameAs(builder);
@@ -177,30 +179,27 @@ class HttpRequestTest {
     }
 
     private static Stream<Arguments> headerCombinations() {
+        Map<String, String> mapHeaders1 = Collections.singletonMap("Accept", "text/plain");
+        Map<String, List<String>> expectedHeaders1 = new LinkedHashMap<>();
+        expectedHeaders1.put("Content-Type", Arrays.asList("application/json"));
+        expectedHeaders1.put("Accept", Arrays.asList("text/plain"));
+
+        Map<String, String> mapHeaders2 = Collections.singletonMap("Content-Type", "application/json");
+        Map<String, List<String>> expectedHeaders2 = new LinkedHashMap<>();
+        expectedHeaders2.put("Accept", Arrays.asList("application/json", "application/xml"));
+        expectedHeaders2.put("Content-Type", Arrays.asList("application/json"));
+
+        Map<String, String> mapHeaders3 = new LinkedHashMap<>();
+        mapHeaders3.put("X-Custom-Header", "value2");
+        mapHeaders3.put("Accept", "application/json");
+        Map<String, List<String>> expectedHeaders3 = new LinkedHashMap<>();
+        expectedHeaders3.put("X-Custom-Header", Arrays.asList("value2"));
+        expectedHeaders3.put("Accept", Arrays.asList("application/json"));
+
         return Stream.of(
-                Arguments.of(
-                        "Content-Type",
-                        new String[] {"application/json"},
-                        Map.of("Accept", "text/plain"),
-                        Map.of(
-                                "Content-Type", List.of("application/json"),
-                                "Accept", List.of("text/plain"))),
-                Arguments.of(
-                        "Accept",
-                        new String[] {"application/json", "application/xml"},
-                        Map.of("Content-Type", "application/json"),
-                        Map.of(
-                                "Accept", List.of("application/json", "application/xml"),
-                                "Content-Type", List.of("application/json"))),
-                Arguments.of(
-                        "X-Custom-Header",
-                        new String[] {"value1"},
-                        Map.of(
-                                "X-Custom-Header", "value2",
-                                "Accept", "application/json"),
-                        Map.of(
-                                "X-Custom-Header", List.of("value2"),
-                                "Accept", List.of("application/json"))));
+                Arguments.of("Content-Type", new String[] {"application/json"}, mapHeaders1, expectedHeaders1),
+                Arguments.of("Accept", new String[] {"application/json", "application/xml"}, mapHeaders2, expectedHeaders2),
+                Arguments.of("X-Custom-Header", new String[] {"value1"}, mapHeaders3, expectedHeaders3));
     }
 
     @Test
@@ -210,10 +209,10 @@ class HttpRequestTest {
         HttpRequest.Builder builder = HttpRequest.builder().method(GET).url("http://example.com");
 
         // when
-        builder.addHeader("Accept", "application/json").addHeaders(Map.of("Accept", "text/plain"));
+        builder.addHeader("Accept", "application/json").addHeaders(Collections.singletonMap("Accept", "text/plain"));
 
         // then
-        assertThat(builder.build().headers()).containsEntry("Accept", List.of("text/plain"));
+        assertThat(builder.build().headers()).containsEntry("Accept", Arrays.asList("text/plain"));
     }
 
     @Test
@@ -229,7 +228,7 @@ class HttpRequestTest {
         // then
         assertThat(request.method()).isEqualTo(HttpMethod.POST);
         assertThat(request.url()).isEqualTo("https://api.example.com/v1/users");
-        assertThat(request.headers()).containsEntry("Content-Type", List.of("application/json"));
+        assertThat(request.headers()).containsEntry("Content-Type", Arrays.asList("application/json"));
         assertThat(request.body()).isEqualTo("request body content");
     }
 
@@ -351,7 +350,7 @@ class HttpRequestTest {
         HttpRequest.Builder builder = HttpRequest.builder().method(GET).url("http://example.com/api");
 
         // when
-        HttpRequest.Builder result = builder.addQueryParams(Map.of());
+        HttpRequest.Builder result = builder.addQueryParams(Collections.emptyMap());
 
         // then
         assertThat(result).isSameAs(builder);
@@ -419,7 +418,7 @@ class HttpRequestTest {
         HttpRequest.Builder builder = HttpRequest.builder().method(GET).url("http://example.com/api");
 
         // when
-        builder.queryParams(Map.of("key1", "value1")).addQueryParam("key2", "value2");
+        builder.queryParams(Collections.singletonMap("key1", "value1")).addQueryParam("key2", "value2");
 
         // then
         assertThat(builder.build().url()).isEqualTo("http://example.com/api?key1=value1&key2=value2");

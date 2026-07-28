@@ -121,20 +121,37 @@ class AiServicesWithToolsWithDescriptionIT {
     static class ToolWithPojoParameter {
 
         @Description("a person")
-        record Person(
-
-                @Description("a name")
-                String name,
-
-                @Description("an age")
-                int age,
-
-                @Description("a height")
-                Double height,
-
-                @Description("is married")
-                boolean married
-        ) {
+        static final class Person {
+            @Description("a name")
+            private final String name;
+            @Description("an age")
+            private final int age;
+            @Description("a height")
+            private final Double height;
+            @Description("is married")
+            private final boolean married;
+            public Person(String name, int age, Double height, boolean married) {
+                this.name = name;
+                this.age = age;
+                this.height = height;
+                this.married = married;
+            }
+            public String name() { return name; }
+            public int age() { return age; }
+            public Double height() { return height; }
+            public boolean married() { return married; }
+            @Override public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof Person)) return false;
+                Person person = (Person) o;
+                return age == person.age && married == person.married
+                    && java.util.Objects.equals(name, person.name)
+                    && java.util.Objects.equals(height, person.height);
+            }
+            @Override public int hashCode() { return java.util.Objects.hash(name, age, height, married); }
+            @Override public String toString() {
+                return "Person[name=" + name + ", age=" + age + ", height=" + height + ", married=" + married + "]";
+            }
         }
 
         @Tool("processes a person")
@@ -192,19 +209,44 @@ class AiServicesWithToolsWithDescriptionIT {
     static class ToolWithNestedPojoParameter {
 
         @Description("a person")
-        record Person(
-
-                @Description("a name")
-                String name,
-
-                @Description("an address 2")
-                Address address) {
+        static final class Person {
+            @Description("a name")
+            private final String name;
+            @Description("an address 2")
+            private final Address address;
+            public Person(String name, Address address) {
+                this.name = name;
+                this.address = address;
+            }
+            public String name() { return name; }
+            public Address address() { return address; }
+            @Override public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof Person)) return false;
+                Person person = (Person) o;
+                return java.util.Objects.equals(name, person.name)
+                    && java.util.Objects.equals(address, person.address);
+            }
+            @Override public int hashCode() { return java.util.Objects.hash(name, address); }
+            @Override public String toString() { return "Person[name=" + name + ", address=" + address + "]"; }
         }
 
         @Description("an address")
-        record Address(
-                @Description("a city")
-                String city) {
+        static final class Address {
+            @Description("a city")
+            private final String city;
+            public Address(String city) {
+                this.city = city;
+            }
+            public String city() { return city; }
+            @Override public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof Address)) return false;
+                Address address = (Address) o;
+                return java.util.Objects.equals(city, address.city);
+            }
+            @Override public int hashCode() { return java.util.Objects.hash(city); }
+            @Override public String toString() { return "Address[city=" + city + "]"; }
         }
 
         @Tool("processes a person")
@@ -263,13 +305,26 @@ class AiServicesWithToolsWithDescriptionIT {
     static class ToolWithRecursion {
 
         @Description("a person")
-        record Person(
-                @Description("a name")
-                String name,
-
-                @Description("a list of person")
-                List<Person> children
-        ) {
+        static final class Person {
+            @Description("a name")
+            private final String name;
+            @Description("a list of person")
+            private final List<Person> children;
+            public Person(String name, List<Person> children) {
+                this.name = name;
+                this.children = children;
+            }
+            public String name() { return name; }
+            public List<Person> children() { return children; }
+            @Override public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof Person)) return false;
+                Person person = (Person) o;
+                return java.util.Objects.equals(name, person.name)
+                    && java.util.Objects.equals(children, person.children);
+            }
+            @Override public int hashCode() { return java.util.Objects.hash(name, children); }
+            @Override public String toString() { return "Person[name=" + name + ", children=" + children + "]"; }
         }
 
         @Tool("processes a person")

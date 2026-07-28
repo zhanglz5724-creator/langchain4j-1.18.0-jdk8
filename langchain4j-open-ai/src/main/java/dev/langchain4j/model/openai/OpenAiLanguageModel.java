@@ -57,7 +57,7 @@ implements LanguageModel {
         CompletionRequest request = CompletionRequest.builder().model(this.modelName).prompt(prompt).temperature(this.temperature).build();
         CompletionResponse response = (CompletionResponse)RetryUtils.withRetryMappingExceptions(() -> (CompletionResponse)this.client.completion(request).execute(), (int)this.maxRetries);
         CompletionChoice completionChoice = response.choices().get(0);
-        return Response.from((Object)completionChoice.text(), (TokenUsage)OpenAiUtils.tokenUsageFrom(response.usage()), (FinishReason)OpenAiUtils.finishReasonFrom(completionChoice.finishReason()));
+        return Response.from(completionChoice.text(), (TokenUsage)OpenAiUtils.tokenUsageFrom(response.usage()), (FinishReason)OpenAiUtils.finishReasonFrom(completionChoice.finishReason()));
     }
 
     public static OpenAiLanguageModelBuilder builder() {

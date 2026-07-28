@@ -35,13 +35,13 @@ public class ToolExecutionResult {
         boolean hasResultContents = builder.resultContents != null && !builder.resultContents.isEmpty();
         ToolExecutionResult.validate(hasResultText, hasResultTextSupplier, hasResultContents);
         if (hasResultText) {
-            this.resultContents = new AtomicReference<List<TextContent>>(Collections.singletonList(TextContent.from((String)builder.resultText)));
+            this.resultContents = new AtomicReference<List<Content>>(Collections.<Content>singletonList(TextContent.from((String)builder.resultText)));
             this.resultTextSupplier = null;
         } else if (hasResultTextSupplier) {
-            this.resultContents = new AtomicReference();
+            this.resultContents = new AtomicReference<List<Content>>();
             this.resultTextSupplier = builder.resultTextSupplier;
         } else {
-            this.resultContents = new AtomicReference<List>(Utils.copy((List)builder.resultContents));
+            this.resultContents = new AtomicReference<List<Content>>(Utils.copy((List<Content>)builder.resultContents));
             this.resultTextSupplier = null;
         }
         this.attributes = Utils.copy((Map)builder.attributes);

@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class CustomMimeTypesFileTypeDetectorTest {
         CustomMimeTypesFileTypeDetector detector = new CustomMimeTypesFileTypeDetector();
 
         // when
-        Path path = Path.of("/foo/bar/index.html");
+        Path path = Paths.get("/foo/bar/index.html");
         String mimeType = detector.probeContentType(path);
 
         // then
@@ -207,7 +208,7 @@ class CustomMimeTypesFileTypeDetectorTest {
         CustomMimeTypesFileTypeDetector detector = new CustomMimeTypesFileTypeDetector();
 
         // when
-        String mimeType = detector.probeContentType(Path.of("/foo/bar/"));
+        String mimeType = detector.probeContentType(Paths.get("/foo/bar/"));
 
         // then
         assertThat(mimeType).isNull();
@@ -219,7 +220,7 @@ class CustomMimeTypesFileTypeDetectorTest {
         CustomMimeTypesFileTypeDetector detector = new CustomMimeTypesFileTypeDetector();
 
         // when
-        String mimeType = detector.probeContentType(Path.of("./docs/readme.txt"));
+        String mimeType = detector.probeContentType(Paths.get("./docs/readme.txt"));
 
         // then
         assertThat(mimeType).isEqualTo("text/plain");

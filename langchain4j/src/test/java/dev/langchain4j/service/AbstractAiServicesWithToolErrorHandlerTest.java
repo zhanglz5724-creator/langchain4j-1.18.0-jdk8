@@ -70,8 +70,8 @@ public abstract class AbstractAiServicesWithToolErrorHandlerTest {
         // then
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 1));
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 3
-                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage toolResult
-                && toolResult.text().equals(toolErrorMessage)));
+                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals(toolErrorMessage)));
         ignoreOtherInteractions(spyModel);
         verifyNoMoreInteractions(spyModel);
     }
@@ -109,8 +109,8 @@ public abstract class AbstractAiServicesWithToolErrorHandlerTest {
         // then
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 1));
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 3
-                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage toolResult
-                && toolResult.text().equals("java.lang.RuntimeException")));
+                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals("java.lang.RuntimeException")));
         ignoreOtherInteractions(spyModel);
         verifyNoMoreInteractions(spyModel);
     }
@@ -145,8 +145,8 @@ public abstract class AbstractAiServicesWithToolErrorHandlerTest {
         // then
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 1));
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 3
-                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage toolResult
-                && toolResult.text().equals("Unsupported content type: \"image\"")));
+                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals("Unsupported content type: \"image\"")));
         ignoreOtherInteractions(spyModel);
         verifyNoMoreInteractions(spyModel);
     }
@@ -196,8 +196,8 @@ public abstract class AbstractAiServicesWithToolErrorHandlerTest {
         // then
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 1));
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 3
-                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage toolResult
-                && toolResult.text().equals(customizedErrorMessage)));
+                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals(customizedErrorMessage)));
         ignoreOtherInteractions(spyModel);
         verifyNoMoreInteractions(spyModel);
     }
@@ -341,8 +341,8 @@ public abstract class AbstractAiServicesWithToolErrorHandlerTest {
         // then
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 1));
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 3
-                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage toolResult
-                && toolResult.text().equals(customizedErrorMessage)));
+                && chatRequest.messages().get(2) instanceof ToolExecutionResultMessage
+                && ((ToolExecutionResultMessage) chatRequest.messages().get(2)).text().equals(customizedErrorMessage)));
         verify(spyModel).chat(argThat((ChatRequest chatRequest) -> chatRequest.messages().size() == 5));
         ignoreOtherInteractions(spyModel);
         verifyNoMoreInteractions(spyModel);

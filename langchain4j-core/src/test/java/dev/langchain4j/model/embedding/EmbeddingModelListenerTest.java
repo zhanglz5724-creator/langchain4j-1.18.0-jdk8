@@ -281,14 +281,14 @@ class EmbeddingModelListenerTest {
         EmbeddingModel delegate = new TestEmbeddingModel() {
             @Override
             public java.util.Set<dev.langchain4j.data.message.ContentType> supportedContentTypes() {
-                return java.util.new HashSet<>(Arrays.asList(
+                return new HashSet<>(Arrays.asList(
                         dev.langchain4j.data.message.ContentType.TEXT,
                         dev.langchain4j.data.message.ContentType.IMAGE));
             }
 
             @Override
             public java.util.Set<dev.langchain4j.model.embedding.request.EmbeddingParameter<?>> supportedParameters() {
-                return java.util.new HashSet<>(Arrays.asList(
+                return new HashSet<>(Arrays.asList(
                         dev.langchain4j.model.embedding.request.EmbeddingRequestParameters.DIMENSIONS));
             }
 

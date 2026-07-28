@@ -3,6 +3,8 @@ package dev.langchain4j.service.output;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,7 +15,27 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class PojoListOutputParserTest {
 
-    record Person(String name) {}
+    static final class Person {
+        private final String name;
+
+        public Person(String name) { this.name = name; }
+
+        public String name() { return name; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Person)) return false;
+            Person person = (Person) o;
+            return java.util.Objects.equals(name, person.name);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name); }
+
+        @Override
+        public String toString() { return "Person[name=" + name + "]"; }
+    }
 
     @ParameterizedTest
     @MethodSource
@@ -28,14 +50,14 @@ class PojoListOutputParserTest {
 
     static Stream<Arguments> should_parse_list_of_pojo() {
         return Stream.of(
-                Arguments.of("{\"values\":[{\"name\":\"Klaus\"}]}", List.of(new Person("Klaus"))),
+                Arguments.of("{\"values\":[{\"name\":\"Klaus\"}]}", Arrays.asList(new Person("Klaus"))),
                 Arguments.of(
                         "{\"values\":[{\"name\":\"Klaus\"}, {\"name\":\"Franny\"}]}",
-                        List.of(new Person("Klaus"), new Person("Franny"))),
-                Arguments.of("", List.of()),
-                Arguments.of(" ", List.of()),
-                Arguments.of("{\"values\":[]}", List.of()),
-                Arguments.of(" {\"values\":[{\"name\":\"Klaus\"}]} ", List.of(new Person("Klaus"))));
+                        Arrays.asList(new Person("Klaus"), new Person("Franny"))),
+                Arguments.of("", Collections.emptyList()),
+                Arguments.of(" ", Collections.emptyList()),
+                Arguments.of("{\"values\":[]}", Collections.emptyList()),
+                Arguments.of(" {\"values\":[{\"name\":\"Klaus\"}]} ", Arrays.asList(new Person("Klaus"))));
     }
 
     @ParameterizedTest
@@ -79,10 +101,10 @@ class PojoListOutputParserTest {
 
     static Stream<Arguments> should_parse_person_with_null_name() {
         return Stream.of(
-                Arguments.of("{\"values\":[{\"name\":null}]}", List.of(new Person(null))),
+                Arguments.of("{\"values\":[{\"name\":null}]}", Arrays.asList(new Person(null))),
                 Arguments.of(
                         "{\"values\":[{\"name\":\"Alice\"},{\"name\":null},{\"name\":\"Bob\"}]}",
-                        List.of(new Person("Alice"), new Person(null), new Person("Bob"))));
+                        Arrays.asList(new Person("Alice"), new Person(null), new Person("Bob"))));
     }
 
     @ParameterizedTest
@@ -97,10 +119,10 @@ class PojoListOutputParserTest {
 
     static Stream<Arguments> should_parse_person_with_missing_name() {
         return Stream.of(
-                Arguments.of("{\"values\":[{}]}", List.of(new Person(null))),
+                Arguments.of("{\"values\":[{}]}", Arrays.asList(new Person(null))),
                 Arguments.of(
                         "{\"values\":[{},{\"name\":\"Alice\"},{}]}",
-                        List.of(new Person(null), new Person("Alice"), new Person(null))));
+                        Arrays.asList(new Person(null), new Person("Alice"), new Person(null))));
     }
 
     @ParameterizedTest
@@ -140,12 +162,12 @@ class PojoListOutputParserTest {
 
     static Stream<Arguments> should_handle_whitespace_in_json() {
         return Stream.of(
-                Arguments.of("  {  \"values\"  :  [  ]  }  ", List.of()),
-                Arguments.of("\n{\n\"values\"\n:\n[\n]\n}\n", List.of()),
-                Arguments.of("\t{\t\"values\"\t:\t[\t]\t}\t", List.of()),
+                Arguments.of("  {  \"values\"  :  [  ]  }  ", Collections.emptyList()),
+                Arguments.of("\n{\n\"values\"\n:\n[\n]\n}\n", Collections.emptyList()),
+                Arguments.of("\t{\t\"values\"\t:\t[\t]\t}\t", Collections.emptyList()),
                 Arguments.of(
                         "   {   \"values\"   :   [   {   \"name\"   :   \"Alice\"   }   ]   }   ",
-                        List.of(new Person("Alice"))));
+                        Arrays.asList(new Person("Alice"))));
     }
 
     @ParameterizedTest
@@ -160,10 +182,10 @@ class PojoListOutputParserTest {
 
     static Stream<Arguments> should_parse_escaped_characters() {
         return Stream.of(
-                Arguments.of("{\"values\":[{\"name\":\"Alice\\\"Bob\"}]}", List.of(new Person("Alice\"Bob"))),
-                Arguments.of("{\"values\":[{\"name\":\"Line\\nBreak\"}]}", List.of(new Person("Line\nBreak"))),
-                Arguments.of("{\"values\":[{\"name\":\"Tab\\tCharacter\"}]}", List.of(new Person("Tab\tCharacter"))),
-                Arguments.of("{\"values\":[{\"name\":\"Back\\\\slash\"}]}", List.of(new Person("Back\\slash"))));
+                Arguments.of("{\"values\":[{\"name\":\"Alice\\\"Bob\"}]}", Arrays.asList(new Person("Alice\"Bob"))),
+                Arguments.of("{\"values\":[{\"name\":\"Line\\nBreak\"}]}", Arrays.asList(new Person("Line\nBreak"))),
+                Arguments.of("{\"values\":[{\"name\":\"Tab\\tCharacter\"}]}", Arrays.asList(new Person("Tab\tCharacter"))),
+                Arguments.of("{\"values\":[{\"name\":\"Back\\\\slash\"}]}", Arrays.asList(new Person("Back\\slash"))));
     }
 
     @ParameterizedTest

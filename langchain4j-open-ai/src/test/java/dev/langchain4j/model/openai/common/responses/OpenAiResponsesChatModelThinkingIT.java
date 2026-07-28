@@ -17,6 +17,7 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.openai.OpenAiResponsesChatModel;
 import dev.langchain4j.model.openai.OpenAiTokenUsage;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -106,7 +107,7 @@ class OpenAiResponsesChatModelThinkingIT {
     void should_return_encrypted_reasoning_and_send_it_back__single_tool_call() {
 
         // given
-        List<String> include = List.of("reasoning.encrypted_content");
+        List<String> include = Arrays.asList("reasoning.encrypted_content");
 
         SpyingHttpClient spyingHttpClient =
                 new SpyingHttpClient(JdkHttpClient.builder().build());
@@ -171,7 +172,7 @@ class OpenAiResponsesChatModelThinkingIT {
     void should_return_encrypted_reasoning_and_send_it_back__two_parallel_tool_calls() {
 
         // given
-        List<String> include = List.of("reasoning.encrypted_content");
+        List<String> include = Arrays.asList("reasoning.encrypted_content");
 
         SpyingHttpClient spyingHttpClient =
                 new SpyingHttpClient(JdkHttpClient.builder().build());

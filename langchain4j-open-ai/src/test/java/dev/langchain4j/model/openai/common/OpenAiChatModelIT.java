@@ -20,6 +20,9 @@ import dev.langchain4j.model.output.TokenUsage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +52,7 @@ class OpenAiChatModelIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 defaultModelBuilder().build(),
                 defaultModelBuilder()
                         .supportedCapabilities(RESPONSE_FORMAT_JSON_SCHEMA)
@@ -107,7 +110,7 @@ class OpenAiChatModelIT extends AbstractChatModelIT {
 
     @Override
     protected Set<FinishReason> finishReasonForMaxOutputTokens() {
-        return Set.of(LENGTH, STOP); // It is hard to make GPT-5 to hit LENGTH because of unpredictable reasoning
+        return new HashSet<>(Arrays.asList(LENGTH, STOP)); // It is hard to make GPT-5 to hit LENGTH because of unpredictable reasoning
     }
 
     @Override
@@ -161,7 +164,7 @@ class OpenAiChatModelIT extends AbstractChatModelIT {
     void should_respect_logitBias_parameter() {
 
         // given
-        Map<String, Integer> logitBias = Map.of(
+        Map<String, Integer> logitBias = Collections.singletonMap(
                 "72782", 100 // token ID for "Paris", see https://platform.openai.com/tokenizer -> "Token IDs"
         );
 
@@ -240,7 +243,7 @@ class OpenAiChatModelIT extends AbstractChatModelIT {
                 .seed(12345)
                 .user("Klaus")
                 .store(true)
-                .metadata(Map.of("key", "value"))
+                .metadata(Collections.singletonMap("key", "value"))
                 .serviceTier("default")
                 .reasoningEffort("medium")
                 .build();
@@ -313,9 +316,10 @@ class OpenAiChatModelIT extends AbstractChatModelIT {
     void should_propagate_custom_http_headers() {
 
         // given
-        Map<String, String> customHeaders = Map.of(
-                "key1", "value1",
-                "key2", "value2");
+        Map<String, String> customHeaders = new LinkedHashMap<String, String>() {{
+            put("key1", "value1");
+            put("key2", "value2");
+        }};
 
         MockHttpClient mockHttpClient = new MockHttpClient();
 
@@ -338,8 +342,8 @@ class OpenAiChatModelIT extends AbstractChatModelIT {
 
         // then
         assertThat(mockHttpClient.request().headers())
-                .containsEntry("key1", List.of("value1"))
-                .containsEntry("key2", List.of("value2"));
+                .containsEntry("key1", Arrays.asList("value1"))
+                .containsEntry("key2", Arrays.asList("value2"));
     }
 
     @Test

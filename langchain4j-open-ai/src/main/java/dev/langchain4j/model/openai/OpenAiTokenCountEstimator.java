@@ -132,13 +132,13 @@ implements TokenCountEstimator {
                 for (ToolExecutionRequest toolExecutionRequest : aiMessage.toolExecutionRequests()) {
                     tokenCount += 7;
                     tokenCount += this.estimateTokenCountInText(toolExecutionRequest.name());
-                    if (Utils.isNullOrBlank((String)toolExecutionRequest.arguments())) continue;
+                    if (Utils.isNullOrBlank(toolExecutionRequest.arguments())) continue;
                     try {
-                        Map arguments = (Map)OBJECT_MAPPER.readValue(toolExecutionRequest.arguments(), Map.class);
-                        for (Map.Entry argument : arguments.entrySet()) {
+                        Map<?, ?> arguments = OBJECT_MAPPER.readValue(toolExecutionRequest.arguments(), Map.class);
+                        for (Map.Entry<?, ?> argument : arguments.entrySet()) {
                             tokenCount += 2;
-                            tokenCount += this.estimateTokenCountInText(String.valueOf(argument.getKey()));
-                            tokenCount += this.estimateTokenCountInText(String.valueOf(argument.getValue()));
+                            tokenCount += estimateTokenCountInText(String.valueOf(argument.getKey()));
+                            tokenCount += estimateTokenCountInText(String.valueOf(argument.getValue()));
                         }
                     }
                     catch (JsonProcessingException e) {

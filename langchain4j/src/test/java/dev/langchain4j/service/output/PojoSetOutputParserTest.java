@@ -3,6 +3,8 @@ package dev.langchain4j.service.output;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,81 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class PojoSetOutputParserTest {
 
-    record Person(String name) {}
+    static final class Person {
+        private final String name;
+
+        public Person(String name) { this.name = name; }
+
+        public String name() { return name; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Person)) return false;
+            Person person = (Person) o;
+            return java.util.Objects.equals(name, person.name);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name); }
+
+        @Override
+        public String toString() { return "Person[name=" + name + "]"; }
+    }
+
+    static final class Config {
+        private final String key;
+        private final String value;
+
+        public Config(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String key() { return key; }
+        public String value() { return value; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Config)) return false;
+            Config config = (Config) o;
+            return java.util.Objects.equals(key, config.key) && java.util.Objects.equals(value, config.value);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(key, value); }
+
+        @Override
+        public String toString() { return "Config[key=" + key + ", value=" + value + "]"; }
+    }
+
+    static final class Item {
+        private final String name;
+        private final Config config;
+
+        public Item(String name, Config config) {
+            this.name = name;
+            this.config = config;
+        }
+
+        public String name() { return name; }
+        public Config config() { return config; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Item)) return false;
+            Item item = (Item) o;
+            return java.util.Objects.equals(name, item.name) && java.util.Objects.equals(config, item.config);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, config); }
+
+        @Override
+        public String toString() { return "Item[name=" + name + ", config=" + config + "]"; }
+    }
 
     @ParameterizedTest
     @MethodSource
@@ -29,14 +105,14 @@ class PojoSetOutputParserTest {
 
     static Stream<Arguments> should_parse_set_of_pojo() {
         return Stream.of(
-                Arguments.of("{\"values\":[{\"name\":\"Klaus\"}]}", Set.of(new Person("Klaus"))),
+                Arguments.of("{\"values\":[{\"name\":\"Klaus\"}]}", new java.util.HashSet<>(java.util.Arrays.asList(new Person("Klaus"))))),
                 Arguments.of(
                         "{\"values\":[{\"name\":\"Klaus\"}, {\"name\":\"Franny\"}]}",
-                        Set.of(new Person("Klaus"), new Person("Franny"))),
-                Arguments.of("", Set.of()),
-                Arguments.of(" ", Set.of()),
-                Arguments.of("{\"values\":[]}", Set.of()),
-                Arguments.of(" {\"values\":[{\"name\":\"Klaus\"}]} ", Set.of(new Person("Klaus"))));
+                        new java.util.HashSet<>(java.util.Arrays.asList(new Person("Klaus"), new Person("Franny"))))),
+                Arguments.of("", java.util.Collections.emptySet()),
+                Arguments.of(" ", java.util.Collections.emptySet()),
+                Arguments.of("{\"values\":[]}", java.util.Collections.emptySet()),
+                Arguments.of(" {\"values\":[{\"name\":\"Klaus\"}]} ", new java.util.HashSet<>(java.util.Arrays.asList(new Person("Klaus"))));
     }
 
     @ParameterizedTest
@@ -84,8 +160,6 @@ class PojoSetOutputParserTest {
 
     @Test
     void should_handle_nested_objects() {
-        record Config(String key, String value) {}
-        record Item(String name, Config config) {}
 
         String json = "{\"values\":[{\"name\":\"Item1\",\"config\":{\"key\":\"Key1\",\"value\":\"Value1\"}}]}";
 

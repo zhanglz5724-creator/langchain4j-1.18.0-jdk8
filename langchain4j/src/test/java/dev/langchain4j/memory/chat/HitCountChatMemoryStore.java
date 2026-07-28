@@ -7,7 +7,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class HitCountChatMemoryStore extends InMemoryChatMemoryStore {
 
-    public record HitCounts(int getMessages, int updateMessages, int deleteMessages) {
+    public static final class HitCounts {
+        private final int getMessages;
+        private final int updateMessages;
+        private final int deleteMessages;
+
+        public HitCounts(int getMessages, int updateMessages, int deleteMessages) {
+            this.getMessages = getMessages;
+            this.updateMessages = updateMessages;
+            this.deleteMessages = deleteMessages;
+        }
+
+        public int getMessages() {
+            return getMessages;
+        }
+
+        public int updateMessages() {
+            return updateMessages;
+        }
+
+        public int deleteMessages() {
+            return deleteMessages;
+        }
+
         public HitCounts subtract(HitCounts other) {
             return new HitCounts(
                     getMessages - other.getMessages,

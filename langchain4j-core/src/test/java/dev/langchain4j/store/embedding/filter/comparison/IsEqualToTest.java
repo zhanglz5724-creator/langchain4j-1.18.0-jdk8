@@ -35,7 +35,7 @@ class IsEqualToTest {
     @Test
     void shouldReturnTrueWhenValuesAreStrings() {
         IsEqualTo isEqualTo = new IsEqualTo("key", "value");
-        Metadata metadata = new Metadata(new HashMap<>() {
+        Metadata metadata = new Metadata(new HashMap<String, Object>() {
             {
                 put("key", "value");
             }
@@ -47,7 +47,7 @@ class IsEqualToTest {
     void shouldReturnTrueWhenActualValueIsUUIDAsString() {
         UUID uuid = UUID.randomUUID();
         IsEqualTo isEqualTo = new IsEqualTo("key", uuid);
-        Metadata metadata = new Metadata(new HashMap<>() {
+        Metadata metadata = new Metadata(new HashMap<String, Object>() {
             {
                 put("key", uuid.toString());
             }

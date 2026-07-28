@@ -50,13 +50,14 @@ implements OutputParserFactory {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public OutputParser<?> get(Class<?> rawClass, Class<?> typeArgumentClass) {
         if (rawClass.isEnum()) {
-            return new EnumOutputParser<Enum>(rawClass.asSubclass(Enum.class));
+            return new EnumOutputParser(rawClass);
         }
         if (rawClass.equals(List.class)) {
             if (typeArgumentClass.isEnum()) {
-                return new EnumListOutputParser<Enum>(typeArgumentClass.asSubclass(Enum.class));
+                return new EnumListOutputParser(typeArgumentClass);
             }
             if (typeArgumentClass.equals(String.class)) {
                 return new StringListOutputParser();
@@ -65,7 +66,7 @@ implements OutputParserFactory {
         }
         if (rawClass.equals(Set.class)) {
             if (typeArgumentClass.isEnum()) {
-                return new EnumSetOutputParser<Enum>(typeArgumentClass.asSubclass(Enum.class));
+                return new EnumSetOutputParser(typeArgumentClass);
             }
             if (typeArgumentClass.equals(String.class)) {
                 return new StringSetOutputParser();

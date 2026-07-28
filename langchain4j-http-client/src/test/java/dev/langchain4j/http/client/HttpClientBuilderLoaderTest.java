@@ -4,9 +4,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import dev.langchain4j.spi.ServiceHelper;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class HttpClientBuilderLoaderTest {
 
     @Test
     void noFactoriesAndProperty() {
-        try (var ignored = ResettableSystemProperties.of("langchain4j.http.clientBuilderFactory", "whatever")) {
+        try (ResettableSystemProperties ignored = ResettableSystemProperties.of("langchain4j.http.clientBuilderFactory", "whatever")) {
             doNoFactories();
         }
     }
@@ -45,7 +45,7 @@ class HttpClientBuilderLoaderTest {
 
     @Test
     void singleFactoryMatchingProperty() {
-        try (var ignored = ResettableSystemProperties.of(
+        try (ResettableSystemProperties ignored = ResettableSystemProperties.of(
                 "langchain4j.http.clientBuilderFactory", MockHttpClientBuilder.MockClientFactory.class.getName())) {
             doSingleFactory();
         }
@@ -54,7 +54,7 @@ class HttpClientBuilderLoaderTest {
     private void doSingleFactory() {
         try (MockedStatic<ServiceHelper> mocked = Mockito.mockStatic(ServiceHelper.class)) {
             mocked.when(() -> ServiceHelper.loadFactories(HttpClientBuilderFactory.class))
-                    .thenReturn(List.of(MockHttpClientBuilder.MockClientFactory.of()));
+                    .thenReturn(Collections.singletonList(MockHttpClientBuilder.MockClientFactory.of()));
 
             assertThat(HttpClientBuilderLoader.loadHttpClientBuilder()).isInstanceOf(MockHttpClientBuilder.class);
         }
@@ -62,10 +62,10 @@ class HttpClientBuilderLoaderTest {
 
     @Test
     void singleFactoryNonMatchingProperty() {
-        try (var ignored = ResettableSystemProperties.of("langchain4j.http.clientBuilderFactory", "whatever")) {
+        try (ResettableSystemProperties ignored = ResettableSystemProperties.of("langchain4j.http.clientBuilderFactory", "whatever")) {
             try (MockedStatic<ServiceHelper> mocked = Mockito.mockStatic(ServiceHelper.class)) {
                 mocked.when(() -> ServiceHelper.loadFactories(HttpClientBuilderFactory.class))
-                        .thenReturn(List.of(MockHttpClientBuilder.MockClientFactory.of()));
+                        .thenReturn(Collections.singletonList(MockHttpClientBuilder.MockClientFactory.of()));
 
                 assertThatThrownBy(HttpClientBuilderLoader::loadHttpClientBuilder)
                         .isInstanceOf(IllegalStateException.class)
@@ -79,7 +79,7 @@ class HttpClientBuilderLoaderTest {
         try (MockedStatic<ServiceHelper> mocked = Mockito.mockStatic(ServiceHelper.class)) {
             mocked.when(() -> ServiceHelper.loadFactories(HttpClientBuilderFactory.class))
                     .thenReturn(
-                            List.of(MockHttpClientBuilder.MockClientFactory.of(), TestHttpClientBuilderFactory.of()));
+                            Arrays.asList(MockHttpClientBuilder.MockClientFactory.of(), TestHttpClientBuilderFactory.of()));
 
             assertThatThrownBy(HttpClientBuilderLoader::loadHttpClientBuilder)
                     .isInstanceOf(IllegalStateException.class)
@@ -89,10 +89,10 @@ class HttpClientBuilderLoaderTest {
 
     @Test
     void multipleFactoriesNonMatchingProperty() {
-        try (var ignored = ResettableSystemProperties.of("langchain4j.http.clientBuilderFactory", "whatever")) {
+        try (ResettableSystemProperties ignored = ResettableSystemProperties.of("langchain4j.http.clientBuilderFactory", "whatever")) {
             try (MockedStatic<ServiceHelper> mocked = Mockito.mockStatic(ServiceHelper.class)) {
                 mocked.when(() -> ServiceHelper.loadFactories(HttpClientBuilderFactory.class))
-                        .thenReturn(List.of(
+                        .thenReturn(Arrays.asList(
                                 MockHttpClientBuilder.MockClientFactory.of(), TestHttpClientBuilderFactory.of()));
 
                 assertThatThrownBy(HttpClientBuilderLoader::loadHttpClientBuilder)
@@ -104,11 +104,11 @@ class HttpClientBuilderLoaderTest {
 
     @Test
     void multipleFactoriesMatchingProperty() {
-        try (var ignored = ResettableSystemProperties.of(
+        try (ResettableSystemProperties ignored = ResettableSystemProperties.of(
                 "langchain4j.http.clientBuilderFactory", MockHttpClientBuilder.MockClientFactory.class.getName())) {
             try (MockedStatic<ServiceHelper> mocked = Mockito.mockStatic(ServiceHelper.class)) {
                 mocked.when(() -> ServiceHelper.loadFactories(HttpClientBuilderFactory.class))
-                        .thenReturn(List.of(
+                        .thenReturn(Arrays.asList(
                                 TestHttpClientBuilderFactory.of(),
                                 MockHttpClientBuilder.MockClientFactory.of(),
                                 TestHttpClientBuilderFactory.of()));
@@ -130,14 +130,14 @@ class HttpClientBuilderLoaderTest {
                 return;
             }
             toRestore = new HashMap<>();
-            for (var entry : toSet.entrySet()) {
+            for (Map.Entry<String, String> entry : toSet.entrySet()) {
                 String oldValue = System.setProperty(entry.getKey(), entry.getValue());
                 toRestore.put(entry.getKey(), oldValue);
             }
         }
 
         public static ResettableSystemProperties of(String name, String value) {
-            return new ResettableSystemProperties(Map.of(name, value));
+            return new ResettableSystemProperties(Collections.singletonMap(name, value));
         }
 
         public static ResettableSystemProperties empty() {
@@ -146,7 +146,7 @@ class HttpClientBuilderLoaderTest {
 
         @Override
         public void close() {
-            for (var entry : toRestore.entrySet()) {
+            for (Map.Entry<String, String> entry : toRestore.entrySet()) {
                 if (entry.getValue() != null) {
                     System.setProperty(entry.getKey(), entry.getValue());
                 } else {

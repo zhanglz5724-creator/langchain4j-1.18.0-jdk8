@@ -114,9 +114,26 @@ class AiServicesWithToolsWithRequiredIT {
         // given
         class ToolWithPojoParameter {
 
-            record Person(
-                    String name,
-                    @JsonProperty(required = false) Integer age) {}
+            static final class Person {
+                private final String name;
+                @JsonProperty(required = false)
+                private final Integer age;
+                public Person(String name, Integer age) {
+                    this.name = name;
+                    this.age = age;
+                }
+                public String name() { return name; }
+                public Integer age() { return age; }
+                @Override public boolean equals(Object o) {
+                    if (this == o) return true;
+                    if (!(o instanceof Person)) return false;
+                    Person person = (Person) o;
+                    return java.util.Objects.equals(name, person.name)
+                        && java.util.Objects.equals(age, person.age);
+                }
+                @Override public int hashCode() { return java.util.Objects.hash(name, age); }
+                @Override public String toString() { return "Person[name=" + name + ", age=" + age + "]"; }
+            }
 
             @Tool
             void process(Person person) {

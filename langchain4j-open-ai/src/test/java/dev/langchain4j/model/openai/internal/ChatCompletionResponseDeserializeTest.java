@@ -13,40 +13,38 @@ class ChatCompletionResponseDeserializeTest {
     void should_deserialize_chat_response_without_tool_type() {
 
         // given
-        String json = """
-                {
-                    "id": "0195a749b17b5668b9753240788da6f8",
-                    "object": "chat.completion.chunk",
-                    "created": 1742268380,
-                    "model": "deepseek-ai/DeepSeek-V3",
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {
-                                "content": null,
-                                "reasoning_content": null,
-                                "tool_calls": [
-                                    {
-                                        "index": 0,
-                                        "id": "",
-                                        "type": "",
-                                        "function": {
-                                            "arguments": "{\\""
-                                        }
-                                    }
-                                ]
-                            },
-                            "finish_reason": null
-                        }
-                    ],
-                    "system_fingerprint": "",
-                    "usage": {
-                        "prompt_tokens": 83,
-                        "completion_tokens": 2,
-                        "total_tokens": 85
-                    }
-                }
-                """;
+        String json = "{\n"
+                + "    \"id\": \"0195a749b17b5668b9753240788da6f8\",\n"
+                + "    \"object\": \"chat.completion.chunk\",\n"
+                + "    \"created\": 1742268380,\n"
+                + "    \"model\": \"deepseek-ai/DeepSeek-V3\",\n"
+                + "    \"choices\": [\n"
+                + "        {\n"
+                + "            \"index\": 0,\n"
+                + "            \"delta\": {\n"
+                + "                \"content\": null,\n"
+                + "                \"reasoning_content\": null,\n"
+                + "                \"tool_calls\": [\n"
+                + "                    {\n"
+                + "                        \"index\": 0,\n"
+                + "                        \"id\": \"\",\n"
+                + "                        \"type\": \"\",\n"
+                + "                        \"function\": {\n"
+                + "                            \"arguments\": \"{\\\"\"\n"
+                + "                        }\n"
+                + "                    }\n"
+                + "                ]\n"
+                + "            },\n"
+                + "            \"finish_reason\": null\n"
+                + "        }\n"
+                + "    ],\n"
+                + "    \"system_fingerprint\": \"\",\n"
+                + "    \"usage\": {\n"
+                + "        \"prompt_tokens\": 83,\n"
+                + "        \"completion_tokens\": 2,\n"
+                + "        \"total_tokens\": 85\n"
+                + "    }\n"
+                + "}";
 
         // when
         ChatCompletionResponse response = Json.fromJson(json, ChatCompletionResponse.class);

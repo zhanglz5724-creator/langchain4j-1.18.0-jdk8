@@ -3,6 +3,7 @@ package dev.langchain4j.invocation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
@@ -23,13 +24,13 @@ class InvocationParametersTest {
     @Test
     void test2() {
         InvocationParameters invocationParameters = InvocationParameters.from("key", "value");
-        assertThat(invocationParameters.asMap()).containsOnly(Map.entry("key", "value"));
+        assertThat(invocationParameters.asMap()).containsOnly(new AbstractMap.SimpleEntry<>("key", "value"));
     }
 
     @Test
     void test3() {
         InvocationParameters invocationParameters = InvocationParameters.from(Collections.singletonMap("key", "value"));
-        assertThat(invocationParameters.asMap()).containsOnly(Map.entry("key", "value"));
+        assertThat(invocationParameters.asMap()).containsOnly(new AbstractMap.SimpleEntry<>("key", "value"));
     }
 
     @Test
@@ -38,7 +39,7 @@ class InvocationParametersTest {
         seedMap.put("key1", "value1");
 
         InvocationParameters invocationParameters = InvocationParameters.from(seedMap);
-        assertThat(invocationParameters.asMap()).containsOnly(Map.entry("key1", "value1"));
+        assertThat(invocationParameters.asMap()).containsOnly(new AbstractMap.SimpleEntry<>("key1", "value1"));
 
         seedMap.put("key2", "value2");
         invocationParameters.put("key3", "value3");
@@ -76,7 +77,7 @@ class InvocationParametersTest {
         invocationParameters.put("key3", "value3");
 
         assertThat(invocationParameters.asMap())
-                .containsOnly(Map.entry("key1", "value1"), Map.entry("key2", "value2"), Map.entry("key3", "value3"));
+                .containsOnly(new AbstractMap.SimpleEntry<>("key1", "value1"), new AbstractMap.SimpleEntry<>("key2", "value2"), new AbstractMap.SimpleEntry<>("key3", "value3"));
     }
 
     @Test
@@ -96,7 +97,7 @@ class InvocationParametersTest {
         InvocationParameters invocationParameters = InvocationParameters.from(map);
 
         assertThat(invocationParameters.asMap())
-                .containsOnly(Map.entry("key1", "value1"), Map.entry("key2", 1), Map.entry("key3", true));
+                .containsOnly(new AbstractMap.SimpleEntry<>("key1", "value1"), new AbstractMap.SimpleEntry<>("key2", 1), new AbstractMap.SimpleEntry<>("key3", true));
     }
 
     @Test

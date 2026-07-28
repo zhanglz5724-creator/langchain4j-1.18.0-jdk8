@@ -176,7 +176,7 @@ public abstract class AbstractStreamingAiServiceIT {
     protected void should_keep_memory_consistent_when_streaming_using_immediate_tool(StreamingChatModel model) {
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
 
-        var assistant = AiServices.builder(Assistant.class)
+        Assistant assistant = AiServices.builder(Assistant.class)
                 .streamingChatModel(model)
                 .tools(new AbstractAiServiceWithToolsIT.ImmediateToolWithPrimitiveParameters())
                 .chatMemory(chatMemory)

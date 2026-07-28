@@ -125,6 +125,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static dev.langchain4j.internal.JsonSchemaElementUtils.toMap;
+import static dev.langchain4j.internal.ToolSpecificationUtils.isEffectivelyStrict;
+
 class OpenAiResponsesClient {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     private static final String DEFAULT_BASE_URL = "https://api.openai.com/v1";
@@ -265,98 +268,120 @@ class OpenAiResponsesClient {
             InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> handler.onError((Throwable)ExceptionMapper.DEFAULT.mapException((Throwable)e)));
         }
     }
-
-    private Map<String, Object> buildRequestPayload(ChatRequest chatRequest, OpenAiResponsesChatRequestParameters parameters, boolean stream) {
-        ArrayList<Map<String, Object>> input = new ArrayList<Map<String, Object>>();
+    private Map<String, Object> buildRequestPayload(
+            ChatRequest chatRequest, OpenAiResponsesChatRequestParameters parameters, boolean stream) {
+        List<Map<String, Object>> input = new ArrayList<>();
         for (ChatMessage message : chatRequest.messages()) {
-            input.addAll(OpenAiResponsesClient.toResponsesMessages(message));
+            input.addAll(toResponsesMessages(message));
         }
-        LinkedHashMap<String, Object> payload = new LinkedHashMap<String, Object>();
+
+        Map<String, Object> payload = new LinkedHashMap<>();
         payload.put(FIELD_MODEL, parameters.modelName());
         payload.put(FIELD_INPUT, input);
         payload.put(FIELD_STREAM, stream);
         payload.put(FIELD_STORE, parameters.store());
+
         if (parameters.temperature() != null) {
             payload.put(FIELD_TEMPERATURE, parameters.temperature());
         }
+
         if (parameters.topP() != null) {
             payload.put(FIELD_TOP_P, parameters.topP());
         }
+
         if (parameters.maxOutputTokens() != null) {
             payload.put(FIELD_MAX_OUTPUT_TOKENS, parameters.maxOutputTokens());
         }
+
         if (parameters.maxToolCalls() != null) {
             payload.put(FIELD_MAX_TOOL_CALLS, parameters.maxToolCalls());
         }
+
         if (parameters.parallelToolCalls() != null) {
             payload.put(FIELD_PARALLEL_TOOL_CALLS, parameters.parallelToolCalls());
         }
+
         if (parameters.previousResponseId() != null) {
             payload.put(FIELD_PREVIOUS_RESPONSE_ID, parameters.previousResponseId());
         }
+
         if (parameters.topLogprobs() != null) {
             payload.put(FIELD_TOP_LOGPROBS, parameters.topLogprobs());
         }
+
         if (parameters.truncation() != null && !parameters.truncation().isEmpty()) {
             payload.put(FIELD_TRUNCATION, parameters.truncation());
         }
+
         if (parameters.include() != null && !parameters.include().isEmpty()) {
             payload.put(FIELD_INCLUDE, parameters.include());
         }
+
         if (parameters.serviceTier() != null) {
             payload.put(FIELD_SERVICE_TIER, parameters.serviceTier());
         }
+
         if (parameters.safetyIdentifier() != null) {
             payload.put(FIELD_SAFETY_IDENTIFIER, parameters.safetyIdentifier());
         }
+
         if (parameters.promptCacheKey() != null) {
             payload.put(FIELD_PROMPT_CACHE_KEY, parameters.promptCacheKey());
         }
+
         if (parameters.promptCacheRetention() != null) {
             payload.put(FIELD_PROMPT_CACHE_RETENTION, parameters.promptCacheRetention());
         }
+
         if (parameters.reasoningEffort() != null || parameters.reasoningSummary() != null) {
-            LinkedHashMap<String, String> reasoning = new LinkedHashMap<String, String>();
+            Map<String, Object> reasoning = new LinkedHashMap<>();
             if (parameters.reasoningEffort() != null) {
                 reasoning.put(FIELD_EFFORT, parameters.reasoningEffort());
             }
             if (parameters.reasoningSummary() != null) {
                 reasoning.put(FIELD_SUMMARY, parameters.reasoningSummary());
             }
-            payload.put("reasoning", reasoning);
+            payload.put(FIELD_REASONING, reasoning);
         }
+
         if (stream && parameters.streamIncludeObfuscation() != null) {
-            LinkedHashMap<String, Boolean> streamOptions = new LinkedHashMap<String, Boolean>();
+            Map<String, Object> streamOptions = new LinkedHashMap<>();
             streamOptions.put(FIELD_INCLUDE_OBFUSCATION, parameters.streamIncludeObfuscation());
             payload.put(FIELD_STREAM_OPTIONS, streamOptions);
         }
+
         boolean strictTools = Boolean.TRUE.equals(parameters.strictTools());
-        ArrayList<Map<Object, Object>> tools = new ArrayList<Map<Object, Object>>();
-        List toolSpecifications = parameters.toolSpecifications();
+        List<Map<String, Object>> tools = new ArrayList<>();
+        List<ToolSpecification> toolSpecifications = parameters.toolSpecifications();
         if (toolSpecifications != null && !toolSpecifications.isEmpty()) {
             for (ToolSpecification toolSpec : toolSpecifications) {
-                boolean effectiveStrict = ToolSpecificationUtils.isEffectivelyStrict((ToolSpecification)toolSpec, (boolean)strictTools);
-                LinkedHashMap<String, Object> tool = new LinkedHashMap<String, Object>();
+                boolean effectiveStrict = isEffectivelyStrict(toolSpec, strictTools);
+
+                Map<String, Object> tool = new LinkedHashMap<>();
                 tool.put(FIELD_TYPE, TYPE_FUNCTION);
                 tool.put(FIELD_NAME, toolSpec.name());
                 if (toolSpec.description() != null) {
                     tool.put(FIELD_DESCRIPTION, toolSpec.description());
                 }
-                LinkedHashMap<String, Object> functionParameters = null;
+
+                Map<String, Object> functionParameters = null;
                 if (toolSpec.parameters() != null) {
-                    functionParameters = JsonSchemaElementUtils.toMap((JsonSchemaElement)toolSpec.parameters(), (boolean)effectiveStrict);
+                    functionParameters = toMap(toolSpec.parameters(), effectiveStrict);
                 } else if (effectiveStrict) {
-                    functionParameters = new LinkedHashMap<String, Object>();
+                    functionParameters = new LinkedHashMap<>();
                     functionParameters.put(FIELD_TYPE, TYPE_OBJECT);
                     functionParameters.put(FIELD_PROPERTIES, Collections.emptyMap());
                     functionParameters.put(FIELD_ADDITIONAL_PROPERTIES, false);
                 }
+
                 if (functionParameters != null) {
                     tool.put(FIELD_PARAMETERS, functionParameters);
                 }
+
                 if (effectiveStrict) {
                     tool.put(FIELD_STRICT, true);
                 }
+
                 tools.add(tool);
             }
         }
@@ -365,23 +390,28 @@ class OpenAiResponsesClient {
         }
         if (!tools.isEmpty()) {
             payload.put(FIELD_TOOLS, tools);
+
             if (parameters.toolChoice() != null) {
-                payload.put(FIELD_TOOL_CHOICE, OpenAiResponsesClient.toToolChoiceString(parameters.toolChoice()));
+                payload.put(FIELD_TOOL_CHOICE, toToolChoiceString(parameters.toolChoice()));
             }
         }
+
         boolean strictJsonSchema = Boolean.TRUE.equals(parameters.strictJsonSchema());
-        Map<String, Object> textConfig = OpenAiResponsesClient.toResponseTextConfig(parameters.responseFormat(), strictJsonSchema);
+        Map<String, Object> textConfig = toResponseTextConfig(parameters.responseFormat(), strictJsonSchema);
         if (parameters.textVerbosity() != null) {
             if (textConfig == null) {
-                textConfig = new LinkedHashMap<String, Object>();
+                textConfig = new LinkedHashMap<>();
             }
             textConfig.put(FIELD_TEXT_VERBOSITY, parameters.textVerbosity());
         }
         if (textConfig != null) {
             payload.put(FIELD_TEXT, textConfig);
         }
+
         return payload;
     }
+
+
 
     private HttpRequest buildHttpRequest(Map<String, Object> payload, boolean stream) throws Exception {
         String requestBody = OBJECT_MAPPER.writeValueAsString(payload);
@@ -571,12 +601,13 @@ class OpenAiResponsesClient {
             if ((text = aiMessage.text()) != null && !text.isEmpty()) {
                 items.add(OpenAiResponsesClient.createMessageEntry(ROLE_ASSISTANT, Collections.singletonList(OpenAiResponsesClient.createOutputTextContent(text))));
             }
+
             if (aiMessage.hasToolExecutionRequests()) {
                 for (ToolExecutionRequest toolRequest : aiMessage.toolExecutionRequests()) {
-                    String callId = OpenAiResponsesClient.requireNonBlank(toolRequest.id(), "ToolExecutionRequest.id");
-                    String name = OpenAiResponsesClient.requireNonBlank(toolRequest.name(), "ToolExecutionRequest.name");
-                    String arguments = OpenAiResponsesClient.requireNonBlank(toolRequest.arguments(), "ToolExecutionRequest.arguments");
-                    LinkedHashMap<String, String> functionCall = new LinkedHashMap<String, String>();
+                    String callId = requireNonBlank(toolRequest.id(), "ToolExecutionRequest.id");
+                    String name = requireNonBlank(toolRequest.name(), "ToolExecutionRequest.name");
+                    String arguments = requireNonBlank(toolRequest.arguments(), "ToolExecutionRequest.arguments");
+                    LinkedHashMap<String, Object> functionCall = new LinkedHashMap<String, Object>();
                     functionCall.put(FIELD_TYPE, TYPE_FUNCTION_CALL);
                     functionCall.put(FIELD_CALL_ID, callId);
                     functionCall.put(FIELD_NAME, name);
@@ -584,6 +615,7 @@ class OpenAiResponsesClient {
                     items.add(functionCall);
                 }
             }
+
             return items;
         }
         if (msg instanceof ToolExecutionResultMessage) {

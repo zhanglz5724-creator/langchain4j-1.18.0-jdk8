@@ -4,6 +4,9 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -15,9 +18,12 @@ class SuccessfulHttpResponseTest {
         // 'é' is 0xE9 in ISO-8859-1 but 0xC3 0xA9 in UTF-8
         byte[] latin1Bytes = "café".getBytes(ISO_8859_1);
 
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("Content-Type", Arrays.asList("text/plain; charset=ISO-8859-1"));
+
         SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                 .statusCode(200)
-                .headers(Map.of("Content-Type", List.of("text/plain; charset=ISO-8859-1")))
+                .headers(headers)
                 .body(latin1Bytes)
                 .build();
 
@@ -29,9 +35,12 @@ class SuccessfulHttpResponseTest {
     void should_match_content_type_header_case_insensitively() {
         byte[] latin1Bytes = "café".getBytes(ISO_8859_1);
 
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("content-type", Arrays.asList("text/plain; CHARSET=iso-8859-1"));
+
         SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                 .statusCode(200)
-                .headers(Map.of("content-type", List.of("text/plain; CHARSET=iso-8859-1")))
+                .headers(headers)
                 .body(latin1Bytes)
                 .build();
 
@@ -42,9 +51,12 @@ class SuccessfulHttpResponseTest {
     void should_default_to_utf8_when_charset_param_is_absent() {
         byte[] utf8Bytes = "café".getBytes(UTF_8);
 
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("Content-Type", Arrays.asList("application/json"));
+
         SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                 .statusCode(200)
-                .headers(Map.of("Content-Type", List.of("application/json")))
+                .headers(headers)
                 .body(utf8Bytes)
                 .build();
 
@@ -57,7 +69,7 @@ class SuccessfulHttpResponseTest {
 
         SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                 .statusCode(200)
-                .headers(Map.of())
+                .headers(Collections.emptyMap())
                 .body(utf8Bytes)
                 .build();
 
@@ -68,9 +80,12 @@ class SuccessfulHttpResponseTest {
     void should_fall_back_to_utf8_when_charset_is_unsupported() {
         byte[] utf8Bytes = "café".getBytes(UTF_8);
 
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("Content-Type", Arrays.asList("text/plain; charset=not-a-real-charset"));
+
         SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                 .statusCode(200)
-                .headers(Map.of("Content-Type", List.of("text/plain; charset=not-a-real-charset")))
+                .headers(headers)
                 .body(utf8Bytes)
                 .build();
 

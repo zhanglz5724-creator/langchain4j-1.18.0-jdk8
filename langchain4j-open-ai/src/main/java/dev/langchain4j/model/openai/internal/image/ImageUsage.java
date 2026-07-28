@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=ImageUsage.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ImageUsage {
@@ -93,7 +93,7 @@ public class ImageUsage {
         return new Builder();
     }
 
-    @JsonDeserialize(builder=TokensDetailsBuilder.class)
+    @JsonDeserialize(builder=TokensDetails.TokensDetailsBuilder.class)
     @JsonInclude(value=JsonInclude.Include.NON_NULL)
     @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class TokensDetails {

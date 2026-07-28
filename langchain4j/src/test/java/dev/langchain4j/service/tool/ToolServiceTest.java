@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.*;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.exception.ToolExecutionException;
 import dev.langchain4j.invocation.InvocationContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class ToolServiceTest {
             InvocationContext.builder().build();
 
     private static final ToolArgumentsErrorHandler DEFAULT_ARGS_HANDLER = (error, ctx) -> {
-        if (error instanceof RuntimeException re) throw re;
+        if (error instanceof RuntimeException) { RuntimeException re = (RuntimeException) error; throw re; }
         throw new RuntimeException(error);
     };
 
@@ -29,7 +30,7 @@ class ToolServiceTest {
 
     @Test
     void shouldReturnImmediately_empty_list_should_not_crash() {
-        assertThatNoException().isThrownBy(() -> shouldReturnImmediately(false, List.of()));
+        assertThatNoException().isThrownBy(() -> shouldReturnImmediately(false, Collections.emptyList()));
     }
 
     // --- error handler returns text ---

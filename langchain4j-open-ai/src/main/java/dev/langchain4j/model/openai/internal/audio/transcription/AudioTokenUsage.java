@@ -27,7 +27,7 @@ import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.openai.internal.audio.transcription.AudioTokenDetailsUsage;
 import java.util.Objects;
 
-@JsonDeserialize(builder=Builder.class)
+@JsonDeserialize(builder=AudioTokenUsage.Builder.class)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
 @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AudioTokenUsage {

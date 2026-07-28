@@ -14,6 +14,9 @@ import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.output.structured.Description;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,13 +27,61 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PolymorphicOutputParserTest {
 
-    sealed interface Animal permits Dog, Cat {
+    interface Animal {
     }
 
-    record Dog(String name, String breed) implements Animal {
+    static final class Dog implements Animal {
+        private final String name;
+        private final String breed;
+
+        public Dog(String name, String breed) {
+            this.name = name;
+            this.breed = breed;
+        }
+
+        public String name() { return name; }
+        public String breed() { return breed; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Dog)) return false;
+            Dog dog = (Dog) o;
+            return java.util.Objects.equals(name, dog.name) && java.util.Objects.equals(breed, dog.breed);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, breed); }
+
+        @Override
+        public String toString() { return "Dog[name=" + name + ", breed=" + breed + "]"; }
     }
 
-    record Cat(String name, boolean indoor) implements Animal {
+    static final class Cat implements Animal {
+        private final String name;
+        private final boolean indoor;
+
+        public Cat(String name, boolean indoor) {
+            this.name = name;
+            this.indoor = indoor;
+        }
+
+        public String name() { return name; }
+        public boolean indoor() { return indoor; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Cat)) return false;
+            Cat cat = (Cat) o;
+            return indoor == cat.indoor && java.util.Objects.equals(name, cat.name);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, indoor); }
+
+        @Override
+        public String toString() { return "Cat[name=" + name + ", indoor=" + indoor + "]"; }
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
@@ -64,13 +115,37 @@ class PolymorphicOutputParserTest {
     }
 
     @Description("A pet that lives in your home")
-    sealed interface Pet permits Hamster, Parrot {
+    interface Pet {
     }
 
-    sealed interface Vehicle permits Truck {
+    interface Vehicle {
     }
 
-    record Truck(String type, int wheels) implements Vehicle {
+    static final class Truck implements Vehicle {
+        private final String type;
+        private final int wheels;
+
+        public Truck(String type, int wheels) {
+            this.type = type;
+            this.wheels = wheels;
+        }
+
+        public String type() { return type; }
+        public int wheels() { return wheels; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Truck)) return false;
+            Truck truck = (Truck) o;
+            return wheels == truck.wheels && java.util.Objects.equals(type, truck.type);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(type, wheels); }
+
+        @Override
+        public String toString() { return "Truck[type=" + type + ", wheels=" + wheels + "]"; }
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS)
@@ -136,50 +211,215 @@ class PolymorphicOutputParserTest {
         String title;
     }
 
-    @Description("A small caged rodent kept as a pet")
-    record Hamster(String name, double weightGrams) implements Pet {
+    static final class Hamster implements Pet {
+        private final String name;
+        private final double weightGrams;
+
+        public Hamster(String name, double weightGrams) {
+            this.name = name;
+            this.weightGrams = weightGrams;
+        }
+
+        public String name() { return name; }
+        public double weightGrams() { return weightGrams; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Hamster)) return false;
+            Hamster hamster = (Hamster) o;
+            return Double.compare(hamster.weightGrams, weightGrams) == 0 && java.util.Objects.equals(name, hamster.name);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, weightGrams); }
+
+        @Override
+        public String toString() { return "Hamster[name=" + name + ", weightGrams=" + weightGrams + "]"; }
     }
 
     @Description("A talking bird that can mimic human speech")
-    record Parrot(String name, int vocabulary) implements Pet {
+    static final class Parrot implements Pet {
+        private final String name;
+        private final int vocabulary;
+
+        public Parrot(String name, int vocabulary) {
+            this.name = name;
+            this.vocabulary = vocabulary;
+        }
+
+        public String name() { return name; }
+        public int vocabulary() { return vocabulary; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Parrot)) return false;
+            Parrot parrot = (Parrot) o;
+            return vocabulary == parrot.vocabulary && java.util.Objects.equals(name, parrot.name);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, vocabulary); }
+
+        @Override
+        public String toString() { return "Parrot[name=" + name + ", vocabulary=" + vocabulary + "]"; }
     }
 
-    record Owner(String name, Animal pet) {
+    static final class Owner {
+        private final String name;
+        private final Animal pet;
+
+        public Owner(String name, Animal pet) {
+            this.name = name;
+            this.pet = pet;
+        }
+
+        public String name() { return name; }
+        public Animal pet() { return pet; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Owner)) return false;
+            Owner owner = (Owner) o;
+            return java.util.Objects.equals(name, owner.name) && java.util.Objects.equals(pet, owner.pet);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, pet); }
+
+        @Override
+        public String toString() { return "Owner[name=" + name + ", pet=" + pet + "]"; }
     }
 
-    sealed interface Bird permits Eagle, Sparrow {
+    interface Bird {
     }
 
     @JsonTypeName("eagle")
-    record Eagle(double wingspanMeters) implements Bird {
+    static final class Eagle implements Bird {
+        private final double wingspanMeters;
+
+        public Eagle(double wingspanMeters) { this.wingspanMeters = wingspanMeters; }
+
+        public double wingspanMeters() { return wingspanMeters; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Eagle)) return false;
+            Eagle eagle = (Eagle) o;
+            return Double.compare(eagle.wingspanMeters, wingspanMeters) == 0;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(wingspanMeters); }
+
+        @Override
+        public String toString() { return "Eagle[wingspanMeters=" + wingspanMeters + "]"; }
     }
 
     @JsonTypeName("sparrow")
-    record Sparrow(boolean migratory) implements Bird {
+    static final class Sparrow implements Bird {
+        private final boolean migratory;
+
+        public Sparrow(boolean migratory) { this.migratory = migratory; }
+
+        public boolean migratory() { return migratory; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Sparrow)) return false;
+            Sparrow sparrow = (Sparrow) o;
+            return migratory == sparrow.migratory;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(migratory); }
+
+        @Override
+        public String toString() { return "Sparrow[migratory=" + migratory + "]"; }
     }
 
-    sealed interface Tree permits Oak, Pine {
+    interface Tree {
     }
 
     // No annotation — should fall back to simpleName "Oak"
-    record Oak(int rings) implements Tree {
+    static final class Oak implements Tree {
+        private final int rings;
+
+        public Oak(int rings) { this.rings = rings; }
+
+        public int rings() { return rings; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Oak)) return false;
+            Oak oak = (Oak) o;
+            return rings == oak.rings;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(rings); }
+
+        @Override
+        public String toString() { return "Oak[rings=" + rings + "]"; }
     }
 
     @JsonTypeName("pine")
-    record Pine(int needles) implements Tree {
+    static final class Pine implements Tree {
+        private final int needles;
+
+        public Pine(int needles) { this.needles = needles; }
+
+        public int needles() { return needles; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Pine)) return false;
+            Pine pine = (Pine) o;
+            return needles == pine.needles;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(needles); }
+
+        @Override
+        public String toString() { return "Pine[needles=" + needles + "]"; }
     }
 
     @JsonSubTypes(@JsonSubTypes.Type(value = ElectricCar.class, name = "tesla"))
-    sealed interface Car permits ElectricCar {
+    interface Car {
     }
 
     // @JsonSubTypes.Type(name="tesla") on the base should win over @JsonTypeName here.
     @JsonTypeName("losing-name")
-    record ElectricCar(int range) implements Car {
+    static final class ElectricCar implements Car {
+        private final int range;
+
+        public ElectricCar(int range) { this.range = range; }
+
+        public int range() { return range; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ElectricCar)) return false;
+            ElectricCar that = (ElectricCar) o;
+            return range == that.range;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(range); }
+
+        @Override
+        public String toString() { return "ElectricCar[range=" + range + "]"; }
     }
 
-    sealed static class Plant permits Rose, Cactus {
-    }
+    abstract static class Plant {
 
     static final class Rose extends Plant {
         String color;
@@ -187,6 +427,7 @@ class PolymorphicOutputParserTest {
 
     static final class Cactus extends Plant {
         int height;
+    }
     }
 
     @JsonSubTypes({
@@ -219,28 +460,136 @@ class PolymorphicOutputParserTest {
         String url;
     }
 
-    sealed interface ExpressionNode permits Literal, BinaryOp {
+    interface ExpressionNode {
     }
 
-    record Literal(int value) implements ExpressionNode {
+    static final class Literal implements ExpressionNode {
+        private final int value;
+
+        public Literal(int value) { this.value = value; }
+
+        public int value() { return value; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Literal)) return false;
+            Literal literal = (Literal) o;
+            return value == literal.value;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(value); }
+
+        @Override
+        public String toString() { return "Literal[value=" + value + "]"; }
     }
 
-    record BinaryOp(String operator, ExpressionNode left, ExpressionNode right) implements ExpressionNode {
+    static final class BinaryOp implements ExpressionNode {
+        private final String operator;
+        private final ExpressionNode left;
+        private final ExpressionNode right;
+
+        public BinaryOp(String operator, ExpressionNode left, ExpressionNode right) {
+            this.operator = operator;
+            this.left = left;
+            this.right = right;
+        }
+
+        public String operator() { return operator; }
+        public ExpressionNode left() { return left; }
+        public ExpressionNode right() { return right; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof BinaryOp)) return false;
+            BinaryOp binaryOp = (BinaryOp) o;
+            return java.util.Objects.equals(operator, binaryOp.operator)
+                    && java.util.Objects.equals(left, binaryOp.left)
+                    && java.util.Objects.equals(right, binaryOp.right);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(operator, left, right); }
+
+        @Override
+        public String toString() { return "BinaryOp[operator=" + operator + ", left=" + left + ", right=" + right + "]"; }
     }
 
     // Multi-level sealed hierarchy: Transport permits LandTransport, Plane;
     // LandTransport itself is sealed and permits Bus, Train.
-    sealed interface Transport permits LandTransport, Plane {
+    interface Transport {
     }
 
-    sealed interface LandTransport extends Transport permits Bus, Train {
+    interface LandTransport extends Transport {
     }
 
-    record Bus(int seats) implements LandTransport {}
+    static final class Bus implements LandTransport {
+        private final int seats;
 
-    record Train(int cars) implements LandTransport {}
+        public Bus(int seats) { this.seats = seats; }
 
-    record Plane(int wingspan) implements Transport {}
+        public int seats() { return seats; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Bus)) return false;
+            Bus bus = (Bus) o;
+            return seats == bus.seats;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(seats); }
+
+        @Override
+        public String toString() { return "Bus[seats=" + seats + "]"; }
+    }
+
+    static final class Train implements LandTransport {
+        private final int cars;
+
+        public Train(int cars) { this.cars = cars; }
+
+        public int cars() { return cars; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Train)) return false;
+            Train train = (Train) o;
+            return cars == train.cars;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(cars); }
+
+        @Override
+        public String toString() { return "Train[cars=" + cars + "]"; }
+    }
+
+    static final class Plane implements Transport {
+        private final int wingspan;
+
+        public Plane(int wingspan) { this.wingspan = wingspan; }
+
+        public int wingspan() { return wingspan; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Plane)) return false;
+            Plane plane = (Plane) o;
+            return wingspan == plane.wingspan;
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(wingspan); }
+
+        @Override
+        public String toString() { return "Plane[wingspan=" + wingspan + "]"; }
+    }
 
     @Test
     void multi_level_sealed_hierarchy_is_flattened_to_concrete_subtypes() {
@@ -281,11 +630,11 @@ class PolymorphicOutputParserTest {
                 .rootElement(JsonObjectSchema.builder()
                         .addProperty("value", selfRef)
                         .required("value")
-                        .definitions(Map.of(
+                        .definitions(Collections.singletonMap(
                                 reference,
                                 JsonAnyOfSchema.builder()
                                         .description("ExpressionNode")
-                                        .anyOf(List.of(
+                                        .anyOf(Arrays.asList(
                                                 JsonObjectSchema.builder()
                                                         .description("Literal")
                                                         .addProperty(
@@ -319,12 +668,12 @@ class PolymorphicOutputParserTest {
     void recursive_polymorphic_parses_correctly() {
 
         // (1 + 2) * 3
-        ExpressionNode parsed = new PojoOutputParser<>(ExpressionNode.class).parse("""
-                {"value":{"type":"BinaryOp","operator":"*",
-                  "left": {"type":"BinaryOp","operator":"+",
-                            "left":{"type":"Literal","value":1},
-                            "right":{"type":"Literal","value":2}},
-                  "right":{"type":"Literal","value":3}}}""");
+        ExpressionNode parsed = new PojoOutputParser<>(ExpressionNode.class).parse(
+                "{\"value\":{\"type\":\"BinaryOp\",\"operator\":\"*\",\n"
+                + "  \"left\": {\"type\":\"BinaryOp\",\"operator\":\"+\",\n"
+                + "            \"left\":{\"type\":\"Literal\",\"value\":1},\n"
+                + "            \"right\":{\"type\":\"Literal\",\"value\":2}},\n"
+                + "  \"right\":{\"type\":\"Literal\",\"value\":3}}}");
 
         assertThat(parsed).isInstanceOf(BinaryOp.class);
         BinaryOp outer = (BinaryOp) parsed;
@@ -336,30 +685,149 @@ class PolymorphicOutputParserTest {
         assertThat(inner.right()).isEqualTo(new Literal(2));
     }
 
-    record Container(Animal pet, Tree tree) {
+    static final class Container {
+        private final Animal pet;
+        private final Tree tree;
+
+        public Container(Animal pet, Tree tree) {
+            this.pet = pet;
+            this.tree = tree;
+        }
+
+        public Animal pet() { return pet; }
+        public Tree tree() { return tree; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Container)) return false;
+            Container container = (Container) o;
+            return java.util.Objects.equals(pet, container.pet) && java.util.Objects.equals(tree, container.tree);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(pet, tree); }
+
+        @Override
+        public String toString() { return "Container[pet=" + pet + ", tree=" + tree + "]"; }
     }
 
-    @Test
-    void pojo_with_two_distinct_polymorphic_fields() {
-
-        JsonObjectSchema root = (JsonObjectSchema)
-                new PojoOutputParser<>(Container.class).jsonSchema().get().rootElement();
-
-        assertThat(root.properties().get("pet")).isInstanceOf(JsonAnyOfSchema.class);
-        assertThat(root.properties().get("tree")).isInstanceOf(JsonAnyOfSchema.class);
-
-        Container c = new PojoOutputParser<>(Container.class).parse("""
-                {"pet":{"type":"Cat","name":"Whiskers","indoor":true},
-                 "tree":{"type":"pine","needles":50000}}""");
-
-        assertThat(c.pet()).isInstanceOf(Cat.class);
-        assertThat(c.tree()).isInstanceOf(Pine.class);
+    interface SingleVariant {
     }
 
-    sealed interface SingleVariant permits OnlyOne {
+    static final class OnlyOne implements SingleVariant {
+        private final String value;
+
+        public OnlyOne(String value) { this.value = value; }
+
+        public String value() { return value; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof OnlyOne)) return false;
+            OnlyOne onlyOne = (OnlyOne) o;
+            return java.util.Objects.equals(value, onlyOne.value);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(value); }
+
+        @Override
+        public String toString() { return "OnlyOne[value=" + value + "]"; }
     }
 
-    record OnlyOne(String value) implements SingleVariant {
+    interface Action {
+    }
+
+    static final class Ping implements Action {
+        public Ping() {}
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            return o instanceof Ping;
+        }
+
+        @Override
+        public int hashCode() { return 0; }
+
+        @Override
+        public String toString() { return "Ping[]"; }
+    }
+
+    static final class Print implements Action {
+        private final String message;
+
+        public Print(String message) { this.message = message; }
+
+        public String message() { return message; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Print)) return false;
+            Print print = (Print) o;
+            return java.util.Objects.equals(message, print.message);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(message); }
+
+        @Override
+        public String toString() { return "Print[message=" + message + "]"; }
+    }
+
+    static final class OwnerWithDescribedPet {
+        private final String name;
+        private final Animal pet;
+
+        public OwnerWithDescribedPet(String name, Animal pet) {
+            this.name = name;
+            this.pet = pet;
+        }
+
+        public String name() { return name; }
+        public Animal pet() { return pet; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof OwnerWithDescribedPet)) return false;
+            OwnerWithDescribedPet that = (OwnerWithDescribedPet) o;
+            return java.util.Objects.equals(name, that.name) && java.util.Objects.equals(pet, that.pet);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, pet); }
+
+        @Override
+        public String toString() { return "OwnerWithDescribedPet[name=" + name + ", pet=" + pet + "]"; }
+    }
+
+    interface SingleVariant {
+    }
+
+    static final class OnlyOne implements SingleVariant {
+        private final String value;
+
+        public OnlyOne(String value) { this.value = value; }
+
+        public String value() { return value; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof OnlyOne)) return false;
+            OnlyOne onlyOne = (OnlyOne) o;
+            return java.util.Objects.equals(value, onlyOne.value);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(value); }
+
+        @Override
+        public String toString() { return "OnlyOne[value=" + value + "]"; }
     }
 
     @Test
@@ -378,18 +846,72 @@ class PolymorphicOutputParserTest {
         assertThat(((OnlyOne) parsed).value()).isEqualTo("hi");
     }
 
-    sealed interface Action permits Ping, Print {
+    interface Action {
     }
 
-    record Ping() implements Action {
+    static final class Ping implements Action {
+        public Ping() {}
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            return o instanceof Ping;
+        }
+
+        @Override
+        public int hashCode() { return 0; }
+
+        @Override
+        public String toString() { return "Ping[]"; }
     }
 
-    record Print(String message) implements Action {
+    static final class Print implements Action {
+        private final String message;
+
+        public Print(String message) { this.message = message; }
+
+        public String message() { return message; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Print)) return false;
+            Print print = (Print) o;
+            return java.util.Objects.equals(message, print.message);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(message); }
+
+        @Override
+        public String toString() { return "Print[message=" + message + "]"; }
     }
 
-    record OwnerWithDescribedPet(
-            String name,
-            @Description("The owner's pet, must be either a dog or a cat") Animal pet) {
+    static final class OwnerWithDescribedPet {
+        private final String name;
+        private final Animal pet;
+
+        public OwnerWithDescribedPet(String name, Animal pet) {
+            this.name = name;
+            this.pet = pet;
+        }
+
+        public String name() { return name; }
+        public Animal pet() { return pet; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof OwnerWithDescribedPet)) return false;
+            OwnerWithDescribedPet that = (OwnerWithDescribedPet) o;
+            return java.util.Objects.equals(name, that.name) && java.util.Objects.equals(pet, that.pet);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, pet); }
+
+        @Override
+        public String toString() { return "OwnerWithDescribedPet[name=" + name + ", pet=" + pet + "]"; }
     }
 
     @Test
@@ -402,9 +924,85 @@ class PolymorphicOutputParserTest {
         assertThat(petAnyOf.description()).isEqualTo("The owner's pet, must be either a dog or a cat");
     }
 
-    record OwnerWithDescribedPetAlsoOnBase(
-            String name,
-            @Description("Field-level description wins") Pet pet) {
+    static final class OwnerWithDescribedPetAlsoOnBase {
+        private final String name;
+        private final Pet pet;
+
+        public OwnerWithDescribedPetAlsoOnBase(String name, Pet pet) {
+            this.name = name;
+            this.pet = pet;
+        }
+
+        public String name() { return name; }
+        public Pet pet() { return pet; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof OwnerWithDescribedPetAlsoOnBase)) return false;
+            OwnerWithDescribedPetAlsoOnBase that = (OwnerWithDescribedPetAlsoOnBase) o;
+            return java.util.Objects.equals(name, that.name) && java.util.Objects.equals(pet, that.pet);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(name, pet); }
+
+        @Override
+        public String toString() { return "OwnerWithDescribedPetAlsoOnBase[name=" + name + ", pet=" + pet + "]"; }
+    }
+
+    static final class Adoption {
+        private final Owner owner;
+        private final List<Animal> petsAdopted;
+
+        public Adoption(Owner owner, List<Animal> petsAdopted) {
+            this.owner = owner;
+            this.petsAdopted = petsAdopted;
+        }
+
+        public Owner owner() { return owner; }
+        public List<Animal> petsAdopted() { return petsAdopted; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Adoption)) return false;
+            Adoption adoption = (Adoption) o;
+            return java.util.Objects.equals(owner, adoption.owner) && java.util.Objects.equals(petsAdopted, adoption.petsAdopted);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(owner, petsAdopted); }
+
+        @Override
+        public String toString() { return "Adoption[owner=" + owner + ", petsAdopted=" + petsAdopted + "]"; }
+    }
+
+    static final class Reservation {
+        private final String customer;
+        private final Shape preferredShape;
+
+        public Reservation(String customer, Shape preferredShape) {
+            this.customer = customer;
+            this.preferredShape = preferredShape;
+        }
+
+        public String customer() { return customer; }
+        public Shape preferredShape() { return preferredShape; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Reservation)) return false;
+            Reservation that = (Reservation) o;
+            return java.util.Objects.equals(customer, that.customer) && java.util.Objects.equals(preferredShape, that.preferredShape);
+        }
+
+        @Override
+        public int hashCode() { return java.util.Objects.hash(customer, preferredShape); }
+
+        @Override
+        public String toString() { return "Reservation[customer=" + customer + ", preferredShape=" + preferredShape + "]"; }
     }
 
     @Test
@@ -564,9 +1162,6 @@ class PolymorphicOutputParserTest {
         assertThat(discriminator.enumValues()).containsExactly("tesla");
     }
 
-    record Adoption(Owner owner, List<Animal> petsAdopted) {
-    }
-
     @Test
     void nested_sealed_field_produces_anyOf_in_outer_schema() {
 
@@ -635,9 +1230,6 @@ class PolymorphicOutputParserTest {
         assertThat(adoption.petsAdopted()).hasSize(2);
         assertThat(adoption.petsAdopted().get(0)).isInstanceOf(Dog.class);
         assertThat(adoption.petsAdopted().get(1)).isInstanceOf(Cat.class);
-    }
-
-    record Reservation(String customer, Shape preferredShape) {
     }
 
     @Test

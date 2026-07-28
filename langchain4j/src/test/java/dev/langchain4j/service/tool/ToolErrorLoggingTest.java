@@ -32,7 +32,7 @@ class ToolErrorLoggingTest {
             InvocationContext.builder().build();
 
     private static final ToolArgumentsErrorHandler DEFAULT_ARGS_HANDLER = (error, ctx) -> {
-        if (error instanceof RuntimeException re) throw re;
+        if (error instanceof RuntimeException) { RuntimeException re = (RuntimeException) error; throw re; }
         throw new RuntimeException(error);
     };
 

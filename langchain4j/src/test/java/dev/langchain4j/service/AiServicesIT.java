@@ -48,7 +48,9 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -390,9 +392,64 @@ public class AiServicesIT {
                 .chat(chatRequest("Return a JSON map with the age of each person in the following text: " + text));
     }
 
-    record Address(Integer streetNumber, String street, String city) {}
+    static class Address {
+        private final Integer streetNumber;
+        private final String street;
+        private final String city;
 
-    static record Person(String firstName, String lastName, LocalDate birthDate, Address address) {}
+        public Address(Integer streetNumber, String street, String city) {
+            this.streetNumber = streetNumber;
+            this.street = street;
+            this.city = city;
+        }
+
+        public Integer getStreetNumber() { return streetNumber; }
+        public String getStreet() { return street; }
+        public String getCity() { return city; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Address)) return false;
+            Address a = (Address) o;
+            return Objects.equals(streetNumber, a.streetNumber) && Objects.equals(street, a.street) && Objects.equals(city, a.city);
+        }
+        @Override
+        public int hashCode() { return Objects.hash(streetNumber, street, city); }
+        @Override
+        public String toString() { return "Address[streetNumber=" + streetNumber + ", street=" + street + ", city=" + city + "]"; }
+    }
+
+    static class Person {
+        private final String firstName;
+        private final String lastName;
+        private final LocalDate birthDate;
+        private final Address address;
+
+        public Person(String firstName, String lastName, LocalDate birthDate, Address address) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.birthDate = birthDate;
+            this.address = address;
+        }
+
+        public String getFirstName() { return firstName; }
+        public String getLastName() { return lastName; }
+        public LocalDate getBirthDate() { return birthDate; }
+        public Address getAddress() { return address; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Person)) return false;
+            Person p = (Person) o;
+            return Objects.equals(firstName, p.firstName) && Objects.equals(lastName, p.lastName) && Objects.equals(birthDate, p.birthDate) && Objects.equals(address, p.address);
+        }
+        @Override
+        public int hashCode() { return Objects.hash(firstName, lastName, birthDate, address); }
+        @Override
+        public String toString() { return "Person[firstName=" + firstName + ", lastName=" + lastName + ", birthDate=" + birthDate + ", address=" + address + "]"; }
+    }
 
     interface PersonExtractor {
 
@@ -414,12 +471,12 @@ public class AiServicesIT {
 
         Person person = personExtractor.extractPersonFrom(text);
 
-        assertThat(person.firstName).isEqualTo("John");
-        assertThat(person.lastName).isEqualTo("Doe");
-        assertThat(person.birthDate).isEqualTo(LocalDate.of(1968, JULY, 4));
-        assertThat(person.address.streetNumber).isEqualTo(345);
-        assertThat(person.address.street).isEqualTo("Whispering Pines Avenue");
-        assertThat(person.address.city).isEqualTo("Springfield");
+        assertThat(person.getFirstName()).isEqualTo("John");
+        assertThat(person.getLastName()).isEqualTo("Doe");
+        assertThat(person.getBirthDate()).isEqualTo(LocalDate.of(1968, JULY, 4));
+        assertThat(person.getAddress().getStreetNumber()).isEqualTo(345);
+        assertThat(person.getAddress().getStreet()).isEqualTo("Whispering Pines Avenue");
+        assertThat(person.getAddress().getCity()).isEqualTo("Springfield");
 
         verify(chatModel)
                 .chat(chatRequest("Extract information about a person from " + text + "\n"
@@ -460,12 +517,12 @@ public class AiServicesIT {
 
         Person person = personExtractor.extractPersonFrom(text);
 
-        assertThat(person.firstName).isEqualTo("John");
-        assertThat(person.lastName).isEqualTo("Doe");
-        assertThat(person.birthDate).isEqualTo(LocalDate.of(1968, JULY, 4));
-        assertThat(person.address.streetNumber).isEqualTo(345);
-        assertThat(person.address.street).isEqualTo("Whispering Pines Avenue");
-        assertThat(person.address.city).isEqualTo("Springfield");
+        assertThat(person.getFirstName()).isEqualTo("John");
+        assertThat(person.getLastName()).isEqualTo("Doe");
+        assertThat(person.getBirthDate()).isEqualTo(LocalDate.of(1968, JULY, 4));
+        assertThat(person.getAddress().getStreetNumber()).isEqualTo(345);
+        assertThat(person.getAddress().getStreet()).isEqualTo("Whispering Pines Avenue");
+        assertThat(person.getAddress().getCity()).isEqualTo("Springfield");
 
         verify(chatModel)
                 .chat(chatRequest("Extract information about a person from " + text + "\n"
@@ -481,11 +538,36 @@ public class AiServicesIT {
                         + "}"));
     }
 
-    static record Recipe(
-            String title,
-            String description,
-            @Description("each step should be described in 4 words, steps should rhyme") String[] steps,
-            Integer preparationTimeMinutes) {}
+    static class Recipe {
+        private final String title;
+        private final String description;
+        private final String[] steps;
+        private final Integer preparationTimeMinutes;
+
+        public Recipe(String title, String description, String[] steps, Integer preparationTimeMinutes) {
+            this.title = title;
+            this.description = description;
+            this.steps = steps;
+            this.preparationTimeMinutes = preparationTimeMinutes;
+        }
+
+        public String getTitle() { return title; }
+        public String getDescription() { return description; }
+        public String[] getSteps() { return steps; }
+        public Integer getPreparationTimeMinutes() { return preparationTimeMinutes; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Recipe)) return false;
+            Recipe r = (Recipe) o;
+            return Objects.equals(title, r.title) && Objects.equals(description, r.description) && java.util.Arrays.equals(steps, r.steps) && Objects.equals(preparationTimeMinutes, r.preparationTimeMinutes);
+        }
+        @Override
+        public int hashCode() { return Objects.hash(title, description, java.util.Arrays.hashCode(steps), preparationTimeMinutes); }
+        @Override
+        public String toString() { return "Recipe[title=" + title + ", description=" + description + ", steps=" + java.util.Arrays.toString(steps) + ", preparationTimeMinutes=" + preparationTimeMinutes + "]"; }
+    }
 
     interface Chef {
 
@@ -517,10 +599,10 @@ public class AiServicesIT {
 
         Recipe recipe = chef.createRecipeFrom("cucumber", "tomato", "feta", "onion", "olives");
 
-        assertThat(recipe.title).isNotBlank();
-        assertThat(recipe.description).isNotBlank();
-        assertThat(recipe.steps).isNotEmpty();
-        assertThat(recipe.preparationTimeMinutes).isPositive();
+        assertThat(recipe.getTitle()).isNotBlank();
+        assertThat(recipe.getDescription()).isNotBlank();
+        assertThat(recipe.getSteps()).isNotEmpty();
+        assertThat(recipe.getPreparationTimeMinutes()).isPositive();
 
         verify(chatModel)
                 .chat(chatRequest("Create recipe using only [cucumber, tomato, feta, onion, olives]\n"
@@ -539,10 +621,10 @@ public class AiServicesIT {
 
         Recipe recipe = chef.createRecipeFromUsingResource("cucumber", "tomato", "feta", "onion", "olives");
 
-        assertThat(recipe.title).isNotBlank();
-        assertThat(recipe.description).isNotBlank();
-        assertThat(recipe.steps).isNotEmpty();
-        assertThat(recipe.preparationTimeMinutes).isPositive();
+        assertThat(recipe.getTitle()).isNotBlank();
+        assertThat(recipe.getDescription()).isNotBlank();
+        assertThat(recipe.getSteps()).isNotEmpty();
+        assertThat(recipe.getPreparationTimeMinutes()).isPositive();
 
         verify(chatModel)
                 .chat(chatRequest("Create recipe using only [cucumber, tomato, feta, onion, olives]\n"
@@ -561,10 +643,10 @@ public class AiServicesIT {
 
         Recipe recipe = chef.createRecipeFromUsingResourceInRoot("cucumber", "tomato", "feta", "onion", "olives");
 
-        assertThat(recipe.title).isNotBlank();
-        assertThat(recipe.description).isNotBlank();
-        assertThat(recipe.steps).isNotEmpty();
-        assertThat(recipe.preparationTimeMinutes).isPositive();
+        assertThat(recipe.getTitle()).isNotBlank();
+        assertThat(recipe.getDescription()).isNotBlank();
+        assertThat(recipe.getSteps()).isNotEmpty();
+        assertThat(recipe.getPreparationTimeMinutes()).isPositive();
 
         verify(chatModel)
                 .chat(chatRequest("Create recipe using only [cucumber, tomato, feta, onion, olives]\n"
@@ -584,10 +666,10 @@ public class AiServicesIT {
         Recipe recipe =
                 chef.createRecipeFromUsingResourceInSubdirectory("cucumber", "tomato", "feta", "onion", "olives");
 
-        assertThat(recipe.title).isNotBlank();
-        assertThat(recipe.description).isNotBlank();
-        assertThat(recipe.steps).isNotEmpty();
-        assertThat(recipe.preparationTimeMinutes).isPositive();
+        assertThat(recipe.getTitle()).isNotBlank();
+        assertThat(recipe.getDescription()).isNotBlank();
+        assertThat(recipe.getSteps()).isNotEmpty();
+        assertThat(recipe.getPreparationTimeMinutes()).isPositive();
 
         verify(chatModel)
                 .chat(chatRequest("Create recipe using only [cucumber, tomato, feta, onion, olives]\n"
@@ -641,7 +723,30 @@ public class AiServicesIT {
     }
 
     @StructuredPrompt("Create a recipe of a {{dish}} that can be prepared using only {{ingredients}}")
-    record CreateRecipePrompt(String dish, List<String> ingredients) {}
+    static class CreateRecipePrompt {
+        private final String dish;
+        private final List<String> ingredients;
+
+        public CreateRecipePrompt(String dish, List<String> ingredients) {
+            this.dish = dish;
+            this.ingredients = ingredients;
+        }
+
+        public String getDish() { return dish; }
+        public List<String> getIngredients() { return ingredients; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CreateRecipePrompt)) return false;
+            CreateRecipePrompt c = (CreateRecipePrompt) o;
+            return Objects.equals(dish, c.dish) && Objects.equals(ingredients, c.ingredients);
+        }
+        @Override
+        public int hashCode() { return Objects.hash(dish, ingredients); }
+        @Override
+        public String toString() { return "CreateRecipePrompt[dish=" + dish + ", ingredients=" + ingredients + "]"; }
+    }
 
     @Test
     void create_recipe_using_structured_prompt() {
@@ -649,14 +754,14 @@ public class AiServicesIT {
         Chef chef = AiServices.create(Chef.class, chatModel);
 
         CreateRecipePrompt prompt =
-                new CreateRecipePrompt("salad", List.of("cucumber", "tomato", "feta", "onion", "olives"));
+                new CreateRecipePrompt("salad", Arrays.asList("cucumber", "tomato", "feta", "onion", "olives"));
 
         Recipe recipe = chef.createRecipeFrom(prompt);
 
-        assertThat(recipe.title).isNotBlank();
-        assertThat(recipe.description).isNotBlank();
-        assertThat(recipe.steps).isNotEmpty();
-        assertThat(recipe.preparationTimeMinutes).isPositive();
+        assertThat(recipe.getTitle()).isNotBlank();
+        assertThat(recipe.getDescription()).isNotBlank();
+        assertThat(recipe.getSteps()).isNotEmpty();
+        assertThat(recipe.getPreparationTimeMinutes()).isPositive();
 
         verify(chatModel)
                 .chat(chatRequest(
@@ -675,14 +780,14 @@ public class AiServicesIT {
         Chef chef = AiServices.create(Chef.class, chatModel);
 
         CreateRecipePrompt prompt =
-                new CreateRecipePrompt("salad", List.of("cucumber", "tomato", "feta", "onion", "olives"));
+                new CreateRecipePrompt("salad", Arrays.asList("cucumber", "tomato", "feta", "onion", "olives"));
 
         Recipe recipe = chef.createRecipeFrom(prompt, "funny");
 
-        assertThat(recipe.title).isNotBlank();
-        assertThat(recipe.description).isNotBlank();
-        assertThat(recipe.steps).isNotEmpty();
-        assertThat(recipe.preparationTimeMinutes).isPositive();
+        assertThat(recipe.getTitle()).isNotBlank();
+        assertThat(recipe.getDescription()).isNotBlank();
+        assertThat(recipe.getSteps()).isNotEmpty();
+        assertThat(recipe.getPreparationTimeMinutes()).isPositive();
 
         verify(chatModel)
                 .chat(ChatRequest.builder()
@@ -705,14 +810,14 @@ public class AiServicesIT {
         Chef chef = AiServices.create(Chef.class, chatModel);
 
         CreateRecipePrompt prompt =
-                new CreateRecipePrompt("salad", List.of("cucumber", "tomato", "feta", "onion", "olives"));
+                new CreateRecipePrompt("salad", Arrays.asList("cucumber", "tomato", "feta", "onion", "olives"));
 
         Recipe recipe = chef.createRecipeFromUsingResource(prompt, "funny");
 
-        assertThat(recipe.title).isNotBlank();
-        assertThat(recipe.description).isNotBlank();
-        assertThat(recipe.steps).isNotEmpty();
-        assertThat(recipe.preparationTimeMinutes).isPositive();
+        assertThat(recipe.getTitle()).isNotBlank();
+        assertThat(recipe.getDescription()).isNotBlank();
+        assertThat(recipe.getSteps()).isNotEmpty();
+        assertThat(recipe.getPreparationTimeMinutes()).isPositive();
 
         verify(chatModel)
                 .chat(ChatRequest.builder()
@@ -828,15 +933,15 @@ public class AiServicesIT {
                 .isExactlyInstanceOf(ModerationException.class)
                 .hasMessage("Text \"" + message + "\" violates content policy")
                 .satisfies(e -> {
-                    final var moderationException = (ModerationException) e;
-                    final var moderation = moderationException.moderation();
+                    final ModerationException moderationException = (ModerationException) e;
+                    final dev.langchain4j.model.moderation.Moderation moderation = moderationException.moderation();
                     assertThat(moderation.flagged()).isTrue();
                     assertThat(moderation.flaggedText()).contains("I WILL KILL YOU!!!");
                 });
 
         verify(chatModel).chat(chatRequest(message));
 
-        verify(moderationModel).doModerate(argThat(req -> req.texts().equals(List.of(message))));
+        verify(moderationModel).doModerate(argThat(req -> req.texts().equals(singletonList(message))));
         ignoreInteractions(moderationModel).moderate(any(List.class));
         ignoreInteractions(moderationModel).moderate(any(ModerationRequest.class));
         ignoreInteractions(moderationModel).modelName();
@@ -860,7 +965,7 @@ public class AiServicesIT {
 
         verify(chatModel).chat(chatRequest(message));
 
-        verify(moderationModel).doModerate(argThat(req -> req.texts().equals(List.of(message))));
+        verify(moderationModel).doModerate(argThat(req -> req.texts().equals(singletonList(message))));
         ignoreInteractions(moderationModel).moderate(any(List.class));
         ignoreInteractions(moderationModel).moderate(any(ModerationRequest.class));
         ignoreInteractions(moderationModel).modelName();
@@ -990,7 +1095,7 @@ public class AiServicesIT {
                                 .map(message -> message == userMessage ?
                                         dev.langchain4j.data.message.UserMessage.from(transformedMessage) :
                                         message)
-                                .toList();
+                                .collect(Collectors.toList());
                         return ChatRequest.builder()
                                 .messages(messages)
                                 .parameters(chatRequest.parameters())

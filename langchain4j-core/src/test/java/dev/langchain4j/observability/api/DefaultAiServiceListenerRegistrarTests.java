@@ -199,10 +199,10 @@ class DefaultAiServiceListenerRegistrarTests {
 
     @Test
     void hasCorrectListeners() {
-        DefaultAiServiceListenerRegistrar registrar = (DefaultAiServiceListenerRegistrar) assertThat(REGISTRAR)
+        assertThat(REGISTRAR)
                 .isNotNull()
-                .isExactlyInstanceOf(DefaultAiServiceListenerRegistrar.class)
-                .actual();
+                .isExactlyInstanceOf(DefaultAiServiceListenerRegistrar.class);
+        DefaultAiServiceListenerRegistrar registrar = (DefaultAiServiceListenerRegistrar) REGISTRAR;
 
         // Assert our starting point that nothing has happened
         assertListenersNotExecuted();

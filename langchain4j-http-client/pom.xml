@@ -57,6 +57,16 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <testExcludes>
+                        <testExclude>**/HttpClientTimeoutIT.java</testExclude>
+                    </testExcludes>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 

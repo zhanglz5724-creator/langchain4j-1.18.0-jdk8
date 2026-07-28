@@ -7,6 +7,7 @@ import dev.langchain4j.model.moderation.Moderation;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.model.moderation.ModerationRequest;
 import dev.langchain4j.model.moderation.ModerationResponse;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -65,7 +66,7 @@ class OpenAiModerationModelIT {
 
         // request overrides with a valid model name
         ModerationRequest request = ModerationRequest.builder()
-                .texts(List.of("I want to hug them."))
+                .texts(Arrays.asList("I want to hug them."))
                 .modelName("omni-moderation-latest")
                 .build();
 

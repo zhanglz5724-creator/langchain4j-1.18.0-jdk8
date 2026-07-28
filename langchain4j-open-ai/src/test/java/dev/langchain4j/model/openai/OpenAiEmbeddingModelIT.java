@@ -10,6 +10,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -86,7 +87,7 @@ class OpenAiEmbeddingModelIT {
 
         List<TextSegment> segments = Stream.generate(() -> TextSegment.from("hello"))
                 .limit(totalSegmentsToEmbed)
-                .toList();
+                .collect(Collectors.toList());
 
         // when
         Response<List<Embedding>> response = model.embedAll(segments);

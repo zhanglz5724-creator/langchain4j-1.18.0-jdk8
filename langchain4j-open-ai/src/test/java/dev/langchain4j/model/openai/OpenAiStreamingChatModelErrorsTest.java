@@ -55,7 +55,7 @@ class OpenAiStreamingChatModelErrorsTest {
     void should_handle_error_responses(int httpStatusCode, Class<LangChain4jException> exception) throws Exception {
 
         // given
-        final var question = "Return error: " + httpStatusCode;
+        final String question = "Return error: " + httpStatusCode;
         MOCK.completion(req -> req.userMessageContains(question)).respondsError(res -> {
             res.setHttpStatus(HttpStatusCode.Companion.fromValue(httpStatusCode));
             res.setBody("");
@@ -91,7 +91,7 @@ class OpenAiStreamingChatModelErrorsTest {
                 .logResponses(true)
                 .build();
 
-        final var question = "Simulate timeout";
+        final String question = "Simulate timeout";
         MOCK.completion(req -> req.userMessageContains(question)).respondsError(res -> {
             res.delayMillis(TIMEOUT.multipliedBy(2).toMillis());
             res.setHttpStatus(HttpStatusCode.Companion.getNoContent());
@@ -110,7 +110,13 @@ class OpenAiStreamingChatModelErrorsTest {
         assertThat(error).isExactlyInstanceOf(dev.langchain4j.exception.TimeoutException.class);
     }
 
-    private record ErrorHandler(CompletableFuture<Throwable> futureError) implements StreamingChatResponseHandler {
+    private static final class ErrorHandler implements StreamingChatResponseHandler {
+
+        private final CompletableFuture<Throwable> futureError;
+
+        private ErrorHandler(CompletableFuture<Throwable> futureError) {
+            this.futureError = futureError;
+        }
 
         @Override
         public void onPartialResponse(String partialResponse) {

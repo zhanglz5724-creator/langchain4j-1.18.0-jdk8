@@ -557,32 +557,19 @@ class AiServicesWithJsonSchemaWithDescriptionsIT {
     @Test
     void should_extract_pojo_with_set_of_pojos() {
 
-        @Description("a pet")
-        record Pet(@Description("a name of a pet") String name) {
-        }
-
-        @Description("a person")
-        record Person(@Description("a name") String name, @Description("pets of a person") Set<Pet> pets) {
-        }
-
-        interface PersonExtractor {
-
-            Person extractPersonFrom(String text);
-        }
-
         // given
-        PersonExtractor personExtractor = AiServices.create(PersonExtractor.class, model);
+        PersonExtractor9 personExtractor = AiServices.create(PersonExtractor9.class, model);
 
         String text = "Klaus has 2 pets: Peanut and Muffin";
 
         // when
-        Person person = personExtractor.extractPersonFrom(text);
+        PersonForSet person = personExtractor.extractPersonFrom(text);
 
         // then
-        assertThat(person).isEqualTo(new Person("Klaus", Set.of(
-                new Pet("Peanut"),
-                new Pet("Muffin")
-        )));
+        assertThat(person).isEqualTo(new PersonForSet("Klaus", new java.util.HashSet<>(java.util.Arrays.asList(
+                new PetForSet("Peanut"),
+                new PetForSet("Muffin")
+        ))));
 
         verify(model).chat(ChatRequest.builder()
                 .messages(singletonList(userMessage(text)))
@@ -823,6 +810,11 @@ class AiServicesWithJsonSchemaWithDescriptionsIT {
         }
 
         Person extractPersonFrom(String text);
+    }
+
+    interface PersonExtractor9 {
+
+        PersonForSet extractPersonFrom(String text);
     }
 
     @Test

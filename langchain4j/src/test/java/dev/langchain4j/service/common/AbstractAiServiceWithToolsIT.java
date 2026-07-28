@@ -51,6 +51,7 @@ import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.TestInstance;
@@ -156,7 +157,42 @@ public abstract class AbstractAiServiceWithToolsIT {
 
     static class ToolWithPojoParameter {
 
-        record Person(String name, int age, Double height, boolean married) {}
+        static class Person {
+            private final String name;
+            private final int age;
+            private final Double height;
+            private final boolean married;
+
+            public Person(String name, int age, Double height, boolean married) {
+                this.name = name;
+                this.age = age;
+                this.height = height;
+                this.married = married;
+            }
+
+            public String name() { return name; }
+            public int age() { return age; }
+            public Double height() { return height; }
+            public boolean married() { return married; }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Person person = (Person) o;
+                return age == person.age && married == person.married && Objects.equals(name, person.name) && Objects.equals(height, person.height);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(name, age, height, married);
+            }
+
+            @Override
+            public String toString() {
+                return "Person[name=" + name + ", age=" + age + ", height=" + height + ", married=" + married + "]";
+            }
+        }
 
         @Tool
         void process(Person person) {}
@@ -212,9 +248,64 @@ public abstract class AbstractAiServiceWithToolsIT {
 
     static class ToolWithNestedPojoParameter {
 
-        record Person(String name, Address address) {}
+        static class Person {
+            private final String name;
+            private final Address address;
 
-        record Address(String city) {}
+            public Person(String name, Address address) {
+                this.name = name;
+                this.address = address;
+            }
+
+            public String name() { return name; }
+            public Address address() { return address; }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Person person = (Person) o;
+                return Objects.equals(name, person.name) && Objects.equals(address, person.address);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(name, address);
+            }
+
+            @Override
+            public String toString() {
+                return "Person[name=" + name + ", address=" + address + "]";
+            }
+        }
+
+        static class Address {
+            private final String city;
+
+            public Address(String city) {
+                this.city = city;
+            }
+
+            public String city() { return city; }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Address address = (Address) o;
+                return Objects.equals(city, address.city);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(city);
+            }
+
+            @Override
+            public String toString() {
+                return "Address[city=" + city + "]";
+            }
+        }
 
         @Tool
         void process(Person person) {}
@@ -275,7 +366,36 @@ public abstract class AbstractAiServiceWithToolsIT {
 
     static class ToolWithRecursion {
 
-        record Person(String name, List<Person> children) {}
+        static class Person {
+            private final String name;
+            private final List<Person> children;
+
+            public Person(String name, List<Person> children) {
+                this.name = name;
+                this.children = children;
+            }
+
+            public String name() { return name; }
+            public List<Person> children() { return children; }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Person person = (Person) o;
+                return Objects.equals(name, person.name) && Objects.equals(children, person.children);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(name, children);
+            }
+
+            @Override
+            public String toString() {
+                return "Person[name=" + name + ", children=" + children + "]";
+            }
+        }
 
         @Tool
         void process(Person person) {
@@ -676,7 +796,33 @@ public abstract class AbstractAiServiceWithToolsIT {
 
     static class ToolWithListOfPojoParameter {
 
-        record Person(String name) {}
+        static class Person {
+            private final String name;
+
+            public Person(String name) {
+                this.name = name;
+            }
+
+            public String name() { return name; }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Person person = (Person) o;
+                return Objects.equals(name, person.name);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(name);
+            }
+
+            @Override
+            public String toString() {
+                return "Person[name=" + name + "]";
+            }
+        }
 
         @Tool
         void process(List<Person> people) {}
@@ -830,15 +976,15 @@ public abstract class AbstractAiServiceWithToolsIT {
         // given
         model = spy(model);
 
-        var tool = spy(toolInstance);
+        AdderTool tool = spy(toolInstance);
 
-        var assistant =
+        Assistant assistant =
                 AiServices.builder(Assistant.class).chatModel(model).tools(tool).build();
 
-        var text = adaptPrompt3("How much is 37 plus 87? Answer in the following format: 37 + 87 = ...");
+        String text = adaptPrompt3("How much is 37 plus 87? Answer in the following format: 37 + 87 = ...");
 
         // when
-        var response = assistant.chat(text);
+        Result<String> response = assistant.chat(text);
 
         // then
         if (returnBehavior == ReturnBehavior.TO_LLM) {
@@ -860,9 +1006,9 @@ public abstract class AbstractAiServiceWithToolsIT {
             verify(model).supportedCapabilities();
             verify(model, times(chatInvocations)).chat(chatRequestCaptor.capture());
 
-            var toolSpecifications = chatRequestCaptor.getValue().toolSpecifications();
+            List<ToolSpecification> toolSpecifications = chatRequestCaptor.getValue().toolSpecifications();
             assertThat(toolSpecifications).hasSize(1);
-            var toolSpecification = toolSpecifications.get(0);
+            ToolSpecification toolSpecification = toolSpecifications.get(0);
             assertThat(toolSpecification.name()).isEqualTo("add");
             assertThat(toolSpecification.description()).isNull();
             assertThat(toolSpecification.parameters()).isEqualTo(PRIMITIVE_TOOL_EXPECTED_SCHEMA);
@@ -907,15 +1053,15 @@ public abstract class AbstractAiServiceWithToolsIT {
         // given
         model = spy(model);
 
-        var tool = spy(toolInstance);
+        AdderTool tool = spy(toolInstance);
 
-        var assistant =
+        Assistant assistant =
                 AiServices.builder(Assistant.class).chatModel(model).tools(tool).build();
 
-        var text = "How much is 37 plus 87? How much is 73 plus 78? Call 2 tools in parallel (at the same time)!";
+        String text = "How much is 37 plus 87? How much is 73 plus 78? Call 2 tools in parallel (at the same time)!";
 
         // when
-        var response = assistant.chat(text);
+        Result<String> response = assistant.chat(text);
 
         // then
         if (returnBehavior == ReturnBehavior.TO_LLM) {
@@ -941,9 +1087,9 @@ public abstract class AbstractAiServiceWithToolsIT {
             verify(model).supportedCapabilities();
             verify(model, times(chatInvocations)).chat(chatRequestCaptor.capture());
 
-            var toolSpecifications = chatRequestCaptor.getValue().toolSpecifications();
+            List<ToolSpecification> toolSpecifications = chatRequestCaptor.getValue().toolSpecifications();
             assertThat(toolSpecifications).hasSize(1);
-            var toolSpecification = toolSpecifications.get(0);
+            ToolSpecification toolSpecification = toolSpecifications.get(0);
             assertThat(toolSpecification.name()).isEqualTo("add");
             assertThat(toolSpecification.description()).isNull();
             assertThat(toolSpecification.parameters()).isEqualTo(PRIMITIVE_TOOL_EXPECTED_SCHEMA);
@@ -991,19 +1137,19 @@ public abstract class AbstractAiServiceWithToolsIT {
         // given
         model = spy(model);
 
-        var addTool = spy(toolInstance);
-        var multiplyTool = spy(new MultiplyTool());
+        AdderTool addTool = spy(toolInstance);
+        MultiplyTool multiplyTool = spy(new MultiplyTool());
 
-        var assistant = AiServices.builder(Assistant.class)
+        Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(model)
                 .tools(addTool, multiplyTool)
                 .build();
 
-        var text = adaptPrompt1(
+        String text = adaptPrompt1(
                 "First add 2 and 3 by calling 'add' tool, then multiply the result by 4 by calling 'multiply' tool");
 
         // when
-        var response = assistant.chat(text);
+        Result<String> response = assistant.chat(text);
 
         // then
         switch (returnBehavior) {
@@ -1040,14 +1186,14 @@ public abstract class AbstractAiServiceWithToolsIT {
             verify(model).supportedCapabilities();
             verify(model, times(chatInvocations)).chat(chatRequestCaptor.capture());
 
-            var toolSpecifications = chatRequestCaptor.getValue().toolSpecifications();
+            List<ToolSpecification> toolSpecifications = chatRequestCaptor.getValue().toolSpecifications();
             assertThat(toolSpecifications).hasSize(2);
         }
 
         // perform one more invocation of the AI service to make sure that memory is not corrupted and the service can
         // be used further
-        var text2 = "How much is 37 plus 87?";
-        var response2 = assistant.chat(text2);
+        String text2 = "How much is 37 plus 87?";
+        Result<String> response2 = assistant.chat(text2);
         if (returnBehavior == ReturnBehavior.IMMEDIATE) {
             assertThat(response2.content()).isNull();
         } else {
@@ -1065,13 +1211,13 @@ public abstract class AbstractAiServiceWithToolsIT {
     protected void should_keep_memory_consistent_using_return_immediate(ChatModel model) {
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
 
-        var assistant = AiServices.builder(Assistant.class)
+        Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(model)
                 .tools(new ImmediateToolWithPrimitiveParameters())
                 .chatMemory(chatMemory)
                 .build();
 
-        var response = assistant.chat("How much is 37 plus 87?");
+        Result<String> response = assistant.chat("How much is 37 plus 87?");
         assertThat(response.content()).isNull();
         assertThat(response.toolExecutions().get(0).result()).isEqualTo("124");
 
@@ -1118,14 +1264,14 @@ public abstract class AbstractAiServiceWithToolsIT {
         // given
         model = spy(model);
 
-        var tool = spy(toolInstance);
+        AdderTool tool = spy(toolInstance);
 
-        var assistant = AiServices.builder(StringAssistant.class)
+        StringAssistant assistant = AiServices.builder(StringAssistant.class)
                 .chatModel(model)
                 .tools(tool)
                 .build();
 
-        var text = "How much is 37 plus 87?";
+        String text = "How much is 37 plus 87?";
 
         assertThatThrownBy(() -> assistant.chat(text))
                 .isInstanceOf(IllegalConfigurationException.class)
@@ -1164,9 +1310,9 @@ public abstract class AbstractAiServiceWithToolsIT {
 
         verify(model)
                 .chat(argThat((ChatRequest request) -> request.messages().size() == 3
-                        && request.messages().get(2) instanceof ToolExecutionResultMessage toolResultMessage
-                        && toolResultMessage.text().isEmpty()
-                        && toolResultMessage.contents().equals(List.of(TextContent.from("")))));
+                        && request.messages().get(2) instanceof ToolExecutionResultMessage
+                        && ((ToolExecutionResultMessage) request.messages().get(2)).text().isEmpty()
+                        && ((ToolExecutionResultMessage) request.messages().get(2)).contents().equals(List.of(TextContent.from("")))));
     }
 
     @ParameterizedTest
@@ -1200,9 +1346,9 @@ public abstract class AbstractAiServiceWithToolsIT {
 
         verify(model, atLeastOnce())
                 .chat(argThat((ChatRequest request) -> request.messages().size() > 2
-                        && request.messages().get(2) instanceof ToolExecutionResultMessage toolResultMessage
-                        && toolResultMessage.text().equals(" ")
-                        && toolResultMessage.contents().equals(List.of(TextContent.from(" ")))));
+                        && request.messages().get(2) instanceof ToolExecutionResultMessage
+                        && ((ToolExecutionResultMessage) request.messages().get(2)).text().equals(" ")
+                        && ((ToolExecutionResultMessage) request.messages().get(2)).contents().equals(List.of(TextContent.from(" ")))));
     }
 
     static final String CAT_IMAGE_URL =

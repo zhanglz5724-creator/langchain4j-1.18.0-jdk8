@@ -18,7 +18,7 @@ extends SyncOrAsync<ResponseContent> {
 
     default public StreamingResponseHandling onRawPartialResponse(Consumer<ParsedAndRawResponse<ResponseContent>> handler) {
         ServerSentEvent rawEvent = null;
-        return this.onPartialResponse(parsedResponse -> handler.accept(new ParsedAndRawResponse<Object>(parsedResponse, rawEvent)));
+        return this.onPartialResponse(parsedResponse -> handler.accept(new ParsedAndRawResponse<ResponseContent>(parsedResponse, rawEvent)));
     }
 }
 

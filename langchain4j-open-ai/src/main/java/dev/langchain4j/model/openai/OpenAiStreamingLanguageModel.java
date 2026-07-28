@@ -68,7 +68,7 @@ implements StreamingLanguageModel {
             }
         }).onComplete(() -> {
             ChatResponse chatResponse = responseBuilder.build();
-            handler.onComplete(Response.from((Object)chatResponse.aiMessage().text(), (TokenUsage)chatResponse.metadata().tokenUsage(), (FinishReason)chatResponse.metadata().finishReason()));
+            handler.onComplete(Response.from(chatResponse.aiMessage().text(), (TokenUsage)chatResponse.metadata().tokenUsage(), (FinishReason)chatResponse.metadata().finishReason()));
         }).onError(throwable -> handler.onError((Throwable)ExceptionMapper.DEFAULT.mapException(throwable))).execute();
     }
 

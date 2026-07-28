@@ -20,10 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.mockito.InOrder;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static dev.langchain4j.MockitoUtils.ignoreInteractions;
-import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -79,7 +79,7 @@ class OpenAiResponsesStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler = spy(new TestStreamingChatResponseHandler());
-        model.chat(of(userMessage), spyHandler);
+        model.chat(Arrays.asList(userMessage), spyHandler);
 
         // then
         ChatResponse chatResponse = spyHandler.get();
@@ -120,7 +120,7 @@ class OpenAiResponsesStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler = spy(new TestStreamingChatResponseHandler());
-        model.chat(of(userMessage), spyHandler);
+        model.chat(Arrays.asList(userMessage), spyHandler);
 
         // then
         ChatResponse chatResponse = spyHandler.get();
@@ -136,7 +136,7 @@ class OpenAiResponsesStreamingChatModelThinkingIT {
     void should_return_encrypted_reasoning_and_send_it_back__single_tool_call() {
 
         // given
-        List<String> include = List.of("reasoning.encrypted_content");
+        List<String> include = Arrays.asList("reasoning.encrypted_content");
 
         SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
 
@@ -203,7 +203,7 @@ class OpenAiResponsesStreamingChatModelThinkingIT {
     void should_return_encrypted_reasoning_and_send_it_back__two_parallel_tool_calls() {
 
         // given
-        List<String> include = List.of("reasoning.encrypted_content");
+        List<String> include = Arrays.asList("reasoning.encrypted_content");
 
         SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
 

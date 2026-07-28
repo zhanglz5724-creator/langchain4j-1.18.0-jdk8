@@ -91,19 +91,19 @@ class EnumListOutputParserTest {
                 .hasMessageContaining("Animal");
     }
 
+    enum MyEnumWithToString {
+        A, B, C;
+
+        @Override
+        public String toString() {
+            return "[" + name() + "]";
+        }
+    }
+
     @Test
     void should_create_schema_for_enum_with_custom_toString() {
 
         // given
-        enum MyEnumWithToString {
-            A, B, C;
-
-            @Override
-            public String toString() {
-                return "[" + name() + "]";
-            }
-        }
-
         assertThat(MyEnumWithToString.A.toString()).isEqualTo("[A]");
 
         EnumListOutputParser<MyEnumWithToString> parser = new EnumListOutputParser<>(MyEnumWithToString.class);

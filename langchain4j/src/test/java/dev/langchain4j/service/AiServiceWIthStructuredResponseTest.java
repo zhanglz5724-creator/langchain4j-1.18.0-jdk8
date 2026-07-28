@@ -6,6 +6,8 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AiServiceWIthStructuredResponseTest {
@@ -14,7 +16,26 @@ public class AiServiceWIthStructuredResponseTest {
         LEGAL, MEDICAL, TECHNICAL, UNKNOWN
     }
 
-    public record RequestClassifierResponse(RequestCategory category) {
+    public static class RequestClassifierResponse {
+        private final RequestCategory category;
+
+        public RequestClassifierResponse(RequestCategory category) {
+            this.category = category;
+        }
+
+        public RequestCategory getCategory() { return category; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof RequestClassifierResponse)) return false;
+            RequestClassifierResponse r = (RequestClassifierResponse) o;
+            return Objects.equals(category, r.category);
+        }
+        @Override
+        public int hashCode() { return Objects.hash(category); }
+        @Override
+        public String toString() { return "RequestClassifierResponse[category=" + category + "]"; }
     }
 
     public interface CategoryRouter {
@@ -35,6 +56,6 @@ public class AiServiceWIthStructuredResponseTest {
                 .build();
 
         RequestClassifierResponse response = categoryRouter.classify("Some request");
-        assertThat(response.category()).isEqualTo(RequestCategory.LEGAL);
+        assertThat(response.getCategory()).isEqualTo(RequestCategory.LEGAL);
     }
 }

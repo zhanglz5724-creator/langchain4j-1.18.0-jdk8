@@ -183,6 +183,10 @@ class TypeUtilsTest {
         List<?> ask(String input);
     }
 
+    interface SetWildcardTypeInvalidServiceDefinition {
+        Set<?> ask(String input);
+    }
+
     @Test
     void listWildcardTypeInvalidServiceDefinition() {
         // Given
@@ -247,9 +251,6 @@ class TypeUtilsTest {
 
     @Test
     void setWildcardTypeInvalidServiceDefinition() {
-        interface SetWildcardTypeInvalidServiceDefinition {
-            Set<?> ask(String input);
-        }
         // Given
         ChatModel stubModel = ChatModelMock.thatAlwaysResponds("Hello there!");
 

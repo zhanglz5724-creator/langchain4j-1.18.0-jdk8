@@ -29,13 +29,13 @@ public class Result<T> {
     private final ChatResponse finalResponse;
 
     public Result(ResultBuilder<T> builder) {
-        this.content = ((ResultBuilder)builder).content;
-        this.tokenUsage = ((ResultBuilder)builder).tokenUsage;
-        this.sources = Utils.copy((List)((ResultBuilder)builder).sources);
-        this.finishReason = ((ResultBuilder)builder).finishReason;
-        this.toolExecutions = Utils.copy((List)((ResultBuilder)builder).toolExecutions);
-        this.intermediateResponses = Utils.copy((List)((ResultBuilder)builder).intermediateResponses);
-        this.finalResponse = ((ResultBuilder)builder).finalResponse;
+        this.content = ((ResultBuilder<T>) builder).content;
+        this.tokenUsage = ((ResultBuilder<T>) builder).tokenUsage;
+        this.sources = Utils.copy((List)((ResultBuilder<T>) builder).sources);
+        this.finishReason = ((ResultBuilder<T>) builder).finishReason;
+        this.toolExecutions = Utils.copy((List)((ResultBuilder<T>) builder).toolExecutions);
+        this.intermediateResponses = Utils.copy((List)((ResultBuilder<T>) builder).intermediateResponses);
+        this.finalResponse = ((ResultBuilder<T>) builder).finalResponse;
     }
 
     public Result(T content, TokenUsage tokenUsage, List<Content> sources, FinishReason finishReason, List<ToolExecution> toolExecutions) {

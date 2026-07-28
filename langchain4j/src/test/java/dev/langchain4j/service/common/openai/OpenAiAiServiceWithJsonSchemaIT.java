@@ -108,31 +108,29 @@ class OpenAiAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT 
 
         // given
         String body =
-                """
-                {
-                  "model": "gpt-4o-mini",
-                  "messages": [{"role": "user", "content": "say hi"}],
-                  "response_format": {
-                    "type": "json_schema",
-                    "json_schema": {
-                      "name": "Animal",
-                      "strict": true,
-                      "schema": {
-                        "anyOf": [
-                          {"type": "object",
-                           "properties": {"kind": {"type": "string", "enum": ["Dog"]}},
-                           "required": ["kind"],
-                           "additionalProperties": false},
-                          {"type": "object",
-                           "properties": {"kind": {"type": "string", "enum": ["Cat"]}},
-                           "required": ["kind"],
-                           "additionalProperties": false}
-                        ]
-                      }
-                    }
-                  }
-                }
-                """;
+                "{"
+                + "\"model\": \"gpt-4o-mini\","
+                + "\"messages\": [{\"role\": \"user\", \"content\": \"say hi\"}],"
+                + "\"response_format\": {"
+                + "\"type\": \"json_schema\","
+                + "\"json_schema\": {"
+                + "\"name\": \"Animal\","
+                + "\"strict\": true,"
+                + "\"schema\": {"
+                + "\"anyOf\": ["
+                + "{\"type\": \"object\","
+                + "\"properties\": {\"kind\": {\"type\": \"string\", \"enum\": [\"Dog\"]}},"
+                + "\"required\": [\"kind\"],"
+                + "\"additionalProperties\": false},"
+                + "{\"type\": \"object\","
+                + "\"properties\": {\"kind\": {\"type\": \"string\", \"enum\": [\"Cat\"]}},"
+                + "\"required\": [\"kind\"],"
+                + "\"additionalProperties\": false}"
+                + "]"
+                + "}"
+                + "}"
+                + "}"
+                + "}";
 
         String baseUrl = Optional.ofNullable(System.getenv("OPENAI_BASE_URL")).orElse("https://api.openai.com/v1");
         HttpRequest request = HttpRequest.builder()

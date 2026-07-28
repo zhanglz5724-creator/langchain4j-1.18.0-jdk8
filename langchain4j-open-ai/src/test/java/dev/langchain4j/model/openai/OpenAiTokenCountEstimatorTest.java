@@ -59,12 +59,10 @@ class OpenAiTokenCountEstimatorTest {
         ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
                 .id("tool-id")
                 .name("tool-name")
-                .arguments("""
-                        {
-                            "name": "Klaus",
-                            "address": null
-                        }
-                        """)
+                .arguments("{\n"
+                        + "    \"name\": \"Klaus\",\n"
+                        + "    \"address\": null\n"
+                        + "}")
                 .build();
 
         AiMessage aiMessage = AiMessage.from(toolExecutionRequest, toolExecutionRequest); // duplicate on purpose

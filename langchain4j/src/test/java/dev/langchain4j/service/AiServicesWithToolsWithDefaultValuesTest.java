@@ -20,10 +20,13 @@ import dev.langchain4j.model.chat.mock.ChatModelMock;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -278,17 +281,46 @@ class AiServicesWithToolsWithDefaultValuesTest {
     // POJOs (including nested)
     // ---------------------------------------------------------------------
 
-    public record Address(String city, String country) {}
+    public static final class Address {
+        private final String city;
+        private final String country;
+        public Address(String city, String country) { this.city = city; this.country = country; }
+        public String city() { return city; }
+        public String country() { return country; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Address)) return false;
+            Address other = (Address) o;
+            return Objects.equals(city, other.city) && Objects.equals(country, other.country);
+        }
+        @Override public int hashCode() { return Objects.hash(city, country); }
+        @Override public String toString() { return "Address[city=" + city + ", country=" + country + "]"; }
+    }
 
-    public record Person(String name, int age, Address address) {}
+    public static final class Person {
+        private final String name;
+        private final int age;
+        private final Address address;
+        public Person(String name, int age, Address address) { this.name = name; this.age = age; this.address = address; }
+        public String name() { return name; }
+        public int age() { return age; }
+        public Address address() { return address; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Person)) return false;
+            Person other = (Person) o;
+            return Objects.equals(name, other.name) && age == other.age && Objects.equals(address, other.address);
+        }
+        @Override public int hashCode() { return Objects.hash(name, age, address); }
+        @Override public String toString() { return "Person[name=" + name + ", age=" + age + ", address=" + address + "]"; }
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"{}", "{\"arg0\":null}"})
     void should_substitute_default_for_POJO_with_nested_POJO_when_LLM_omits_it(String missingArguments) {
         class Tools {
 
-            public static final String DEFAULT_PERSON = """
-                            {"name":"Klaus","age":42,"address":{"city":"Berlin","country":"DE"}}""";
+            public static final String DEFAULT_PERSON = "{\"name\":\"Klaus\",\"age\":42,\"address\":{\"city\":\"Berlin\",\"country\":\"DE\"}}";
 
             @Tool
             void process(@P(defaultValue = DEFAULT_PERSON) Person person) {}
@@ -315,11 +347,33 @@ class AiServicesWithToolsWithDefaultValuesTest {
         @JsonSubTypes.Type(value = Cat.class, name = "cat"),
         @JsonSubTypes.Type(value = Dog.class, name = "dog")
     })
-    public sealed interface Animal permits Cat, Dog {}
+    public interface Animal {}
 
-    public record Cat(String name) implements Animal {}
+    public static final class Cat implements Animal {
+        private final String name;
+        public Cat(String name) { this.name = name; }
+        public String name() { return name; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Cat)) return false;
+            return Objects.equals(name, ((Cat)o).name);
+        }
+        @Override public int hashCode() { return Objects.hash(name); }
+        @Override public String toString() { return "Cat[name=" + name + "]"; }
+    }
 
-    public record Dog(String breed) implements Animal {}
+    public static final class Dog implements Animal {
+        private final String breed;
+        public Dog(String breed) { this.breed = breed; }
+        public String breed() { return breed; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Dog)) return false;
+            return Objects.equals(breed, ((Dog)o).breed);
+        }
+        @Override public int hashCode() { return Objects.hash(breed); }
+        @Override public String toString() { return "Dog[breed=" + breed + "]"; }
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"{}", "{\"arg0\":null}"})
@@ -361,7 +415,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
 
         assistant.chat("call the tool");
 
-        verify(tool).process(List.of("red", "green", "blue"));
+        verify(tool).process(Arrays.asList("red", "green", "blue"));
         verifyNoMoreInteractions(tool);
     }
 
@@ -381,7 +435,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
 
         assistant.chat("call the tool");
 
-        verify(tool).process(new LinkedHashSet<>(List.of(1, 2, 3)));
+        verify(tool).process(new LinkedHashSet<>(Arrays.asList(1, 2, 3)));
         verifyNoMoreInteractions(tool);
     }
 
@@ -416,11 +470,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
     @ValueSource(strings = {"{}", "{\"arg0\":null}"})
     void should_substitute_default_for_List_of_POJOs_when_LLM_omits_it(String missingArguments) {
         class Tools {
-            public static final String DEFAULT_PEOPLE = """
-                            [
-                              {"name":"Klaus","age":42,"address":{"city":"Berlin","country":"DE"}},
-                              {"name":"Peter","age":43,"address":{"city":"Munich","country":"DE"}}
-                            ]""";
+            public static final String DEFAULT_PEOPLE = "[{\"name\":\"Klaus\",\"age\":42,\"address\":{\"city\":\"Berlin\",\"country\":\"DE\"}},{\"name\":\"Peter\",\"age\":43,\"address\":{\"city\":\"Munich\",\"country\":\"DE\"}}]";
 
             @Tool
             void process(@P(defaultValue = DEFAULT_PEOPLE) List<Person> people) {}
@@ -435,7 +485,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
         assistant.chat("call the tool");
 
         verify(tool)
-                .process(List.of(
+                .process(Arrays.asList(
                         new Person("Klaus", 42, new Address("Berlin", "DE")),
                         new Person("Peter", 43, new Address("Munich", "DE"))));
         verifyNoMoreInteractions(tool);
@@ -445,11 +495,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
     @ValueSource(strings = {"{}", "{\"arg0\":null}"})
     void should_substitute_default_for_Set_of_POJOs_when_LLM_omits_it(String missingArguments) {
         class Tools {
-            public static final String DEFAULT_PEOPLE = """
-                            [
-                              {"name":"Klaus","age":42,"address":{"city":"Berlin","country":"DE"}},
-                              {"name":"Peter","age":43,"address":{"city":"Munich","country":"DE"}}
-                            ]""";
+            public static final String DEFAULT_PEOPLE = "[{\"name\":\"Klaus\",\"age\":42,\"address\":{\"city\":\"Berlin\",\"country\":\"DE\"}},{\"name\":\"Peter\",\"age\":43,\"address\":{\"city\":\"Munich\",\"country\":\"DE\"}}]";
 
             @Tool
             void process(@P(defaultValue = DEFAULT_PEOPLE) Set<Person> people) {}
@@ -474,11 +520,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
     @ValueSource(strings = {"{}", "{\"arg0\":null}"})
     void should_substitute_default_for_Map_of_String_to_POJO_when_LLM_omits_it(String missingArguments) {
         class Tools {
-            public static final String DEFAULT_MAP = """
-                            {
-                              "p1": {"name":"Klaus","age":42,"address":{"city":"Berlin","country":"DE"}},
-                              "p2": {"name":"Peter","age":43,"address":{"city":"Munich","country":"DE"}}
-                            }""";
+            public static final String DEFAULT_MAP = "{\"p1\":{\"name\":\"Klaus\",\"age\":42,\"address\":{\"city\":\"Berlin\",\"country\":\"DE\"}},\"p2\":{\"name\":\"Peter\",\"age\":43,\"address\":{\"city\":\"Munich\",\"country\":\"DE\"}}}";
 
             @Tool
             void process(@P(defaultValue = DEFAULT_MAP) Map<String, Person> people) {}
@@ -563,7 +605,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
 
         assistant.chat("call the tool");
 
-        verify(tool).process(List.of());
+        verify(tool).process(Collections.emptyList());
         verifyNoMoreInteractions(tool);
     }
 
@@ -583,7 +625,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
 
         assistant.chat("call the tool");
 
-        verify(tool).process(Map.of());
+        verify(tool).process(Collections.emptyMap());
         verifyNoMoreInteractions(tool);
     }
 
@@ -607,7 +649,7 @@ class AiServicesWithToolsWithDefaultValuesTest {
 
         assistant.chat("call the tool");
 
-        verify(tool).process(List.of(Currency.USD, Currency.EUR));
+        verify(tool).process(Arrays.asList(Currency.USD, Currency.EUR));
         verifyNoMoreInteractions(tool);
     }
 
@@ -726,7 +768,18 @@ class AiServicesWithToolsWithDefaultValuesTest {
      * A naive cache that stores the parsed record would share the same inner list
      * across invocations — this test ensures fresh inner state on each call.
      */
-    public record RecordWithList(List<String> items) {}
+    public static final class RecordWithList {
+        private final List<String> items;
+        public RecordWithList(List<String> items) { this.items = items; }
+        public List<String> items() { return items; }
+        @Override public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof RecordWithList)) return false;
+            return Objects.equals(items, ((RecordWithList)o).items);
+        }
+        @Override public int hashCode() { return Objects.hash(items); }
+        @Override public String toString() { return "RecordWithList[items=" + items + "]"; }
+    }
 
     @Test
     void mutation_of_record_inner_collection_does_not_leak_between_invocations() {

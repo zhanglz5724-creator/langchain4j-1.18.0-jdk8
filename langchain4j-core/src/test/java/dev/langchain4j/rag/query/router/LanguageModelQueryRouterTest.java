@@ -156,7 +156,9 @@ class LanguageModelQueryRouterTest {
 
         ChatModelMock model = ChatModelMock.thatAlwaysResponds("Sorry, I don't know");
 
-        final Map<ContentRetriever, String> retrieverToDescription = new java.util.HashMap<String,Object>(){{put(catArticlesRetriever, "articles about cats");put(dogArticlesRetriever, "articles about dogs");}};
+        final Map<ContentRetriever, String> retrieverToDescription = new HashMap<>();
+        retrieverToDescription.put(catArticlesRetriever, "articles about cats");
+        retrieverToDescription.put(dogArticlesRetriever, "articles about dogs");
 
         QueryRouter router = new LanguageModelQueryRouter(model, retrieverToDescription);
 
