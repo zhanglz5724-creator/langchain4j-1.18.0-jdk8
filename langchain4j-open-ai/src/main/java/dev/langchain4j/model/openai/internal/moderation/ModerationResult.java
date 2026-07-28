@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.moderation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,14 +22,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.moderation.Categories;
+import dev.langchain4j.model.openai.internal.moderation.CategoryScores;
 import java.util.Objects;
 
-@JsonDeserialize(builder = ModerationResult.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class ModerationResult {
-
     @JsonProperty
     private final Categories categories;
     @JsonProperty
@@ -30,61 +44,52 @@ public final class ModerationResult {
     }
 
     public Categories categories() {
-        return categories;
+        return this.categories;
     }
 
     public CategoryScores categoryScores() {
-        return categoryScores;
+        return this.categoryScores;
     }
 
     public Boolean isFlagged() {
-        return flagged;
+        return this.flagged;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof ModerationResult
-                && equalTo((ModerationResult) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof ModerationResult && this.equalTo((ModerationResult)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(ModerationResult another) {
-        return Objects.equals(categories, another.categories)
-                && Objects.equals(categoryScores, another.categoryScores)
-                && Objects.equals(flagged, another.flagged);
+        return Objects.equals(this.categories, another.categories) && Objects.equals(this.categoryScores, another.categoryScores) && Objects.equals(this.flagged, another.flagged);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(categories);
-        h += (h << 5) + Objects.hashCode(categoryScores);
-        h += (h << 5) + Objects.hashCode(flagged);
+        h += (h << 5) + Objects.hashCode(this.categories);
+        h += (h << 5) + Objects.hashCode(this.categoryScores);
+        h += (h << 5) + Objects.hashCode(this.flagged);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "ModerationResult{"
-                + "categories=" + categories
-                + ", categoryScores=" + categoryScores
-                + ", flagged=" + flagged
-                + "}";
+        return "ModerationResult{categories=" + this.categories + ", categoryScores=" + this.categoryScores + ", flagged=" + this.flagged + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private Categories categories;
         private CategoryScores categoryScores;
         private Boolean flagged;
@@ -109,3 +114,4 @@ public final class ModerationResult {
         }
     }
 }
+

@@ -1,19 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
+import dev.langchain4j.model.ollama.OllamaModel;
 import java.util.List;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class ModelsListResponse {
-
     private List<OllamaModel> models;
 
     ModelsListResponse() {
@@ -28,7 +35,7 @@ class ModelsListResponse {
     }
 
     public List<OllamaModel> getModels() {
-        return models;
+        return this.models;
     }
 
     public void setModels(List<OllamaModel> models) {
@@ -36,8 +43,10 @@ class ModelsListResponse {
     }
 
     static class Builder {
-
         private List<OllamaModel> models;
+
+        Builder() {
+        }
 
         Builder models(List<OllamaModel> models) {
             this.models = models;
@@ -45,7 +54,8 @@ class ModelsListResponse {
         }
 
         ModelsListResponse build() {
-            return new ModelsListResponse(models);
+            return new ModelsListResponse(this.models);
         }
     }
 }
+

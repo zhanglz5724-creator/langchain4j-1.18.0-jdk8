@@ -1,9 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.auth.oauth2.GoogleCredentials
+ *  com.google.genai.Client
+ *  com.google.genai.types.Content
+ *  com.google.genai.types.CountTokensConfig
+ *  com.google.genai.types.CountTokensResponse
+ *  com.google.genai.types.FunctionDeclaration
+ *  com.google.genai.types.Tool
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.TokenCountEstimator
+ */
 package dev.langchain4j.model.google.genai;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.util.Collections.singletonList;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
@@ -17,100 +34,81 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.TokenCountEstimator;
+import dev.langchain4j.model.google.genai.GoogleGenAiClientFactory;
+import dev.langchain4j.model.google.genai.GoogleGenAiContentMapper;
+import dev.langchain4j.model.google.genai.GoogleGenAiExceptionMapper;
+import dev.langchain4j.model.google.genai.GoogleGenAiToolMapper;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class GoogleGenAiTokenCountEstimator implements TokenCountEstimator {
-
+public class GoogleGenAiTokenCountEstimator
+implements TokenCountEstimator {
     private final Client client;
     private final String modelName;
     private final Integer maxRetries;
 
     private GoogleGenAiTokenCountEstimator(Builder builder) {
-        this.client = builder.client != null
-                ? builder.client
-                : GoogleGenAiClientFactory.createClient(
-                        builder.apiKey,
-                        builder.googleCredentials,
-                        builder.projectId,
-                        builder.location,
-                        builder.timeout,
-                        builder.customHeaders,
-                        builder.apiEndpoint);
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.maxRetries = getOrDefault(builder.maxRetries, 3);
+        this.client = builder.client != null ? builder.client : GoogleGenAiClientFactory.createClient(builder.apiKey, builder.googleCredentials, builder.projectId, builder.location, builder.timeout, builder.customHeaders, builder.apiEndpoint);
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)3);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public int estimateTokenCountInText(String text) {
-        return estimateTokenCountInMessages(singletonList(UserMessage.from(text)));
+        return this.estimateTokenCountInMessages(Collections.singletonList(UserMessage.from((String)text)));
     }
 
-    @Override
     public int estimateTokenCountInMessage(ChatMessage message) {
-        return estimateTokenCountInMessages(singletonList(message));
+        return this.estimateTokenCountInMessages(Collections.singletonList(message));
     }
 
-    @Override
     public int estimateTokenCountInMessages(Iterable<ChatMessage> messages) {
-        List<ChatMessage> allMessages = new LinkedList<>();
+        LinkedList<ChatMessage> allMessages = new LinkedList<ChatMessage>();
         messages.forEach(allMessages::add);
-
         List<Content> contents = GoogleGenAiContentMapper.toContents(allMessages);
         Content systemInstruction = GoogleGenAiContentMapper.toSystemInstruction(allMessages);
-
         if (systemInstruction != null) {
-            // The Java SDK currently throws an exception if `systemInstruction` is passed to CountTokensConfig.
-            // As a workaround, we simply append the system instruction as a standard Content block to approximate
-            // tokens.
-            List<Content> merged = new ArrayList<>();
+            ArrayList<Content> merged = new ArrayList<Content>();
             merged.add(systemInstruction);
             merged.addAll(contents);
             contents = merged;
         }
-
         if (contents.isEmpty()) {
             return 0;
         }
-
-        return estimateTokenCount(contents, null);
+        return this.estimateTokenCount(contents, null);
     }
 
     public int estimateTokenCountInToolExecutionRequests(Iterable<ToolExecutionRequest> toolExecutionRequests) {
-        List<ToolExecutionRequest> allToolRequests = new LinkedList<>();
+        LinkedList allToolRequests = new LinkedList();
         toolExecutionRequests.forEach(allToolRequests::add);
-
-        return estimateTokenCountInMessage(AiMessage.from(allToolRequests));
+        return this.estimateTokenCountInMessage((ChatMessage)AiMessage.from(allToolRequests));
     }
 
     public int estimateTokenCountInToolSpecifications(Iterable<ToolSpecification> toolSpecifications) {
-        List<FunctionDeclaration> functionDeclarations = new ArrayList<>();
+        ArrayList<FunctionDeclaration> functionDeclarations = new ArrayList<FunctionDeclaration>();
         for (ToolSpecification toolSpec : toolSpecifications) {
             functionDeclarations.add(GoogleGenAiToolMapper.convertToGoogleFunction(toolSpec));
         }
-
         Tool tool = Tool.builder().functionDeclarations(functionDeclarations).build();
-
-        // The Java SDK currently throws an exception if `tools` are passed to CountTokensConfig.
-        // As a workaround, we serialize the tool declarations to a string and count the text tokens.
         String toolJson = tool.toJson();
-        return estimateTokenCountInText(toolJson);
+        return this.estimateTokenCountInText(toolJson);
     }
 
     private int estimateTokenCount(List<Content> contents, CountTokensConfig config) {
-        CountTokensResponse response =
-                withRetryMappingExceptions(
-                        () -> client.models.countTokens(modelName, contents, config),
-                        maxRetries,
-                        GoogleGenAiExceptionMapper.INSTANCE);
+        CountTokensResponse response = (CountTokensResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.models.countTokens(this.modelName, contents, config), (int)this.maxRetries, (ExceptionMapper)GoogleGenAiExceptionMapper.INSTANCE);
         return response.totalTokens().orElse(0);
     }
 
@@ -193,3 +191,4 @@ public class GoogleGenAiTokenCountEstimator implements TokenCountEstimator {
         }
     }
 }
+

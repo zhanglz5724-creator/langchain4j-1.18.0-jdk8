@@ -1,16 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpClientMethod;
+import dev.langchain4j.mcp.protocol.McpClientRequest;
+import dev.langchain4j.mcp.protocol.McpGetPromptParams;
 import java.util.Map;
 
-/**
- * Corresponds to the {@code GetPromptRequest} type from the MCP schema.
- */
 @Internal
-public class McpGetPromptRequest extends McpClientRequest {
-
+public class McpGetPromptRequest
+extends McpClientRequest {
     public McpGetPromptRequest(Long id, String promptName, Map<String, Object> arguments) {
         super(id, McpClientMethod.PROMPTS_GET);
-        setParams(new McpGetPromptParams(promptName, arguments));
+        this.setParams(new McpGetPromptParams(promptName, arguments));
     }
 }
+

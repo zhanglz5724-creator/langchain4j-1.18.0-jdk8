@@ -1,3 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ *  dev.langchain4j.http.client.sse.ServerSentEvent
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ */
 package dev.langchain4j.model.openai.internal;
 
 import dev.langchain4j.Internal;
@@ -7,20 +16,16 @@ import dev.langchain4j.model.chat.response.StreamingHandle;
 
 @Internal
 public class ParsedAndRawResponse<R> {
-
     private final R parsedResponse;
     private final SuccessfulHttpResponse rawHttpResponse;
     private final ServerSentEvent rawServerSentEvent;
     private final StreamingHandle streamingHandle;
 
-    /**
-     * @since 1.8.0
-     */
     protected ParsedAndRawResponse(Builder<R> builder) {
-        this.parsedResponse = builder.parsedResponse;
-        this.rawHttpResponse = builder.rawHttpResponse;
-        this.rawServerSentEvent = builder.rawServerSentEvent;
-        this.streamingHandle = builder.streamingHandle;
+        this.parsedResponse = ((Builder)builder).parsedResponse;
+        this.rawHttpResponse = ((Builder)builder).rawHttpResponse;
+        this.rawServerSentEvent = ((Builder)builder).rawServerSentEvent;
+        this.streamingHandle = ((Builder)builder).streamingHandle;
     }
 
     protected ParsedAndRawResponse(R parsedResponse, SuccessfulHttpResponse rawHttpResponse) {
@@ -37,9 +42,7 @@ public class ParsedAndRawResponse<R> {
         this.streamingHandle = null;
     }
 
-    protected ParsedAndRawResponse(R parsedResponse,
-                                   SuccessfulHttpResponse rawHttpResponse,
-                                   ServerSentEvent rawServerSentEvent) {
+    protected ParsedAndRawResponse(R parsedResponse, SuccessfulHttpResponse rawHttpResponse, ServerSentEvent rawServerSentEvent) {
         this.parsedResponse = parsedResponse;
         this.rawHttpResponse = rawHttpResponse;
         this.rawServerSentEvent = rawServerSentEvent;
@@ -47,36 +50,26 @@ public class ParsedAndRawResponse<R> {
     }
 
     public R parsedResponse() {
-        return parsedResponse;
+        return this.parsedResponse;
     }
 
     public SuccessfulHttpResponse rawHttpResponse() {
-        return rawHttpResponse;
+        return this.rawHttpResponse;
     }
 
     public ServerSentEvent rawServerSentEvent() {
-        return rawServerSentEvent;
+        return this.rawServerSentEvent;
     }
 
-    /**
-     * @since 1.8.0
-     */
     public StreamingHandle streamingHandle() {
-        return streamingHandle;
+        return this.streamingHandle;
     }
 
-    /**
-     * @since 1.8.0
-     */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * @since 1.8.0
-     */
     public static class Builder<R> {
-
         private R parsedResponse;
         private SuccessfulHttpResponse rawHttpResponse;
         private ServerSentEvent rawServerSentEvent;
@@ -103,7 +96,8 @@ public class ParsedAndRawResponse<R> {
         }
 
         public ParsedAndRawResponse<R> build() {
-            return new ParsedAndRawResponse<R>(this);
+            return new ParsedAndRawResponse(this);
         }
     }
 }
+

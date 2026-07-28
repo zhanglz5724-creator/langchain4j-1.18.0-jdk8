@@ -1,8 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
-
-import static dev.langchain4j.model.openai.internal.chat.ContentType.*;
-import static dev.langchain4j.model.openai.internal.chat.Role.USER;
-import static java.util.Collections.unmodifiableList;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,22 +22,29 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.chat.Content;
+import dev.langchain4j.model.openai.internal.chat.ContentType;
+import dev.langchain4j.model.openai.internal.chat.ImageDetail;
+import dev.langchain4j.model.openai.internal.chat.ImageUrl;
+import dev.langchain4j.model.openai.internal.chat.InputAudio;
+import dev.langchain4j.model.openai.internal.chat.Message;
+import dev.langchain4j.model.openai.internal.chat.PdfFile;
+import dev.langchain4j.model.openai.internal.chat.Role;
+import dev.langchain4j.model.openai.internal.chat.VideoUrl;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@JsonDeserialize(builder = UserMessage.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public final class UserMessage implements Message {
-
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+public final class UserMessage
+implements Message {
     @JsonProperty
-    private final Role role = USER;
-
+    private final Role role = Role.USER;
     @JsonProperty
     private final Object content;
-
     @JsonProperty
     private final String name;
 
@@ -36,53 +53,51 @@ public final class UserMessage implements Message {
         this.name = builder.name;
     }
 
+    @Override
     public Role role() {
-        return role;
+        return this.role;
     }
 
     public Object content() {
-        return content;
+        return this.content;
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof UserMessage && equalTo((UserMessage) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof UserMessage && this.equalTo((UserMessage)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(UserMessage another) {
-        return Objects.equals(role, another.role)
-                && Objects.equals(content, another.content)
-                && Objects.equals(name, another.name);
+        return Objects.equals((Object)this.role, (Object)another.role) && Objects.equals(this.content, another.content) && Objects.equals(this.name, another.name);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(role);
-        h += (h << 5) + Objects.hashCode(content);
-        h += (h << 5) + Objects.hashCode(name);
+        h += (h << 5) + Objects.hashCode((Object)this.role);
+        h += (h << 5) + Objects.hashCode(this.content);
+        h += (h << 5) + Objects.hashCode(this.name);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "UserMessage{" + "role=" + role + ", content=" + content + ", name=" + name + "}";
+        return "UserMessage{role=" + (Object)((Object)this.role) + ", content=" + this.content + ", name=" + this.name + "}";
     }
 
     public static UserMessage from(String text) {
         return UserMessage.builder().content(text).build();
     }
 
-    public static UserMessage from(String text, String... imageUrls) {
+    public static UserMessage from(String text, String ... imageUrls) {
         return UserMessage.builder().addText(text).addImageUrls(imageUrls).build();
     }
 
@@ -90,79 +105,68 @@ public final class UserMessage implements Message {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
-        private String stringContent; // keeping it for compatibility with other OpenAI-like APIs
+        private String stringContent;
         private List<Content> content;
         private String name;
 
         public Builder addText(String text) {
-            initializeContent();
-            Content content = Content.builder().type(TEXT).text(text).build();
+            this.initializeContent();
+            Content content = Content.builder().type(ContentType.TEXT).text(text).build();
             this.content.add(content);
             return this;
         }
 
         public Builder addImageUrl(String imageUrl) {
-            return addImageUrl(imageUrl, null);
+            return this.addImageUrl(imageUrl, null);
         }
 
         public Builder addImageUrl(String imageUrl, ImageDetail imageDetail) {
-            initializeContent();
-            Content content = Content.builder()
-                    .type(IMAGE_URL)
-                    .imageUrl(
-                            ImageUrl.builder().url(imageUrl).detail(imageDetail).build())
-                    .build();
+            this.initializeContent();
+            Content content = Content.builder().type(ContentType.IMAGE_URL).imageUrl(ImageUrl.builder().url(imageUrl).detail(imageDetail).build()).build();
             this.content.add(content);
             return this;
         }
 
-        public Builder addImageUrls(String... imageUrls) {
+        public Builder addImageUrls(String ... imageUrls) {
             for (String imageUrl : imageUrls) {
-                addImageUrl(imageUrl);
+                this.addImageUrl(imageUrl);
             }
             return this;
         }
 
         public Builder addVideoUrl(String videoUrl) {
-            initializeContent();
-            Content content = Content.builder()
-                    .type(VIDEO_URL)
-                    .videoUrl(VideoUrl.builder().url(videoUrl).build())
-                    .build();
+            this.initializeContent();
+            Content content = Content.builder().type(ContentType.VIDEO_URL).videoUrl(VideoUrl.builder().url(videoUrl).build()).build();
             this.content.add(content);
             return this;
         }
 
-        public Builder addVideoUrls(String... videoUrls) {
+        public Builder addVideoUrls(String ... videoUrls) {
             for (String videoUrl : videoUrls) {
-                addVideoUrl(videoUrl);
+                this.addVideoUrl(videoUrl);
             }
             return this;
         }
 
         public Builder addInputAudio(InputAudio inputAudio) {
-            initializeContent();
-            this.content.add(
-                    Content.builder().type(AUDIO).inputAudio(inputAudio).build());
-
+            this.initializeContent();
+            this.content.add(Content.builder().type(ContentType.AUDIO).inputAudio(inputAudio).build());
             return this;
         }
 
         public Builder addPdfFile(PdfFile pdfFile) {
-            initializeContent();
-            this.content.add(Content.builder().type(FILE).file(pdfFile).build());
-
+            this.initializeContent();
+            this.content.add(Content.builder().type(ContentType.FILE).file(pdfFile).build());
             return this;
         }
 
         public Builder content(List<Content> content) {
             if (content != null) {
-                this.content = unmodifiableList(content);
+                this.content = Collections.unmodifiableList(content);
             }
             return this;
         }
@@ -183,8 +187,9 @@ public final class UserMessage implements Message {
 
         private void initializeContent() {
             if (this.content == null) {
-                this.content = new ArrayList<>();
+                this.content = new ArrayList<Content>();
             }
         }
     }
 }
+

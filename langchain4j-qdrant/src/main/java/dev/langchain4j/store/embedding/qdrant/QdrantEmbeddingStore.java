@@ -1,41 +1,76 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.CosineSimilarity
+ *  dev.langchain4j.store.embedding.EmbeddingMatch
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  dev.langchain4j.store.embedding.RelevanceScore
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  io.qdrant.client.PointIdFactory
+ *  io.qdrant.client.QdrantClient
+ *  io.qdrant.client.QdrantGrpcClient
+ *  io.qdrant.client.QdrantGrpcClient$Builder
+ *  io.qdrant.client.QueryFactory
+ *  io.qdrant.client.ValueFactory
+ *  io.qdrant.client.VectorsFactory
+ *  io.qdrant.client.WithPayloadSelectorFactory
+ *  io.qdrant.client.WithVectorsSelectorFactory
+ *  io.qdrant.client.grpc.Common$Filter
+ *  io.qdrant.client.grpc.Common$PointId
+ *  io.qdrant.client.grpc.JsonWithInt$Value
+ *  io.qdrant.client.grpc.Points$DeletePoints
+ *  io.qdrant.client.grpc.Points$PointStruct
+ *  io.qdrant.client.grpc.Points$PointStruct$Builder
+ *  io.qdrant.client.grpc.Points$PointsIdsList
+ *  io.qdrant.client.grpc.Points$PointsSelector
+ *  io.qdrant.client.grpc.Points$QueryPoints
+ *  io.qdrant.client.grpc.Points$QueryPoints$Builder
+ *  io.qdrant.client.grpc.Points$ScoredPoint
+ *  io.qdrant.client.grpc.Points$VectorOutput
+ *  javax.annotation.Nullable
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.store.embedding.qdrant;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.Utils.randomUUID;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static io.qdrant.client.PointIdFactory.id;
-import static io.qdrant.client.ValueFactory.value;
-import static io.qdrant.client.VectorsFactory.vectors;
-import static io.qdrant.client.WithPayloadSelectorFactory.enable;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Comparator.comparingDouble;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.store.embedding.*;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.store.embedding.CosineSimilarity;
+import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
+import dev.langchain4j.store.embedding.EmbeddingSearchResult;
+import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.RelevanceScore;
+import dev.langchain4j.store.embedding.filter.Filter;
+import dev.langchain4j.store.embedding.qdrant.ObjectFactory;
+import dev.langchain4j.store.embedding.qdrant.QdrantFilterConverter;
+import dev.langchain4j.store.embedding.qdrant.ValueMapFactory;
+import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.QdrantGrpcClient;
 import io.qdrant.client.QueryFactory;
+import io.qdrant.client.ValueFactory;
+import io.qdrant.client.VectorsFactory;
+import io.qdrant.client.WithPayloadSelectorFactory;
 import io.qdrant.client.WithVectorsSelectorFactory;
-import io.qdrant.client.grpc.Common.Filter;
-import io.qdrant.client.grpc.Common.PointId;
-import io.qdrant.client.grpc.JsonWithInt.Value;
+import io.qdrant.client.grpc.Common;
+import io.qdrant.client.grpc.JsonWithInt;
 import io.qdrant.client.grpc.Points;
-import io.qdrant.client.grpc.Points.DeletePoints;
-import io.qdrant.client.grpc.Points.PointStruct;
-import io.qdrant.client.grpc.Points.PointsSelector;
-import io.qdrant.client.grpc.Points.QueryPoints;
-import io.qdrant.client.grpc.Points.ScoredPoint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,274 +81,193 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Represents a <a href="https://qdrant.tech/">Qdrant</a> collection as an
- * embedding store. With
- * support for storing {@link dev.langchain4j.data.document.Metadata}.
- */
-public class QdrantEmbeddingStore implements EmbeddingStore<TextSegment> {
+public class QdrantEmbeddingStore
+implements EmbeddingStore<TextSegment> {
     private static final Logger log = LoggerFactory.getLogger(QdrantEmbeddingStore.class);
-
     private final QdrantClient client;
     private final String payloadTextKey;
     private final String collectionName;
 
-    /**
-     * @param collectionName The name of the Qdrant collection.
-     * @param host           The host of the Qdrant instance.
-     * @param port           The GRPC port of the Qdrant instance.
-     * @param useTls         Whether to use TLS(HTTPS).
-     * @param payloadTextKey The field name of the text segment in the Qdrant
-     * payload.
-     * @param apiKey         The Qdrant API key to authenticate with.
-     */
-    public QdrantEmbeddingStore(
-            String collectionName,
-            String host,
-            int port,
-            boolean useTls,
-            String payloadTextKey,
-            @Nullable String apiKey) {
-
-        QdrantGrpcClient.Builder grpcClientBuilder = QdrantGrpcClient.newBuilder(host, port, useTls);
-
+    public QdrantEmbeddingStore(String collectionName, String host, int port, boolean useTls, String payloadTextKey, @Nullable String apiKey) {
+        QdrantGrpcClient.Builder grpcClientBuilder = QdrantGrpcClient.newBuilder((String)host, (int)port, (boolean)useTls);
         if (apiKey != null) {
             grpcClientBuilder.withApiKey(apiKey);
         }
-
         this.client = new QdrantClient(grpcClientBuilder.build());
         this.collectionName = collectionName;
         this.payloadTextKey = payloadTextKey;
     }
 
-    /**
-     * @param client         A Qdrant client instance.
-     * @param collectionName The name of the Qdrant collection.
-     * @param payloadTextKey The field name of the text segment in the Qdrant
-     * payload.
-     */
     public QdrantEmbeddingStore(QdrantClient client, String collectionName, String payloadTextKey) {
         this.client = client;
         this.collectionName = collectionName;
         this.payloadTextKey = payloadTextKey;
     }
 
-    @Override
     public String add(Embedding embedding) {
-        String id = randomUUID();
-        add(id, embedding);
+        String id = Utils.randomUUID();
+        this.add(id, embedding);
         return id;
     }
 
-    @Override
     public void add(String id, Embedding embedding) {
-        addInternal(id, embedding, null);
+        this.addInternal(id, embedding, null);
     }
 
-    @Override
     public String add(Embedding embedding, TextSegment textSegment) {
-        String id = randomUUID();
-        addInternal(id, embedding, textSegment);
+        String id = Utils.randomUUID();
+        this.addInternal(id, embedding, textSegment);
         return id;
     }
 
-    @Override
     public List<String> addAll(List<Embedding> embeddings) {
-
-        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).collect(Collectors.toList());
-
-        addAll(ids, embeddings, null);
-
+        List<String> ids = embeddings.stream().map(ignored -> Utils.randomUUID()).collect(Collectors.toList());
+        this.addAll(ids, embeddings, null);
         return ids;
     }
 
     private void addInternal(String id, Embedding embedding, TextSegment textSegment) {
-        addAll(singletonList(id), singletonList(embedding), textSegment == null ? null : singletonList(textSegment));
+        this.addAll(Collections.singletonList(id), Collections.singletonList(embedding), textSegment == null ? null : Collections.singletonList(textSegment));
     }
 
-    @Override
-    public void addAll(List<String> ids, List<Embedding> embeddings, List<TextSegment> textSegments)
-            throws RuntimeException {
-        if (isNullOrEmpty(ids) || isNullOrEmpty(embeddings)) {
+    public void addAll(List<String> ids, List<Embedding> embeddings, List<TextSegment> textSegments) throws RuntimeException {
+        if (Utils.isNullOrEmpty(ids) || Utils.isNullOrEmpty(embeddings)) {
             log.info("Empty embeddings - no ops");
             return;
         }
         try {
-            List<PointStruct> points = new ArrayList<>(embeddings.size());
-
-            for (int i = 0; i < embeddings.size(); i++) {
-
+            ArrayList<Points.PointStruct> points = new ArrayList<Points.PointStruct>(embeddings.size());
+            for (int i = 0; i < embeddings.size(); ++i) {
                 String id = ids.get(i);
-                PointId qdrantId = toPointId(id);
+                Common.PointId qdrantId = QdrantEmbeddingStore.toPointId(id);
                 Embedding embedding = embeddings.get(i);
-
-                PointStruct.Builder pointBuilder =
-                        PointStruct.newBuilder().setId(qdrantId).setVectors(vectors(embedding.vector()));
-
+                Points.PointStruct.Builder pointBuilder = Points.PointStruct.newBuilder().setId(qdrantId).setVectors(VectorsFactory.vectors((float[])embedding.vector()));
                 if (textSegments != null) {
-                    Map<String, Object> metadata =
-                            textSegments.get(i).metadata().toMap();
-
-                    // Assuming ValueMapFactory is available in your actual codebase imports
-                    // If not, it might be an internal class you need to make sure is accessible
-                    Map<String, Value> payload = ValueMapFactory.valueMap(metadata);
-                    payload.put(payloadTextKey, value(textSegments.get(i).text()));
+                    Map metadata = textSegments.get(i).metadata().toMap();
+                    Map<String, JsonWithInt.Value> payload = ValueMapFactory.valueMap(metadata);
+                    payload.put(this.payloadTextKey, ValueFactory.value((String)textSegments.get(i).text()));
                     pointBuilder.putAllPayload(payload);
                 }
-
                 points.add(pointBuilder.build());
             }
-
-            client.upsertAsync(collectionName, points).get();
-        } catch (InterruptedException | ExecutionException e) {
+            this.client.upsertAsync(this.collectionName, points).get();
+        }
+        catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
     public void remove(String id) {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("id cannot be null or blank");
         }
-        removeAll(Collections.singleton(id));
+        this.removeAll(Collections.singleton(id));
     }
 
-    @Override
     public void removeAll(Collection<String> ids) {
-        ensureNotEmpty(ids, "ids");
+        ValidationUtils.ensureNotEmpty(ids, (String)"ids");
         try {
-
-            Points.PointsIdsList pointsIdsList = Points.PointsIdsList.newBuilder()
-                    .addAllIds(ids.stream().map(QdrantEmbeddingStore::toPointId).collect(toList()))
-                    .build();
-            PointsSelector pointsSelector =
-                    PointsSelector.newBuilder().setPoints(pointsIdsList).build();
-
-            client.deleteAsync(DeletePoints.newBuilder()
-                            .setCollectionName(collectionName)
-                            .setPoints(pointsSelector)
-                            .build())
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
+            Points.PointsIdsList pointsIdsList = Points.PointsIdsList.newBuilder().addAllIds((Iterable)ids.stream().map(QdrantEmbeddingStore::toPointId).collect(Collectors.toList())).build();
+            Points.PointsSelector pointsSelector = Points.PointsSelector.newBuilder().setPoints(pointsIdsList).build();
+            this.client.deleteAsync(Points.DeletePoints.newBuilder().setCollectionName(this.collectionName).setPoints(pointsSelector).build()).get();
+        }
+        catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public void removeAll(dev.langchain4j.store.embedding.filter.Filter filter) {
-        ensureNotNull(filter, "filter");
+    public void removeAll(Filter filter) {
+        ValidationUtils.ensureNotNull((Object)filter, (String)"filter");
         try {
-            Filter qdrantFilter = QdrantFilterConverter.convertExpression(filter);
-            PointsSelector pointsSelector =
-                    PointsSelector.newBuilder().setFilter(qdrantFilter).build();
-
-            client.deleteAsync(DeletePoints.newBuilder()
-                            .setCollectionName(collectionName)
-                            .setPoints(pointsSelector)
-                            .build())
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
+            Common.Filter qdrantFilter = QdrantFilterConverter.convertExpression(filter);
+            Points.PointsSelector pointsSelector = Points.PointsSelector.newBuilder().setFilter(qdrantFilter).build();
+            this.client.deleteAsync(Points.DeletePoints.newBuilder().setCollectionName(this.collectionName).setPoints(pointsSelector).build()).get();
+        }
+        catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
     public void removeAll() {
-        clearStore();
+        this.clearStore();
     }
 
-    @Override
     public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
-
-        QueryPoints.Builder queryBuilder = QueryPoints.newBuilder()
-                .setCollectionName(collectionName)
-                .setQuery(QueryFactory.nearest(request.queryEmbedding().vectorAsList()))
-                .setWithVectors(WithVectorsSelectorFactory.enable(true))
-                .setWithPayload(enable(true))
-                .setLimit(request.maxResults());
-
+        List results;
+        Points.QueryPoints.Builder queryBuilder = Points.QueryPoints.newBuilder().setCollectionName(this.collectionName).setQuery(QueryFactory.nearest((List)request.queryEmbedding().vectorAsList())).setWithVectors(WithVectorsSelectorFactory.enable((boolean)true)).setWithPayload(WithPayloadSelectorFactory.enable((boolean)true)).setLimit((long)request.maxResults());
         if (request.filter() != null) {
-            Filter filter = QdrantFilterConverter.convertExpression(request.filter());
+            Common.Filter filter = QdrantFilterConverter.convertExpression(request.filter());
             queryBuilder.setFilter(filter);
         }
-
-        List<ScoredPoint> results;
-
         try {
-            results = client.queryAsync(queryBuilder.build()).get();
-        } catch (InterruptedException | ExecutionException e) {
+            results = (List)this.client.queryAsync(queryBuilder.build()).get();
+        }
+        catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-
         if (results.isEmpty()) {
-            return new EmbeddingSearchResult<>(emptyList());
+            return new EmbeddingSearchResult(Collections.emptyList());
         }
-
-        List<EmbeddingMatch<TextSegment>> matches = results.stream()
-                .map(vector -> toEmbeddingMatch(vector, request.queryEmbedding()))
-                .filter(match -> match.score() >= request.minScore())
-                .sorted(comparingDouble(EmbeddingMatch::score))
-                .collect(toList());
-
+        List matches = results.stream().map(vector -> this.toEmbeddingMatch((Points.ScoredPoint)vector, request.queryEmbedding())).filter(match -> match.score() >= request.minScore()).sorted(Comparator.comparingDouble(EmbeddingMatch::score)).collect(Collectors.toList());
         Collections.reverse(matches);
-
-        return new EmbeddingSearchResult<>(matches);
+        return new EmbeddingSearchResult(matches);
     }
 
-    /** Deletes all points from the Qdrant collection. */
     public void clearStore() {
         try {
-
-            Filter emptyFilter = Filter.newBuilder().build();
-            PointsSelector allPointsSelector =
-                    PointsSelector.newBuilder().setFilter(emptyFilter).build();
-
-            client.deleteAsync(DeletePoints.newBuilder()
-                            .setCollectionName(collectionName)
-                            .setPoints(allPointsSelector)
-                            .build())
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
+            Common.Filter emptyFilter = Common.Filter.newBuilder().build();
+            Points.PointsSelector allPointsSelector = Points.PointsSelector.newBuilder().setFilter(emptyFilter).build();
+            this.client.deleteAsync(Points.DeletePoints.newBuilder().setCollectionName(this.collectionName).setPoints(allPointsSelector).build()).get();
+        }
+        catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    /** Closes the underlying GRPC client. */
     public void close() {
-        client.close();
+        this.client.close();
     }
 
-    private EmbeddingMatch<TextSegment> toEmbeddingMatch(ScoredPoint scoredPoint, Embedding referenceEmbedding) {
-        Map<String, Value> payload = scoredPoint.getPayloadMap();
-
-        Value textSegmentValue = payload.getOrDefault(payloadTextKey, null);
-
-        Map<String, Object> metadata = payload.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(payloadTextKey))
-                .collect(toMap(Map.Entry::getKey, entry -> ObjectFactory.object(entry.getValue())));
-
-        Embedding embedding = toEmbedding(scoredPoint.getVectors().getVector());
-        double cosineSimilarity = CosineSimilarity.between(embedding, referenceEmbedding);
-
-        return new EmbeddingMatch<>(
-                RelevanceScore.fromCosineSimilarity(cosineSimilarity),
-                pointIdToString(scoredPoint.getId()),
-                embedding,
-                textSegmentValue == null
-                        ? null
-                        : TextSegment.from(textSegmentValue.getStringValue(), new Metadata(metadata)));
+    private EmbeddingMatch<TextSegment> toEmbeddingMatch(Points.ScoredPoint scoredPoint, Embedding referenceEmbedding) {
+        Map payload = scoredPoint.getPayloadMap();
+        JsonWithInt.Value textSegmentValue = payload.getOrDefault(this.payloadTextKey, null);
+        Map<String, Object> metadata = payload.entrySet().stream().filter(entry -> !((String)entry.getKey()).equals(this.payloadTextKey)).collect(Collectors.toMap(Map.Entry::getKey, entry -> ObjectFactory.object((JsonWithInt.Value)entry.getValue())));
+        Embedding embedding = QdrantEmbeddingStore.toEmbedding(scoredPoint.getVectors().getVector());
+        double cosineSimilarity = CosineSimilarity.between((Embedding)embedding, (Embedding)referenceEmbedding);
+        return new EmbeddingMatch(Double.valueOf(RelevanceScore.fromCosineSimilarity((double)cosineSimilarity)), QdrantEmbeddingStore.pointIdToString(scoredPoint.getId()), embedding, textSegmentValue == null ? null : TextSegment.from((String)textSegmentValue.getStringValue(), (Metadata)new Metadata(metadata)));
     }
 
     private static Embedding toEmbedding(Points.VectorOutput vectorOutput) {
-        return Embedding.from(getOrDefault(vectorOutput.getDense().getDataList(), vectorOutput.getDataList()));
+        return Embedding.from((List)Utils.getOrDefault((List)vectorOutput.getDense().getDataList(), (List)vectorOutput.getDataList()));
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    private static Common.PointId toPointId(String id) {
+        try {
+            long num = Long.parseUnsignedLong(id);
+            return PointIdFactory.id((long)num);
+        }
+        catch (NumberFormatException e) {
+            return PointIdFactory.id((UUID)UUID.fromString(id));
+        }
+    }
 
+    private static String pointIdToString(Common.PointId pointId) {
+        switch (pointId.getPointIdOptionsCase()) {
+            case NUM: {
+                return Long.toUnsignedString(pointId.getNum());
+            }
+            case UUID: {
+                return pointId.getUuid();
+            }
+        }
+        throw new IllegalStateException("Unknown point ID type: " + pointId.getPointIdOptionsCase());
+    }
+
+    public static class Builder {
         private String collectionName;
         private String host = "localhost";
         private int port = 6334;
@@ -322,91 +276,48 @@ public class QdrantEmbeddingStore implements EmbeddingStore<TextSegment> {
         private String apiKey = null;
         private QdrantClient client = null;
 
-        /**
-         * @param host The host of the Qdrant instance. Defaults to "localhost".
-         */
         public Builder host(String host) {
             this.host = host;
             return this;
         }
 
-        /**
-         * @param collectionName REQUIRED. The name of the collection.
-         */
         public Builder collectionName(String collectionName) {
             this.collectionName = collectionName;
             return this;
         }
 
-        /**
-         * @param port The GRPC port of the Qdrant instance. Defaults to 6334.
-         * @return
-         */
         public Builder port(int port) {
             this.port = port;
             return this;
         }
 
-        /**
-         * @param useTls Whether to use TLS(HTTPS). Defaults to false.
-         * @return
-         */
         public Builder useTls(boolean useTls) {
             this.useTls = useTls;
             return this;
         }
 
-        /**
-         * @param payloadTextKey The field name of the text segment in the payload.
-         * Defaults to
-         * "text_segment".
-         * @return
-         */
         public Builder payloadTextKey(String payloadTextKey) {
             this.payloadTextKey = payloadTextKey;
             return this;
         }
 
-        /**
-         * @param apiKey The Qdrant API key to authenticate with. Defaults to null.
-         */
         public Builder apiKey(String apiKey) {
             this.apiKey = apiKey;
             return this;
         }
 
-        /**
-         * @param client A Qdrant client instance. Defaults to null.
-         */
         public Builder client(QdrantClient client) {
             this.client = client;
             return this;
         }
 
         public QdrantEmbeddingStore build() {
-            Objects.requireNonNull(collectionName, "collectionName cannot be null");
-
-            if (client != null) {
-                return new QdrantEmbeddingStore(client, collectionName, payloadTextKey);
+            Objects.requireNonNull(this.collectionName, "collectionName cannot be null");
+            if (this.client != null) {
+                return new QdrantEmbeddingStore(this.client, this.collectionName, this.payloadTextKey);
             }
-            return new QdrantEmbeddingStore(collectionName, host, port, useTls, payloadTextKey, apiKey);
+            return new QdrantEmbeddingStore(this.collectionName, this.host, this.port, this.useTls, this.payloadTextKey, this.apiKey);
         }
-    }
-
-    private static PointId toPointId(String id) {
-        try {
-            long num = Long.parseUnsignedLong(id);
-            return id(num);
-        } catch (NumberFormatException e) {
-            return id(UUID.fromString(id));
-        }
-    }
-
-    private static String pointIdToString(PointId pointId) {
-        return switch (pointId.getPointIdOptionsCase()) {
-            case NUM -> Long.toUnsignedString(pointId.getNum());
-            case UUID -> pointId.getUuid();
-            default -> throw new IllegalStateException("Unknown point ID type: " + pointId.getPointIdOptionsCase());
-        };
     }
 }
+

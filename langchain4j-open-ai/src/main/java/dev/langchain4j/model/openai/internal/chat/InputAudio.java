@@ -1,3 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -5,68 +16,59 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
 import java.util.Objects;
 
-@JsonDeserialize(builder = InputAudio.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class InputAudio {
-
     private final String data;
     private final String format;
 
     public InputAudio(Builder builder) {
-        data = builder.data;
-        format = builder.format;
+        this.data = builder.data;
+        this.format = builder.format;
     }
 
     public String getData() {
-        return data;
+        return this.data;
     }
 
     public String getFormat() {
-        return format;
+        return this.format;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof InputAudio
-                && equalTo((InputAudio) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof InputAudio && this.equalTo((InputAudio)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(InputAudio another) {
-        return Objects.equals(data, another.data)
-                && Objects.equals(format, another.format);
+        return Objects.equals(this.data, another.data) && Objects.equals(this.format, another.format);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(data);
-        h += (h << 5) + Objects.hashCode(format);
+        h += (h << 5) + Objects.hashCode(this.data);
+        h += (h << 5) + Objects.hashCode(this.format);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "InputAudio{" +
-                "data=" + data +
-                ", format=" + format +
-                "}";
+        return "InputAudio{data=" + this.data + ", format=" + this.format + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
-    
+
     public static final class Builder {
-        
         private String data;
         private String format;
 
@@ -87,6 +89,6 @@ public class InputAudio {
         public InputAudio build() {
             return new InputAudio(this);
         }
-        
     }
 }
+

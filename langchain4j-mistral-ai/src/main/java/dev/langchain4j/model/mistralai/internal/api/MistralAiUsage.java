@@ -1,22 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiUsage.MistralAiUsageBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralAiUsageBuilder.class)
 public class MistralAiUsage {
-
     private final Integer promptTokens;
     private final Integer totalTokens;
     private final Integer completionTokens;
@@ -39,7 +48,6 @@ public class MistralAiUsage {
         return this.completionTokens;
     }
 
-    @Override
     public int hashCode() {
         int hash = 3;
         hash = 89 * hash + Objects.hashCode(this.promptTokens);
@@ -48,34 +56,29 @@ public class MistralAiUsage {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        final MistralAiUsage other = (MistralAiUsage) obj;
-        return Objects.equals(this.promptTokens, other.promptTokens)
-                && Objects.equals(this.totalTokens, other.totalTokens)
-                && Objects.equals(this.completionTokens, other.completionTokens);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        MistralAiUsage other = (MistralAiUsage)obj;
+        return Objects.equals(this.promptTokens, other.promptTokens) && Objects.equals(this.totalTokens, other.totalTokens) && Objects.equals(this.completionTokens, other.completionTokens);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiUsage [", "]")
-                .add("promptTokens=" + this.getPromptTokens())
-                .add("totalTokens=" + this.getTotalTokens())
-                .add("completionTokens=" + this.getCompletionTokens())
-                .toString();
+        return new StringJoiner(", ", "MistralAiUsage [", "]").add("promptTokens=" + this.getPromptTokens()).add("totalTokens=" + this.getTotalTokens()).add("completionTokens=" + this.getCompletionTokens()).toString();
     }
 
     public static MistralAiUsageBuilder builder() {
         return new MistralAiUsageBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiUsageBuilder {
-
         private Integer promptTokens;
         private Integer totalTokens;
         private Integer completionTokens;
@@ -100,3 +103,4 @@ public class MistralAiUsage {
         }
     }
 }
+

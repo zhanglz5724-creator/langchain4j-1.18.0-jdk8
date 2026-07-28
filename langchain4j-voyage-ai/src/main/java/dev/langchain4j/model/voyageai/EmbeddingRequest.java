@@ -1,9 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.voyageai;
 
 import java.util.List;
 
 class EmbeddingRequest {
-
     private List<String> input;
     private String model;
     private String inputType;
@@ -22,23 +24,23 @@ class EmbeddingRequest {
     }
 
     public List<String> getInput() {
-        return input;
+        return this.input;
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public String getInputType() {
-        return inputType;
+        return this.inputType;
     }
 
     public Boolean getTruncation() {
-        return truncation;
+        return this.truncation;
     }
 
     public String getEncodingFormat() {
-        return encodingFormat;
+        return this.encodingFormat;
     }
 
     static Builder builder() {
@@ -46,12 +48,14 @@ class EmbeddingRequest {
     }
 
     static class Builder {
-
         private List<String> input;
         private String model;
         private String inputType;
         private Boolean truncation;
         private String encodingFormat;
+
+        Builder() {
+        }
 
         Builder input(List<String> input) {
             this.input = input;
@@ -79,7 +83,8 @@ class EmbeddingRequest {
         }
 
         EmbeddingRequest build() {
-            return new EmbeddingRequest(input, model, inputType, truncation, encodingFormat);
+            return new EmbeddingRequest(this.input, this.model, this.inputType, this.truncation, this.encodingFormat);
         }
     }
 }
+

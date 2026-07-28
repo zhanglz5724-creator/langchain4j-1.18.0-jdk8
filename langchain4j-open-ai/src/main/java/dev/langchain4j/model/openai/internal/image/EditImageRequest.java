@@ -1,11 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.openai.internal.image;
 
-/**
- * Represents the request to the OpenAI image edit API.
- * Find description of parameters <a href="https://developers.openai.com/api/reference/resources/images/methods/edit">here</a>.
- */
-public class EditImageRequest {
+import dev.langchain4j.model.openai.internal.image.ImageFile;
 
+public class EditImageRequest {
     private final ImageFile image;
     private final ImageFile mask;
     private final String model;
@@ -33,47 +33,47 @@ public class EditImageRequest {
     }
 
     public ImageFile image() {
-        return image;
+        return this.image;
     }
 
     public ImageFile mask() {
-        return mask;
+        return this.mask;
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public String prompt() {
-        return prompt;
+        return this.prompt;
     }
 
     public int n() {
-        return n;
+        return this.n;
     }
 
     public String size() {
-        return size;
+        return this.size;
     }
 
     public String quality() {
-        return quality;
+        return this.quality;
     }
 
     public String user() {
-        return user;
+        return this.user;
     }
 
     public String background() {
-        return background;
+        return this.background;
     }
 
     public String outputFormat() {
-        return outputFormat;
+        return this.outputFormat;
     }
 
     public Integer outputCompression() {
-        return outputCompression;
+        return this.outputCompression;
     }
 
     public static Builder builder() {
@@ -81,7 +81,6 @@ public class EditImageRequest {
     }
 
     public static class Builder {
-
         private ImageFile image;
         private ImageFile mask;
         private String model;
@@ -154,3 +153,4 @@ public class EditImageRequest {
         }
     }
 }
+

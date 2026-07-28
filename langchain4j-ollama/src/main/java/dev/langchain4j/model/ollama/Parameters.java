@@ -1,20 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import java.util.List;
 import java.util.Map;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class Parameters {
-
     private String type;
     private Map<String, Map<String, Object>> properties;
     private List<String> required;
@@ -33,7 +39,7 @@ class Parameters {
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public void setType(String type) {
@@ -41,7 +47,7 @@ class Parameters {
     }
 
     public Map<String, Map<String, Object>> getProperties() {
-        return properties;
+        return this.properties;
     }
 
     public void setProperties(Map<String, Map<String, Object>> properties) {
@@ -49,7 +55,7 @@ class Parameters {
     }
 
     public List<String> getRequired() {
-        return required;
+        return this.required;
     }
 
     public void setRequired(List<String> required) {
@@ -57,10 +63,12 @@ class Parameters {
     }
 
     static class Builder {
-
         private String type = "object";
         private Map<String, Map<String, Object>> properties;
         private List<String> required;
+
+        Builder() {
+        }
 
         Builder type(String type) {
             this.type = type;
@@ -78,7 +86,8 @@ class Parameters {
         }
 
         Parameters build() {
-            return new Parameters(type, properties, required);
+            return new Parameters(this.type, this.properties, this.required);
         }
     }
 }
+

@@ -1,33 +1,47 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.embedding.listener.EmbeddingModelListener
+ *  dev.langchain4j.model.embedding.request.EmbeddingInput
+ *  dev.langchain4j.model.embedding.request.EmbeddingRequest
+ *  dev.langchain4j.model.embedding.response.EmbeddingResponse
+ *  dev.langchain4j.model.output.TokenUsage
+ *  dev.langchain4j.spi.ServiceHelper
+ */
 package dev.langchain4j.model.ollama;
 
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureGreaterThanZeroIfNotNull;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-
 import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
+import dev.langchain4j.model.embedding.request.EmbeddingInput;
+import dev.langchain4j.model.ollama.EmbeddingRequest;
+import dev.langchain4j.model.ollama.EmbeddingResponse;
+import dev.langchain4j.model.ollama.OllamaClient;
 import dev.langchain4j.model.ollama.spi.OllamaEmbeddingModelBuilderFactory;
-import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/**
- * <a href="https://github.com/jmorganca/ollama/blob/main/docs/api.md">Ollama API reference</a>
- */
-public class OllamaEmbeddingModel extends DimensionAwareEmbeddingModel {
-
+public class OllamaEmbeddingModel
+extends DimensionAwareEmbeddingModel {
     private final OllamaClient client;
     private final String modelName;
     private final Integer maxRetries;
@@ -35,76 +49,48 @@ public class OllamaEmbeddingModel extends DimensionAwareEmbeddingModel {
     private final List<EmbeddingModelListener> listeners;
 
     public OllamaEmbeddingModel(OllamaEmbeddingModelBuilder builder) {
-        this.client = OllamaClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(builder.baseUrl)
-                .timeout(builder.timeout)
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .customHeaders(builder.customHeadersSupplier)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
-        this.dimensions = ensureGreaterThanZeroIfNotNull(builder.dimensions, "dimensions");
-        this.listeners = copy(builder.listeners);
+        this.client = OllamaClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl(builder.baseUrl).timeout(builder.timeout).logRequests(builder.logRequests).logResponses(builder.logResponses).customHeaders(builder.customHeadersSupplier).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
+        this.dimensions = ValidationUtils.ensureGreaterThanZeroIfNotNull((Integer)builder.dimensions, (String)"dimensions");
+        this.listeners = Utils.copy((List)builder.listeners);
     }
 
-    @Override
     public List<EmbeddingModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
         return ModelProvider.OLLAMA;
     }
 
     public static OllamaEmbeddingModelBuilder builder() {
-        for (OllamaEmbeddingModelBuilderFactory factory : loadFactories(OllamaEmbeddingModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(OllamaEmbeddingModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OllamaEmbeddingModelBuilderFactory factory = (OllamaEmbeddingModelBuilderFactory)iterator.next();
+            return (OllamaEmbeddingModelBuilder)factory.get();
         }
         return new OllamaEmbeddingModelBuilder();
     }
 
-    @Override
-    public dev.langchain4j.model.embedding.response.EmbeddingResponse doEmbed(
-            dev.langchain4j.model.embedding.request.EmbeddingRequest request) {
-        List<String> input = request.inputs().stream()
-                .map(dev.langchain4j.model.embedding.request.EmbeddingInput::text)
-                .collect(Collectors.toList());
-
-        EmbeddingRequest ollamaRequest = EmbeddingRequest.builder()
-                .model(modelName)
-                .input(input)
-                .dimensions(dimensions)
-                .build();
-        EmbeddingResponse ollamaResponse = withRetryMappingExceptions(() -> client.embed(ollamaRequest), maxRetries);
-        List<Embedding> embeddings =
-                ollamaResponse.getEmbeddings().stream().map(Embedding::from).collect(Collectors.toList());
-
-        TokenUsage tokenUsage = ollamaResponse.getPromptEvalCount() == null
-                ? null
-                : new TokenUsage(ollamaResponse.getPromptEvalCount());
-
-        return dev.langchain4j.model.embedding.response.EmbeddingResponse.builder()
-                .embeddings(embeddings)
-                .modelName(modelName)
-                .tokenUsage(tokenUsage)
-                .build();
+    public dev.langchain4j.model.embedding.response.EmbeddingResponse doEmbed(dev.langchain4j.model.embedding.request.EmbeddingRequest request) {
+        List<String> input = request.inputs().stream().map(EmbeddingInput::text).collect(Collectors.toList());
+        EmbeddingRequest ollamaRequest = EmbeddingRequest.builder().model(this.modelName).input(input).dimensions(this.dimensions).build();
+        EmbeddingResponse ollamaResponse = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.embed(ollamaRequest), (int)this.maxRetries);
+        List embeddings = ollamaResponse.getEmbeddings().stream().map(Embedding::from).collect(Collectors.toList());
+        TokenUsage tokenUsage = ollamaResponse.getPromptEvalCount() == null ? null : new TokenUsage(ollamaResponse.getPromptEvalCount());
+        return dev.langchain4j.model.embedding.response.EmbeddingResponse.builder().embeddings(embeddings).modelName(this.modelName).tokenUsage(tokenUsage).build();
     }
 
-    @Override
     public String modelName() {
         return this.modelName;
     }
 
-    @Override
     protected Integer knownDimension() {
-        return dimensions;
+        return this.dimensions;
     }
 
     public static class OllamaEmbeddingModelBuilder {
-
         private HttpClientBuilder httpClientBuilder;
         private String baseUrl;
         private String modelName;
@@ -116,16 +102,6 @@ public class OllamaEmbeddingModel extends DimensionAwareEmbeddingModel {
         private Integer dimensions;
         private List<EmbeddingModelListener> listeners;
 
-        public OllamaEmbeddingModelBuilder() {
-            // This is public so it can be extended
-        }
-
-        /**
-         * Sets the {@link HttpClientBuilder} that will be used to create the {@link HttpClient}
-         * that will be used to communicate with Ollama.
-         * <p>
-         * NOTE: {@link #timeout(Duration)} overrides timeouts set on the {@link HttpClientBuilder}.
-         */
         public OllamaEmbeddingModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -161,41 +137,21 @@ public class OllamaEmbeddingModel extends DimensionAwareEmbeddingModel {
             return this;
         }
 
-        /**
-         * Sets custom HTTP headers.
-         */
         public OllamaEmbeddingModelBuilder customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
             return this;
         }
 
-        /**
-         * Sets a supplier for custom HTTP headers.
-         * The supplier is called before each request, allowing dynamic header values.
-         * For example, this is useful for OAuth2 tokens that expire and need refreshing.
-         */
         public OllamaEmbeddingModelBuilder customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
             return this;
         }
 
-        /**
-         * Sets the number of dimensions for the generated embeddings.
-         * <p>
-         * If provided, the embedding vector will be truncated or projected
-         * to the specified size by the Ollama embedding model.
-         *
-         * @param dimensions the embedding dimension size, must be positive
-         * @return builder
-         */
         public OllamaEmbeddingModelBuilder dimensions(Integer dimensions) {
             this.dimensions = dimensions;
             return this;
         }
 
-        /**
-         * Sets the {@link EmbeddingModelListener}s notified around each embedding call.
-         */
         public OllamaEmbeddingModelBuilder listeners(List<EmbeddingModelListener> listeners) {
             this.listeners = listeners;
             return this;
@@ -206,3 +162,4 @@ public class OllamaEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
     }
 }
+

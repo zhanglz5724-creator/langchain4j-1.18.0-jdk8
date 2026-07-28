@@ -1,30 +1,36 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.model.chat.request.json.JsonObjectSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchemaElement
+ */
 package dev.langchain4j.service.output;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
-
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
+import dev.langchain4j.service.output.OutputParser;
+import dev.langchain4j.service.output.ParsingUtils;
 import java.util.Optional;
 
-import static dev.langchain4j.service.output.ParsingUtils.parseAsStringOrJson;
-
 @Internal
-class FloatOutputParser implements OutputParser<Float> {
+class FloatOutputParser
+implements OutputParser<Float> {
+    FloatOutputParser() {
+    }
 
     @Override
     public Float parse(String text) {
-        return parseAsStringOrJson(text, Float::parseFloat, Float.class);
+        return ParsingUtils.parseAsStringOrJson(text, Float::parseFloat, Float.class);
     }
 
     @Override
     public Optional<JsonSchema> jsonSchema() {
-        JsonSchema jsonSchema = JsonSchema.builder()
-                .name("number")
-                .rootElement(JsonObjectSchema.builder()
-                        .addNumberProperty("value")
-                        .required("value")
-                        .build())
-                .build();
+        JsonSchema jsonSchema = JsonSchema.builder().name("number").rootElement((JsonSchemaElement)JsonObjectSchema.builder().addNumberProperty("value").required(new String[]{"value"}).build()).build();
         return Optional.of(jsonSchema);
     }
 
@@ -33,3 +39,4 @@ class FloatOutputParser implements OutputParser<Float> {
         return "floating point number";
     }
 }
+

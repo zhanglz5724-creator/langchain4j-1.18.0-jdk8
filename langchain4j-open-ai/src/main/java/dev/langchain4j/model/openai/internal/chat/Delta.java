@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,17 +22,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.chat.FunctionCall;
+import dev.langchain4j.model.openai.internal.chat.ToolCall;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Collections.unmodifiableList;
-
-@JsonDeserialize(builder = Delta.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Delta {
-
     @JsonProperty
     private final String role;
     @JsonProperty
@@ -40,76 +53,63 @@ public final class Delta {
     }
 
     public String role() {
-        return role;
+        return this.role;
     }
 
     public String content() {
-        return content;
+        return this.content;
     }
 
     public String reasoningContent() {
-        return reasoningContent;
+        return this.reasoningContent;
     }
 
     public List<ToolCall> toolCalls() {
-        return toolCalls;
+        return this.toolCalls;
     }
 
     @Deprecated
     public FunctionCall functionCall() {
-        return functionCall;
+        return this.functionCall;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof Delta
-                && equalTo((Delta) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof Delta && this.equalTo((Delta)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(Delta another) {
-        return Objects.equals(role, another.role)
-                && Objects.equals(content, another.content)
-                && Objects.equals(reasoningContent, another.reasoningContent)
-                && Objects.equals(toolCalls, another.toolCalls)
-                && Objects.equals(functionCall, another.functionCall);
+        return Objects.equals(this.role, another.role) && Objects.equals(this.content, another.content) && Objects.equals(this.reasoningContent, another.reasoningContent) && Objects.equals(this.toolCalls, another.toolCalls) && Objects.equals(this.functionCall, another.functionCall);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(role);
-        h += (h << 5) + Objects.hashCode(content);
-        h += (h << 5) + Objects.hashCode(reasoningContent);
-        h += (h << 5) + Objects.hashCode(toolCalls);
-        h += (h << 5) + Objects.hashCode(functionCall);
+        h += (h << 5) + Objects.hashCode(this.role);
+        h += (h << 5) + Objects.hashCode(this.content);
+        h += (h << 5) + Objects.hashCode(this.reasoningContent);
+        h += (h << 5) + Objects.hashCode(this.toolCalls);
+        h += (h << 5) + Objects.hashCode(this.functionCall);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "Delta{"
-                + "role=" + role
-                + ", content=" + content
-                + ", reasoningContent=" + reasoningContent
-                + ", toolCalls=" + toolCalls
-                + ", functionCall=" + functionCall
-                + "}";
+        return "Delta{role=" + this.role + ", content=" + this.content + ", reasoningContent=" + this.reasoningContent + ", toolCalls=" + this.toolCalls + ", functionCall=" + this.functionCall + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String role;
         private String content;
         private String reasoningContent;
@@ -134,7 +134,7 @@ public final class Delta {
 
         public Builder toolCalls(List<ToolCall> toolCalls) {
             if (toolCalls != null) {
-                this.toolCalls = unmodifiableList(toolCalls);
+                this.toolCalls = Collections.unmodifiableList(toolCalls);
             }
             return this;
         }
@@ -150,3 +150,4 @@ public final class Delta {
         }
     }
 }
+

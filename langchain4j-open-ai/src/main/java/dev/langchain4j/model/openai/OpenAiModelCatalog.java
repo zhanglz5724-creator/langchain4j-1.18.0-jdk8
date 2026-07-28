@@ -1,3 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.catalog.ModelCatalog
+ *  dev.langchain4j.model.catalog.ModelDescription
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.openai;
 
 import dev.langchain4j.http.client.HttpClientBuilder;
@@ -8,79 +19,40 @@ import dev.langchain4j.model.catalog.ModelDescription;
 import dev.langchain4j.model.openai.internal.OpenAiClient;
 import dev.langchain4j.model.openai.internal.models.ModelsListResponse;
 import dev.langchain4j.model.openai.internal.models.OpenAiModelInfo;
-import org.slf4j.Logger;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
 
-import static dev.langchain4j.model.ModelProvider.OPEN_AI;
-
-/**
- * OpenAI implementation of {@link ModelCatalog}.
- *
- * <p>Example:
- * <pre>{@code
- * OpenAiModelCatalog catalog = OpenAiModelCatalog.builder()
- *     .apiKey(System.getenv("OPENAI_API_KEY"))
- *     .build();
- *
- * List<ModelDescription> models = catalog.listModels();
- * }</pre>
- */
-public class OpenAiModelCatalog implements ModelCatalog {
-
+public class OpenAiModelCatalog
+implements ModelCatalog {
     private final OpenAiClient client;
 
     private OpenAiModelCatalog(Builder builder) {
-        this.client = OpenAiClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(Utils.getOrDefault(builder.baseUrl, "https://api.openai.com/v1/"))
-                .apiKey(builder.apiKey)
-                .organizationId(builder.organizationId)
-                .projectId(builder.projectId)
-                .connectTimeout(builder.connectTimeout)
-                .readTimeout(builder.readTimeout)
-                .userAgent(builder.userAgent)
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .logger(builder.logger)
-                .customHeaders(builder.customHeaders)
-                .customQueryParams(builder.customQueryParams)
-                .build();
+        this.client = ((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)OpenAiClient.builder().httpClientBuilder(builder.httpClientBuilder)).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)"https://api.openai.com/v1/"))).apiKey(builder.apiKey)).organizationId(builder.organizationId)).projectId(builder.projectId)).connectTimeout(builder.connectTimeout)).readTimeout(builder.readTimeout)).userAgent(builder.userAgent)).logRequests(builder.logRequests)).logResponses(builder.logResponses)).logger(builder.logger)).customHeaders(builder.customHeaders)).customQueryParams(builder.customQueryParams)).build();
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public List<ModelDescription> listModels() {
-        ModelsListResponse response = client.listModels().execute();
-        List<ModelDescription> models =
-                response.getData().stream().map(this::mapToModelDescription).collect(Collectors.toList());
-
+        ModelsListResponse response = this.client.listModels().execute();
+        List<ModelDescription> models = response.getData().stream().map(this::mapToModelDescription).collect(Collectors.toList());
         return models;
     }
 
-    @Override
     public ModelProvider provider() {
-        return OPEN_AI;
+        return ModelProvider.OPEN_AI;
     }
 
     private ModelDescription mapToModelDescription(OpenAiModelInfo modelInfo) {
-        return ModelDescription.builder()
-                .name(modelInfo.id())
-                .provider(OPEN_AI)
-                .owner(modelInfo.ownedBy())
-                .createdAt(modelInfo.created() != null ? Instant.ofEpochSecond(modelInfo.created()) : null)
-                .build();
+        return ModelDescription.builder().name(modelInfo.id()).provider(ModelProvider.OPEN_AI).owner(modelInfo.ownedBy()).createdAt(modelInfo.created() != null ? Instant.ofEpochSecond(modelInfo.created()) : null).build();
     }
 
     public static class Builder {
-
         private HttpClientBuilder httpClientBuilder;
         private String baseUrl;
         private String apiKey;
@@ -165,3 +137,4 @@ public class OpenAiModelCatalog implements ModelCatalog {
         }
     }
 }
+

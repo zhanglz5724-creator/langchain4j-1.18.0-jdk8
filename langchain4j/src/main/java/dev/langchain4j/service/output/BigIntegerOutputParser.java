@@ -1,19 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.model.chat.request.json.JsonObjectSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchemaElement
+ */
 package dev.langchain4j.service.output;
-
-import static dev.langchain4j.service.output.ParsingUtils.parseAsStringOrJson;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
+import dev.langchain4j.service.output.OutputParser;
+import dev.langchain4j.service.output.ParsingUtils;
 import java.math.BigInteger;
 import java.util.Optional;
 
 @Internal
-class BigIntegerOutputParser implements OutputParser<BigInteger> {
+class BigIntegerOutputParser
+implements OutputParser<BigInteger> {
+    BigIntegerOutputParser() {
+    }
 
     @Override
     public BigInteger parse(String text) {
-        return parseAsStringOrJson(text, BigIntegerOutputParser::parseBigInteger, BigInteger.class);
+        return ParsingUtils.parseAsStringOrJson(text, BigIntegerOutputParser::parseBigInteger, BigInteger.class);
     }
 
     private static BigInteger parseBigInteger(String text) {
@@ -22,13 +35,7 @@ class BigIntegerOutputParser implements OutputParser<BigInteger> {
 
     @Override
     public Optional<JsonSchema> jsonSchema() {
-        JsonSchema jsonSchema = JsonSchema.builder()
-                .name("integer")
-                .rootElement(JsonObjectSchema.builder()
-                        .addIntegerProperty("value")
-                        .required("value")
-                        .build())
-                .build();
+        JsonSchema jsonSchema = JsonSchema.builder().name("integer").rootElement((JsonSchemaElement)JsonObjectSchema.builder().addIntegerProperty("value").required(new String[]{"value"}).build()).build();
         return Optional.of(jsonSchema);
     }
 
@@ -37,3 +44,4 @@ class BigIntegerOutputParser implements OutputParser<BigInteger> {
         return "integer number";
     }
 }
+

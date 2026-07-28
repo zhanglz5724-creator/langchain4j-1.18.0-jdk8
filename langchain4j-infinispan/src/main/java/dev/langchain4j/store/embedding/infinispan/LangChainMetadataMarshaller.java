@@ -1,73 +1,69 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.infinispan.protostream.MessageMarshaller
+ *  org.infinispan.protostream.MessageMarshaller$ProtoStreamReader
+ *  org.infinispan.protostream.MessageMarshaller$ProtoStreamWriter
+ */
 package dev.langchain4j.store.embedding.infinispan;
 
+import dev.langchain4j.store.embedding.infinispan.LangChainMetadata;
 import java.io.IOException;
 import org.infinispan.protostream.MessageMarshaller;
 
-/**
- * Marshaller to read and write metadata to Infinispan
- */
-public class LangChainMetadataMarshaller implements MessageMarshaller<LangChainMetadata> {
-
+public class LangChainMetadataMarshaller
+implements MessageMarshaller<LangChainMetadata> {
     private final String typeName;
 
-    /**
-     * Constructor for the LangChainMetadata Marshaller
-     * @param typeName, the full type of the protobuf entity
-     */
     public LangChainMetadataMarshaller(String typeName) {
         this.typeName = typeName;
     }
 
-    @Override
-    public LangChainMetadata readFrom(ProtoStreamReader reader) throws IOException {
+    public LangChainMetadata readFrom(MessageMarshaller.ProtoStreamReader reader) throws IOException {
         String name = reader.readString("name");
         String valueStr = reader.readString("value");
         Long valueInt = reader.readLong("value_int");
         Double valueFloat = reader.readDouble("value_float");
         Object value = valueStr;
-
         if (value == null) {
             value = valueInt;
         }
         if (value == null) {
             value = valueFloat;
         }
-
         return new LangChainMetadata(name, value);
     }
 
-    @Override
-    public void writeTo(ProtoStreamWriter writer, LangChainMetadata item) throws IOException {
+    public void writeTo(MessageMarshaller.ProtoStreamWriter writer, LangChainMetadata item) throws IOException {
         writer.writeString("name", item.name());
         String value = null;
         Long value_int = null;
         Double value_float = null;
         if (item.value() instanceof String) {
-            value = (String) item.value();
+            value = (String)item.value();
         } else if (item.value() instanceof Integer) {
-            value_int = ((Integer) item.value()).longValue();
+            value_int = ((Integer)item.value()).longValue();
         } else if (item.value() instanceof Long) {
-            value_int = (Long) item.value();
+            value_int = (Long)item.value();
         } else if (item.value() instanceof Float) {
-            value_float = ((Float) item.value()).doubleValue();
+            value_float = ((Float)item.value()).doubleValue();
         } else if (item.value() instanceof Double) {
-            value_float = (Double) item.value();
+            value_float = (Double)item.value();
         } else {
             value = item.value().toString();
         }
-
         writer.writeString("value", value);
         writer.writeLong("value_int", value_int);
         writer.writeDouble("value_float", value_float);
     }
 
-    @Override
     public Class<? extends LangChainMetadata> getJavaClass() {
         return LangChainMetadata.class;
     }
 
-    @Override
     public String getTypeName() {
-        return typeName;
+        return this.typeName;
     }
 }
+

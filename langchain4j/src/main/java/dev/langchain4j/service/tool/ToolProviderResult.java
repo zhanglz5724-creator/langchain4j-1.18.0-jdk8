@@ -1,9 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ReturnBehavior
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ */
 package dev.langchain4j.service.tool;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.service.IllegalConfigurationException;
-
+import dev.langchain4j.service.tool.AiServiceTool;
+import dev.langchain4j.service.tool.ToolExecutor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,11 +20,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
 
 public class ToolProviderResult {
-
     private final List<AiServiceTool> tools;
 
     public ToolProviderResult(Builder builder) {
@@ -24,65 +30,51 @@ public class ToolProviderResult {
     }
 
     public ToolProviderResult(List<AiServiceTool> tools) {
-        this(builder().addAll(tools));
+        this(ToolProviderResult.builder().addAll(tools));
     }
 
     public ToolProviderResult(Map<ToolSpecification, ToolExecutor> tools) {
-        this(builder().addAll(tools));
+        this(ToolProviderResult.builder().addAll(tools));
     }
 
-    /**
-     * @since 1.14.0
-     */
     public List<AiServiceTool> aiServiceTools() {
-        return tools;
+        return this.tools;
     }
 
-    @Deprecated(since = "1.14.0")
+    @Deprecated
     public ToolSpecification toolSpecificationByName(String name) {
-        for (AiServiceTool tool : tools) {
-            if (tool.name().equals(name)) {
-                return tool.toolSpecification();
-            }
+        for (AiServiceTool tool : this.tools) {
+            if (!tool.name().equals(name)) continue;
+            return tool.toolSpecification();
         }
         return null;
     }
 
-    @Deprecated(since = "1.14.0")
+    @Deprecated
     public ToolExecutor toolExecutorByName(String name) {
-        for (AiServiceTool tool : tools) {
-            if (tool.name().equals(name)) {
-                return tool.toolExecutor();
-            }
+        for (AiServiceTool tool : this.tools) {
+            if (!tool.name().equals(name)) continue;
+            return tool.toolExecutor();
         }
         return null;
     }
 
-    /**
-     * @deprecated use {@link #aiServiceTools()} instead
-     */
-    @Deprecated(since = "1.14.0")
+    @Deprecated
     public Map<ToolSpecification, ToolExecutor> tools() {
-        Map<ToolSpecification, ToolExecutor> result = new LinkedHashMap<>(tools.size());
-        for (AiServiceTool tool : tools) {
+        LinkedHashMap<ToolSpecification, ToolExecutor> result = new LinkedHashMap<ToolSpecification, ToolExecutor>(this.tools.size());
+        for (AiServiceTool tool : this.tools) {
             result.put(tool.toolSpecification(), tool.toolExecutor());
         }
         return result;
     }
 
-    /**
-     * @deprecated use {@link #aiServiceTools()} to get tool's {@link ReturnBehavior}
-     */
-    @Deprecated(since = "1.14.0")
+    @Deprecated
     public Set<String> immediateReturnToolNames() {
-        return tools.stream()
-                .filter(tool -> tool.returnBehavior() == ReturnBehavior.IMMEDIATE)
-                .map(tool -> tool.name())
-                .collect(toSet());
+        return this.tools.stream().filter(tool -> tool.returnBehavior() == ReturnBehavior.IMMEDIATE).map(tool -> tool.name()).collect(Collectors.toSet());
     }
 
     public Builder toBuilder() {
-        return builder().addAll(tools);
+        return ToolProviderResult.builder().addAll(this.tools);
     }
 
     public static Builder builder() {
@@ -90,25 +82,20 @@ public class ToolProviderResult {
     }
 
     public static class Builder {
-
-        private final List<AiServiceTool> tools = new ArrayList<>();
-        private final Set<String> immediateReturnToolNames = new HashSet<>();
+        private final List<AiServiceTool> tools = new ArrayList<AiServiceTool>();
+        private final Set<String> immediateReturnToolNames = new HashSet<String>();
 
         public Builder add(AiServiceTool tool) {
-            tools.add(tool);
+            this.tools.add(tool);
             return this;
         }
 
         public Builder add(ToolSpecification tool, ToolExecutor executor) {
-            return add(tool, executor, ReturnBehavior.TO_LLM);
+            return this.add(tool, executor, ReturnBehavior.TO_LLM);
         }
 
         public Builder add(ToolSpecification tool, ToolExecutor executor, ReturnBehavior returnBehavior) {
-            tools.add(AiServiceTool.builder()
-                    .toolSpecification(tool)
-                    .toolExecutor(executor)
-                    .returnBehavior(returnBehavior)
-                    .build());
+            this.tools.add(AiServiceTool.builder().toolSpecification(tool).toolExecutor(executor).returnBehavior(returnBehavior).build());
             return this;
         }
 
@@ -122,11 +109,7 @@ public class ToolProviderResult {
             return this;
         }
 
-        /**
-         * @deprecated use {@link #add(AiServiceTool)} or {@link #add(ToolSpecification, ToolExecutor, ReturnBehavior)}
-         * to specify tool's {@link ReturnBehavior}
-         */
-        @Deprecated(since = "1.14.0")
+        @Deprecated
         public Builder immediateReturnToolNames(Set<String> immediateReturnToolNames) {
             if (immediateReturnToolNames != null) {
                 this.immediateReturnToolNames.addAll(immediateReturnToolNames);
@@ -139,26 +122,20 @@ public class ToolProviderResult {
         }
 
         private List<AiServiceTool> buildFinalToolList() {
-            Map<String, Integer> toolsByName = new HashMap<>(tools.size());
-            for (int i = 0; i < tools.size(); i++) {
-                String name = tools.get(i).name();
-                if (toolsByName.putIfAbsent(name, i) != null) {
-                    throw new IllegalConfigurationException("Duplicated definition for tool: " + name);
-                }
+            HashMap<String, Integer> toolsByName = new HashMap<String, Integer>(this.tools.size());
+            for (int i = 0; i < this.tools.size(); ++i) {
+                String name = this.tools.get(i).name();
+                if (toolsByName.putIfAbsent(name, i) == null) continue;
+                throw new IllegalConfigurationException("Duplicated definition for tool: " + name);
             }
-            for (String name : immediateReturnToolNames) {
-                Integer idx = toolsByName.get(name);
-                if (idx == null) {
-                    continue;
-                }
-                AiServiceTool existing = tools.get(idx);
-                if (existing.returnBehavior() != ReturnBehavior.IMMEDIATE) {
-                    tools.set(idx, existing.toBuilder()
-                            .returnBehavior(ReturnBehavior.IMMEDIATE)
-                            .build());
-                }
+            for (String name : this.immediateReturnToolNames) {
+                AiServiceTool existing;
+                Integer idx = (Integer)toolsByName.get(name);
+                if (idx == null || (existing = this.tools.get(idx)).returnBehavior() == ReturnBehavior.IMMEDIATE) continue;
+                this.tools.set(idx, existing.toBuilder().returnBehavior(ReturnBehavior.IMMEDIATE).build());
             }
-            return tools;
+            return this.tools;
         }
     }
 }
+

@@ -1,16 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.image.Image$Builder
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.image.ImageModel
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.openai;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.DEFAULT_OPENAI_URL;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.DEFAULT_USER_AGENT;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.time.Duration.ofSeconds;
 
 import dev.langchain4j.data.image.Image;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.image.ImageModel;
+import dev.langchain4j.model.openai.OpenAiImageModelName;
 import dev.langchain4j.model.openai.internal.OpenAiClient;
+import dev.langchain4j.model.openai.internal.SyncOrAsync;
 import dev.langchain4j.model.openai.internal.image.EditImageRequest;
 import dev.langchain4j.model.openai.internal.image.GenerateImagesRequest;
 import dev.langchain4j.model.openai.internal.image.GenerateImagesResponse;
@@ -18,19 +29,17 @@ import dev.langchain4j.model.openai.internal.image.ImageData;
 import dev.langchain4j.model.openai.internal.image.ImageFile;
 import dev.langchain4j.model.openai.spi.OpenAiImageModelBuilderFactory;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
-/**
- * Represents an OpenAI image generation model.
- * Find the parameters description <a href="https://developers.openai.com/api/reference/resources/images/methods/generate">here</a>.
- */
-public class OpenAiImageModel implements ImageModel {
-
+public class OpenAiImageModel
+implements ImageModel {
     private final String modelName;
     private final String size;
     private final String quality;
@@ -39,30 +48,13 @@ public class OpenAiImageModel implements ImageModel {
     private final String outputFormat;
     private final Integer outputCompression;
     private final String moderation;
-
     private final OpenAiClient client;
-
     private final Integer maxRetries;
 
     public OpenAiImageModel(OpenAiImageModelBuilder builder) {
-        OpenAiClient.Builder cBuilder = OpenAiClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.baseUrl, DEFAULT_OPENAI_URL))
-                .apiKey(builder.apiKey)
-                .organizationId(builder.organizationId)
-                .projectId(builder.projectId)
-                .connectTimeout(getOrDefault(builder.timeout, ofSeconds(15)))
-                .readTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .userAgent(DEFAULT_USER_AGENT)
-                .customHeaders(builder.customHeadersSupplier)
-                .customQueryParams(builder.customQueryParams);
-
-        this.client = cBuilder.build();
-
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        Object cBuilder = ((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)OpenAiClient.builder().httpClientBuilder(builder.httpClientBuilder)).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)"https://api.openai.com/v1"))).apiKey(builder.apiKey)).organizationId(builder.organizationId)).projectId(builder.projectId)).connectTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(15L)))).readTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L)))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false))).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false))).logger(builder.logger)).userAgent("langchain4j-openai")).customHeaders(builder.customHeadersSupplier)).customQueryParams(builder.customQueryParams);
+        this.client = ((OpenAiClient.Builder)cBuilder).build();
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
         this.modelName = builder.modelName;
         this.size = builder.size;
         this.quality = builder.quality;
@@ -74,68 +66,65 @@ public class OpenAiImageModel implements ImageModel {
     }
 
     public String modelName() {
-        return modelName;
+        return this.modelName;
     }
 
-    @Override
     public Response<Image> generate(String prompt) {
-        GenerateImagesRequest request = requestBuilder(prompt).build();
-
-        GenerateImagesResponse response = withRetryMappingExceptions(() -> client.imagesGeneration(request), maxRetries)
-                .execute();
-
-        return Response.from(fromImageData(response.data().get(0), response.outputFormat()));
+        GenerateImagesRequest request = this.requestBuilder(prompt).build();
+        GenerateImagesResponse response = (GenerateImagesResponse)((SyncOrAsync)RetryUtils.withRetryMappingExceptions(() -> this.client.imagesGeneration(request), (int)this.maxRetries)).execute();
+        return Response.from((Object)OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
     }
 
-    @Override
     public Response<List<Image>> generate(String prompt, int n) {
-        GenerateImagesRequest request = requestBuilder(prompt).n(n).build();
-
-        GenerateImagesResponse response = withRetryMappingExceptions(() -> client.imagesGeneration(request), maxRetries)
-                .execute();
-
+        GenerateImagesRequest request = this.requestBuilder(prompt).n(n).build();
+        GenerateImagesResponse response = (GenerateImagesResponse)((SyncOrAsync)RetryUtils.withRetryMappingExceptions(() -> this.client.imagesGeneration(request), (int)this.maxRetries)).execute();
         String responseOutputFormat = response.outputFormat();
-        return Response.from(response.data().stream()
-                .map(data -> fromImageData(data, responseOutputFormat))
-                .collect(Collectors.toList()));
+        return Response.from(response.data().stream().map(data -> OpenAiImageModel.fromImageData(data, responseOutputFormat)).collect(Collectors.toList()));
     }
 
-    @Override
     public Response<Image> edit(Image image, String prompt) {
-        EditImageRequest request = editRequestBuilder(image, prompt).build();
-
-        GenerateImagesResponse response = withRetryMappingExceptions(() -> client.imagesEdit(request), maxRetries)
-                .execute();
-
-        return Response.from(fromImageData(response.data().get(0), response.outputFormat()));
+        EditImageRequest request = this.editRequestBuilder(image, prompt).build();
+        GenerateImagesResponse response = (GenerateImagesResponse)((SyncOrAsync)RetryUtils.withRetryMappingExceptions(() -> this.client.imagesEdit(request), (int)this.maxRetries)).execute();
+        return Response.from((Object)OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
     }
 
-    @Override
     public Response<Image> edit(Image image, Image mask, String prompt) {
-        EditImageRequest request =
-                editRequestBuilder(image, prompt).mask(ImageFile.from(mask)).build();
-
-        GenerateImagesResponse response = withRetryMappingExceptions(() -> client.imagesEdit(request), maxRetries)
-                .execute();
-
-        return Response.from(fromImageData(response.data().get(0), response.outputFormat()));
+        EditImageRequest request = this.editRequestBuilder(image, prompt).mask(ImageFile.from(mask)).build();
+        GenerateImagesResponse response = (GenerateImagesResponse)((SyncOrAsync)RetryUtils.withRetryMappingExceptions(() -> this.client.imagesEdit(request), (int)this.maxRetries)).execute();
+        return Response.from((Object)OpenAiImageModel.fromImageData(response.data().get(0), response.outputFormat()));
     }
 
     public static OpenAiImageModelBuilder builder() {
-        for (OpenAiImageModelBuilderFactory factory : loadFactories(OpenAiImageModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(OpenAiImageModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OpenAiImageModelBuilderFactory factory = (OpenAiImageModelBuilderFactory)iterator.next();
+            return (OpenAiImageModelBuilder)factory.get();
         }
         return new OpenAiImageModelBuilder();
     }
 
-    public static class OpenAiImageModelBuilder {
+    private static Image fromImageData(ImageData data, String outputFormat) {
+        Image.Builder imageBuilder = Image.builder().url(data.url()).base64Data(data.b64Json()).revisedPrompt(data.revisedPrompt());
+        if (outputFormat != null) {
+            imageBuilder.mimeType("image/" + outputFormat);
+        }
+        return imageBuilder.build();
+    }
 
+    private GenerateImagesRequest.Builder requestBuilder(String prompt) {
+        return GenerateImagesRequest.builder().model(this.modelName).prompt(prompt).size(this.size).quality(this.quality).user(this.user).background(this.background).outputFormat(this.outputFormat).outputCompression(this.outputCompression).moderation(this.moderation);
+    }
+
+    private EditImageRequest.Builder editRequestBuilder(Image image, String prompt) {
+        return EditImageRequest.builder().image(ImageFile.from(image)).model(this.modelName).prompt(prompt).size(this.size).quality(this.quality).user(this.user).background(this.background).outputFormat(this.outputFormat).outputCompression(this.outputCompression);
+    }
+
+    public static class OpenAiImageModelBuilder {
         private HttpClientBuilder httpClientBuilder;
         private String baseUrl;
         private String apiKey;
         private String organizationId;
         private String projectId;
-
         private String modelName;
         private String size;
         private String quality;
@@ -151,10 +140,6 @@ public class OpenAiImageModel implements ImageModel {
         private Logger logger;
         private Supplier<Map<String, String>> customHeadersSupplier;
         private Map<String, String> customQueryParams;
-
-        public OpenAiImageModelBuilder() {
-            // This is public so it can be extended
-        }
 
         public OpenAiImageModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
@@ -246,28 +231,16 @@ public class OpenAiImageModel implements ImageModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public OpenAiImageModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
-        /**
-         * Sets custom HTTP headers.
-         */
         public OpenAiImageModelBuilder customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
             return this;
         }
 
-        /**
-         * Sets a supplier for custom HTTP headers.
-         * The supplier is called before each request, allowing dynamic header values.
-         * For example, this is useful for OAuth2 tokens that expire and need refreshing.
-         */
         public OpenAiImageModelBuilder customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
             return this;
@@ -282,41 +255,5 @@ public class OpenAiImageModel implements ImageModel {
             return new OpenAiImageModel(this);
         }
     }
-
-    private static Image fromImageData(ImageData data, String outputFormat) {
-        Image.Builder imageBuilder =
-                Image.builder().url(data.url()).base64Data(data.b64Json()).revisedPrompt(data.revisedPrompt());
-
-        if (outputFormat != null) {
-            imageBuilder.mimeType("image/" + outputFormat);
-        }
-
-        return imageBuilder.build();
-    }
-
-    private GenerateImagesRequest.Builder requestBuilder(String prompt) {
-        return GenerateImagesRequest.builder()
-                .model(modelName)
-                .prompt(prompt)
-                .size(size)
-                .quality(quality)
-                .user(user)
-                .background(background)
-                .outputFormat(outputFormat)
-                .outputCompression(outputCompression)
-                .moderation(moderation);
-    }
-
-    private EditImageRequest.Builder editRequestBuilder(Image image, String prompt) {
-        return EditImageRequest.builder()
-                .image(ImageFile.from(image))
-                .model(modelName)
-                .prompt(prompt)
-                .size(size)
-                .quality(quality)
-                .user(user)
-                .background(background)
-                .outputFormat(outputFormat)
-                .outputCompression(outputCompression);
-    }
 }
+

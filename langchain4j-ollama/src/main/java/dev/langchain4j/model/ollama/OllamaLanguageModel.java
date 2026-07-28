@@ -1,30 +1,42 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.language.LanguageModel
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  dev.langchain4j.spi.ServiceHelper
+ */
 package dev.langchain4j.model.ollama;
 
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.ollama.InternalOllamaHelper.toOllamaResponseFormat;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-
-import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.language.LanguageModel;
+import dev.langchain4j.model.ollama.CompletionRequest;
+import dev.langchain4j.model.ollama.CompletionResponse;
+import dev.langchain4j.model.ollama.InternalOllamaHelper;
+import dev.langchain4j.model.ollama.OllamaClient;
+import dev.langchain4j.model.ollama.Options;
 import dev.langchain4j.model.ollama.spi.OllamaLanguageModelBuilderFactory;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * <a href="https://github.com/jmorganca/ollama/blob/main/docs/api.md">Ollama API reference</a>
- * <br>
- * <a href="https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values">Ollama API parameters</a>.
- */
-public class OllamaLanguageModel implements LanguageModel {
-
+public class OllamaLanguageModel
+implements LanguageModel {
     private final OllamaClient client;
     private final String modelName;
     private final Options options;
@@ -32,55 +44,29 @@ public class OllamaLanguageModel implements LanguageModel {
     private final Integer maxRetries;
 
     public OllamaLanguageModel(OllamaLanguageModelBuilder builder) {
-        this.client = OllamaClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(builder.baseUrl)
-                .timeout(builder.timeout)
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .customHeaders(builder.customHeadersSupplier)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.options = Options.builder()
-                .temperature(builder.temperature)
-                .topK(builder.topK)
-                .topP(builder.topP)
-                .repeatPenalty(builder.repeatPenalty)
-                .seed(builder.seed)
-                .numPredict(builder.numPredict)
-                .numCtx(builder.numCtx)
-                .stop(builder.stop)
-                .build();
+        this.client = OllamaClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl(builder.baseUrl).timeout(builder.timeout).logRequests(builder.logRequests).logResponses(builder.logResponses).customHeaders(builder.customHeadersSupplier).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.options = Options.builder().temperature(builder.temperature).topK(builder.topK).topP(builder.topP).repeatPenalty(builder.repeatPenalty).seed(builder.seed).numPredict(builder.numPredict).numCtx(builder.numCtx).stop(builder.stop).build();
         this.responseFormat = builder.responseFormat;
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
     public static OllamaLanguageModelBuilder builder() {
-        for (OllamaLanguageModelBuilderFactory factory : loadFactories(OllamaLanguageModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(OllamaLanguageModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OllamaLanguageModelBuilderFactory factory = (OllamaLanguageModelBuilderFactory)iterator.next();
+            return (OllamaLanguageModelBuilder)factory.get();
         }
         return new OllamaLanguageModelBuilder();
     }
 
-    @Override
     public Response<String> generate(String prompt) {
-
-        CompletionRequest request = CompletionRequest.builder()
-                .model(modelName)
-                .prompt(prompt)
-                .options(options)
-                .format(toOllamaResponseFormat(responseFormat))
-                .stream(false)
-                .build();
-
-        CompletionResponse response = withRetryMappingExceptions(() -> client.completion(request), maxRetries);
-
-        return Response.from(
-                response.getResponse(), new TokenUsage(response.getPromptEvalCount(), response.getEvalCount()));
+        CompletionRequest request = CompletionRequest.builder().model(this.modelName).prompt(prompt).options(this.options).format(InternalOllamaHelper.toOllamaResponseFormat(this.responseFormat)).stream(false).build();
+        CompletionResponse response = (CompletionResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.completion(request), (int)this.maxRetries);
+        return Response.from((Object)response.getResponse(), (TokenUsage)new TokenUsage(response.getPromptEvalCount(), response.getEvalCount()));
     }
 
     public static class OllamaLanguageModelBuilder {
-
         private HttpClientBuilder httpClientBuilder;
         private String baseUrl;
         private String modelName;
@@ -99,16 +85,6 @@ public class OllamaLanguageModel implements LanguageModel {
         private Boolean logResponses;
         private Supplier<Map<String, String>> customHeadersSupplier;
 
-        public OllamaLanguageModelBuilder() {
-            // This is public so it can be extended
-        }
-
-        /**
-         * Sets the {@link HttpClientBuilder} that will be used to create the {@link HttpClient}
-         * that will be used to communicate with Ollama.
-         * <p>
-         * NOTE: {@link #timeout(Duration)} overrides timeouts set on the {@link HttpClientBuilder}.
-         */
         public OllamaLanguageModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -189,19 +165,11 @@ public class OllamaLanguageModel implements LanguageModel {
             return this;
         }
 
-        /**
-         * Sets custom HTTP headers.
-         */
         public OllamaLanguageModelBuilder customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
             return this;
         }
 
-        /**
-         * Sets a supplier for custom HTTP headers.
-         * The supplier is called before each request, allowing dynamic header values.
-         * For example, this is useful for OAuth2 tokens that expire and need refreshing.
-         */
         public OllamaLanguageModelBuilder customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
             return this;
@@ -212,3 +180,4 @@ public class OllamaLanguageModel implements LanguageModel {
         }
     }
 }
+

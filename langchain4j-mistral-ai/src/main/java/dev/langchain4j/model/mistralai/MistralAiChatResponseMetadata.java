@@ -1,70 +1,73 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ *  dev.langchain4j.http.client.sse.ServerSentEvent
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata$Builder
+ */
 package dev.langchain4j.model.mistralai;
-
-import static dev.langchain4j.internal.Utils.copy;
 
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEvent;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import java.util.List;
 import java.util.Objects;
 
-public class MistralAiChatResponseMetadata extends ChatResponseMetadata {
+public class MistralAiChatResponseMetadata
+extends ChatResponseMetadata {
     private final SuccessfulHttpResponse rawHttpResponse;
     private final List<ServerSentEvent> rawServerSentEvents;
 
     private MistralAiChatResponseMetadata(Builder builder) {
-        super(builder);
+        super((ChatResponseMetadata.Builder)builder);
         this.rawHttpResponse = builder.rawHttpResponse;
-        this.rawServerSentEvents = copy(builder.rawServerSentEvents);
+        this.rawServerSentEvents = Utils.copy((List)builder.rawServerSentEvents);
     }
 
     public SuccessfulHttpResponse rawHttpResponse() {
-        return rawHttpResponse;
+        return this.rawHttpResponse;
     }
 
     public List<ServerSentEvent> rawServerSentEvents() {
-        return rawServerSentEvents;
+        return this.rawServerSentEvents;
     }
 
-    @Override
     public Builder toBuilder() {
-        return ((Builder) super.toBuilder(builder()))
-                .rawHttpResponse(rawHttpResponse)
-                .rawServerSentEvents(rawServerSentEvents);
+        return ((Builder)super.toBuilder((ChatResponseMetadata.Builder)MistralAiChatResponseMetadata.builder())).rawHttpResponse(this.rawHttpResponse).rawServerSentEvents(this.rawServerSentEvents);
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        MistralAiChatResponseMetadata that = (MistralAiChatResponseMetadata) o;
-        return Objects.equals(rawHttpResponse, that.rawHttpResponse)
-                && Objects.equals(rawServerSentEvents, that.rawServerSentEvents);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        MistralAiChatResponseMetadata that = (MistralAiChatResponseMetadata)((Object)o);
+        return Objects.equals(this.rawHttpResponse, that.rawHttpResponse) && Objects.equals(this.rawServerSentEvents, that.rawServerSentEvents);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), rawHttpResponse, rawServerSentEvents);
+        return Objects.hash(super.hashCode(), this.rawHttpResponse, this.rawServerSentEvents);
     }
 
-    @Override
     public String toString() {
-        return "MistralAiChatResponseMetadata{" + "id='"
-                + id() + '\'' + ", modelName='"
-                + modelName() + '\'' + ", tokenUsage="
-                + tokenUsage() + ", finishReason="
-                + finishReason() + ", created="
-                + rawHttpResponse + ", rawServerSentEvents="
-                + rawServerSentEvents + '}';
+        return "MistralAiChatResponseMetadata{id='" + this.id() + '\'' + ", modelName='" + this.modelName() + '\'' + ", tokenUsage=" + this.tokenUsage() + ", finishReason=" + this.finishReason() + ", created=" + this.rawHttpResponse + ", rawServerSentEvents=" + this.rawServerSentEvents + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends ChatResponseMetadata.Builder<Builder> {
-
+    public static class Builder
+    extends ChatResponseMetadata.Builder<Builder> {
         private SuccessfulHttpResponse rawHttpResponse;
         private List<ServerSentEvent> rawServerSentEvents;
 
@@ -78,9 +81,9 @@ public class MistralAiChatResponseMetadata extends ChatResponseMetadata {
             return this;
         }
 
-        @Override
         public MistralAiChatResponseMetadata build() {
             return new MistralAiChatResponseMetadata(this);
         }
     }
 }
+

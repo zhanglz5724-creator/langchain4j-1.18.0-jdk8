@@ -1,8 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.planner;
 
+import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.scope.AgenticScope;
-
 import java.util.List;
+import java.util.Objects;
+
 public class InitPlanningContext {
     private final AgenticScope agenticScope;
     private final AgentInstance plannerAgent;
@@ -14,34 +19,41 @@ public class InitPlanningContext {
         this.subagents = subagents;
     }
 
-    public AgenticScope getAgenticScope() {
-        return agenticScope;
+    public AgenticScope agenticScope() {
+        return this.agenticScope;
     }
 
-    public AgentInstance getPlannerAgent() {
-        return plannerAgent;
+    public AgentInstance plannerAgent() {
+        return this.plannerAgent;
     }
 
-    public List<AgentInstance> getSubagents() {
-        return subagents;
+    public List<AgentInstance> subagents() {
+        return this.subagents;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        InitPlanningContext that = (InitPlanningContext) o;
-        return java.util.Objects.equals(this.agenticScope, that.agenticScope) && java.util.Objects.equals(this.plannerAgent, that.plannerAgent) && java.util.Objects.equals(this.subagents, that.subagents);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof InitPlanningContext)) {
+            return false;
+        }
+        InitPlanningContext other = (InitPlanningContext)o;
+        if (!Objects.equals(this.agenticScope, other.agenticScope)) {
+            return false;
+        }
+        if (!Objects.equals(this.plannerAgent, other.plannerAgent)) {
+            return false;
+        }
+        return Objects.equals(this.subagents, other.subagents);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(agenticScope, plannerAgent, subagents);
+        return Objects.hash(this.agenticScope, this.plannerAgent, this.subagents);
     }
 
-    @Override
     public String toString() {
-        return "InitPlanningContext{"agenticScope=" + agenticScope + , "plannerAgent=" + plannerAgent + , "subagents=" + subagents + "}"";
+        return "InitPlanningContext{agenticScope=" + this.agenticScope + ", plannerAgent=" + this.plannerAgent + ", subagents=" + this.subagents + "}";
     }
-
 }
+

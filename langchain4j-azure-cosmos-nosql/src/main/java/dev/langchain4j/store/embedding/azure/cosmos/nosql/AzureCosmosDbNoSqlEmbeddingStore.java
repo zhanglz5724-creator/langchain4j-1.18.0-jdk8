@@ -1,7 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.azure.core.credential.AzureKeyCredential
+ *  com.azure.core.credential.TokenCredential
+ *  com.azure.cosmos.models.CosmosFullTextPolicy
+ *  com.azure.cosmos.models.CosmosVectorEmbeddingPolicy
+ *  com.azure.cosmos.models.IndexingPolicy
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ */
 package dev.langchain4j.store.embedding.azure.cosmos.nosql;
-
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.internal.ValidationUtils.ensureTrue;
 
 import com.azure.core.credential.AzureKeyCredential;
 import com.azure.core.credential.TokenCredential;
@@ -9,71 +19,21 @@ import com.azure.cosmos.models.CosmosFullTextPolicy;
 import com.azure.cosmos.models.CosmosVectorEmbeddingPolicy;
 import com.azure.cosmos.models.IndexingPolicy;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.rag.content.retriever.azure.cosmos.nosql.AzureCosmosDBNoSqlFilterMapper;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.azure.cosmos.nosql.AbstractAzureCosmosDBNoSqlEmbeddingStore;
+import dev.langchain4j.store.embedding.azure.cosmos.nosql.AzureCosmosDBSearchQueryType;
 
-/**
- * Implementation of {@link EmbeddingStore} that uses Azure Cosmos DB NoSQL API for storing and retrieving embeddings.
- * This store provides vector search capabilities using Cosmos DB's vector search functionality.
- * <p>
- * You can read more about vector search using Azure Cosmos DB NoSQL
- * <a href="https://aka.ms/CosmosVectorSearch">here</a>.
- */
-public class AzureCosmosDbNoSqlEmbeddingStore extends AbstractAzureCosmosDBNoSqlEmbeddingStore
-        implements EmbeddingStore<TextSegment> {
-
-    public AzureCosmosDbNoSqlEmbeddingStore(
-            String endpoint,
-            AzureKeyCredential keyCredential,
-            String databaseName,
-            String containerName,
-            String partitionKeyPath,
-            IndexingPolicy indexingPolicy,
-            CosmosVectorEmbeddingPolicy cosmosVectorEmbeddingPolicy,
-            CosmosFullTextPolicy cosmosFullTextPolicy,
-            Integer vectorStoreThroughput,
-            AzureCosmosDBSearchQueryType azureCosmosDBSearchQueryType,
-            AzureCosmosDBNoSqlFilterMapper filterMapper) {
-        this.initialize(
-                endpoint,
-                keyCredential,
-                null,
-                databaseName,
-                containerName,
-                partitionKeyPath,
-                indexingPolicy,
-                cosmosVectorEmbeddingPolicy,
-                cosmosFullTextPolicy,
-                vectorStoreThroughput,
-                azureCosmosDBSearchQueryType,
-                filterMapper);
+public class AzureCosmosDbNoSqlEmbeddingStore
+extends AbstractAzureCosmosDBNoSqlEmbeddingStore
+implements EmbeddingStore<TextSegment> {
+    public AzureCosmosDbNoSqlEmbeddingStore(String endpoint, AzureKeyCredential keyCredential, String databaseName, String containerName, String partitionKeyPath, IndexingPolicy indexingPolicy, CosmosVectorEmbeddingPolicy cosmosVectorEmbeddingPolicy, CosmosFullTextPolicy cosmosFullTextPolicy, Integer vectorStoreThroughput, AzureCosmosDBSearchQueryType azureCosmosDBSearchQueryType, AzureCosmosDBNoSqlFilterMapper filterMapper) {
+        this.initialize(endpoint, keyCredential, null, databaseName, containerName, partitionKeyPath, indexingPolicy, cosmosVectorEmbeddingPolicy, cosmosFullTextPolicy, vectorStoreThroughput, azureCosmosDBSearchQueryType, filterMapper);
     }
 
-    public AzureCosmosDbNoSqlEmbeddingStore(
-            String endpoint,
-            TokenCredential tokenCredential,
-            String databaseName,
-            String containerName,
-            String partitionKeyPath,
-            IndexingPolicy indexingPolicy,
-            CosmosVectorEmbeddingPolicy cosmosVectorEmbeddingPolicy,
-            CosmosFullTextPolicy cosmosFullTextPolicy,
-            Integer vectorStoreThroughput,
-            AzureCosmosDBSearchQueryType azureCosmosDBSearchQueryType,
-            AzureCosmosDBNoSqlFilterMapper filterMappe) {
-        this.initialize(
-                endpoint,
-                null,
-                tokenCredential,
-                databaseName,
-                containerName,
-                partitionKeyPath,
-                indexingPolicy,
-                cosmosVectorEmbeddingPolicy,
-                cosmosFullTextPolicy,
-                vectorStoreThroughput,
-                azureCosmosDBSearchQueryType,
-                filterMapper);
+    public AzureCosmosDbNoSqlEmbeddingStore(String endpoint, TokenCredential tokenCredential, String databaseName, String containerName, String partitionKeyPath, IndexingPolicy indexingPolicy, CosmosVectorEmbeddingPolicy cosmosVectorEmbeddingPolicy, CosmosFullTextPolicy cosmosFullTextPolicy, Integer vectorStoreThroughput, AzureCosmosDBSearchQueryType azureCosmosDBSearchQueryType, AzureCosmosDBNoSqlFilterMapper filterMappe) {
+        this.initialize(endpoint, null, tokenCredential, databaseName, containerName, partitionKeyPath, indexingPolicy, cosmosVectorEmbeddingPolicy, cosmosFullTextPolicy, vectorStoreThroughput, azureCosmosDBSearchQueryType, this.filterMapper);
     }
 
     public static Builder builder() {
@@ -94,56 +54,26 @@ public class AzureCosmosDbNoSqlEmbeddingStore extends AbstractAzureCosmosDBNoSql
         private AzureCosmosDBSearchQueryType searchQueryType;
         private AzureCosmosDBNoSqlFilterMapper filterMapper;
 
-        /**
-         * Sets the Cosmos DB endpoint.
-         *
-         * @param endpoint the Cosmos DB endpoint
-         * @return this builder instance
-         */
         public Builder endpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;
         }
 
-        /**
-         * Sets the Azure AI Search API key.
-         *
-         * @param apiKey The Azure AI Search API key.
-         * @return builder
-         */
         public Builder apiKey(String apiKey) {
             this.keyCredential = new AzureKeyCredential(apiKey);
             return this;
         }
 
-        /**
-         * Used to authenticate to Azure OpenAI with Azure Active Directory credentials.
-         *
-         * @param tokenCredential the credentials to authenticate with Azure Active Directory
-         * @return builder
-         */
         public Builder tokenCredential(TokenCredential tokenCredential) {
             this.tokenCredential = tokenCredential;
             return this;
         }
 
-        /**
-         * Sets the database name.
-         *
-         * @param databaseName the database name
-         * @return this builder instance
-         */
         public Builder databaseName(String databaseName) {
             this.databaseName = databaseName;
             return this;
         }
 
-        /**
-         * Sets the container name.
-         *
-         * @param containerName the container name
-         * @return this builder instance
-         */
         public Builder containerName(String containerName) {
             this.containerName = containerName;
             return this;
@@ -184,43 +114,14 @@ public class AzureCosmosDbNoSqlEmbeddingStore extends AbstractAzureCosmosDBNoSql
             return this;
         }
 
-        /**
-         * Builds a new {@link AzureCosmosDbNoSqlEmbeddingStore} instance with the configured properties.
-         *
-         * @return a new AzureCosmosDbNoSqlEmbeddingStore instance
-         */
         public AzureCosmosDbNoSqlEmbeddingStore build() {
-            ensureNotNull(endpoint, "endpoint");
-            ensureTrue(
-                    keyCredential != null || tokenCredential != null, "either apiKey or tokenCredential must be set");
-
-            if (keyCredential != null) {
-                return new AzureCosmosDbNoSqlEmbeddingStore(
-                        this.endpoint,
-                        this.keyCredential,
-                        this.databaseName,
-                        this.containerName,
-                        this.partitionKeyPath,
-                        this.indexingPolicy,
-                        this.cosmosVectorEmbeddingPolicy,
-                        this.cosmosFullTextPolicy,
-                        this.vectorStoreThroughput,
-                        this.searchQueryType,
-                        this.filterMapper);
-            } else {
-                return new AzureCosmosDbNoSqlEmbeddingStore(
-                        this.endpoint,
-                        this.tokenCredential,
-                        this.databaseName,
-                        this.containerName,
-                        this.partitionKeyPath,
-                        this.indexingPolicy,
-                        this.cosmosVectorEmbeddingPolicy,
-                        this.cosmosFullTextPolicy,
-                        this.vectorStoreThroughput,
-                        this.searchQueryType,
-                        this.filterMapper);
+            ValidationUtils.ensureNotNull((Object)this.endpoint, (String)"endpoint");
+            ValidationUtils.ensureTrue((this.keyCredential != null || this.tokenCredential != null ? 1 : 0) != 0, (String)"either apiKey or tokenCredential must be set");
+            if (this.keyCredential != null) {
+                return new AzureCosmosDbNoSqlEmbeddingStore(this.endpoint, this.keyCredential, this.databaseName, this.containerName, this.partitionKeyPath, this.indexingPolicy, this.cosmosVectorEmbeddingPolicy, this.cosmosFullTextPolicy, this.vectorStoreThroughput, this.searchQueryType, this.filterMapper);
             }
+            return new AzureCosmosDbNoSqlEmbeddingStore(this.endpoint, this.tokenCredential, this.databaseName, this.containerName, this.partitionKeyPath, this.indexingPolicy, this.cosmosVectorEmbeddingPolicy, this.cosmosFullTextPolicy, this.vectorStoreThroughput, this.searchQueryType, this.filterMapper);
         }
     }
 }
+

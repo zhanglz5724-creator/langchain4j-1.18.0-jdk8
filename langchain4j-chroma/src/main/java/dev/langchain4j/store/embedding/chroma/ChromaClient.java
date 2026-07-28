@@ -1,18 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.store.embedding.chroma;
 
 import dev.langchain4j.Internal;
+import dev.langchain4j.store.embedding.chroma.AddEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.Collection;
+import dev.langchain4j.store.embedding.chroma.CreateCollectionRequest;
+import dev.langchain4j.store.embedding.chroma.DeleteEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.QueryRequest;
+import dev.langchain4j.store.embedding.chroma.QueryResponse;
 
 @Internal
 interface ChromaClient {
-    Collection createCollection(CreateCollectionRequest createCollectionRequest);
+    public Collection createCollection(CreateCollectionRequest var1);
 
-    Collection collection(String collectionName);
+    public Collection collection(String var1);
 
-    boolean addEmbeddings(String collectionId, AddEmbeddingsRequest addEmbeddingsRequest);
+    public boolean addEmbeddings(String var1, AddEmbeddingsRequest var2);
 
-    QueryResponse queryCollection(String collectionId, QueryRequest queryRequest);
+    public QueryResponse queryCollection(String var1, QueryRequest var2);
 
-    void deleteEmbeddings(String collectionId, DeleteEmbeddingsRequest deleteEmbeddingsRequest);
+    public void deleteEmbeddings(String var1, DeleteEmbeddingsRequest var2);
 
-    void deleteCollection(String collectionName);
+    public void deleteCollection(String var1);
 }
+

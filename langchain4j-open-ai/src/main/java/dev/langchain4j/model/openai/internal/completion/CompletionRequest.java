@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.completion;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,19 +23,15 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
 import dev.langchain4j.model.openai.internal.shared.StreamOptions;
-
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
-
-@JsonDeserialize(builder = CompletionRequest.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class CompletionRequest {
-
     @JsonProperty
     private final String model;
     @JsonProperty
@@ -78,159 +88,122 @@ public final class CompletionRequest {
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public String prompt() {
-        return prompt;
+        return this.prompt;
     }
 
     public String suffix() {
-        return suffix;
+        return this.suffix;
     }
 
     public Integer maxTokens() {
-        return maxTokens;
+        return this.maxTokens;
     }
 
     public Double temperature() {
-        return temperature;
+        return this.temperature;
     }
 
     public Double topP() {
-        return topP;
+        return this.topP;
     }
 
     public Integer n() {
-        return n;
+        return this.n;
     }
 
     public Boolean stream() {
-        return stream;
+        return this.stream;
     }
 
     public StreamOptions streamOptions() {
-        return streamOptions;
+        return this.streamOptions;
     }
 
     public Integer logprobs() {
-        return logprobs;
+        return this.logprobs;
     }
 
     public Boolean echo() {
-        return echo;
+        return this.echo;
     }
 
     public List<String> stop() {
-        return stop;
+        return this.stop;
     }
 
     public Double presencePenalty() {
-        return presencePenalty;
+        return this.presencePenalty;
     }
 
     public Double frequencyPenalty() {
-        return frequencyPenalty;
+        return this.frequencyPenalty;
     }
 
     public Integer bestOf() {
-        return bestOf;
+        return this.bestOf;
     }
 
     public Map<String, Integer> logitBias() {
-        return logitBias;
+        return this.logitBias;
     }
 
     public String user() {
-        return user;
+        return this.user;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof CompletionRequest
-                && equalTo((CompletionRequest) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof CompletionRequest && this.equalTo((CompletionRequest)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(CompletionRequest another) {
-        return Objects.equals(model, another.model)
-                && Objects.equals(prompt, another.prompt)
-                && Objects.equals(suffix, another.suffix)
-                && Objects.equals(maxTokens, another.maxTokens)
-                && Objects.equals(temperature, another.temperature)
-                && Objects.equals(topP, another.topP)
-                && Objects.equals(n, another.n)
-                && Objects.equals(stream, another.stream)
-                && Objects.equals(streamOptions, another.streamOptions)
-                && Objects.equals(logprobs, another.logprobs)
-                && Objects.equals(echo, another.echo)
-                && Objects.equals(stop, another.stop)
-                && Objects.equals(presencePenalty, another.presencePenalty)
-                && Objects.equals(frequencyPenalty, another.frequencyPenalty)
-                && Objects.equals(bestOf, another.bestOf)
-                && Objects.equals(logitBias, another.logitBias)
-                && Objects.equals(user, another.user);
+        return Objects.equals(this.model, another.model) && Objects.equals(this.prompt, another.prompt) && Objects.equals(this.suffix, another.suffix) && Objects.equals(this.maxTokens, another.maxTokens) && Objects.equals(this.temperature, another.temperature) && Objects.equals(this.topP, another.topP) && Objects.equals(this.n, another.n) && Objects.equals(this.stream, another.stream) && Objects.equals(this.streamOptions, another.streamOptions) && Objects.equals(this.logprobs, another.logprobs) && Objects.equals(this.echo, another.echo) && Objects.equals(this.stop, another.stop) && Objects.equals(this.presencePenalty, another.presencePenalty) && Objects.equals(this.frequencyPenalty, another.frequencyPenalty) && Objects.equals(this.bestOf, another.bestOf) && Objects.equals(this.logitBias, another.logitBias) && Objects.equals(this.user, another.user);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(model);
-        h += (h << 5) + Objects.hashCode(prompt);
-        h += (h << 5) + Objects.hashCode(suffix);
-        h += (h << 5) + Objects.hashCode(maxTokens);
-        h += (h << 5) + Objects.hashCode(temperature);
-        h += (h << 5) + Objects.hashCode(topP);
-        h += (h << 5) + Objects.hashCode(n);
-        h += (h << 5) + Objects.hashCode(stream);
-        h += (h << 5) + Objects.hashCode(streamOptions);
-        h += (h << 5) + Objects.hashCode(logprobs);
-        h += (h << 5) + Objects.hashCode(echo);
-        h += (h << 5) + Objects.hashCode(stop);
-        h += (h << 5) + Objects.hashCode(presencePenalty);
-        h += (h << 5) + Objects.hashCode(frequencyPenalty);
-        h += (h << 5) + Objects.hashCode(bestOf);
-        h += (h << 5) + Objects.hashCode(logitBias);
-        h += (h << 5) + Objects.hashCode(user);
+        h += (h << 5) + Objects.hashCode(this.model);
+        h += (h << 5) + Objects.hashCode(this.prompt);
+        h += (h << 5) + Objects.hashCode(this.suffix);
+        h += (h << 5) + Objects.hashCode(this.maxTokens);
+        h += (h << 5) + Objects.hashCode(this.temperature);
+        h += (h << 5) + Objects.hashCode(this.topP);
+        h += (h << 5) + Objects.hashCode(this.n);
+        h += (h << 5) + Objects.hashCode(this.stream);
+        h += (h << 5) + Objects.hashCode(this.streamOptions);
+        h += (h << 5) + Objects.hashCode(this.logprobs);
+        h += (h << 5) + Objects.hashCode(this.echo);
+        h += (h << 5) + Objects.hashCode(this.stop);
+        h += (h << 5) + Objects.hashCode(this.presencePenalty);
+        h += (h << 5) + Objects.hashCode(this.frequencyPenalty);
+        h += (h << 5) + Objects.hashCode(this.bestOf);
+        h += (h << 5) + Objects.hashCode(this.logitBias);
+        h += (h << 5) + Objects.hashCode(this.user);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "CompletionRequest{"
-                + "model=" + model
-                + ", prompt=" + prompt
-                + ", suffix=" + suffix
-                + ", maxTokens=" + maxTokens
-                + ", temperature=" + temperature
-                + ", topP=" + topP
-                + ", n=" + n
-                + ", stream=" + stream
-                + ", streamOptions=" + streamOptions
-                + ", logprobs=" + logprobs
-                + ", echo=" + echo
-                + ", stop=" + stop
-                + ", presencePenalty=" + presencePenalty
-                + ", frequencyPenalty=" + frequencyPenalty
-                + ", bestOf=" + bestOf
-                + ", logitBias=" + logitBias
-                + ", user=" + user
-                + "}";
+        return "CompletionRequest{model=" + this.model + ", prompt=" + this.prompt + ", suffix=" + this.suffix + ", maxTokens=" + this.maxTokens + ", temperature=" + this.temperature + ", topP=" + this.topP + ", n=" + this.n + ", stream=" + this.stream + ", streamOptions=" + this.streamOptions + ", logprobs=" + this.logprobs + ", echo=" + this.echo + ", stop=" + this.stop + ", presencePenalty=" + this.presencePenalty + ", frequencyPenalty=" + this.frequencyPenalty + ", bestOf=" + this.bestOf + ", logitBias=" + this.logitBias + ", user=" + this.user + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String model;
         private String prompt;
         private String suffix;
@@ -250,23 +223,23 @@ public final class CompletionRequest {
         private String user;
 
         public Builder from(CompletionRequest request) {
-            model(request.model);
-            prompt(request.prompt);
-            suffix(request.suffix);
-            maxTokens(request.maxTokens);
-            temperature(request.temperature);
-            topP(request.topP);
-            n(request.n);
-            stream(request.stream);
-            streamOptions(request.streamOptions);
-            logprobs(request.logprobs);
-            echo(request.echo);
-            stop(request.stop);
-            presencePenalty(request.presencePenalty);
-            frequencyPenalty(request.frequencyPenalty);
-            bestOf(request.bestOf);
-            logitBias(request.logitBias);
-            user(request.user);
+            this.model(request.model);
+            this.prompt(request.prompt);
+            this.suffix(request.suffix);
+            this.maxTokens(request.maxTokens);
+            this.temperature(request.temperature);
+            this.topP(request.topP);
+            this.n(request.n);
+            this.stream(request.stream);
+            this.streamOptions(request.streamOptions);
+            this.logprobs(request.logprobs);
+            this.echo(request.echo);
+            this.stop(request.stop);
+            this.presencePenalty(request.presencePenalty);
+            this.frequencyPenalty(request.frequencyPenalty);
+            this.bestOf(request.bestOf);
+            this.logitBias(request.logitBias);
+            this.user(request.user);
             return this;
         }
 
@@ -327,7 +300,7 @@ public final class CompletionRequest {
 
         public Builder stop(List<String> stop) {
             if (stop != null) {
-                this.stop = unmodifiableList(stop);
+                this.stop = Collections.unmodifiableList(stop);
             }
             return this;
         }
@@ -349,7 +322,7 @@ public final class CompletionRequest {
 
         public Builder logitBias(Map<String, Integer> logitBias) {
             if (logitBias != null) {
-                this.logitBias = unmodifiableMap(logitBias);
+                this.logitBias = Collections.unmodifiableMap(logitBias);
             }
             return this;
         }
@@ -364,3 +337,4 @@ public final class CompletionRequest {
         }
     }
 }
+

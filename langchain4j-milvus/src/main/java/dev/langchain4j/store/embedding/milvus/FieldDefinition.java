@@ -1,14 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.milvus;
 
-
 class FieldDefinition {
-
     String idFieldName;
-
     String textFieldName;
-
     String metadataFieldName;
-
     String vectorFieldName;
 
     public FieldDefinition(String idFieldName, String textFieldName, String metadataFieldName, String vectorFieldName) {
@@ -19,19 +17,19 @@ class FieldDefinition {
     }
 
     public String getIdFieldName() {
-        return idFieldName;
+        return this.idFieldName;
     }
 
     public String getTextFieldName() {
-        return textFieldName;
+        return this.textFieldName;
     }
 
     public String getMetadataFieldName() {
-        return metadataFieldName;
+        return this.metadataFieldName;
     }
 
     public String getVectorFieldName() {
-        return vectorFieldName;
+        return this.vectorFieldName;
     }
-
 }
+

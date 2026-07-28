@@ -1,132 +1,136 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  dev.langchain4j.store.embedding.filter.comparison.ContainsString
+ *  dev.langchain4j.store.embedding.filter.comparison.IsEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsIn
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotIn
+ *  dev.langchain4j.store.embedding.filter.logical.And
+ *  dev.langchain4j.store.embedding.filter.logical.Not
+ *  dev.langchain4j.store.embedding.filter.logical.Or
+ */
 package dev.langchain4j.store.embedding.milvus;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
-
 import dev.langchain4j.store.embedding.filter.Filter;
-import dev.langchain4j.store.embedding.filter.comparison.*;
+import dev.langchain4j.store.embedding.filter.comparison.ContainsString;
+import dev.langchain4j.store.embedding.filter.comparison.IsEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan;
+import dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsIn;
+import dev.langchain4j.store.embedding.filter.comparison.IsLessThan;
+import dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsNotIn;
 import dev.langchain4j.store.embedding.filter.logical.And;
 import dev.langchain4j.store.embedding.filter.logical.Not;
 import dev.langchain4j.store.embedding.filter.logical.Or;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 class MilvusMetadataFilterMapper {
+    MilvusMetadataFilterMapper() {
+    }
 
     static String map(Filter filter, String metadataFieldName) {
-        if (filter instanceof ContainsString containsString) {
-            return mapContains(containsString, metadataFieldName);
-        } else if (filter instanceof IsEqualTo isEqualTo) {
-            return mapEqual(isEqualTo, metadataFieldName);
-        } else if (filter instanceof IsNotEqualTo isNotEqualTo) {
-            return mapNotEqual(isNotEqualTo, metadataFieldName);
-        } else if (filter instanceof IsGreaterThan isGreaterThan) {
-            return mapGreaterThan(isGreaterThan, metadataFieldName);
-        } else if (filter instanceof IsGreaterThanOrEqualTo isGreaterThanOrEqualTo) {
-            return mapGreaterThanOrEqual(isGreaterThanOrEqualTo, metadataFieldName);
-        } else if (filter instanceof IsLessThan isLessThan) {
-            return mapLessThan(isLessThan, metadataFieldName);
-        } else if (filter instanceof IsLessThanOrEqualTo isLessThanOrEqualTo) {
-            return mapLessThanOrEqual(isLessThanOrEqualTo, metadataFieldName);
-        } else if (filter instanceof IsIn isIn) {
-            return mapIn(isIn, metadataFieldName);
-        } else if (filter instanceof IsNotIn isNotIn) {
-            return mapNotIn(isNotIn, metadataFieldName);
-        } else if (filter instanceof And and) {
-            return mapAnd(and, metadataFieldName);
-        } else if (filter instanceof Not not) {
-            return mapNot(not, metadataFieldName);
-        } else if (filter instanceof Or or) {
-            return mapOr(or, metadataFieldName);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Unsupported filter type: " + filter.getClass().getName());
+        if (filter instanceof ContainsString) {
+            return MilvusMetadataFilterMapper.mapContains((ContainsString)filter, metadataFieldName);
         }
+        if (filter instanceof IsEqualTo) {
+            return MilvusMetadataFilterMapper.mapEqual((IsEqualTo)filter, metadataFieldName);
+        }
+        if (filter instanceof IsNotEqualTo) {
+            return MilvusMetadataFilterMapper.mapNotEqual((IsNotEqualTo)filter, metadataFieldName);
+        }
+        if (filter instanceof IsGreaterThan) {
+            return MilvusMetadataFilterMapper.mapGreaterThan((IsGreaterThan)filter, metadataFieldName);
+        }
+        if (filter instanceof IsGreaterThanOrEqualTo) {
+            return MilvusMetadataFilterMapper.mapGreaterThanOrEqual((IsGreaterThanOrEqualTo)filter, metadataFieldName);
+        }
+        if (filter instanceof IsLessThan) {
+            return MilvusMetadataFilterMapper.mapLessThan((IsLessThan)filter, metadataFieldName);
+        }
+        if (filter instanceof IsLessThanOrEqualTo) {
+            return MilvusMetadataFilterMapper.mapLessThanOrEqual((IsLessThanOrEqualTo)filter, metadataFieldName);
+        }
+        if (filter instanceof IsIn) {
+            return MilvusMetadataFilterMapper.mapIn((IsIn)filter, metadataFieldName);
+        }
+        if (filter instanceof IsNotIn) {
+            return MilvusMetadataFilterMapper.mapNotIn((IsNotIn)filter, metadataFieldName);
+        }
+        if (filter instanceof And) {
+            return MilvusMetadataFilterMapper.mapAnd((And)filter, metadataFieldName);
+        }
+        if (filter instanceof Not) {
+            return MilvusMetadataFilterMapper.mapNot((Not)filter, metadataFieldName);
+        }
+        if (filter instanceof Or) {
+            return MilvusMetadataFilterMapper.mapOr((Or)filter, metadataFieldName);
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private static String mapContains(ContainsString containsString, String metadataFieldName) {
-        // ContainsString is a literal substring match (see Filter / ContainsString#test, which uses
-        // String#contains). Milvus LIKE treats % and _ as wildcards, so any % or _ in the user-supplied
-        // value must be escaped to be matched literally; only the surrounding % we add are real wildcards.
-        return format(
-                "%s LIKE %s",
-                formatKey(containsString.key(), metadataFieldName),
-                formatLikePattern(containsString.comparisonValue()));
+        return String.format("%s LIKE %s", MilvusMetadataFilterMapper.formatKey(containsString.key(), metadataFieldName), MilvusMetadataFilterMapper.formatLikePattern(containsString.comparisonValue()));
     }
 
-    /**
-     * Builds a quoted Milvus LIKE pattern that matches the given value as a literal substring. The value's
-     * own LIKE wildcards ({@code %} and {@code _}) are escaped with a backslash so they are matched
-     * literally, while the surrounding {@code %} characters remain wildcards for the "contains" semantics.
-     * Backslash and double quote are escaped as in {@link #formatValue(Object)} so the value stays inside
-     * the string literal.
-     */
     private static String formatLikePattern(String value) {
-        // Escape backslash first, then the LIKE wildcards % and _, then the string-literal double quote.
-        String escaped = value.replace("\\", "\\\\")
-                .replace("%", "\\%")
-                .replace("_", "\\_")
-                .replace("\"", "\\\"");
+        String escaped = value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_").replace("\"", "\\\"");
         return "\"%" + escaped + "%\"";
     }
 
     private static String mapEqual(IsEqualTo isEqualTo, String metadataFieldName) {
-        return format(
-                "%s == %s", formatKey(isEqualTo.key(), metadataFieldName), formatValue(isEqualTo.comparisonValue()));
+        return String.format("%s == %s", MilvusMetadataFilterMapper.formatKey(isEqualTo.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValue(isEqualTo.comparisonValue()));
     }
 
     private static String mapNotEqual(IsNotEqualTo isNotEqualTo, String metadataFieldName) {
-        return format(
-                "%s != %s",
-                formatKey(isNotEqualTo.key(), metadataFieldName), formatValue(isNotEqualTo.comparisonValue()));
+        return String.format("%s != %s", MilvusMetadataFilterMapper.formatKey(isNotEqualTo.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValue(isNotEqualTo.comparisonValue()));
     }
 
     private static String mapGreaterThan(IsGreaterThan isGreaterThan, String metadataFieldName) {
-        return format(
-                "%s > %s",
-                formatKey(isGreaterThan.key(), metadataFieldName), formatValue(isGreaterThan.comparisonValue()));
+        return String.format("%s > %s", MilvusMetadataFilterMapper.formatKey(isGreaterThan.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValue(isGreaterThan.comparisonValue()));
     }
 
-    private static String mapGreaterThanOrEqual(
-            IsGreaterThanOrEqualTo isGreaterThanOrEqualTo, String metadataFieldName) {
-        return format(
-                "%s >= %s",
-                formatKey(isGreaterThanOrEqualTo.key(), metadataFieldName),
-                formatValue(isGreaterThanOrEqualTo.comparisonValue()));
+    private static String mapGreaterThanOrEqual(IsGreaterThanOrEqualTo isGreaterThanOrEqualTo, String metadataFieldName) {
+        return String.format("%s >= %s", MilvusMetadataFilterMapper.formatKey(isGreaterThanOrEqualTo.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValue(isGreaterThanOrEqualTo.comparisonValue()));
     }
 
     private static String mapLessThan(IsLessThan isLessThan, String metadataFieldName) {
-        return format(
-                "%s < %s", formatKey(isLessThan.key(), metadataFieldName), formatValue(isLessThan.comparisonValue()));
+        return String.format("%s < %s", MilvusMetadataFilterMapper.formatKey(isLessThan.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValue(isLessThan.comparisonValue()));
     }
 
     private static String mapLessThanOrEqual(IsLessThanOrEqualTo isLessThanOrEqualTo, String metadataFieldName) {
-        return format(
-                "%s <= %s",
-                formatKey(isLessThanOrEqualTo.key(), metadataFieldName),
-                formatValue(isLessThanOrEqualTo.comparisonValue()));
+        return String.format("%s <= %s", MilvusMetadataFilterMapper.formatKey(isLessThanOrEqualTo.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValue(isLessThanOrEqualTo.comparisonValue()));
     }
 
     private static String mapIn(IsIn isIn, String metadataFieldName) {
-        return format("%s in %s", formatKey(isIn.key(), metadataFieldName), formatValues(isIn.comparisonValues()));
+        return String.format("%s in %s", MilvusMetadataFilterMapper.formatKey(isIn.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValues(isIn.comparisonValues()));
     }
 
     private static String mapNotIn(IsNotIn isNotIn, String metadataFieldName) {
-        return format(
-                "%s not in %s", formatKey(isNotIn.key(), metadataFieldName), formatValues(isNotIn.comparisonValues()));
+        return String.format("%s not in %s", MilvusMetadataFilterMapper.formatKey(isNotIn.key(), metadataFieldName), MilvusMetadataFilterMapper.formatValues(isNotIn.comparisonValues()));
     }
 
     private static String mapAnd(And and, String metadataFieldName) {
-        return format("%s and %s", map(and.left(), metadataFieldName), map(and.right(), metadataFieldName));
+        return String.format("%s and %s", MilvusMetadataFilterMapper.map(and.left(), metadataFieldName), MilvusMetadataFilterMapper.map(and.right(), metadataFieldName));
     }
 
     private static String mapNot(Not not, String metadataFieldName) {
-        return format("not(%s)", map(not.expression(), metadataFieldName));
+        return String.format("not(%s)", MilvusMetadataFilterMapper.map(not.expression(), metadataFieldName));
     }
 
     private static String mapOr(Or or, String metadataFieldName) {
-        return format("(%s or %s)", map(or.left(), metadataFieldName), map(or.right(), metadataFieldName));
+        return String.format("(%s or %s)", MilvusMetadataFilterMapper.map(or.left(), metadataFieldName), MilvusMetadataFilterMapper.map(or.right(), metadataFieldName));
     }
 
     private static String formatKey(String key, String metadataFieldName) {
@@ -134,18 +138,19 @@ class MilvusMetadataFilterMapper {
     }
 
     private static String formatValue(Object value) {
-        if (value instanceof String stringValue) {
-            // Escape backslashes first, then double quotes (Milvus treats backslash as the escape character)
-            final String escapedValue = stringValue.replace("\\", "\\\\").replace("\"", "\\\"");
+        if (value instanceof String) {
+            String stringValue = (String)value;
+            String escapedValue = stringValue.replace("\\", "\\\\").replace("\"", "\\\"");
             return "\"" + escapedValue + "\"";
-        } else if (value instanceof UUID) {
-            return "\"" + value + "\"";
-        } else {
-            return value.toString();
         }
+        if (value instanceof UUID) {
+            return "\"" + value + "\"";
+        }
+        return value.toString();
     }
 
     protected static List<String> formatValues(Collection<?> values) {
-        return values.stream().map(MilvusMetadataFilterMapper::formatValue).collect(toList());
+        return values.stream().map(MilvusMetadataFilterMapper::formatValue).collect(Collectors.toList());
     }
 }
+

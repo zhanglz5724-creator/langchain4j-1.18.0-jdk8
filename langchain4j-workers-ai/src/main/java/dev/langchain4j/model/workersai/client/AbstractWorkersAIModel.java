@@ -1,59 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.model.workersai.client;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.workersai.client.WorkersAiClient;
 
-/**
- * Abstract class for WorkerAI models as they are all initialized the same way.
- * <a href="https://developers.cloudflare.com/api/operations/workers-ai-post-run-model">...</a>
- */
 public abstract class AbstractWorkersAIModel {
-
-    /**
-     * Account identifier, provided by the WorkerAI platform.
-     */
     protected String accountId;
-
-    /**
-     * ModelName, preferred as enum for extensibility.
-     */
     protected String modelName;
-
-    /**
-     * Client for the WorkerAI API.
-     */
     protected WorkersAiClient client;
 
-    /**
-     * Simple constructor.
-     *
-     * @param accountId account identifier.
-     * @param modelName model name.
-     * @param apiToken  api apiToken from .
-     */
     public AbstractWorkersAIModel(String accountId, String modelName, String apiToken) {
         this(accountId, modelName, apiToken, null);
     }
 
-    /**
-     * Constructor allowing to customize the underlying HTTP client.
-     *
-     * @param accountId         account identifier.
-     * @param modelName         model name.
-     * @param apiToken          api token.
-     * @param httpClientBuilder the HTTP client builder to use, may be {@code null} to use the default one.
-     */
-    public AbstractWorkersAIModel(
-            String accountId, String modelName, String apiToken, HttpClientBuilder httpClientBuilder) {
-        ensureNotEmpty(accountId, "%s", "Account identifier should not be null or empty");
+    public AbstractWorkersAIModel(String accountId, String modelName, String apiToken, HttpClientBuilder httpClientBuilder) {
+        ValidationUtils.ensureNotEmpty((String)accountId, (String)"%s", (Object[])new Object[]{"Account identifier should not be null or empty"});
         this.accountId = accountId;
-        ensureNotEmpty(modelName, "%s", "Model name should not be null or empty");
+        ValidationUtils.ensureNotEmpty((String)modelName, (String)"%s", (Object[])new Object[]{"Model name should not be null or empty"});
         this.modelName = modelName;
-        ensureNotEmpty(apiToken, "%s", "Token should not be null or empty");
-        this.client = WorkersAiClient.builder()
-                .apiToken(apiToken)
-                .httpClientBuilder(httpClientBuilder)
-                .build();
+        ValidationUtils.ensureNotEmpty((String)apiToken, (String)"%s", (Object[])new Object[]{"Token should not be null or empty"});
+        this.client = WorkersAiClient.builder().apiToken(apiToken).httpClientBuilder(httpClientBuilder).build();
     }
 }
+

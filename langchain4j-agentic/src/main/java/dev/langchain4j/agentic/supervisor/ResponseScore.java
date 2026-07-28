@@ -1,12 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.supervisor;
 
 public class ResponseScore {
-
     private double score1;
     private double score2;
 
     public double getScore1() {
-        return score1;
+        return this.score1;
     }
 
     public void setScore1(double score1) {
@@ -14,18 +16,15 @@ public class ResponseScore {
     }
 
     public double getScore2() {
-        return score2;
+        return this.score2;
     }
 
     public void setScore2(double score2) {
         this.score2 = score2;
     }
 
-    @Override
     public String toString() {
-        return "ResponseScore{" +
-                "score1=" + score1 +
-                ", score2=" + score2 +
-                '}';
+        return "ResponseScore{score1=" + this.score1 + ", score2=" + this.score2 + '}';
     }
 }
+

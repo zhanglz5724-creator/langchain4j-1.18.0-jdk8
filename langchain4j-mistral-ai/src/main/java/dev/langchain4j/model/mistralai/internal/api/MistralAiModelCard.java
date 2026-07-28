@@ -1,21 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiModelPermission;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiModelCard.MistralAiModelCardBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralAiModelCardBuilder.class)
 public class MistralAiModelCard {
     private String id;
     private String object;
@@ -63,7 +74,6 @@ public class MistralAiModelCard {
         return this.permission;
     }
 
-    @Override
     public int hashCode() {
         int hash = 3;
         hash = 83 * hash + Objects.hashCode(this.id);
@@ -76,40 +86,28 @@ public class MistralAiModelCard {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        final MistralAiModelCard other = (MistralAiModelCard) obj;
-        return Objects.equals(this.id, other.id)
-                && Objects.equals(this.object, other.object)
-                && Objects.equals(this.ownerBy, other.ownerBy)
-                && Objects.equals(this.root, other.root)
-                && Objects.equals(this.parent, other.parent)
-                && Objects.equals(this.created, other.created)
-                && Objects.equals(this.permission, other.permission);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        MistralAiModelCard other = (MistralAiModelCard)obj;
+        return Objects.equals(this.id, other.id) && Objects.equals(this.object, other.object) && Objects.equals(this.ownerBy, other.ownerBy) && Objects.equals(this.root, other.root) && Objects.equals(this.parent, other.parent) && Objects.equals(this.created, other.created) && Objects.equals(this.permission, other.permission);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiModelCard [", "]")
-                .add("id=" + this.getId())
-                .add("object=" + this.getObject())
-                .add("created=" + this.getCreated())
-                .add("ownerBy=" + this.getOwnerBy())
-                .add("root=" + this.getRoot())
-                .add("parent=" + this.getParent())
-                .add("permission=" + this.getPermission())
-                .toString();
+        return new StringJoiner(", ", "MistralAiModelCard [", "]").add("id=" + this.getId()).add("object=" + this.getObject()).add("created=" + this.getCreated()).add("ownerBy=" + this.getOwnerBy()).add("root=" + this.getRoot()).add("parent=" + this.getParent()).add("permission=" + this.getPermission()).toString();
     }
 
     public static MistralAiModelCardBuilder builder() {
         return new MistralAiModelCardBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiModelCardBuilder {
         private String id;
         private String object;
@@ -119,59 +117,39 @@ public class MistralAiModelCard {
         private String parent;
         private List<MistralAiModelPermission> permission;
 
-        private MistralAiModelCardBuilder() {}
+        private MistralAiModelCardBuilder() {
+        }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiModelCardBuilder id(String id) {
             this.id = id;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiModelCardBuilder object(String object) {
             this.object = object;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiModelCardBuilder created(Integer created) {
             this.created = created;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiModelCardBuilder ownerBy(String ownerBy) {
             this.ownerBy = ownerBy;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiModelCardBuilder root(String root) {
             this.root = root;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiModelCardBuilder parent(String parent) {
             this.parent = parent;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiModelCardBuilder permission(List<MistralAiModelPermission> permission) {
             this.permission = permission;
             return this;
@@ -182,3 +160,4 @@ public class MistralAiModelCard {
         }
     }
 }
+

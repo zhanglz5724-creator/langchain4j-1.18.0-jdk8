@@ -1,3 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.cloud.vertexai.api.Content
+ *  com.google.cloud.vertexai.api.Part
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.ChatMessageType
+ *  dev.langchain4j.data.message.SystemMessage
+ *  dev.langchain4j.data.message.ToolExecutionResultMessage
+ *  dev.langchain4j.data.message.UserMessage
+ */
 package dev.langchain4j.model.vertexai.gemini;
 
 import com.google.cloud.vertexai.api.Content;
@@ -8,94 +21,74 @@ import dev.langchain4j.data.message.ChatMessageType;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
-
+import dev.langchain4j.model.vertexai.gemini.PartsMapper;
+import dev.langchain4j.model.vertexai.gemini.RoleMapper;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class ContentsMapper {
-    static class InstructionAndContent {
-        public Content systemInstruction = null;
-        public List<Content> contents = new ArrayList<>();
-
-        @Override
-        public String toString() {
-            return "InstructionAndContent {\n" +
-                " systemInstruction = " + systemInstruction +
-                ",\n contents = " + contents +
-                "\n}";
-        }
+    ContentsMapper() {
     }
 
     static InstructionAndContent splitInstructionAndContent(List<ChatMessage> messages) {
         InstructionAndContent instructionAndContent = new InstructionAndContent();
-        List<Part> sysInstructionParts = new ArrayList<>();
-
-        List<ToolExecutionResultMessage> executionResultMessages = new ArrayList<>();
-
-        for (int msgIdx = 0; msgIdx < messages.size(); msgIdx++) {
+        ArrayList<Part> sysInstructionParts = new ArrayList<Part>();
+        ArrayList<Object> executionResultMessages = new ArrayList<ToolExecutionResultMessage>();
+        for (int msgIdx = 0; msgIdx < messages.size(); ++msgIdx) {
+            boolean isLastMessage;
             ChatMessage message = messages.get(msgIdx);
-            boolean isLastMessage = msgIdx == messages.size() - 1;
-
+            boolean bl = isLastMessage = msgIdx == messages.size() - 1;
             if (message instanceof ToolExecutionResultMessage) {
-                ToolExecutionResultMessage toolResult = (ToolExecutionResultMessage) message;
+                ToolExecutionResultMessage toolResult = (ToolExecutionResultMessage)message;
                 if (isLastMessage) {
-                    // if there's no accumulated tool results, add it right away to the list of messages
                     if (executionResultMessages.isEmpty()) {
-                        instructionAndContent.contents.add(createContent(message));
-                    } else { // otherwise add to the list, and create the new user message with all the tool results
-                        executionResultMessages.add(toolResult);
-                        instructionAndContent.contents.add(createToolExecutionResultContent(executionResultMessages));
+                        instructionAndContent.contents.add(ContentsMapper.createContent(message));
+                        continue;
                     }
-                } else { // not the last message, so just accumulate the new tool result
                     executionResultMessages.add(toolResult);
+                    instructionAndContent.contents.add(ContentsMapper.createToolExecutionResultContent(executionResultMessages));
+                    continue;
                 }
-            } else {
-                // if we're done with tool results and encounter a new user or AI message
-                // then bundle all the tool results into a new user message
-                if (!executionResultMessages.isEmpty()) {
-                    instructionAndContent.contents.add(createToolExecutionResultContent(executionResultMessages));
-                    executionResultMessages = new ArrayList<>();
-                }
-
-                // directly add user and AI messages to the list
-                if (message instanceof UserMessage || message instanceof AiMessage) {
-                    instructionAndContent.contents.add(createContent(message));
-                } else if (message instanceof SystemMessage) { // save system messages separately
-                    sysInstructionParts.addAll(PartsMapper.map(message));
-                }
+                executionResultMessages.add(toolResult);
+                continue;
             }
+            if (!executionResultMessages.isEmpty()) {
+                instructionAndContent.contents.add(ContentsMapper.createToolExecutionResultContent(executionResultMessages));
+                executionResultMessages = new ArrayList();
+            }
+            if (message instanceof UserMessage || message instanceof AiMessage) {
+                instructionAndContent.contents.add(ContentsMapper.createContent(message));
+                continue;
+            }
+            if (!(message instanceof SystemMessage)) continue;
+            sysInstructionParts.addAll(PartsMapper.map(message));
         }
-
-        // if there are system instructions, collect them together into one system instruction Content
         if (!sysInstructionParts.isEmpty()) {
-            instructionAndContent.systemInstruction = Content.newBuilder()
-                .setRole("system")
-                .addAllParts(sysInstructionParts)
-                .build();
+            instructionAndContent.systemInstruction = Content.newBuilder().setRole("system").addAllParts(sysInstructionParts).build();
         }
-
         return instructionAndContent;
     }
 
-    // transform a LangChain4j ChatMessage into a Gemini Content
     private static Content createContent(ChatMessage message) {
-        return Content.newBuilder()
-            .setRole(RoleMapper.map(message.type()))
-            .addAllParts(PartsMapper.map(message))
-            .build();
+        return Content.newBuilder().setRole(RoleMapper.map(message.type())).addAllParts(PartsMapper.map(message)).build();
     }
 
-    // transform a list of LangChain4j tool execution results
-    // into a user message made of multiple Gemini Parts
     private static Content createToolExecutionResultContent(List<ToolExecutionResultMessage> executionResultMessages) {
-        return Content.newBuilder()
-            .setRole(RoleMapper.map(ChatMessageType.TOOL_EXECUTION_RESULT))
-            .addAllParts(
-                executionResultMessages.stream()
-                    .map(PartsMapper::map)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList()))
-            .build();
+        return Content.newBuilder().setRole(RoleMapper.map(ChatMessageType.TOOL_EXECUTION_RESULT)).addAllParts((Iterable)executionResultMessages.stream().map(PartsMapper::map).flatMap(Collection::stream).collect(Collectors.toList())).build();
+    }
+
+    static class InstructionAndContent {
+        public Content systemInstruction = null;
+        public List<Content> contents = new ArrayList<Content>();
+
+        InstructionAndContent() {
+        }
+
+        public String toString() {
+            return "InstructionAndContent {\n systemInstruction = " + this.systemInstruction + ",\n contents = " + this.contents + "\n}";
+        }
     }
 }
+

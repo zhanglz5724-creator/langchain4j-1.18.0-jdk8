@@ -1,80 +1,68 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.invocation.InvocationContext
+ *  dev.langchain4j.invocation.InvocationParameters
+ */
 package dev.langchain4j.service.tool;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.invocation.InvocationContext;
 import dev.langchain4j.invocation.InvocationParameters;
 import java.util.Objects;
 
-/**
- * @since 1.4.0
- */
 public class ToolErrorContext {
-
     private final ToolExecutionRequest toolExecutionRequest;
     private final InvocationContext invocationContext;
     private final Exception rawError;
 
     public ToolErrorContext(Builder builder) {
-        this.toolExecutionRequest = ensureNotNull(builder.toolExecutionRequest, "toolExecutionRequest");
-        this.invocationContext = ensureNotNull(builder.invocationContext, "invocationContext");
+        this.toolExecutionRequest = (ToolExecutionRequest)ValidationUtils.ensureNotNull((Object)builder.toolExecutionRequest, (String)"toolExecutionRequest");
+        this.invocationContext = (InvocationContext)ValidationUtils.ensureNotNull((Object)builder.invocationContext, (String)"invocationContext");
         this.rawError = builder.rawError;
     }
 
     public ToolExecutionRequest toolExecutionRequest() {
-        return toolExecutionRequest;
+        return this.toolExecutionRequest;
     }
 
-    /**
-     * @since 1.6.0
-     */
     public InvocationContext invocationContext() {
-        return invocationContext;
+        return this.invocationContext;
     }
 
-    /**
-     * @since 1.6.0
-     */
     public InvocationParameters invocationParameters() {
-        return invocationContext.invocationParameters();
+        return this.invocationContext.invocationParameters();
     }
 
-    /**
-     * Returns the raw error as thrown by the tool executor, before any
-     * cause unwrapping. May be {@code null} if not provided.
-     *
-     * @since 1.17.0
-     */
     public Exception rawError() {
-        return rawError;
+        return this.rawError;
     }
 
     public Object memoryId() {
-        return invocationContext.chatMemoryId();
+        return this.invocationContext.chatMemoryId();
     }
 
-    @Override
     public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        ToolErrorContext that = (ToolErrorContext) object;
-        return Objects.equals(toolExecutionRequest, that.toolExecutionRequest)
-                && Objects.equals(invocationContext, that.invocationContext)
-                && Objects.equals(rawError, that.rawError);
+        if (this == object) {
+            return true;
+        }
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+        ToolErrorContext that = (ToolErrorContext)object;
+        return Objects.equals(this.toolExecutionRequest, that.toolExecutionRequest) && Objects.equals(this.invocationContext, that.invocationContext) && Objects.equals(this.rawError, that.rawError);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(toolExecutionRequest, invocationContext, rawError);
+        return Objects.hash(this.toolExecutionRequest, this.invocationContext, this.rawError);
     }
 
-    @Override
     public String toString() {
-        return "ToolErrorContext{" + "toolExecutionRequest="
-                + toolExecutionRequest + ", invocationContext="
-                + invocationContext + ", rawError="
-                + rawError + '}';
+        return "ToolErrorContext{toolExecutionRequest=" + this.toolExecutionRequest + ", invocationContext=" + this.invocationContext + ", rawError=" + this.rawError + '}';
     }
 
     public static Builder builder() {
@@ -82,7 +70,6 @@ public class ToolErrorContext {
     }
 
     public static class Builder {
-
         private ToolExecutionRequest toolExecutionRequest;
         private InvocationContext invocationContext;
         private Exception rawError;
@@ -97,23 +84,14 @@ public class ToolErrorContext {
             return this;
         }
 
-        /**
-         * Sets the raw error thrown during tool execution.
-         *
-         * @since 1.17.0
-         */
         public Builder rawError(Exception rawError) {
             this.rawError = rawError;
             return this;
         }
 
-        /**
-         * @deprecated Please set {@link #invocationContext(InvocationContext)} instead
-         */
-        @Deprecated(since = "1.5.0")
+        @Deprecated
         public Builder memoryId(Object memoryId) {
-            this.invocationContext =
-                    InvocationContext.builder().chatMemoryId(memoryId).build();
+            this.invocationContext = InvocationContext.builder().chatMemoryId(memoryId).build();
             return this;
         }
 
@@ -122,3 +100,4 @@ public class ToolErrorContext {
         }
     }
 }
+

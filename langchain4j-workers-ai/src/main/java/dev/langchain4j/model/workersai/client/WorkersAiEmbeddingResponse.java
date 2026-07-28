@@ -1,38 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.workersai.client;
 
+import dev.langchain4j.model.workersai.client.ApiResponse;
 import java.util.List;
 
-/**
- * Response to compute embeddings
- */
-public class WorkersAiEmbeddingResponse extends ApiResponse<WorkersAiEmbeddingResponse.EmbeddingResult> {
+public class WorkersAiEmbeddingResponse
+extends ApiResponse<EmbeddingResult> {
 
-    /**
-     * Default constructor.
-     */
-    public WorkersAiEmbeddingResponse() {
-    }
-
-    /**
-     * Beam to hold results
-     */
     public static class EmbeddingResult {
-
-        /**
-         * Shape of the result
-         */
         private List<Integer> shape;
-
-        /**
-         * Embedding data
-         */
         private List<List<Float>> data;
-
-        /**
-         * Default constructor.
-         */
-        public EmbeddingResult() {
-        }
 
         public List<Integer> getShape() {
             return this.shape;
@@ -50,31 +29,38 @@ public class WorkersAiEmbeddingResponse extends ApiResponse<WorkersAiEmbeddingRe
             this.data = data;
         }
 
-        public boolean equals(final Object o) {
-            if (o == this) return true;
-            if (!(o instanceof EmbeddingResult)) return false;
-            final EmbeddingResult other = (EmbeddingResult) o;
-            if (!other.canEqual((Object) this)) return false;
-            final Object this$shape = this.getShape();
-            final Object other$shape = other.getShape();
-            if (this$shape == null ? other$shape != null : !this$shape.equals(other$shape)) return false;
-            final Object this$data = this.getData();
-            final Object other$data = other.getData();
-            if (this$data == null ? other$data != null : !this$data.equals(other$data)) return false;
-            return true;
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (!(o instanceof EmbeddingResult)) {
+                return false;
+            }
+            EmbeddingResult other = (EmbeddingResult)o;
+            if (!other.canEqual(this)) {
+                return false;
+            }
+            List<Integer> this$shape = this.getShape();
+            List<Integer> other$shape = other.getShape();
+            if (this$shape == null ? other$shape != null : !((Object)this$shape).equals(other$shape)) {
+                return false;
+            }
+            List<List<Float>> this$data = this.getData();
+            List<List<Float>> other$data = other.getData();
+            return !(this$data == null ? other$data != null : !((Object)this$data).equals(other$data));
         }
 
-        protected boolean canEqual(final Object other) {
+        protected boolean canEqual(Object other) {
             return other instanceof EmbeddingResult;
         }
 
         public int hashCode() {
-            final int PRIME = 59;
+            int PRIME = 59;
             int result = 1;
-            final Object $shape = this.getShape();
-            result = result * PRIME + ($shape == null ? 43 : $shape.hashCode());
-            final Object $data = this.getData();
-            result = result * PRIME + ($data == null ? 43 : $data.hashCode());
+            List<Integer> $shape = this.getShape();
+            result = result * 59 + ($shape == null ? 43 : ((Object)$shape).hashCode());
+            List<List<Float>> $data = this.getData();
+            result = result * 59 + ($data == null ? 43 : ((Object)$data).hashCode());
             return result;
         }
 
@@ -82,5 +68,5 @@ public class WorkersAiEmbeddingResponse extends ApiResponse<WorkersAiEmbeddingRe
             return "WorkersAiEmbeddingResponse.EmbeddingResult(shape=" + this.getShape() + ", data=" + this.getData() + ")";
         }
     }
-
 }
+

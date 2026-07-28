@@ -1,96 +1,57 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agentic.planner.AgentInstance
+ *  dev.langchain4j.agentic.scope.AgenticScope
+ */
 package dev.langchain4j.agentic.patterns.blackboard;
 
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.scope.AgenticScope;
-
 import java.util.List;
 import java.util.function.Predicate;
 
-/**
- * Strategy for resolving conflicts when multiple agents can fire simultaneously on the blackboard.
- * The strategy receives the current scope state and all candidate agents that are ready to fire,
- * and returns which one should be activated.
- */
 @FunctionalInterface
 public interface ConflictResolutionStrategy {
+    public static final ConflictResolutionStrategy DECLARATION_ORDER = (scope, candidates) -> (AgentInstance)candidates.get(0);
 
-    /**
-     * Selects the first candidate, preserving the declaration order used in the {@code subAgents} method.
-     */
-    ConflictResolutionStrategy DECLARATION_ORDER = (scope, candidates) -> candidates.get(0);
+    public AgentInstance resolve(AgenticScope var1, List<AgentInstance> var2);
 
-    AgentInstance resolve(AgenticScope scope, List<AgentInstance> candidates);
-
-    /**
-     * Returns a strategy that selects the first candidate in declaration order.
-     * This is the default strategy used by {@link BlackboardPlanner} if no strategy is provided.
-     */
-    static ConflictResolutionStrategy declarationOrder() {
+    public static ConflictResolutionStrategy declarationOrder() {
         return DECLARATION_ORDER;
     }
 
-    /**
-     * Returns a strategy that selects the candidate matching {@code agentType} only when {@code condition}
-     * is satisfied, or {@code null} otherwise. Intended to be chained with {@link #or(ConflictResolutionStrategy)}.
-     */
-    static ConflictResolutionStrategy agentOfType(Class<?> agentType, Predicate<AgenticScope> condition) {
-        return selectAgent(a -> a.type() == agentType, condition);
+    public static ConflictResolutionStrategy agentOfType(Class<?> agentType, Predicate<AgenticScope> condition) {
+        return ConflictResolutionStrategy.selectAgent(a -> a.type() == agentType, condition);
     }
 
-    /**
-     * Returns a strategy that unconditionally selects the candidate matching {@code agentType},
-     * or {@code null} if no candidate of that type is present.
-     */
-    static ConflictResolutionStrategy agentOfType(Class<?> agentType) {
-        return selectAgent(a -> a.type() == agentType);
+    public static ConflictResolutionStrategy agentOfType(Class<?> agentType) {
+        return ConflictResolutionStrategy.selectAgent(a -> a.type() == agentType);
     }
 
-    /**
-     * Returns a strategy that selects the candidate matching {@code agentName} only when {@code condition}
-     * is satisfied, or {@code null} otherwise. Intended to be chained with {@link #or(ConflictResolutionStrategy)}.
-     */
-    static ConflictResolutionStrategy agentWithName(String agentName, Predicate<AgenticScope> condition) {
-        return selectAgent(a -> agentName.equals(a.name()), condition);
+    public static ConflictResolutionStrategy agentWithName(String agentName, Predicate<AgenticScope> condition) {
+        return ConflictResolutionStrategy.selectAgent(a -> agentName.equals(a.name()), condition);
     }
 
-    /**
-     * Returns a strategy that unconditionally selects the candidate matching {@code agentName},
-     * or {@code null} if no candidate with that name is present.
-     */
-    static ConflictResolutionStrategy agentWithName(String agentName) {
-        return selectAgent(a -> agentName.equals(a.name()));
+    public static ConflictResolutionStrategy agentWithName(String agentName) {
+        return ConflictResolutionStrategy.selectAgent(a -> agentName.equals(a.name()));
     }
 
-    /**
-     * Returns a strategy that selects the first candidate matching {@code agentFilter} only when
-     * {@code condition} is satisfied, or {@code null} otherwise.
-     * Intended to be chained with {@link #or(ConflictResolutionStrategy)}.
-     */
-    static ConflictResolutionStrategy selectAgent(Predicate<AgentInstance> agentFilter, Predicate<AgenticScope> condition) {
+    public static ConflictResolutionStrategy selectAgent(Predicate<AgentInstance> agentFilter, Predicate<AgenticScope> condition) {
         return (scope, candidates) -> {
             if (condition.test(scope)) {
-                return selectAgent(agentFilter).resolve(scope, candidates);
+                return ConflictResolutionStrategy.selectAgent(agentFilter).resolve(scope, candidates);
             }
             return null;
         };
     }
 
-    /**
-     * Returns a strategy that unconditionally selects the first candidate matching {@code agentFilter},
-     * or {@code null} if no candidate matches.
-     */
-    static ConflictResolutionStrategy selectAgent(Predicate<AgentInstance> agentFilter) {
-        return (scope, candidates) -> candidates.stream()
-                .filter(agentFilter)
-                .findFirst()
-                .orElse(null);
+    public static ConflictResolutionStrategy selectAgent(Predicate<AgentInstance> agentFilter) {
+        return (scope, candidates) -> candidates.stream().filter(agentFilter).findFirst().orElse(null);
     }
 
-    /**
-     * Chains this strategy with a fallback: if this strategy returns {@code null},
-     * the {@code other} strategy is applied instead.
-     */
-    default ConflictResolutionStrategy or(ConflictResolutionStrategy other) {
+    default public ConflictResolutionStrategy or(ConflictResolutionStrategy other) {
         return (scope, candidates) -> {
             AgentInstance result = this.resolve(scope, candidates);
             if (result != null) {
@@ -100,3 +61,4 @@ public interface ConflictResolutionStrategy {
         };
     }
 }
+

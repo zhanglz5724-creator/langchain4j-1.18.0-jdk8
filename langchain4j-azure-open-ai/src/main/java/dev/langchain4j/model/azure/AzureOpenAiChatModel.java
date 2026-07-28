@@ -1,22 +1,36 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.azure.ai.openai.OpenAIClient
+ *  com.azure.ai.openai.models.AzureChatEnhancementConfiguration
+ *  com.azure.ai.openai.models.AzureChatExtensionConfiguration
+ *  com.azure.ai.openai.models.ChatChoice
+ *  com.azure.ai.openai.models.ChatCompletions
+ *  com.azure.ai.openai.models.ChatCompletionsOptions
+ *  com.azure.ai.openai.models.CompletionsFinishReason
+ *  com.azure.ai.openai.models.ReasoningEffortValue
+ *  com.azure.core.credential.KeyCredential
+ *  com.azure.core.credential.TokenCredential
+ *  com.azure.core.http.HttpClientProvider
+ *  com.azure.core.http.ProxyOptions
+ *  com.azure.core.http.policy.RetryOptions
+ *  dev.langchain4j.exception.ContentFilteredException
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.spi.ServiceHelper
+ */
 package dev.langchain4j.model.azure;
-
-import static com.azure.ai.openai.models.CompletionsFinishReason.CONTENT_FILTERED;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.copyIfNotNull;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.model.ModelProvider.AZURE_OPEN_AI;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.aiMessageFrom;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.finishReasonFrom;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.setupSyncClient;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.toAzureOpenAiResponseFormat;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.toOpenAiMessages;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.toToolChoice;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.toToolDefinitions;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.tokenUsageFrom;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.validate;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.util.Arrays.asList;
 
 import com.azure.ai.openai.OpenAIClient;
 import com.azure.ai.openai.models.AzureChatEnhancementConfiguration;
@@ -24,6 +38,7 @@ import com.azure.ai.openai.models.AzureChatExtensionConfiguration;
 import com.azure.ai.openai.models.ChatChoice;
 import com.azure.ai.openai.models.ChatCompletions;
 import com.azure.ai.openai.models.ChatCompletionsOptions;
+import com.azure.ai.openai.models.CompletionsFinishReason;
 import com.azure.ai.openai.models.ReasoningEffortValue;
 import com.azure.core.credential.KeyCredential;
 import com.azure.core.credential.TokenCredential;
@@ -31,7 +46,11 @@ import com.azure.core.http.HttpClientProvider;
 import com.azure.core.http.ProxyOptions;
 import com.azure.core.http.policy.RetryOptions;
 import dev.langchain4j.exception.ContentFilteredException;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.ModelProvider;
+import dev.langchain4j.model.azure.AzureOpenAiExceptionMapper;
+import dev.langchain4j.model.azure.InternalAzureOpenAiHelper;
 import dev.langchain4j.model.azure.spi.AzureOpenAiChatModelBuilderFactory;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
@@ -42,43 +61,19 @@ import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Represents an OpenAI language model, hosted on Azure, that has a chat completion interface, such as gpt-3.5-turbo.
- * <p>
- * Mandatory parameters for initialization are: endpoint and apikey (or an alternate authentication method, see below for more information).
- * Optionally you can set serviceVersion (if not, the latest version is used) and deploymentName (if not, a default name is used).
- * You can also provide your own OpenAIClient instance, if you need more flexibility.
- * <p>
- * There are 3 authentication methods:
- * <p>
- * 1. Azure OpenAI API Key Authentication: this is the most common method, using an Azure OpenAI API key.
- * You need to provide the OpenAI API Key as a parameter, using the apiKey() method in the Builder, or the apiKey parameter in the constructor:
- * For example, you would use `builder.apiKey("{key}")`.
- * <p>
- * 2. non-Azure OpenAI API Key Authentication: this method allows you to use the OpenAI service, instead of Azure OpenAI.
- * You can use the nonAzureApiKey() method in the Builder, which will also automatically set the endpoint to "https://api.openai.com/v1".
- * For example, you would use `builder.nonAzureApiKey("{key}")`.
- * The constructor requires a KeyCredential instance, which can be created using `new AzureKeyCredential("{key}")`, and doesn't set up the endpoint.
- * <p>
- * 3. Azure OpenAI client with Microsoft Entra ID (formerly Azure Active Directory) credentials.
- * - This requires to add the `com.azure:azure-identity` dependency to your project.
- * - You need to provide a TokenCredential instance, using the tokenCredential() method in the Builder, or the tokenCredential parameter in the constructor.
- * As an example, DefaultAzureCredential can be used to authenticate the client: Set the values of the client ID, tenant ID, and
- * client secret of the AAD application as environment variables: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_CLIENT_SECRET.
- * Then, provide the DefaultAzureCredential instance to the builder: `builder.tokenCredential(new DefaultAzureCredentialBuilder().build())`.
- */
-public class AzureOpenAiChatModel implements ChatModel {
-
+public class AzureOpenAiChatModel
+implements ChatModel {
     private final OpenAIClient client;
-
     private final ChatRequestParameters defaultRequestParameters;
-
     private final Map<String, Integer> logitBias;
     private final String user;
     private final List<AzureChatExtensionConfiguration> dataSources;
@@ -87,177 +82,83 @@ public class AzureOpenAiChatModel implements ChatModel {
     private final Boolean strictJsonSchema;
     private final Integer maxCompletionTokens;
     private final ReasoningEffortValue reasoningEffort;
-
     private final List<ChatModelListener> listeners;
     private final Set<Capability> supportedCapabilities;
 
     public AzureOpenAiChatModel(Builder builder) {
-        if (builder.openAIClient == null) {
-            if (builder.tokenCredential != null) {
-                this.client = setupSyncClient(
-                        builder.endpoint,
-                        builder.serviceVersion,
-                        builder.tokenCredential,
-                        builder.timeout,
-                        builder.maxRetries,
-                        builder.retryOptions,
-                        builder.httpClientProvider,
-                        builder.proxyOptions,
-                        builder.logRequestsAndResponses,
-                        builder.userAgentSuffix,
-                        builder.customHeaders);
-
-            } else if (builder.keyCredential != null) {
-                this.client = setupSyncClient(
-                        builder.endpoint,
-                        builder.serviceVersion,
-                        builder.keyCredential,
-                        builder.timeout,
-                        builder.maxRetries,
-                        builder.retryOptions,
-                        builder.httpClientProvider,
-                        builder.proxyOptions,
-                        builder.logRequestsAndResponses,
-                        builder.userAgentSuffix,
-                        builder.customHeaders);
-            } else {
-                this.client = setupSyncClient(
-                        builder.endpoint,
-                        builder.serviceVersion,
-                        builder.apiKey,
-                        builder.timeout,
-                        builder.maxRetries,
-                        builder.retryOptions,
-                        builder.httpClientProvider,
-                        builder.proxyOptions,
-                        builder.logRequestsAndResponses,
-                        builder.userAgentSuffix,
-                        builder.customHeaders);
-            }
-        } else {
-            this.client = ensureNotNull(builder.openAIClient, "openAIClient");
-        }
-
         ChatRequestParameters parameters;
+        this.client = builder.openAIClient == null ? (builder.tokenCredential != null ? InternalAzureOpenAiHelper.setupSyncClient(builder.endpoint, builder.serviceVersion, builder.tokenCredential, builder.timeout, builder.maxRetries, builder.retryOptions, builder.httpClientProvider, builder.proxyOptions, builder.logRequestsAndResponses, builder.userAgentSuffix, builder.customHeaders) : (builder.keyCredential != null ? InternalAzureOpenAiHelper.setupSyncClient(builder.endpoint, builder.serviceVersion, builder.keyCredential, builder.timeout, builder.maxRetries, builder.retryOptions, builder.httpClientProvider, builder.proxyOptions, builder.logRequestsAndResponses, builder.userAgentSuffix, builder.customHeaders) : InternalAzureOpenAiHelper.setupSyncClient(builder.endpoint, builder.serviceVersion, builder.apiKey, builder.timeout, builder.maxRetries, builder.retryOptions, builder.httpClientProvider, builder.proxyOptions, builder.logRequestsAndResponses, builder.userAgentSuffix, builder.customHeaders))) : (OpenAIClient)ValidationUtils.ensureNotNull((Object)builder.openAIClient, (String)"openAIClient");
         if (builder.defaultRequestParameters != null) {
-            validate(builder.defaultRequestParameters);
+            InternalAzureOpenAiHelper.validate(builder.defaultRequestParameters);
             parameters = builder.defaultRequestParameters;
         } else {
             parameters = DefaultChatRequestParameters.EMPTY;
         }
-
-        this.defaultRequestParameters = ChatRequestParameters.builder()
-                .modelName(getOrDefault(builder.deploymentName, parameters.modelName()))
-                .temperature(getOrDefault(builder.temperature, parameters.temperature()))
-                .topP(getOrDefault(builder.topP, parameters.topP()))
-                .frequencyPenalty(getOrDefault(builder.frequencyPenalty, parameters.frequencyPenalty()))
-                .presencePenalty(getOrDefault(builder.presencePenalty, parameters.presencePenalty()))
-                .maxOutputTokens(getOrDefault(builder.maxTokens, parameters.maxOutputTokens()))
-                .stopSequences(getOrDefault(builder.stop, parameters.stopSequences()))
-                .toolSpecifications(parameters.toolSpecifications())
-                .toolChoice(parameters.toolChoice())
-                .responseFormat(getOrDefault(builder.responseFormat, parameters.responseFormat()))
-                .build();
-
-        this.logitBias = copy(builder.logitBias);
+        this.defaultRequestParameters = ChatRequestParameters.builder().modelName((String)Utils.getOrDefault((Object)builder.deploymentName, (Object)parameters.modelName())).temperature((Double)Utils.getOrDefault((Object)builder.temperature, (Object)parameters.temperature())).topP((Double)Utils.getOrDefault((Object)builder.topP, (Object)parameters.topP())).frequencyPenalty((Double)Utils.getOrDefault((Object)builder.frequencyPenalty, (Object)parameters.frequencyPenalty())).presencePenalty((Double)Utils.getOrDefault((Object)builder.presencePenalty, (Object)parameters.presencePenalty())).maxOutputTokens((Integer)Utils.getOrDefault((Object)builder.maxTokens, (Object)parameters.maxOutputTokens())).stopSequences(Utils.getOrDefault((List)builder.stop, (List)parameters.stopSequences())).toolSpecifications(parameters.toolSpecifications()).toolChoice(parameters.toolChoice()).responseFormat((ResponseFormat)Utils.getOrDefault((Object)builder.responseFormat, (Object)parameters.responseFormat())).build();
+        this.logitBias = Utils.copy((Map)builder.logitBias);
         this.user = builder.user;
-        this.dataSources = copyIfNotNull(builder.dataSources);
+        this.dataSources = Utils.copyIfNotNull((List)builder.dataSources);
         this.enhancements = builder.enhancements;
         this.seed = builder.seed;
-        this.strictJsonSchema = getOrDefault(builder.strictJsonSchema, false);
+        this.strictJsonSchema = (Boolean)Utils.getOrDefault((Object)builder.strictJsonSchema, (Object)false);
         this.maxCompletionTokens = builder.maxCompletionTokens;
         this.reasoningEffort = builder.reasoningEffort;
-
-        this.listeners = copy(builder.listeners);
-        this.supportedCapabilities = copy(builder.supportedCapabilities);
+        this.listeners = Utils.copy((List)builder.listeners);
+        this.supportedCapabilities = Utils.copy((Set)builder.supportedCapabilities);
     }
 
-    @Override
     public ChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
-    @Override
     public Set<Capability> supportedCapabilities() {
-        return supportedCapabilities;
+        return this.supportedCapabilities;
     }
 
-    @Override
     public ChatResponse doChat(ChatRequest request) {
+        ChatCompletions chatCompletions;
+        ChatChoice chatChoice;
         ChatRequestParameters parameters = request.parameters();
-        validate(parameters);
-
-        ChatCompletionsOptions options = new ChatCompletionsOptions(toOpenAiMessages(request.messages()))
-                .setModel(parameters.modelName())
-                .setTemperature(parameters.temperature())
-                .setTopP(parameters.topP())
-                .setFrequencyPenalty(parameters.frequencyPenalty())
-                .setPresencePenalty(parameters.presencePenalty())
-                .setMaxTokens(parameters.maxOutputTokens())
-                .setMaxCompletionTokens(maxCompletionTokens)
-                .setStop(parameters.stopSequences().isEmpty() ? null : parameters.stopSequences())
-                .setResponseFormat(toAzureOpenAiResponseFormat(parameters.responseFormat(), this.strictJsonSchema))
-                .setLogitBias(logitBias.isEmpty() ? null : logitBias)
-                .setUser(user)
-                .setDataSources(dataSources)
-                .setEnhancements(enhancements)
-                .setSeed(seed)
-                .setReasoningEffort(reasoningEffort);
-
+        InternalAzureOpenAiHelper.validate(parameters);
+        ChatCompletionsOptions options = new ChatCompletionsOptions(InternalAzureOpenAiHelper.toOpenAiMessages(request.messages())).setModel(parameters.modelName()).setTemperature(parameters.temperature()).setTopP(parameters.topP()).setFrequencyPenalty(parameters.frequencyPenalty()).setPresencePenalty(parameters.presencePenalty()).setMaxTokens(parameters.maxOutputTokens()).setMaxCompletionTokens(this.maxCompletionTokens).setStop(parameters.stopSequences().isEmpty() ? null : parameters.stopSequences()).setResponseFormat(InternalAzureOpenAiHelper.toAzureOpenAiResponseFormat(parameters.responseFormat(), this.strictJsonSchema)).setLogitBias(this.logitBias.isEmpty() ? null : this.logitBias).setUser(this.user).setDataSources(this.dataSources).setEnhancements(this.enhancements).setSeed(this.seed).setReasoningEffort(this.reasoningEffort);
         if (!parameters.toolSpecifications().isEmpty()) {
-            options.setTools(toToolDefinitions(parameters.toolSpecifications()));
+            options.setTools(InternalAzureOpenAiHelper.toToolDefinitions(parameters.toolSpecifications()));
         }
         if (parameters.toolChoice() != null) {
-            options.setToolChoice(toToolChoice(parameters.toolChoice()));
+            options.setToolChoice(InternalAzureOpenAiHelper.toToolChoice(parameters.toolChoice()));
         }
-
-        ChatCompletions chatCompletions = AzureOpenAiExceptionMapper.INSTANCE.withExceptionMapper(
-                () -> client.getChatCompletions(parameters.modelName(), options));
-
-        ChatChoice chatChoice = chatCompletions.getChoices().get(0);
-
-        if (chatChoice.getFinishReason() == CONTENT_FILTERED) {
+        if ((chatChoice = (ChatChoice)(chatCompletions = (ChatCompletions)AzureOpenAiExceptionMapper.INSTANCE.withExceptionMapper(() -> this.client.getChatCompletions(parameters.modelName(), options))).getChoices().get(0)).getFinishReason() == CompletionsFinishReason.CONTENT_FILTERED) {
             String details;
             try {
                 details = chatChoice.getContentFilterResults().toJsonString();
-            } catch (Exception ignored) {
+            }
+            catch (Exception ignored) {
                 details = "The content has been filtered, and no additional information is available.";
             }
             throw new ContentFilteredException(details);
         }
-
-        return ChatResponse.builder()
-                .aiMessage(aiMessageFrom(chatChoice.getMessage()))
-                .metadata(ChatResponseMetadata.builder()
-                        .id(chatCompletions.getId())
-                        .modelName(chatCompletions.getModel())
-                        .tokenUsage(tokenUsageFrom(chatCompletions.getUsage()))
-                        .finishReason(finishReasonFrom(chatChoice.getFinishReason()))
-                        .build())
-                .build();
+        return ChatResponse.builder().aiMessage(InternalAzureOpenAiHelper.aiMessageFrom(chatChoice.getMessage())).metadata(ChatResponseMetadata.builder().id(chatCompletions.getId()).modelName(chatCompletions.getModel()).tokenUsage(InternalAzureOpenAiHelper.tokenUsageFrom(chatCompletions.getUsage())).finishReason(InternalAzureOpenAiHelper.finishReasonFrom(chatChoice.getFinishReason())).build()).build();
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return AZURE_OPEN_AI;
+        return ModelProvider.AZURE_OPEN_AI;
     }
 
     public static Builder builder() {
-        for (AzureOpenAiChatModelBuilderFactory factory : loadFactories(AzureOpenAiChatModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(AzureOpenAiChatModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            AzureOpenAiChatModelBuilderFactory factory = (AzureOpenAiChatModelBuilderFactory)iterator.next();
+            return (Builder)factory.get();
         }
         return new Builder();
     }
 
     public static class Builder {
-
         private ChatRequestParameters defaultRequestParameters;
-
         private String endpoint;
         private String serviceVersion;
         private String apiKey;
@@ -296,80 +197,37 @@ public class AzureOpenAiChatModel implements ChatModel {
             return this;
         }
 
-        /**
-         * Sets the Azure OpenAI endpoint. This is a mandatory parameter.
-         *
-         * @param endpoint The Azure OpenAI endpoint in the format: https://{resource}.openai.azure.com/
-         * @return builder
-         */
         public Builder endpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;
         }
 
-        /**
-         * Sets the Azure OpenAI API service version. This is a mandatory parameter.
-         *
-         * @param serviceVersion The Azure OpenAI API service version in the format: 2023-05-15
-         * @return builder
-         */
         public Builder serviceVersion(String serviceVersion) {
             this.serviceVersion = serviceVersion;
             return this;
         }
 
-        /**
-         * Sets the Azure OpenAI API key.
-         *
-         * @param apiKey The Azure OpenAI API key.
-         * @return builder
-         */
         public Builder apiKey(String apiKey) {
             this.apiKey = apiKey;
             return this;
         }
 
-        /**
-         * Used to authenticate with the OpenAI service, instead of Azure OpenAI.
-         * This automatically sets the endpoint to https://api.openai.com/v1.
-         *
-         * @param nonAzureApiKey The non-Azure OpenAI API key
-         * @return builder
-         */
         public Builder nonAzureApiKey(String nonAzureApiKey) {
             this.keyCredential = new KeyCredential(nonAzureApiKey);
             this.endpoint = "https://api.openai.com/v1";
             return this;
         }
 
-        /**
-         * Used to authenticate to Azure OpenAI with Azure Active Directory credentials.
-         *
-         * @param tokenCredential the credentials to authenticate with Azure Active Directory
-         * @return builder
-         */
         public Builder tokenCredential(TokenCredential tokenCredential) {
             this.tokenCredential = tokenCredential;
             return this;
         }
 
-        /**
-         * Sets the {@code HttpClientProvider} to use for creating the HTTP client to communicate with the OpenAI api.
-         *
-         * @param httpClientProvider The {@code HttpClientProvider} to use
-         * @return builder
-         */
         public Builder httpClientProvider(HttpClientProvider httpClientProvider) {
             this.httpClientProvider = httpClientProvider;
             return this;
         }
 
-        /**
-         * Sets the deployment name in Azure OpenAI. This is a mandatory parameter.
-         *
-         * @param deploymentName The Deployment name.
-         * @return builder
-         */
         public Builder deploymentName(String deploymentName) {
             this.deploymentName = deploymentName;
             return this;
@@ -475,12 +333,6 @@ public class AzureOpenAiChatModel implements ChatModel {
             return this;
         }
 
-        /**
-         * Sets the Azure OpenAI client. This is an optional parameter, if you need more flexibility than using the endpoint, serviceVersion, apiKey, deploymentName parameters.
-         *
-         * @param openAIClient The Azure OpenAI client.
-         * @return builder
-         */
         public Builder openAIClient(OpenAIClient openAIClient) {
             this.openAIClient = openAIClient;
             return this;
@@ -501,8 +353,8 @@ public class AzureOpenAiChatModel implements ChatModel {
             return this;
         }
 
-        public Builder supportedCapabilities(Capability... supportedCapabilities) {
-            return supportedCapabilities(new HashSet<>(asList(supportedCapabilities)));
+        public Builder supportedCapabilities(Capability ... supportedCapabilities) {
+            return this.supportedCapabilities(new HashSet<Capability>(Arrays.asList(supportedCapabilities)));
         }
 
         public Builder reasoningEffort(ReasoningEffortValue reasoningEffort) {
@@ -515,3 +367,4 @@ public class AzureOpenAiChatModel implements ChatModel {
         }
     }
 }
+

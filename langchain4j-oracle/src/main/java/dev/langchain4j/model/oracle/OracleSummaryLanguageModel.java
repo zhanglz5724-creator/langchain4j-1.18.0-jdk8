@@ -1,3 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.model.language.LanguageModel
+ *  dev.langchain4j.model.output.Response
+ */
 package dev.langchain4j.model.oracle;
 
 import dev.langchain4j.model.language.LanguageModel;
@@ -8,93 +15,65 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Summarize documents
- *
- * Use dbms_vector_chain.utl_to_summary to summarize documents.
- * You can specify which provider to use such as database
- * for Oracle Text or a third-party provider via a REST call.
- *
- * Some example preferences
- *
- * To use an ONNX model:
- * {
- *   "provider": "database",
- *   "model": "database"
- * }
- * To use a third-party provider:
- * {
- *   "provider": "ocigenai",
- *   "credential_name" : "OCI_CRED",
- *   "url": "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat",
- *   "model" : "cohere.command-r-16k",
- *   "chatRequest": {
- *     "maxTokens": 256
- *   }
- * }
- */
-public class OracleSummaryLanguageModel implements LanguageModel {
-
+public class OracleSummaryLanguageModel
+implements LanguageModel {
     private final Connection conn;
     private final String pref;
     private final String proxy;
 
-    /**
-     * Create a summary language model
-     */
     public OracleSummaryLanguageModel(Connection conn, String pref) {
         this.conn = conn;
         this.pref = pref;
         this.proxy = "";
     }
 
-    /**
-     * Create a summary language model with a proxy
-     */
     public OracleSummaryLanguageModel(Connection conn, String pref, String proxy) {
         this.conn = conn;
         this.pref = pref;
         this.proxy = proxy;
     }
 
-    /**
-     * generate summary
-     *
-     * @param input    text to summarize
-     */
-    @Override
     public Response<String> generate(String input) {
-
         String text = "";
-
         try {
-            if (proxy != null && !proxy.isEmpty()) {
-                String query = "begin utl_http.set_proxy(?); end;";
-                try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                    stmt.setObject(1, proxy);
+            PreparedStatement stmt;
+            String query;
+            if (this.proxy != null && !this.proxy.isEmpty()) {
+                query = "begin utl_http.set_proxy(?); end;";
+                stmt = this.conn.prepareStatement(query);
+                try {
+                    stmt.setObject(1, this.proxy);
                     stmt.execute();
                 }
+                finally {
+                    if (stmt != null) {
+                        stmt.close();
+                    }
+                }
             }
-
-            String query = "select dbms_vector_chain.utl_to_summary(?, json(?)) data from dual";
-
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                Clob clob = conn.createClob();
-                clob.setString(1, input);
-
+            query = "select dbms_vector_chain.utl_to_summary(?, json(?)) data from dual";
+            stmt = this.conn.prepareStatement(query);
+            try {
+                Clob clob = this.conn.createClob();
+                clob.setString(1L, input);
                 stmt.setObject(1, clob);
-                stmt.setObject(2, pref);
-
-                try (ResultSet rs = stmt.executeQuery()) {
+                stmt.setObject(2, this.pref);
+                try (ResultSet rs = stmt.executeQuery();){
                     while (rs.next()) {
                         text = rs.getString("data");
                     }
                 }
             }
-        } catch (SQLException ex) {
+            finally {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            }
+        }
+        catch (SQLException ex) {
             throw new RuntimeException("cannot get summary", ex);
         }
-
-        return Response.from(text);
+        return Response.from((Object)text);
     }
 }
+

@@ -1,3 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -5,16 +15,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicThinking {
-
     @JsonProperty
     private final String type;
-
     @JsonProperty
     private final Integer budgetTokens;
-
     @JsonProperty
     private final String display;
 
@@ -29,12 +36,12 @@ public class AnthropicThinking {
     }
 
     public static final class Builder {
-
         private String type;
         private Integer budgetTokens;
         private String display;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder type(String type) {
             this.type = type;
@@ -46,13 +53,6 @@ public class AnthropicThinking {
             return this;
         }
 
-        /**
-         * Controls how thinking content is returned in the response.
-         * <p>
-         * Valid values: {@code "summarized"} and {@code "omitted"}. On Claude Opus 4.7
-         * the server default is {@code "omitted"}; on earlier Opus/Sonnet models the
-         * default is {@code "summarized"}.
-         */
         public Builder display(String display) {
             this.display = display;
             return this;
@@ -63,3 +63,4 @@ public class AnthropicThinking {
         }
     }
 }
+

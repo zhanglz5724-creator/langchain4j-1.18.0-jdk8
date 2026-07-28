@@ -1,17 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.workflow.impl;
 
 import dev.langchain4j.agentic.planner.Action;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.planner.AgenticSystemTopology;
 import dev.langchain4j.agentic.planner.InitPlanningContext;
-import dev.langchain4j.agentic.planner.PlanningContext;
 import dev.langchain4j.agentic.planner.Planner;
+import dev.langchain4j.agentic.planner.PlanningContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
-public class SequentialPlanner implements Planner {
-
+public class SequentialPlanner
+implements Planner {
     private List<AgentInstance> agents;
     private int agentCursor = 0;
 
@@ -22,7 +25,7 @@ public class SequentialPlanner implements Planner {
 
     @Override
     public Action nextAction(PlanningContext planningContext) {
-        return terminated() ? done() : call(agents.get(agentCursor++));
+        return this.terminated() ? this.done() : this.call(this.agents.get(this.agentCursor++));
     }
 
     @Override
@@ -32,22 +35,21 @@ public class SequentialPlanner implements Planner {
 
     @Override
     public boolean terminated() {
-        return agentCursor >= agents.size();
+        return this.agentCursor >= this.agents.size();
     }
 
     @Override
     public Map<String, Object> executionState() {
-        // Save cursor - 1: the agent that was just scheduled for execution.
-        // On recovery, firstAction() delegates to nextAction() which calls agents.get(agentCursor++),
-        // so the restored cursor must point to the agent that needs to be (re-)executed.
-        return agentCursor > 0 ? Collections.singletonMap("cursor", agentCursor - 1) : Collections.emptyMap();
+        return this.agentCursor > 0 ? Collections.singletonMap("cursor", this.agentCursor - 1) : Collections.emptyMap();
     }
 
     @Override
     public void restoreExecutionState(Map<String, Object> state) {
         Object savedCursor = state.get("cursor");
-        if (savedCursor instanceof Number n) {
+        if (savedCursor instanceof Number) {
+            Number n = (Number)savedCursor;
             this.agentCursor = n.intValue();
         }
     }
 }
+

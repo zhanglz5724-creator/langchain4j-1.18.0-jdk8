@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
 public class McpRepository {
@@ -7,44 +10,39 @@ public class McpRepository {
     private String url;
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
     public String getSource() {
-        return source;
+        return this.source;
     }
 
-    public void setSource(final String source) {
+    public void setSource(String source) {
         this.source = source;
     }
 
     public String getSubfolder() {
-        return subfolder;
+        return this.subfolder;
     }
 
-    public void setSubfolder(final String subfolder) {
+    public void setSubfolder(String subfolder) {
         this.subfolder = subfolder;
     }
 
     public String getUrl() {
-        return url;
+        return this.url;
     }
 
-    public void setUrl(final String url) {
+    public void setUrl(String url) {
         this.url = url;
     }
 
-    @Override
     public String toString() {
-        return "McpRepository{" +
-                "id='" + id + '\'' +
-                ", source='" + source + '\'' +
-                ", subfolder='" + subfolder + '\'' +
-                ", url='" + url + '\'' +
-                '}';
+        return "McpRepository{id='" + this.id + '\'' + ", source='" + this.source + '\'' + ", subfolder='" + this.subfolder + '\'' + ", url='" + this.url + '\'' + '}';
     }
 }
+

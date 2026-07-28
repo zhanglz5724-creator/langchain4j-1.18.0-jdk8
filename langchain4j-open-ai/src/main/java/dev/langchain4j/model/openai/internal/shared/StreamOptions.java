@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.shared;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,14 +22,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
 import java.util.Objects;
 
-@JsonDeserialize(builder = StreamOptions.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class StreamOptions {
-
     @JsonProperty
     private final Boolean includeUsage;
 
@@ -24,47 +36,42 @@ public final class StreamOptions {
     }
 
     public Boolean includeUsage() {
-        return includeUsage;
+        return this.includeUsage;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof StreamOptions
-                && equalTo((StreamOptions) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof StreamOptions && this.equalTo((StreamOptions)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(StreamOptions another) {
-        return Objects.equals(includeUsage, another.includeUsage);
+        return Objects.equals(this.includeUsage, another.includeUsage);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(includeUsage);
+        h += (h << 5) + Objects.hashCode(this.includeUsage);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "StreamOptions{" +
-                "includeUsage=" + includeUsage +
-                "}";
+        return "StreamOptions{includeUsage=" + this.includeUsage + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Builder {
-
         private Boolean includeUsage;
 
         public Builder includeUsage(Boolean includeUsage) {
@@ -77,3 +84,4 @@ public final class StreamOptions {
         }
     }
 }
+

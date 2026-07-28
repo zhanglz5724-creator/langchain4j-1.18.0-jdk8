@@ -1,14 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.service.output;
 
 import dev.langchain4j.Internal;
-
+import dev.langchain4j.service.output.EnumCollectionOutputParser;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
 @Internal
-class EnumSetOutputParser<E extends Enum<E>> extends EnumCollectionOutputParser<E, Set<E>> {
-
+class EnumSetOutputParser<E extends Enum<E>>
+extends EnumCollectionOutputParser<E, Set<E>> {
     EnumSetOutputParser(Class<E> enumClass) {
         super(enumClass);
     }
@@ -23,3 +29,4 @@ class EnumSetOutputParser<E extends Enum<E>> extends EnumCollectionOutputParser<
         return Set.class;
     }
 }
+

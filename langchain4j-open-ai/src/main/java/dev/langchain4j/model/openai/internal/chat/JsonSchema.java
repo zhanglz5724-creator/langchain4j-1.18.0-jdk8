@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,15 +22,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
 import java.util.Map;
 import java.util.Objects;
 
-@JsonDeserialize(builder = JsonSchema.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class JsonSchema {
-
     @JsonProperty
     private final String name;
     @JsonProperty
@@ -30,50 +42,41 @@ public class JsonSchema {
         this.schema = builder.schema;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof JsonSchema
-                && equalTo((JsonSchema) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof JsonSchema && this.equalTo((JsonSchema)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(JsonSchema another) {
-        return Objects.equals(name, another.name)
-                && Objects.equals(strict, another.strict)
-                && Objects.equals(schema, another.schema);
+        return Objects.equals(this.name, another.name) && Objects.equals(this.strict, another.strict) && Objects.equals(this.schema, another.schema);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(name);
-        h += (h << 5) + Objects.hashCode(strict);
-        h += (h << 5) + Objects.hashCode(schema);
+        h += (h << 5) + Objects.hashCode(this.name);
+        h += (h << 5) + Objects.hashCode(this.strict);
+        h += (h << 5) + Objects.hashCode(this.schema);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "JsonSchema{" +
-                "name=" + name +
-                ", strict=" + strict +
-                ", schema=" + schema +
-                "}";
+        return "JsonSchema{name=" + this.name + ", strict=" + this.strict + ", schema=" + this.schema + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Builder {
-
         private String name;
         private Boolean strict;
         private Map<String, Object> schema;
@@ -98,3 +101,4 @@ public class JsonSchema {
         }
     }
 }
+

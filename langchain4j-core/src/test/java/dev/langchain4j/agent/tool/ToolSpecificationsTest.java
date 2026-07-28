@@ -12,7 +12,9 @@ import dev.langchain4j.model.output.structured.Description;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +22,7 @@ import java.util.Set;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 
-class ToolSpecificationsTest implements WithAssertions {
+public class ToolSpecificationsTest implements WithAssertions {
 
     public static class Person {
         @Description("Name of the person")
@@ -422,7 +424,7 @@ class ToolSpecificationsTest implements WithAssertions {
         ToolSpecification toolSpecification = ToolSpecifications.toolSpecificationFrom(method);
 
         // then
-        assertThat(toolSpecification.metadata()).containsExactly(Map.entry("one", "one"), Map.entry("two", 2));
+        assertThat(toolSpecification.metadata()).containsExactly(new AbstractMap.SimpleEntry<>("one", "one"), new AbstractMap.SimpleEntry<>("two", 2));
     }
 
     @Test

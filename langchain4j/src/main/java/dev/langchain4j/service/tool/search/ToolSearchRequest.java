@@ -1,79 +1,63 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.invocation.InvocationContext
+ */
 package dev.langchain4j.service.tool.search;
 
 import dev.langchain4j.Experimental;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.invocation.InvocationContext;
-
 import java.util.List;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * A request to search for tools.
- * Contains a {@link ToolExecutionRequest} representing an LLM tool call (including search terms or a query),
- * as well as all searchable tools in the AI Service.
- *
- * @since 1.12.0
- */
 @Experimental
 public class ToolSearchRequest {
-
     private final ToolExecutionRequest toolExecutionRequest;
     private final List<ToolSpecification> searchableTools;
     private final InvocationContext invocationContext;
 
     public ToolSearchRequest(Builder builder) {
-        this.toolExecutionRequest = ensureNotNull(builder.toolExecutionRequest, "toolExecutionRequest");
-        this.searchableTools = copy(builder.searchableTools);
-        this.invocationContext = ensureNotNull(builder.invocationContext, "invocationContext");
+        this.toolExecutionRequest = (ToolExecutionRequest)ValidationUtils.ensureNotNull((Object)builder.toolExecutionRequest, (String)"toolExecutionRequest");
+        this.searchableTools = Utils.copy((List)builder.searchableTools);
+        this.invocationContext = (InvocationContext)ValidationUtils.ensureNotNull((Object)builder.invocationContext, (String)"invocationContext");
     }
 
-    /**
-     * Returns the tool call containing the search query.
-     */
     public ToolExecutionRequest toolExecutionRequest() {
-        return toolExecutionRequest;
+        return this.toolExecutionRequest;
     }
 
-    /**
-     * Returns all searchable tools for the AI Service.
-     * This list does not include tools that were already found during previous searches.
-     */
     public List<ToolSpecification> searchableTools() {
-        return searchableTools;
+        return this.searchableTools;
     }
 
-    /**
-     * Returns the AI Service invocation context associated with this tool search request.
-     */
     public InvocationContext invocationContext() {
-        return invocationContext;
+        return this.invocationContext;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        ToolSearchRequest that = (ToolSearchRequest) o;
-        return Objects.equals(toolExecutionRequest, that.toolExecutionRequest)
-                && Objects.equals(searchableTools, that.searchableTools)
-                && Objects.equals(invocationContext, that.invocationContext);
+    public boolean equals(Object o) {
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        ToolSearchRequest that = (ToolSearchRequest)o;
+        return Objects.equals(this.toolExecutionRequest, that.toolExecutionRequest) && Objects.equals(this.searchableTools, that.searchableTools) && Objects.equals(this.invocationContext, that.invocationContext);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(toolExecutionRequest, searchableTools, invocationContext);
+        return Objects.hash(this.toolExecutionRequest, this.searchableTools, this.invocationContext);
     }
 
-    @Override
     public String toString() {
-        return "ToolSearchRequest{" +
-                "toolExecutionRequest=" + toolExecutionRequest +
-                ", searchableTools=" + searchableTools +
-                ", invocationContext=" + invocationContext +
-                '}';
+        return "ToolSearchRequest{toolExecutionRequest=" + this.toolExecutionRequest + ", searchableTools=" + this.searchableTools + ", invocationContext=" + this.invocationContext + '}';
     }
 
     public static Builder builder() {
@@ -81,7 +65,6 @@ public class ToolSearchRequest {
     }
 
     public static class Builder {
-
         private ToolExecutionRequest toolExecutionRequest;
         private List<ToolSpecification> searchableTools;
         private InvocationContext invocationContext;
@@ -106,3 +89,4 @@ public class ToolSearchRequest {
         }
     }
 }
+

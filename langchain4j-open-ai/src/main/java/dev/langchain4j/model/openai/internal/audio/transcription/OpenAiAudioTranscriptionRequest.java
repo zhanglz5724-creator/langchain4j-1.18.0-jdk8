@@ -1,25 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.openai.internal.audio.transcription;
 
-/**
- * Represents the audio request.
- * Find description of parameters
- * <a href="https://platform.openai.com/docs/api-reference/audio/createTranscription">here</a>.
- */
+import dev.langchain4j.model.openai.internal.audio.transcription.AudioFile;
+
 public class OpenAiAudioTranscriptionRequest {
-
-    /**
-     * The audio file object (not file name) to transcribe,
-     * in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
-     */
     private final AudioFile file;
-
-    /**
-     * ID of the model to use. The options are
-     * gpt-4o-transcribe, gpt-4o-mini-transcribe, whisper-1 (which is powered by our open source Whisper V2 model),
-     * and gpt-4o-transcribe-diarize.
-     */
     private final String model;
-
     private final String language;
     private final String prompt;
     private final Double temperature;
@@ -33,23 +21,23 @@ public class OpenAiAudioTranscriptionRequest {
     }
 
     public AudioFile file() {
-        return file;
+        return this.file;
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public String language() {
-        return language;
+        return this.language;
     }
 
     public String prompt() {
-        return prompt;
+        return this.prompt;
     }
 
     public Double temperature() {
-        return temperature;
+        return this.temperature;
     }
 
     public static Builder builder() {
@@ -57,7 +45,6 @@ public class OpenAiAudioTranscriptionRequest {
     }
 
     public static class Builder {
-
         private AudioFile file;
         private String model;
         private String language;
@@ -94,3 +81,4 @@ public class OpenAiAudioTranscriptionRequest {
         }
     }
 }
+

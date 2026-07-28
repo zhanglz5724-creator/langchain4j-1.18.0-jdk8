@@ -1,18 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OllamaModelDetails {
-
     private String parentModel;
     private String format;
     private String family;
@@ -20,10 +27,10 @@ public class OllamaModelDetails {
     private String parameterSize;
     private String quantizationLevel;
 
-    OllamaModelDetails() {}
+    OllamaModelDetails() {
+    }
 
-    public OllamaModelDetails(
-            String format, String family, List<String> families, String parameterSize, String quantizationLevel) {
+    public OllamaModelDetails(String format, String family, List<String> families, String parameterSize, String quantizationLevel) {
         this.format = format;
         this.family = family;
         this.families = families;
@@ -36,7 +43,7 @@ public class OllamaModelDetails {
     }
 
     public String getParentModel() {
-        return parentModel;
+        return this.parentModel;
     }
 
     public void setParentModel(String parentModel) {
@@ -44,7 +51,7 @@ public class OllamaModelDetails {
     }
 
     public String getFormat() {
-        return format;
+        return this.format;
     }
 
     public void setFormat(String format) {
@@ -52,7 +59,7 @@ public class OllamaModelDetails {
     }
 
     public String getFamily() {
-        return family;
+        return this.family;
     }
 
     public void setFamily(String family) {
@@ -60,7 +67,7 @@ public class OllamaModelDetails {
     }
 
     public List<String> getFamilies() {
-        return families;
+        return this.families;
     }
 
     public void setFamilies(List<String> families) {
@@ -68,7 +75,7 @@ public class OllamaModelDetails {
     }
 
     public String getParameterSize() {
-        return parameterSize;
+        return this.parameterSize;
     }
 
     public void setParameterSize(String parameterSize) {
@@ -76,7 +83,7 @@ public class OllamaModelDetails {
     }
 
     public String getQuantizationLevel() {
-        return quantizationLevel;
+        return this.quantizationLevel;
     }
 
     public void setQuantizationLevel(String quantizationLevel) {
@@ -84,7 +91,6 @@ public class OllamaModelDetails {
     }
 
     public static class Builder {
-
         private String parentModel;
         private String format;
         private String family;
@@ -123,10 +129,10 @@ public class OllamaModelDetails {
         }
 
         public OllamaModelDetails build() {
-            OllamaModelDetails details =
-                    new OllamaModelDetails(format, family, families, parameterSize, quantizationLevel);
-            details.setParentModel(parentModel);
+            OllamaModelDetails details = new OllamaModelDetails(this.format, this.family, this.families, this.parameterSize, this.quantizationLevel);
+            details.setParentModel(this.parentModel);
             return details;
         }
     }
 }
+

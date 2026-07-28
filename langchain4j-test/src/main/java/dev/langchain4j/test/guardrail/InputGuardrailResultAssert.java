@@ -1,22 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.guardrail.InputGuardrailResult
+ *  dev.langchain4j.guardrail.InputGuardrailResult$Failure
+ */
 package dev.langchain4j.test.guardrail;
 
 import dev.langchain4j.guardrail.InputGuardrailResult;
-import dev.langchain4j.guardrail.InputGuardrailResult.Failure;
+import dev.langchain4j.test.guardrail.GuardrailResultAssert;
 
-/**
- * Custom assertions for {@link InputGuardrailResult}s
- * <p>
- *     This follows the pattern described in https://assertj.github.io/doc/#assertj-core-custom-assertions-creation
- * </p>
- */
 public final class InputGuardrailResultAssert
-        extends GuardrailResultAssert<InputGuardrailResultAssert, InputGuardrailResult, Failure> {
-
+extends GuardrailResultAssert<InputGuardrailResultAssert, InputGuardrailResult, InputGuardrailResult.Failure> {
     private InputGuardrailResultAssert(InputGuardrailResult inputGuardrailResult) {
-        super(inputGuardrailResult, InputGuardrailResultAssert.class, Failure.class);
+        super(inputGuardrailResult, InputGuardrailResultAssert.class, InputGuardrailResult.Failure.class);
     }
 
     public static InputGuardrailResultAssert assertThat(InputGuardrailResult actual) {
         return new InputGuardrailResultAssert(actual);
     }
 }
+

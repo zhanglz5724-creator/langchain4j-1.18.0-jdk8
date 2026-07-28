@@ -1,27 +1,41 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.service.tool.AiServiceTool
+ *  dev.langchain4j.service.tool.ToolExecutor
+ *  dev.langchain4j.service.tool.ToolProvider
+ *  dev.langchain4j.service.tool.ToolProviderResult
+ *  dev.langchain4j.service.tool.ToolService
+ */
 package dev.langchain4j.skills;
-
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.util.Arrays.asList;
 
 import dev.langchain4j.Experimental;
 import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.service.tool.AiServiceTool;
 import dev.langchain4j.service.tool.ToolExecutor;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderResult;
 import dev.langchain4j.service.tool.ToolService;
+import dev.langchain4j.skills.Skill;
+import dev.langchain4j.skills.SkillResource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 @Experimental
-public abstract class AbstractSkill implements Skill {
-
+public abstract class AbstractSkill
+implements Skill {
     private final String name;
     private final String description;
     private final String content;
@@ -32,30 +46,24 @@ public abstract class AbstractSkill implements Skill {
     private final List<ToolProvider> aggregatedToolProviders;
 
     protected AbstractSkill(BaseBuilder<?> builder) {
-        this.name = ensureNotBlank(builder.name, "name");
-        this.description = ensureNotBlank(builder.description, "description");
-        this.content = ensureNotBlank(builder.content, "content");
-        this.resources = copy(builder.resources);
-        validateUniquePaths(this.resources);
-        this.annotatedTools = copy(builder.annotatedTools);
-        this.mapTools = copy(builder.mapTools);
-        this.toolProviders = copy(builder.toolProviders);
-        this.aggregatedToolProviders = aggregate(this.annotatedTools, this.mapTools, this.toolProviders);
+        this.name = ValidationUtils.ensureNotBlank((String)((BaseBuilder)builder).name, (String)"name");
+        this.description = ValidationUtils.ensureNotBlank((String)((BaseBuilder)builder).description, (String)"description");
+        this.content = ValidationUtils.ensureNotBlank((String)((BaseBuilder)builder).content, (String)"content");
+        this.resources = Utils.copy((Collection)((BaseBuilder)builder).resources);
+        AbstractSkill.validateUniquePaths(this.resources);
+        this.annotatedTools = Utils.copy((List)((BaseBuilder)builder).annotatedTools);
+        this.mapTools = Utils.copy((List)((BaseBuilder)builder).mapTools);
+        this.toolProviders = Utils.copy((List)((BaseBuilder)builder).toolProviders);
+        this.aggregatedToolProviders = AbstractSkill.aggregate(this.annotatedTools, this.mapTools, this.toolProviders);
     }
 
-    private static List<ToolProvider> aggregate(
-            List<AiServiceTool> annotatedTools,
-            List<AiServiceTool> mapTools,
-            List<ToolProvider> toolProviders) {
-
-        List<AiServiceTool> staticTools = new ArrayList<>();
+    private static List<ToolProvider> aggregate(List<AiServiceTool> annotatedTools, List<AiServiceTool> mapTools, List<ToolProvider> toolProviders) {
+        ArrayList<AiServiceTool> staticTools = new ArrayList<AiServiceTool>();
         staticTools.addAll(annotatedTools);
         staticTools.addAll(mapTools);
-
-        List<ToolProvider> result = new ArrayList<>();
+        ArrayList<ToolProvider> result = new ArrayList<ToolProvider>();
         if (!staticTools.isEmpty()) {
-            ToolProviderResult staticResult =
-                    ToolProviderResult.builder().addAll(staticTools).build();
+            ToolProviderResult staticResult = ToolProviderResult.builder().addAll(staticTools).build();
             result.add(request -> staticResult);
         }
         result.addAll(toolProviders);
@@ -64,71 +72,58 @@ public abstract class AbstractSkill implements Skill {
 
     @Override
     public String name() {
-        return name;
+        return this.name;
     }
 
     @Override
     public String description() {
-        return description;
+        return this.description;
     }
 
     @Override
     public String content() {
-        return content;
+        return this.content;
     }
 
     @Override
     public List<SkillResource> resources() {
-        return resources;
+        return this.resources;
     }
 
     @Override
     public List<ToolProvider> toolProviders() {
-        return aggregatedToolProviders;
+        return this.aggregatedToolProviders;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AbstractSkill that)) return false;
-        return Objects.equals(name, that.name)
-                && Objects.equals(description, that.description)
-                && Objects.equals(content, that.content)
-                && Objects.equals(resources, that.resources)
-                && Objects.equals(annotatedTools, that.annotatedTools)
-                && Objects.equals(mapTools, that.mapTools)
-                && Objects.equals(toolProviders, that.toolProviders);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AbstractSkill)) {
+            return false;
+        }
+        AbstractSkill that = (AbstractSkill)o;
+        return Objects.equals(this.name, that.name) && Objects.equals(this.description, that.description) && Objects.equals(this.content, that.content) && Objects.equals(this.resources, that.resources) && Objects.equals(this.annotatedTools, that.annotatedTools) && Objects.equals(this.mapTools, that.mapTools) && Objects.equals(this.toolProviders, that.toolProviders);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(name, description, content, resources, annotatedTools, mapTools, toolProviders);
+        return Objects.hash(this.name, this.description, this.content, this.resources, this.annotatedTools, this.mapTools, this.toolProviders);
     }
 
-    @Override
     public String toString() {
-        return getClass().getSimpleName() + " {"
-                + " name = " + name
-                + ", description = " + description
-                + ", content = " + content
-                + ", resources = " + resources
-                + ", toolProviders = " + aggregatedToolProviders
-                + " }";
+        return this.getClass().getSimpleName() + " { name = " + this.name + ", description = " + this.description + ", content = " + this.content + ", resources = " + this.resources + ", toolProviders = " + this.aggregatedToolProviders + " }";
     }
 
     private static void validateUniquePaths(List<SkillResource> resources) {
-        Set<String> seenPaths = new HashSet<>();
+        HashSet<String> seenPaths = new HashSet<String>();
         for (SkillResource resource : resources) {
             String path = resource.relativePath();
-            if (!seenPaths.add(path)) {
-                throw new IllegalStateException(String.format("Duplicate skill resource path detected: '%s'", path));
-            }
+            if (seenPaths.add(path)) continue;
+            throw new IllegalStateException(String.format("Duplicate skill resource path detected: '%s'", path));
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public abstract static class BaseBuilder<B extends BaseBuilder<B>> {
-
+    public static abstract class BaseBuilder<B extends BaseBuilder<B>> {
         private String name;
         private String description;
         private String content;
@@ -139,69 +134,59 @@ public abstract class AbstractSkill implements Skill {
 
         public B name(String name) {
             this.name = name;
-            return (B) this;
+            return (B)this;
         }
 
         public B description(String description) {
             this.description = description;
-            return (B) this;
+            return (B)this;
         }
 
         public B content(String content) {
             this.content = content;
-            return (B) this;
+            return (B)this;
         }
 
         public B resources(Collection<? extends SkillResource> resources) {
             this.resources = resources;
-            return (B) this;
+            return (B)this;
         }
 
-        public B tools(Object... objectsWithTools) {
-            this.annotatedTools = new ArrayList<>();
+        public B tools(Object ... objectsWithTools) {
+            this.annotatedTools = new ArrayList<AiServiceTool>();
             for (Object objectWithTools : objectsWithTools) {
-                this.annotatedTools.addAll(ToolService.findTools(objectWithTools));
+                this.annotatedTools.addAll(ToolService.findTools((Object)objectWithTools));
             }
-            return (B) this;
+            return (B)this;
         }
 
         public B toolProviders(Collection<? extends ToolProvider> toolProviders) {
-            this.toolProviders = new ArrayList<>(toolProviders);
-            return (B) this;
+            this.toolProviders = new ArrayList<ToolProvider>(toolProviders);
+            return (B)this;
         }
 
-        public B toolProviders(ToolProvider... toolProviders) {
-            return toolProviders(asList(toolProviders));
+        public B toolProviders(ToolProvider ... toolProviders) {
+            return this.toolProviders(Arrays.asList(toolProviders));
         }
 
         public B tools(Map<ToolSpecification, ToolExecutor> tools) {
-            this.mapTools = new ArrayList<>();
+            this.mapTools = new ArrayList<AiServiceTool>();
             for (Map.Entry<ToolSpecification, ToolExecutor> entry : tools.entrySet()) {
-                this.mapTools.add(AiServiceTool.builder()
-                        .toolSpecification(entry.getKey())
-                        .toolExecutor(entry.getValue())
-                        .build());
+                this.mapTools.add(AiServiceTool.builder().toolSpecification(entry.getKey()).toolExecutor(entry.getValue()).build());
             }
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * Populates this builder with the values from the given skill so the original tool state
-         * (annotated tools, map tools, and user-provided tool providers) can be modified independently
-         * via subsequent {@link #tools} / {@link #toolProviders} calls — preserving the same
-         * "last call wins" semantics as a fresh builder chain.
-         * <p>
-         * Subclasses with additional fields should chain their own setters after calling this.
-         */
         protected B copyFrom(AbstractSkill skill) {
             this.name = skill.name;
             this.description = skill.description;
             this.content = skill.content;
-            this.resources = skill.resources.isEmpty() ? null : new ArrayList<>(skill.resources);
-            this.annotatedTools = skill.annotatedTools.isEmpty() ? null : new ArrayList<>(skill.annotatedTools);
-            this.mapTools = skill.mapTools.isEmpty() ? null : new ArrayList<>(skill.mapTools);
-            this.toolProviders = skill.toolProviders.isEmpty() ? null : new ArrayList<>(skill.toolProviders);
-            return (B) this;
+            this.resources = skill.resources.isEmpty() ? null : new ArrayList(skill.resources);
+            this.annotatedTools = skill.annotatedTools.isEmpty() ? null : new ArrayList(skill.annotatedTools);
+            this.mapTools = skill.mapTools.isEmpty() ? null : new ArrayList(skill.mapTools);
+            this.toolProviders = skill.toolProviders.isEmpty() ? null : new ArrayList(skill.toolProviders);
+            return (B)this;
         }
     }
 }
+

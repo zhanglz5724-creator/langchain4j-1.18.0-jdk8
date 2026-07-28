@@ -1,20 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.langchain4j.Internal;
 
-/**
- * Corresponds to the {@code Implementation} type from the MCP schema.
- */
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
 @Internal
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class McpImplementation {
-
     private String name;
     private String version;
     private String title;
 
-    public McpImplementation() {}
+    public McpImplementation() {
+    }
 
     public McpImplementation(String name, String version) {
         this(name, version, null);
@@ -27,7 +32,7 @@ public class McpImplementation {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -35,7 +40,7 @@ public class McpImplementation {
     }
 
     public String getVersion() {
-        return version;
+        return this.version;
     }
 
     public void setVersion(String version) {
@@ -43,10 +48,11 @@ public class McpImplementation {
     }
 
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 }
+

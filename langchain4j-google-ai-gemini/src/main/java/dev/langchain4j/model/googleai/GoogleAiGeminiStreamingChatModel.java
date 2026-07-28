@@ -1,18 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.StreamingChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.response.StreamingChatResponseHandler
+ */
 package dev.langchain4j.model.googleai;
-
-import static dev.langchain4j.model.ModelProvider.GOOGLE_AI_GEMINI;
 
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.googleai.BaseGeminiChatModel;
+import dev.langchain4j.model.googleai.GeminiGenerateContentRequest;
+import dev.langchain4j.model.googleai.GeminiService;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatRequestParameters;
 import java.util.List;
 
-public class GoogleAiGeminiStreamingChatModel extends BaseGeminiChatModel implements StreamingChatModel {
-
+public class GoogleAiGeminiStreamingChatModel
+extends BaseGeminiChatModel
+implements StreamingChatModel {
     public GoogleAiGeminiStreamingChatModel(GoogleAiGeminiStreamingChatModelBuilder builder) {
-        this(builder, buildGeminiService(builder));
+        this(builder, GoogleAiGeminiStreamingChatModel.buildGeminiService(builder));
     }
 
     GoogleAiGeminiStreamingChatModel(GoogleAiGeminiStreamingChatModelBuilder builder, GeminiService geminiService) {
@@ -23,35 +36,31 @@ public class GoogleAiGeminiStreamingChatModel extends BaseGeminiChatModel implem
         return new GoogleAiGeminiStreamingChatModelBuilder();
     }
 
-    @Override
     public GoogleAiGeminiChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
-    @Override
     public void doChat(ChatRequest request, StreamingChatResponseHandler handler) {
-        GeminiGenerateContentRequest geminiRequest = createGenerateContentRequest(request);
-        geminiService.generateContentStream(
-                request.modelName(), geminiRequest, includeCodeExecutionOutput, returnThinking, handler);
+        GeminiGenerateContentRequest geminiRequest = this.createGenerateContentRequest(request);
+        this.geminiService.generateContentStream(request.modelName(), geminiRequest, this.includeCodeExecutionOutput, this.returnThinking, handler);
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return GOOGLE_AI_GEMINI;
+        return ModelProvider.GOOGLE_AI_GEMINI;
     }
 
     public static final class GoogleAiGeminiStreamingChatModelBuilder
-            extends GoogleAiGeminiChatModelBaseBuilder<GoogleAiGeminiStreamingChatModelBuilder> {
-
-        private GoogleAiGeminiStreamingChatModelBuilder() {}
+    extends BaseGeminiChatModel.GoogleAiGeminiChatModelBaseBuilder<GoogleAiGeminiStreamingChatModelBuilder> {
+        private GoogleAiGeminiStreamingChatModelBuilder() {
+        }
 
         public GoogleAiGeminiStreamingChatModel build() {
             return new GoogleAiGeminiStreamingChatModel(this);
         }
     }
 }
+

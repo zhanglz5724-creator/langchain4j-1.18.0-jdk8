@@ -1,25 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.internal;
 
 import dev.langchain4j.agentic.observability.AgentListener;
 import dev.langchain4j.agentic.planner.AgentInstance;
 
-public interface InternalAgent extends AgentInstance {
+public interface InternalAgent
+extends AgentInstance {
+    public void setParent(InternalAgent var1);
 
-    void setParent(InternalAgent parent);
+    public void registerInheritedParentListener(AgentListener var1);
 
-    void registerInheritedParentListener(AgentListener parentListener);
+    public void appendId(String var1);
 
-    void appendId(String idSuffix);
+    default public void setAgentId(String agentId) {
+    }
 
-    default void setAgentId(String agentId) {}
+    public AgentListener listener();
 
-    AgentListener listener();
-
-    default boolean allowStreamingOutput() {
+    default public boolean allowStreamingOutput() {
         throw new UnsupportedOperationException();
     }
 
-    default boolean allowChatMemory() {
+    default public boolean allowChatMemory() {
         return true;
     }
 }
+

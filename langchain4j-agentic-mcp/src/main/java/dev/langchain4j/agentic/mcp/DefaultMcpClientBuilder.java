@@ -1,17 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.agentic.UntypedAgent
+ *  dev.langchain4j.agentic.internal.AgentInvoker
+ *  dev.langchain4j.agentic.internal.InternalAgent
+ *  dev.langchain4j.agentic.internal.McpClientBuilder
+ *  dev.langchain4j.agentic.observability.AgentListener
+ *  dev.langchain4j.agentic.observability.ComposedAgentListener
+ *  dev.langchain4j.agentic.planner.AgentArgument
+ *  dev.langchain4j.agentic.planner.AgentInstance
+ *  dev.langchain4j.agentic.planner.AgenticSystemConfigurationException
+ *  dev.langchain4j.agentic.planner.AgenticSystemTopology
+ *  dev.langchain4j.agentic.planner.Planner
+ *  dev.langchain4j.internal.Json
+ *  dev.langchain4j.mcp.client.McpClient
+ *  dev.langchain4j.model.chat.request.json.JsonObjectSchema
+ *  dev.langchain4j.service.output.ServiceOutputParser
+ *  dev.langchain4j.service.tool.ToolExecutionResult
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.agentic.mcp;
 
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.agentic.UntypedAgent;
 import dev.langchain4j.agentic.internal.AgentInvoker;
 import dev.langchain4j.agentic.internal.InternalAgent;
 import dev.langchain4j.agentic.internal.McpClientBuilder;
+import dev.langchain4j.agentic.mcp.McpClientInstance;
 import dev.langchain4j.agentic.observability.AgentListener;
+import dev.langchain4j.agentic.observability.ComposedAgentListener;
 import dev.langchain4j.agentic.planner.AgentArgument;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.planner.AgenticSystemConfigurationException;
 import dev.langchain4j.agentic.planner.AgenticSystemTopology;
 import dev.langchain4j.agentic.planner.Planner;
-import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.internal.Json;
 import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
@@ -24,32 +51,26 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dev.langchain4j.agentic.observability.ComposedAgentListener.composeWithInherited;
-
-public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, InternalAgent, InvocationHandler {
-
+public class DefaultMcpClientBuilder<T>
+implements McpClientBuilder<T>,
+InternalAgent,
+InvocationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultMcpClientBuilder.class);
-
     private final ServiceOutputParser serviceOutputParser = new ServiceOutputParser();
-
     private final McpClient mcpClient;
     private final Class<T> agentServiceClass;
-
     private String toolName;
     private String name;
     private String agentId;
     private String description;
     private InternalAgent parent;
-
     private String[] inputKeys;
     private String outputKey;
     private boolean async;
-
     private AgentListener agentListener;
 
     DefaultMcpClientBuilder(McpClient mcpClient, Class<T> agentServiceClass) {
@@ -57,77 +78,52 @@ public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, Internal
         this.agentServiceClass = agentServiceClass;
     }
 
-    @Override
     public McpClientBuilder<T> toolName(String toolName) {
         this.toolName = toolName;
         return this;
     }
 
-    @Override
-    public McpClientBuilder<T> inputKeys(String... inputKeys) {
+    public McpClientBuilder<T> inputKeys(String ... inputKeys) {
         this.inputKeys = inputKeys;
         return this;
     }
 
-    @Override
     public McpClientBuilder<T> outputKey(String outputKey) {
         this.outputKey = outputKey;
         return this;
     }
 
-    @Override
     public McpClientBuilder<T> async(boolean async) {
         this.async = async;
         return this;
     }
 
-    @Override
     public McpClientBuilder<T> listener(AgentListener agentListener) {
         this.agentListener = agentListener;
         return this;
     }
 
-    @Override
     public T build() {
-        ToolSpecification toolSpec = findTool();
-
-        this.name = toolSpec.name();
-        this.agentId = this.name;
+        ToolSpecification toolSpec = this.findTool();
+        this.agentId = this.name = toolSpec.name();
         this.description = toolSpec.description();
-
-        if (agentServiceClass == UntypedAgent.class && inputKeys == null) {
+        if (this.agentServiceClass == UntypedAgent.class && this.inputKeys == null) {
             JsonObjectSchema params = toolSpec.parameters();
-            if (params != null && params.properties() != null) {
-                this.inputKeys = params.properties().keySet().toArray(new String[0]);
-            } else {
-                this.inputKeys = new String[0];
-            }
+            this.inputKeys = params != null && params.properties() != null ? params.properties().keySet().toArray(new String[0]) : new String[0];
         }
-
-        Object agent = Proxy.newProxyInstance(
-                agentServiceClass.getClassLoader(),
-                new Class<?>[] {agentServiceClass, McpClientInstance.class}, this);
-
-        return (T) agent;
+        Object agent = Proxy.newProxyInstance(this.agentServiceClass.getClassLoader(), new Class[]{this.agentServiceClass, McpClientInstance.class}, this);
+        return (T)agent;
     }
 
     private ToolSpecification findTool() {
-        List<ToolSpecification> tools = mcpClient.listTools();
-        if (toolName == null || toolName.trim().isEmpty()) {
+        List tools = this.mcpClient.listTools();
+        if (this.toolName == null || this.toolName.isBlank()) {
             if (tools.size() == 1) {
-                return tools.get(0);
+                return (ToolSpecification)tools.get(0);
             }
-            throw new AgenticSystemConfigurationException(
-                    "Tool name is required when there is more than one tool available: " +
-                            tools.stream().map(ToolSpecification::name).collect(Collectors.toList()));
+            throw new AgenticSystemConfigurationException("Tool name is required when there is more than one tool available: " + tools.stream().map(ToolSpecification::name).toList());
         }
-
-        return tools.stream()
-                .filter(t -> toolName == null || t.name().equals(toolName))
-                .findFirst()
-                .orElseThrow(() -> new AgenticSystemConfigurationException(
-                        "Tool '" + toolName + "' not found. Available tools: " +
-                                tools.stream().map(ToolSpecification::name).collect(Collectors.toList())));
+        return tools.stream().filter(t -> this.toolName == null || t.name().equals(this.toolName)).findFirst().orElseThrow(() -> new AgenticSystemConfigurationException("Tool '" + this.toolName + "' not found. Available tools: " + tools.stream().map(ToolSpecification::name).toList()));
     }
 
     @Override
@@ -135,19 +131,15 @@ public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, Internal
         if (method.getDeclaringClass() == AgentInstance.class || method.getDeclaringClass() == InternalAgent.class) {
             return method.invoke(Proxy.getInvocationHandler(proxy), args);
         }
-
         if (method.getDeclaringClass() == McpClientInstance.class) {
             return switch (method.getName()) {
-                case "toolName" -> name;
-                case "toolDescription" -> description;
-                case "inputKeys" -> inputKeys;
-                default ->
-                        throw new UnsupportedOperationException(
-                                "Unknown method on McpClientInstance class: " + method.getName());
+                case "toolName" -> this.name;
+                case "toolDescription" -> this.description;
+                case "inputKeys" -> this.inputKeys;
+                default -> throw new UnsupportedOperationException("Unknown method on McpClientInstance class: " + method.getName());
             };
         }
-
-        return invokeTool(method, args);
+        return this.invokeTool(method, args);
     }
 
     private static Type getReturnType(Method method) {
@@ -156,124 +148,97 @@ public class DefaultMcpClientBuilder<T> implements McpClientBuilder<T>, Internal
     }
 
     private Object invokeTool(Method method, Object[] args) {
-        Type returnType = getReturnType(method);
-        Map<String, Object> argsMap = new HashMap<>();
-
-        if (agentServiceClass == UntypedAgent.class) {
-            Map<String, Object> params = (Map<String, Object>) args[0];
-            for (String inputKey : inputKeys) {
+        Type returnType = DefaultMcpClientBuilder.getReturnType(method);
+        HashMap<String, Object> argsMap = new HashMap<String, Object>();
+        if (this.agentServiceClass == UntypedAgent.class) {
+            Map params = (Map)args[0];
+            for (String inputKey : this.inputKeys) {
                 argsMap.put(inputKey, params.get(inputKey));
             }
         } else {
-            String[] keys = inputKeys;
+            String[] keys = this.inputKeys;
             if (keys == null) {
-                keys = java.util.stream.Stream.of(method.getParameters())
-                        .map(AgentInvoker::parameterName)
-                        .toArray(String[]::new);
+                keys = (String[])Stream.of(method.getParameters()).map(AgentInvoker::parameterName).toArray(String[]::new);
             }
-            for (int i = 0; i < keys.length && i < args.length; i++) {
+            for (int i = 0; i < keys.length && i < args.length; ++i) {
                 argsMap.put(keys[i], args[i]);
             }
         }
-
         String argumentsJson = Json.toJson(argsMap);
-
-        ToolExecutionRequest executionRequest = ToolExecutionRequest.builder()
-                .name(name)
-                .arguments(argumentsJson)
-                .build();
-
-        ToolExecutionResult result = mcpClient.executeTool(executionRequest);
-
+        ToolExecutionRequest executionRequest = ToolExecutionRequest.builder().name(this.name).arguments(argumentsJson).build();
+        ToolExecutionResult result = this.mcpClient.executeTool(executionRequest);
         if (result.isError()) {
             throw new RuntimeException("MCP tool execution failed: " + result.resultText());
         }
-
         String responseText = result.resultText();
-        LOG.debug("MCP tool '{}' response: {}", name, responseText);
-
-        return serviceOutputParser.parseText(returnType, responseText);
+        LOG.debug("MCP tool '{}' response: {}", (Object)this.name, (Object)responseText);
+        return this.serviceOutputParser.parseText(returnType, responseText);
     }
 
-    @Override
     public void setParent(InternalAgent parent) {
         this.parent = parent;
     }
 
-    @Override
     public void registerInheritedParentListener(AgentListener parentListener) {
         if (parentListener != null && parentListener.inheritedBySubagents()) {
-            agentListener = composeWithInherited(listener(), parentListener);
+            this.agentListener = ComposedAgentListener.composeWithInherited((AgentListener)this.listener(), (AgentListener)parentListener);
         }
     }
 
-    @Override
     public void appendId(String idSuffix) {
         this.agentId = this.agentId + idSuffix;
     }
 
-    @Override
     public AgentListener listener() {
-        return agentListener;
+        return this.agentListener;
     }
 
-    @Override
     public Class<?> type() {
-        return agentServiceClass;
+        return this.agentServiceClass;
     }
 
-    @Override
     public Class<? extends Planner> plannerType() {
         return null;
     }
 
-    @Override
     public String name() {
-        return name;
+        return this.name;
     }
 
-    @Override
     public String agentId() {
-        return agentId;
+        return this.agentId;
     }
 
-    @Override
     public String description() {
-        return description;
+        return this.description;
     }
 
-    @Override
     public Type outputType() {
         return Object.class;
     }
 
-    @Override
     public String outputKey() {
-        return outputKey;
+        return this.outputKey;
     }
 
-    @Override
     public boolean async() {
-        return async;
+        return this.async;
     }
 
-    @Override
     public List<AgentArgument> arguments() {
-        return Collections.emptyList();
+        return List.of();
     }
 
-    @Override
     public AgentInstance parent() {
-        return parent;
+        return this.parent;
     }
 
-    @Override
     public List<AgentInstance> subagents() {
-        return Collections.emptyList();
+        return List.of();
     }
 
-    @Override
     public AgenticSystemTopology topology() {
         return AgenticSystemTopology.NON_AI_AGENT;
     }
 }
+

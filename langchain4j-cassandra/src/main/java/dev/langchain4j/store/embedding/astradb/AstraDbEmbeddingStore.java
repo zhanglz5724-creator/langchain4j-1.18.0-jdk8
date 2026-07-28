@@ -1,9 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.dtsx.astra.sdk.AstraDBCollection
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.store.embedding.EmbeddingMatch
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  io.stargate.sdk.data.domain.JsonDocument
+ *  io.stargate.sdk.data.domain.JsonDocumentMutationResult
+ *  io.stargate.sdk.data.domain.JsonDocumentResult
+ *  io.stargate.sdk.data.domain.odm.Document
+ *  io.stargate.sdk.data.domain.query.Filter
+ *  org.jspecify.annotations.NonNull
+ */
 package dev.langchain4j.store.embedding.astradb;
 
 import com.dtsx.astra.sdk.AstraDBCollection;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
@@ -13,64 +34,25 @@ import io.stargate.sdk.data.domain.JsonDocumentMutationResult;
 import io.stargate.sdk.data.domain.JsonDocumentResult;
 import io.stargate.sdk.data.domain.odm.Document;
 import io.stargate.sdk.data.domain.query.Filter;
-import org.jspecify.annotations.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NonNull;
 
-import static dev.langchain4j.internal.Utils.randomUUID;
-import static dev.langchain4j.internal.Utils.toStringValueMap;
-
-/**
- * Implementation of {@link EmbeddingStore} using AstraDB.
- *
- * @see EmbeddingStore
- */
-public class AstraDbEmbeddingStore implements EmbeddingStore<TextSegment> {
-
-    /**
-     * Saving the text chunk as an attribut.
-     */
+public class AstraDbEmbeddingStore
+implements EmbeddingStore<TextSegment> {
     public static final String KEY_ATTRIBUTES_BLOB = "body_blob";
-
-    /**
-     * Metadata used for similarity.
-     */
     public static final String KEY_SIMILARITY = "$similarity";
-
-    /**
-     * Client to work with an Astra Collection
-     */
     private final AstraDBCollection astraDBCollection;
-
-    /**
-     * Bulk loading are processed in chunks, size of 1 chunk in between 1 and 20
-     */
     private final int itemsPerChunk;
-
-    /**
-     * Bulk loading is distributed,the is the number threads
-     */
     private final int concurrentThreads;
 
-    /**
-     * Initialization of the store with an EXISTING collection.
-     *
-     * @param client astra db collection client
-     */
     public AstraDbEmbeddingStore(@NonNull AstraDBCollection client) {
         this(client, 20, 8);
     }
 
-    /**
-     * Initialization of the store with an EXISTING collection.
-     *
-     * @param client        astra db collection client
-     * @param itemsPerChunk size of 1 chunk in between 1 and 20
-     */
     public AstraDbEmbeddingStore(@NonNull AstraDBCollection client, int itemsPerChunk, int concurrentThreads) {
         Objects.requireNonNull(client, "'client' must not be null");
         if (itemsPerChunk > 20 || itemsPerChunk < 1) {
@@ -84,148 +66,78 @@ public class AstraDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         this.concurrentThreads = concurrentThreads;
     }
 
-    /**
-     * Delete all records from the table.
-     */
     public void clear() {
-        astraDBCollection.deleteAll();
+        this.astraDBCollection.deleteAll();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public String add(Embedding embedding) {
-        return add(embedding, null);
+        return this.add(embedding, null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public String add(Embedding embedding, TextSegment textSegment) {
-        return astraDBCollection
-                .insertOne(mapRecord(randomUUID(), embedding, textSegment))
-                .getDocument().getId();
+        return this.astraDBCollection.insertOne(this.mapRecord(Utils.randomUUID(), embedding, textSegment)).getDocument().getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void add(String id, Embedding embedding) {
-        astraDBCollection.upsertOne(new JsonDocument().id(id).vector(embedding.vector()));
+        this.astraDBCollection.upsertOne(new JsonDocument().id(id).vector(embedding.vector()));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<String> addAll(List<Embedding> embeddings) {
-        if (embeddings == null) return null;
-
-        // Map as a JsonDocument list.
-        List<JsonDocument> recordList = embeddings
-                .stream()
-                .map(e -> mapRecord(randomUUID(), e, null))
-                .collect(Collectors.toList());
-
-        // No upsert needed as ids will be generated.
-        return astraDBCollection
-                .insertManyChunkedJsonDocuments(recordList, itemsPerChunk, concurrentThreads)
-                .stream()
-                .map(JsonDocumentMutationResult::getDocument)
-                .map(Document::getId)
-                .collect(Collectors.toList());
+        if (embeddings == null) {
+            return null;
+        }
+        List recordList = embeddings.stream().map(e -> this.mapRecord(Utils.randomUUID(), (Embedding)e, null)).collect(Collectors.toList());
+        return this.astraDBCollection.insertManyChunkedJsonDocuments(recordList, this.itemsPerChunk, this.concurrentThreads).stream().map(JsonDocumentMutationResult::getDocument).map(Document::getId).collect(Collectors.toList());
     }
 
-    @Override
     public void addAll(List<String> ids, List<Embedding> embeddingList, List<TextSegment> textSegmentList) {
         if (embeddingList == null || textSegmentList == null || embeddingList.size() != textSegmentList.size()) {
             throw new IllegalArgumentException("embeddingList and textSegmentList must not be null and have the same size");
         }
-
-        // Map as JsonDocument list
-        List<JsonDocument> recordList = new ArrayList<>();
-        for (int i = 0; i < embeddingList.size(); i++) {
-            recordList.add(mapRecord(ids.get(i), embeddingList.get(i), textSegmentList.get(i)));
+        ArrayList<JsonDocument> recordList = new ArrayList<JsonDocument>();
+        for (int i = 0; i < embeddingList.size(); ++i) {
+            recordList.add(this.mapRecord(ids.get(i), embeddingList.get(i), textSegmentList.get(i)));
         }
-
-        // No upsert needed (ids will be generated)
-        astraDBCollection
-                .insertManyChunkedJsonDocuments(recordList, itemsPerChunk, concurrentThreads);
+        this.astraDBCollection.insertManyChunkedJsonDocuments(recordList, this.itemsPerChunk, this.concurrentThreads);
     }
 
-    @Override
     public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
         if (request.filter() != null) {
             throw new UnsupportedOperationException("EmbeddingSearchRequest.Filter is not supported yet.");
         }
-
-        List<EmbeddingMatch<TextSegment>> matches =
-                findRelevant(request.queryEmbedding(), request.maxResults(), request.minScore());
-        return new EmbeddingSearchResult<>(matches);
+        List<EmbeddingMatch<TextSegment>> matches = this.findRelevant(request.queryEmbedding(), request.maxResults(), request.minScore());
+        return new EmbeddingSearchResult(matches);
     }
 
     public List<EmbeddingMatch<TextSegment>> findRelevant(Embedding referenceEmbedding, int maxResults, double minScore) {
-        return findRelevant(referenceEmbedding, (Filter) null, maxResults, minScore);
+        return this.findRelevant(referenceEmbedding, null, maxResults, minScore);
     }
 
-    /**
-     * Semantic search with metadata filtering.
-     *
-     * @param referenceEmbedding vector
-     * @param metaDatafilter     fileter for metadata
-     * @param maxResults         limit
-     * @param minScore           threshold
-     * @return records
-     */
     public List<EmbeddingMatch<TextSegment>> findRelevant(Embedding referenceEmbedding, Filter metaDatafilter, int maxResults, double minScore) {
-        return astraDBCollection.findVector(referenceEmbedding.vector(), metaDatafilter, maxResults)
-                .filter(r -> r.getSimilarity() >= minScore)
-                .map(this::mapJsonResult)
-                .collect(Collectors.toList());
+        return this.astraDBCollection.findVector(referenceEmbedding.vector(), metaDatafilter, maxResults).filter(r -> (double)r.getSimilarity().floatValue() >= minScore).map(this::mapJsonResult).collect(Collectors.toList());
     }
 
-    /**
-     * Mapping the output of the query to a {@link EmbeddingMatch}..
-     *
-     * @param jsonRes returned object as Json
-     * @return embedding match as expected by langchain4j
-     */
     private EmbeddingMatch<TextSegment> mapJsonResult(JsonDocumentResult jsonRes) {
-        Double score = (double) jsonRes.getSimilarity();
+        Object body;
+        Double score = jsonRes.getSimilarity().floatValue();
         String embeddingId = jsonRes.getId();
-        Embedding embedding = Embedding.from(jsonRes.getVector());
+        Embedding embedding = Embedding.from((float[])jsonRes.getVector());
         TextSegment embedded = null;
-        Map<String, Object> properties = jsonRes.getData();
-        if (properties != null) {
-            Object body = properties.get(KEY_ATTRIBUTES_BLOB);
-            if (body != null) {
-                Metadata metadata = new Metadata(properties.entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey,
-                                entry -> entry.getValue() == null ? "" : entry.getValue().toString()
-                        )));
-                metadata.remove(KEY_ATTRIBUTES_BLOB);
-                metadata.remove(KEY_SIMILARITY);
-                embedded = new TextSegment(body.toString(), metadata);
-            }
+        Map properties = jsonRes.getData();
+        if (properties != null && (body = properties.get(KEY_ATTRIBUTES_BLOB)) != null) {
+            Metadata metadata = new Metadata(properties.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() == null ? "" : entry.getValue().toString())));
+            metadata.remove(KEY_ATTRIBUTES_BLOB);
+            metadata.remove(KEY_SIMILARITY);
+            embedded = new TextSegment(body.toString(), metadata);
         }
-        return new EmbeddingMatch<TextSegment>(score, embeddingId, embedding, embedded);
+        return new EmbeddingMatch(score, embeddingId, embedding, embedded);
     }
 
-    /**
-     * Map from LangChain4j record to AstraDB record.
-     *
-     * @param embedding   embedding (vector)
-     * @param textSegment text segment (text to encode)
-     * @return a json document
-     */
     private JsonDocument mapRecord(String id, Embedding embedding, TextSegment textSegment) {
         JsonDocument record = new JsonDocument().id(id).vector(embedding.vector());
         if (textSegment != null) {
-            record.put(KEY_ATTRIBUTES_BLOB, textSegment.text());
-            toStringValueMap(textSegment.metadata().toMap()).forEach(record::put);
+            record.put(KEY_ATTRIBUTES_BLOB, (Object)textSegment.text());
+            Utils.toStringValueMap((Map)textSegment.metadata().toMap()).forEach((arg_0, arg_1) -> ((JsonDocument)record).put(arg_0, arg_1));
         }
         return record;
     }
@@ -242,3 +154,4 @@ public class AstraDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         return this.concurrentThreads;
     }
 }
+

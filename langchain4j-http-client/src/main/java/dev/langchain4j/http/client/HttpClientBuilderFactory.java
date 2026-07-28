@@ -1,6 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.http.client;
 
-public interface HttpClientBuilderFactory {
+import dev.langchain4j.http.client.HttpClientBuilder;
 
-    HttpClientBuilder create();
+public interface HttpClientBuilderFactory {
+    public HttpClientBuilder create();
 }
+

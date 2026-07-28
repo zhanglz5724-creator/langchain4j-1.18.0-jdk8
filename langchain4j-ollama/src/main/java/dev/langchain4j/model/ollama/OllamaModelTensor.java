@@ -1,23 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OllamaModelTensor {
-
     private String name;
     private String type;
     private List<Long> shape;
 
-    OllamaModelTensor() {}
+    OllamaModelTensor() {
+    }
 
     public OllamaModelTensor(String name, String type, List<Long> shape) {
         this.name = name;
@@ -30,7 +38,7 @@ public class OllamaModelTensor {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -38,7 +46,7 @@ public class OllamaModelTensor {
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public void setType(String type) {
@@ -46,7 +54,7 @@ public class OllamaModelTensor {
     }
 
     public List<Long> getShape() {
-        return shape;
+        return this.shape;
     }
 
     public void setShape(List<Long> shape) {
@@ -54,7 +62,6 @@ public class OllamaModelTensor {
     }
 
     public static class Builder {
-
         private String name;
         private String type;
         private List<Long> shape;
@@ -75,7 +82,8 @@ public class OllamaModelTensor {
         }
 
         public OllamaModelTensor build() {
-            return new OllamaModelTensor(name, type, shape);
+            return new OllamaModelTensor(this.name, this.type, this.shape);
         }
     }
 }
+

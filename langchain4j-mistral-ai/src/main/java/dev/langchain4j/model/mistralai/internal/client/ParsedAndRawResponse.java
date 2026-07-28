@@ -1,9 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ */
 package dev.langchain4j.model.mistralai.internal.client;
 
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 
 public class ParsedAndRawResponse<R> {
-
     private final R parsedResponse;
     private final SuccessfulHttpResponse rawResponse;
 
@@ -13,10 +18,11 @@ public class ParsedAndRawResponse<R> {
     }
 
     public R parsedResponse() {
-        return parsedResponse;
+        return this.parsedResponse;
     }
 
     public SuccessfulHttpResponse rawResponse() {
-        return rawResponse;
+        return this.rawResponse;
     }
 }
+

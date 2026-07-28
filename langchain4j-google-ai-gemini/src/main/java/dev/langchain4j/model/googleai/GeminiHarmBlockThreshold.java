@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.googleai;
 
 public enum GeminiHarmBlockThreshold {
@@ -5,5 +8,7 @@ public enum GeminiHarmBlockThreshold {
     BLOCK_LOW_AND_ABOVE,
     BLOCK_MEDIUM_AND_ABOVE,
     BLOCK_ONLY_HIGH,
-    BLOCK_NONE
+    BLOCK_NONE;
+
 }
+

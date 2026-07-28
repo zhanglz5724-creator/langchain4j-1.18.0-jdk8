@@ -1,19 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.model.anthropic;
 
 import dev.langchain4j.Experimental;
-
+import dev.langchain4j.internal.Utils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.copy;
-
-/**
- * @since 1.10.0
- */
 @Experimental
 public class AnthropicServerTool {
-
     private final String type;
     private final String name;
     private final Map<String, Object> attributes;
@@ -21,42 +22,35 @@ public class AnthropicServerTool {
     public AnthropicServerTool(Builder builder) {
         this.type = builder.type;
         this.name = builder.name;
-        this.attributes = copy(builder.attributes);
+        this.attributes = Utils.copy((Map)builder.attributes);
     }
 
     public String type() {
-        return type;
+        return this.type;
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
     public Map<String, Object> attributes() {
-        return attributes;
+        return this.attributes;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        AnthropicServerTool that = (AnthropicServerTool) o;
-        return Objects.equals(type, that.type)
-                && Objects.equals(name, that.name)
-                && Objects.equals(attributes, that.attributes);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        AnthropicServerTool that = (AnthropicServerTool)o;
+        return Objects.equals(this.type, that.type) && Objects.equals(this.name, that.name) && Objects.equals(this.attributes, that.attributes);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(type, name, attributes);
+        return Objects.hash(this.type, this.name, this.attributes);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicServerTool{" +
-                "type='" + type + '\'' +
-                ", name='" + name + '\'' +
-                ", attributes=" + attributes +
-                '}';
+        return "AnthropicServerTool{type='" + this.type + '\'' + ", name='" + this.name + '\'' + ", attributes=" + this.attributes + '}';
     }
 
     public static Builder builder() {
@@ -64,7 +58,6 @@ public class AnthropicServerTool {
     }
 
     public static class Builder {
-
         private String type;
         private String name;
         private Map<String, Object> attributes;
@@ -86,7 +79,7 @@ public class AnthropicServerTool {
 
         public Builder addAttribute(String key, Object value) {
             if (this.attributes == null) {
-                this.attributes = new LinkedHashMap<>();
+                this.attributes = new LinkedHashMap<String, Object>();
             }
             this.attributes.put(key, value);
             return this;
@@ -97,3 +90,4 @@ public class AnthropicServerTool {
         }
     }
 }
+

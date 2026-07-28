@@ -1,278 +1,265 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.data.message.PdfFileContent
+ *  dev.langchain4j.data.message.SystemMessage
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.message.ToolExecutionResultMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.data.pdf.PdfFile
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.Exceptions
+ *  dev.langchain4j.internal.Json
+ *  dev.langchain4j.internal.JsonSchemaElementUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.request.json.JsonObjectSchema
+ */
 package dev.langchain4j.model.vertexai.anthropic.internal.mapper;
-
-import static dev.langchain4j.internal.Exceptions.illegalArgument;
-import static dev.langchain4j.internal.JsonSchemaElementUtils.toMap;
-import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toList;
 
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.image.Image;
-import dev.langchain4j.data.message.*;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.PdfFileContent;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.TextContent;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.data.pdf.PdfFile;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.Exceptions;
 import dev.langchain4j.internal.Json;
+import dev.langchain4j.internal.JsonSchemaElementUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.vertexai.anthropic.internal.Constants;
-import dev.langchain4j.model.vertexai.anthropic.internal.api.*;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicCacheControl;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicMessage;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicRequest;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicSource;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicSystemMessage;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicTool;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicToolChoice;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class AnthropicRequestMapper {
+    private AnthropicRequestMapper() {
+    }
 
-    private AnthropicRequestMapper() {}
-
-    public static AnthropicRequest toRequest(
-            String model,
-            List<ChatMessage> messages,
-            List<ToolSpecification> toolSpecs,
-            ToolChoice toolChoice,
-            Integer maxTokens,
-            Double temperature,
-            Double topP,
-            Integer topK,
-            List<String> stopSequences,
-            Boolean enablePromptCaching) {
+    public static AnthropicRequest toRequest(String model, List<ChatMessage> messages, List<ToolSpecification> toolSpecs, ToolChoice toolChoice, Integer maxTokens, Double temperature, Double topP, Integer topK, List<String> stopSequences, Boolean enablePromptCaching) {
         if (model == null || model.trim().isEmpty()) {
             throw new IllegalArgumentException("model cannot be null or empty");
         }
         if (messages == null || messages.isEmpty()) {
             throw new IllegalArgumentException("messages cannot be null or empty");
         }
-
         AnthropicRequest request = new AnthropicRequest();
-        request.maxTokens = maxTokens != null ? maxTokens : Constants.DEFAULT_MAX_TOKENS;
+        request.maxTokens = maxTokens != null ? maxTokens : 4096;
         request.temperature = temperature;
         request.topP = topP;
         request.topK = topK;
         request.stopSequences = stopSequences;
         request.stream = false;
-
-        // Process messages like the original AnthropicMapper
-        List<AnthropicMessage> anthropicMessages = toAnthropicMessages(messages);
-        List<AnthropicSystemMessage> systemMessages = toAnthropicSystemMessages(messages);
-
-        // Apply cache control if enabled
-        if (enablePromptCaching != null && enablePromptCaching) {
-            applyCacheControl(anthropicMessages, systemMessages);
+        List<AnthropicMessage> anthropicMessages = AnthropicRequestMapper.toAnthropicMessages(messages);
+        List<AnthropicSystemMessage> systemMessages = AnthropicRequestMapper.toAnthropicSystemMessages(messages);
+        if (enablePromptCaching != null && enablePromptCaching.booleanValue()) {
+            AnthropicRequestMapper.applyCacheControl(anthropicMessages, systemMessages);
         }
-
         request.messages = anthropicMessages;
-        request.system = systemMessages.isEmpty() ? null : systemMessages;
-
-        // Process tools
+        List<AnthropicSystemMessage> list = request.system = systemMessages.isEmpty() ? null : systemMessages;
         if (toolSpecs != null && !toolSpecs.isEmpty()) {
-            request.tools =
-                    toolSpecs.stream().map(AnthropicRequestMapper::toTool).collect(Collectors.toList());
-            request.toolChoice = toAnthropicToolChoice(toolChoice);
+            request.tools = toolSpecs.stream().map(AnthropicRequestMapper::toTool).collect(Collectors.toList());
+            request.toolChoice = AnthropicRequestMapper.toAnthropicToolChoice(toolChoice);
         }
-        request.anthropicVersion = Constants.ANTHROPIC_VERSION;
-
+        request.anthropicVersion = "vertex-2023-10-16";
         return request;
     }
 
     public static List<AnthropicMessage> toAnthropicMessages(List<ChatMessage> messages) {
-        List<AnthropicMessage> anthropicMessages = new ArrayList<>();
-        List<AnthropicContent> toolContents = new ArrayList<>();
-
+        ArrayList<AnthropicMessage> anthropicMessages = new ArrayList<AnthropicMessage>();
+        ArrayList<AnthropicContent> toolContents = new ArrayList<AnthropicContent>();
         for (ChatMessage message : messages) {
+            List<AnthropicContent> contents;
             if (message instanceof ToolExecutionResultMessage) {
-                toolContents.add(toAnthropicToolResultContent((ToolExecutionResultMessage) message));
-            } else if (message instanceof SystemMessage) {
-                // ignore, it is handled in the "toAnthropicSystemMessages" method
-            } else {
-                if (!toolContents.isEmpty()) {
-                    anthropicMessages.add(new AnthropicMessage(Constants.USER_ROLE, toolContents));
-                    toolContents = new ArrayList<>();
-                }
-
-                if (message instanceof UserMessage) {
-                    List<AnthropicContent> contents = toAnthropicMessageContents((UserMessage) message);
-                    anthropicMessages.add(new AnthropicMessage(Constants.USER_ROLE, contents));
-                } else if (message instanceof AiMessage) {
-                    List<AnthropicContent> contents = toAnthropicMessageContents((AiMessage) message);
-                    anthropicMessages.add(new AnthropicMessage(Constants.ASSISTANT_ROLE, contents));
-                }
+                toolContents.add(AnthropicRequestMapper.toAnthropicToolResultContent((ToolExecutionResultMessage)message));
+                continue;
             }
+            if (message instanceof SystemMessage) continue;
+            if (!toolContents.isEmpty()) {
+                anthropicMessages.add(new AnthropicMessage("user", toolContents));
+                toolContents = new ArrayList();
+            }
+            if (message instanceof UserMessage) {
+                contents = AnthropicRequestMapper.toAnthropicMessageContents((UserMessage)message);
+                anthropicMessages.add(new AnthropicMessage("user", contents));
+                continue;
+            }
+            if (!(message instanceof AiMessage)) continue;
+            contents = AnthropicRequestMapper.toAnthropicMessageContents((AiMessage)message);
+            anthropicMessages.add(new AnthropicMessage("assistant", contents));
         }
-
         if (!toolContents.isEmpty()) {
-            anthropicMessages.add(new AnthropicMessage(Constants.USER_ROLE, toolContents));
+            anthropicMessages.add(new AnthropicMessage("user", toolContents));
         }
-
         return anthropicMessages;
     }
 
     private static AnthropicContent toAnthropicToolResultContent(ToolExecutionResultMessage message) {
         if (!message.hasSingleText()) {
-            throw new UnsupportedFeatureException(
-                    "Vertex AI Anthropic does not support non-text content in tool results. "
-                            + "Only text content is supported.");
+            throw new UnsupportedFeatureException("Vertex AI Anthropic does not support non-text content in tool results. Only text content is supported.");
         }
         return AnthropicContent.toolResult(message.id(), message.text());
     }
 
     private static List<AnthropicContent> toAnthropicMessageContents(UserMessage message) {
-        return message.contents().stream()
-                .map(content -> {
-                    if (content instanceof TextContent textContent) {
-                        return AnthropicContent.textContent(textContent.text());
-                    } else if (content instanceof ImageContent imageContent) {
-                        Image image = imageContent.image();
-                        if (image.url() != null) {
-                            throw new UnsupportedFeatureException(
-                                    "Anthropic does not support images as URLs, only as Base64-encoded strings");
-                        }
-                        String base64Data = ensureNotBlank(image.base64Data(), "base64Data");
-                        String mimeType = ensureNotBlank(image.mimeType(), "mimeType");
-                        AnthropicSource source = AnthropicSource.base64(mimeType, base64Data);
-                        return AnthropicContent.imageContent(source);
-                    } else if (content instanceof PdfFileContent pdfFileContent) {
-                        PdfFile pdfFile = pdfFileContent.pdfFile();
-                        String base64Data = ensureNotBlank(pdfFile.base64Data(), "base64Data");
-                        // Note: Vertex AI Anthropic may not support PDF files yet, but keeping for consistency
-                        throw new UnsupportedFeatureException("PDF files are not yet supported in Vertex AI Anthropic");
-                    } else {
-                        throw illegalArgument("Unknown content type: " + content);
-                    }
-                })
-                .collect(toList());
+        return message.contents().stream().map(content -> {
+            if (content instanceof TextContent) {
+                TextContent textContent = (TextContent)content;
+                return AnthropicContent.textContent(textContent.text());
+            }
+            if (content instanceof ImageContent) {
+                ImageContent imageContent = (ImageContent)content;
+                Image image = imageContent.image();
+                if (image.url() != null) {
+                    throw new UnsupportedFeatureException("Anthropic does not support images as URLs, only as Base64-encoded strings");
+                }
+                String base64Data = ValidationUtils.ensureNotBlank((String)image.base64Data(), (String)"base64Data");
+                String mimeType = ValidationUtils.ensureNotBlank((String)image.mimeType(), (String)"mimeType");
+                AnthropicSource source = AnthropicSource.base64(mimeType, base64Data);
+                return AnthropicContent.imageContent(source);
+            }
+            if (content instanceof PdfFileContent) {
+                PdfFileContent pdfFileContent = (PdfFileContent)content;
+                PdfFile pdfFile = pdfFileContent.pdfFile();
+                String base64Data = ValidationUtils.ensureNotBlank((String)pdfFile.base64Data(), (String)"base64Data");
+                throw new UnsupportedFeatureException("PDF files are not yet supported in Vertex AI Anthropic");
+            }
+            throw Exceptions.illegalArgument((String)("Unknown content type: " + content), (Object[])new Object[0]);
+        }).collect(Collectors.toList());
     }
 
     private static List<AnthropicContent> toAnthropicMessageContents(AiMessage message) {
-        List<AnthropicContent> contents = new ArrayList<>();
-
-        if (isNotNullOrBlank(message.text())) {
+        ArrayList<AnthropicContent> contents = new ArrayList<AnthropicContent>();
+        if (Utils.isNotNullOrBlank((String)message.text())) {
             contents.add(AnthropicContent.textContent(message.text()));
         }
-
         if (message.hasToolExecutionRequests()) {
-            List<AnthropicContent> toolUseContents = message.toolExecutionRequests().stream()
-                    .map(toolExecutionRequest -> AnthropicContent.toolUse(
-                            toolExecutionRequest.id(),
-                            toolExecutionRequest.name(),
-                            toAnthropicInput(toolExecutionRequest)))
-                    .collect(Collectors.toList());
+            List toolUseContents = message.toolExecutionRequests().stream().map(toolExecutionRequest -> AnthropicContent.toolUse(toolExecutionRequest.id(), toolExecutionRequest.name(), AnthropicRequestMapper.toAnthropicInput(toolExecutionRequest))).collect(Collectors.toList());
             contents.addAll(toolUseContents);
         }
-
         return contents;
     }
 
     private static Object toAnthropicInput(ToolExecutionRequest toolExecutionRequest) {
         String arguments = toolExecutionRequest.arguments();
-        if (isNullOrBlank(arguments)) {
-            return Collections.emptyMap(); // Empty map instead of "{}" string
+        if (Utils.isNullOrBlank((String)arguments)) {
+            return Collections.emptyMap();
         }
         try {
-            // Parse the JSON string into an Object (Map)
-            return Json.fromJson(arguments, Map.class);
-        } catch (Exception e) {
-            // If parsing fails, return empty map to avoid API errors
+            return Json.fromJson((String)arguments, Map.class);
+        }
+        catch (Exception e) {
             return Collections.emptyMap();
         }
     }
 
     public static List<AnthropicSystemMessage> toAnthropicSystemMessages(List<ChatMessage> messages) {
-        return messages.stream()
-                .filter(message -> message instanceof SystemMessage)
-                .map(message -> AnthropicSystemMessage.textSystemMessage(((SystemMessage) message).text()))
-                .collect(toList());
+        return messages.stream().filter(message -> message instanceof SystemMessage).map(message -> AnthropicSystemMessage.textSystemMessage(((SystemMessage)message).text())).collect(Collectors.toList());
     }
 
     public static AnthropicTool toAnthropicTool(ToolSpecification toolSpecification) {
+        String description;
         JsonObjectSchema parameters = toolSpecification.parameters();
-
-        Object properties;
-        if (parameters != null && parameters.properties() != null) {
-            // toMap returns Map<String, Map<String, Object>> for properties
-            properties = toMap(parameters.properties());
-        } else {
-            properties = emptyMap();
-        }
-
-        List<String> required = parameters != null ? parameters.required() : emptyList();
-
-        Map<String, Object> inputSchema = new LinkedHashMap<>();
+        Map properties = parameters != null && parameters.properties() != null ? JsonSchemaElementUtils.toMap((Map)parameters.properties()) : Collections.emptyMap();
+        List required = parameters != null ? parameters.required() : Collections.emptyList();
+        LinkedHashMap<String, Object> inputSchema = new LinkedHashMap<String, Object>();
         inputSchema.put("type", "object");
         inputSchema.put("properties", properties);
         inputSchema.put("required", required);
-        if (parameters != null
-                && parameters.definitions() != null
-                && !parameters.definitions().isEmpty()) {
-            inputSchema.put("$defs", toMap(parameters.definitions()));
+        if (parameters != null && parameters.definitions() != null && !parameters.definitions().isEmpty()) {
+            inputSchema.put("$defs", JsonSchemaElementUtils.toMap((Map)parameters.definitions()));
         }
-
-        String description;
-        if (isNotNullOrBlank(toolSpecification.description())) {
+        if (Utils.isNotNullOrBlank((String)toolSpecification.description())) {
             description = toolSpecification.description();
         } else {
-            // Provide intelligent default descriptions based on tool name
-            description = switch (toolSpecification.name().toLowerCase()) {
-                case "get_current_time", "current_time", "time" -> "Gets the current time";
-                case "get_weather", "weather" -> "Gets weather information";
-                case "calculator", "calculate" -> "Performs mathematical calculations";
-                default -> "Tool: " + toolSpecification.name();
-            };
+            String lowerName;
+            switch (lowerName = toolSpecification.name().toLowerCase()) {
+                case "get_current_time": 
+                case "current_time": 
+                case "time": {
+                    description = "Gets the current time";
+                    break;
+                }
+                case "get_weather": 
+                case "weather": {
+                    description = "Gets weather information";
+                    break;
+                }
+                case "calculator": 
+                case "calculate": {
+                    description = "Performs mathematical calculations";
+                    break;
+                }
+                default: {
+                    description = "Tool: " + toolSpecification.name();
+                }
+            }
         }
-
         return new AnthropicTool(toolSpecification.name(), description, inputSchema);
     }
 
     private static AnthropicTool toTool(ToolSpecification toolSpec) {
-        return toAnthropicTool(toolSpec);
+        return AnthropicRequestMapper.toAnthropicTool(toolSpec);
     }
 
     public static AnthropicToolChoice toAnthropicToolChoice(ToolChoice toolChoice) {
         if (toolChoice == null) {
             return null;
         }
-
-        return switch (toolChoice) {
-            case AUTO -> AnthropicToolChoice.auto();
-            case REQUIRED -> AnthropicToolChoice.any();
-            case NONE -> null;
-        };
+        switch (toolChoice) {
+            case AUTO: {
+                return AnthropicToolChoice.auto();
+            }
+            case REQUIRED: {
+                return AnthropicToolChoice.any();
+            }
+            case NONE: {
+                return null;
+            }
+        }
+        throw new IllegalArgumentException("Unknown tool choice: " + toolChoice);
     }
 
-    private static void applyCacheControl(
-            List<AnthropicMessage> anthropicMessages, List<AnthropicSystemMessage> systemMessages) {
-        // Apply cache control based on Claude's caching strategy
-        // According to the documentation, caching happens in this order: tools → system → messages
-
-        // For now, implement a simple strategy: cache the last system message if it exists
-        // and the last user message that has substantial content
-
-        // Cache the last system message if it exists
+    private static void applyCacheControl(List<AnthropicMessage> anthropicMessages, List<AnthropicSystemMessage> systemMessages) {
         if (!systemMessages.isEmpty()) {
             AnthropicSystemMessage lastSystemMessage = systemMessages.get(systemMessages.size() - 1);
             lastSystemMessage.cacheControl = AnthropicCacheControl.ephemeral();
         }
-
-        // Cache the last user message if it has substantial content (more than 100 characters)
-        for (int i = anthropicMessages.size() - 1; i >= 0; i--) {
+        for (int i = anthropicMessages.size() - 1; i >= 0; --i) {
+            boolean hasSubstantialContent;
             AnthropicMessage message = anthropicMessages.get(i);
-            if (Constants.USER_ROLE.equals(message.role) && message.content != null && !message.content.isEmpty()) {
-                // Check if the message has substantial text content
-                boolean hasSubstantialContent = message.content.stream()
-                        .anyMatch(content -> Constants.TEXT_CONTENT_TYPE.equals(content.type)
-                                && content.text != null
-                                && content.text.length() > Constants.SUBSTANTIAL_CONTENT_THRESHOLD);
-
-                if (hasSubstantialContent) {
-                    message.cacheControl = AnthropicCacheControl.ephemeral();
-                    break; // Only cache one message for now
-                }
-            }
+            if (!"user".equals(message.role) || message.content == null || message.content.isEmpty() || !(hasSubstantialContent = message.content.stream().anyMatch(content -> "text".equals(content.type) && content.text != null && content.text.length() > 100))) continue;
+            message.cacheControl = AnthropicCacheControl.ephemeral();
+            break;
         }
     }
 }
+

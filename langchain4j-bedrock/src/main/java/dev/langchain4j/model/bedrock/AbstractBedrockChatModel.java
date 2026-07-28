@@ -1,30 +1,96 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.data.message.PdfFileContent
+ *  dev.langchain4j.data.message.SystemMessage
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.message.ToolExecutionResultMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.Json
+ *  dev.langchain4j.internal.JsonSchemaElementUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ResponseFormatType
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.request.json.JsonRawSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchemaElement
+ *  dev.langchain4j.model.output.FinishReason
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ *  software.amazon.awssdk.core.SdkBytes
+ *  software.amazon.awssdk.core.document.Document
+ *  software.amazon.awssdk.regions.Region
+ *  software.amazon.awssdk.services.bedrockruntime.model.AnyToolChoice
+ *  software.amazon.awssdk.services.bedrockruntime.model.CachePointBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.CachePointType
+ *  software.amazon.awssdk.services.bedrockruntime.model.CacheTTL
+ *  software.amazon.awssdk.services.bedrockruntime.model.ContentBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.ContentBlock$Type
+ *  software.amazon.awssdk.services.bedrockruntime.model.ConversationRole
+ *  software.amazon.awssdk.services.bedrockruntime.model.ConverseResponse
+ *  software.amazon.awssdk.services.bedrockruntime.model.ConverseTrace
+ *  software.amazon.awssdk.services.bedrockruntime.model.DocumentBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.DocumentFormat
+ *  software.amazon.awssdk.services.bedrockruntime.model.DocumentSource
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailConfiguration
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentFilter
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentPolicyAssessment
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailContextualGroundingFilter
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailContextualGroundingPolicyAssessment
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailPiiEntityFilter
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailRegexFilter
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailSensitiveInformationPolicyAssessment
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailStreamConfiguration
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailStreamProcessingMode
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailTopic
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailTopicPolicyAssessment
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailTrace
+ *  software.amazon.awssdk.services.bedrockruntime.model.GuardrailWordPolicyAssessment
+ *  software.amazon.awssdk.services.bedrockruntime.model.ImageBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.ImageSource
+ *  software.amazon.awssdk.services.bedrockruntime.model.InferenceConfiguration
+ *  software.amazon.awssdk.services.bedrockruntime.model.JsonSchemaDefinition
+ *  software.amazon.awssdk.services.bedrockruntime.model.Message
+ *  software.amazon.awssdk.services.bedrockruntime.model.OutputConfig
+ *  software.amazon.awssdk.services.bedrockruntime.model.OutputFormat
+ *  software.amazon.awssdk.services.bedrockruntime.model.OutputFormatStructure
+ *  software.amazon.awssdk.services.bedrockruntime.model.OutputFormatType
+ *  software.amazon.awssdk.services.bedrockruntime.model.ReasoningContentBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.ReasoningTextBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.ServiceTier
+ *  software.amazon.awssdk.services.bedrockruntime.model.ServiceTierType
+ *  software.amazon.awssdk.services.bedrockruntime.model.StopReason
+ *  software.amazon.awssdk.services.bedrockruntime.model.SystemContentBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.TokenUsage
+ *  software.amazon.awssdk.services.bedrockruntime.model.Tool
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolChoice
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolConfiguration
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolConfiguration$Builder
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolInputSchema
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolResultBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolResultContentBlock
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolSpecification
+ *  software.amazon.awssdk.services.bedrockruntime.model.ToolUseBlock
+ */
 package dev.langchain4j.model.bedrock;
-
-import static dev.langchain4j.internal.JsonSchemaElementUtils.toMap;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNotNullOrEmpty;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.Utils.readBytes;
-import static dev.langchain4j.model.bedrock.AwsDocumentConverter.convertAdditionalModelRequestFields;
-import static dev.langchain4j.model.bedrock.AwsDocumentConverter.convertJsonObjectSchemaToDocument;
-import static dev.langchain4j.model.bedrock.AwsDocumentConverter.documentFromJson;
-import static dev.langchain4j.model.bedrock.AwsDocumentConverter.documentToJson;
-import static dev.langchain4j.model.bedrock.GuardrailAssessment.Policy.CONTENT;
-import static dev.langchain4j.model.bedrock.GuardrailAssessment.Policy.CONTEXT;
-import static dev.langchain4j.model.bedrock.GuardrailAssessment.Policy.SENSITIVE;
-import static dev.langchain4j.model.bedrock.GuardrailAssessment.Policy.TOPIC;
-import static dev.langchain4j.model.bedrock.GuardrailAssessment.Policy.WORD;
-import static dev.langchain4j.model.bedrock.Utils.extractAndValidateFormat;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.nonNull;
-import static software.amazon.awssdk.core.SdkBytes.fromByteArray;
-import static software.amazon.awssdk.services.bedrockruntime.model.OutputFormatType.JSON_SCHEMA;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.Content;
@@ -36,6 +102,21 @@ import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
 import dev.langchain4j.internal.Json;
+import dev.langchain4j.internal.JsonSchemaElementUtils;
+import dev.langchain4j.model.bedrock.AwsDocumentConverter;
+import dev.langchain4j.model.bedrock.BedrockCachePointPlacement;
+import dev.langchain4j.model.bedrock.BedrockChatRequestParameters;
+import dev.langchain4j.model.bedrock.BedrockGuardrailConfiguration;
+import dev.langchain4j.model.bedrock.BedrockServiceTier;
+import dev.langchain4j.model.bedrock.BedrockSystemContent;
+import dev.langchain4j.model.bedrock.BedrockSystemMessage;
+import dev.langchain4j.model.bedrock.BedrockSystemTextContent;
+import dev.langchain4j.model.bedrock.BedrockTokenUsage;
+import dev.langchain4j.model.bedrock.GuardrailAssessment;
+import dev.langchain4j.model.bedrock.GuardrailAssessmentSummary;
+import dev.langchain4j.model.bedrock.InputGuardrailAssessment;
+import dev.langchain4j.model.bedrock.OutputGuardrailAssessment;
+import dev.langchain4j.model.bedrock.Utils;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -46,14 +127,15 @@ import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
-import dev.langchain4j.model.chat.response.PartialThinking;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.output.FinishReason;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +145,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkBytes;
@@ -80,14 +161,11 @@ import software.amazon.awssdk.services.bedrockruntime.model.ConverseTrace;
 import software.amazon.awssdk.services.bedrockruntime.model.DocumentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.DocumentFormat;
 import software.amazon.awssdk.services.bedrockruntime.model.DocumentSource;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailConfiguration;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentFilter;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentPolicyAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContextualGroundingFilter;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContextualGroundingPolicyAssessment;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailCustomWord;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailManagedWord;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailPiiEntityFilter;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailRegexFilter;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailSensitiveInformationPolicyAssessment;
@@ -105,52 +183,28 @@ import software.amazon.awssdk.services.bedrockruntime.model.Message;
 import software.amazon.awssdk.services.bedrockruntime.model.OutputConfig;
 import software.amazon.awssdk.services.bedrockruntime.model.OutputFormat;
 import software.amazon.awssdk.services.bedrockruntime.model.OutputFormatStructure;
+import software.amazon.awssdk.services.bedrockruntime.model.OutputFormatType;
 import software.amazon.awssdk.services.bedrockruntime.model.ReasoningContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ReasoningTextBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ServiceTier;
 import software.amazon.awssdk.services.bedrockruntime.model.ServiceTierType;
 import software.amazon.awssdk.services.bedrockruntime.model.StopReason;
 import software.amazon.awssdk.services.bedrockruntime.model.SystemContentBlock;
+import software.amazon.awssdk.services.bedrockruntime.model.TokenUsage;
 import software.amazon.awssdk.services.bedrockruntime.model.Tool;
 import software.amazon.awssdk.services.bedrockruntime.model.ToolConfiguration;
 import software.amazon.awssdk.services.bedrockruntime.model.ToolInputSchema;
 import software.amazon.awssdk.services.bedrockruntime.model.ToolResultBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ToolResultContentBlock;
+import software.amazon.awssdk.services.bedrockruntime.model.ToolSpecification;
 import software.amazon.awssdk.services.bedrockruntime.model.ToolUseBlock;
 
 @Internal
 abstract class AbstractBedrockChatModel {
-
     private static final Logger log = LoggerFactory.getLogger(AbstractBedrockChatModel.class);
-
-    private static final String THINKING_SIGNATURE_KEY =
-            "thinking_signature"; // do not change, will break backward compatibility!
-
-    /**
-     * Maximum cache points allowed by AWS Bedrock per request.
-     */
+    private static final String THINKING_SIGNATURE_KEY = "thinking_signature";
     private static final int MAX_CACHE_POINTS_PER_REQUEST = 4;
-
-    /**
-     * Default cache point block with no TTL (5-minute default).
-     */
-    private static final CachePointBlock DEFAULT_CACHE_POINT =
-            CachePointBlock.builder().type(CachePointType.DEFAULT).build();
-
-    /**
-     * Creates a CachePointBlock with the specified TTL.
-     * If cacheTtl is null, returns the default cache point (5-minute TTL).
-     */
-    private static CachePointBlock buildCachePoint(CacheTTL cacheTtl) {
-        if (cacheTtl == null) {
-            return DEFAULT_CACHE_POINT;
-        }
-        return CachePointBlock.builder()
-                .type(CachePointType.DEFAULT)
-                .ttl(cacheTtl)
-                .build();
-    }
-
+    private static final CachePointBlock DEFAULT_CACHE_POINT = (CachePointBlock)CachePointBlock.builder().type(CachePointType.DEFAULT).build();
     protected final Region region;
     protected final Duration timeout;
     protected final boolean returnThinking;
@@ -160,882 +214,568 @@ abstract class AbstractBedrockChatModel {
     protected final Set<Capability> supportedCapabilities;
     protected final Supplier<Map<String, String>> customHeadersSupplier;
 
-    protected AbstractBedrockChatModel(AbstractBuilder<?> builder) {
-        this.region = getOrDefault(builder.region, Region.US_EAST_1);
-        this.timeout = getOrDefault(builder.timeout, Duration.ofMinutes(1));
-        this.returnThinking = getOrDefault(builder.returnThinking, false);
-        this.sendThinking = getOrDefault(builder.sendThinking, true);
-        this.listeners = copy(builder.listeners);
-        this.supportedCapabilities = copy(builder.supportedCapabilities);
-        this.customHeadersSupplier = builder.customHeadersSupplier;
+    private static CachePointBlock buildCachePoint(CacheTTL cacheTtl) {
+        if (cacheTtl == null) {
+            return DEFAULT_CACHE_POINT;
+        }
+        return (CachePointBlock)CachePointBlock.builder().type(CachePointType.DEFAULT).ttl(cacheTtl).build();
+    }
 
+    protected AbstractBedrockChatModel(AbstractBuilder<?> builder) {
         ChatRequestParameters commonParameters;
+        this.region = (Region)dev.langchain4j.internal.Utils.getOrDefault((Object)builder.region, (Object)Region.US_EAST_1);
+        this.timeout = (Duration)dev.langchain4j.internal.Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofMinutes(1L));
+        this.returnThinking = (Boolean)dev.langchain4j.internal.Utils.getOrDefault((Object)builder.returnThinking, (Object)false);
+        this.sendThinking = (Boolean)dev.langchain4j.internal.Utils.getOrDefault((Object)builder.sendThinking, (Object)true);
+        this.listeners = dev.langchain4j.internal.Utils.copy(builder.listeners);
+        this.supportedCapabilities = dev.langchain4j.internal.Utils.copy(builder.supportedCapabilities);
+        this.customHeadersSupplier = builder.customHeadersSupplier;
         if (builder.defaultRequestParameters != null) {
-            validate(builder.defaultRequestParameters);
+            AbstractBedrockChatModel.validate(builder.defaultRequestParameters);
             commonParameters = builder.defaultRequestParameters;
         } else {
             commonParameters = DefaultChatRequestParameters.EMPTY;
         }
-
-        BedrockChatRequestParameters bedrockParameters =
-                builder.defaultRequestParameters instanceof BedrockChatRequestParameters bedrockChatRequestParameters
-                        ? bedrockChatRequestParameters
-                        : BedrockChatRequestParameters.EMPTY;
-
-        this.defaultRequestParameters = BedrockChatRequestParameters.builder()
-                // common parameters
-                .modelName(getOrDefault(builder.modelId, commonParameters.modelName()))
-                .temperature(commonParameters.temperature())
-                .topP(commonParameters.topP())
-                .maxOutputTokens(commonParameters.maxOutputTokens())
-                .stopSequences(commonParameters.stopSequences())
-                .toolSpecifications(commonParameters.toolSpecifications())
-                .toolChoice(commonParameters.toolChoice())
-                // Bedrock-specific parameters
-                .additionalModelRequestFields(bedrockParameters.additionalModelRequestFields())
-                .promptCaching(bedrockParameters.cachePointPlacement(), bedrockParameters.cacheTtl())
-                .guardrailConfiguration(bedrockParameters.bedrockGuardrailConfiguration())
-                .build();
+        BedrockChatRequestParameters bedrockParameters = builder.defaultRequestParameters instanceof BedrockChatRequestParameters ? (BedrockChatRequestParameters)builder.defaultRequestParameters : BedrockChatRequestParameters.EMPTY;
+        this.defaultRequestParameters = ((BedrockChatRequestParameters.Builder)((BedrockChatRequestParameters.Builder)((BedrockChatRequestParameters.Builder)((BedrockChatRequestParameters.Builder)((BedrockChatRequestParameters.Builder)((BedrockChatRequestParameters.Builder)((BedrockChatRequestParameters.Builder)BedrockChatRequestParameters.builder().modelName((String)dev.langchain4j.internal.Utils.getOrDefault((Object)builder.modelId, (Object)commonParameters.modelName()))).temperature(commonParameters.temperature())).topP(commonParameters.topP())).maxOutputTokens(commonParameters.maxOutputTokens())).stopSequences(commonParameters.stopSequences())).toolSpecifications(commonParameters.toolSpecifications())).toolChoice(commonParameters.toolChoice())).additionalModelRequestFields(bedrockParameters.additionalModelRequestFields()).promptCaching(bedrockParameters.cachePointPlacement(), bedrockParameters.cacheTtl()).guardrailConfiguration(bedrockParameters.bedrockGuardrailConfiguration()).build();
     }
 
     protected List<SystemContentBlock> extractSystemMessages(List<ChatMessage> messages) {
-        return extractSystemMessages(messages, null, null);
+        return this.extractSystemMessages(messages, null, null);
     }
 
-    protected List<SystemContentBlock> extractSystemMessages(
-            List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement) {
-        return extractSystemMessages(messages, cachePointPlacement, null);
+    protected List<SystemContentBlock> extractSystemMessages(List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement) {
+        return this.extractSystemMessages(messages, cachePointPlacement, null);
     }
 
-    protected List<SystemContentBlock> extractSystemMessages(
-            List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, CacheTTL cacheTtl) {
+    protected List<SystemContentBlock> extractSystemMessages(List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, CacheTTL cacheTtl) {
         if (messages == null) {
-            return new ArrayList<>();
+            return new ArrayList<SystemContentBlock>();
         }
-
-        List<SystemContentBlock> systemBlocks = new ArrayList<>();
+        ArrayList<SystemContentBlock> systemBlocks = new ArrayList<SystemContentBlock>();
         boolean lastWasCoreSystemMessage = false;
-
         for (ChatMessage message : messages) {
-            if (message == null) {
-                continue; // Skip null messages gracefully
-            }
-
-            // CRITICAL: Use instanceof, NOT type() check to avoid ClassCastException
-            if (message instanceof BedrockSystemMessage bedrockMsg) {
-                // Handle BedrockSystemMessage with granular cache points
+            if (message == null) continue;
+            if (message instanceof BedrockSystemMessage) {
+                BedrockSystemMessage bedrockMsg = (BedrockSystemMessage)message;
                 for (BedrockSystemContent content : bedrockMsg.contents()) {
-                    if (content instanceof BedrockSystemTextContent textContent) {
-                        systemBlocks.add(SystemContentBlock.builder()
-                                .text(textContent.text())
-                                .build());
-
-                        // Add cache point AFTER this content block if marked
-                        if (textContent.hasCachePoint()) {
-                            systemBlocks.add(SystemContentBlock.builder()
-                                    .cachePoint(buildCachePoint(cacheTtl))
-                                    .build());
-                        }
-                    } else {
-                        // Fail fast for unknown content types to prevent silent data loss
-                        throw new UnsupportedFeatureException("Unsupported BedrockSystemContent type: " + content.type()
-                                + ". Only TEXT content is currently supported.");
+                    if (content instanceof BedrockSystemTextContent) {
+                        BedrockSystemTextContent textContent = (BedrockSystemTextContent)content;
+                        systemBlocks.add((SystemContentBlock)SystemContentBlock.builder().text(textContent.text()).build());
+                        if (!textContent.hasCachePoint()) continue;
+                        systemBlocks.add((SystemContentBlock)SystemContentBlock.builder().cachePoint(AbstractBedrockChatModel.buildCachePoint(cacheTtl)).build());
+                        continue;
                     }
+                    throw new UnsupportedFeatureException("Unsupported BedrockSystemContent type: " + (Object)((Object)content.type()) + ". Only TEXT content is currently supported.");
                 }
                 lastWasCoreSystemMessage = false;
-
-            } else if (message instanceof SystemMessage systemMsg) {
-                // Handle core SystemMessage (legacy)
-                systemBlocks.add(
-                        SystemContentBlock.builder().text(systemMsg.text()).build());
-                lastWasCoreSystemMessage = true;
+                continue;
             }
+            if (!(message instanceof SystemMessage)) continue;
+            SystemMessage systemMsg = (SystemMessage)message;
+            systemBlocks.add((SystemContentBlock)SystemContentBlock.builder().text(systemMsg.text()).build());
+            lastWasCoreSystemMessage = true;
         }
-
-        // Apply legacy AFTER_SYSTEM placement ONLY if:
-        // 1. It's enabled
-        // 2. There are system blocks
-        // 3. The LAST system message was a core SystemMessage (not BedrockSystemMessage)
         if (cachePointPlacement == BedrockCachePointPlacement.AFTER_SYSTEM && !systemBlocks.isEmpty()) {
             if (lastWasCoreSystemMessage) {
-                systemBlocks.add(SystemContentBlock.builder()
-                        .cachePoint(buildCachePoint(cacheTtl))
-                        .build());
+                systemBlocks.add((SystemContentBlock)SystemContentBlock.builder().cachePoint(AbstractBedrockChatModel.buildCachePoint(cacheTtl)).build());
             } else {
-                log.warn("BedrockCachePointPlacement.AFTER_SYSTEM is configured but ignored because "
-                        + "the last system message is a BedrockSystemMessage with granular cache points. "
-                        + "Use granular cache points within BedrockSystemMessage or ensure the last "
-                        + "system message is a core SystemMessage.");
+                log.warn("BedrockCachePointPlacement.AFTER_SYSTEM is configured but ignored because the last system message is a BedrockSystemMessage with granular cache points. Use granular cache points within BedrockSystemMessage or ensure the last system message is a core SystemMessage.");
             }
         }
-
         return systemBlocks;
     }
 
     protected List<Message> extractRegularMessages(List<ChatMessage> messages) {
-        return extractRegularMessages(messages, null, null);
+        return this.extractRegularMessages(messages, null, null);
     }
 
-    protected List<Message> extractRegularMessages(
-            List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement) {
-        return extractRegularMessages(messages, cachePointPlacement, null);
+    protected List<Message> extractRegularMessages(List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement) {
+        return this.extractRegularMessages(messages, cachePointPlacement, null);
     }
 
-    protected List<Message> extractRegularMessages(
-            List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, CacheTTL cacheTtl) {
+    protected List<Message> extractRegularMessages(List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, CacheTTL cacheTtl) {
+        int i;
         if (messages == null) {
-            return new ArrayList<>();
+            return new ArrayList<Message>();
         }
-
-        List<Message> bedrockMessages = new ArrayList<>();
-        List<ContentBlock> currentBlocks = new ArrayList<>();
+        ArrayList<Message> bedrockMessages = new ArrayList<Message>();
+        ArrayList<ContentBlock> currentBlocks = new ArrayList<ContentBlock>();
         boolean firstUserMessageProcessed = false;
-
-        // Find the index of the last user message for AFTER_LAST_USER_MESSAGE placement
         int lastUserMessageIndex = -1;
         if (cachePointPlacement == BedrockCachePointPlacement.AFTER_LAST_USER_MESSAGE) {
-            for (int i = messages.size() - 1; i >= 0; i--) {
-                if (messages.get(i) instanceof UserMessage) {
-                    lastUserMessageIndex = i;
-                    break;
-                }
+            for (i = messages.size() - 1; i >= 0; --i) {
+                if (!(messages.get(i) instanceof UserMessage)) continue;
+                lastUserMessageIndex = i;
+                break;
             }
         }
-
-        for (int i = 0; i < messages.size(); i++) {
+        for (i = 0; i < messages.size(); ++i) {
             ChatMessage msg = messages.get(i);
-            if (msg == null) {
-                continue; // Skip null messages gracefully
+            if (msg == null) continue;
+            if (msg instanceof ToolExecutionResultMessage) {
+                ToolExecutionResultMessage toolResult = (ToolExecutionResultMessage)msg;
+                this.handleToolResult(toolResult, currentBlocks, bedrockMessages, i, messages);
+                continue;
             }
-            if (msg instanceof ToolExecutionResultMessage toolResult) {
-                handleToolResult(toolResult, currentBlocks, bedrockMessages, i, messages);
-            } else if ((msg instanceof UserMessage) || (msg instanceof AiMessage)) {
-                Message bedrockMessage = convertToBedRockMessage(msg);
-
-                boolean shouldAddCachePoint = false;
-
-                if (msg instanceof UserMessage) {
-                    if (cachePointPlacement == BedrockCachePointPlacement.AFTER_USER_MESSAGE
-                            && !firstUserMessageProcessed) {
-                        shouldAddCachePoint = true;
-                        firstUserMessageProcessed = true;
-                    } else if (cachePointPlacement == BedrockCachePointPlacement.AFTER_LAST_USER_MESSAGE
-                            && i == lastUserMessageIndex) {
-                        shouldAddCachePoint = true;
-                    }
+            if (!(msg instanceof UserMessage) && !(msg instanceof AiMessage)) continue;
+            Message bedrockMessage = this.convertToBedRockMessage(msg);
+            boolean shouldAddCachePoint = false;
+            if (msg instanceof UserMessage) {
+                if (cachePointPlacement == BedrockCachePointPlacement.AFTER_USER_MESSAGE && !firstUserMessageProcessed) {
+                    shouldAddCachePoint = true;
+                    firstUserMessageProcessed = true;
+                } else if (cachePointPlacement == BedrockCachePointPlacement.AFTER_LAST_USER_MESSAGE && i == lastUserMessageIndex) {
+                    shouldAddCachePoint = true;
                 }
-
-                if (shouldAddCachePoint) {
-                    List<ContentBlock> contentWithCachePoint = new ArrayList<>(bedrockMessage.content());
-                    contentWithCachePoint.add(ContentBlock.builder()
-                            .cachePoint(buildCachePoint(cacheTtl))
-                            .build());
-
-                    bedrockMessage = Message.builder()
-                            .role(bedrockMessage.role())
-                            .content(contentWithCachePoint)
-                            .build();
-                }
-
-                bedrockMessages.add(bedrockMessage);
             }
+            if (shouldAddCachePoint) {
+                ArrayList<Object> contentWithCachePoint = new ArrayList<Object>(bedrockMessage.content());
+                contentWithCachePoint.add(ContentBlock.builder().cachePoint(AbstractBedrockChatModel.buildCachePoint(cacheTtl)).build());
+                bedrockMessage = (Message)Message.builder().role(bedrockMessage.role()).content(contentWithCachePoint).build();
+            }
+            bedrockMessages.add(bedrockMessage);
         }
-
         return bedrockMessages;
     }
 
-    protected void handleToolResult(
-            ToolExecutionResultMessage toolResult,
-            List<ContentBlock> blocks,
-            List<Message> bedrockMessages,
-            int currentIndex,
-            List<ChatMessage> allMessages) {
-        blocks.add(createToolResultBlock(toolResult));
-
-        boolean isLastOrNextIsNotToolResult = currentIndex + 1 >= allMessages.size()
-                || !(allMessages.get(currentIndex + 1) instanceof ToolExecutionResultMessage);
-
+    protected void handleToolResult(ToolExecutionResultMessage toolResult, List<ContentBlock> blocks, List<Message> bedrockMessages, int currentIndex, List<ChatMessage> allMessages) {
+        boolean isLastOrNextIsNotToolResult;
+        blocks.add(this.createToolResultBlock(toolResult));
+        boolean bl = isLastOrNextIsNotToolResult = currentIndex + 1 >= allMessages.size() || !(allMessages.get(currentIndex + 1) instanceof ToolExecutionResultMessage);
         if (isLastOrNextIsNotToolResult) {
-            bedrockMessages.add(Message.builder()
-                    .role(ConversationRole.USER)
-                    .content(blocks)
-                    .build());
+            bedrockMessages.add((Message)Message.builder().role(ConversationRole.USER).content(blocks).build());
             blocks.clear();
         }
     }
 
     protected ContentBlock createToolResultBlock(ToolExecutionResultMessage toolResult) {
         if (toolResult.hasSingleText()) {
-            return ContentBlock.builder()
-                    .toolResult(ToolResultBlock.builder()
-                            .toolUseId(toolResult.id())
-                            .content(ToolResultContentBlock.builder()
-                                    .text(toolResult.text())
-                                    .build())
-                            .build())
-                    .build();
+            return (ContentBlock)ContentBlock.builder().toolResult((ToolResultBlock)ToolResultBlock.builder().toolUseId(toolResult.id()).content(new ToolResultContentBlock[]{(ToolResultContentBlock)ToolResultContentBlock.builder().text(toolResult.text()).build()}).build()).build();
         }
-
-        List<ToolResultContentBlock> contentBlocks = new ArrayList<>();
+        ArrayList<Object> contentBlocks = new ArrayList<Object>();
         for (Content content : toolResult.contents()) {
-            if (content instanceof TextContent textContent) {
-                contentBlocks.add(ToolResultContentBlock.builder()
-                        .text(textContent.text())
-                        .build());
-            } else if (content instanceof ImageContent imageContent) {
-                SdkBytes bytes = fromByteArray(
-                        nonNull(imageContent.image().base64Data())
-                                ? Base64.getDecoder()
-                                        .decode(imageContent.image().base64Data())
-                                : readBytes(String.valueOf(imageContent.image().url())));
-                String imgFormat = extractAndValidateFormat(imageContent.image());
-                contentBlocks.add(ToolResultContentBlock.builder()
-                        .image(ImageBlock.builder()
-                                .format(imgFormat)
-                                .source(ImageSource.builder().bytes(bytes).build())
-                                .build())
-                        .build());
-            } else {
-                throw new UnsupportedFeatureException("Bedrock does not support content type '" + content.type()
-                        + "' in tool results. Only text and image content are supported.");
+            if (content instanceof TextContent) {
+                TextContent textContent = (TextContent)content;
+                contentBlocks.add(ToolResultContentBlock.builder().text(textContent.text()).build());
+                continue;
             }
+            if (content instanceof ImageContent) {
+                ImageContent imageContent = (ImageContent)content;
+                SdkBytes bytes = SdkBytes.fromByteArray((byte[])(Objects.nonNull(imageContent.image().base64Data()) ? Base64.getDecoder().decode(imageContent.image().base64Data()) : dev.langchain4j.internal.Utils.readBytes((String)String.valueOf(imageContent.image().url()))));
+                String imgFormat = Utils.extractAndValidateFormat(imageContent.image());
+                contentBlocks.add(ToolResultContentBlock.builder().image((ImageBlock)ImageBlock.builder().format(imgFormat).source((ImageSource)ImageSource.builder().bytes(bytes).build()).build()).build());
+                continue;
+            }
+            throw new UnsupportedFeatureException("Bedrock does not support content type '" + content.type() + "' in tool results. Only text and image content are supported.");
         }
-        return ContentBlock.builder()
-                .toolResult(ToolResultBlock.builder()
-                        .toolUseId(toolResult.id())
-                        .content(contentBlocks)
-                        .build())
-                .build();
+        return (ContentBlock)ContentBlock.builder().toolResult((ToolResultBlock)ToolResultBlock.builder().toolUseId(toolResult.id()).content(contentBlocks).build()).build();
     }
 
     protected Message convertToBedRockMessage(ChatMessage message) {
-        if (message instanceof UserMessage userMsg) {
-            return createUserMessage(userMsg);
-        } else if (message instanceof AiMessage aiMsg) {
-            return createAiMessage(aiMsg);
+        if (message instanceof UserMessage) {
+            UserMessage userMsg = (UserMessage)message;
+            return this.createUserMessage(userMsg);
+        }
+        if (message instanceof AiMessage) {
+            AiMessage aiMsg = (AiMessage)message;
+            return this.createAiMessage(aiMsg);
         }
         throw new IllegalArgumentException("Unsupported message type: " + message.getClass());
     }
 
     protected Message createUserMessage(UserMessage message) {
-        return Message.builder()
-                .role(ConversationRole.USER)
-                .content(convertContents(message.contents()))
-                .build();
+        return (Message)Message.builder().role(ConversationRole.USER).content(this.convertContents(message.contents())).build();
     }
 
     protected Message createAiMessage(AiMessage message) {
-        List<ContentBlock> blocks = new ArrayList<>();
-
-        if (sendThinking && message.thinking() != null) {
-            ReasoningContentBlock reasoningContentBlock = ReasoningContentBlock.builder()
-                    .reasoningText(ReasoningTextBlock.builder()
-                            .text(message.thinking())
-                            .signature(message.attribute(THINKING_SIGNATURE_KEY, String.class))
-                            .build())
-                    .build();
-            blocks.add(ContentBlock.builder()
-                    .reasoningContent(reasoningContentBlock)
-                    .build());
+        ArrayList<Object> blocks = new ArrayList<Object>();
+        if (this.sendThinking && message.thinking() != null) {
+            ReasoningContentBlock reasoningContentBlock = (ReasoningContentBlock)ReasoningContentBlock.builder().reasoningText((ReasoningTextBlock)ReasoningTextBlock.builder().text(message.thinking()).signature((String)message.attribute(THINKING_SIGNATURE_KEY, String.class)).build()).build();
+            blocks.add(ContentBlock.builder().reasoningContent(reasoningContentBlock).build());
         }
-
         if (message.text() != null) {
             blocks.add(ContentBlock.builder().text(message.text()).build());
         }
-
         if (message.hasToolExecutionRequests()) {
-            blocks.addAll(convertToolRequests(message.toolExecutionRequests()));
+            blocks.addAll(this.convertToolRequests(message.toolExecutionRequests()));
         }
-
-        return Message.builder()
-                .role(ConversationRole.ASSISTANT)
-                .content(blocks)
-                .build();
+        return (Message)Message.builder().role(ConversationRole.ASSISTANT).content(blocks).build();
     }
 
     protected List<ContentBlock> convertToolRequests(List<ToolExecutionRequest> requests) {
-        return requests.stream()
-                .map(req -> ContentBlock.builder()
-                        .toolUse(ToolUseBlock.builder()
-                                .name(req.name())
-                                .toolUseId(req.id())
-                                .input(documentFromJson(req.arguments()))
-                                .build())
-                        .build())
-                .collect(Collectors.toList());
+        return requests.stream().map(req -> (ContentBlock)ContentBlock.builder().toolUse((ToolUseBlock)ToolUseBlock.builder().name(req.name()).toolUseId(req.id()).input(AwsDocumentConverter.documentFromJson(req.arguments())).build()).build()).collect(Collectors.toList());
     }
 
     protected List<ContentBlock> convertContents(List<Content> contents) {
-        if (isNullOrEmpty(contents)) {
-            return emptyList();
+        if (dev.langchain4j.internal.Utils.isNullOrEmpty(contents)) {
+            return Collections.emptyList();
         }
-
         return contents.stream().map(this::convertContent).collect(Collectors.toList());
     }
 
     protected ContentBlock convertContent(Content content) {
-        if (content instanceof TextContent text) {
-            return ContentBlock.builder().text(text.text()).build();
-        } else if (content instanceof PdfFileContent pdfFileContent) {
-            final SdkBytes bytes = fromByteArray(
-                    nonNull(pdfFileContent.pdfFile().base64Data())
-                            ? Base64.getDecoder()
-                                    .decode(pdfFileContent.pdfFile().base64Data())
-                            : readBytes(String.valueOf(pdfFileContent.pdfFile().url())));
-            return ContentBlock.builder()
-                    .document(DocumentBlock.builder()
-                            .format(DocumentFormat.PDF)
-                            .source(DocumentSource.builder().bytes(bytes).build())
-                            .name(extractFilenameWithoutExtensionFromUri(
-                                    pdfFileContent.pdfFile().url()))
-                            .build())
-                    .build();
-        } else if (content instanceof ImageContent image) {
-            return createImageBlock(image);
+        if (content instanceof TextContent) {
+            TextContent text = (TextContent)content;
+            return (ContentBlock)ContentBlock.builder().text(text.text()).build();
+        }
+        if (content instanceof PdfFileContent) {
+            PdfFileContent pdfFileContent = (PdfFileContent)content;
+            SdkBytes bytes = SdkBytes.fromByteArray((byte[])(Objects.nonNull(pdfFileContent.pdfFile().base64Data()) ? Base64.getDecoder().decode(pdfFileContent.pdfFile().base64Data()) : dev.langchain4j.internal.Utils.readBytes((String)String.valueOf(pdfFileContent.pdfFile().url()))));
+            return (ContentBlock)ContentBlock.builder().document((DocumentBlock)DocumentBlock.builder().format(DocumentFormat.PDF).source((DocumentSource)DocumentSource.builder().bytes(bytes).build()).name(AbstractBedrockChatModel.extractFilenameWithoutExtensionFromUri(pdfFileContent.pdfFile().url())).build()).build();
+        }
+        if (content instanceof ImageContent) {
+            ImageContent image = (ImageContent)content;
+            return this.createImageBlock(image);
         }
         throw new IllegalArgumentException("Unsupported content type: " + content.getClass());
     }
 
     protected ContentBlock createImageBlock(ImageContent imageContent) {
-        final SdkBytes bytes = fromByteArray(
-                nonNull(imageContent.image().base64Data())
-                        ? Base64.getDecoder().decode(imageContent.image().base64Data())
-                        : readBytes(String.valueOf(imageContent.image().url())));
-        final String imgFormat = extractAndValidateFormat(imageContent.image());
-        return ContentBlock.builder()
-                .image(ImageBlock.builder()
-                        .format(imgFormat)
-                        .source(ImageSource.builder().bytes(bytes).build())
-                        .build())
-                .build();
+        SdkBytes bytes = SdkBytes.fromByteArray((byte[])(Objects.nonNull(imageContent.image().base64Data()) ? Base64.getDecoder().decode(imageContent.image().base64Data()) : dev.langchain4j.internal.Utils.readBytes((String)String.valueOf(imageContent.image().url()))));
+        String imgFormat = Utils.extractAndValidateFormat(imageContent.image());
+        return (ContentBlock)ContentBlock.builder().image((ImageBlock)ImageBlock.builder().format(imgFormat).source((ImageSource)ImageSource.builder().bytes(bytes).build()).build()).build();
     }
 
     protected ToolConfiguration extractToolConfigurationFrom(ChatRequest chatRequest) {
-        return extractToolConfigurationFrom(chatRequest, null, null);
+        return this.extractToolConfigurationFrom(chatRequest, null, null);
     }
 
-    protected ToolConfiguration extractToolConfigurationFrom(
-            ChatRequest chatRequest, BedrockCachePointPlacement cachePointPlacement) {
-        return extractToolConfigurationFrom(chatRequest, cachePointPlacement, null);
+    protected ToolConfiguration extractToolConfigurationFrom(ChatRequest chatRequest, BedrockCachePointPlacement cachePointPlacement) {
+        return this.extractToolConfigurationFrom(chatRequest, cachePointPlacement, null);
     }
 
-    protected ToolConfiguration extractToolConfigurationFrom(
-            ChatRequest chatRequest, BedrockCachePointPlacement cachePointPlacement, CacheTTL cacheTtl) {
-        List<ToolSpecification> toolSpecifications = chatRequest.toolSpecifications();
+    protected ToolConfiguration extractToolConfigurationFrom(ChatRequest chatRequest, BedrockCachePointPlacement cachePointPlacement, CacheTTL cacheTtl) {
+        List toolSpecifications = chatRequest.toolSpecifications();
         ChatRequestParameters parameters = chatRequest.parameters();
-
-        final List<Tool> allTools = new ArrayList<>();
-        final ToolConfiguration.Builder toolConfigurationBuilder = ToolConfiguration.builder();
-
-        if (nonNull(toolSpecifications) && !toolSpecifications.isEmpty()) {
-            final List<Tool> tools = toolSpecifications.stream()
-                    .map(toolSpecification -> {
-                        ToolInputSchema toolInputSchema = ToolInputSchema.builder()
-                                .json(convertJsonObjectSchemaToDocument(toolSpecification))
-                                .build();
-                        return software.amazon.awssdk.services.bedrockruntime.model.ToolSpecification.builder()
-                                .name(toolSpecification.name())
-                                .description(toolSpecification.description())
-                                .inputSchema(toolInputSchema)
-                                .build();
-                    })
-                    .map(toolSpecification ->
-                            Tool.builder().toolSpec(toolSpecification).build())
-                    .collect(Collectors.toList());
-
+        ArrayList<Object> allTools = new ArrayList<Object>();
+        ToolConfiguration.Builder toolConfigurationBuilder = ToolConfiguration.builder();
+        if (Objects.nonNull(toolSpecifications) && !toolSpecifications.isEmpty()) {
+            List tools = toolSpecifications.stream().map(toolSpecification -> {
+                ToolInputSchema toolInputSchema = (ToolInputSchema)ToolInputSchema.builder().json(AwsDocumentConverter.convertJsonObjectSchemaToDocument(toolSpecification)).build();
+                return (ToolSpecification)ToolSpecification.builder().name(toolSpecification.name()).description(toolSpecification.description()).inputSchema(toolInputSchema).build();
+            }).map(toolSpecification -> (Tool)Tool.builder().toolSpec(toolSpecification).build()).collect(Collectors.toList());
             allTools.addAll(tools);
-
             if (cachePointPlacement == BedrockCachePointPlacement.AFTER_TOOLS) {
-                allTools.add(
-                        Tool.builder().cachePoint(buildCachePoint(cacheTtl)).build());
+                allTools.add(Tool.builder().cachePoint(AbstractBedrockChatModel.buildCachePoint(cacheTtl)).build());
             }
         }
-
         if (allTools.isEmpty()) {
             return null;
-        } else toolConfigurationBuilder.tools(allTools);
-
-        if (nonNull(parameters) && ToolChoice.REQUIRED.equals(parameters.toolChoice())) {
-            toolConfigurationBuilder.toolChoice(software.amazon.awssdk.services.bedrockruntime.model.ToolChoice.fromAny(
-                    AnyToolChoice.builder().build()));
         }
-
-        return toolConfigurationBuilder.build();
+        toolConfigurationBuilder.tools(allTools);
+        if (Objects.nonNull(parameters) && ToolChoice.REQUIRED.equals((Object)parameters.toolChoice())) {
+            toolConfigurationBuilder.toolChoice(software.amazon.awssdk.services.bedrockruntime.model.ToolChoice.fromAny((AnyToolChoice)((AnyToolChoice)AnyToolChoice.builder().build())));
+        }
+        return (ToolConfiguration)toolConfigurationBuilder.build();
     }
 
-    /**
-     * Validates that the total number of cache points across all sources does not exceed
-     * the AWS Bedrock limit of 4 per request.
-     *
-     * @param messages the chat messages
-     * @param cachePointPlacement the cache point placement strategy (may be null)
-     * @param hasTools whether tools are configured
-     * @throws IllegalArgumentException if total cache points exceed 4
-     */
-    protected void validateTotalCachePoints(
-            List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, boolean hasTools) {
-        int totalCachePoints = countTotalCachePoints(messages, cachePointPlacement, hasTools);
-
-        if (totalCachePoints > MAX_CACHE_POINTS_PER_REQUEST) {
-            throw new IllegalArgumentException(
-                    "Total cache points (" + totalCachePoints + ") exceeds AWS Bedrock limit of "
-                            + MAX_CACHE_POINTS_PER_REQUEST + " per request. "
-                            + "Reduce cache points in BedrockSystemMessage or adjust BedrockCachePointPlacement settings.");
+    protected void validateTotalCachePoints(List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, boolean hasTools) {
+        int totalCachePoints = this.countTotalCachePoints(messages, cachePointPlacement, hasTools);
+        if (totalCachePoints > 4) {
+            throw new IllegalArgumentException("Total cache points (" + totalCachePoints + ") exceeds AWS Bedrock limit of " + 4 + " per request. Reduce cache points in BedrockSystemMessage or adjust BedrockCachePointPlacement settings.");
         }
     }
 
-    /**
-     * Counts total cache points from all sources in a request.
-     * <p>
-     * AWS Bedrock limits cache points to {@link #MAX_CACHE_POINTS_PER_REQUEST} (4) per request.
-     * This method counts cache points from all possible sources to ensure the limit is not exceeded.
-     * <p>
-     * <b>Cache point sources counted:</b>
-     * <ol>
-     *   <li><b>Granular cache points:</b> Each {@link BedrockSystemMessage} can contain multiple
-     *       content blocks with individual cache points via {@link BedrockSystemTextContent#withCachePoint(String)}</li>
-     *   <li><b>AFTER_SYSTEM placement:</b> Adds 1 cache point if:
-     *       <ul>
-     *         <li>{@link BedrockCachePointPlacement#AFTER_SYSTEM} is configured, AND</li>
-     *         <li>There are system messages, AND</li>
-     *         <li>The LAST system message is a core {@link SystemMessage} (not {@link BedrockSystemMessage})</li>
-     *       </ul>
-     *       Note: AFTER_SYSTEM is ignored if the last system message is a BedrockSystemMessage,
-     *       as granular cache points take precedence.</li>
-     *   <li><b>AFTER_USER_MESSAGE placement:</b> Adds 1 cache point if configured and user messages exist</li>
-     *   <li><b>AFTER_LAST_USER_MESSAGE placement:</b> Adds 1 cache point if configured and user messages exist</li>
-     *   <li><b>AFTER_TOOLS placement:</b> Adds 1 cache point if configured and tools are present</li>
-     * </ol>
-     *
-     * @param messages the chat messages (may contain SystemMessage, BedrockSystemMessage, UserMessage, etc.)
-     * @param cachePointPlacement the legacy cache point placement strategy (may be null)
-     * @param hasTools whether tool specifications are present in the request
-     * @return the total count of cache points that will be created in the AWS Bedrock request
-     */
-    private int countTotalCachePoints(
-            List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, boolean hasTools) {
+    private int countTotalCachePoints(List<ChatMessage> messages, BedrockCachePointPlacement cachePointPlacement, boolean hasTools) {
         if (messages == null) {
             return 0;
         }
-
         int count = 0;
         boolean hasUserMessage = false;
         boolean lastSystemIsCoreMessage = false;
         boolean hasAnySystemMessage = false;
-
-        // First pass: count granular cache points and track message types
         for (ChatMessage message : messages) {
-            if (message == null) {
-                continue;
-            }
-
-            if (message instanceof BedrockSystemMessage bedrockMsg) {
-                // Count granular cache points within BedrockSystemMessage
+            if (message == null) continue;
+            if (message instanceof BedrockSystemMessage) {
+                BedrockSystemMessage bedrockMsg = (BedrockSystemMessage)message;
                 count += bedrockMsg.cachePointCount();
                 lastSystemIsCoreMessage = false;
                 hasAnySystemMessage = true;
-            } else if (message instanceof SystemMessage) {
-                // Core SystemMessage - may have AFTER_SYSTEM cache point added
+                continue;
+            }
+            if (message instanceof SystemMessage) {
                 lastSystemIsCoreMessage = true;
                 hasAnySystemMessage = true;
-            } else if (message instanceof UserMessage) {
-                hasUserMessage = true;
+                continue;
             }
+            if (!(message instanceof UserMessage)) continue;
+            hasUserMessage = true;
         }
-
-        // Second pass: add placement-based cache points
-        // These are mutually exclusive with granular cache points for system messages
         if (cachePointPlacement != null) {
-            // AFTER_SYSTEM only applies if the last system message is a core SystemMessage
-            // (BedrockSystemMessage handles its own cache points internally)
-            if (cachePointPlacement == BedrockCachePointPlacement.AFTER_SYSTEM
-                    && hasAnySystemMessage
-                    && lastSystemIsCoreMessage) {
-                count++;
+            if (cachePointPlacement == BedrockCachePointPlacement.AFTER_SYSTEM && hasAnySystemMessage && lastSystemIsCoreMessage) {
+                ++count;
             }
-            // AFTER_USER_MESSAGE adds cache point after the first user message
             if (cachePointPlacement == BedrockCachePointPlacement.AFTER_USER_MESSAGE && hasUserMessage) {
-                count++;
+                ++count;
             }
-            // AFTER_LAST_USER_MESSAGE adds cache point after the last user message
             if (cachePointPlacement == BedrockCachePointPlacement.AFTER_LAST_USER_MESSAGE && hasUserMessage) {
-                count++;
+                ++count;
             }
-            // AFTER_TOOLS adds cache point after tool definitions (only if tools exist)
             if (cachePointPlacement == BedrockCachePointPlacement.AFTER_TOOLS && hasTools) {
-                count++;
+                ++count;
             }
         }
-
         return count;
     }
 
     protected AiMessage aiMessageFrom(ConverseResponse converseResponse) {
-
-        List<String> texts = new ArrayList<>();
+        ArrayList<String> texts = new ArrayList<String>();
         String thinking = null;
-        Map<String, Object> attributes = null;
-        List<ToolExecutionRequest> toolExecutionRequests = new ArrayList<>();
-
+        HashMap<String, String> attributes = null;
+        ArrayList<ToolExecutionRequest> toolExecutionRequests = new ArrayList<ToolExecutionRequest>();
         for (ContentBlock cBlock : converseResponse.output().message().content()) {
             if (cBlock.type() == ContentBlock.Type.TOOL_USE) {
-                toolExecutionRequests.add(ToolExecutionRequest.builder()
-                        .name(cBlock.toolUse().name())
-                        .id(cBlock.toolUse().toolUseId())
-                        .arguments(documentToJson(cBlock.toolUse().input()))
-                        .build());
-            } else if (cBlock.type() == ContentBlock.Type.TEXT) {
-                if (isNotNullOrEmpty(cBlock.text())) {
-                    texts.add(cBlock.text());
-                }
-            } else if (cBlock.type() == ContentBlock.Type.REASONING_CONTENT) {
-                if (returnThinking) {
-                    ReasoningContentBlock reasoningContentBlock = cBlock.reasoningContent();
-                    if (reasoningContentBlock != null) {
-                        ReasoningTextBlock reasoningTextBlock = reasoningContentBlock.reasoningText();
-                        if (reasoningTextBlock != null) {
-                            if (isNotNullOrEmpty(reasoningTextBlock.text())) {
-                                thinking = reasoningTextBlock.text();
-                            }
-                            if (isNotNullOrEmpty(reasoningTextBlock.signature())) {
-                                attributes = Collections.singletonMap(THINKING_SIGNATURE_KEY, reasoningTextBlock.signature());
-                            }
-                        }
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException(
-                        "Unsupported content in LLM response. Content type: " + cBlock.type());
+                toolExecutionRequests.add(ToolExecutionRequest.builder().name(cBlock.toolUse().name()).id(cBlock.toolUse().toolUseId()).arguments(AwsDocumentConverter.documentToJson(cBlock.toolUse().input())).build());
+                continue;
             }
+            if (cBlock.type() == ContentBlock.Type.TEXT) {
+                if (!dev.langchain4j.internal.Utils.isNotNullOrEmpty((String)cBlock.text())) continue;
+                texts.add(cBlock.text());
+                continue;
+            }
+            if (cBlock.type() == ContentBlock.Type.REASONING_CONTENT) {
+                ReasoningTextBlock reasoningTextBlock;
+                ReasoningContentBlock reasoningContentBlock;
+                if (!this.returnThinking || (reasoningContentBlock = cBlock.reasoningContent()) == null || (reasoningTextBlock = reasoningContentBlock.reasoningText()) == null) continue;
+                if (dev.langchain4j.internal.Utils.isNotNullOrEmpty((String)reasoningTextBlock.text())) {
+                    thinking = reasoningTextBlock.text();
+                }
+                if (!dev.langchain4j.internal.Utils.isNotNullOrEmpty((String)reasoningTextBlock.signature())) continue;
+                HashMap<String, String> attrs = new HashMap<String, String>();
+                attrs.put(THINKING_SIGNATURE_KEY, reasoningTextBlock.signature());
+                attributes = attrs;
+                continue;
+            }
+            throw new IllegalArgumentException("Unsupported content in LLM response. Content type: " + cBlock.type());
         }
-
         String text = texts.stream().collect(Collectors.joining("\n\n"));
-
-        return AiMessage.builder()
-                .text(isNullOrEmpty(text) ? null : text)
-                .thinking(thinking)
-                .attributes(attributes)
-                .toolExecutionRequests(toolExecutionRequests)
-                .build();
+        return AiMessage.builder().text(dev.langchain4j.internal.Utils.isNullOrEmpty((String)text) ? null : text).thinking(thinking).attributes(attributes).toolExecutionRequests(toolExecutionRequests).build();
     }
 
-    protected BedrockTokenUsage tokenUsageFrom(
-            software.amazon.awssdk.services.bedrockruntime.model.TokenUsage tokenUsage) {
-        return Optional.ofNullable(tokenUsage)
-                .map(usage -> BedrockTokenUsage.builder()
-                        .inputTokenCount(tokenUsage.inputTokens())
-                        .outputTokenCount(tokenUsage.outputTokens())
-                        .cacheWriteInputTokens(tokenUsage.cacheWriteInputTokens())
-                        .cacheReadInputTokens(tokenUsage.cacheReadInputTokens())
-                        .build())
-                .orElseGet(BedrockTokenUsage.builder()::build);
+    protected BedrockTokenUsage tokenUsageFrom(TokenUsage tokenUsage) {
+        return Optional.ofNullable(tokenUsage).map(usage -> BedrockTokenUsage.builder().inputTokenCount(tokenUsage.inputTokens()).outputTokenCount(tokenUsage.outputTokens()).cacheWriteInputTokens(tokenUsage.cacheWriteInputTokens()).cacheReadInputTokens(tokenUsage.cacheReadInputTokens()).build()).orElseGet(BedrockTokenUsage.builder()::build);
     }
 
     protected FinishReason finishReasonFrom(StopReason stopReason) {
         if (stopReason == StopReason.END_TURN || stopReason == StopReason.STOP_SEQUENCE) {
             return FinishReason.STOP;
         }
-
         if (stopReason == StopReason.MAX_TOKENS) {
             return FinishReason.LENGTH;
         }
-
         if (stopReason == StopReason.TOOL_USE) {
             return FinishReason.TOOL_EXECUTION;
         }
-
         if (stopReason == StopReason.CONTENT_FILTERED || stopReason == StopReason.GUARDRAIL_INTERVENED) {
             return FinishReason.CONTENT_FILTER;
         }
-
         throw new IllegalArgumentException("Unknown stop reason: " + stopReason);
     }
 
     protected InferenceConfiguration inferenceConfigFrom(ChatRequestParameters parameters) {
-        return InferenceConfiguration.builder()
-                .maxTokens(parameters.maxOutputTokens())
-                .temperature(dblToFloat(parameters.temperature()))
-                .topP(dblToFloat(parameters.topP()))
-                .stopSequences(isNullOrEmpty(parameters.stopSequences()) ? null : parameters.stopSequences())
-                .build();
+        return (InferenceConfiguration)InferenceConfiguration.builder().maxTokens(parameters.maxOutputTokens()).temperature(AbstractBedrockChatModel.dblToFloat(parameters.temperature())).topP(AbstractBedrockChatModel.dblToFloat(parameters.topP())).stopSequences((Collection)(dev.langchain4j.internal.Utils.isNullOrEmpty((Collection)parameters.stopSequences()) ? null : parameters.stopSequences())).build();
     }
 
     protected GuardrailConfiguration guardrailConfigFrom(BedrockGuardrailConfiguration bedrockGuardrailConfiguration) {
-
         if (bedrockGuardrailConfiguration == null) {
             return null;
         }
-
-        return GuardrailConfiguration.builder()
-                .guardrailVersion(bedrockGuardrailConfiguration.guardrailVersion())
-                .guardrailIdentifier(bedrockGuardrailConfiguration.guardrailIdentifier())
-                .trace(GuardrailTrace.ENABLED)
-                .build();
+        return (GuardrailConfiguration)GuardrailConfiguration.builder().guardrailVersion(bedrockGuardrailConfiguration.guardrailVersion()).guardrailIdentifier(bedrockGuardrailConfiguration.guardrailIdentifier()).trace(GuardrailTrace.ENABLED).build();
     }
 
-    protected GuardrailStreamConfiguration guardrailStreamConfigFrom(
-            BedrockGuardrailConfiguration bedrockGuardrailConfiguration) {
-
+    protected GuardrailStreamConfiguration guardrailStreamConfigFrom(BedrockGuardrailConfiguration bedrockGuardrailConfiguration) {
         if (bedrockGuardrailConfiguration == null) {
             return null;
         }
-
         GuardrailStreamProcessingMode mode = null;
-
         if (bedrockGuardrailConfiguration.streamProcessingMode() != null) {
             switch (bedrockGuardrailConfiguration.streamProcessingMode()) {
-                case SYNC -> mode = GuardrailStreamProcessingMode.SYNC;
-                case ASYNC -> mode = GuardrailStreamProcessingMode.ASYNC;
+                case SYNC: {
+                    mode = GuardrailStreamProcessingMode.SYNC;
+                    break;
+                }
+                case ASYNC: {
+                    mode = GuardrailStreamProcessingMode.ASYNC;
+                }
             }
         }
-
-        return GuardrailStreamConfiguration.builder()
-                .guardrailVersion(bedrockGuardrailConfiguration.guardrailVersion())
-                .guardrailIdentifier(bedrockGuardrailConfiguration.guardrailIdentifier())
-                .trace(GuardrailTrace.ENABLED)
-                .streamProcessingMode(mode)
-                .build();
+        return (GuardrailStreamConfiguration)GuardrailStreamConfiguration.builder().guardrailVersion(bedrockGuardrailConfiguration.guardrailVersion()).guardrailIdentifier(bedrockGuardrailConfiguration.guardrailIdentifier()).trace(GuardrailTrace.ENABLED).streamProcessingMode(mode).build();
     }
 
     protected ServiceTier serviceTierFor(BedrockServiceTier bedrockServiceTier) {
+        ServiceTierType serviceTierType;
         if (bedrockServiceTier == null) {
             return null;
         }
-
-        ServiceTierType serviceTierType;
-
         switch (bedrockServiceTier) {
-            case PRIORITY -> serviceTierType = ServiceTierType.PRIORITY;
-            case DEFAULT -> serviceTierType = ServiceTierType.DEFAULT;
-            case FLEX -> serviceTierType = ServiceTierType.FLEX;
-            case RESERVED -> serviceTierType = ServiceTierType.RESERVED;
-            default -> throw new IllegalArgumentException("Unknown service tier type: " + bedrockServiceTier);
+            case PRIORITY: {
+                serviceTierType = ServiceTierType.PRIORITY;
+                break;
+            }
+            case DEFAULT: {
+                serviceTierType = ServiceTierType.DEFAULT;
+                break;
+            }
+            case FLEX: {
+                serviceTierType = ServiceTierType.FLEX;
+                break;
+            }
+            case RESERVED: {
+                serviceTierType = ServiceTierType.RESERVED;
+                break;
+            }
+            default: {
+                throw new IllegalArgumentException("Unknown service tier type: " + (Object)((Object)bedrockServiceTier));
+            }
         }
-
-        return ServiceTier.builder().type(serviceTierType).build();
+        return (ServiceTier)ServiceTier.builder().type(serviceTierType).build();
     }
 
     protected Document additionalRequestModelFieldsFrom(ChatRequestParameters chatRequestParameters) {
-        Map<String, Object> additionalModelRequestFieldsMap =
-                new HashMap<>(this.defaultRequestParameters.additionalModelRequestFields());
-
-        if ((chatRequestParameters instanceof BedrockChatRequestParameters bedrockChatRequestParameters)
-                && (nonNull(bedrockChatRequestParameters.additionalModelRequestFields()))) {
-
-            additionalModelRequestFieldsMap.putAll(bedrockChatRequestParameters.additionalModelRequestFields());
+        HashMap<String, Object> additionalModelRequestFieldsMap = new HashMap<String, Object>(this.defaultRequestParameters.additionalModelRequestFields());
+        if (chatRequestParameters instanceof BedrockChatRequestParameters && Objects.nonNull(((BedrockChatRequestParameters)chatRequestParameters).additionalModelRequestFields())) {
+            additionalModelRequestFieldsMap.putAll(((BedrockChatRequestParameters)chatRequestParameters).additionalModelRequestFields());
         }
-        if (isNullOrEmpty(additionalModelRequestFieldsMap)) {
+        if (dev.langchain4j.internal.Utils.isNullOrEmpty(additionalModelRequestFieldsMap)) {
             return null;
-        } else {
-            return convertAdditionalModelRequestFields(additionalModelRequestFieldsMap);
         }
+        return AwsDocumentConverter.convertAdditionalModelRequestFields(additionalModelRequestFieldsMap);
     }
 
     protected GuardrailAssessmentSummary guardrailAssessmentSummaryFrom(ConverseTrace trace) {
-
+        Object policy6;
         if (trace == null) {
             return null;
         }
-
         GuardrailAssessmentSummary.Builder builder = GuardrailAssessmentSummary.builder();
-
         if (trace.guardrail().hasInputAssessment()) {
-            List<GuardrailAssessment> inputAssessments = new ArrayList<>();
-
-            for (List<GuardrailAssessment> assessment : trace.guardrail().inputAssessment().values()) {
-
-                // --- Topic Policy ---
+            ArrayList<GuardrailAssessment> inputAssessments = new ArrayList<GuardrailAssessment>();
+            for (software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment assessment : trace.guardrail().inputAssessment().values()) {
+                Object contextualPolicy;
+                GuardrailSensitiveInformationPolicyAssessment sensitivePolicy;
+                GuardrailWordPolicyAssessment wordPolicy;
+                GuardrailContentPolicyAssessment contentPolicy;
                 GuardrailTopicPolicyAssessment topicPolicy = assessment.topicPolicy();
                 if (topicPolicy != null && topicPolicy.topics() != null) {
-                    for (GuardrailTopic policy : topicPolicy.topics()) {
-                        inputAssessments.add(InputGuardrailAssessment.builder()
-                                .policy(TOPIC)
-                                .name(policy.name())
-                                .action(policy.actionAsString())
-                                .build());
+                    for (GuardrailTopic policy2 : topicPolicy.topics()) {
+                        inputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)InputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.TOPIC)).name(policy2.name())).action(policy2.actionAsString())).build());
                     }
                 }
-
-                // --- Content Policy ---
-                GuardrailContentPolicyAssessment contentPolicy = assessment.contentPolicy();
-                if (contentPolicy != null && contentPolicy.filters() != null) {
-                    for (GuardrailContentFilter policy : contentPolicy.filters()) {
-                        inputAssessments.add(InputGuardrailAssessment.builder()
-                                .policy(CONTENT)
-                                .name(policy.typeAsString())
-                                .action(policy.actionAsString())
-                                .build());
+                if ((contentPolicy = assessment.contentPolicy()) != null && contentPolicy.filters() != null) {
+                    GuardrailTopic policy2;
+                    policy2 = contentPolicy.filters().iterator();
+                    while (policy2.hasNext()) {
+                        GuardrailContentFilter policy3 = (GuardrailContentFilter)policy2.next();
+                        inputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)InputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.CONTENT)).name(policy3.typeAsString())).action(policy3.actionAsString())).build());
                     }
                 }
-
-                // --- Word Policy ---
-                GuardrailWordPolicyAssessment wordPolicy = assessment.wordPolicy();
-                if (wordPolicy != null) {
+                if ((wordPolicy = assessment.wordPolicy()) != null) {
                     if (wordPolicy.customWords() != null) {
-                        for (GuardrailCustomWord policy : wordPolicy.customWords()) {
-                            inputAssessments.add(InputGuardrailAssessment.builder()
-                                    .policy(WORD)
-                                    .name(policy.match())
-                                    .action(policy.actionAsString())
-                                    .build());
+                        for (Object policy4 : wordPolicy.customWords()) {
+                            inputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)InputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.WORD)).name(policy4.match())).action(policy4.actionAsString())).build());
                         }
                     }
                     if (wordPolicy.managedWordLists() != null) {
-                        for (GuardrailManagedWord policy : wordPolicy.managedWordLists()) {
-                            inputAssessments.add(InputGuardrailAssessment.builder()
-                                    .policy(WORD)
-                                    .name(policy.typeAsString())
-                                    .action(policy.actionAsString())
-                                    .build());
+                        for (Object policy4 : wordPolicy.managedWordLists()) {
+                            inputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)InputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.WORD)).name(policy4.typeAsString())).action(policy4.actionAsString())).build());
                         }
                     }
                 }
-
-                // --- Sensitive Information Policy ---
-                GuardrailSensitiveInformationPolicyAssessment sensitivePolicy = assessment.sensitiveInformationPolicy();
-                if (sensitivePolicy != null) {
+                if ((sensitivePolicy = assessment.sensitiveInformationPolicy()) != null) {
+                    Object policy4;
                     if (sensitivePolicy.piiEntities() != null) {
-                        for (GuardrailPiiEntityFilter policy : sensitivePolicy.piiEntities()) {
-                            inputAssessments.add(InputGuardrailAssessment.builder()
-                                    .policy(SENSITIVE)
-                                    .name(policy.typeAsString())
-                                    .action(policy.actionAsString())
-                                    .build());
+                        policy4 = sensitivePolicy.piiEntities().iterator();
+                        while (policy4.hasNext()) {
+                            policy6 = (GuardrailPiiEntityFilter)policy4.next();
+                            inputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)InputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.SENSITIVE)).name(policy6.typeAsString())).action(policy6.actionAsString())).build());
                         }
                     }
                     if (sensitivePolicy.regexes() != null) {
-                        for (GuardrailRegexFilter policy : sensitivePolicy.regexes()) {
-                            inputAssessments.add(InputGuardrailAssessment.builder()
-                                    .policy(SENSITIVE)
-                                    .name(policy.name())
-                                    .action(policy.actionAsString())
-                                    .build());
+                        policy4 = sensitivePolicy.regexes().iterator();
+                        while (policy4.hasNext()) {
+                            policy6 = (GuardrailRegexFilter)policy4.next();
+                            inputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)InputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.SENSITIVE)).name(policy6.name())).action(policy6.actionAsString())).build());
                         }
                     }
                 }
-
-                // --- Contextual Grounding Policy ---
-                GuardrailContextualGroundingPolicyAssessment contextualPolicy = assessment.contextualGroundingPolicy();
-                if (contextualPolicy != null && contextualPolicy.filters() != null) {
-                    for (GuardrailContextualGroundingFilter policy : contextualPolicy.filters()) {
-                        inputAssessments.add(InputGuardrailAssessment.builder()
-                                .policy(CONTEXT)
-                                .name(policy.typeAsString())
-                                .action(policy.actionAsString())
-                                .build());
-                    }
+                if ((contextualPolicy = assessment.contextualGroundingPolicy()) == null || contextualPolicy.filters() == null) continue;
+                for (Object policy5 : contextualPolicy.filters()) {
+                    inputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)InputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.CONTEXT)).name(policy5.typeAsString())).action(policy5.actionAsString())).build());
                 }
             }
-
             builder.inputAssessments(inputAssessments);
         }
-
         if (trace.guardrail().hasOutputAssessments()) {
-
-            List<GuardrailAssessment> outputAssessments = new ArrayList<>();
-            Map<String, List<GuardrailAssessment>> outputAssessmentValues = trace.guardrail().outputAssessments();
-
+            ArrayList<GuardrailAssessment> outputAssessments = new ArrayList<GuardrailAssessment>();
+            Map outputAssessmentValues = trace.guardrail().outputAssessments();
             if (outputAssessmentValues != null) {
-                for (List<GuardrailAssessment> assessments : outputAssessmentValues.values()) {
+                for (List assessments : outputAssessmentValues.values()) {
                     if (assessments == null) continue;
-
-                    for (GuardrailAssessment assessment : assessments) {
+                    for (software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment assessment : assessments) {
+                        GuardrailContextualGroundingPolicyAssessment contextualPolicy;
+                        GuardrailSensitiveInformationPolicyAssessment sensitivePolicy;
+                        GuardrailWordPolicyAssessment wordPolicy;
+                        GuardrailContentPolicyAssessment contentPolicy;
                         if (assessment == null) continue;
-
-                        // --- Topic Policy ---
                         GuardrailTopicPolicyAssessment topicPolicy = assessment.topicPolicy();
                         if (topicPolicy != null && topicPolicy.topics() != null) {
-                            for (GuardrailTopic policy : topicPolicy.topics()) {
-                                outputAssessments.add(OutputGuardrailAssessment.builder()
-                                        .policy(TOPIC)
-                                        .name(policy.name())
-                                        .action(policy.actionAsString())
-                                        .build());
+                            for (Object policy6 : topicPolicy.topics()) {
+                                outputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)OutputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.TOPIC)).name(policy6.name())).action(policy6.actionAsString())).build());
                             }
                         }
-
-                        // --- Content Policy ---
-                        GuardrailContentPolicyAssessment contentPolicy = assessment.contentPolicy();
-                        if (contentPolicy != null && contentPolicy.filters() != null) {
-                            for (GuardrailContentFilter policy : contentPolicy.filters()) {
-                                outputAssessments.add(OutputGuardrailAssessment.builder()
-                                        .policy(CONTENT)
-                                        .name(policy.typeAsString())
-                                        .action(policy.actionAsString())
-                                        .build());
+                        if ((contentPolicy = assessment.contentPolicy()) != null && contentPolicy.filters() != null) {
+                            policy6 = contentPolicy.filters().iterator();
+                            while (policy6.hasNext()) {
+                                Object policy5;
+                                policy5 = (GuardrailContentFilter)policy6.next();
+                                outputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)OutputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.CONTENT)).name(policy5.typeAsString())).action(policy5.actionAsString())).build());
                             }
                         }
-
-                        // --- Word Policy ---
-                        GuardrailWordPolicyAssessment wordPolicy = assessment.wordPolicy();
-                        if (wordPolicy != null) {
+                        if ((wordPolicy = assessment.wordPolicy()) != null) {
                             if (wordPolicy.customWords() != null) {
-                                for (GuardrailCustomWord policy : wordPolicy.customWords()) {
-                                    outputAssessments.add(OutputGuardrailAssessment.builder()
-                                            .policy(WORD)
-                                            .name(policy.match())
-                                            .action(policy.actionAsString())
-                                            .build());
+                                for (Object policy7 : wordPolicy.customWords()) {
+                                    outputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)OutputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.WORD)).name(policy7.match())).action(policy7.actionAsString())).build());
                                 }
                             }
                             if (wordPolicy.managedWordLists() != null) {
-                                for (GuardrailManagedWord policy : wordPolicy.managedWordLists()) {
-                                    outputAssessments.add(OutputGuardrailAssessment.builder()
-                                            .policy(WORD)
-                                            .name(policy.typeAsString())
-                                            .action(policy.actionAsString())
-                                            .build());
+                                for (Object policy7 : wordPolicy.managedWordLists()) {
+                                    outputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)OutputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.WORD)).name(policy7.typeAsString())).action(policy7.actionAsString())).build());
                                 }
                             }
                         }
-
-                        // --- Sensitive Information Policy ---
-                        GuardrailSensitiveInformationPolicyAssessment sensitivePolicy = assessment.sensitiveInformationPolicy();
-                        if (sensitivePolicy != null) {
+                        if ((sensitivePolicy = assessment.sensitiveInformationPolicy()) != null) {
+                            GuardrailPiiEntityFilter policy8;
+                            Object policy7;
                             if (sensitivePolicy.piiEntities() != null) {
-                                for (GuardrailPiiEntityFilter policy : sensitivePolicy.piiEntities()) {
-                                    outputAssessments.add(OutputGuardrailAssessment.builder()
-                                            .policy(SENSITIVE)
-                                            .name(policy.typeAsString())
-                                            .action(policy.actionAsString())
-                                            .build());
+                                policy7 = sensitivePolicy.piiEntities().iterator();
+                                while (policy7.hasNext()) {
+                                    policy8 = (GuardrailPiiEntityFilter)policy7.next();
+                                    outputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)OutputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.SENSITIVE)).name(policy8.typeAsString())).action(policy8.actionAsString())).build());
                                 }
                             }
                             if (sensitivePolicy.regexes() != null) {
-                                for (GuardrailRegexFilter policy : sensitivePolicy.regexes()) {
-                                    outputAssessments.add(OutputGuardrailAssessment.builder()
-                                            .policy(SENSITIVE)
-                                            .name(policy.name())
-                                            .action(policy.actionAsString())
-                                            .build());
+                                policy7 = sensitivePolicy.regexes().iterator();
+                                while (policy7.hasNext()) {
+                                    policy8 = (GuardrailRegexFilter)policy7.next();
+                                    outputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)OutputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.SENSITIVE)).name(policy8.name())).action(policy8.actionAsString())).build());
                                 }
                             }
                         }
-
-                        // --- Contextual Grounding Policy ---
-                        GuardrailContextualGroundingPolicyAssessment contextualPolicy = assessment.contextualGroundingPolicy();
-                        if (contextualPolicy != null && contextualPolicy.filters() != null) {
-                            for (GuardrailContextualGroundingFilter policy : contextualPolicy.filters()) {
-                                outputAssessments.add(OutputGuardrailAssessment.builder()
-                                        .policy(CONTEXT)
-                                        .name(policy.typeAsString())
-                                        .action(policy.actionAsString())
-                                        .build());
-                            }
+                        if ((contextualPolicy = assessment.contextualGroundingPolicy()) == null || contextualPolicy.filters() == null) continue;
+                        for (GuardrailContextualGroundingFilter policy9 : contextualPolicy.filters()) {
+                            outputAssessments.add(((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)((GuardrailAssessment.Builder)OutputGuardrailAssessment.builder().policy(GuardrailAssessment.Policy.CONTEXT)).name(policy9.typeAsString())).action(policy9.actionAsString())).build());
                         }
                     }
                 }
             }
-
             builder.outputAssessments(outputAssessments);
         }
-
         return builder.build();
     }
 
     protected static void validate(ChatRequestParameters parameters) {
         String errorTemplate = "%s is not supported yet by this model provider";
-
         if (parameters.topK() != null) {
             throw new UnsupportedFeatureException(String.format(errorTemplate, "'topK' parameter"));
         }
@@ -1047,61 +787,41 @@ abstract class AbstractBedrockChatModel {
         }
     }
 
-    /**
-     * Builds OutputConfig for structured output support based on the ResponseFormat.
-     * When a JSON schema is provided, it creates the appropriate TextFormat configuration.
-     *
-     * @param responseFormat the response format specification
-     * @return OutputConfig if JSON format with schema is requested, null otherwise
-     */
     protected static OutputConfig outputConfigFrom(ResponseFormat responseFormat) {
+        String jsonSchemaString;
         if (responseFormat == null || responseFormat.type() != ResponseFormatType.JSON) {
             return null;
         }
-
         JsonSchema jsonSchema = responseFormat.jsonSchema();
         if (jsonSchema == null) {
             throw new UnsupportedFeatureException("JSON response format is not supported without a schema");
         }
-
-        String jsonSchemaString;
-        if (jsonSchema.rootElement() instanceof JsonRawSchema rawSchema) {
+        if (jsonSchema.rootElement() instanceof JsonRawSchema) {
+            JsonRawSchema rawSchema = (JsonRawSchema)jsonSchema.rootElement();
             jsonSchemaString = rawSchema.schema();
         } else {
-            Map<String, Object> jsonSchemaMap = toMap(jsonSchema.rootElement(), true, true, "string");
-            jsonSchemaString = Json.toJson(jsonSchemaMap);
+            Map jsonSchemaMap = JsonSchemaElementUtils.toMap((JsonSchemaElement)jsonSchema.rootElement(), (boolean)true, (boolean)true, (String)"string");
+            jsonSchemaString = Json.toJson((Object)jsonSchemaMap);
         }
-
-        return OutputConfig.builder()
-                .textFormat(OutputFormat.builder()
-                        .type(JSON_SCHEMA)
-                        .structure(OutputFormatStructure.builder()
-                                .jsonSchema(JsonSchemaDefinition.builder()
-                                        .schema(jsonSchemaString)
-                                        .name(jsonSchema.name())
-                                        .build())
-                                .build())
-                        .build())
-                .build();
+        return (OutputConfig)OutputConfig.builder().textFormat((OutputFormat)OutputFormat.builder().type(OutputFormatType.JSON_SCHEMA).structure((OutputFormatStructure)OutputFormatStructure.builder().jsonSchema((JsonSchemaDefinition)JsonSchemaDefinition.builder().schema(jsonSchemaString).name(jsonSchema.name()).build()).build()).build()).build();
     }
 
     protected static Float dblToFloat(Double d) {
         if (Objects.isNull(d)) {
             return null;
-        } else return d.floatValue();
+        }
+        return Float.valueOf(d.floatValue());
     }
 
     protected static String extractFilenameWithoutExtensionFromUri(URI uri) {
         String extractedCleanFileName = Utils.extractCleanFileName(uri);
-        if (isNullOrEmpty(extractedCleanFileName)) {
+        if (dev.langchain4j.internal.Utils.isNullOrEmpty((String)extractedCleanFileName)) {
             extractedCleanFileName = UUID.randomUUID().toString();
         }
         return extractedCleanFileName;
     }
 
-    // Abstract builder class
-    public abstract static class AbstractBuilder<T extends AbstractBuilder<T>> {
-
+    public static abstract class AbstractBuilder<T extends AbstractBuilder<T>> {
         protected Region region;
         protected String modelId;
         protected Duration timeout;
@@ -1115,129 +835,83 @@ abstract class AbstractBedrockChatModel {
         protected Set<Capability> supportedCapabilities;
         protected Supplier<Map<String, String>> customHeadersSupplier;
 
-        @SuppressWarnings("unchecked")
         public T self() {
-            return (T) this;
+            return (T)this;
         }
 
         public T defaultRequestParameters(ChatRequestParameters defaultRequestParameters) {
             this.defaultRequestParameters = defaultRequestParameters;
-            return self();
+            return this.self();
         }
 
         public T region(Region region) {
             this.region = region;
-            return self();
+            return this.self();
         }
 
         public T modelId(String modelId) {
             this.modelId = modelId;
-            return self();
+            return this.self();
         }
 
-        /**
-         * Controls whether to return thinking/reasoning text (if available) inside {@link AiMessage#thinking()}
-         * and whether to invoke the {@link StreamingChatResponseHandler#onPartialThinking(PartialThinking)} callback.
-         * Please note that this does not enable thinking/reasoning for the LLM;
-         * it only controls whether to parse the {@code REASONING_CONTENT} block from the API response
-         * and return it inside the {@link AiMessage}.
-         * To enable thinking, set {@link BedrockChatRequestParameters.Builder#enableReasoning(Integer)}
-         * via {@link #defaultRequestParameters(ChatRequestParameters)}.
-         * <p>
-         * Disabled by default.
-         * If enabled, the thinking text will be stored within the {@link AiMessage} and may be persisted.
-         * If enabled, thinking signatures will also be stored and returned inside the {@link AiMessage#attributes()}.
-         *
-         * @see #sendThinking(Boolean)
-         */
         public T returnThinking(Boolean returnThinking) {
             this.returnThinking = returnThinking;
-            return self();
+            return this.self();
         }
 
-        /**
-         * Controls whether to send thinking/reasoning text to the LLM in follow-up requests.
-         * <p>
-         * Enabled by default.
-         * If enabled, the contents of {@link AiMessage#thinking()} will be sent in the API request.
-         * If enabled, thinking signatures (inside the {@link AiMessage#attributes()}) will also be sent.
-         *
-         * @see #returnThinking(Boolean)
-         */
         public T sendThinking(Boolean sendThinking) {
             this.sendThinking = sendThinking;
-            return self();
+            return this.self();
         }
 
         public T timeout(Duration timeout) {
             this.timeout = timeout;
-            return self();
+            return this.self();
         }
 
-        /**
-         * Enables logging of HTTP requests to AWS Bedrock.
-         * <p>
-         * <b>WARNING:</b> When enabled, the ENTIRE request body is logged at DEBUG level,
-         * including all message content (system prompts, user messages, etc.). This may
-         * expose sensitive information such as:
-         * <ul>
-         *   <li>Confidential instructions in system prompts</li>
-         *   <li>PII or personal data in user messages</li>
-         *   <li>API keys or secrets accidentally included in prompts</li>
-         * </ul>
-         * <p>
-         * Use with caution in production environments. Consider using a custom logger
-         * with appropriate filtering/redaction if needed.
-         *
-         * @param logRequests true to enable request logging
-         * @return this builder
-         */
         public T logRequests(Boolean logRequests) {
             this.logRequests = logRequests;
-            return self();
+            return this.self();
         }
 
         public T logResponses(Boolean logResponses) {
             this.logResponses = logResponses;
-            return self();
+            return this.self();
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public T logger(Logger logger) {
             this.logger = logger;
-            return self();
+            return this.self();
         }
 
         public T listeners(List<ChatModelListener> listeners) {
             this.listeners = listeners;
-            return self();
+            return this.self();
         }
 
-        public T listeners(ChatModelListener... listeners) {
-            return listeners(asList(listeners));
+        public T listeners(ChatModelListener ... listeners) {
+            return this.listeners(Arrays.asList(listeners));
         }
 
         public T supportedCapabilities(Set<Capability> supportedCapabilities) {
             this.supportedCapabilities = supportedCapabilities;
-            return self();
+            return this.self();
         }
 
-        public T supportedCapabilities(Capability... supportedCapabilities) {
+        public T supportedCapabilities(Capability ... supportedCapabilities) {
             this.supportedCapabilities = Arrays.stream(supportedCapabilities).collect(Collectors.toSet());
-            return self();
+            return this.self();
         }
 
         public T customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
-            return self();
+            return this.self();
         }
 
         public T customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
-            return self();
+            return this.self();
         }
     }
 }
+

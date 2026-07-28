@@ -1,17 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
 public class McpRegistryPong {
-
     private boolean pong;
 
     public boolean pong() {
-        return pong;
+        return this.pong;
     }
 
-    @Override
     public String toString() {
-        return "McpRegistryPong{" +
-                "pong=" + pong +
-                '}';
+        return "McpRegistryPong{pong=" + this.pong + '}';
     }
 }
+

@@ -1,14 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.sse.ServerSentEvent
+ */
 package dev.langchain4j.model.openai.internal;
 
-import java.util.function.Consumer;
 import dev.langchain4j.http.client.sse.ServerSentEvent;
+import dev.langchain4j.model.openai.internal.ParsedAndRawResponse;
+import dev.langchain4j.model.openai.internal.StreamingResponseHandling;
+import dev.langchain4j.model.openai.internal.SyncOrAsync;
+import java.util.function.Consumer;
 
-public interface SyncOrAsyncOrStreaming<ResponseContent> extends SyncOrAsync<ResponseContent> {
+public interface SyncOrAsyncOrStreaming<ResponseContent>
+extends SyncOrAsync<ResponseContent> {
+    public StreamingResponseHandling onPartialResponse(Consumer<ResponseContent> var1);
 
-    StreamingResponseHandling onPartialResponse(Consumer<ResponseContent> partialResponseHandler);
-
-    default StreamingResponseHandling onRawPartialResponse(Consumer<ParsedAndRawResponse<ResponseContent>> handler) {
+    default public StreamingResponseHandling onRawPartialResponse(Consumer<ParsedAndRawResponse<ResponseContent>> handler) {
         ServerSentEvent rawEvent = null;
-        return onPartialResponse(parsedResponse -> handler.accept(new ParsedAndRawResponse<>(parsedResponse, rawEvent)));
+        return this.onPartialResponse(parsedResponse -> handler.accept(new ParsedAndRawResponse<Object>(parsedResponse, rawEvent)));
     }
 }
+

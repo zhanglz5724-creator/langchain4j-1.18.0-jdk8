@@ -1,16 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.databind.node.ObjectNode
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.langchain4j.Internal;
-import java.util.Map;
+import dev.langchain4j.mcp.protocol.McpCallToolParams;
+import dev.langchain4j.mcp.protocol.McpClientMethod;
+import dev.langchain4j.mcp.protocol.McpClientRequest;
 import java.util.Collections;
 
-/**
- * Corresponds to the {@code CallToolRequest} type from the MCP schema.
- */
 @Internal
-public class McpCallToolRequest extends McpClientRequest {
-
+public class McpCallToolRequest
+extends McpClientRequest {
     public McpCallToolRequest(Long id, String toolName, ObjectNode arguments) {
         this(id, toolName, arguments, null);
     }
@@ -21,6 +27,7 @@ public class McpCallToolRequest extends McpClientRequest {
         if (progressToken != null) {
             params.setMeta(Collections.singletonMap("progressToken", progressToken));
         }
-        setParams(params);
+        this.setParams(params);
     }
 }
+

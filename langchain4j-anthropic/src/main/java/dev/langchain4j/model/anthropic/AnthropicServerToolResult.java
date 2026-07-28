@@ -1,19 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ */
 package dev.langchain4j.model.anthropic;
 
 import dev.langchain4j.Experimental;
 import java.util.Objects;
 
-/**
- * Represents a result from an Anthropic server-executed tool (e.g., web_search, code_execution).
- * <p>
- * Content is stored as raw {@link Object} to be flexible and survive API changes.
- * Users can cast to {@code Map<String, Object>} or {@code List<Map<String, Object>>} as needed.
- *
- * @since 1.10.0
- */
 @Experimental
 public class AnthropicServerToolResult {
-
     private final String type;
     private final String toolUseId;
     private final Object content;
@@ -24,49 +21,32 @@ public class AnthropicServerToolResult {
         this.content = builder.content;
     }
 
-    /**
-     * The type of server tool result (e.g., "web_search_tool_result", "code_execution_tool_result").
-     */
     public String type() {
-        return type;
+        return this.type;
     }
 
-    /**
-     * The ID linking this result to the corresponding server_tool_use block.
-     */
     public String toolUseId() {
-        return toolUseId;
+        return this.toolUseId;
     }
 
-    /**
-     * The raw content from the API response.
-     * For web_search: typically a {@code List<Map<String, Object>>} with search results.
-     * For code_execution: typically a {@code Map<String, Object>} with stdout, stderr, return_code, etc.
-     */
     public Object content() {
-        return content;
+        return this.content;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        AnthropicServerToolResult that = (AnthropicServerToolResult) o;
-        return Objects.equals(type, that.type)
-                && Objects.equals(toolUseId, that.toolUseId)
-                && Objects.equals(content, that.content);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        AnthropicServerToolResult that = (AnthropicServerToolResult)o;
+        return Objects.equals(this.type, that.type) && Objects.equals(this.toolUseId, that.toolUseId) && Objects.equals(this.content, that.content);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(type, toolUseId, content);
+        return Objects.hash(this.type, this.toolUseId, this.content);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicServerToolResult{" + "type='"
-                + type + '\'' + ", toolUseId='"
-                + toolUseId + '\'' + ", content="
-                + content + '}';
+        return "AnthropicServerToolResult{type='" + this.type + '\'' + ", toolUseId='" + this.toolUseId + '\'' + ", content=" + this.content + '}';
     }
 
     public static Builder builder() {
@@ -74,7 +54,6 @@ public class AnthropicServerToolResult {
     }
 
     public static class Builder {
-
         private String type;
         private String toolUseId;
         private Object content;
@@ -99,3 +78,4 @@ public class AnthropicServerToolResult {
         }
     }
 }
+

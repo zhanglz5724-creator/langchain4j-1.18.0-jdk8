@@ -1,32 +1,104 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.store.embedding.chroma;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.internal.Utils;
+import dev.langchain4j.store.embedding.chroma.AddEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.ChromaApiImpl;
+import dev.langchain4j.store.embedding.chroma.ChromaClient;
+import dev.langchain4j.store.embedding.chroma.ChromaHttpClient;
+import dev.langchain4j.store.embedding.chroma.Collection;
+import dev.langchain4j.store.embedding.chroma.CreateCollectionRequest;
+import dev.langchain4j.store.embedding.chroma.DeleteEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.QueryRequest;
+import dev.langchain4j.store.embedding.chroma.QueryResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Supplier;
 
 @Internal
-class ChromaClientV1 implements ChromaClient {
-
+class ChromaClientV1
+implements ChromaClient {
     private final ChromaApiImpl chromaApi;
 
     private ChromaClientV1(Builder builder) {
-        ChromaHttpClient httpClient = new ChromaHttpClient(
-                Utils.ensureTrailingForwardSlash(builder.baseUrl),
-                builder.timeout,
-                builder.logRequests,
-                builder.logResponses,
-                builder.httpClientBuilder,
-                builder.customHeadersSupplier);
-
+        ChromaHttpClient httpClient = new ChromaHttpClient(Utils.ensureTrailingForwardSlash((String)builder.baseUrl), builder.timeout, builder.logRequests, builder.logResponses, builder.httpClientBuilder, builder.customHeadersSupplier);
         this.chromaApi = new ChromaApiImpl(httpClient);
     }
 
-    public static class Builder {
+    @Override
+    public Collection createCollection(CreateCollectionRequest createCollectionRequest) {
+        try {
+            return this.chromaApi.createCollection(createCollectionRequest);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    @Override
+    public Collection collection(String collectionName) {
+        try {
+            return this.chromaApi.collection(collectionName);
+        }
+        catch (RuntimeException e) {
+            return null;
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean addEmbeddings(String collectionId, AddEmbeddingsRequest addEmbeddingsRequest) {
+        try {
+            return this.chromaApi.addEmbeddings(collectionId, addEmbeddingsRequest);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public QueryResponse queryCollection(String collectionId, QueryRequest queryRequest) {
+        try {
+            return this.chromaApi.queryCollection(collectionId, queryRequest);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteEmbeddings(String collectionId, DeleteEmbeddingsRequest deleteEmbeddingsRequest) {
+        try {
+            this.chromaApi.deleteEmbeddings(collectionId, deleteEmbeddingsRequest);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteCollection(String collectionName) {
+        try {
+            this.chromaApi.deleteCollection(collectionName);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static class Builder {
         private String baseUrl;
         private Duration timeout;
         private HttpClientBuilder httpClientBuilder;
@@ -68,61 +140,5 @@ class ChromaClientV1 implements ChromaClient {
             return new ChromaClientV1(this);
         }
     }
-
-    @Override
-    public Collection createCollection(CreateCollectionRequest createCollectionRequest) {
-        try {
-            return chromaApi.createCollection(createCollectionRequest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Collection collection(String collectionName) {
-        try {
-            return chromaApi.collection(collectionName);
-        } catch (RuntimeException e) {
-            // if collection is not present, Chroma returns: Status - 500
-            return null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public boolean addEmbeddings(String collectionId, AddEmbeddingsRequest addEmbeddingsRequest) {
-        try {
-            return chromaApi.addEmbeddings(collectionId, addEmbeddingsRequest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public QueryResponse queryCollection(String collectionId, QueryRequest queryRequest) {
-        try {
-            return chromaApi.queryCollection(collectionId, queryRequest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteEmbeddings(String collectionId, DeleteEmbeddingsRequest deleteEmbeddingsRequest) {
-        try {
-            chromaApi.deleteEmbeddings(collectionId, deleteEmbeddingsRequest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteCollection(String collectionName) {
-        try {
-            chromaApi.deleteCollection(collectionName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
+

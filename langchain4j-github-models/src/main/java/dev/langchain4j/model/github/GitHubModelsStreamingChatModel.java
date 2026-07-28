@@ -1,3 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.azure.ai.inference.ChatCompletionsAsyncClient
+ *  com.azure.ai.inference.ModelServiceVersion
+ *  com.azure.ai.inference.models.ChatCompletionsOptions
+ *  com.azure.ai.inference.models.ChatCompletionsResponseFormat
+ *  com.azure.ai.inference.models.StreamingChatChoiceUpdate
+ *  com.azure.ai.inference.models.StreamingChatCompletionsUpdate
+ *  com.azure.ai.inference.models.StreamingChatResponseMessageUpdate
+ *  com.azure.core.exception.HttpResponseException
+ *  com.azure.core.http.ProxyOptions
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.ChatRequestValidationUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.StreamingResponseHandler
+ *  dev.langchain4j.model.chat.StreamingChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelErrorContext
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.listener.ChatModelRequestContext
+ *  dev.langchain4j.model.chat.listener.ChatModelResponseContext
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.chat.response.StreamingChatResponseHandler
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ *  reactor.core.publisher.Flux
+ */
 package dev.langchain4j.model.github;
 
 import com.azure.ai.inference.ChatCompletionsAsyncClient;
@@ -13,6 +54,9 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.ChatRequestValidationUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -22,59 +66,35 @@ import dev.langchain4j.model.chat.listener.ChatModelRequestContext;
 import dev.langchain4j.model.chat.listener.ChatModelResponseContext;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
-import dev.langchain4j.internal.ChatRequestValidationUtils;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.github.GitHubModelsChatModelName;
+import dev.langchain4j.model.github.GitHubModelsStreamingResponseBuilder;
+import dev.langchain4j.model.github.InternalGitHubModelHelper;
 import dev.langchain4j.model.github.spi.GitHubModelsStreamingChatModelBuilderFactory;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 
-import static dev.langchain4j.data.message.AiMessage.aiMessage;
-import static dev.langchain4j.internal.Utils.copyIfNotNull;
-import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.ModelProvider.GITHUB_MODELS;
-import static dev.langchain4j.model.chat.request.ToolChoice.REQUIRED;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.contentFilterManagement;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.createListenerRequest;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.createListenerResponse;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.setupChatCompletionsBuilder;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.toAzureAiMessages;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.toToolChoice;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.toToolDefinitions;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-
-/**
- * Represents a language model, hosted on GitHub Models, that has a chat completion interface, such as gpt-4o.
- * <p>
- * Mandatory parameters for initialization are: gitHubToken (the GitHub Token used for authentication) and modelName (the name of the model to use).
- * You can also provide your own ChatCompletionsClient and ChatCompletionsAsyncClient instance, if you need more flexibility.
- * <p>
- * The list of models, as well as the documentation and a playground to test them, can be found at https://github.com/marketplace/models
- *
- * @deprecated This module is deprecated and will be removed in a future release. Please use the langchain4j-openai-official module instead.
- */
-@Deprecated(since = "1.10.0", forRemoval = true)
-public class GitHubModelsStreamingChatModel implements StreamingChatModel {
-
+@Deprecated
+public class GitHubModelsStreamingChatModel
+implements StreamingChatModel {
     private static final Logger logger = LoggerFactory.getLogger(GitHubModelsStreamingChatModel.class);
-
     private ChatCompletionsAsyncClient client;
     private final String modelName;
     private final Integer maxTokens;
@@ -87,183 +107,104 @@ public class GitHubModelsStreamingChatModel implements StreamingChatModel {
     private final ChatCompletionsResponseFormat responseFormat;
     private final List<ChatModelListener> listeners;
 
-    private GitHubModelsStreamingChatModel(ChatCompletionsAsyncClient client,
-                                           String modelName,
-                                           Integer maxTokens,
-                                           Double temperature,
-                                           Double topP,
-                                           List<String> stop,
-                                           Double presencePenalty,
-                                           Double frequencyPenalty,
-                                           Long seed,
-                                           ChatCompletionsResponseFormat responseFormat,
-                                           List<ChatModelListener> listeners) {
-
+    private GitHubModelsStreamingChatModel(ChatCompletionsAsyncClient client, String modelName, Integer maxTokens, Double temperature, Double topP, List<String> stop, Double presencePenalty, Double frequencyPenalty, Long seed, ChatCompletionsResponseFormat responseFormat, List<ChatModelListener> listeners) {
         this(modelName, maxTokens, temperature, topP, stop, presencePenalty, frequencyPenalty, seed, responseFormat, listeners);
         this.client = client;
     }
 
-    private GitHubModelsStreamingChatModel(String endpoint,
-                                           ModelServiceVersion serviceVersion,
-                                           String gitHubToken,
-                                           String modelName,
-                                           Integer maxTokens,
-                                           Double temperature,
-                                           Double topP,
-                                           List<String> stop,
-                                           Double presencePenalty,
-                                           Double frequencyPenalty,
-                                           Long seed,
-                                           ChatCompletionsResponseFormat responseFormat,
-                                           Duration timeout,
-                                           Integer maxRetries,
-                                           ProxyOptions proxyOptions,
-                                           boolean logRequestsAndResponses,
-                                           List<ChatModelListener> listeners,
-                                           String userAgentSuffix,
-                                           Map<String, String> customHeaders) {
-
+    private GitHubModelsStreamingChatModel(String endpoint, ModelServiceVersion serviceVersion, String gitHubToken, String modelName, Integer maxTokens, Double temperature, Double topP, List<String> stop, Double presencePenalty, Double frequencyPenalty, Long seed, ChatCompletionsResponseFormat responseFormat, Duration timeout, Integer maxRetries, ProxyOptions proxyOptions, boolean logRequestsAndResponses, List<ChatModelListener> listeners, String userAgentSuffix, Map<String, String> customHeaders) {
         this(modelName, maxTokens, temperature, topP, stop, presencePenalty, frequencyPenalty, seed, responseFormat, listeners);
-        this.client = setupChatCompletionsBuilder(endpoint, serviceVersion, gitHubToken, timeout, maxRetries, proxyOptions, logRequestsAndResponses, userAgentSuffix, customHeaders)
-                .buildAsyncClient();
+        this.client = InternalGitHubModelHelper.setupChatCompletionsBuilder(endpoint, serviceVersion, gitHubToken, timeout, maxRetries, proxyOptions, logRequestsAndResponses, userAgentSuffix, customHeaders).buildAsyncClient();
     }
 
-    private GitHubModelsStreamingChatModel(String modelName,
-                                           Integer maxTokens,
-                                           Double temperature,
-                                           Double topP,
-                                           List<String> stop,
-                                           Double presencePenalty,
-                                           Double frequencyPenalty,
-                                           Long seed,
-                                           ChatCompletionsResponseFormat responseFormat,
-                                           List<ChatModelListener> listeners) {
-
-        this.modelName = ensureNotBlank(modelName, "modelName");
+    private GitHubModelsStreamingChatModel(String modelName, Integer maxTokens, Double temperature, Double topP, List<String> stop, Double presencePenalty, Double frequencyPenalty, Long seed, ChatCompletionsResponseFormat responseFormat, List<ChatModelListener> listeners) {
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
         this.maxTokens = maxTokens;
         this.temperature = temperature;
         this.topP = topP;
-        this.stop = copyIfNotNull(stop);
+        this.stop = Utils.copyIfNotNull(stop);
         this.presencePenalty = presencePenalty;
         this.frequencyPenalty = frequencyPenalty;
         this.seed = seed;
         this.responseFormat = responseFormat;
-        this.listeners = listeners == null ? emptyList() : new ArrayList<>(listeners);
+        this.listeners = listeners == null ? Collections.emptyList() : new ArrayList<ChatModelListener>(listeners);
     }
 
-    @Override
-    public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+    public void chat(ChatRequest request, final StreamingChatResponseHandler handler) {
         ChatRequestParameters parameters = request.parameters();
-        ChatRequestValidationUtils.validateParameters(parameters);
-        ChatRequestValidationUtils.validate(parameters.responseFormat());
+        ChatRequestValidationUtils.validateParameters((ChatRequestParameters)parameters);
+        ChatRequestValidationUtils.validate((ResponseFormat)parameters.responseFormat());
+        StreamingResponseHandler<AiMessage> legacyHandler = new StreamingResponseHandler<AiMessage>(){
 
-        StreamingResponseHandler<AiMessage> legacyHandler = new StreamingResponseHandler<>() {
-
-            @Override
             public void onNext(String token) {
                 handler.onPartialResponse(token);
             }
 
-            @Override
             public void onComplete(Response<AiMessage> response) {
-                ChatResponse chatResponse = ChatResponse.builder()
-                        .aiMessage(response.content())
-                        .metadata(ChatResponseMetadata.builder()
-                                .tokenUsage(response.tokenUsage())
-                                .finishReason(response.finishReason())
-                                .build())
-                        .build();
+                ChatResponse chatResponse = ChatResponse.builder().aiMessage((AiMessage)response.content()).metadata(ChatResponseMetadata.builder().tokenUsage(response.tokenUsage()).finishReason(response.finishReason()).build()).build();
                 handler.onCompleteResponse(chatResponse);
             }
 
-            @Override
             public void onError(Throwable error) {
                 handler.onError(error);
             }
         };
-
-        List<ToolSpecification> toolSpecifications = parameters.toolSpecifications();
-        if (isNullOrEmpty(toolSpecifications)) {
-            generate(request.messages(), legacyHandler);
-        } else {
-            if (parameters.toolChoice() == REQUIRED) {
-                if (toolSpecifications.size() != 1) {
-                    throw new UnsupportedFeatureException(
-                            String.format("%s.%s is currently supported only when there is a single tool", 
-                                    ToolChoice.class.getSimpleName(), REQUIRED.name()));
-                }
-                generate(request.messages(), toolSpecifications.get(0), legacyHandler);
-            } else {
-                generate(request.messages(), toolSpecifications, legacyHandler);
+        List toolSpecifications = parameters.toolSpecifications();
+        if (Utils.isNullOrEmpty((Collection)toolSpecifications)) {
+            this.generate(request.messages(), legacyHandler);
+        } else if (parameters.toolChoice() == ToolChoice.REQUIRED) {
+            if (toolSpecifications.size() != 1) {
+                throw new UnsupportedFeatureException(String.format("%s.%s is currently supported only when there is a single tool", ToolChoice.class.getSimpleName(), ToolChoice.REQUIRED.name()));
             }
+            this.generate((List<ChatMessage>)request.messages(), (ToolSpecification)toolSpecifications.get(0), legacyHandler);
+        } else {
+            this.generate((List<ChatMessage>)request.messages(), toolSpecifications, legacyHandler);
         }
     }
 
     private void generate(List<ChatMessage> messages, StreamingResponseHandler<AiMessage> handler) {
-        generate(messages, null, null, handler);
+        this.generate(messages, null, null, handler);
     }
 
     private void generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications, StreamingResponseHandler<AiMessage> handler) {
-        generate(messages, toolSpecifications, null, handler);
+        this.generate(messages, toolSpecifications, null, handler);
     }
 
     private void generate(List<ChatMessage> messages, ToolSpecification toolSpecification, StreamingResponseHandler<AiMessage> handler) {
-        generate(messages, null, toolSpecification, handler);
+        this.generate(messages, null, toolSpecification, handler);
     }
 
-    private void generate(List<ChatMessage> messages,
-                          List<ToolSpecification> toolSpecifications,
-                          ToolSpecification toolThatMustBeExecuted,
-                          StreamingResponseHandler<AiMessage> handler
-    ) {
-        ChatCompletionsOptions options = new ChatCompletionsOptions(toAzureAiMessages(messages))
-                .setModel(modelName)
-                .setMaxTokens(maxTokens)
-                .setTemperature(temperature)
-                .setTopP(topP)
-                .setStop(stop)
-                .setPresencePenalty(presencePenalty)
-                .setFrequencyPenalty(frequencyPenalty)
-                .setSeed(seed)
-                .setResponseFormat(responseFormat);
-
+    private void generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications, ToolSpecification toolThatMustBeExecuted, StreamingResponseHandler<AiMessage> handler) {
+        ChatCompletionsOptions options = new ChatCompletionsOptions(InternalGitHubModelHelper.toAzureAiMessages(messages)).setModel(this.modelName).setMaxTokens(this.maxTokens).setTemperature(this.temperature).setTopP(this.topP).setStop(this.stop).setPresencePenalty(this.presencePenalty).setFrequencyPenalty(this.frequencyPenalty).setSeed(this.seed).setResponseFormat(this.responseFormat);
         if (toolThatMustBeExecuted != null) {
-            options.setTools(toToolDefinitions(singletonList(toolThatMustBeExecuted)));
-            options.setToolChoice(toToolChoice(toolThatMustBeExecuted));
+            options.setTools(InternalGitHubModelHelper.toToolDefinitions(Collections.singletonList(toolThatMustBeExecuted)));
+            options.setToolChoice(InternalGitHubModelHelper.toToolChoice(toolThatMustBeExecuted));
         }
-        if (!isNullOrEmpty(toolSpecifications)) {
-            options.setTools(toToolDefinitions(toolSpecifications));
+        if (!Utils.isNullOrEmpty(toolSpecifications)) {
+            options.setTools(InternalGitHubModelHelper.toToolDefinitions(toolSpecifications));
         }
-
         GitHubModelsStreamingResponseBuilder responseBuilder = new GitHubModelsStreamingResponseBuilder();
-
-        ChatRequest listenerRequest = createListenerRequest(options, messages, toolSpecifications);
-        Map<Object, Object> attributes = new ConcurrentHashMap<>();
-        ChatModelRequestContext requestContext =
-                new ChatModelRequestContext(listenerRequest, provider(), attributes);
-
-        listeners.forEach(listener -> {
+        ChatRequest listenerRequest = InternalGitHubModelHelper.createListenerRequest(options, messages, toolSpecifications);
+        ConcurrentHashMap attributes = new ConcurrentHashMap();
+        ChatModelRequestContext requestContext = new ChatModelRequestContext(listenerRequest, this.provider(), attributes);
+        this.listeners.forEach(listener -> {
             try {
                 listener.onRequest(requestContext);
-            } catch (Exception e) {
-                logger.warn("Exception while calling model listener", e);
+            }
+            catch (Exception e) {
+                logger.warn("Exception while calling model listener", (Throwable)e);
             }
         });
-
-        asyncCall(handler, options, responseBuilder, requestContext);
+        this.asyncCall(handler, options, responseBuilder, requestContext);
     }
 
     private void handleResponseException(Throwable throwable, StreamingResponseHandler<AiMessage> handler) {
         if (throwable instanceof HttpResponseException) {
-            HttpResponseException httpResponseException = (HttpResponseException) throwable;
+            HttpResponseException httpResponseException = (HttpResponseException)throwable;
             logger.info("Error generating response, {}", httpResponseException.getValue());
-            FinishReason exceptionFinishReason = contentFilterManagement(httpResponseException, "content_filter");
+            FinishReason exceptionFinishReason = InternalGitHubModelHelper.contentFilterManagement(httpResponseException, "content_filter");
             if (exceptionFinishReason == FinishReason.CONTENT_FILTER) {
-                Response<AiMessage> response = Response.from(
-                        aiMessage(httpResponseException.getMessage()),
-                        null,
-                        exceptionFinishReason
-                );
+                Response response = Response.from((Object)AiMessage.aiMessage((String)httpResponseException.getMessage()), null, (FinishReason)exceptionFinishReason);
                 handler.onComplete(response);
             } else {
                 handler.onError(throwable);
@@ -274,95 +215,74 @@ public class GitHubModelsStreamingChatModel implements StreamingChatModel {
     }
 
     private void asyncCall(StreamingResponseHandler<AiMessage> handler, ChatCompletionsOptions options, GitHubModelsStreamingResponseBuilder responseBuilder, ChatModelRequestContext requestContext) {
-        Flux<StreamingChatCompletionsUpdate> chatCompletionsStream = client.completeStream(options);
-
-        AtomicReference<String> responseId = new AtomicReference<>();
-        AtomicReference<String> responseModel = new AtomicReference<>();
-
+        Flux chatCompletionsStream = this.client.completeStream(options);
+        AtomicReference responseId = new AtomicReference();
+        AtomicReference responseModel = new AtomicReference();
         chatCompletionsStream.subscribe(chatCompletion -> {
-                    responseBuilder.append(chatCompletion);
-                    handle(chatCompletion, handler);
-
-                    if (isNotNullOrBlank(chatCompletion.getId())) {
-                        responseId.set(chatCompletion.getId());
-                    }
-                    if (!isNullOrBlank(chatCompletion.getModel())) {
-                        responseModel.set(chatCompletion.getModel());
-                    }
-                },
-                throwable -> {
-                    ChatModelErrorContext errorContext = new ChatModelErrorContext(
-                            throwable,
-                            requestContext.chatRequest(),
-                            provider(),
-                            requestContext.attributes()
-                    );
-                    listeners.forEach(listener -> {
-                        try {
-                            listener.onError(errorContext);
-                        } catch (Exception e2) {
-                            logger.warn("Exception while calling model listener", e2);
-                        }
-                    });
-                    handleResponseException(throwable, handler);
-                },
-                () -> {
-                    Response<AiMessage> response = responseBuilder.build();
-                    ChatResponse listenerResponse = createListenerResponse(
-                            responseId.get(),
-                            options.getModel(),
-                            response
-                    );
-                    ChatModelResponseContext responseContext = new ChatModelResponseContext(
-                            listenerResponse,
-                            requestContext.chatRequest(),
-                            provider(),
-                            requestContext.attributes()
-                    );
-                    listeners.forEach(listener -> {
-                        try {
-                            listener.onResponse(responseContext);
-                        } catch (Exception e) {
-                            logger.warn("Exception while calling model listener", e);
-                        }
-                    });
-                    handler.onComplete(response);
-                });
+            responseBuilder.append((StreamingChatCompletionsUpdate)chatCompletion);
+            GitHubModelsStreamingChatModel.handle(chatCompletion, handler);
+            if (Utils.isNotNullOrBlank((String)chatCompletion.getId())) {
+                responseId.set(chatCompletion.getId());
+            }
+            if (!Utils.isNullOrBlank((String)chatCompletion.getModel())) {
+                responseModel.set(chatCompletion.getModel());
+            }
+        }, throwable -> {
+            ChatModelErrorContext errorContext = new ChatModelErrorContext(throwable, requestContext.chatRequest(), this.provider(), requestContext.attributes());
+            this.listeners.forEach(listener -> {
+                try {
+                    listener.onError(errorContext);
+                }
+                catch (Exception e2) {
+                    logger.warn("Exception while calling model listener", (Throwable)e2);
+                }
+            });
+            this.handleResponseException((Throwable)throwable, handler);
+        }, () -> {
+            Response<AiMessage> response = responseBuilder.build();
+            ChatResponse listenerResponse = InternalGitHubModelHelper.createListenerResponse((String)responseId.get(), options.getModel(), response);
+            ChatModelResponseContext responseContext = new ChatModelResponseContext(listenerResponse, requestContext.chatRequest(), this.provider(), requestContext.attributes());
+            this.listeners.forEach(listener -> {
+                try {
+                    listener.onResponse(responseContext);
+                }
+                catch (Exception e) {
+                    logger.warn("Exception while calling model listener", (Throwable)e);
+                }
+            });
+            handler.onComplete(response);
+        });
     }
 
-
-    private static void handle(StreamingChatCompletionsUpdate chatCompletions,
-                               StreamingResponseHandler<AiMessage> handler) {
-
-        List<StreamingChatChoiceUpdate> choices = chatCompletions.getChoices();
-        if (isNullOrEmpty(choices)) {
+    private static void handle(StreamingChatCompletionsUpdate chatCompletions, StreamingResponseHandler<AiMessage> handler) {
+        List choices = chatCompletions.getChoices();
+        if (Utils.isNullOrEmpty((Collection)choices)) {
             return;
         }
-        StreamingChatResponseMessageUpdate message = choices.get(0).getDelta();
+        StreamingChatResponseMessageUpdate message = ((StreamingChatChoiceUpdate)choices.get(0)).getDelta();
         if (message != null && message.getContent() != null) {
             handler.onNext(message.getContent());
         }
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return GITHUB_MODELS;
+        return ModelProvider.GITHUB_MODELS;
     }
 
     public static Builder builder() {
-        for (GitHubModelsStreamingChatModelBuilderFactory factory : loadFactories(GitHubModelsStreamingChatModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(GitHubModelsStreamingChatModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            GitHubModelsStreamingChatModelBuilderFactory factory = (GitHubModelsStreamingChatModelBuilderFactory)iterator.next();
+            return (Builder)factory.get();
         }
         return new Builder();
     }
 
     public static class Builder {
-
         private String endpoint;
         private ModelServiceVersion serviceVersion;
         private String gitHubToken;
@@ -384,45 +304,21 @@ public class GitHubModelsStreamingChatModel implements StreamingChatModel {
         private List<ChatModelListener> listeners;
         private Map<String, String> customHeaders;
 
-        /**
-         * Sets the GitHub Models endpoint. The default endpoint will be used if this isn't set.
-         *
-         * @param endpoint The GitHub Models endpoint in the format: https://models.inference.ai.azure.com
-         * @return builder
-         */
         public Builder endpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;
         }
 
-        /**
-         * Sets the Azure OpenAI API service version. If left blank, the latest service version will be used.
-         *
-         * @param serviceVersion The Azure OpenAI API service version in the format: 2023-05-15
-         * @return builder
-         */
         public Builder serviceVersion(ModelServiceVersion serviceVersion) {
             this.serviceVersion = serviceVersion;
             return this;
         }
 
-        /**
-         * Sets the GitHub token to access GitHub Models.
-         *
-         * @param gitHubToken The GitHub token.
-         * @return builder
-         */
         public Builder gitHubToken(String gitHubToken) {
             this.gitHubToken = gitHubToken;
             return this;
         }
 
-        /**
-         * Sets the model name in Azure OpenAI. This is a mandatory parameter.
-         *
-         * @param modelName The Model name.
-         * @return builder
-         */
         public Builder modelName(String modelName) {
             this.modelName = modelName;
             return this;
@@ -514,43 +410,11 @@ public class GitHubModelsStreamingChatModel implements StreamingChatModel {
         }
 
         public GitHubModelsStreamingChatModel build() {
-            if (client != null) {
-                return new GitHubModelsStreamingChatModel(
-                        client,
-                        modelName,
-                        maxTokens,
-                        temperature,
-                        topP,
-                        stop,
-                        presencePenalty,
-                        frequencyPenalty,
-                        seed,
-                        responseFormat,
-                        listeners
-                );
-            } else {
-                return new GitHubModelsStreamingChatModel(
-                        endpoint,
-                        serviceVersion,
-                        gitHubToken,
-                        modelName,
-                        maxTokens,
-                        temperature,
-                        topP,
-                        stop,
-                        presencePenalty,
-                        frequencyPenalty,
-                        seed,
-                        responseFormat,
-                        timeout,
-                        maxRetries,
-                        proxyOptions,
-                        logRequestsAndResponses,
-                        listeners,
-                        userAgentSuffix,
-                        customHeaders
-                );
+            if (this.client != null) {
+                return new GitHubModelsStreamingChatModel(this.client, this.modelName, this.maxTokens, this.temperature, this.topP, this.stop, this.presencePenalty, this.frequencyPenalty, this.seed, this.responseFormat, this.listeners);
             }
+            return new GitHubModelsStreamingChatModel(this.endpoint, this.serviceVersion, this.gitHubToken, this.modelName, this.maxTokens, this.temperature, this.topP, this.stop, this.presencePenalty, this.frequencyPenalty, this.seed, this.responseFormat, this.timeout, this.maxRetries, this.proxyOptions, this.logRequestsAndResponses, this.listeners, this.userAgentSuffix, this.customHeaders);
         }
     }
 }
+

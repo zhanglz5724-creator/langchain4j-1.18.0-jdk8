@@ -1,15 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.azure.AzureOpenAIServiceVersion
+ *  com.openai.client.OpenAIClient
+ *  com.openai.core.RequestOptions
+ *  com.openai.core.RequestOptions$Builder
+ *  com.openai.credential.Credential
+ *  com.openai.models.images.Image
+ *  com.openai.models.images.ImageGenerateParams
+ *  com.openai.models.images.ImageGenerateParams$Background
+ *  com.openai.models.images.ImageGenerateParams$Builder
+ *  com.openai.models.images.ImageGenerateParams$Moderation
+ *  com.openai.models.images.ImageGenerateParams$OutputFormat
+ *  com.openai.models.images.ImageGenerateParams$Quality
+ *  com.openai.models.images.ImageGenerateParams$Size
+ *  com.openai.models.images.ImageModel
+ *  com.openai.models.images.ImagesResponse
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.image.Image$Builder
+ *  dev.langchain4j.model.image.ImageModel
+ *  dev.langchain4j.model.output.Response
+ */
 package dev.langchain4j.model.openaiofficial;
-
-import static dev.langchain4j.model.openaiofficial.setup.OpenAiOfficialSetup.setupSyncClient;
 
 import com.openai.azure.AzureOpenAIServiceVersion;
 import com.openai.client.OpenAIClient;
 import com.openai.core.RequestOptions;
 import com.openai.credential.Credential;
 import com.openai.models.images.ImageGenerateParams;
+import com.openai.models.images.ImageModel;
 import com.openai.models.images.ImagesResponse;
 import dev.langchain4j.data.image.Image;
-import dev.langchain4j.model.image.ImageModel;
+import dev.langchain4j.model.openaiofficial.setup.OpenAiOfficialSetup;
 import dev.langchain4j.model.output.Response;
 import java.net.Proxy;
 import java.time.Duration;
@@ -17,12 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Represents an OpenAI image generation model.
- * Find the parameters description <a href="https://developers.openai.com/api/reference/resources/images/methods/generate">here</a>.
- */
-public class OpenAiOfficialImageModel implements ImageModel {
-
+public class OpenAiOfficialImageModel
+implements dev.langchain4j.model.image.ImageModel {
     private final OpenAIClient client;
     private final String modelName;
     private final ImageGenerateParams.Size size;
@@ -35,26 +54,7 @@ public class OpenAiOfficialImageModel implements ImageModel {
     private final ImageGenerateParams.Moderation moderation;
 
     public OpenAiOfficialImageModel(Builder builder) {
-
-        if (builder.openAIClient != null) {
-            this.client = builder.openAIClient;
-        } else {
-            this.client = setupSyncClient(
-                    builder.baseUrl,
-                    builder.apiKey,
-                    builder.credential,
-                    builder.microsoftFoundryDeploymentName,
-                    builder.azureOpenAIServiceVersion,
-                    builder.organizationId,
-                    builder.isMicrosoftFoundry,
-                    builder.isGitHubModels,
-                    builder.modelName,
-                    builder.timeout,
-                    builder.maxRetries,
-                    builder.proxy,
-                    builder.customHeaders);
-        }
-
+        this.client = builder.openAIClient != null ? builder.openAIClient : OpenAiOfficialSetup.setupSyncClient(builder.baseUrl, builder.apiKey, builder.credential, builder.microsoftFoundryDeploymentName, builder.azureOpenAIServiceVersion, builder.organizationId, builder.isMicrosoftFoundry, builder.isGitHubModels, builder.modelName, builder.timeout, builder.maxRetries, builder.proxy, builder.customHeaders);
         this.modelName = builder.modelName;
         this.size = builder.size;
         this.quality = builder.quality;
@@ -67,99 +67,80 @@ public class OpenAiOfficialImageModel implements ImageModel {
     }
 
     public String modelName() {
-        return modelName;
+        return this.modelName;
     }
 
-    @Override
     public Response<Image> generate(String prompt) {
-
-        ImageGenerateParams imageGenerateParams =
-                imageGenerateParamsBuilder(prompt).build();
-
-        ImagesResponse response = client.images().generate(imageGenerateParams, requestOptions());
-
-        if (response.data().isEmpty() || response.data().get().isEmpty()) {
+        ImageGenerateParams imageGenerateParams = this.imageGenerateParamsBuilder(prompt).build();
+        ImagesResponse response = this.client.images().generate(imageGenerateParams, this.requestOptions());
+        if (!response.data().isPresent() || ((List)response.data().get()).isEmpty()) {
             throw new IllegalArgumentException("Image generation failed: no image returned");
         }
-
         String mimeType = response.outputFormat().map(of -> "image/" + of).orElse(null);
-        return Response.from(fromOpenAiImage(response.data().get().get(0), mimeType));
+        return Response.from((Object)OpenAiOfficialImageModel.fromOpenAiImage((com.openai.models.images.Image)((List)response.data().get()).get(0), mimeType));
     }
 
-    @Override
     public Response<List<Image>> generate(String prompt, int n) {
-
-        ImageGenerateParams imageGenerateParams =
-                imageGenerateParamsBuilder(prompt).n(n).build();
-
-        ImagesResponse response = client.images().generate(imageGenerateParams, requestOptions());
-
-        if (response.data().isEmpty()) {
+        ImageGenerateParams imageGenerateParams = this.imageGenerateParamsBuilder(prompt).n((long)n).build();
+        ImagesResponse response = this.client.images().generate(imageGenerateParams, this.requestOptions());
+        if (!response.data().isPresent()) {
             throw new IllegalArgumentException("Image generation failed: no image returned");
         }
-
         String mimeType = response.outputFormat().map(of -> "image/" + of).orElse(null);
-        return Response.from(response.data().get().stream()
-                .map(img -> fromOpenAiImage(img, mimeType))
-                .collect(Collectors.toList()));
+        return Response.from(((List)response.data().get()).stream().map(img -> OpenAiOfficialImageModel.fromOpenAiImage(img, mimeType)).collect(Collectors.toList()));
     }
 
     private ImageGenerateParams.Builder imageGenerateParamsBuilder(String prompt) {
         ImageGenerateParams.Builder builder = ImageGenerateParams.builder();
-        builder.model(modelName);
+        builder.model(this.modelName);
         builder.prompt(prompt);
-
-        if (size != null) {
-            builder.size(size);
+        if (this.size != null) {
+            builder.size(this.size);
         }
-        if (quality != null) {
-            builder.quality(quality);
+        if (this.quality != null) {
+            builder.quality(this.quality);
         }
-        if (user != null) {
-            builder.user(user);
+        if (this.user != null) {
+            builder.user(this.user);
         }
-        if (background != null) {
-            builder.background(background);
+        if (this.background != null) {
+            builder.background(this.background);
         }
-        if (outputFormat != null) {
-            builder.outputFormat(outputFormat);
+        if (this.outputFormat != null) {
+            builder.outputFormat(this.outputFormat);
         }
-        if (outputCompression != null) {
-            builder.outputCompression(outputCompression);
+        if (this.outputCompression != null) {
+            builder.outputCompression(this.outputCompression);
         }
-        if (moderation != null) {
-            builder.moderation(moderation);
+        if (this.moderation != null) {
+            builder.moderation(this.moderation);
         }
         return builder;
     }
 
     private RequestOptions requestOptions() {
         RequestOptions.Builder builder = new RequestOptions.Builder();
-        if (timeout != null) {
-            builder.timeout(timeout);
+        if (this.timeout != null) {
+            builder.timeout(this.timeout);
         }
         return builder.build();
     }
 
     private static Image fromOpenAiImage(com.openai.models.images.Image openAiImage, String mimeType) {
         Image.Builder imageBuilder = Image.builder();
-
         if (openAiImage.url().isPresent()) {
-            imageBuilder.url(openAiImage.url().get());
+            imageBuilder.url((String)openAiImage.url().get());
         } else if (openAiImage.b64Json().isPresent()) {
-            imageBuilder.base64Data(openAiImage.b64Json().get());
+            imageBuilder.base64Data((String)openAiImage.b64Json().get());
         } else {
             throw new IllegalArgumentException("Image must have either a URL or base64 data");
         }
-
         if (openAiImage.revisedPrompt().isPresent()) {
-            imageBuilder.revisedPrompt(openAiImage.revisedPrompt().get());
+            imageBuilder.revisedPrompt((String)openAiImage.revisedPrompt().get());
         }
-
         if (mimeType != null) {
             imageBuilder.mimeType(mimeType);
         }
-
         return imageBuilder.build();
     }
 
@@ -168,7 +149,6 @@ public class OpenAiOfficialImageModel implements ImageModel {
     }
 
     public static class Builder {
-
         private String baseUrl;
         private String apiKey;
         private Credential credential;
@@ -206,9 +186,6 @@ public class OpenAiOfficialImageModel implements ImageModel {
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #microsoftFoundryDeploymentName(String)} instead
-         */
         @Deprecated
         public Builder azureDeploymentName(String azureDeploymentName) {
             this.microsoftFoundryDeploymentName = azureDeploymentName;
@@ -230,9 +207,6 @@ public class OpenAiOfficialImageModel implements ImageModel {
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #isMicrosoftFoundry(boolean)} instead
-         */
         @Deprecated
         public Builder isAzure(boolean isAzure) {
             this.isMicrosoftFoundry = isAzure;
@@ -259,13 +233,13 @@ public class OpenAiOfficialImageModel implements ImageModel {
             return this;
         }
 
-        public Builder modelName(com.openai.models.images.ImageModel modelName) {
+        public Builder modelName(ImageModel modelName) {
             this.modelName = modelName.toString();
             return this;
         }
 
         public Builder size(String size) {
-            this.size = ImageGenerateParams.Size.of(size);
+            this.size = ImageGenerateParams.Size.of((String)size);
             return this;
         }
 
@@ -275,7 +249,7 @@ public class OpenAiOfficialImageModel implements ImageModel {
         }
 
         public Builder quality(String quality) {
-            this.quality = ImageGenerateParams.Quality.of(quality);
+            this.quality = ImageGenerateParams.Quality.of((String)quality);
             return this;
         }
 
@@ -290,7 +264,7 @@ public class OpenAiOfficialImageModel implements ImageModel {
         }
 
         public Builder background(String background) {
-            this.background = ImageGenerateParams.Background.of(background);
+            this.background = ImageGenerateParams.Background.of((String)background);
             return this;
         }
 
@@ -300,7 +274,7 @@ public class OpenAiOfficialImageModel implements ImageModel {
         }
 
         public Builder outputFormat(String outputFormat) {
-            this.outputFormat = ImageGenerateParams.OutputFormat.of(outputFormat);
+            this.outputFormat = ImageGenerateParams.OutputFormat.of((String)outputFormat);
             return this;
         }
 
@@ -315,7 +289,7 @@ public class OpenAiOfficialImageModel implements ImageModel {
         }
 
         public Builder moderation(String moderation) {
-            this.moderation = ImageGenerateParams.Moderation.of(moderation);
+            this.moderation = ImageGenerateParams.Moderation.of((String)moderation);
             return this;
         }
 
@@ -349,3 +323,4 @@ public class OpenAiOfficialImageModel implements ImageModel {
         }
     }
 }
+

@@ -1,38 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.internal;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 public interface DelayedResponse<T> {
+    public boolean isDone();
 
-    boolean isDone();
+    public T blockingGet();
 
-    T blockingGet();
-
-    default Object result() {
-        return isDone() ? blockingGet() : "<pending>";
+    default public Object result() {
+        return this.isDone() ? this.blockingGet() : "<pending>";
     }
 
-    /**
-     * Blocks on {@code future} and, on failure, rethrows the original cause instead of the
-     * {@link CompletionException} that {@link CompletableFuture#join()} wraps it in, so an
-     * asynchronous agent failure surfaces the same exception type as the synchronous path (an
-     * {@link dev.langchain4j.agentic.agent.AgentInvocationException}) instead of leaking the
-     * {@code CompletableFuture} plumbing. A checked-exception cause cannot be rethrown from here
-     * and is left wrapped.
-     */
-    static <R> R join(CompletableFuture<R> future) {
+    public static <R> R join(CompletableFuture<R> future) {
         try {
             return future.join();
-        } catch (CompletionException e) {
+        }
+        catch (CompletionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException)cause;
             }
-            if (cause instanceof Error error) {
-                throw error;
+            if (cause instanceof Error) {
+                throw (Error)cause;
             }
             throw e;
         }
     }
 }
+

@@ -1,152 +1,142 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agentic.UntypedAgent
+ *  dev.langchain4j.agentic.internal.AgentInvocationArguments
+ *  dev.langchain4j.agentic.internal.AgentInvoker
+ *  dev.langchain4j.agentic.internal.AgentUtil
+ *  dev.langchain4j.agentic.internal.InternalAgent
+ *  dev.langchain4j.agentic.observability.AgentListener
+ *  dev.langchain4j.agentic.planner.AgentArgument
+ *  dev.langchain4j.agentic.planner.AgentInstance
+ *  dev.langchain4j.agentic.planner.AgenticSystemTopology
+ *  dev.langchain4j.agentic.planner.Planner
+ *  dev.langchain4j.agentic.scope.AgenticScope
+ *  dev.langchain4j.service.ParameterNameResolver
+ *  org.a2aproject.sdk.spec.AgentCard
+ */
 package dev.langchain4j.agentic.a2a;
 
 import dev.langchain4j.agentic.UntypedAgent;
+import dev.langchain4j.agentic.a2a.A2AClientInstance;
+import dev.langchain4j.agentic.a2a.A2AContextId;
+import dev.langchain4j.agentic.a2a.A2ATaskId;
+import dev.langchain4j.agentic.internal.AgentInvocationArguments;
+import dev.langchain4j.agentic.internal.AgentInvoker;
+import dev.langchain4j.agentic.internal.AgentUtil;
 import dev.langchain4j.agentic.internal.InternalAgent;
 import dev.langchain4j.agentic.observability.AgentListener;
-import dev.langchain4j.agentic.internal.AgentInvocationArguments;
 import dev.langchain4j.agentic.planner.AgentArgument;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.planner.AgenticSystemTopology;
 import dev.langchain4j.agentic.planner.Planner;
 import dev.langchain4j.agentic.scope.AgenticScope;
-import dev.langchain4j.agentic.internal.AgentInvoker;
 import dev.langchain4j.service.ParameterNameResolver;
-import org.a2aproject.sdk.spec.AgentCard;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.Collections;
+import org.a2aproject.sdk.spec.AgentCard;
 
-import static dev.langchain4j.agentic.internal.AgentUtil.agentInvocationArguments;
-import static dev.langchain4j.agentic.internal.AgentUtil.argumentsFromMethod;
-
-public class A2AClientAgentInvoker implements AgentInvoker {
-
+public class A2AClientAgentInvoker
+implements AgentInvoker {
     private String agentId;
     private final List<AgentArgument> arguments;
-
     private final A2AClientInstance a2AClientInstance;
-
     private final AgentCard agentCard;
     private final Method method;
-
     private InternalAgent parent;
 
     public A2AClientAgentInvoker(A2AClientInstance a2AClientInstance, Method method) {
         this.method = method;
         this.a2AClientInstance = a2AClientInstance;
         this.agentCard = a2AClientInstance.agentCard();
-        this.agentId = name();
-        this.arguments = arguments(a2AClientInstance);
+        this.agentId = this.name();
+        this.arguments = this.arguments(a2AClientInstance);
     }
 
     private List<AgentArgument> arguments(A2AClientInstance a2AClientInstance) {
-        Set<String> a2aArgs = Stream.of(method.getParameters())
-                .filter(p -> p.isAnnotationPresent(A2AContextId.class) || p.isAnnotationPresent(A2ATaskId.class))
-                .map(ParameterNameResolver::name)
-                .collect(Collectors.toSet());
-        return isUntyped() ?
-                Stream.of(a2AClientInstance.inputKeys())
-                        .map(input -> new AgentArgument(Object.class, input))
-                        .collect(Collectors.toList()) :
-                argumentsFromMethod(method, a2aArgs);
+        Set a2aArgs = Stream.of(this.method.getParameters()).filter(p -> p.isAnnotationPresent(A2AContextId.class) || p.isAnnotationPresent(A2ATaskId.class)).map(ParameterNameResolver::name).collect(Collectors.toSet());
+        return this.isUntyped() ? Stream.of(a2AClientInstance.inputKeys()).map(input -> new AgentArgument(Object.class, input)).toList() : AgentUtil.argumentsFromMethod((Method)this.method, a2aArgs);
     }
 
-    @Override
     public String name() {
-        return agentCard.name();
+        return this.agentCard.name();
     }
 
-    @Override
     public String agentId() {
-        return agentId;
+        return this.agentId;
     }
 
-    @Override
     public String description() {
-        return agentCard.description();
+        return this.agentCard.description();
     }
 
-    @Override
     public Class<?> type() {
         return Object.class;
     }
 
-    @Override
     public Class<? extends Planner> plannerType() {
         return null;
     }
 
-    @Override
     public Type outputType() {
         return Object.class;
     }
 
-    @Override
     public String outputKey() {
-        return a2AClientInstance.outputKey();
+        return this.a2AClientInstance.outputKey();
     }
 
-    @Override
     public boolean async() {
-        return a2AClientInstance.async();
+        return this.a2AClientInstance.async();
     }
 
-    @Override
     public Method method() {
-        return method;
+        return this.method;
     }
 
-    @Override
     public List<AgentArgument> arguments() {
-        return arguments;
+        return this.arguments;
     }
 
-    @Override
     public List<AgentInstance> subagents() {
-        return Collections.emptyList();
+        return List.of();
     }
 
-    @Override
     public AgentInvocationArguments toInvocationArguments(AgenticScope agenticScope) {
-        return isUntyped()
-                ? new AgentInvocationArguments(agenticScope.state(), new Object[] {agenticScope.state()})
-                : agentInvocationArguments(agenticScope, arguments);
+        return this.isUntyped() ? new AgentInvocationArguments(agenticScope.state(), new Object[]{agenticScope.state()}) : AgentUtil.agentInvocationArguments((AgenticScope)agenticScope, this.arguments);
     }
 
     private boolean isUntyped() {
-        return method.getDeclaringClass() == UntypedAgent.class;
+        return this.method.getDeclaringClass() == UntypedAgent.class;
     }
 
-    @Override
     public AgentListener listener() {
-        return a2AClientInstance.listener();
+        return this.a2AClientInstance.listener();
     }
 
-    @Override
     public AgenticSystemTopology topology() {
-        return a2AClientInstance.topology();
+        return this.a2AClientInstance.topology();
     }
 
-    @Override
     public AgentInstance parent() {
-        return parent;
+        return this.parent;
     }
 
-    @Override
     public void setParent(InternalAgent parent) {
         this.parent = parent;
     }
-    @Override
+
     public void registerInheritedParentListener(AgentListener parentListener) {
-        a2AClientInstance.registerInheritedParentListener(parentListener);
+        this.a2AClientInstance.registerInheritedParentListener(parentListener);
     }
 
-    @Override
     public void appendId(String idSuffix) {
         this.agentId = this.agentId + idSuffix;
     }
 }
+

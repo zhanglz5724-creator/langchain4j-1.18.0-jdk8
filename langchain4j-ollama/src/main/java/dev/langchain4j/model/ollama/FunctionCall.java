@@ -1,19 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import java.util.Map;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class FunctionCall {
-
     private Integer index;
     private String name;
     private Map<String, Object> arguments;
@@ -32,7 +38,7 @@ class FunctionCall {
     }
 
     public Integer getIndex() {
-        return index;
+        return this.index;
     }
 
     public void setIndex(Integer index) {
@@ -40,7 +46,7 @@ class FunctionCall {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -48,7 +54,7 @@ class FunctionCall {
     }
 
     public Map<String, Object> getArguments() {
-        return arguments;
+        return this.arguments;
     }
 
     public void setArguments(Map<String, Object> arguments) {
@@ -56,10 +62,12 @@ class FunctionCall {
     }
 
     static class Builder {
-
         private Integer index;
         private String name;
         private Map<String, Object> arguments;
+
+        Builder() {
+        }
 
         Builder index(Integer index) {
             this.index = index;
@@ -77,7 +85,8 @@ class FunctionCall {
         }
 
         FunctionCall build() {
-            return new FunctionCall(index, name, arguments);
+            return new FunctionCall(this.index, this.name, this.arguments);
         }
     }
 }
+

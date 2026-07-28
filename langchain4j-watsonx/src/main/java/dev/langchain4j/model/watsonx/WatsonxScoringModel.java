@@ -1,123 +1,72 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.ibm.watsonx.ai.rerank.RerankParameters
+ *  com.ibm.watsonx.ai.rerank.RerankResponse
+ *  com.ibm.watsonx.ai.rerank.RerankResponse$RerankResult
+ *  com.ibm.watsonx.ai.rerank.RerankService
+ *  com.ibm.watsonx.ai.rerank.RerankService$Builder
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  dev.langchain4j.model.scoring.ScoringModel
+ */
 package dev.langchain4j.model.watsonx;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 import com.ibm.watsonx.ai.rerank.RerankParameters;
 import com.ibm.watsonx.ai.rerank.RerankResponse;
-import com.ibm.watsonx.ai.rerank.RerankResponse.RerankResult;
 import com.ibm.watsonx.ai.rerank.RerankService;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.model.scoring.ScoringModel;
+import dev.langchain4j.model.watsonx.WatsonxBuilder;
+import dev.langchain4j.model.watsonx.WatsonxExceptionMapper;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-/**
- * A {@link ScoringModel} implementation that integrates IBM watsonx.ai with LangChain4j.
- * <p>
- * <b>Example usage:</b>
- *
- * <pre>{@code
- * ScoringModel scoringModel = new WatsonxScoringModel.builder()
- *     .baseUrl("https://...") // or use CloudRegion
- *     .apiKey("...")
- *     .projectId("...")
- *     .modelId("cross-encoder/ms-marco-minilm-l-12-v2")
- *     .build();
- * }</pre>
- *
- */
-public class WatsonxScoringModel implements ScoringModel {
-
+public class WatsonxScoringModel
+implements ScoringModel {
     private final RerankService rerankService;
 
     private WatsonxScoringModel(Builder builder) {
-
-        RerankService.Builder rerankServiceBuilder = nonNull(builder.authenticator)
-                ? RerankService.builder().authenticator(builder.authenticator)
-                : RerankService.builder().apiKey(builder.apiKey);
-
-        rerankService = rerankServiceBuilder
-                .baseUrl(builder.baseUrl)
-                .modelId(builder.modelName)
-                .version(builder.version)
-                .projectId(builder.projectId)
-                .spaceId(builder.spaceId)
-                .timeout(builder.timeout)
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .httpClient(builder.httpClient)
-                .verifySsl(builder.verifySsl)
-                .build();
+        RerankService.Builder rerankServiceBuilder = Objects.nonNull(builder.authenticator) ? (RerankService.Builder)RerankService.builder().authenticator(builder.authenticator) : (RerankService.Builder)RerankService.builder().apiKey(builder.apiKey);
+        this.rerankService = ((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)((RerankService.Builder)rerankServiceBuilder.baseUrl(builder.baseUrl)).modelId(builder.modelName)).version(builder.version)).projectId(builder.projectId)).spaceId(builder.spaceId)).timeout(builder.timeout)).logRequests(builder.logRequests)).logResponses(builder.logResponses)).httpClient(builder.httpClient)).verifySsl(builder.verifySsl)).build();
     }
 
-    @Override
     public Response<List<Double>> scoreAll(List<TextSegment> segments, String query) {
-        return scoreAll(segments, query, null);
+        return this.scoreAll(segments, query, null);
     }
 
-    /**
-     * Scores all provided {@link TextSegment}s against a given query using the given {@link RerankParameters}.
-     *
-     * @param segments The list of {@link TextSegment}s to score.
-     * @param query The query against which to score the segments.
-     * @param parameters the rerank parameters to use.
-     * @return the list of scores. The order of scores corresponds to the order of {@link TextSegment}s.
-     */
     public Response<List<Double>> scoreAll(List<TextSegment> segments, String query, RerankParameters parameters) {
-
-        if (isNull(segments) || segments.isEmpty()) return Response.from(Collections.emptyList());
-
-        if (isNull(query) || query.trim().isEmpty()) return Response.from(Collections.emptyList());
-
-        List<String> inputs = segments.stream().map(TextSegment::text).collect(Collectors.toList());
-
-        RerankResponse response = WatsonxExceptionMapper.INSTANCE.withExceptionMapper(
-                () -> rerankService.rerank(query, inputs, parameters));
-
+        if (Objects.isNull(segments) || segments.isEmpty()) {
+            return Response.from((Object)List.of());
+        }
+        if (Objects.isNull(query) || query.isBlank()) {
+            return Response.from((Object)List.of());
+        }
+        List inputs = segments.stream().map(TextSegment::text).toList();
+        RerankResponse response = (RerankResponse)WatsonxExceptionMapper.INSTANCE.withExceptionMapper(() -> this.rerankService.rerank(query, inputs, parameters));
         Double[] content = new Double[response.results().size()];
-        for (RerankResult rerankResult : response.results()) content[rerankResult.index()] = rerankResult.score();
-
-        return Response.from(Arrays.asList(content), new TokenUsage(response.inputTokenCount()));
+        for (RerankResponse.RerankResult rerankResult : response.results()) {
+            content[rerankResult.index()] = rerankResult.score();
+        }
+        return Response.from(Arrays.asList(content), (TokenUsage)new TokenUsage(Integer.valueOf(response.inputTokenCount())));
     }
 
-    /**
-     * Returns a new {@link Builder} instance.
-     * <p>
-     * <b>Example usage:</b>
-     *
-     * <pre>{@code
-     * ScoringModel scoringModel = new WatsonxScoringModel.builder()
-     *     .baseUrl("https://...") // or use CloudRegion
-     *     .apiKey("...")
-     *     .projectId("...")
-     *     .modelId("cross-encoder/ms-marco-minilm-l-12-v2")
-     *     .build();
-     * }</pre>
-     *
-     */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Builder class for constructing {@link WatsonxScoringModel} instances with configurable parameters.
-     */
-    public static class Builder extends WatsonxBuilder<Builder> {
+    public static class Builder
+    extends WatsonxBuilder<Builder> {
         private String modelName;
 
-        private Builder() {}
+        private Builder() {
+        }
 
-        /**
-         * Sets the watsonx.ai reranking model ID, e.g. {@code "ibm/slate-125m-english-rtrvr-v2"}.
-         *
-         * @param modelName the model ID
-         * @return {@code this}
-         */
         public Builder modelName(String modelName) {
             this.modelName = modelName;
             return this;
@@ -128,3 +77,4 @@ public class WatsonxScoringModel implements ScoringModel {
         }
     }
 }
+

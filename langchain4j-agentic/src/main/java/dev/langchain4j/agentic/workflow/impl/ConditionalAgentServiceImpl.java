@@ -1,98 +1,89 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.workflow.impl;
 
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.buildAgentFeatures;
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.configureOutput;
-import static dev.langchain4j.agentic.internal.AgentUtil.agentsToExecutors;
-import static dev.langchain4j.agentic.internal.AgentUtil.validateAgentClass;
-
 import dev.langchain4j.agentic.UntypedAgent;
+import dev.langchain4j.agentic.declarative.DeclarativeUtil;
 import dev.langchain4j.agentic.internal.AbstractServiceBuilder;
 import dev.langchain4j.agentic.internal.AgentExecutor;
+import dev.langchain4j.agentic.internal.AgentUtil;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.scope.AgenticScope;
 import dev.langchain4j.agentic.workflow.ConditionalAgent;
 import dev.langchain4j.agentic.workflow.ConditionalAgentService;
+import dev.langchain4j.agentic.workflow.impl.ConditionalPlanner;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
-public class ConditionalAgentServiceImpl<T> extends AbstractServiceBuilder<T, ConditionalAgentService<T>>
-        implements ConditionalAgentService<T> {
-
-    protected final List<ConditionalAgent> conditionalAgents = new ArrayList<>();
+public class ConditionalAgentServiceImpl<T>
+extends AbstractServiceBuilder<T, ConditionalAgentService<T>>
+implements ConditionalAgentService<T> {
+    protected final List<ConditionalAgent> conditionalAgents = new ArrayList<ConditionalAgent>();
 
     public ConditionalAgentServiceImpl(Class<T> agentServiceClass, Method agenticMethod) {
         super(agentServiceClass, agenticMethod);
-        configureConditional(agentServiceClass);
+        this.configureConditional(agentServiceClass);
     }
 
     @Override
     public T build() {
-        return build(() -> new ConditionalPlanner(conditionalAgents));
+        return this.build(() -> new ConditionalPlanner(this.conditionalAgents));
     }
 
     public static ConditionalAgentServiceImpl<UntypedAgent> builder() {
-        return new ConditionalAgentServiceImpl<>(UntypedAgent.class, null);
+        return new ConditionalAgentServiceImpl<UntypedAgent>(UntypedAgent.class, null);
     }
 
     public static <T> ConditionalAgentServiceImpl<T> builder(Class<T> agentServiceClass) {
-        return new ConditionalAgentServiceImpl<>(
-                agentServiceClass,
-                validateAgentClass(
-                        agentServiceClass, false, dev.langchain4j.agentic.declarative.ConditionalAgent.class));
+        return new ConditionalAgentServiceImpl<T>(agentServiceClass, AgentUtil.validateAgentClass(agentServiceClass, false, dev.langchain4j.agentic.declarative.ConditionalAgent.class));
     }
 
     @Override
-    public ConditionalAgentServiceImpl<T> subAgents(Object... agents) {
-        return subAgents(agenticScope -> true, agents);
+    public ConditionalAgentServiceImpl<T> subAgents(Object ... agents) {
+        return this.subAgents(agenticScope -> true, agents);
     }
 
     @Override
-    public ConditionalAgentServiceImpl<T> subAgents(Predicate<AgenticScope> condition, Object... agents) {
-        return subAgents("<unknown>", condition, agentsToExecutors(Collections.singletonList(agents)));
+    public ConditionalAgentServiceImpl<T> subAgents(Predicate<AgenticScope> condition, Object ... agents) {
+        return this.subAgents("<unknown>", (Predicate)condition, (List)AgentUtil.agentsToExecutors(Arrays.asList(agents)));
     }
 
     @Override
-    public ConditionalAgentServiceImpl<T> subAgents(
-            String conditionDescription, Predicate<AgenticScope> condition, Object... agents) {
-        return subAgents(conditionDescription, condition, agentsToExecutors(Collections.singletonList(agents)));
+    public ConditionalAgentServiceImpl<T> subAgents(String conditionDescription, Predicate<AgenticScope> condition, Object ... agents) {
+        return this.subAgents(conditionDescription, (Predicate)condition, (List)AgentUtil.agentsToExecutors(Arrays.asList(agents)));
     }
 
     @Override
     public ConditionalAgentServiceImpl<T> subAgents(Collection<?> agents) {
-        return subAgents(agenticScope -> true, agentsToExecutors(agents));
+        return this.subAgents(agenticScope -> true, (List)AgentUtil.agentsToExecutors(agents));
     }
 
     @Override
-    public ConditionalAgentServiceImpl<T> subAgents(
-            Predicate<AgenticScope> condition, List<AgentExecutor> agentExecutors) {
-        return subAgents("<unknown>", condition, agentExecutors);
+    public ConditionalAgentServiceImpl<T> subAgents(Predicate<AgenticScope> condition, List<AgentExecutor> agentExecutors) {
+        return this.subAgents("<unknown>", (Predicate)condition, (List)agentExecutors);
     }
 
     @Override
-    public ConditionalAgentServiceImpl<T> subAgents(
-            String conditionDescription, Predicate<AgenticScope> condition, List<AgentExecutor> agentExecutors) {
+    public ConditionalAgentServiceImpl<T> subAgents(String conditionDescription, Predicate<AgenticScope> condition, List<AgentExecutor> agentExecutors) {
         super.subAgents(agentExecutors);
-        conditionalAgents.add(new ConditionalAgent(
-                conditionDescription,
-                condition,
-                agentExecutors.stream().map(AgentInstance.class::cast).collect(Collectors.toList())));
+        this.conditionalAgents.add(new ConditionalAgent(conditionDescription, condition, agentExecutors.stream().map(AgentInstance.class::cast).collect(Collectors.toList())));
         return this;
     }
 
     @Override
     public ConditionalAgentServiceImpl<T> subAgent(Predicate<AgenticScope> condition, AgentExecutor agentExecutor) {
-        return subAgents(condition, Collections.singletonList(agentExecutor));
+        return this.subAgents((Predicate)condition, (List)Arrays.asList(agentExecutor));
     }
 
     @Override
-    public ConditionalAgentServiceImpl<T> subAgent(
-            String conditionDescription, Predicate<AgenticScope> condition, AgentExecutor agentExecutor) {
-        return subAgents(conditionDescription, condition, Collections.singletonList(agentExecutor));
+    public ConditionalAgentServiceImpl<T> subAgent(String conditionDescription, Predicate<AgenticScope> condition, AgentExecutor agentExecutor) {
+        return this.subAgents(conditionDescription, (Predicate)condition, (List)Arrays.asList(agentExecutor));
     }
 
     @Override
@@ -101,7 +92,8 @@ public class ConditionalAgentServiceImpl<T> extends AbstractServiceBuilder<T, Co
     }
 
     private void configureConditional(Class<T> agentServiceClass) {
-        configureOutput(agentServiceClass, this);
-        buildAgentFeatures(agentServiceClass, this);
+        DeclarativeUtil.configureOutput(agentServiceClass, this);
+        DeclarativeUtil.buildAgentFeatures(agentServiceClass, this);
     }
 }
+

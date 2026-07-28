@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.vertexai;
 
 class VertexAiEmbeddingParameters {
@@ -10,10 +13,11 @@ class VertexAiEmbeddingParameters {
     }
 
     public Integer getOutputDimensionality() {
-        return outputDimensionality;
+        return this.outputDimensionality;
     }
 
     public Boolean isAutoTruncate() {
-        return autoTruncate;
+        return this.autoTruncate;
     }
 }
+

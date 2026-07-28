@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.image;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,23 +24,18 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
 import java.util.Objects;
 
-@JsonDeserialize(builder = ImageUsage.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ImageUsage {
-
     @JsonProperty
     private final Integer inputTokens;
-
     @JsonProperty
     private final Integer outputTokens;
-
     @JsonProperty
     private final Integer totalTokens;
-
     @JsonProperty
     private final TokensDetails inputTokensDetails;
-
     @JsonProperty
     private final TokensDetails outputTokensDetails;
 
@@ -39,65 +48,126 @@ public class ImageUsage {
     }
 
     public Integer inputTokens() {
-        return inputTokens;
+        return this.inputTokens;
     }
 
     public Integer outputTokens() {
-        return outputTokens;
+        return this.outputTokens;
     }
 
     public Integer totalTokens() {
-        return totalTokens;
+        return this.totalTokens;
     }
 
     public TokensDetails inputTokensDetails() {
-        return inputTokensDetails;
+        return this.inputTokensDetails;
     }
 
     public TokensDetails outputTokensDetails() {
-        return outputTokensDetails;
+        return this.outputTokensDetails;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        if (another == null || getClass() != another.getClass()) return false;
-        ImageUsage that = (ImageUsage) another;
-        return Objects.equals(inputTokens, that.inputTokens)
-                && Objects.equals(outputTokens, that.outputTokens)
-                && Objects.equals(totalTokens, that.totalTokens)
-                && Objects.equals(inputTokensDetails, that.inputTokensDetails)
-                && Objects.equals(outputTokensDetails, that.outputTokensDetails);
+        if (this == another) {
+            return true;
+        }
+        if (another == null || this.getClass() != another.getClass()) {
+            return false;
+        }
+        ImageUsage that = (ImageUsage)another;
+        return Objects.equals(this.inputTokens, that.inputTokens) && Objects.equals(this.outputTokens, that.outputTokens) && Objects.equals(this.totalTokens, that.totalTokens) && Objects.equals(this.inputTokensDetails, that.inputTokensDetails) && Objects.equals(this.outputTokensDetails, that.outputTokensDetails);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
-        return Objects.hash(inputTokens, outputTokens, totalTokens, inputTokensDetails, outputTokensDetails);
+        return Objects.hash(this.inputTokens, this.outputTokens, this.totalTokens, this.inputTokensDetails, this.outputTokensDetails);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "ImageUsage{"
-                + "inputTokens=" + inputTokens
-                + ", outputTokens=" + outputTokens
-                + ", totalTokens=" + totalTokens
-                + ", inputTokensDetails=" + inputTokensDetails
-                + ", outputTokensDetails=" + outputTokensDetails
-                + '}';
+        return "ImageUsage{inputTokens=" + this.inputTokens + ", outputTokens=" + this.outputTokens + ", totalTokens=" + this.totalTokens + ", inputTokensDetails=" + this.inputTokensDetails + ", outputTokensDetails=" + this.outputTokensDetails + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class Builder {
+    @JsonDeserialize(builder=TokensDetailsBuilder.class)
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class TokensDetails {
+        @JsonProperty
+        private final Integer imageTokens;
+        @JsonProperty
+        private final Integer textTokens;
 
+        public TokensDetails(TokensDetailsBuilder builder) {
+            this.imageTokens = builder.imageTokens;
+            this.textTokens = builder.textTokens;
+        }
+
+        public Integer imageTokens() {
+            return this.imageTokens;
+        }
+
+        public Integer textTokens() {
+            return this.textTokens;
+        }
+
+        @JacocoIgnoreCoverageGenerated
+        public boolean equals(Object another) {
+            if (this == another) {
+                return true;
+            }
+            if (another == null || this.getClass() != another.getClass()) {
+                return false;
+            }
+            TokensDetails that = (TokensDetails)another;
+            return Objects.equals(this.imageTokens, that.imageTokens) && Objects.equals(this.textTokens, that.textTokens);
+        }
+
+        @JacocoIgnoreCoverageGenerated
+        public int hashCode() {
+            return Objects.hash(this.imageTokens, this.textTokens);
+        }
+
+        @JacocoIgnoreCoverageGenerated
+        public String toString() {
+            return "TokensDetails{imageTokens=" + this.imageTokens + ", textTokens=" + this.textTokens + '}';
+        }
+
+        public static TokensDetailsBuilder builder() {
+            return new TokensDetailsBuilder();
+        }
+
+        @JsonPOJOBuilder(withPrefix="")
+        @JsonIgnoreProperties(ignoreUnknown=true)
+        @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+        public static class TokensDetailsBuilder {
+            private Integer imageTokens;
+            private Integer textTokens;
+
+            public TokensDetailsBuilder imageTokens(Integer imageTokens) {
+                this.imageTokens = imageTokens;
+                return this;
+            }
+
+            public TokensDetailsBuilder textTokens(Integer textTokens) {
+                this.textTokens = textTokens;
+                return this;
+            }
+
+            public TokensDetails build() {
+                return new TokensDetails(this);
+            }
+        }
+    }
+
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class Builder {
         private Integer inputTokens;
         private Integer outputTokens;
         private Integer totalTokens;
@@ -133,77 +203,5 @@ public class ImageUsage {
             return new ImageUsage(this);
         }
     }
-
-    @JsonDeserialize(builder = TokensDetails.TokensDetailsBuilder.class)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class TokensDetails {
-
-        @JsonProperty
-        private final Integer imageTokens;
-
-        @JsonProperty
-        private final Integer textTokens;
-
-        public TokensDetails(TokensDetailsBuilder builder) {
-            this.imageTokens = builder.imageTokens;
-            this.textTokens = builder.textTokens;
-        }
-
-        public Integer imageTokens() {
-            return imageTokens;
-        }
-
-        public Integer textTokens() {
-            return textTokens;
-        }
-
-        @Override
-        @JacocoIgnoreCoverageGenerated
-        public boolean equals(Object another) {
-            if (this == another) return true;
-            if (another == null || getClass() != another.getClass()) return false;
-            TokensDetails that = (TokensDetails) another;
-            return Objects.equals(imageTokens, that.imageTokens) && Objects.equals(textTokens, that.textTokens);
-        }
-
-        @Override
-        @JacocoIgnoreCoverageGenerated
-        public int hashCode() {
-            return Objects.hash(imageTokens, textTokens);
-        }
-
-        @Override
-        @JacocoIgnoreCoverageGenerated
-        public String toString() {
-            return "TokensDetails{" + "imageTokens=" + imageTokens + ", textTokens=" + textTokens + '}';
-        }
-
-        public static TokensDetailsBuilder builder() {
-            return new TokensDetailsBuilder();
-        }
-
-        @JsonPOJOBuilder(withPrefix = "")
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-        public static class TokensDetailsBuilder {
-
-            private Integer imageTokens;
-            private Integer textTokens;
-
-            public TokensDetailsBuilder imageTokens(Integer imageTokens) {
-                this.imageTokens = imageTokens;
-                return this;
-            }
-
-            public TokensDetailsBuilder textTokens(Integer textTokens) {
-                this.textTokens = textTokens;
-                return this;
-            }
-
-            public TokensDetails build() {
-                return new TokensDetails(this);
-            }
-        }
-    }
 }
+

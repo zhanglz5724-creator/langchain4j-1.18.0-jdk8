@@ -1,18 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.bedrock;
 
 import dev.langchain4j.model.output.TokenUsage;
 import java.util.Objects;
 
-/**
- * Bedrock-specific token usage that includes cache-related metrics.
- * <p>
- * This class extends {@link TokenUsage} to include AWS Bedrock prompt caching
- * metrics: {@link #cacheWriteInputTokens()} and {@link #cacheReadInputTokens()}.
- *
- * @since 1.0.0-beta2
- */
-public class BedrockTokenUsage extends TokenUsage {
-
+public class BedrockTokenUsage
+extends TokenUsage {
     private final Integer cacheWriteInputTokens;
     private final Integer cacheReadInputTokens;
 
@@ -22,77 +20,57 @@ public class BedrockTokenUsage extends TokenUsage {
         this.cacheReadInputTokens = builder.cacheReadInputTokens;
     }
 
-    /**
-     * Returns The total cached token write count, or null if unknown.
-     *
-     * @return The total cached token write count, or null if unknown.
-     */
     public Integer cacheWriteInputTokens() {
-        return cacheWriteInputTokens;
+        return this.cacheWriteInputTokens;
     }
 
-    /**
-     * Returns The total cached token read count, or null if unknown.
-     *
-     * @return The total cached token read count, or null if unknown.
-     */
     public Integer cacheReadInputTokens() {
-        return cacheReadInputTokens;
+        return this.cacheReadInputTokens;
     }
 
-    @Override
     public BedrockTokenUsage add(TokenUsage that) {
         if (that == null) {
             return this;
         }
-
-        return builder()
-                .inputTokenCount(sum(this.inputTokenCount(), that.inputTokenCount()))
-                .outputTokenCount(sum(this.outputTokenCount(), that.outputTokenCount()))
-                .cacheWriteInputTokens(addCacheWriteInputTokens(that))
-                .cacheReadInputTokens(addCacheReadInputTokens(that))
-                .build();
+        return BedrockTokenUsage.builder().inputTokenCount(BedrockTokenUsage.sum((Integer)this.inputTokenCount(), (Integer)that.inputTokenCount())).outputTokenCount(BedrockTokenUsage.sum((Integer)this.outputTokenCount(), (Integer)that.outputTokenCount())).cacheWriteInputTokens(this.addCacheWriteInputTokens(that)).cacheReadInputTokens(this.addCacheReadInputTokens(that)).build();
     }
 
     private Integer addCacheWriteInputTokens(TokenUsage that) {
-        if (that instanceof BedrockTokenUsage thatBedrockTokenUsage) {
-            return sum(this.cacheWriteInputTokens, thatBedrockTokenUsage.cacheWriteInputTokens);
-        } else {
-            return this.cacheWriteInputTokens;
+        if (that instanceof BedrockTokenUsage) {
+            BedrockTokenUsage thatBedrockTokenUsage = (BedrockTokenUsage)that;
+            return BedrockTokenUsage.sum((Integer)this.cacheWriteInputTokens, (Integer)thatBedrockTokenUsage.cacheWriteInputTokens);
         }
+        return this.cacheWriteInputTokens;
     }
 
     private Integer addCacheReadInputTokens(TokenUsage that) {
-        if (that instanceof BedrockTokenUsage thatBedrockTokenUsage) {
-            return sum(this.cacheReadInputTokens, thatBedrockTokenUsage.cacheReadInputTokens);
-        } else {
-            return this.cacheReadInputTokens;
+        if (that instanceof BedrockTokenUsage) {
+            BedrockTokenUsage thatBedrockTokenUsage = (BedrockTokenUsage)that;
+            return BedrockTokenUsage.sum((Integer)this.cacheReadInputTokens, (Integer)thatBedrockTokenUsage.cacheReadInputTokens);
         }
+        return this.cacheReadInputTokens;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        BedrockTokenUsage that = (BedrockTokenUsage) o;
-        return Objects.equals(cacheWriteInputTokens, that.cacheWriteInputTokens)
-                && Objects.equals(cacheReadInputTokens, that.cacheReadInputTokens);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        BedrockTokenUsage that = (BedrockTokenUsage)((Object)o);
+        return Objects.equals(this.cacheWriteInputTokens, that.cacheWriteInputTokens) && Objects.equals(this.cacheReadInputTokens, that.cacheReadInputTokens);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cacheWriteInputTokens, cacheReadInputTokens);
+        return Objects.hash(super.hashCode(), this.cacheWriteInputTokens, this.cacheReadInputTokens);
     }
 
-    @Override
     public String toString() {
-        return "BedrockTokenUsage {" + " inputTokenCount = "
-                + inputTokenCount() + ", outputTokenCount = "
-                + outputTokenCount() + ", totalTokenCount = "
-                + totalTokenCount() + ", cacheWriteInputTokens = "
-                + cacheWriteInputTokens + ", cacheReadInputTokens = "
-                + cacheReadInputTokens + " }";
+        return "BedrockTokenUsage { inputTokenCount = " + this.inputTokenCount() + ", outputTokenCount = " + this.outputTokenCount() + ", totalTokenCount = " + this.totalTokenCount() + ", cacheWriteInputTokens = " + this.cacheWriteInputTokens + ", cacheReadInputTokens = " + this.cacheReadInputTokens + " }";
     }
 
     public static Builder builder() {
@@ -100,7 +78,6 @@ public class BedrockTokenUsage extends TokenUsage {
     }
 
     public static class Builder {
-
         private Integer inputTokenCount;
         private Integer outputTokenCount;
         private Integer cacheWriteInputTokens;
@@ -131,3 +108,4 @@ public class BedrockTokenUsage extends TokenUsage {
         }
     }
 }
+

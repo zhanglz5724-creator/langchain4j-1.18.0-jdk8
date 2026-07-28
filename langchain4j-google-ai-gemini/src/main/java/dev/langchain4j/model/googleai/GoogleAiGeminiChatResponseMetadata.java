@@ -1,68 +1,68 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata$Builder
+ */
 package dev.langchain4j.model.googleai;
 
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
+import dev.langchain4j.model.googleai.GroundingMetadata;
+import dev.langchain4j.model.googleai.UrlContextMetadata;
 import java.util.Objects;
 
-/**
- * Gemini-specific metadata for {@link dev.langchain4j.model.chat.response.ChatResponse}.
- */
-public class GoogleAiGeminiChatResponseMetadata extends ChatResponseMetadata {
-
+public class GoogleAiGeminiChatResponseMetadata
+extends ChatResponseMetadata {
     private final GroundingMetadata groundingMetadata;
     private final UrlContextMetadata urlContextMetadata;
 
     private GoogleAiGeminiChatResponseMetadata(Builder builder) {
-        super(builder);
+        super((ChatResponseMetadata.Builder)builder);
         this.groundingMetadata = builder.groundingMetadata;
         this.urlContextMetadata = builder.urlContextMetadata;
     }
 
     public GroundingMetadata groundingMetadata() {
-        return groundingMetadata;
+        return this.groundingMetadata;
     }
 
     public UrlContextMetadata urlContextMetadata() {
-        return urlContextMetadata;
+        return this.urlContextMetadata;
     }
 
-    @Override
     public Builder toBuilder() {
-        return ((Builder) super.toBuilder(builder()))
-                .groundingMetadata(groundingMetadata)
-                .urlContextMetadata(urlContextMetadata);
+        return ((Builder)super.toBuilder((ChatResponseMetadata.Builder)GoogleAiGeminiChatResponseMetadata.builder())).groundingMetadata(this.groundingMetadata).urlContextMetadata(this.urlContextMetadata);
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GoogleAiGeminiChatResponseMetadata that)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(groundingMetadata, that.groundingMetadata)
-                && Objects.equals(urlContextMetadata, that.urlContextMetadata);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GoogleAiGeminiChatResponseMetadata)) {
+            return false;
+        }
+        GoogleAiGeminiChatResponseMetadata that = (GoogleAiGeminiChatResponseMetadata)((Object)o);
+        if (!super.equals(o)) {
+            return false;
+        }
+        return Objects.equals(this.groundingMetadata, that.groundingMetadata) && Objects.equals(this.urlContextMetadata, that.urlContextMetadata);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), groundingMetadata, urlContextMetadata);
+        return Objects.hash(super.hashCode(), this.groundingMetadata, this.urlContextMetadata);
     }
 
-    @Override
     public String toString() {
-        return "GoogleAiGeminiChatResponseMetadata{" + "id='"
-                + id() + '\'' + ", modelName='"
-                + modelName() + '\'' + ", tokenUsage="
-                + tokenUsage() + ", finishReason="
-                + finishReason() + ", groundingMetadata="
-                + groundingMetadata + ", urlContextMetadata="
-                + urlContextMetadata + '}';
+        return "GoogleAiGeminiChatResponseMetadata{id='" + this.id() + '\'' + ", modelName='" + this.modelName() + '\'' + ", tokenUsage=" + this.tokenUsage() + ", finishReason=" + this.finishReason() + ", groundingMetadata=" + this.groundingMetadata + ", urlContextMetadata=" + this.urlContextMetadata + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends ChatResponseMetadata.Builder<Builder> {
-
+    public static class Builder
+    extends ChatResponseMetadata.Builder<Builder> {
         private GroundingMetadata groundingMetadata;
         private UrlContextMetadata urlContextMetadata;
 
@@ -76,9 +76,9 @@ public class GoogleAiGeminiChatResponseMetadata extends ChatResponseMetadata {
             return this;
         }
 
-        @Override
         public GoogleAiGeminiChatResponseMetadata build() {
             return new GoogleAiGeminiChatResponseMetadata(this);
         }
     }
 }
+

@@ -1,23 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OllamaModelToolCallFunction {
-
     private Integer index;
     private String name;
     private Map<String, Object> arguments;
 
-    OllamaModelToolCallFunction() {}
+    OllamaModelToolCallFunction() {
+    }
 
     public OllamaModelToolCallFunction(Integer index, String name, Map<String, Object> arguments) {
         this.index = index;
@@ -30,7 +38,7 @@ public class OllamaModelToolCallFunction {
     }
 
     public Integer getIndex() {
-        return index;
+        return this.index;
     }
 
     public void setIndex(Integer index) {
@@ -38,7 +46,7 @@ public class OllamaModelToolCallFunction {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -46,7 +54,7 @@ public class OllamaModelToolCallFunction {
     }
 
     public Map<String, Object> getArguments() {
-        return arguments;
+        return this.arguments;
     }
 
     public void setArguments(Map<String, Object> arguments) {
@@ -54,7 +62,6 @@ public class OllamaModelToolCallFunction {
     }
 
     public static class Builder {
-
         private Integer index;
         private String name;
         private Map<String, Object> arguments;
@@ -75,7 +82,8 @@ public class OllamaModelToolCallFunction {
         }
 
         public OllamaModelToolCallFunction build() {
-            return new OllamaModelToolCallFunction(index, name, arguments);
+            return new OllamaModelToolCallFunction(this.index, this.name, this.arguments);
         }
     }
 }
+

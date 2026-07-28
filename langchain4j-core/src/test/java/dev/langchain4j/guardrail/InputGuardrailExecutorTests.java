@@ -397,7 +397,7 @@ class InputGuardrailExecutorTests {
         public Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context)
                 throws ArgumentsAggregationException {
 
-            return accessor.collect(Collectors.toList()).stream()
+            return accessor.toList().stream()
                     .skip(context.getIndex())
                     .map(InputGuardrail.class::cast)
                     .toArray(InputGuardrail[]::new);

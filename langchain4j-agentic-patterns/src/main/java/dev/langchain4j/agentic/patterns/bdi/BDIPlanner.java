@@ -1,49 +1,51 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agentic.planner.Action
+ *  dev.langchain4j.agentic.planner.AgentInstance
+ *  dev.langchain4j.agentic.planner.AgenticSystemTopology
+ *  dev.langchain4j.agentic.planner.InitPlanningContext
+ *  dev.langchain4j.agentic.planner.Planner
+ *  dev.langchain4j.agentic.planner.PlanningContext
+ *  dev.langchain4j.agentic.scope.AgenticScope
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.agentic.patterns.bdi;
 
+import dev.langchain4j.agentic.patterns.bdi.Desire;
 import dev.langchain4j.agentic.planner.Action;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.planner.AgenticSystemTopology;
 import dev.langchain4j.agentic.planner.InitPlanningContext;
-import dev.langchain4j.agentic.planner.PlanningContext;
 import dev.langchain4j.agentic.planner.Planner;
+import dev.langchain4j.agentic.planner.PlanningContext;
 import dev.langchain4j.agentic.scope.AgenticScope;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static java.util.stream.Collectors.toMap;
-
-/**
- * A Belief-Desire-Intention planner that maintains prioritized goals ({@link Desire Desires}) and
- * reactively switches between them as the {@link AgenticScope} evolves. On each step the planner
- * checks whether a strictly higher-priority desire has become achievable and, if so, preempts the
- * current intention and re-deliberates. Among desires with equal priority, the one declared first
- * in the list is selected (stable ordering).
- */
-public class BDIPlanner implements Planner {
-
+public class BDIPlanner
+implements Planner {
     private static final Logger LOG = LoggerFactory.getLogger(BDIPlanner.class);
-
     private static final int DEFAULT_MAX_INVOCATIONS = 50;
-
     private final List<Desire> desires;
     private final int maxInvocations;
-
     private Map<Class<?>, AgentInstance> agentsByType;
-    private final Map<String, Integer> desireProgress = new HashMap<>();
+    private final Map<String, Integer> desireProgress = new HashMap<String, Integer>();
     private Desire currentDesire;
     private List<AgentInstance> currentIntention;
     private int intentionCursor;
     private int invocationCounter;
 
     public BDIPlanner(List<Desire> desires) {
-        this(desires, DEFAULT_MAX_INVOCATIONS);
+        this(desires, 50);
     }
 
     public BDIPlanner(List<Desire> desires, int maxInvocations) {
@@ -57,118 +59,80 @@ public class BDIPlanner implements Planner {
         this.maxInvocations = maxInvocations;
     }
 
-    @Override
     public AgenticSystemTopology topology() {
         return AgenticSystemTopology.SEQUENCE;
     }
 
-    @Override
     public void init(InitPlanningContext initPlanningContext) {
-        this.agentsByType = initPlanningContext.subagents().stream()
-                .collect(toMap(AgentInstance::type, a -> a, (a, b) -> {
-                    throw new IllegalArgumentException(
-                            "BDI desires reference agents by type, so each agent type must be unique. " +
-                            "Duplicate agent type: " + a.type().getName());
-                }));
-        for (Desire desire : desires) {
+        this.agentsByType = initPlanningContext.subagents().stream().collect(Collectors.toMap(AgentInstance::type, a -> a, (a, b) -> {
+            throw new IllegalArgumentException("BDI desires reference agents by type, so each agent type must be unique. Duplicate agent type: " + a.type().getName());
+        }));
+        for (Desire desire : this.desires) {
             for (Class<?> agentType : desire.agentTypes()) {
-                if (!agentsByType.containsKey(agentType)) {
-                    throw new IllegalArgumentException(
-                            "Desire '" + desire.name() + "' references unknown agent type: " + agentType.getName());
-                }
+                if (this.agentsByType.containsKey(agentType)) continue;
+                throw new IllegalArgumentException("Desire '" + desire.name() + "' references unknown agent type: " + agentType.getName());
             }
         }
     }
 
-    @Override
     public Action firstAction(PlanningContext planningContext) {
-        return deliberate(planningContext.agenticScope());
+        return this.deliberate(planningContext.agenticScope());
     }
 
-    @Override
     public Action nextAction(PlanningContext planningContext) {
         AgenticScope scope = planningContext.agenticScope();
-
-        if (currentDesire != null && !currentDesire.satisfied().test(scope)) {
-            boolean preempted = desires.stream()
-                    .filter(d -> d.priority() > currentDesire.priority())
-                    .filter(d -> d.achievable().test(scope))
-                    .anyMatch(d -> !d.satisfied().test(scope));
-
+        if (this.currentDesire != null && !this.currentDesire.satisfied().test(scope)) {
+            boolean preempted = this.desires.stream().filter(d -> d.priority() > this.currentDesire.priority()).filter(d -> d.achievable().test(scope)).anyMatch(d -> !d.satisfied().test(scope));
             if (preempted) {
-                desireProgress.put(currentDesire.name(), intentionCursor + 1);
-                LOG.info("Preempting desire '{}' for a higher-priority desire", currentDesire.name());
-                return deliberate(scope);
+                this.desireProgress.put(this.currentDesire.name(), this.intentionCursor + 1);
+                LOG.info("Preempting desire '{}' for a higher-priority desire", (Object)this.currentDesire.name());
+                return this.deliberate(scope);
             }
-
-            if (currentDesire.achievable().test(scope)) {
-                intentionCursor++;
-                if (intentionCursor < currentIntention.size()) {
-                    return dispatch(currentIntention.get(intentionCursor));
+            if (this.currentDesire.achievable().test(scope)) {
+                ++this.intentionCursor;
+                if (this.intentionCursor < this.currentIntention.size()) {
+                    return this.dispatch(this.currentIntention.get(this.intentionCursor));
                 }
-                throw new IllegalStateException(
-                        "Desire '" + currentDesire.name() + "' is still unsatisfied after its entire intention " +
-                        "completed (" + currentIntention.size() + " agents). Check that the intention's agents " +
-                        "write the state keys required by the desire's satisfied predicate.");
+                throw new IllegalStateException("Desire '" + this.currentDesire.name() + "' is still unsatisfied after its entire intention completed (" + this.currentIntention.size() + " agents). Check that the intention's agents write the state keys required by the desire's satisfied predicate.");
             }
         }
-
-        return deliberate(scope);
+        return this.deliberate(scope);
     }
 
     private Action dispatch(AgentInstance agent) {
-        if (invocationCounter >= maxInvocations) {
-            throw new IllegalStateException(
-                    "Maximum invocations (" + maxInvocations + ") reached with unsatisfied desires. " +
-                    "Increase maxInvocations or check desire predicates.");
+        if (this.invocationCounter >= this.maxInvocations) {
+            throw new IllegalStateException("Maximum invocations (" + this.maxInvocations + ") reached with unsatisfied desires. Increase maxInvocations or check desire predicates.");
         }
-        invocationCounter++;
-        return call(agent);
+        ++this.invocationCounter;
+        return this.call(new AgentInstance[]{agent});
     }
 
     private Action deliberate(AgenticScope scope) {
-        return desires.stream()
-                .filter(d -> d.achievable().test(scope))
-                .filter(d -> !d.satisfied().test(scope))
-                .max(Comparator.comparingInt(Desire::priority))
-                .map(desire -> {
-                    currentDesire = desire;
-                    currentIntention = desire.agentTypes().stream()
-                            .map(agentsByType::get)
-                            .collect(Collectors.toList());
-                    intentionCursor = desireProgress.getOrDefault(desire.name(), 0);
-                    if (intentionCursor >= currentIntention.size()) {
-                        throw new IllegalStateException(
-                                "Desire '" + desire.name() + "' is still unsatisfied after its entire intention " +
-                                "completed (" + currentIntention.size() + " agents). Check that the intention's agents " +
-                                "write the state keys required by the desire's satisfied predicate.");
-                    }
-                    LOG.info("Committing to desire '{}' (priority {}) at step {}/{}",
-                            desire.name(), desire.priority(), intentionCursor + 1, currentIntention.size());
-                    return dispatch(currentIntention.get(intentionCursor));
-                })
-                .orElseGet(() -> {
-                    LOG.info("All desires satisfied or none achievable after {} invocations", invocationCounter);
-                    return done();
-                });
+        return this.desires.stream().filter(d -> d.achievable().test(scope)).filter(d -> !d.satisfied().test(scope)).max(Comparator.comparingInt(Desire::priority)).map(desire -> {
+            this.currentDesire = desire;
+            this.currentIntention = desire.agentTypes().stream().map(this.agentsByType::get).collect(Collectors.toList());
+            this.intentionCursor = this.desireProgress.getOrDefault(desire.name(), 0);
+            if (this.intentionCursor >= this.currentIntention.size()) {
+                throw new IllegalStateException("Desire '" + desire.name() + "' is still unsatisfied after its entire intention completed (" + this.currentIntention.size() + " agents). Check that the intention's agents write the state keys required by the desire's satisfied predicate.");
+            }
+            LOG.info("Committing to desire '{}' (priority {}) at step {}/{}", new Object[]{desire.name(), desire.priority(), this.intentionCursor + 1, this.currentIntention.size()});
+            return this.dispatch(this.currentIntention.get(this.intentionCursor));
+        }).orElseGet(() -> {
+            LOG.info("All desires satisfied or none achievable after {} invocations", (Object)this.invocationCounter);
+            return this.done();
+        });
     }
 
-    @Override
     public Map<String, Object> executionState() {
-        return Collections.singletonMap("invocationCounter", invocationCounter);
+        return Collections.singletonMap("invocationCounter", this.invocationCounter);
     }
 
-    /**
-     * Only {@code invocationCounter} is persisted. On crash recovery the framework calls
-     * {@link #firstAction(PlanningContext)}, which re-deliberates from scratch: satisfied desires
-     * are skipped, but the selected desire's intention restarts from its first agent — agents that
-     * already completed will run again. Intention agents must therefore be idempotent.
-     */
-    @Override
     public void restoreExecutionState(Map<String, Object> state) {
         Object savedCounter = state.get("invocationCounter");
-        if (savedCounter instanceof Number n) {
+        if (savedCounter instanceof Number) {
+            Number n = (Number)savedCounter;
             this.invocationCounter = n.intValue();
         }
     }
 }
+

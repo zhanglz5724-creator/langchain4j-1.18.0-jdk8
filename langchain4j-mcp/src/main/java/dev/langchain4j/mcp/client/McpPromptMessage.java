@@ -1,3 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.message.UserMessage
+ */
 package dev.langchain4j.mcp.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -7,78 +19,60 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
-
+import dev.langchain4j.mcp.client.McpPromptContent;
+import dev.langchain4j.mcp.client.McpRole;
 import java.util.Objects;
 
-/**
- * The 'PromptMessage' object from the MCP protocol schema.
- * This can be directly translated to a ChatMessage object from the LangChain4j API.
- */
 public class McpPromptMessage {
-
     private final McpRole role;
     private final McpPromptContent content;
 
     @JsonCreator
-    public McpPromptMessage(
-            @JsonProperty("role") McpRole role,
-            @JsonProperty("content") McpPromptContent content
-    ) {
+    public McpPromptMessage(@JsonProperty(value="role") McpRole role, @JsonProperty(value="content") McpPromptContent content) {
         this.role = role;
         this.content = content;
     }
 
-    /**
-     * Converts this MCP-specific PromptMessage representation to a
-     * ChatMessage object from the core LangChain4j API, if possible.
-     * This is currently not possible if the role is "assistant" AND
-     * the content is something other than text.
-     *
-     * @throws UnsupportedOperationException if the role is 'assistant' and
-     *                                       the content is something other than text.
-     */
     public ChatMessage toChatMessage() {
-        if (role.equals(McpRole.USER)) {
-            return UserMessage.userMessage(content.toContent());
-        } else if (role.equals(McpRole.ASSISTANT)) {
-            Content convertedContent = content.toContent();
-            if (convertedContent instanceof TextContent convertedTextContent) {
-                return AiMessage.aiMessage(convertedTextContent.text());
-            } else {
-                throw new UnsupportedOperationException("Cannot create an AiMessage with content" + " of type "
-                        + convertedContent.getClass().getName());
-            }
-        } else {
-            throw new UnsupportedOperationException("Unknown role: " + role);
+        if (this.role.equals((Object)McpRole.USER)) {
+            return UserMessage.userMessage((Content[])new Content[]{this.content.toContent()});
         }
+        if (this.role.equals((Object)McpRole.ASSISTANT)) {
+            Content convertedContent = this.content.toContent();
+            if (convertedContent instanceof TextContent) {
+                TextContent convertedTextContent = (TextContent)convertedContent;
+                return AiMessage.aiMessage((String)convertedTextContent.text());
+            }
+            throw new UnsupportedOperationException("Cannot create an AiMessage with content of type " + convertedContent.getClass().getName());
+        }
+        throw new UnsupportedOperationException("Unknown role: " + (Object)((Object)this.role));
     }
 
     public McpRole role() {
-        return role;
+        return this.role;
     }
 
     public McpPromptContent content() {
-        return content;
+        return this.content;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        McpPromptMessage that = (McpPromptMessage) obj;
-        return Objects.equals(this.role, that.role) &&
-                Objects.equals(this.content, that.content);
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        McpPromptMessage that = (McpPromptMessage)obj;
+        return Objects.equals((Object)this.role, (Object)that.role) && Objects.equals(this.content, that.content);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(role, content);
+        return Objects.hash(new Object[]{this.role, this.content});
     }
 
-    @Override
     public String toString() {
-        return "McpPromptMessage[" +
-                "role=" + role + ", " +
-                "content=" + content + ']';
+        return "McpPromptMessage[role=" + (Object)((Object)this.role) + ", content=" + this.content + ']';
     }
 }
+

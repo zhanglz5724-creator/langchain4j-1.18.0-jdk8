@@ -1,16 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiModerationResult;
+import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonDeserialize(builder = MistralAiModerationResponse.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonDeserialize(builder=Builder.class)
 public final class MistralAiModerationResponse {
-
     private final String id;
     private final String model;
     private final List<MistralAiModerationResult> results;
@@ -22,26 +32,25 @@ public final class MistralAiModerationResponse {
     }
 
     public String id() {
-        return id;
+        return this.id;
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public List<MistralAiModerationResult> results() {
-        return results;
+        return this.results;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Builder {
-
         private String id;
         private String model;
         private List<MistralAiModerationResult> results;
@@ -66,3 +75,4 @@ public final class MistralAiModerationResponse {
         }
     }
 }
+

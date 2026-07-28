@@ -1,39 +1,153 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.store.embedding.chroma;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.internal.Utils;
+import dev.langchain4j.store.embedding.chroma.AddEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.ChromaApiV2Impl;
+import dev.langchain4j.store.embedding.chroma.ChromaClient;
+import dev.langchain4j.store.embedding.chroma.ChromaHttpClient;
+import dev.langchain4j.store.embedding.chroma.Collection;
+import dev.langchain4j.store.embedding.chroma.CreateCollectionRequest;
+import dev.langchain4j.store.embedding.chroma.Database;
+import dev.langchain4j.store.embedding.chroma.DeleteEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.QueryRequest;
+import dev.langchain4j.store.embedding.chroma.QueryResponse;
+import dev.langchain4j.store.embedding.chroma.Tenant;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Supplier;
 
 @Internal
-class ChromaClientV2 implements ChromaClient {
-
+class ChromaClientV2
+implements ChromaClient {
     private final ChromaApiV2Impl chromaApi;
     private final String tenantName;
     private final String databaseName;
 
     private ChromaClientV2(Builder builder) {
-        this.tenantName = getOrDefault(builder.tenantName, "default");
-        this.databaseName = getOrDefault(builder.databaseName, "default");
-
-        ChromaHttpClient httpClient = new ChromaHttpClient(
-                Utils.ensureTrailingForwardSlash(builder.baseUrl),
-                builder.timeout,
-                builder.logRequests,
-                builder.logResponses,
-                builder.httpClientBuilder,
-                builder.customHeadersSupplier);
-
+        this.tenantName = (String)Utils.getOrDefault((Object)builder.tenantName, (Object)"default");
+        this.databaseName = (String)Utils.getOrDefault((Object)builder.databaseName, (Object)"default");
+        ChromaHttpClient httpClient = new ChromaHttpClient(Utils.ensureTrailingForwardSlash((String)builder.baseUrl), builder.timeout, builder.logRequests, builder.logResponses, builder.httpClientBuilder, builder.customHeadersSupplier);
         this.chromaApi = new ChromaApiV2Impl(httpClient);
     }
 
-    public static class Builder {
+    public void createTenant() {
+        try {
+            this.chromaApi.createTenant(new Tenant(this.tenantName));
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    public Tenant tenant() {
+        try {
+            return this.chromaApi.tenant(this.tenantName);
+        }
+        catch (RuntimeException e) {
+            return null;
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void createDatabase() {
+        try {
+            this.chromaApi.createDatabase(this.tenantName, new Database(this.databaseName));
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Database database() {
+        try {
+            return this.chromaApi.database(this.tenantName, this.databaseName);
+        }
+        catch (RuntimeException e) {
+            return null;
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Collection createCollection(CreateCollectionRequest createCollectionRequest) {
+        try {
+            return this.chromaApi.createCollection(this.tenantName, this.databaseName, createCollectionRequest);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Collection collection(String collectionName) {
+        try {
+            return this.chromaApi.collection(this.tenantName, this.databaseName, collectionName);
+        }
+        catch (RuntimeException e) {
+            return null;
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean addEmbeddings(String collectionId, AddEmbeddingsRequest addEmbeddingsRequest) {
+        try {
+            this.chromaApi.addEmbeddings(this.tenantName, this.databaseName, collectionId, addEmbeddingsRequest);
+            return true;
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public QueryResponse queryCollection(String collectionId, QueryRequest queryRequest) {
+        try {
+            return this.chromaApi.queryCollection(this.tenantName, this.databaseName, collectionId, queryRequest);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteEmbeddings(String collectionId, DeleteEmbeddingsRequest deleteEmbeddingsRequest) {
+        try {
+            this.chromaApi.deleteEmbeddings(this.tenantName, this.databaseName, collectionId, deleteEmbeddingsRequest);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteCollection(String collectionName) {
+        try {
+            this.chromaApi.deleteCollection(this.tenantName, this.databaseName, collectionName);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static class Builder {
         private String baseUrl;
         private Duration timeout;
         private HttpClientBuilder httpClientBuilder;
@@ -87,100 +201,5 @@ class ChromaClientV2 implements ChromaClient {
             return new ChromaClientV2(this);
         }
     }
-
-    public void createTenant() {
-        try {
-            chromaApi.createTenant(new Tenant(tenantName));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Tenant tenant() {
-        try {
-            return chromaApi.tenant(tenantName);
-        } catch (RuntimeException e) {
-            // if tenant is not present, Chroma returns: Status - 500
-            return null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void createDatabase() {
-        try {
-            chromaApi.createDatabase(tenantName, new Database(databaseName));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Database database() {
-        try {
-            return chromaApi.database(tenantName, databaseName);
-        } catch (RuntimeException e) {
-            // if database is not present, Chroma returns: Status - 500
-            return null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Collection createCollection(CreateCollectionRequest createCollectionRequest) {
-        try {
-            return chromaApi.createCollection(tenantName, databaseName, createCollectionRequest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Collection collection(String collectionName) {
-        try {
-            return chromaApi.collection(tenantName, databaseName, collectionName);
-        } catch (RuntimeException e) {
-            // if collection is not present, Chroma returns: Status - 500
-            return null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public boolean addEmbeddings(String collectionId, AddEmbeddingsRequest addEmbeddingsRequest) {
-        try {
-            chromaApi.addEmbeddings(tenantName, databaseName, collectionId, addEmbeddingsRequest);
-            return true;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public QueryResponse queryCollection(String collectionId, QueryRequest queryRequest) {
-        try {
-            return chromaApi.queryCollection(tenantName, databaseName, collectionId, queryRequest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteEmbeddings(String collectionId, DeleteEmbeddingsRequest deleteEmbeddingsRequest) {
-        try {
-            chromaApi.deleteEmbeddings(tenantName, databaseName, collectionId, deleteEmbeddingsRequest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteCollection(String collectionName) {
-        try {
-            chromaApi.deleteCollection(tenantName, databaseName, collectionName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
+

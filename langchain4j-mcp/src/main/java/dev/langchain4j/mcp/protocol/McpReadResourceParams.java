@@ -1,17 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpClientParams;
 import java.util.Objects;
 
-/**
- * Corresponds to the {@code params} of the {@code ReadResourceRequest} type from the MCP schema.
- */
 @Internal
-public class McpReadResourceParams extends McpClientParams {
-
+public class McpReadResourceParams
+extends McpClientParams {
     private String uri;
 
-    public McpReadResourceParams() {}
+    public McpReadResourceParams() {
+    }
 
     public McpReadResourceParams(String uri) {
         Objects.requireNonNull(uri);
@@ -19,10 +24,11 @@ public class McpReadResourceParams extends McpClientParams {
     }
 
     public String getUri() {
-        return uri;
+        return this.uri;
     }
 
     public void setUri(String uri) {
         this.uri = uri;
     }
 }
+

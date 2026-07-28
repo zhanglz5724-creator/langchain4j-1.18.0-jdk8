@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.shared;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,14 +22,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.shared.CompletionTokensDetails;
+import dev.langchain4j.model.openai.internal.shared.PromptTokensDetails;
 import java.util.Objects;
 
-@JsonDeserialize(builder = Usage.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Usage {
-
     @JsonProperty
     private final Integer totalTokens;
     @JsonProperty
@@ -36,75 +50,62 @@ public final class Usage {
     }
 
     public Integer totalTokens() {
-        return totalTokens;
+        return this.totalTokens;
     }
 
     public Integer promptTokens() {
-        return promptTokens;
+        return this.promptTokens;
     }
 
     public PromptTokensDetails promptTokensDetails() {
-        return promptTokensDetails;
+        return this.promptTokensDetails;
     }
 
     public Integer completionTokens() {
-        return completionTokens;
+        return this.completionTokens;
     }
 
     public CompletionTokensDetails completionTokensDetails() {
-        return completionTokensDetails;
+        return this.completionTokensDetails;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof Usage
-                && equalTo((Usage) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof Usage && this.equalTo((Usage)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(Usage another) {
-        return Objects.equals(totalTokens, another.totalTokens)
-                && Objects.equals(promptTokens, another.promptTokens)
-                && Objects.equals(promptTokensDetails, another.promptTokensDetails)
-                && Objects.equals(completionTokens, another.completionTokens)
-                && Objects.equals(completionTokensDetails, another.completionTokensDetails);
+        return Objects.equals(this.totalTokens, another.totalTokens) && Objects.equals(this.promptTokens, another.promptTokens) && Objects.equals(this.promptTokensDetails, another.promptTokensDetails) && Objects.equals(this.completionTokens, another.completionTokens) && Objects.equals(this.completionTokensDetails, another.completionTokensDetails);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(totalTokens);
-        h += (h << 5) + Objects.hashCode(promptTokens);
-        h += (h << 5) + Objects.hashCode(promptTokensDetails);
-        h += (h << 5) + Objects.hashCode(completionTokens);
-        h += (h << 5) + Objects.hashCode(completionTokensDetails);
+        h += (h << 5) + Objects.hashCode(this.totalTokens);
+        h += (h << 5) + Objects.hashCode(this.promptTokens);
+        h += (h << 5) + Objects.hashCode(this.promptTokensDetails);
+        h += (h << 5) + Objects.hashCode(this.completionTokens);
+        h += (h << 5) + Objects.hashCode(this.completionTokensDetails);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "Usage{"
-                + "totalTokens=" + totalTokens
-                + ", promptTokens=" + promptTokens
-                + ", promptTokensDetails=" + promptTokensDetails
-                + ", completionTokens=" + completionTokens
-                + ", completionTokensDetails=" + completionTokensDetails
-                + "}";
+        return "Usage{totalTokens=" + this.totalTokens + ", promptTokens=" + this.promptTokens + ", promptTokensDetails=" + this.promptTokensDetails + ", completionTokens=" + this.completionTokens + ", completionTokensDetails=" + this.completionTokensDetails + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private Integer totalTokens;
         private Integer promptTokens;
         private PromptTokensDetails promptTokensDetails;
@@ -141,3 +142,4 @@ public final class Usage {
         }
     }
 }
+

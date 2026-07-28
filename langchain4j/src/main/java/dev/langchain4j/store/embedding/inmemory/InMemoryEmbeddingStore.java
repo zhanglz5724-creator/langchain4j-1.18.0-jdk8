@@ -1,20 +1,29 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnore
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.spi.ServiceHelper
+ *  dev.langchain4j.store.embedding.CosineSimilarity
+ *  dev.langchain4j.store.embedding.EmbeddingMatch
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  dev.langchain4j.store.embedding.RelevanceScore
+ *  dev.langchain4j.store.embedding.filter.Filter
+ */
 package dev.langchain4j.store.embedding.inmemory;
 
-import static dev.langchain4j.internal.Utils.randomUUID;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.util.Arrays.asList;
-import static java.util.Comparator.comparingDouble;
-import static java.util.stream.Collectors.toList;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.spi.ServiceHelper;
 import dev.langchain4j.spi.store.embedding.inmemory.InMemoryEmbeddingStoreJsonCodecFactory;
 import dev.langchain4j.store.embedding.CosineSimilarity;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
@@ -23,266 +32,199 @@ import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.RelevanceScore;
 import dev.langchain4j.store.embedding.filter.Filter;
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStoreJsonCodec;
+import dev.langchain4j.store.embedding.inmemory.JacksonInMemoryEmbeddingStoreJsonCodec;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
-/**
- * An {@link EmbeddingStore} that stores embeddings in memory.
- * <p>
- * Uses a brute force approach by iterating over all embeddings to find the best matches.
- * <p>
- * This store can be persisted using the {@link #serializeToJson()} and {@link #serializeToFile(Path)} methods.
- * <p>
- * It can also be recreated from JSON or a file using the {@link #fromJson(String)} and {@link #fromFile(Path)} methods.
- *
- * @param <Embedded> The class of the object that has been embedded.
- *                   Typically, it is {@link dev.langchain4j.data.segment.TextSegment}.
- */
-public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded> {
-
+public class InMemoryEmbeddingStore<Embedded>
+implements EmbeddingStore<Embedded> {
     final CopyOnWriteArrayList<Entry<Embedded>> entries;
 
     public InMemoryEmbeddingStore() {
-        this.entries = new CopyOnWriteArrayList<>();
+        this.entries = new CopyOnWriteArrayList();
     }
 
     private InMemoryEmbeddingStore(Collection<Entry<Embedded>> entries) {
-        this.entries = new CopyOnWriteArrayList<>(entries);
+        this.entries = new CopyOnWriteArrayList<Entry<Embedded>>(entries);
     }
 
-    @Override
     public String add(Embedding embedding) {
-        String id = randomUUID();
-        add(id, embedding);
+        String id = Utils.randomUUID();
+        this.add(id, embedding);
         return id;
     }
 
-    @Override
     public void add(String id, Embedding embedding) {
-        add(id, embedding, null);
+        this.add(id, embedding, null);
     }
 
-    @Override
     public String add(Embedding embedding, Embedded embedded) {
-        String id = randomUUID();
-        add(id, embedding, embedded);
+        String id = Utils.randomUUID();
+        this.add(id, embedding, embedded);
         return id;
     }
 
     public void add(String id, Embedding embedding, Embedded embedded) {
-        entries.add(new Entry<>(id, embedding, embedded));
+        this.entries.add(new Entry<Embedded>(id, embedding, embedded));
     }
 
-    @Override
     public List<String> addAll(List<Embedding> embeddings) {
-
-        List<Entry<Embedded>> newEntries = embeddings.stream()
-                .map(embedding -> new Entry<Embedded>(randomUUID(), embedding))
-                .collect(toList());
-
-        return add(newEntries);
+        List<Entry<Embedded>> newEntries = embeddings.stream().map(embedding -> new Entry(Utils.randomUUID(), (Embedding)embedding)).collect(Collectors.toList());
+        return this.add(newEntries);
     }
 
-    @Override
     public void addAll(List<String> ids, List<Embedding> embeddings, List<Embedded> embedded) {
         if (ids.size() != embeddings.size() || embeddings.size() != embedded.size()) {
             throw new IllegalArgumentException("The list of ids and embeddings and embedded must have the same size");
         }
-
-        List<Entry<Embedded>> newEntries = new ArrayList<>(ids.size());
-
-        for (int i = 0; i < ids.size(); i++) {
-            newEntries.add(new Entry<>(ids.get(i), embeddings.get(i), embedded.get(i)));
+        ArrayList<Entry<Embedded>> newEntries = new ArrayList<Entry<Embedded>>(ids.size());
+        for (int i = 0; i < ids.size(); ++i) {
+            newEntries.add(new Entry<Embedded>(ids.get(i), embeddings.get(i), embedded.get(i)));
         }
-        add(newEntries);
+        this.add(newEntries);
     }
 
     private List<String> add(List<Entry<Embedded>> newEntries) {
-
-        entries.addAll(newEntries);
-
-        return newEntries.stream().map(entry -> entry.id).collect(toList());
+        this.entries.addAll(newEntries);
+        return newEntries.stream().map(entry -> entry.id).collect(Collectors.toList());
     }
 
-    @Override
     public void removeAll(Collection<String> ids) {
-        ensureNotEmpty(ids, "ids");
-        Set<String> idSet = (ids instanceof Set) ? (Set<String>) ids : new HashSet<>(ids);
-
-        entries.removeIf(entry -> idSet.contains(entry.id));
+        ValidationUtils.ensureNotEmpty(ids, (String)"ids");
+        Set<Object> idSet = ids instanceof Set ? (Set<Object>)ids : new HashSet<String>(ids);
+        this.entries.removeIf(entry -> idSet.contains(entry.id));
     }
 
-    /**
-     * Removes all entries whose embedded object matches the given {@link Filter}.
-     * <p>
-     * Filtering is applied only to entries whose embedded object is a {@link TextSegment},
-     * by testing the filter against the segment's {@link Metadata}.
-     * Entries whose embedded object is {@code null} or is not a {@link TextSegment} are considered
-     * non-matching and are therefore never removed.
-     */
-    @Override
     public void removeAll(Filter filter) {
-        ensureNotNull(filter, "filter");
-
-        entries.removeIf(entry -> matchesFilter(entry.embedded, filter));
+        ValidationUtils.ensureNotNull((Object)filter, (String)"filter");
+        this.entries.removeIf(entry -> InMemoryEmbeddingStore.matchesFilter(entry.embedded, filter));
     }
 
-    @Override
     public void removeAll() {
-        entries.clear();
+        this.entries.clear();
     }
 
-    /**
-     * Searches for the embeddings most similar to the query embedding, optionally constrained by a {@link Filter}.
-     * <p>
-     * When a filter is present, it is applied only to entries whose embedded object is a {@link TextSegment},
-     * by testing the filter against the segment's {@link Metadata}.
-     * Entries whose embedded object is {@code null} or is not a {@link TextSegment} are considered
-     * non-matching and are therefore excluded from the results.
-     * <p>
-     * When no filter is present, all entries are eligible regardless of their embedded object type.
-     */
-    @Override
     public EmbeddingSearchResult<Embedded> search(EmbeddingSearchRequest embeddingSearchRequest) {
-
-        Comparator<EmbeddingMatch<Embedded>> comparator = comparingDouble(EmbeddingMatch::score);
-        PriorityQueue<EmbeddingMatch<Embedded>> matches = new PriorityQueue<>(comparator);
-
+        Comparator<EmbeddingMatch> comparator = Comparator.comparingDouble(EmbeddingMatch::score);
+        PriorityQueue<EmbeddingMatch> matches = new PriorityQueue<EmbeddingMatch>(comparator);
         Filter filter = embeddingSearchRequest.filter();
-
-        for (Entry<Embedded> entry : entries) {
-
-            if (!matchesFilter(entry.embedded, filter)) {
-                continue;
-            }
-
-            double cosineSimilarity =
-                    CosineSimilarity.between(entry.embedding, embeddingSearchRequest.queryEmbedding());
-            double score = RelevanceScore.fromCosineSimilarity(cosineSimilarity);
-            if (score >= embeddingSearchRequest.minScore()) {
-                matches.add(new EmbeddingMatch<>(score, entry.id, entry.embedding, entry.embedded));
-                if (matches.size() > embeddingSearchRequest.maxResults()) {
-                    matches.poll();
-                }
-            }
+        for (Entry<Embedded> entry : this.entries) {
+            double cosineSimilarity;
+            double score;
+            if (!InMemoryEmbeddingStore.matchesFilter(entry.embedded, filter) || !((score = RelevanceScore.fromCosineSimilarity((double)(cosineSimilarity = CosineSimilarity.between((Embedding)entry.embedding, (Embedding)embeddingSearchRequest.queryEmbedding())))) >= embeddingSearchRequest.minScore())) continue;
+            matches.add(new EmbeddingMatch(Double.valueOf(score), entry.id, entry.embedding, entry.embedded));
+            if (matches.size() <= embeddingSearchRequest.maxResults()) continue;
+            matches.poll();
         }
-
-        List<EmbeddingMatch<Embedded>> result = new ArrayList<>(matches);
+        ArrayList<EmbeddingMatch> result = new ArrayList<EmbeddingMatch>(matches);
         result.sort(comparator);
         Collections.reverse(result);
-
-        return new EmbeddingSearchResult<>(result);
+        return new EmbeddingSearchResult(result);
     }
 
     public String serializeToJson() {
-        return loadCodec().toJson(this);
+        return InMemoryEmbeddingStore.loadCodec().toJson(this);
     }
 
-    /**
-     * Serializes this store to a file in JSON format.
-     *
-     * This method uses streaming serialization to avoid holding the entire JSON document in memory.
-     * Prefer this over {@link #serializeToJson()}
-     */
     public void serializeToFile(Path filePath) {
-        try (OutputStream outputStream =
-                new BufferedOutputStream(Files.newOutputStream(filePath, CREATE, TRUNCATE_EXISTING))) {
-            loadCodec().toJson(outputStream, this);
-        } catch (IOException e) {
+        try (BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(filePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING));){
+            InMemoryEmbeddingStore.loadCodec().toJson(outputStream, this);
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     * @see #serializeToFile(Path)
-     */
     public void serializeToFile(String filePath) {
-        serializeToFile(Paths.get(filePath));
+        this.serializeToFile(Paths.get(filePath, new String[0]));
     }
 
     public static InMemoryEmbeddingStore<TextSegment> fromJson(String json) {
-        return loadCodec().fromJson(json);
+        return InMemoryEmbeddingStore.loadCodec().fromJson(json);
     }
 
-    /**
-     * Deserializes an embedding store from a JSON file.
-     *
-     * Uses streaming deserialization to avoid loading the entire JSON document into memory.
+    /*
+     * Enabled aggressive block sorting
+     * Enabled unnecessary exception pruning
+     * Enabled aggressive exception aggregation
      */
     public static InMemoryEmbeddingStore<TextSegment> fromFile(Path filePath) {
-        try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(filePath))) {
-            return loadCodec().fromJson(inputStream);
-
-        } catch (IOException e) {
+        try (BufferedInputStream inputStream = new BufferedInputStream(Files.newInputStream(filePath, new OpenOption[0]));){
+            InMemoryEmbeddingStore<TextSegment> inMemoryEmbeddingStore = InMemoryEmbeddingStore.loadCodec().fromJson(inputStream);
+            return inMemoryEmbeddingStore;
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     * @see #fromFile(Path)
-     */
     public static InMemoryEmbeddingStore<TextSegment> fromFile(String filePath) {
-        return fromFile(Paths.get(filePath));
+        return InMemoryEmbeddingStore.fromFile(Paths.get(filePath, new String[0]));
     }
 
-    /**
-     * Merges given {@code InMemoryEmbeddingStore}s into a single {@code InMemoryEmbeddingStore},
-     * copying all entries from each store.
-     */
-    public static <Embedded> InMemoryEmbeddingStore<Embedded> merge(
-            Collection<InMemoryEmbeddingStore<Embedded>> stores) {
-        ensureNotNull(stores, "stores");
-        List<Entry<Embedded>> entries = new ArrayList<>();
+    public static <Embedded> InMemoryEmbeddingStore<Embedded> merge(Collection<InMemoryEmbeddingStore<Embedded>> stores) {
+        ValidationUtils.ensureNotNull(stores, (String)"stores");
+        ArrayList<Entry<Embedded>> entries = new ArrayList<Entry<Embedded>>();
         for (InMemoryEmbeddingStore<Embedded> store : stores) {
             entries.addAll(store.entries);
         }
-        return new InMemoryEmbeddingStore<>(entries);
+        return new InMemoryEmbeddingStore<Embedded>(entries);
     }
 
-    /**
-     * Merges given {@code InMemoryEmbeddingStore}s into a single {@code InMemoryEmbeddingStore},
-     * copying all entries from each store.
-     */
-    public static <Embedded> InMemoryEmbeddingStore<Embedded> merge(
-            InMemoryEmbeddingStore<Embedded> first, InMemoryEmbeddingStore<Embedded> second) {
-        return merge(asList(first, second));
+    public static <Embedded> InMemoryEmbeddingStore<Embedded> merge(InMemoryEmbeddingStore<Embedded> first, InMemoryEmbeddingStore<Embedded> second) {
+        return InMemoryEmbeddingStore.merge(Arrays.asList(first, second));
     }
 
-    /**
-     * Tests whether an embedded object matches the given {@link Filter}.
-     *
-     * @return {@code true} if the filter is {@code null} (no filtering requested), or if the embedded object
-     *         is a {@link TextSegment} whose {@link Metadata} passes the filter;
-     *         {@code false} otherwise, including when the embedded object is {@code null} or not a {@link TextSegment}.
-     */
     private static boolean matchesFilter(Object embedded, Filter filter) {
         if (filter == null) {
             return true;
         }
         if (embedded instanceof TextSegment) {
-            return filter.test(((TextSegment) embedded).metadata());
+            return filter.test((Object)((TextSegment)embedded).metadata());
         }
         return false;
     }
 
-    static class Entry<Embedded> {
+    private static InMemoryEmbeddingStoreJsonCodec loadCodec() {
+        Iterator iterator = ServiceHelper.loadFactories(InMemoryEmbeddingStoreJsonCodecFactory.class).iterator();
+        if (iterator.hasNext()) {
+            InMemoryEmbeddingStoreJsonCodecFactory factory = (InMemoryEmbeddingStoreJsonCodecFactory)iterator.next();
+            return factory.create();
+        }
+        return new JacksonInMemoryEmbeddingStoreJsonCodec();
+    }
 
+    @JsonIgnore
+    public int size() {
+        return this.entries.size();
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return this.entries.isEmpty();
+    }
+
+    static class Entry<Embedded> {
         String id;
         Embedding embedding;
         Embedded embedded;
@@ -292,42 +234,25 @@ public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded
         }
 
         Entry(String id, Embedding embedding, Embedded embedded) {
-            this.id = ensureNotBlank(id, "id");
-            this.embedding = ensureNotNull(embedding, "embedding");
+            this.id = ValidationUtils.ensureNotBlank((String)id, (String)"id");
+            this.embedding = (Embedding)ValidationUtils.ensureNotNull((Object)embedding, (String)"embedding");
             this.embedded = embedded;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Entry<?> that = (Entry<?>) o;
-            return Objects.equals(this.id, that.id)
-                    && Objects.equals(this.embedding, that.embedding)
-                    && Objects.equals(this.embedded, that.embedded);
+            if (this == o) {
+                return true;
+            }
+            if (o == null || this.getClass() != o.getClass()) {
+                return false;
+            }
+            Entry that = (Entry)o;
+            return Objects.equals(this.id, that.id) && Objects.equals(this.embedding, that.embedding) && Objects.equals(this.embedded, that.embedded);
         }
 
-        @Override
         public int hashCode() {
-            return Objects.hash(id, embedding, embedded);
+            return Objects.hash(this.id, this.embedding, this.embedded);
         }
-    }
-
-    private static InMemoryEmbeddingStoreJsonCodec loadCodec() {
-        for (InMemoryEmbeddingStoreJsonCodecFactory factory :
-                loadFactories(InMemoryEmbeddingStoreJsonCodecFactory.class)) {
-            return factory.create();
-        }
-        return new JacksonInMemoryEmbeddingStoreJsonCodec();
-    }
-
-    @JsonIgnore
-    public int size() {
-        return entries.size();
-    }
-
-    @JsonIgnore
-    public boolean isEmpty() {
-        return entries.isEmpty();
     }
 }
+

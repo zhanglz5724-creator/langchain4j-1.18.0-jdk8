@@ -1,21 +1,29 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class MistralAiFimCompletionRequest {
-
     private String model;
     private String prompt;
     private String suffix;
@@ -84,7 +92,6 @@ public class MistralAiFimCompletionRequest {
         return new MistralAiFimCompletionRequestBuilder();
     }
 
-    @Override
     public int hashCode() {
         int hash = 7;
         hash = 89 * hash + Objects.hashCode(this.model);
@@ -100,42 +107,24 @@ public class MistralAiFimCompletionRequest {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        final MistralAiFimCompletionRequest other = (MistralAiFimCompletionRequest) obj;
-        return Objects.equals(this.model, other.model)
-                && Objects.equals(this.prompt, other.prompt)
-                && Objects.equals(this.suffix, other.suffix)
-                && Objects.equals(this.temperature, other.temperature)
-                && Objects.equals(this.maxTokens, other.maxTokens)
-                && Objects.equals(this.minTokens, other.minTokens)
-                && Objects.equals(this.topP, other.topP)
-                && Objects.equals(this.stream, other.stream)
-                && Objects.equals(this.randomSeed, other.randomSeed)
-                && Objects.equals(this.stop, other.stop);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        MistralAiFimCompletionRequest other = (MistralAiFimCompletionRequest)obj;
+        return Objects.equals(this.model, other.model) && Objects.equals(this.prompt, other.prompt) && Objects.equals(this.suffix, other.suffix) && Objects.equals(this.temperature, other.temperature) && Objects.equals(this.maxTokens, other.maxTokens) && Objects.equals(this.minTokens, other.minTokens) && Objects.equals(this.topP, other.topP) && Objects.equals(this.stream, other.stream) && Objects.equals(this.randomSeed, other.randomSeed) && Objects.equals(this.stop, other.stop);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", MistralAiFimCompletionRequest.class.getSimpleName() + "[", "]")
-                .add("model='" + model + "'")
-                .add("prompt='" + prompt + "'")
-                .add("suffix='" + suffix + "'")
-                .add("temperature=" + temperature)
-                .add("maxTokens=" + maxTokens)
-                .add("minTokens=" + minTokens)
-                .add("topP=" + topP)
-                .add("stream=" + stream)
-                .add("randomSeed=" + randomSeed)
-                .add("stop=" + stop)
-                .toString();
+        return new StringJoiner(", ", MistralAiFimCompletionRequest.class.getSimpleName() + "[", "]").add("model='" + this.model + "'").add("prompt='" + this.prompt + "'").add("suffix='" + this.suffix + "'").add("temperature=" + this.temperature).add("maxTokens=" + this.maxTokens).add("minTokens=" + this.minTokens).add("topP=" + this.topP).add("stream=" + this.stream).add("randomSeed=" + this.randomSeed).add("stop=" + this.stop).toString();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiFimCompletionRequestBuilder {
         private String model;
         private String prompt;
@@ -148,7 +137,8 @@ public class MistralAiFimCompletionRequest {
         private Integer randomSeed;
         private List<String> stop;
 
-        private MistralAiFimCompletionRequestBuilder() {}
+        private MistralAiFimCompletionRequestBuilder() {
+        }
 
         public MistralAiFimCompletionRequestBuilder model(String model) {
             this.model = model;
@@ -205,3 +195,4 @@ public class MistralAiFimCompletionRequest {
         }
     }
 }
+

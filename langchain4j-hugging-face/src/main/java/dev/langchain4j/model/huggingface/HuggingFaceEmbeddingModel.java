@@ -1,66 +1,64 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.spi.ServiceHelper
+ */
 package dev.langchain4j.model.huggingface;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
+import dev.langchain4j.model.huggingface.FactoryCreator;
 import dev.langchain4j.model.huggingface.client.EmbeddingRequest;
 import dev.langchain4j.model.huggingface.client.HuggingFaceClient;
 import dev.langchain4j.model.huggingface.spi.HuggingFaceClientFactory;
 import dev.langchain4j.model.huggingface.spi.HuggingFaceEmbeddingModelBuilderFactory;
 import dev.langchain4j.model.output.Response;
-
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.util.stream.Collectors.toList;
-
-public class HuggingFaceEmbeddingModel extends DimensionAwareEmbeddingModel {
-
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(15);
-
+public class HuggingFaceEmbeddingModel
+extends DimensionAwareEmbeddingModel {
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(15L);
     private HuggingFaceClient client;
     private final boolean waitForModel;
     private final String modelId;
     private final String baseUrl;
 
-    /**
-     * Constructor with Custom baseUrl parameter
-     */
-    public HuggingFaceEmbeddingModel(
-            String baseUrl, String accessToken, String modelId, Boolean waitForModel, Duration timeout) {
-        this(new HuggingFaceEmbeddingModelBuilder()
-                .baseUrl(baseUrl)
-                .accessToken(accessToken)
-                .modelId(modelId)
-                .waitForModel(waitForModel)
-                .timeout(timeout));
+    public HuggingFaceEmbeddingModel(String baseUrl, String accessToken, String modelId, Boolean waitForModel, Duration timeout) {
+        this(new HuggingFaceEmbeddingModelBuilder().baseUrl(baseUrl).accessToken(accessToken).modelId(modelId).waitForModel(waitForModel).timeout(timeout));
     }
 
     public HuggingFaceEmbeddingModel(String accessToken, String modelId, Boolean waitForModel, Duration timeout) {
-        this(new HuggingFaceEmbeddingModelBuilder()
-                .accessToken(accessToken)
-                .modelId(modelId)
-                .waitForModel(waitForModel)
-                .timeout(timeout));
+        this(new HuggingFaceEmbeddingModelBuilder().accessToken(accessToken).modelId(modelId).waitForModel(waitForModel).timeout(timeout));
     }
 
     public HuggingFaceEmbeddingModel(HuggingFaceEmbeddingModelBuilder builder) {
-        ensureNotBlank(builder.accessToken, "%s", "HuggingFace access token must be defined. It can be generated here: https://huggingface.co/settings/tokens");
-        this.waitForModel = builder.waitForModel == null || builder.waitForModel;
+        ValidationUtils.ensureNotBlank((String)builder.accessToken, (String)"%s", (Object[])new Object[]{"HuggingFace access token must be defined. It can be generated here: https://huggingface.co/settings/tokens"});
+        this.waitForModel = builder.waitForModel == null || builder.waitForModel != false;
         this.baseUrl = builder.baseUrl;
         this.modelId = builder.modelId;
-        this.client = createClient(builder.httpClientBuilder, builder.accessToken, builder.modelId, builder.timeout);
+        this.client = this.createClient(builder.httpClientBuilder, builder.accessToken, builder.modelId, builder.timeout);
     }
 
-    private HuggingFaceClient createClient(
-            HttpClientBuilder httpClientBuilder, String accessToken, String modelId, Duration timeout) {
-        return FactoryCreator.FACTORY.create(new HuggingFaceClientFactory.Input() {
+    private HuggingFaceClient createClient(final HttpClientBuilder httpClientBuilder, final String accessToken, final String modelId, final Duration timeout) {
+        return FactoryCreator.FACTORY.create(new HuggingFaceClientFactory.Input(){
+
             @Override
             public String baseUrl() {
-                return baseUrl;
+                return HuggingFaceEmbeddingModel.this.baseUrl;
             }
 
             @Override
@@ -85,33 +83,27 @@ public class HuggingFaceEmbeddingModel extends DimensionAwareEmbeddingModel {
         });
     }
 
-    @Override
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-
-        List<String> texts = textSegments.stream().map(TextSegment::text).collect(toList());
-
-        return embedTexts(texts);
+        List<String> texts = textSegments.stream().map(TextSegment::text).collect(Collectors.toList());
+        return this.embedTexts(texts);
     }
 
     private Response<List<Embedding>> embedTexts(List<String> texts) {
-
-        EmbeddingRequest request = new EmbeddingRequest(texts, waitForModel);
-
-        List<float[]> response = client.embed(request);
-
-        List<Embedding> embeddings = response.stream().map(Embedding::from).collect(toList());
-
+        EmbeddingRequest request = new EmbeddingRequest(texts, this.waitForModel);
+        List<float[]> response = this.client.embed(request);
+        List embeddings = response.stream().map(Embedding::from).collect(Collectors.toList());
         return Response.from(embeddings);
     }
 
     public static HuggingFaceEmbeddingModel withAccessToken(String accessToken) {
-        return builder().accessToken(accessToken).build();
+        return HuggingFaceEmbeddingModel.builder().accessToken(accessToken).build();
     }
 
     public static HuggingFaceEmbeddingModelBuilder builder() {
-        for (HuggingFaceEmbeddingModelBuilderFactory factory :
-                loadFactories(HuggingFaceEmbeddingModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(HuggingFaceEmbeddingModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            HuggingFaceEmbeddingModelBuilderFactory factory = (HuggingFaceEmbeddingModelBuilderFactory)iterator.next();
+            return (HuggingFaceEmbeddingModelBuilder)factory.get();
         }
         return new HuggingFaceEmbeddingModelBuilder();
     }
@@ -124,16 +116,6 @@ public class HuggingFaceEmbeddingModel extends DimensionAwareEmbeddingModel {
         private Boolean waitForModel;
         private Duration timeout;
 
-        public HuggingFaceEmbeddingModelBuilder() {
-            // This is public so it can be extended
-        }
-
-        /**
-         * Sets the HTTP client builder that will be used to create the HTTP client to communicate with HuggingFace.
-         *
-         * @param httpClientBuilder the HTTP client builder to use
-         * @return {@code this}
-         */
         public HuggingFaceEmbeddingModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -173,3 +155,4 @@ public class HuggingFaceEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
     }
 }
+

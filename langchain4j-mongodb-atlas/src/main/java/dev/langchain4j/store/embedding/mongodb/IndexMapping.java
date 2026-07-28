@@ -1,31 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.mongodb;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class IndexMapping {
-
     private final int dimension;
     private final Set<String> metadataFieldNames;
 
     public IndexMapping(int dimension, Set<String> metadataFieldNames) {
         this.dimension = dimension;
-        this.metadataFieldNames = new HashSet<>(metadataFieldNames);
+        this.metadataFieldNames = new HashSet<String>(metadataFieldNames);
     }
 
     public static IndexMapping defaultIndexMapping() {
-        return IndexMapping.builder()
-                .dimension(1536)
-                .metadataFieldNames(new HashSet<>())
-                .build();
+        return IndexMapping.builder().dimension(1536).metadataFieldNames(new HashSet<String>()).build();
     }
 
     public int getDimension() {
-        return dimension;
+        return this.dimension;
     }
 
     public Set<String> getMetadataFieldNames() {
-        return metadataFieldNames;
+        return this.metadataFieldNames;
     }
 
     public static Builder builder() {
@@ -33,7 +32,6 @@ public class IndexMapping {
     }
 
     public static class Builder {
-
         private int dimension;
         private Set<String> metadataFieldNames;
 
@@ -48,7 +46,8 @@ public class IndexMapping {
         }
 
         public IndexMapping build() {
-            return new IndexMapping(dimension, metadataFieldNames);
+            return new IndexMapping(this.dimension, this.metadataFieldNames);
         }
     }
 }
+

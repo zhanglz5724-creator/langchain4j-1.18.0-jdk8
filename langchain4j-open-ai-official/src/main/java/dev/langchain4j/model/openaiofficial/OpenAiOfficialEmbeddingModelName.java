@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.models.embeddings.EmbeddingModel
+ */
 package dev.langchain4j.model.openaiofficial;
 
 import com.openai.models.embeddings.EmbeddingModel;
@@ -11,31 +17,30 @@ enum OpenAiOfficialEmbeddingModelName {
 
     private final String stringValue;
     private final Integer dimension;
+    private static final Map<String, Integer> KNOWN_DIMENSION;
 
-    OpenAiOfficialEmbeddingModelName(String stringValue, Integer dimension) {
+    private OpenAiOfficialEmbeddingModelName(String stringValue, Integer dimension) {
         this.stringValue = stringValue;
         this.dimension = dimension;
     }
 
-    @Override
     public String toString() {
-        return stringValue;
+        return this.stringValue;
     }
 
     Integer dimension() {
-        return dimension;
-    }
-
-    private static final Map<String, Integer> KNOWN_DIMENSION =
-            new HashMap<>(OpenAiOfficialEmbeddingModelName.values().length);
-
-    static {
-        for (OpenAiOfficialEmbeddingModelName embeddingModelName : OpenAiOfficialEmbeddingModelName.values()) {
-            KNOWN_DIMENSION.put(embeddingModelName.toString(), embeddingModelName.dimension());
-        }
+        return this.dimension;
     }
 
     static Integer knownDimension(String modelName) {
         return KNOWN_DIMENSION.get(modelName);
     }
+
+    static {
+        KNOWN_DIMENSION = new HashMap<String, Integer>(OpenAiOfficialEmbeddingModelName.values().length);
+        for (OpenAiOfficialEmbeddingModelName embeddingModelName : OpenAiOfficialEmbeddingModelName.values()) {
+            KNOWN_DIMENSION.put(embeddingModelName.toString(), embeddingModelName.dimension());
+        }
+    }
 }
+

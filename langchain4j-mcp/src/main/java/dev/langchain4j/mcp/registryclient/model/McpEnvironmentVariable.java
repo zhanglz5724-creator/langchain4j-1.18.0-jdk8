@@ -1,77 +1,70 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAlias
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.mcp.registryclient.model.McpVariable;
 import java.util.List;
 import java.util.Map;
 
 public class McpEnvironmentVariable {
     private List<String> choices;
-
-    @JsonProperty("default")
+    @JsonProperty(value="default")
     private String defaultValue;
-
     private String description;
     private String format;
-
-    @JsonAlias("is_required")
+    @JsonAlias(value={"is_required"})
     private boolean isRequired;
-
-    @JsonAlias("is_secret")
+    @JsonAlias(value={"is_secret"})
     private boolean isSecret;
-
     private String name;
     private String value;
     private Map<String, McpVariable> variables;
 
     public List<String> getChoices() {
-        return choices;
+        return this.choices;
     }
 
     public String getDefaultValue() {
-        return defaultValue;
+        return this.defaultValue;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public String getFormat() {
-        return format;
+        return this.format;
     }
 
     public boolean isRequired() {
-        return isRequired;
+        return this.isRequired;
     }
 
     public boolean isSecret() {
-        return isSecret;
+        return this.isSecret;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getValue() {
-        return value;
+        return this.value;
     }
 
     public Map<String, McpVariable> getVariables() {
-        return variables;
+        return this.variables;
     }
 
-    @Override
     public String toString() {
-        return "McpEnvironmentVariable{" +
-                "choices=" + choices +
-                ", defaultValue='" + defaultValue + '\'' +
-                ", description='" + description + '\'' +
-                ", format='" + format + '\'' +
-                ", isRequired=" + isRequired +
-                ", isSecret=" + isSecret +
-                ", name='" + name + '\'' +
-                ", value='" + value + '\'' +
-                ", variables=" + variables +
-                '}';
+        return "McpEnvironmentVariable{choices=" + this.choices + ", defaultValue='" + this.defaultValue + '\'' + ", description='" + this.description + '\'' + ", format='" + this.format + '\'' + ", isRequired=" + this.isRequired + ", isSecret=" + this.isSecret + ", name='" + this.name + '\'' + ", value='" + this.value + '\'' + ", variables=" + this.variables + '}';
     }
 }
+

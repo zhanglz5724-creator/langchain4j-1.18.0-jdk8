@@ -1,6 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.embedding;
-
-import static java.util.Collections.unmodifiableList;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,18 +22,17 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.embedding.OpenAiEmbeddingDeserializer;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@JsonDeserialize(builder = Embedding.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Embedding {
-
     @JsonProperty
     private final List<Float> embedding;
-
     @JsonProperty
     private final Integer index;
 
@@ -31,56 +42,54 @@ public final class Embedding {
     }
 
     public List<Float> embedding() {
-        return embedding;
+        return this.embedding;
     }
 
     public Integer index() {
-        return index;
+        return this.index;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof Embedding && equalTo((Embedding) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof Embedding && this.equalTo((Embedding)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(Embedding another) {
-        return Objects.equals(embedding, another.embedding) && Objects.equals(index, another.index);
+        return Objects.equals(this.embedding, another.embedding) && Objects.equals(this.index, another.index);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(embedding);
-        h += (h << 5) + Objects.hashCode(index);
+        h += (h << 5) + Objects.hashCode(this.embedding);
+        h += (h << 5) + Objects.hashCode(this.index);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "Embedding{" + "embedding=" + embedding + ", index=" + index + "}";
+        return "Embedding{embedding=" + this.embedding + ", index=" + this.index + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private List<Float> embedding;
         private Integer index;
 
-        @JsonDeserialize(using = OpenAiEmbeddingDeserializer.class)
+        @JsonDeserialize(using=OpenAiEmbeddingDeserializer.class)
         public Builder embedding(List<Float> embedding) {
             if (embedding != null) {
-                this.embedding = unmodifiableList(embedding);
+                this.embedding = Collections.unmodifiableList(embedding);
             }
             return this;
         }
@@ -95,3 +104,4 @@ public final class Embedding {
         }
     }
 }
+

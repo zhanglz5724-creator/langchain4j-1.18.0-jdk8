@@ -1,30 +1,53 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  com.fasterxml.jackson.databind.SerializationFeature
+ *  com.google.api.HttpBody
+ *  com.google.api.gax.core.CredentialsProvider
+ *  com.google.api.gax.core.FixedCredentialsProvider
+ *  com.google.api.gax.rpc.UnavailableException
+ *  com.google.auth.Credentials
+ *  com.google.auth.oauth2.GoogleCredentials
+ *  com.google.cloud.aiplatform.v1.EndpointName
+ *  com.google.cloud.aiplatform.v1.PredictionServiceClient
+ *  com.google.cloud.aiplatform.v1.PredictionServiceSettings
+ *  com.google.cloud.aiplatform.v1.PredictionServiceSettings$Builder
+ *  com.google.cloud.aiplatform.v1.RawPredictRequest
+ *  com.google.protobuf.ByteString
+ *  io.grpc.Status$Code
+ *  io.grpc.StatusRuntimeException
+ */
 package dev.langchain4j.model.vertexai.anthropic.internal.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.api.HttpBody;
+import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.api.gax.rpc.UnavailableException;
+import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.aiplatform.v1.EndpointName;
 import com.google.cloud.aiplatform.v1.PredictionServiceClient;
 import com.google.cloud.aiplatform.v1.PredictionServiceSettings;
 import com.google.cloud.aiplatform.v1.RawPredictRequest;
 import com.google.protobuf.ByteString;
-import dev.langchain4j.model.vertexai.anthropic.internal.Constants;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent;
 import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicRequest;
 import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicResponse;
+import dev.langchain4j.model.vertexai.anthropic.internal.client.StreamingResponseHandler;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VertexAiAnthropicClient {
-
     private static final String PUBLISHER = "anthropic";
-
     private static final String CREDENTIALS_ENDPOINT_TEMPLATE = "%s-aiplatform.googleapis.com:443";
-
     private volatile PredictionServiceClient predictionServiceClient;
     private final String project;
     private final String location;
@@ -42,148 +65,116 @@ public class VertexAiAnthropicClient {
         if (location == null || location.trim().isEmpty()) {
             throw new IllegalArgumentException("location cannot be null or empty");
         }
-        // Note: model parameter is kept for backward compatibility but is now ignored
-        // The actual model is determined per request
-        // Suppress SonarQube warning about unused parameter - kept for API compatibility
-        @SuppressWarnings("unused")
         String ignoredModel = model;
-
         this.project = project;
         this.location = location;
         this.credentials = credentials;
         this.objectMapper = new ObjectMapper().disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        this.predictionServiceClient = createClient();
+        this.predictionServiceClient = this.createClient();
     }
 
     private PredictionServiceClient createClient() {
         try {
             PredictionServiceSettings.Builder settingsBuilder = PredictionServiceSettings.newBuilder();
-            settingsBuilder.setEndpoint(String.format(CREDENTIALS_ENDPOINT_TEMPLATE, location.toLowerCase()));
-            if (credentials != null) {
-                GoogleCredentials scopedCredentials =
-                        credentials.createScoped("https://www.googleapis.com/auth/cloud-platform");
-                settingsBuilder.setCredentialsProvider(FixedCredentialsProvider.create(scopedCredentials));
+            settingsBuilder.setEndpoint(String.format(CREDENTIALS_ENDPOINT_TEMPLATE, this.location.toLowerCase()));
+            if (this.credentials != null) {
+                GoogleCredentials scopedCredentials = this.credentials.createScoped(new String[]{"https://www.googleapis.com/auth/cloud-platform"});
+                settingsBuilder.setCredentialsProvider((CredentialsProvider)FixedCredentialsProvider.create((Credentials)scopedCredentials));
             }
-            return PredictionServiceClient.create(settingsBuilder.build());
-        } catch (Exception e) {
+            return PredictionServiceClient.create((PredictionServiceSettings)settingsBuilder.build());
+        }
+        catch (Exception e) {
             throw new RuntimeException("Failed to initialize Vertex AI client", e);
         }
     }
 
     public AnthropicResponse generateContent(AnthropicRequest request, String modelName) throws IOException {
-        return generateContentWithRetry(request, modelName, 1);
+        return this.generateContentWithRetry(request, modelName, 1);
     }
 
-    /**
-     * Streaming version of generateContent - simulates streaming by chunking the response
-     */
-    public void generateContentStreaming(AnthropicRequest request, String modelName, StreamingResponseHandler handler)
-            throws IOException {
+    public void generateContentStreaming(AnthropicRequest request, String modelName, StreamingResponseHandler handler) throws IOException {
         try {
-            // For now, use the synchronous method and simulate streaming
-            AnthropicResponse response = generateContent(request, modelName);
-
-            // Send response metadata first
+            AnthropicResponse response = this.generateContent(request, modelName);
             handler.onResponse(response);
-
-            // Simulate streaming by sending the response in chunks
             if (response.content != null && !response.content.isEmpty()) {
-                processContentForStreaming(response.content, handler);
+                this.processContentForStreaming(response.content, handler);
             }
-
             handler.onComplete();
-
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             handler.onError(e);
         }
     }
 
-    private void processContentForStreaming(
-            java.util.List<dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent> contentList,
-            StreamingResponseHandler handler) {
-        for (dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent content : contentList) {
-            if (Constants.TEXT_CONTENT_TYPE.equals(content.type) && content.text != null) {
-                processTextContentStreaming(content.text, handler);
-            } else if (Constants.TOOL_USE_CONTENT_TYPE.equals(content.type)) {
-                processToolContentStreaming(content, handler);
+    private void processContentForStreaming(List<AnthropicContent> contentList, StreamingResponseHandler handler) {
+        for (AnthropicContent content : contentList) {
+            if ("text".equals(content.type) && content.text != null) {
+                this.processTextContentStreaming(content.text, handler);
+                continue;
             }
+            if (!"tool_use".equals(content.type)) continue;
+            this.processToolContentStreaming(content, handler);
         }
     }
 
     private void processTextContentStreaming(String text, StreamingResponseHandler handler) {
-        int chunkSize = 10; // Small chunks to simulate streaming
-
+        int chunkSize = 10;
         for (int i = 0; i < text.length(); i += chunkSize) {
             int end = Math.min(i + chunkSize, text.length());
             String chunk = text.substring(i, end);
-
-            // Create a streaming-like JSON chunk
-            String streamChunk = String.format(
-                    "{\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"%s\"}}",
-                    chunk.replace("\"", "\\\"").replace("\n", "\\n"));
-
+            String streamChunk = String.format("{\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"%s\"}}", chunk.replace("\"", "\\\"").replace("\n", "\\n"));
             handler.onChunk(streamChunk);
-
-            // Small delay to simulate streaming
-            simulateStreamingDelay(handler);
+            this.simulateStreamingDelay(handler);
         }
     }
 
-    private void processToolContentStreaming(
-            dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent content,
-            StreamingResponseHandler handler) {
-        String toolChunk = String.format(
-                "{\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"id\":\"%s\",\"name\":\"%s\"}}",
-                content.id, content.name);
+    private void processToolContentStreaming(AnthropicContent content, StreamingResponseHandler handler) {
+        String toolChunk = String.format("{\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"id\":\"%s\",\"name\":\"%s\"}}", content.id, content.name);
         handler.onChunk(toolChunk);
     }
 
     private void simulateStreamingDelay(StreamingResponseHandler handler) {
         try {
-            Thread.sleep(10); // NOSONAR - Intentional for streaming simulation
-        } catch (InterruptedException e) {
+            Thread.sleep(10L);
+        }
+        catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             handler.onError(e);
         }
     }
 
-    private AnthropicResponse generateContentWithRetry(AnthropicRequest request, String modelName, int attempt)
-            throws IOException {
+    private AnthropicResponse generateContentWithRetry(AnthropicRequest request, String modelName, int attempt) throws IOException {
         if (request == null) {
             throw new IllegalArgumentException("request cannot be null");
         }
-
         try {
-            Map<String, Object> requestMap = buildRequestMap(request);
-            String requestJson = objectMapper.writeValueAsString(requestMap);
-
-            RawPredictRequest rawPredictRequest = buildRawPredictRequest(requestJson, modelName);
-            HttpBody response = predictionServiceClient.rawPredict(rawPredictRequest);
-
+            Map<String, Object> requestMap = this.buildRequestMap(request);
+            String requestJson = this.objectMapper.writeValueAsString(requestMap);
+            RawPredictRequest rawPredictRequest = this.buildRawPredictRequest(requestJson, modelName);
+            HttpBody response = this.predictionServiceClient.rawPredict(rawPredictRequest);
             String responseJson = response.getData().toStringUtf8();
-            return objectMapper.readValue(responseJson, AnthropicResponse.class);
-
-        } catch (UnavailableException e) {
-            return handleUnavailableException(e, request, modelName, attempt);
-        } catch (Exception e) {
+            return (AnthropicResponse)this.objectMapper.readValue(responseJson, AnthropicResponse.class);
+        }
+        catch (UnavailableException e) {
+            return this.handleUnavailableException(e, request, modelName, attempt);
+        }
+        catch (Exception e) {
             throw new IOException("Failed to generate content using Vertex AI rawPredict", e);
         }
     }
 
     private Map<String, Object> buildRequestMap(AnthropicRequest request) {
-        Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put("anthropic_version", Constants.ANTHROPIC_VERSION);
+        HashMap<String, Object> requestMap = new HashMap<String, Object>();
+        requestMap.put("anthropic_version", "vertex-2023-10-16");
         requestMap.put("messages", request.messages);
         requestMap.put("max_tokens", request.maxTokens);
-
-        addOptionalParameter(requestMap, "temperature", request.temperature);
-        addOptionalParameter(requestMap, "system", request.system);
-        addOptionalParameter(requestMap, "top_p", request.topP);
-        addOptionalParameter(requestMap, "top_k", request.topK);
-        addOptionalParameter(requestMap, "stop_sequences", request.stopSequences);
-        addOptionalParameter(requestMap, "tools", request.tools);
-        addOptionalParameter(requestMap, "tool_choice", request.toolChoice);
-
+        this.addOptionalParameter(requestMap, "temperature", request.temperature);
+        this.addOptionalParameter(requestMap, "system", request.system);
+        this.addOptionalParameter(requestMap, "top_p", request.topP);
+        this.addOptionalParameter(requestMap, "top_k", request.topK);
+        this.addOptionalParameter(requestMap, "stop_sequences", request.stopSequences);
+        this.addOptionalParameter(requestMap, "tools", request.tools);
+        this.addOptionalParameter(requestMap, "tool_choice", request.toolChoice);
         return requestMap;
     }
 
@@ -194,68 +185,55 @@ public class VertexAiAnthropicClient {
     }
 
     private RawPredictRequest buildRawPredictRequest(String requestJson, String modelName) {
-        String endpoint = EndpointName.ofProjectLocationPublisherModelName(project, location, PUBLISHER, modelName)
-                .toString();
-
-        HttpBody httpBody = HttpBody.newBuilder()
-                .setContentType("application/json")
-                .setData(ByteString.copyFromUtf8(requestJson))
-                .build();
-
-        return RawPredictRequest.newBuilder()
-                .setEndpoint(endpoint)
-                .setHttpBody(httpBody)
-                .build();
+        String endpoint = EndpointName.ofProjectLocationPublisherModelName((String)this.project, (String)this.location, (String)PUBLISHER, (String)modelName).toString();
+        HttpBody httpBody = HttpBody.newBuilder().setContentType("application/json").setData(ByteString.copyFromUtf8((String)requestJson)).build();
+        return RawPredictRequest.newBuilder().setEndpoint(endpoint).setHttpBody(httpBody).build();
     }
 
-    private AnthropicResponse handleUnavailableException(
-            UnavailableException e, AnthropicRequest request, String modelName, int attempt) throws IOException {
-        if (isChannelShutdownError(e) && attempt < 3) {
-            return retryAfterDelay(request, modelName, attempt);
+    private AnthropicResponse handleUnavailableException(UnavailableException e, AnthropicRequest request, String modelName, int attempt) throws IOException {
+        if (this.isChannelShutdownError(e) && attempt < 3) {
+            return this.retryAfterDelay(request, modelName, attempt);
         }
         throw new IOException("Failed to generate content using Vertex AI rawPredict", e);
     }
 
     private boolean isChannelShutdownError(UnavailableException e) {
-        return e.getCause() instanceof StatusRuntimeException statusException
-                && statusException.getStatus().getCode() == io.grpc.Status.Code.UNAVAILABLE
-                && statusException.getMessage().contains("Channel shutdown invoked");
+        return e.getCause() instanceof StatusRuntimeException && ((StatusRuntimeException)e.getCause()).getStatus().getCode() == Status.Code.UNAVAILABLE && ((StatusRuntimeException)e.getCause()).getMessage().contains("Channel shutdown invoked");
     }
 
-    private AnthropicResponse retryAfterDelay(AnthropicRequest request, String modelName, int attempt)
-            throws IOException {
+    private AnthropicResponse retryAfterDelay(AnthropicRequest request, String modelName, int attempt) throws IOException {
         try {
-            Thread.sleep(100L * attempt); // NOSONAR - Intentional for retry backoff
-        } catch (InterruptedException ie) {
+            Thread.sleep(100L * (long)attempt);
+        }
+        catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             throw new IOException("Request interrupted", ie);
         }
-
-        recreateClient();
-        return generateContentWithRetry(request, modelName, attempt + 1);
+        this.recreateClient();
+        return this.generateContentWithRetry(request, modelName, attempt + 1);
     }
 
     private void recreateClient() {
         try {
-            if (predictionServiceClient != null) {
-                predictionServiceClient.close();
+            if (this.predictionServiceClient != null) {
+                this.predictionServiceClient.close();
             }
-        } catch (Exception ignored) { // NOSONAR - Intentionally catching all exceptions during cleanup
-            // Ignore close errors during retry cleanup
         }
-        predictionServiceClient = createClient();
+        catch (Exception exception) {
+            // empty catch block
+        }
+        this.predictionServiceClient = this.createClient();
     }
 
     public void close() {
-        // Simply close the client without complex lifecycle management
-        // The gRPC channel shutdown errors in tests are due to concurrent close calls
-        // but are not harmful for the actual functionality
-        if (predictionServiceClient != null && !predictionServiceClient.isShutdown()) {
+        if (this.predictionServiceClient != null && !this.predictionServiceClient.isShutdown()) {
             try {
-                predictionServiceClient.close();
-            } catch (Exception e) { // NOSONAR - Intentionally catching all exceptions during shutdown
-                // Ignore shutdown errors as they're likely due to concurrent closes in tests
+                this.predictionServiceClient.close();
+            }
+            catch (Exception exception) {
+                // empty catch block
             }
         }
     }
 }
+

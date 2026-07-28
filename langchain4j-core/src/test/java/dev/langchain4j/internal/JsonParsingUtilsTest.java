@@ -206,10 +206,9 @@ class JsonParsingUtilsTest {
 
     @Test
     void extract_object_with_closing_brace_in_string_and_prefix() throws Exception {
-        String text = """
-                Sure, here is the JSON:
-                {"log":"Unexpected character '}' at position 42"}
-                """;
+        String text = "Sure, here is the JSON:\n" +
+"{\"log\":\"Unexpected character '}' at position 42\"}\n" +
+"\n";
 
         JsonParsingUtils.ParsedJson<LogEntry> result =
                 JsonParsingUtils.extractAndParseJson(text, LogEntry.class);
@@ -219,10 +218,9 @@ class JsonParsingUtilsTest {
 
     @Test
     void extract_object_with_closing_bracket_in_string_and_prefix() throws Exception {
-        String text = """
-                Here is your result:
-                {"log":"Error: unexpected ']' found"}
-                """;
+        String text = "Here is your result:\n" +
+"{\"log\":\"Error: unexpected ']' found\"}\n" +
+"\n";
 
         JsonParsingUtils.ParsedJson<LogEntry> result =
                 JsonParsingUtils.extractAndParseJson(text, LogEntry.class);
@@ -232,10 +230,9 @@ class JsonParsingUtilsTest {
 
     @Test
     void extract_array_with_closing_brace_in_string_and_prefix() throws Exception {
-        String text = """
-                The results are:
-                [{"log":"missing '}'"},{"log":"ok"}]
-                """;
+        String text = "The results are:\n" +
+"[{\"log\":\"missing '}'\"},{\"log\":\"ok\"}]\n" +
+"\n";
 
         JsonParsingUtils.ParsedJson<LogEntry[]> result =
                 JsonParsingUtils.extractAndParseJson(text, LogEntry[].class);

@@ -1,43 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.workersai.client;
 
-/**
- * Request to generate an image.
- */
+import java.util.Arrays;
+
 public class WorkersAiImageGenerationRequest {
-
-    /**
-     * Prompt to generate the image.
-     */
     String prompt;
-
-    /**
-     * Source image to edit
-     */
     int[] image;
-
-    /**
-     * Mask image to edit (optional)
-     */
     int[] mask;
-
-    /**
-     * Mask operation to apply.
-     */
     Integer num_steps;
-
-    /**
-     * Strength
-     */
     Integer strength;
-
-    /**
-     * File to save the image.
-     */
     String destinationFile;
 
-    /**
-     * Default constructor.
-     */
     public WorkersAiImageGenerationRequest() {
     }
 
@@ -98,50 +73,65 @@ public class WorkersAiImageGenerationRequest {
         this.destinationFile = destinationFile;
     }
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof WorkersAiImageGenerationRequest)) return false;
-        final WorkersAiImageGenerationRequest other = (WorkersAiImageGenerationRequest) o;
-        if (!other.canEqual((Object) this)) return false;
-        final Object this$prompt = this.getPrompt();
-        final Object other$prompt = other.getPrompt();
-        if (this$prompt == null ? other$prompt != null : !this$prompt.equals(other$prompt)) return false;
-        if (!java.util.Arrays.equals(this.getImage(), other.getImage())) return false;
-        if (!java.util.Arrays.equals(this.getMask(), other.getMask())) return false;
-        final Object this$num_steps = this.getNum_steps();
-        final Object other$num_steps = other.getNum_steps();
-        if (this$num_steps == null ? other$num_steps != null : !this$num_steps.equals(other$num_steps)) return false;
-        final Object this$strength = this.getStrength();
-        final Object other$strength = other.getStrength();
-        if (this$strength == null ? other$strength != null : !this$strength.equals(other$strength)) return false;
-        final Object this$destinationFile = this.getDestinationFile();
-        final Object other$destinationFile = other.getDestinationFile();
-        if (this$destinationFile == null ? other$destinationFile != null : !this$destinationFile.equals(other$destinationFile))
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof WorkersAiImageGenerationRequest)) {
             return false;
-        return true;
+        }
+        WorkersAiImageGenerationRequest other = (WorkersAiImageGenerationRequest)o;
+        if (!other.canEqual(this)) {
+            return false;
+        }
+        String this$prompt = this.getPrompt();
+        String other$prompt = other.getPrompt();
+        if (this$prompt == null ? other$prompt != null : !this$prompt.equals(other$prompt)) {
+            return false;
+        }
+        if (!Arrays.equals(this.getImage(), other.getImage())) {
+            return false;
+        }
+        if (!Arrays.equals(this.getMask(), other.getMask())) {
+            return false;
+        }
+        Integer this$num_steps = this.getNum_steps();
+        Integer other$num_steps = other.getNum_steps();
+        if (this$num_steps == null ? other$num_steps != null : !((Object)this$num_steps).equals(other$num_steps)) {
+            return false;
+        }
+        Integer this$strength = this.getStrength();
+        Integer other$strength = other.getStrength();
+        if (this$strength == null ? other$strength != null : !((Object)this$strength).equals(other$strength)) {
+            return false;
+        }
+        String this$destinationFile = this.getDestinationFile();
+        String other$destinationFile = other.getDestinationFile();
+        return !(this$destinationFile == null ? other$destinationFile != null : !this$destinationFile.equals(other$destinationFile));
     }
 
-    protected boolean canEqual(final Object other) {
+    protected boolean canEqual(Object other) {
         return other instanceof WorkersAiImageGenerationRequest;
     }
 
     public int hashCode() {
-        final int PRIME = 59;
+        int PRIME = 59;
         int result = 1;
-        final Object $prompt = this.getPrompt();
-        result = result * PRIME + ($prompt == null ? 43 : $prompt.hashCode());
-        result = result * PRIME + java.util.Arrays.hashCode(this.getImage());
-        result = result * PRIME + java.util.Arrays.hashCode(this.getMask());
-        final Object $num_steps = this.getNum_steps();
-        result = result * PRIME + ($num_steps == null ? 43 : $num_steps.hashCode());
-        final Object $strength = this.getStrength();
-        result = result * PRIME + ($strength == null ? 43 : $strength.hashCode());
-        final Object $destinationFile = this.getDestinationFile();
-        result = result * PRIME + ($destinationFile == null ? 43 : $destinationFile.hashCode());
+        String $prompt = this.getPrompt();
+        result = result * 59 + ($prompt == null ? 43 : $prompt.hashCode());
+        result = result * 59 + Arrays.hashCode(this.getImage());
+        result = result * 59 + Arrays.hashCode(this.getMask());
+        Integer $num_steps = this.getNum_steps();
+        result = result * 59 + ($num_steps == null ? 43 : ((Object)$num_steps).hashCode());
+        Integer $strength = this.getStrength();
+        result = result * 59 + ($strength == null ? 43 : ((Object)$strength).hashCode());
+        String $destinationFile = this.getDestinationFile();
+        result = result * 59 + ($destinationFile == null ? 43 : $destinationFile.hashCode());
         return result;
     }
 
     public String toString() {
-        return "WorkersAiImageGenerationRequest(prompt=" + this.getPrompt() + ", image=" + java.util.Arrays.toString(this.getImage()) + ", mask=" + java.util.Arrays.toString(this.getMask()) + ", num_steps=" + this.getNum_steps() + ", strength=" + this.getStrength() + ", destinationFile=" + this.getDestinationFile() + ")";
+        return "WorkersAiImageGenerationRequest(prompt=" + this.getPrompt() + ", image=" + Arrays.toString(this.getImage()) + ", mask=" + Arrays.toString(this.getMask()) + ", num_steps=" + this.getNum_steps() + ", strength=" + this.getStrength() + ", destinationFile=" + this.getDestinationFile() + ")";
     }
 }
+

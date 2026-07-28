@@ -1,12 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonValue
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import dev.langchain4j.Internal;
 
-/**
- * Enum representing method names for server-initiated MCP messages.
- */
 @Internal
 public enum McpServerMethod {
     PING("ping"),
@@ -21,22 +26,22 @@ public enum McpServerMethod {
 
     private final String value;
 
-    McpServerMethod(String value) {
+    private McpServerMethod(String value) {
         this.value = value;
     }
 
     @JsonValue
     public String getValue() {
-        return value;
+        return this.value;
     }
 
     @JsonCreator
     public static McpServerMethod from(String value) {
-        for (McpServerMethod method : values()) {
-            if (method.value.equals(value)) {
-                return method;
-            }
+        for (McpServerMethod method : McpServerMethod.values()) {
+            if (!method.value.equals(value)) continue;
+            return method;
         }
         return null;
     }
 }
+

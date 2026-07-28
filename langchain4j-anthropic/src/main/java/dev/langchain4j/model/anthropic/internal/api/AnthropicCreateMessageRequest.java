@@ -1,21 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAnyGetter
+ *  com.fasterxml.jackson.annotation.JsonIgnore
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicContainer;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicDiagnosticsParameters;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicMessage;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicMetadata;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicOutputConfig;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicTextContent;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicThinking;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicTool;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicToolChoice;
 import java.util.List;
 import java.util.Map;
 
-@JsonInclude(NON_EMPTY)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicCreateMessageRequest {
-
     public String model;
     public List<AnthropicMessage> messages;
     public List<AnthropicTextContent> system;
@@ -32,11 +50,11 @@ public class AnthropicCreateMessageRequest {
     public AnthropicMetadata metadata;
     public AnthropicContainer container;
     public AnthropicDiagnosticsParameters diagnostics;
-
     @JsonIgnore
     public Map<String, Object> customParameters;
 
-    public AnthropicCreateMessageRequest() {}
+    public AnthropicCreateMessageRequest() {
+    }
 
     public AnthropicCreateMessageRequest(Builder builder) {
         this.model = builder.model;
@@ -58,21 +76,8 @@ public class AnthropicCreateMessageRequest {
         this.customParameters = builder.customParameters;
     }
 
-    @Deprecated(since = "1.7.0-beta13", forRemoval = true)
-    public AnthropicCreateMessageRequest(
-            String model,
-            List<AnthropicMessage> messages,
-            List<AnthropicTextContent> system,
-            int maxTokens,
-            List<String> stopSequences,
-            boolean stream,
-            Double temperature,
-            Double topP,
-            Integer topK,
-            List<AnthropicTool> tools,
-            AnthropicToolChoice toolChoice,
-            AnthropicThinking thinking,
-            AnthropicMetadata metadata) {
+    @Deprecated
+    public AnthropicCreateMessageRequest(String model, List<AnthropicMessage> messages, List<AnthropicTextContent> system, int maxTokens, List<String> stopSequences, boolean stream, Double temperature, Double topP, Integer topK, List<AnthropicTool> tools, AnthropicToolChoice toolChoice, AnthropicThinking thinking, AnthropicMetadata metadata) {
         this.model = model;
         this.messages = messages;
         this.system = system;
@@ -89,7 +94,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -97,7 +102,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public List<AnthropicMessage> getMessages() {
-        return messages;
+        return this.messages;
     }
 
     public void setMessages(List<AnthropicMessage> messages) {
@@ -105,7 +110,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public List<AnthropicTextContent> getSystem() {
-        return system;
+        return this.system;
     }
 
     public void setSystem(List<AnthropicTextContent> system) {
@@ -113,7 +118,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public int getMaxTokens() {
-        return maxTokens;
+        return this.maxTokens;
     }
 
     public void setMaxTokens(int maxTokens) {
@@ -121,7 +126,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public List<String> getStopSequences() {
-        return stopSequences;
+        return this.stopSequences;
     }
 
     public void setStopSequences(List<String> stopSequences) {
@@ -129,7 +134,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public boolean isStream() {
-        return stream;
+        return this.stream;
     }
 
     public void setStream(boolean stream) {
@@ -137,7 +142,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public Double getTemperature() {
-        return temperature;
+        return this.temperature;
     }
 
     public void setTemperature(Double temperature) {
@@ -145,7 +150,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public Double getTopP() {
-        return topP;
+        return this.topP;
     }
 
     public void setTopP(Double topP) {
@@ -153,7 +158,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public Integer getTopK() {
-        return topK;
+        return this.topK;
     }
 
     public void setTopK(Integer topK) {
@@ -161,7 +166,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public List<AnthropicTool> getTools() {
-        return tools;
+        return this.tools;
     }
 
     public void setTools(List<AnthropicTool> tools) {
@@ -169,7 +174,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public AnthropicToolChoice getToolChoice() {
-        return toolChoice;
+        return this.toolChoice;
     }
 
     public void setToolChoice(AnthropicToolChoice toolChoice) {
@@ -177,7 +182,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public AnthropicOutputConfig getOutputConfig() {
-        return outputConfig;
+        return this.outputConfig;
     }
 
     public void setOutputConfig(AnthropicOutputConfig outputConfig) {
@@ -185,7 +190,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public AnthropicThinking getThinking() {
-        return thinking;
+        return this.thinking;
     }
 
     public void setThinking(AnthropicThinking thinking) {
@@ -193,7 +198,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public AnthropicMetadata getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public void setMetadata(AnthropicMetadata metadata) {
@@ -201,7 +206,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public AnthropicContainer getContainer() {
-        return container;
+        return this.container;
     }
 
     public void setContainer(AnthropicContainer container) {
@@ -209,7 +214,7 @@ public class AnthropicCreateMessageRequest {
     }
 
     public AnthropicDiagnosticsParameters getDiagnostics() {
-        return diagnostics;
+        return this.diagnostics;
     }
 
     public void setDiagnostics(AnthropicDiagnosticsParameters diagnostics) {
@@ -218,7 +223,7 @@ public class AnthropicCreateMessageRequest {
 
     @JsonAnyGetter
     public Map<String, Object> getCustomParameters() {
-        return customParameters;
+        return this.customParameters;
     }
 
     public void setCustomParameters(Map<String, Object> customParameters) {
@@ -230,28 +235,10 @@ public class AnthropicCreateMessageRequest {
     }
 
     public Builder toBuilder() {
-        return new Builder()
-                        .model(this.model)
-                        .messages(this.messages)
-                        .system(this.system)
-                        .maxTokens(this.maxTokens)
-                        .stopSequences(this.stopSequences)
-                        .stream(this.stream)
-                        .temperature(this.temperature)
-                        .topP(this.topP)
-                        .topK(this.topK)
-                        .tools(this.tools)
-                        .toolChoice(this.toolChoice)
-                        .outputConfig(this.outputConfig)
-                        .thinking(this.thinking)
-                        .metadata(this.metadata)
-                        .container(this.container)
-                        .diagnostics(this.diagnostics)
-                        .customParameters(this.customParameters);
+        return new Builder().model(this.model).messages(this.messages).system(this.system).maxTokens(this.maxTokens).stopSequences(this.stopSequences).stream(this.stream).temperature(this.temperature).topP(this.topP).topK(this.topK).tools(this.tools).toolChoice(this.toolChoice).outputConfig(this.outputConfig).thinking(this.thinking).metadata(this.metadata).container(this.container).diagnostics(this.diagnostics).customParameters(this.customParameters);
     }
 
     public static class Builder {
-
         private String model;
         private List<AnthropicMessage> messages;
         private List<AnthropicTextContent> system;
@@ -360,3 +347,4 @@ public class AnthropicCreateMessageRequest {
         }
     }
 }
+

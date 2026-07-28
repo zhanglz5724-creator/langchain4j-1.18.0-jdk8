@@ -1,7 +1,29 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.memory.ChatMemory
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.rag.AugmentationRequest
+ *  dev.langchain4j.rag.AugmentationResult
+ *  dev.langchain4j.rag.DefaultRetrievalAugmentor
+ *  dev.langchain4j.rag.RetrievalAugmentor
+ *  dev.langchain4j.rag.content.retriever.ContentRetriever
+ *  dev.langchain4j.rag.query.Metadata
+ */
 package dev.langchain4j.chain;
 
+import dev.langchain4j.chain.Chain;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -11,67 +33,39 @@ import dev.langchain4j.rag.DefaultRetrievalAugmentor;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.query.Metadata;
-import dev.langchain4j.service.AiServices;
+import java.util.List;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * A chain for conversing with a specified {@link ChatModel}
- * based on the information retrieved by a specified {@link ContentRetriever}.
- * Includes a default {@link ChatMemory} (a message window with maximum 10 messages), which can be overridden.
- * You can fully customize RAG behavior by providing an instance of a {@link RetrievalAugmentor},
- * such as {@link DefaultRetrievalAugmentor}, or your own custom implementation.
- * <br>
- * Chains are not going to be developed further, it is recommended to use {@link AiServices} instead.
- */
-public class ConversationalRetrievalChain implements Chain<String, String> {
-
+public class ConversationalRetrievalChain
+implements Chain<String, String> {
     private final ChatModel chatModel;
     private final ChatMemory chatMemory;
     private final RetrievalAugmentor retrievalAugmentor;
 
-    public ConversationalRetrievalChain(ChatModel chatModel,
-                                        ChatMemory chatMemory,
-                                        ContentRetriever contentRetriever) {
-        this(
-                chatModel,
-                chatMemory,
-                DefaultRetrievalAugmentor.builder()
-                        .contentRetriever(contentRetriever)
-                        .build()
-        );
+    public ConversationalRetrievalChain(ChatModel chatModel, ChatMemory chatMemory, ContentRetriever contentRetriever) {
+        this(chatModel, chatMemory, (RetrievalAugmentor)DefaultRetrievalAugmentor.builder().contentRetriever(contentRetriever).build());
     }
 
-    public ConversationalRetrievalChain(ChatModel chatModel,
-                                        ChatMemory chatMemory,
-                                        RetrievalAugmentor retrievalAugmentor) {
-        this.chatModel = ensureNotNull(chatModel, "chatModel");
-        this.chatMemory = getOrDefault(chatMemory, () -> MessageWindowChatMemory.withMaxMessages(10));
-        this.retrievalAugmentor = ensureNotNull(retrievalAugmentor, "retrievalAugmentor");
+    public ConversationalRetrievalChain(ChatModel chatModel, ChatMemory chatMemory, RetrievalAugmentor retrievalAugmentor) {
+        this.chatModel = (ChatModel)ValidationUtils.ensureNotNull((Object)chatModel, (String)"chatModel");
+        this.chatMemory = (ChatMemory)Utils.getOrDefault((Object)chatMemory, () -> MessageWindowChatMemory.withMaxMessages(10));
+        this.retrievalAugmentor = (RetrievalAugmentor)ValidationUtils.ensureNotNull((Object)retrievalAugmentor, (String)"retrievalAugmentor");
     }
 
     @Override
     public String execute(String query) {
-
-        UserMessage userMessage = UserMessage.from(query);
-        userMessage = augment(userMessage);
-        chatMemory.add(userMessage);
-
-        AiMessage aiMessage = chatModel.chat(chatMemory.messages()).aiMessage();
-
-        chatMemory.add(aiMessage);
+        UserMessage userMessage = UserMessage.from((String)query);
+        userMessage = this.augment(userMessage);
+        this.chatMemory.add((ChatMessage)userMessage);
+        AiMessage aiMessage = this.chatModel.chat(this.chatMemory.messages()).aiMessage();
+        this.chatMemory.add((ChatMessage)aiMessage);
         return aiMessage.text();
     }
 
     private UserMessage augment(UserMessage userMessage) {
-        Metadata metadata = Metadata.from(userMessage, chatMemory.id(), chatMemory.messages());
-
-        AugmentationRequest augmentationRequest = new AugmentationRequest(userMessage, metadata);
-
-        AugmentationResult augmentationResult = retrievalAugmentor.augment(augmentationRequest);
-
-        return (UserMessage) augmentationResult.chatMessage();
+        Metadata metadata = Metadata.from((ChatMessage)userMessage, (Object)this.chatMemory.id(), (List)this.chatMemory.messages());
+        AugmentationRequest augmentationRequest = new AugmentationRequest((ChatMessage)userMessage, metadata);
+        AugmentationResult augmentationResult = this.retrievalAugmentor.augment(augmentationRequest);
+        return (UserMessage)augmentationResult.chatMessage();
     }
 
     public static Builder builder() {
@@ -79,7 +73,6 @@ public class ConversationalRetrievalChain implements Chain<String, String> {
     }
 
     public static class Builder {
-
         private ChatModel chatModel;
         private ChatMemory chatMemory;
         private RetrievalAugmentor retrievalAugmentor;
@@ -96,9 +89,7 @@ public class ConversationalRetrievalChain implements Chain<String, String> {
 
         public Builder contentRetriever(ContentRetriever contentRetriever) {
             if (contentRetriever != null) {
-                this.retrievalAugmentor = DefaultRetrievalAugmentor.builder()
-                        .contentRetriever(contentRetriever)
-                        .build();
+                this.retrievalAugmentor = DefaultRetrievalAugmentor.builder().contentRetriever(contentRetriever).build();
             }
             return this;
         }
@@ -109,7 +100,8 @@ public class ConversationalRetrievalChain implements Chain<String, String> {
         }
 
         public ConversationalRetrievalChain build() {
-            return new ConversationalRetrievalChain(chatModel, chatMemory, retrievalAugmentor);
+            return new ConversationalRetrievalChain(this.chatModel, this.chatMemory, this.retrievalAugmentor);
         }
     }
 }
+

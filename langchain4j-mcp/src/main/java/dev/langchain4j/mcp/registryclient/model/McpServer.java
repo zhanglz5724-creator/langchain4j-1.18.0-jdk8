@@ -1,88 +1,78 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAlias
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.mcp.registryclient.model.McpMeta;
+import dev.langchain4j.mcp.registryclient.model.McpPackage;
+import dev.langchain4j.mcp.registryclient.model.McpRemote;
+import dev.langchain4j.mcp.registryclient.model.McpRepository;
 import java.util.List;
 
 public class McpServer {
-
     private String name;
     private String description;
-
-    @JsonProperty("$schema")
+    @JsonProperty(value="$schema")
     private String schema;
-
     private String status;
     private McpRepository repository;
     private String version;
-
-    @JsonAlias("website_url")
+    @JsonAlias(value={"website_url"})
     private String websiteUrl;
-
     private List<McpRemote> remotes;
-
-    @JsonProperty("_meta")
+    @JsonProperty(value="_meta")
     private McpMeta meta;
-
     private List<McpPackage> packages;
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public String getSchema() {
-        return schema;
+        return this.schema;
     }
 
-    /**
-     * @deprecated This field was moved to the McpOfficialMeta object in schema version 2025-09-29
-     */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
     public McpRepository getRepository() {
-        return repository;
+        return this.repository;
     }
 
     public String getVersion() {
-        return version;
+        return this.version;
     }
 
     public String getWebsiteUrl() {
-        return websiteUrl;
+        return this.websiteUrl;
     }
 
     public List<McpRemote> getRemotes() {
-        return remotes;
+        return this.remotes;
     }
 
     public McpMeta getMeta() {
-        return meta;
+        return this.meta;
     }
 
     public List<McpPackage> getPackages() {
-        return packages;
+        return this.packages;
     }
 
-    @Override
     public String toString() {
-        return "McpServer{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", schema='" + schema + '\'' +
-                ", status='" + status + '\'' +
-                ", repository=" + repository +
-                ", version='" + version + '\'' +
-                ", websiteUrl='" + websiteUrl + '\'' +
-                ", remotes=" + remotes +
-                ", meta=" + meta +
-                ", packages=" + packages +
-                '}';
+        return "McpServer{name='" + this.name + '\'' + ", description='" + this.description + '\'' + ", schema='" + this.schema + '\'' + ", status='" + this.status + '\'' + ", repository=" + this.repository + ", version='" + this.version + '\'' + ", websiteUrl='" + this.websiteUrl + '\'' + ", remotes=" + this.remotes + ", meta=" + this.meta + ", packages=" + this.packages + '}';
     }
 }
+

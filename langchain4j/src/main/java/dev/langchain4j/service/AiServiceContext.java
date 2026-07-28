@@ -1,6 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.invocation.InvocationContext
+ *  dev.langchain4j.memory.ChatMemory
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.StreamingChatModel
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.moderation.ModerationModel
+ *  dev.langchain4j.observability.api.AiServiceListenerRegistrar
+ *  dev.langchain4j.rag.RetrievalAugmentor
+ *  dev.langchain4j.spi.ServiceHelper
+ */
 package dev.langchain4j.service;
-
-import static dev.langchain4j.spi.ServiceHelper.loadFactory;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.invocation.InvocationContext;
@@ -15,6 +28,7 @@ import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.service.guardrail.GuardrailService;
 import dev.langchain4j.service.memory.ChatMemoryService;
 import dev.langchain4j.service.tool.ToolService;
+import dev.langchain4j.spi.ServiceHelper;
 import dev.langchain4j.spi.services.AiServiceContextFactory;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,37 +37,24 @@ import java.util.function.Function;
 
 @Internal
 public class AiServiceContext {
-
     private static final Function<Object, Optional<String>> DEFAULT_USER_MESSAGE_PROVIDER = x -> Optional.empty();
     private static final Function<Object, Optional<String>> DEFAULT_SYSTEM_MESSAGE_PROVIDER = x -> Optional.empty();
-
     public final Class<?> aiServiceClass;
     public final AiServiceListenerRegistrar eventListenerRegistrar = AiServiceListenerRegistrar.newInstance();
-
     public Class<?> returnType;
-
     public ChatModel chatModel;
     public StreamingChatModel streamingChatModel;
-
     public ChatMemoryService chatMemoryService;
-
     public ToolService toolService = new ToolService();
-
     public final GuardrailService.Builder guardrailServiceBuilder;
-    private final AtomicReference<GuardrailService> guardrailService = new AtomicReference<>();
-
+    private final AtomicReference<GuardrailService> guardrailService = new AtomicReference();
     public ModerationModel moderationModel;
-
     public RetrievalAugmentor retrievalAugmentor;
-
     public boolean storeRetrievedContentInChatMemory = true;
-
     public Function<Object, Optional<String>> userMessageProvider = DEFAULT_USER_MESSAGE_PROVIDER;
     public Function<Object, Optional<String>> systemMessageProvider = DEFAULT_SYSTEM_MESSAGE_PROVIDER;
     public Function<InvocationContext, String> systemMessageProviderWithContext = null;
-
     public BiFunction<String, InvocationContext, String> systemMessageTransformer = null;
-
     public BiFunction<ChatRequest, Object, ChatRequest> chatRequestTransformer = (req, memId) -> req;
 
     protected AiServiceContext(Class<?> aiServiceClass) {
@@ -61,34 +62,35 @@ public class AiServiceContext {
         this.guardrailServiceBuilder = GuardrailService.builder(aiServiceClass);
     }
 
-    private static class FactoryHolder {
-        private static final AiServiceContextFactory contextFactory = loadFactory(AiServiceContextFactory.class);
-    }
-
     public static AiServiceContext create(Class<?> aiServiceClass) {
-        return FactoryHolder.contextFactory != null
-                ? FactoryHolder.contextFactory.create(aiServiceClass)
-                : new AiServiceContext(aiServiceClass);
+        return FactoryHolder.contextFactory != null ? FactoryHolder.contextFactory.create(aiServiceClass) : new AiServiceContext(aiServiceClass);
     }
 
     public boolean hasChatMemory() {
-        return chatMemoryService != null;
+        return this.chatMemoryService != null;
     }
 
     public void initChatMemories(ChatMemory chatMemory) {
-        chatMemoryService = new ChatMemoryService(chatMemory);
+        this.chatMemoryService = new ChatMemoryService(chatMemory);
     }
 
     public void initChatMemories(ChatMemoryProvider chatMemoryProvider) {
-        chatMemoryService = new ChatMemoryService(chatMemoryProvider);
+        this.chatMemoryService = new ChatMemoryService(chatMemoryProvider);
     }
 
     public boolean hasModerationModel() {
-        return moderationModel != null;
+        return this.moderationModel != null;
     }
 
     public GuardrailService guardrailService() {
-        return this.guardrailService.updateAndGet(
-                service -> (service != null) ? service : guardrailServiceBuilder.build());
+        return this.guardrailService.updateAndGet(service -> service != null ? service : this.guardrailServiceBuilder.build());
+    }
+
+    private static class FactoryHolder {
+        private static final AiServiceContextFactory contextFactory = (AiServiceContextFactory)ServiceHelper.loadFactory(AiServiceContextFactory.class);
+
+        private FactoryHolder() {
+        }
     }
 }
+

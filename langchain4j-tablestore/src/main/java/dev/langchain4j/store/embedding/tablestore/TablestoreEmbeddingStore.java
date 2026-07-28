@@ -1,3 +1,67 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.alicloud.openservices.tablestore.SyncClient
+ *  com.alicloud.openservices.tablestore.core.utils.ValueUtil
+ *  com.alicloud.openservices.tablestore.model.CapacityUnit
+ *  com.alicloud.openservices.tablestore.model.Column
+ *  com.alicloud.openservices.tablestore.model.ColumnType
+ *  com.alicloud.openservices.tablestore.model.ColumnValue
+ *  com.alicloud.openservices.tablestore.model.CreateTableRequest
+ *  com.alicloud.openservices.tablestore.model.DeleteRowRequest
+ *  com.alicloud.openservices.tablestore.model.DeleteTableRequest
+ *  com.alicloud.openservices.tablestore.model.Direction
+ *  com.alicloud.openservices.tablestore.model.GetRangeRequest
+ *  com.alicloud.openservices.tablestore.model.GetRangeResponse
+ *  com.alicloud.openservices.tablestore.model.ListTableResponse
+ *  com.alicloud.openservices.tablestore.model.PrimaryKey
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeyBuilder
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeySchema
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeyType
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeyValue
+ *  com.alicloud.openservices.tablestore.model.PutRowRequest
+ *  com.alicloud.openservices.tablestore.model.RangeRowQueryCriteria
+ *  com.alicloud.openservices.tablestore.model.ReservedThroughput
+ *  com.alicloud.openservices.tablestore.model.Row
+ *  com.alicloud.openservices.tablestore.model.RowDeleteChange
+ *  com.alicloud.openservices.tablestore.model.RowPutChange
+ *  com.alicloud.openservices.tablestore.model.TableMeta
+ *  com.alicloud.openservices.tablestore.model.TableOptions
+ *  com.alicloud.openservices.tablestore.model.search.CreateSearchIndexRequest
+ *  com.alicloud.openservices.tablestore.model.search.DeleteSearchIndexRequest
+ *  com.alicloud.openservices.tablestore.model.search.FieldSchema
+ *  com.alicloud.openservices.tablestore.model.search.FieldSchema$Analyzer
+ *  com.alicloud.openservices.tablestore.model.search.FieldType
+ *  com.alicloud.openservices.tablestore.model.search.IndexSchema
+ *  com.alicloud.openservices.tablestore.model.search.ListSearchIndexRequest
+ *  com.alicloud.openservices.tablestore.model.search.ListSearchIndexResponse
+ *  com.alicloud.openservices.tablestore.model.search.SearchHit
+ *  com.alicloud.openservices.tablestore.model.search.SearchIndexInfo
+ *  com.alicloud.openservices.tablestore.model.search.SearchQuery
+ *  com.alicloud.openservices.tablestore.model.search.SearchRequest
+ *  com.alicloud.openservices.tablestore.model.search.SearchResponse
+ *  com.alicloud.openservices.tablestore.model.search.query.KnnVectorQuery
+ *  com.alicloud.openservices.tablestore.model.search.query.Query
+ *  com.alicloud.openservices.tablestore.model.search.query.QueryBuilders
+ *  com.alicloud.openservices.tablestore.model.search.sort.ScoreSort
+ *  com.alicloud.openservices.tablestore.model.search.sort.Sort
+ *  com.alicloud.openservices.tablestore.model.search.vector.VectorDataType
+ *  com.alicloud.openservices.tablestore.model.search.vector.VectorMetricType
+ *  com.alicloud.openservices.tablestore.model.search.vector.VectorOptions
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Exceptions
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.EmbeddingMatch
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.store.embedding.tablestore;
 
 import com.alicloud.openservices.tablestore.SyncClient;
@@ -56,9 +120,8 @@ import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.filter.Filter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import dev.langchain4j.store.embedding.tablestore.TablestoreMetadataFilterMapper;
+import dev.langchain4j.store.embedding.tablestore.TablestoreUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,12 +129,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-
-public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
-    private final Logger log = LoggerFactory.getLogger(getClass());
+public class TablestoreEmbeddingStore
+implements EmbeddingStore<TextSegment> {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final SyncClient client;
     private final String tableName;
     private final String searchIndexName;
@@ -81,14 +144,12 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
     private final int vectorDimension;
     private final VectorMetricType vectorMetricType;
     private final List<FieldSchema> metadataSchemaList;
-
     private static final String DEFAULT_TABLE_NAME = "langchain4j_embedding_store_ots_v1";
     private static final String DEFAULT_INDEX_NAME = "langchain4j_embedding_ots_index_v1";
     private static final String DEFAULT_TABLE_PK_NAME = "id";
     private static final String DEFAULT_TEXT_FIELD_NAME = "default_content";
     private static final String DEFAULT_VECTOR_FIELD_NAME = "default_embedding";
     private static final VectorMetricType DEFAULT_VECTOR_METRIC_TYPE = VectorMetricType.COSINE;
-
 
     public TablestoreEmbeddingStore(SyncClient client, int vectorDimension) {
         this(client, vectorDimension, Collections.emptyList());
@@ -99,24 +160,24 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
     }
 
     public TablestoreEmbeddingStore(SyncClient client, String tableName, String searchIndexName, String pkName, String textField, String embeddingField, int vectorDimension, VectorMetricType vectorMetricType, List<FieldSchema> metadataSchemaList) {
-        this.client = ValidationUtils.ensureNotNull(client, "client");
-        this.tableName = ValidationUtils.ensureNotBlank(tableName, "tableName");
-        this.searchIndexName = ValidationUtils.ensureNotBlank(searchIndexName, "searchIndexName");
-        this.pkName = ValidationUtils.ensureNotBlank(pkName, "pkName");
-        this.textField = ValidationUtils.ensureNotBlank(textField, "textField");
-        this.embeddingField = ValidationUtils.ensureNotBlank(embeddingField, "embeddingField");
-        this.vectorDimension = ValidationUtils.ensureGreaterThanZero(vectorDimension, "vectorDimension");
-        this.vectorMetricType = ValidationUtils.ensureNotNull(vectorMetricType, "vectorMetricType");
-        ValidationUtils.ensureNotNull(metadataSchemaList, "metadataSchemaList");
-        List<FieldSchema> tmpMetaList = new ArrayList<>();
+        this.client = (SyncClient)ValidationUtils.ensureNotNull((Object)client, (String)"client");
+        this.tableName = ValidationUtils.ensureNotBlank((String)tableName, (String)"tableName");
+        this.searchIndexName = ValidationUtils.ensureNotBlank((String)searchIndexName, (String)"searchIndexName");
+        this.pkName = ValidationUtils.ensureNotBlank((String)pkName, (String)"pkName");
+        this.textField = ValidationUtils.ensureNotBlank((String)textField, (String)"textField");
+        this.embeddingField = ValidationUtils.ensureNotBlank((String)embeddingField, (String)"embeddingField");
+        this.vectorDimension = ValidationUtils.ensureGreaterThanZero((Integer)vectorDimension, (String)"vectorDimension");
+        this.vectorMetricType = (VectorMetricType)ValidationUtils.ensureNotNull((Object)vectorMetricType, (String)"vectorMetricType");
+        ValidationUtils.ensureNotNull(metadataSchemaList, (String)"metadataSchemaList");
+        ArrayList<FieldSchema> tmpMetaList = new ArrayList<FieldSchema>();
         tmpMetaList.add(new FieldSchema(textField, FieldType.TEXT).setIndex(true).setAnalyzer(FieldSchema.Analyzer.MaxWord));
         tmpMetaList.add(new FieldSchema(embeddingField, FieldType.VECTOR).setIndex(true).setVectorOptions(new VectorOptions(VectorDataType.FLOAT_32, vectorDimension, vectorMetricType)));
         for (FieldSchema fieldSchema : metadataSchemaList) {
             if (fieldSchema.getFieldName().equals(textField)) {
-                throw Exceptions.illegalArgument("the custom meta data field name matches the system text field:{}", textField);
+                throw Exceptions.illegalArgument((String)"the custom meta data field name matches the system text field:{}", (Object[])new Object[]{textField});
             }
             if (fieldSchema.getFieldName().equals(embeddingField)) {
-                throw Exceptions.illegalArgument("the custom meta data field name matches the system embedding field:{}", embeddingField);
+                throw Exceptions.illegalArgument((String)"the custom meta data field name matches the system embedding field:{}", (Object[])new Object[]{embeddingField});
             }
             tmpMetaList.add(fieldSchema);
         }
@@ -124,85 +185,82 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
     }
 
     public void init() {
-        createTableIfNotExist();
-        createSearchIndexIfNotExist();
+        this.createTableIfNotExist();
+        this.createSearchIndexIfNotExist();
     }
 
     public SyncClient getClient() {
-        return client;
+        return this.client;
     }
 
     public String getTableName() {
-        return tableName;
+        return this.tableName;
     }
 
     public String getSearchIndexName() {
-        return searchIndexName;
+        return this.searchIndexName;
     }
 
     public String getPkName() {
-        return pkName;
+        return this.pkName;
     }
 
     public String getTextField() {
-        return textField;
+        return this.textField;
     }
 
     public String getEmbeddingField() {
-        return embeddingField;
+        return this.embeddingField;
     }
 
     public int getVectorDimension() {
-        return vectorDimension;
+        return this.vectorDimension;
     }
 
     public VectorMetricType getVectorMetricType() {
-        return vectorMetricType;
+        return this.vectorMetricType;
     }
 
     public List<FieldSchema> getMetadataSchemaList() {
-        return metadataSchemaList;
+        return this.metadataSchemaList;
     }
 
-    @Override
     public String add(Embedding embedding) {
         String id = UUID.randomUUID().toString();
-        innerAdd(id, embedding, null);
+        this.innerAdd(id, embedding, null);
         return id;
     }
 
-    @Override
     public void add(String id, Embedding embedding) {
-        innerAdd(id, embedding, null);
+        this.innerAdd(id, embedding, null);
     }
 
-    @Override
     public String add(Embedding embedding, TextSegment textSegment) {
         String id = UUID.randomUUID().toString();
-        innerAdd(id, embedding, textSegment);
+        this.innerAdd(id, embedding, textSegment);
         return id;
     }
 
-    @Override
     public List<String> addAll(List<Embedding> embeddings) {
-        return addAll(embeddings, null);
+        return this.addAll(embeddings, null);
     }
 
-    @Override
     public void addAll(List<String> ids, List<Embedding> embeddings, List<TextSegment> embedded) {
         if (embedded != null) {
-            ValidationUtils.ensureEq(embeddings.size(), embedded.size(), "the size of embeddings should be the same as the size of embedded");
+            ValidationUtils.ensureEq((Object)embeddings.size(), (Object)embedded.size(), (String)"the size of embeddings should be the same as the size of embedded", (Object[])new Object[0]);
         }
-        List<Exception> exceptions = new ArrayList<>();
-        for (int i = 0; i < embeddings.size(); i++) {
+        ArrayList<Exception> exceptions = new ArrayList<Exception>();
+        for (int i = 0; i < embeddings.size(); ++i) {
             Embedding embedding = embeddings.get(i);
             TextSegment textSegment = null;
             if (embedded != null) {
                 textSegment = embedded.get(i);
             }
             try {
-                innerAdd(ids.get(i), embedding, textSegment);
-            } catch (Exception e) {
+                this.innerAdd(ids.get(i), embedding, textSegment);
+                continue;
+            }
+            catch (Exception e) {
                 exceptions.add(e);
             }
         }
@@ -215,21 +273,20 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
     }
 
-    @Override
     public void remove(String id) {
-        ensureNotBlank(id, "id");
-        innerDelete(id);
+        ValidationUtils.ensureNotBlank((String)id, (String)DEFAULT_TABLE_PK_NAME);
+        this.innerDelete(id);
     }
 
-    @Override
     public void removeAll(Collection<String> ids) {
-        ensureNotEmpty(ids, "ids");
-        log.debug("remove all:{}", ids);
-        List<Exception> exceptions = new ArrayList<>();
+        ValidationUtils.ensureNotEmpty(ids, (String)"ids");
+        this.log.debug("remove all:{}", ids);
+        ArrayList<Exception> exceptions = new ArrayList<Exception>();
         for (String id : ids) {
             try {
-                remove(id);
-            } catch (Exception e) {
+                this.remove(id);
+            }
+            catch (Exception e) {
                 exceptions.add(e);
             }
         }
@@ -242,49 +299,31 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
     }
 
-    @Override
     public void removeAll(Filter filter) {
         if (filter == null) {
-            throw Exceptions.illegalArgument("filter cannot be null");
+            throw Exceptions.illegalArgument((String)"filter cannot be null", (Object[])new Object[0]);
         }
-        forEachAllData(Collections.emptyList(), (row -> {
-            Metadata metadata = rowToMetadata(row);
-            if (filter.test(metadata)) {
-                remove(row.getPrimaryKey().getPrimaryKeyColumn(pkName).getValue().asString());
+        this.forEachAllData(Collections.emptyList(), row -> {
+            Metadata metadata = this.rowToMetadata((Row)row);
+            if (filter.test((Object)metadata)) {
+                this.remove(row.getPrimaryKey().getPrimaryKeyColumn(this.pkName).getValue().asString());
             }
-        }));
-    }
-
-    @Override
-    public void removeAll() {
-        log.debug("remove all");
-        forEachAllData(Collections.emptyList(), (row) -> {
-            this.innerDelete(row.getPrimaryKey().getPrimaryKeyColumn(pkName).getValue().asString());
         });
     }
 
-    @Override
+    public void removeAll() {
+        this.log.debug("remove all");
+        this.forEachAllData(Collections.emptyList(), row -> this.innerDelete(row.getPrimaryKey().getPrimaryKeyColumn(this.pkName).getValue().asString()));
+    }
+
     public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
-        log.debug("search ([...{}...], {}, {})", request.queryEmbedding().vector().length, request.maxResults(), request.minScore());
-        KnnVectorQuery knnVectorQuery = QueryBuilders.knnVector(embeddingField, request.maxResults(), request.queryEmbedding().vector())
-                .filter(mapFilterToQuery(request.filter()))
-                .build();
-        SearchQuery searchQuery = SearchQuery.newBuilder()
-                .query(knnVectorQuery)
-                .getTotalCount(false)
-                .limit(request.maxResults())
-                .offset(0)
-                .sort(new Sort(Collections.singletonList(new ScoreSort())))
-                .build();
-        SearchRequest searchRequest = SearchRequest.newBuilder()
-                .tableName(tableName)
-                .indexName(searchIndexName)
-                .searchQuery(searchQuery)
-                .returnAllColumns(true)
-                .build();
-        SearchResponse response = client.search(searchRequest);
-        log.debug("search requestId:{}", response.getRequestId());
-        return searchResponseToEmbeddingSearchResult(request, response);
+        this.log.debug("search ([...{}...], {}, {})", new Object[]{request.queryEmbedding().vector().length, request.maxResults(), request.minScore()});
+        KnnVectorQuery knnVectorQuery = QueryBuilders.knnVector((String)this.embeddingField, (int)request.maxResults(), (float[])request.queryEmbedding().vector()).filter(this.mapFilterToQuery(request.filter())).build();
+        SearchQuery searchQuery = SearchQuery.newBuilder().query((Query)knnVectorQuery).getTotalCount(false).limit(request.maxResults()).offset(0).sort(new Sort(Collections.singletonList(new ScoreSort()))).build();
+        SearchRequest searchRequest = SearchRequest.newBuilder().tableName(this.tableName).indexName(this.searchIndexName).searchQuery(searchQuery).returnAllColumns(true).build();
+        SearchResponse response = this.client.search(searchRequest);
+        this.log.debug("search requestId:{}", (Object)response.getRequestId());
+        return this.searchResponseToEmbeddingSearchResult(request, response);
     }
 
     protected Query mapFilterToQuery(Filter filter) {
@@ -292,90 +331,77 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
     }
 
     private EmbeddingSearchResult<TextSegment> searchResponseToEmbeddingSearchResult(EmbeddingSearchRequest request, SearchResponse response) {
-        List<SearchHit> searchHits = response.getSearchHits();
-        List<EmbeddingMatch<TextSegment>> matches = new ArrayList<>(searchHits.size());
+        List searchHits = response.getSearchHits();
+        ArrayList<EmbeddingMatch> matches = new ArrayList<EmbeddingMatch>(searchHits.size());
         for (SearchHit hit : searchHits) {
             Double score = hit.getScore();
-            if (score < request.minScore()) {
-                continue;
-            }
+            if (score < request.minScore()) continue;
             Row row = hit.getRow();
-
             String text = null;
-            if (row.getLatestColumn(textField) != null) {
-                text = row.getLatestColumn(textField).getValue().asString();
+            if (row.getLatestColumn(this.textField) != null) {
+                text = row.getLatestColumn(this.textField).getValue().asString();
             }
-
             float[] embedding = null;
-            if (row.getLatestColumn(embeddingField) != null) {
-                String embeddingString = row.getLatestColumn(embeddingField).getValue().asString();
+            if (row.getLatestColumn(this.embeddingField) != null) {
+                String embeddingString = row.getLatestColumn(this.embeddingField).getValue().asString();
                 embedding = TablestoreUtils.parseEmbeddingString(embeddingString);
             }
-
-            Metadata metadata = rowToMetadata(row);
-
+            Metadata metadata = this.rowToMetadata(row);
             TextSegment textSegment = null;
             if (text != null && embedding != null) {
                 textSegment = new TextSegment(text, metadata);
             }
-
-            EmbeddingMatch<TextSegment> match = new EmbeddingMatch<TextSegment>(
-                    score,
-                    row.getPrimaryKey().getPrimaryKeyColumn(pkName).getValue().asString(),
-                    new Embedding(embedding),
-                    textSegment
-            );
+            EmbeddingMatch match = new EmbeddingMatch(score, row.getPrimaryKey().getPrimaryKeyColumn(this.pkName).getValue().asString(), new Embedding(embedding), (Object)textSegment);
             matches.add(match);
         }
-        return new EmbeddingSearchResult<>(matches);
+        return new EmbeddingSearchResult(matches);
     }
 
     private void createTableIfNotExist() {
-        if (tableExists()) {
-            log.info("table:{} already exists", tableName);
+        if (this.tableExists()) {
+            this.log.info("table:{} already exists", (Object)this.tableName);
             return;
         }
         TableMeta tableMeta = new TableMeta(this.tableName);
-        tableMeta.addPrimaryKeyColumn(new PrimaryKeySchema(pkName, PrimaryKeyType.STRING));
+        tableMeta.addPrimaryKeyColumn(new PrimaryKeySchema(this.pkName, PrimaryKeyType.STRING));
         TableOptions tableOptions = new TableOptions(-1, 1);
         CreateTableRequest request = new CreateTableRequest(tableMeta, tableOptions);
         request.setReservedThroughput(new ReservedThroughput(new CapacityUnit(0, 0)));
-        client.createTable(request);
-        log.info("create table:{}", tableName);
+        this.client.createTable(request);
+        this.log.info("create table:{}", (Object)this.tableName);
     }
 
     private void createSearchIndexIfNotExist() {
-        if (searchindexExists()) {
-            log.info("index:{} already exists", searchIndexName);
+        if (this.searchindexExists()) {
+            this.log.info("index:{} already exists", (Object)this.searchIndexName);
             return;
         }
         CreateSearchIndexRequest request = new CreateSearchIndexRequest();
-        request.setTableName(tableName);
-        request.setIndexName(searchIndexName);
+        request.setTableName(this.tableName);
+        request.setIndexName(this.searchIndexName);
         IndexSchema indexSchema = new IndexSchema();
-        indexSchema.setFieldSchemas(metadataSchemaList);
+        indexSchema.setFieldSchemas(this.metadataSchemaList);
         request.setIndexSchema(indexSchema);
-        client.createSearchIndex(request);
-        log.info("create index:{}", searchIndexName);
+        this.client.createSearchIndex(request);
+        this.log.info("create index:{}", (Object)this.searchIndexName);
     }
 
     protected void deleteTableAndIndex() {
-        List<SearchIndexInfo> searchIndexInfos = listSearchIndex();
-        deleteIndex(searchIndexInfos);
-        deleteTable();
+        List<SearchIndexInfo> searchIndexInfos = this.listSearchIndex();
+        this.deleteIndex(searchIndexInfos);
+        this.deleteTable();
     }
 
     private boolean tableExists() {
-        ListTableResponse listTableResponse = client.listTable();
-        return listTableResponse.getTableNames().contains(tableName);
+        ListTableResponse listTableResponse = this.client.listTable();
+        return listTableResponse.getTableNames().contains(this.tableName);
     }
 
     private boolean searchindexExists() {
-        List<SearchIndexInfo> searchIndexInfos = listSearchIndex();
+        List<SearchIndexInfo> searchIndexInfos = this.listSearchIndex();
         for (SearchIndexInfo indexInfo : searchIndexInfos) {
-            if (indexInfo.getIndexName().equals(searchIndexName)) {
-                return true;
-            }
+            if (!indexInfo.getIndexName().equals(this.searchIndexName)) continue;
+            return true;
         }
         return false;
     }
@@ -385,78 +411,82 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
             DeleteSearchIndexRequest request = new DeleteSearchIndexRequest();
             request.setTableName(info.getTableName());
             request.setIndexName(info.getIndexName());
-            client.deleteSearchIndex(request);
-            log.info("delete table:{}, index:{}", info.getTableName(), info.getIndexName());
+            this.client.deleteSearchIndex(request);
+            this.log.info("delete table:{}, index:{}", (Object)info.getTableName(), (Object)info.getIndexName());
         });
     }
 
     private void deleteTable() {
-        DeleteTableRequest request = new DeleteTableRequest(tableName);
-        client.deleteTable(request);
-        log.info("delete table:{}", tableName);
+        DeleteTableRequest request = new DeleteTableRequest(this.tableName);
+        this.client.deleteTable(request);
+        this.log.info("delete table:{}", (Object)this.tableName);
     }
 
     private List<SearchIndexInfo> listSearchIndex() {
         ListSearchIndexRequest request = new ListSearchIndexRequest();
-        request.setTableName(tableName);
-        ListSearchIndexResponse listSearchIndexResponse = client.listSearchIndex(request);
+        request.setTableName(this.tableName);
+        ListSearchIndexResponse listSearchIndexResponse = this.client.listSearchIndex(request);
         return listSearchIndexResponse.getIndexInfos();
     }
 
     protected void innerAdd(String id, Embedding embedding, TextSegment textSegment) {
-        ValidationUtils.ensureNotNull(embedding, "embedding");
+        ValidationUtils.ensureNotNull((Object)embedding, (String)"embedding");
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
-        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName, PrimaryKeyValue.fromString(id));
+        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName, PrimaryKeyValue.fromString((String)id));
         PrimaryKey primaryKey = primaryKeyBuilder.build();
         RowPutChange rowPutChange = new RowPutChange(this.tableName, primaryKey);
         String embeddinged = TablestoreUtils.embeddingToString(embedding.vector());
-        rowPutChange.addColumn(new Column(this.embeddingField, ColumnValue.fromString(embeddinged)));
+        rowPutChange.addColumn(new Column(this.embeddingField, ColumnValue.fromString((String)embeddinged)));
         if (textSegment != null) {
+            Metadata metadata;
             String text = textSegment.text();
             if (text != null) {
-                rowPutChange.addColumn(new Column(this.textField, ColumnValue.fromString(text)));
+                rowPutChange.addColumn(new Column(this.textField, ColumnValue.fromString((String)text)));
             }
-            Metadata metadata = textSegment.metadata();
-            if (metadata != null) {
-                Map<String, Object> map = metadata.toMap();
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    String key = entry.getKey();
+            if ((metadata = textSegment.metadata()) != null) {
+                Map map = metadata.toMap();
+                for (Map.Entry entry : map.entrySet()) {
+                    String key = (String)entry.getKey();
                     Object value = entry.getValue();
                     if (this.textField.equals(key)) {
-                        throw Exceptions.illegalArgument("there is a metadata(%s,%s) that is consistent with the name of the text field:%s", key, value, this.textField);
+                        throw Exceptions.illegalArgument((String)"there is a metadata(%s,%s) that is consistent with the name of the text field:%s", (Object[])new Object[]{key, value, this.textField});
                     }
                     if (this.embeddingField.equals(key)) {
-                        throw Exceptions.illegalArgument("there is a metadata(%s,%s) that is consistent with the name of the vector field:%s", key, value, this.embeddingField);
+                        throw Exceptions.illegalArgument((String)"there is a metadata(%s,%s) that is consistent with the name of the vector field:%s", (Object[])new Object[]{key, value, this.embeddingField});
                     }
                     if (value instanceof Float) {
-                        rowPutChange.addColumn(new Column(key, ColumnValue.fromDouble((Float) value)));
-                    } else if (value instanceof UUID) {
-                        rowPutChange.addColumn(new Column(key, ColumnValue.fromString(((UUID) value).toString())));
-                    } else {
-                        rowPutChange.addColumn(new Column(key, ValueUtil.toColumnValue(value)));
+                        rowPutChange.addColumn(new Column(key, ColumnValue.fromDouble((double)((Float)value).floatValue())));
+                        continue;
                     }
+                    if (value instanceof UUID) {
+                        rowPutChange.addColumn(new Column(key, ColumnValue.fromString((String)((UUID)value).toString())));
+                        continue;
+                    }
+                    rowPutChange.addColumn(new Column(key, ValueUtil.toColumnValue(value)));
                 }
             }
         }
         try {
-            client.putRow(new PutRowRequest(rowPutChange));
-            if (log.isDebugEnabled()) {
-                log.debug("add id:{}, textSegment:{}, embedding:{}", id, textSegment, TablestoreUtils.maxLogOrNull(embedding.toString()));
+            this.client.putRow(new PutRowRequest(rowPutChange));
+            if (this.log.isDebugEnabled()) {
+                this.log.debug("add id:{}, textSegment:{}, embedding:{}", new Object[]{id, textSegment, TablestoreUtils.maxLogOrNull(embedding.toString())});
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(String.format("add embedding data failed, id:%s, textSegment:%s,embedding:%s", id, textSegment, embedding), e);
         }
     }
 
     protected void innerDelete(String id) {
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
-        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName, PrimaryKeyValue.fromString(id));
+        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName, PrimaryKeyValue.fromString((String)id));
         PrimaryKey primaryKey = primaryKeyBuilder.build();
         RowDeleteChange rowDeleteChange = new RowDeleteChange(this.tableName, primaryKey);
         try {
-            client.deleteRow(new DeleteRowRequest(rowDeleteChange));
-            log.debug("delete id:{}", id);
-        } catch (Exception e) {
+            this.client.deleteRow(new DeleteRowRequest(rowDeleteChange));
+            this.log.debug("delete id:{}", (Object)id);
+        }
+        catch (Exception e) {
             throw new RuntimeException(String.format("delete embedding data failed, id:%s", id), e);
         }
     }
@@ -474,45 +504,40 @@ public class TablestoreEmbeddingStore implements EmbeddingStore<TextSegment> {
         rangeRowQueryCriteria.addColumnsToGet(columnsToGet);
         rangeRowQueryCriteria.setDirection(Direction.FORWARD);
         GetRangeRequest getRangeRequest = new GetRangeRequest(rangeRowQueryCriteria);
-        GetRangeResponse getRangeResponse;
         while (true) {
-            getRangeResponse = client.getRange(getRangeRequest);
+            GetRangeResponse getRangeResponse = this.client.getRange(getRangeRequest);
             for (Row row : getRangeResponse.getRows()) {
                 rowConsumer.accept(row);
             }
-            if (getRangeResponse.getNextStartPrimaryKey() != null) {
-                rangeRowQueryCriteria.setInclusiveStartPrimaryKey(getRangeResponse.getNextStartPrimaryKey());
-            } else {
-                break;
-            }
+            if (getRangeResponse.getNextStartPrimaryKey() == null) break;
+            rangeRowQueryCriteria.setInclusiveStartPrimaryKey(getRangeResponse.getNextStartPrimaryKey());
         }
     }
 
     private Metadata rowToMetadata(Row row) {
         Metadata metadata = new Metadata();
-        for (Column column : row.getColumns()) {
-            if (column.getName().equals(embeddingField)) {
-                continue;
-            }
-            if (column.getName().equals(textField)) {
-                continue;
-            }
+        block5: for (Column column : row.getColumns()) {
+            if (column.getName().equals(this.embeddingField) || column.getName().equals(this.textField)) continue;
             ColumnType columnType = column.getValue().getType();
             switch (columnType) {
-                case STRING:
+                case STRING: {
                     metadata.put(column.getName(), column.getValue().asString());
-                    break;
-                case INTEGER:
+                    continue block5;
+                }
+                case INTEGER: {
                     metadata.put(column.getName(), column.getValue().asLong());
-                    break;
-                case DOUBLE:
+                    continue block5;
+                }
+                case DOUBLE: {
                     metadata.put(column.getName(), column.getValue().asDouble());
-                    break;
-                default:
-                    log.warn("unsupported columnType:{}, key:{}, value:{}", columnType, column.getName(), column.getValue());
+                    continue block5;
+                }
+                default: {
+                    this.log.warn("unsupported columnType:{}, key:{}, value:{}", new Object[]{columnType, column.getName(), column.getValue()});
+                }
             }
         }
         return metadata;
     }
-
 }
+

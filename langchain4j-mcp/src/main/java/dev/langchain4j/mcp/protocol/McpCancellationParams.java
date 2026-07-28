@@ -1,21 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  dev.langchain4j.Internal
+ *  org.jspecify.annotations.NonNull
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpClientParams;
 import org.jspecify.annotations.NonNull;
 
-/**
- * Corresponds to the {@code params} of the {@code CancelledNotification} type from the MCP schema.
- */
 @Internal
-public class McpCancellationParams extends McpClientParams {
-
+public class McpCancellationParams
+extends McpClientParams {
     private Long requestId;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
     private String reason;
 
-    public McpCancellationParams() {}
+    public McpCancellationParams() {
+    }
 
     public McpCancellationParams(@NonNull Long requestId, String reason) {
         this.requestId = requestId;
@@ -23,7 +30,7 @@ public class McpCancellationParams extends McpClientParams {
     }
 
     public Long getRequestId() {
-        return requestId;
+        return this.requestId;
     }
 
     public void setRequestId(Long requestId) {
@@ -31,10 +38,11 @@ public class McpCancellationParams extends McpClientParams {
     }
 
     public String getReason() {
-        return reason;
+        return this.reason;
     }
 
     public void setReason(String reason) {
         this.reason = reason;
     }
 }
+

@@ -1,18 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.internal;
 
 import dev.langchain4j.agentic.observability.AgentListener;
 
 public interface McpClientBuilder<T> {
+    public McpClientBuilder<T> toolName(String var1);
 
-    McpClientBuilder<T> toolName(String toolName);
+    public McpClientBuilder<T> inputKeys(String ... var1);
 
-    McpClientBuilder<T> inputKeys(String... inputKeys);
+    public McpClientBuilder<T> outputKey(String var1);
 
-    McpClientBuilder<T> outputKey(String outputKey);
+    public McpClientBuilder<T> async(boolean var1);
 
-    McpClientBuilder<T> async(boolean async);
+    public McpClientBuilder<T> listener(AgentListener var1);
 
-    McpClientBuilder<T> listener(AgentListener agentListener);
-
-    T build();
+    public T build();
 }
+

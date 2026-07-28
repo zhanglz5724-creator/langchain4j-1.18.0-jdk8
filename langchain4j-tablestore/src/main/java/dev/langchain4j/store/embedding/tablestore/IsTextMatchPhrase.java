@@ -1,37 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.filter.Filter
+ */
 package dev.langchain4j.store.embedding.tablestore;
 
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.embedding.filter.Filter;
-
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-public class IsTextMatchPhrase implements Filter {
-
+public class IsTextMatchPhrase
+implements Filter {
     private final String key;
     private final String comparisonValue;
 
     public IsTextMatchPhrase(String key, String comparisonValue) {
-        this.key = ensureNotBlank(key, "key");
-        this.comparisonValue = ensureNotNull(comparisonValue, "comparisonValue with key '" + key + "'");
+        this.key = ValidationUtils.ensureNotBlank((String)key, (String)"key");
+        this.comparisonValue = (String)ValidationUtils.ensureNotNull((Object)comparisonValue, (String)("comparisonValue with key '" + key + "'"));
     }
 
     public String key() {
-        return key;
+        return this.key;
     }
 
     public String comparisonValue() {
-        return comparisonValue;
+        return this.comparisonValue;
     }
 
-    @Override
     public boolean test(Object object) {
         throw new UnsupportedOperationException("only used in search filters");
     }
 
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -39,20 +41,16 @@ public class IsTextMatchPhrase implements Filter {
         if (!(o instanceof IsTextMatchPhrase)) {
             return false;
         }
-        IsTextMatchPhrase that = (IsTextMatchPhrase) o;
-        return Objects.equals(key, that.key) && Objects.equals(comparisonValue, that.comparisonValue);
+        IsTextMatchPhrase that = (IsTextMatchPhrase)o;
+        return Objects.equals(this.key, that.key) && Objects.equals(this.comparisonValue, that.comparisonValue);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(key, comparisonValue);
+        return Objects.hash(this.key, this.comparisonValue);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", IsTextMatchPhrase.class.getSimpleName() + "[", "]")
-                .add("key='" + key + "'")
-                .add("comparisonValue='" + comparisonValue + "'")
-                .toString();
+        return new StringJoiner(", ", IsTextMatchPhrase.class.getSimpleName() + "[", "]").add("key='" + this.key + "'").add("comparisonValue='" + this.comparisonValue + "'").toString();
     }
 }
+

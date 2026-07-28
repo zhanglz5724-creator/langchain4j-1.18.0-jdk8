@@ -1,7 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.planner;
 
 import dev.langchain4j.agentic.internal.AgentUtil;
 import java.lang.reflect.Type;
+import java.util.Objects;
+
 public class AgentArgument {
     private final Type type;
     private final String name;
@@ -15,40 +20,49 @@ public class AgentArgument {
         this.isOptional = isOptional;
     }
 
-    public Type getType() {
-        return type;
+    public Type type() {
+        return this.type;
     }
 
-    public String getName() {
-        return name;
+    public String name() {
+        return this.name;
     }
 
-    public Object getDefaultValue() {
-        return defaultValue;
+    public Object defaultValue() {
+        return this.defaultValue;
     }
 
-    public boolean getIsOptional() {
-        return isOptional;
+    public boolean isOptional() {
+        return this.isOptional;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AgentArgument that = (AgentArgument) o;
-        return java.util.Objects.equals(this.type, that.type) && java.util.Objects.equals(this.name, that.name) && java.util.Objects.equals(this.defaultValue, that.defaultValue) && java.util.Objects.equals(this.isOptional, that.isOptional);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AgentArgument)) {
+            return false;
+        }
+        AgentArgument other = (AgentArgument)o;
+        if (!Objects.equals(this.type, other.type)) {
+            return false;
+        }
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.defaultValue, other.defaultValue)) {
+            return false;
+        }
+        return this.isOptional == other.isOptional;
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(type, name, defaultValue, isOptional);
+        return Objects.hash(this.type, this.name, this.defaultValue, this.isOptional);
     }
 
-    @Override
     public String toString() {
-        return "AgentArgument{"type=" + type + , "name=" + name + , "defaultValue=" + defaultValue + , "isOptional=" + isOptional + "}"";
+        return "AgentArgument{type=" + this.type + ", name=" + this.name + ", defaultValue=" + this.defaultValue + ", isOptional=" + this.isOptional + "}";
     }
-
 
     public AgentArgument(Type type, String name) {
         this(type, name, null);
@@ -59,6 +73,7 @@ public class AgentArgument {
     }
 
     public Class<?> rawType() {
-        return AgentUtil.rawType(type);
+        return AgentUtil.rawType(this.type);
     }
 }
+

@@ -1,16 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  org.jspecify.annotations.NonNull
+ */
 package dev.langchain4j.mcp.protocol;
 
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpCancellationParams;
+import dev.langchain4j.mcp.protocol.McpClientMethod;
+import dev.langchain4j.mcp.protocol.McpClientNotification;
 import org.jspecify.annotations.NonNull;
 
-/**
- * Corresponds to the {@code CancelledNotification} type from the MCP schema.
- */
 @Internal
-public class McpCancellationNotification extends McpClientNotification {
-
+public class McpCancellationNotification
+extends McpClientNotification {
     public McpCancellationNotification(@NonNull Long requestId, String reason) {
         super(McpClientMethod.NOTIFICATION_CANCELLED);
-        setParams(new McpCancellationParams(requestId, reason));
+        this.setParams(new McpCancellationParams(requestId, reason));
     }
 }
+

@@ -1,29 +1,33 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.ovhai.internal.client;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.ovhai.internal.client.DefaultOvhAiClient;
+import dev.langchain4j.model.ovhai.internal.client.OvhAiClientBuilderFactory;
 import dev.langchain4j.spi.ServiceHelper;
-import org.slf4j.Logger;
 import java.time.Duration;
+import java.util.Iterator;
+import org.slf4j.Logger;
 
-/**
- * @deprecated Do not use anymore, use {@code langchain4j-open-ai} module instead
- */
-@Deprecated(forRemoval = true, since = "1.14.0")
+@Deprecated
 public abstract class OvhAiClient {
-
-    @SuppressWarnings("rawtypes")
-    public static OvhAiClient.Builder builder() {
-        for (OvhAiClientBuilderFactory factory : ServiceHelper.loadFactories(OvhAiClientBuilderFactory.class)) {
-            return factory.get();
+    public static Builder builder() {
+        Iterator iterator = ServiceHelper.loadFactories(OvhAiClientBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OvhAiClientBuilderFactory factory = (OvhAiClientBuilderFactory)iterator.next();
+            return (Builder)factory.get();
         }
-        // fallback to the default
         return DefaultOvhAiClient.builder();
     }
 
-    public abstract static class Builder<T extends OvhAiClient, B extends Builder<T, B>> {
-
+    public static abstract class Builder<T extends OvhAiClient, B extends Builder<T, B>> {
         public String baseUrl;
         public String apiKey;
         public Duration timeout;
@@ -34,25 +38,25 @@ public abstract class OvhAiClient {
         public abstract T build();
 
         public B baseUrl(String baseUrl) {
-            ensureNotBlank(baseUrl, "baseUrl");
+            ValidationUtils.ensureNotBlank((String)baseUrl, (String)"baseUrl");
             this.baseUrl = baseUrl;
-            return (B) this;
+            return (B)this;
         }
 
         public B apiKey(String apiKey) {
-            ensureNotBlank(apiKey, "%s", "OVHcloud API key must be defined. It can be generated here: https://endpoints.ai.cloud.ovh.net/");
+            ValidationUtils.ensureNotBlank((String)apiKey, (String)"%s", (Object[])new Object[]{"OVHcloud API key must be defined. It can be generated here: https://endpoints.ai.cloud.ovh.net/"});
             this.apiKey = apiKey;
-            return (B) this;
+            return (B)this;
         }
 
         public B timeout(Duration timeout) {
-            ensureNotNull(timeout, "timeout");
+            ValidationUtils.ensureNotNull((Object)timeout, (String)"timeout");
             this.timeout = timeout;
-            return (B) this;
+            return (B)this;
         }
 
         public B logRequests() {
-            return logRequests(true);
+            return this.logRequests(true);
         }
 
         public B logRequests(Boolean logRequests) {
@@ -60,11 +64,11 @@ public abstract class OvhAiClient {
                 logRequests = false;
             }
             this.logRequests = logRequests;
-            return (B) this;
+            return (B)this;
         }
 
         public B logResponses() {
-            return logResponses(true);
+            return this.logResponses(true);
         }
 
         public B logResponses(Boolean logResponses) {
@@ -72,12 +76,13 @@ public abstract class OvhAiClient {
                 logResponses = false;
             }
             this.logResponses = logResponses;
-            return (B) this;
+            return (B)this;
         }
 
         public B logger(Logger logger) {
             this.logger = logger;
-            return (B) this;
+            return (B)this;
         }
     }
 }
+

@@ -1,28 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ */
 package dev.langchain4j.model.huggingface.spi;
 
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.model.huggingface.client.HuggingFaceClient;
-
 import java.time.Duration;
 
 public interface HuggingFaceClientFactory {
+    public HuggingFaceClient create(Input var1);
 
-    HuggingFaceClient create(Input input);
-
-    interface Input {
-
-        default String baseUrl() {
+    public static interface Input {
+        default public String baseUrl() {
             return null;
         }
 
-        String apiKey();
+        public String apiKey();
 
-        String modelId();
+        public String modelId();
 
-        Duration timeout();
+        public Duration timeout();
 
-        default HttpClientBuilder httpClientBuilder() {
+        default public HttpClientBuilder httpClientBuilder() {
             return null;
         }
     }
 }
+

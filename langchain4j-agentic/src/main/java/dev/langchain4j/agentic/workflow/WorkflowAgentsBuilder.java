@@ -1,29 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.workflow;
 
 import dev.langchain4j.agentic.UntypedAgent;
+import dev.langchain4j.agentic.workflow.ConditionalAgentService;
+import dev.langchain4j.agentic.workflow.LoopAgentService;
+import dev.langchain4j.agentic.workflow.ParallelAgentService;
+import dev.langchain4j.agentic.workflow.ParallelMapperService;
+import dev.langchain4j.agentic.workflow.SequentialAgentService;
 
 public interface WorkflowAgentsBuilder {
-    SequentialAgentService<UntypedAgent> sequenceBuilder();
+    public SequentialAgentService<UntypedAgent> sequenceBuilder();
 
-    <T> SequentialAgentService<T> sequenceBuilder(Class<T> agentServiceClass);
+    public <T> SequentialAgentService<T> sequenceBuilder(Class<T> var1);
 
-    ParallelAgentService<UntypedAgent> parallelBuilder();
+    public ParallelAgentService<UntypedAgent> parallelBuilder();
 
-    <T> ParallelAgentService<T> parallelBuilder(Class<T> agentServiceClass);
+    public <T> ParallelAgentService<T> parallelBuilder(Class<T> var1);
 
-    LoopAgentService<UntypedAgent> loopBuilder();
+    public LoopAgentService<UntypedAgent> loopBuilder();
 
-    <T> LoopAgentService<T> loopBuilder(Class<T> agentServiceClass);
+    public <T> LoopAgentService<T> loopBuilder(Class<T> var1);
 
-    ConditionalAgentService<UntypedAgent> conditionalBuilder();
+    public ConditionalAgentService<UntypedAgent> conditionalBuilder();
 
-    <T> ConditionalAgentService<T> conditionalBuilder(Class<T> agentServiceClass);
+    public <T> ConditionalAgentService<T> conditionalBuilder(Class<T> var1);
 
-    default ParallelMapperService<UntypedAgent> parallelMapperBuilder() {
+    default public ParallelMapperService<UntypedAgent> parallelMapperBuilder() {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    default <T> ParallelMapperService<T> parallelMapperBuilder(Class<T> agentServiceClass) {
+    default public <T> ParallelMapperService<T> parallelMapperBuilder(Class<T> agentServiceClass) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 }
+

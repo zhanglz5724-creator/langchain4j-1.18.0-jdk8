@@ -1,8 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAnyGetter
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.annotation.JsonSetter
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,100 +26,86 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.model.openai.internal.chat.AssistantMessage;
+import dev.langchain4j.model.openai.internal.chat.Function;
+import dev.langchain4j.model.openai.internal.chat.FunctionCall;
+import dev.langchain4j.model.openai.internal.chat.Message;
+import dev.langchain4j.model.openai.internal.chat.ResponseFormat;
+import dev.langchain4j.model.openai.internal.chat.ResponseFormatType;
+import dev.langchain4j.model.openai.internal.chat.SystemMessage;
+import dev.langchain4j.model.openai.internal.chat.Tool;
+import dev.langchain4j.model.openai.internal.chat.ToolChoice;
+import dev.langchain4j.model.openai.internal.chat.ToolChoiceMode;
+import dev.langchain4j.model.openai.internal.chat.ToolMessage;
+import dev.langchain4j.model.openai.internal.chat.UserMessage;
 import dev.langchain4j.model.openai.internal.shared.StreamOptions;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonDeserialize(builder = ChatCompletionRequest.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_EMPTY)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class ChatCompletionRequest {
-
     @JsonProperty
     private final String model;
-
     @JsonProperty
     private final List<Message> messages;
-
     @JsonProperty
     private final Double temperature;
-
     @JsonProperty
     private final Double topP;
-
     @JsonProperty
     private final Integer n;
-
     @JsonProperty
     private final Boolean stream;
-
     @JsonProperty
     private final StreamOptions streamOptions;
-
     @JsonProperty
     private final List<String> stop;
-
     @JsonProperty
     private final Integer maxTokens;
-
     @JsonProperty
     private final Integer maxCompletionTokens;
-
     @JsonProperty
     private final Double presencePenalty;
-
     @JsonProperty
     private final Double frequencyPenalty;
-
     @JsonProperty
     private final Map<String, Integer> logitBias;
-
     @JsonProperty
     private final String user;
-
     @JsonProperty
     private final ResponseFormat responseFormat;
-
     @JsonProperty
     private final Integer seed;
-
     @JsonProperty
     private final List<Tool> tools;
-
     @JsonProperty
     private final Object toolChoice;
-
     @JsonProperty
     private final Boolean parallelToolCalls;
-
     @JsonProperty
     private final Boolean store;
-
     @JsonProperty
     private final Map<String, String> metadata;
-
     @JsonProperty
     private final String reasoningEffort;
-
     @JsonProperty
     private final String serviceTier;
-
     @JsonProperty
     private final Boolean logprobs;
-
     @JsonProperty
     private final Integer topLogprobs;
-
     @JsonProperty
     @Deprecated
     private final List<Function> functions;
-
     @JsonProperty
     @Deprecated
     private final FunctionCall functionCall;
-
     private final Map<String, Object> customParameters;
 
     public ChatCompletionRequest(Builder builder) {
@@ -142,238 +140,180 @@ public final class ChatCompletionRequest {
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public List<Message> messages() {
-        return messages;
+        return this.messages;
     }
 
     public Double temperature() {
-        return temperature;
+        return this.temperature;
     }
 
     public Double topP() {
-        return topP;
+        return this.topP;
     }
 
     public Integer n() {
-        return n;
+        return this.n;
     }
 
     public Boolean stream() {
-        return stream;
+        return this.stream;
     }
 
     public StreamOptions streamOptions() {
-        return streamOptions;
+        return this.streamOptions;
     }
 
     public List<String> stop() {
-        return stop;
+        return this.stop;
     }
 
     public Integer maxTokens() {
-        return maxTokens;
+        return this.maxTokens;
     }
 
     public Integer maxCompletionTokens() {
-        return maxCompletionTokens;
+        return this.maxCompletionTokens;
     }
 
     public Double presencePenalty() {
-        return presencePenalty;
+        return this.presencePenalty;
     }
 
     public Double frequencyPenalty() {
-        return frequencyPenalty;
+        return this.frequencyPenalty;
     }
 
     public Map<String, Integer> logitBias() {
-        return logitBias;
+        return this.logitBias;
     }
 
     public String user() {
-        return user;
+        return this.user;
     }
 
     public ResponseFormat responseFormat() {
-        return responseFormat;
+        return this.responseFormat;
     }
 
     public Integer seed() {
-        return seed;
+        return this.seed;
     }
 
     public List<Tool> tools() {
-        return tools;
+        return this.tools;
     }
 
     public Object toolChoice() {
-        return toolChoice;
+        return this.toolChoice;
     }
 
     public Boolean parallelToolCalls() {
-        return parallelToolCalls;
+        return this.parallelToolCalls;
     }
 
     public Boolean store() {
-        return store;
+        return this.store;
     }
 
     public Map<String, String> metadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public String reasoningEffort() {
-        return reasoningEffort;
+        return this.reasoningEffort;
     }
 
     public String serviceTier() {
-        return serviceTier;
+        return this.serviceTier;
     }
 
     public Boolean logprobs() {
-        return logprobs;
+        return this.logprobs;
     }
 
     public Integer topLogprobs() {
-        return topLogprobs;
+        return this.topLogprobs;
     }
 
     @Deprecated
     public List<Function> functions() {
-        return functions;
+        return this.functions;
     }
 
     @Deprecated
     public FunctionCall functionCall() {
-        return functionCall;
+        return this.functionCall;
     }
 
     @JsonAnyGetter
     public Map<String, Object> customParameters() {
-        return customParameters;
+        return this.customParameters;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof ChatCompletionRequest && equalTo((ChatCompletionRequest) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof ChatCompletionRequest && this.equalTo((ChatCompletionRequest)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(ChatCompletionRequest another) {
-        return Objects.equals(model, another.model)
-                && Objects.equals(messages, another.messages)
-                && Objects.equals(temperature, another.temperature)
-                && Objects.equals(topP, another.topP)
-                && Objects.equals(n, another.n)
-                && Objects.equals(stream, another.stream)
-                && Objects.equals(streamOptions, another.streamOptions)
-                && Objects.equals(stop, another.stop)
-                && Objects.equals(maxTokens, another.maxTokens)
-                && Objects.equals(maxCompletionTokens, another.maxCompletionTokens)
-                && Objects.equals(presencePenalty, another.presencePenalty)
-                && Objects.equals(frequencyPenalty, another.frequencyPenalty)
-                && Objects.equals(logitBias, another.logitBias)
-                && Objects.equals(user, another.user)
-                && Objects.equals(responseFormat, another.responseFormat)
-                && Objects.equals(seed, another.seed)
-                && Objects.equals(tools, another.tools)
-                && Objects.equals(toolChoice, another.toolChoice)
-                && Objects.equals(parallelToolCalls, another.parallelToolCalls)
-                && Objects.equals(store, another.store)
-                && Objects.equals(metadata, another.metadata)
-                && Objects.equals(reasoningEffort, another.reasoningEffort)
-                && Objects.equals(serviceTier, another.serviceTier)
-                && Objects.equals(logprobs, another.logprobs)
-                && Objects.equals(topLogprobs, another.topLogprobs)
-                && Objects.equals(functions, another.functions)
-                && Objects.equals(functionCall, another.functionCall)
-                && Objects.equals(customParameters, another.customParameters);
+        return Objects.equals(this.model, another.model) && Objects.equals(this.messages, another.messages) && Objects.equals(this.temperature, another.temperature) && Objects.equals(this.topP, another.topP) && Objects.equals(this.n, another.n) && Objects.equals(this.stream, another.stream) && Objects.equals(this.streamOptions, another.streamOptions) && Objects.equals(this.stop, another.stop) && Objects.equals(this.maxTokens, another.maxTokens) && Objects.equals(this.maxCompletionTokens, another.maxCompletionTokens) && Objects.equals(this.presencePenalty, another.presencePenalty) && Objects.equals(this.frequencyPenalty, another.frequencyPenalty) && Objects.equals(this.logitBias, another.logitBias) && Objects.equals(this.user, another.user) && Objects.equals(this.responseFormat, another.responseFormat) && Objects.equals(this.seed, another.seed) && Objects.equals(this.tools, another.tools) && Objects.equals(this.toolChoice, another.toolChoice) && Objects.equals(this.parallelToolCalls, another.parallelToolCalls) && Objects.equals(this.store, another.store) && Objects.equals(this.metadata, another.metadata) && Objects.equals(this.reasoningEffort, another.reasoningEffort) && Objects.equals(this.serviceTier, another.serviceTier) && Objects.equals(this.logprobs, another.logprobs) && Objects.equals(this.topLogprobs, another.topLogprobs) && Objects.equals(this.functions, another.functions) && Objects.equals(this.functionCall, another.functionCall) && Objects.equals(this.customParameters, another.customParameters);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(model);
-        h += (h << 5) + Objects.hashCode(messages);
-        h += (h << 5) + Objects.hashCode(temperature);
-        h += (h << 5) + Objects.hashCode(topP);
-        h += (h << 5) + Objects.hashCode(n);
-        h += (h << 5) + Objects.hashCode(stream);
-        h += (h << 5) + Objects.hashCode(streamOptions);
-        h += (h << 5) + Objects.hashCode(stop);
-        h += (h << 5) + Objects.hashCode(maxTokens);
-        h += (h << 5) + Objects.hashCode(maxCompletionTokens);
-        h += (h << 5) + Objects.hashCode(presencePenalty);
-        h += (h << 5) + Objects.hashCode(frequencyPenalty);
-        h += (h << 5) + Objects.hashCode(logitBias);
-        h += (h << 5) + Objects.hashCode(user);
-        h += (h << 5) + Objects.hashCode(responseFormat);
-        h += (h << 5) + Objects.hashCode(seed);
-        h += (h << 5) + Objects.hashCode(tools);
-        h += (h << 5) + Objects.hashCode(toolChoice);
-        h += (h << 5) + Objects.hashCode(parallelToolCalls);
-        h += (h << 5) + Objects.hashCode(store);
-        h += (h << 5) + Objects.hashCode(metadata);
-        h += (h << 5) + Objects.hashCode(reasoningEffort);
-        h += (h << 5) + Objects.hashCode(serviceTier);
-        h += (h << 5) + Objects.hashCode(logprobs);
-        h += (h << 5) + Objects.hashCode(topLogprobs);
-        h += (h << 5) + Objects.hashCode(functions);
-        h += (h << 5) + Objects.hashCode(functionCall);
-        h += (h << 5) + Objects.hashCode(customParameters);
+        h += (h << 5) + Objects.hashCode(this.model);
+        h += (h << 5) + Objects.hashCode(this.messages);
+        h += (h << 5) + Objects.hashCode(this.temperature);
+        h += (h << 5) + Objects.hashCode(this.topP);
+        h += (h << 5) + Objects.hashCode(this.n);
+        h += (h << 5) + Objects.hashCode(this.stream);
+        h += (h << 5) + Objects.hashCode(this.streamOptions);
+        h += (h << 5) + Objects.hashCode(this.stop);
+        h += (h << 5) + Objects.hashCode(this.maxTokens);
+        h += (h << 5) + Objects.hashCode(this.maxCompletionTokens);
+        h += (h << 5) + Objects.hashCode(this.presencePenalty);
+        h += (h << 5) + Objects.hashCode(this.frequencyPenalty);
+        h += (h << 5) + Objects.hashCode(this.logitBias);
+        h += (h << 5) + Objects.hashCode(this.user);
+        h += (h << 5) + Objects.hashCode(this.responseFormat);
+        h += (h << 5) + Objects.hashCode(this.seed);
+        h += (h << 5) + Objects.hashCode(this.tools);
+        h += (h << 5) + Objects.hashCode(this.toolChoice);
+        h += (h << 5) + Objects.hashCode(this.parallelToolCalls);
+        h += (h << 5) + Objects.hashCode(this.store);
+        h += (h << 5) + Objects.hashCode(this.metadata);
+        h += (h << 5) + Objects.hashCode(this.reasoningEffort);
+        h += (h << 5) + Objects.hashCode(this.serviceTier);
+        h += (h << 5) + Objects.hashCode(this.logprobs);
+        h += (h << 5) + Objects.hashCode(this.topLogprobs);
+        h += (h << 5) + Objects.hashCode(this.functions);
+        h += (h << 5) + Objects.hashCode(this.functionCall);
+        h += (h << 5) + Objects.hashCode(this.customParameters);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "ChatCompletionRequest{"
-                + "model=" + model
-                + ", messages=" + messages
-                + ", temperature=" + temperature
-                + ", topP=" + topP
-                + ", n=" + n
-                + ", stream=" + stream
-                + ", streamOptions=" + streamOptions
-                + ", stop=" + stop
-                + ", maxTokens=" + maxTokens
-                + ", maxCompletionTokens=" + maxCompletionTokens
-                + ", presencePenalty=" + presencePenalty
-                + ", frequencyPenalty=" + frequencyPenalty
-                + ", logitBias=" + logitBias
-                + ", user=" + user
-                + ", responseFormat=" + responseFormat
-                + ", seed=" + seed
-                + ", tools=" + tools
-                + ", toolChoice=" + toolChoice
-                + ", parallelToolCalls=" + parallelToolCalls
-                + ", store=" + store
-                + ", metadata=" + metadata
-                + ", reasoningEffort=" + reasoningEffort
-                + ", serviceTier=" + serviceTier
-                + ", logprobs=" + logprobs
-                + ", topLogprobs=" + topLogprobs
-                + ", functions=" + functions
-                + ", functionCall=" + functionCall
-                + ", customParameters=" + customParameters
-                + "}";
+        return "ChatCompletionRequest{model=" + this.model + ", messages=" + this.messages + ", temperature=" + this.temperature + ", topP=" + this.topP + ", n=" + this.n + ", stream=" + this.stream + ", streamOptions=" + this.streamOptions + ", stop=" + this.stop + ", maxTokens=" + this.maxTokens + ", maxCompletionTokens=" + this.maxCompletionTokens + ", presencePenalty=" + this.presencePenalty + ", frequencyPenalty=" + this.frequencyPenalty + ", logitBias=" + this.logitBias + ", user=" + this.user + ", responseFormat=" + this.responseFormat + ", seed=" + this.seed + ", tools=" + this.tools + ", toolChoice=" + this.toolChoice + ", parallelToolCalls=" + this.parallelToolCalls + ", store=" + this.store + ", metadata=" + this.metadata + ", reasoningEffort=" + this.reasoningEffort + ", serviceTier=" + this.serviceTier + ", logprobs=" + this.logprobs + ", topLogprobs=" + this.topLogprobs + ", functions=" + this.functions + ", functionCall=" + this.functionCall + ", customParameters=" + this.customParameters + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String model;
         private List<Message> messages;
         private Double temperature;
@@ -399,44 +339,41 @@ public final class ChatCompletionRequest {
         private String serviceTier;
         private Boolean logprobs;
         private Integer topLogprobs;
-
         @Deprecated
         private List<Function> functions;
-
         @Deprecated
         private FunctionCall functionCall;
-
         private Map<String, Object> customParameters;
 
         public Builder from(ChatCompletionRequest instance) {
-            model(instance.model);
-            messages(instance.messages);
-            temperature(instance.temperature);
-            topP(instance.topP);
-            n(instance.n);
-            stream(instance.stream);
-            streamOptions(instance.streamOptions);
-            stop(instance.stop);
-            maxTokens(instance.maxTokens);
-            maxCompletionTokens(instance.maxCompletionTokens);
-            presencePenalty(instance.presencePenalty);
-            frequencyPenalty(instance.frequencyPenalty);
-            logitBias(instance.logitBias);
-            user(instance.user);
-            responseFormat(instance.responseFormat);
-            seed(instance.seed);
-            tools(instance.tools);
-            toolChoice(instance.toolChoice);
-            parallelToolCalls(instance.parallelToolCalls);
-            store(instance.store);
-            metadata(instance.metadata);
-            reasoningEffort(instance.reasoningEffort);
-            serviceTier(instance.serviceTier);
-            logprobs(instance.logprobs);
-            topLogprobs(instance.topLogprobs);
-            functions(instance.functions);
-            functionCall(instance.functionCall);
-            customParameters(instance.customParameters);
+            this.model(instance.model);
+            this.messages(instance.messages);
+            this.temperature(instance.temperature);
+            this.topP(instance.topP);
+            this.n(instance.n);
+            this.stream(instance.stream);
+            this.streamOptions(instance.streamOptions);
+            this.stop(instance.stop);
+            this.maxTokens(instance.maxTokens);
+            this.maxCompletionTokens(instance.maxCompletionTokens);
+            this.presencePenalty(instance.presencePenalty);
+            this.frequencyPenalty(instance.frequencyPenalty);
+            this.logitBias(instance.logitBias);
+            this.user(instance.user);
+            this.responseFormat(instance.responseFormat);
+            this.seed(instance.seed);
+            this.tools(instance.tools);
+            this.toolChoice(instance.toolChoice);
+            this.parallelToolCalls(instance.parallelToolCalls);
+            this.store(instance.store);
+            this.metadata(instance.metadata);
+            this.reasoningEffort(instance.reasoningEffort);
+            this.serviceTier(instance.serviceTier);
+            this.logprobs(instance.logprobs);
+            this.topLogprobs(instance.topLogprobs);
+            this.functions(instance.functions);
+            this.functionCall(instance.functionCall);
+            this.customParameters(instance.customParameters);
             return this;
         }
 
@@ -448,18 +385,18 @@ public final class ChatCompletionRequest {
         @JsonSetter
         public Builder messages(List<Message> messages) {
             if (messages != null) {
-                this.messages = unmodifiableList(messages);
+                this.messages = Collections.unmodifiableList(messages);
             }
             return this;
         }
 
-        public Builder messages(Message... messages) {
-            return messages(asList(messages));
+        public Builder messages(Message ... messages) {
+            return this.messages(Arrays.asList(messages));
         }
 
         public Builder addSystemMessage(String systemMessage) {
             if (this.messages == null) {
-                this.messages = new ArrayList<>();
+                this.messages = new ArrayList<Message>();
             }
             this.messages.add(SystemMessage.from(systemMessage));
             return this;
@@ -467,7 +404,7 @@ public final class ChatCompletionRequest {
 
         public Builder addUserMessage(String userMessage) {
             if (this.messages == null) {
-                this.messages = new ArrayList<>();
+                this.messages = new ArrayList<Message>();
             }
             this.messages.add(UserMessage.from(userMessage));
             return this;
@@ -475,7 +412,7 @@ public final class ChatCompletionRequest {
 
         public Builder addAssistantMessage(String assistantMessage) {
             if (this.messages == null) {
-                this.messages = new ArrayList<>();
+                this.messages = new ArrayList<Message>();
             }
             this.messages.add(AssistantMessage.from(assistantMessage));
             return this;
@@ -483,7 +420,7 @@ public final class ChatCompletionRequest {
 
         public Builder addToolMessage(String toolCallId, String content) {
             if (this.messages == null) {
-                this.messages = new ArrayList<>();
+                this.messages = new ArrayList<Message>();
             }
             this.messages.add(ToolMessage.from(toolCallId, content));
             return this;
@@ -517,13 +454,13 @@ public final class ChatCompletionRequest {
         @JsonSetter
         public Builder stop(List<String> stop) {
             if (stop != null) {
-                this.stop = unmodifiableList(stop);
+                this.stop = Collections.unmodifiableList(stop);
             }
             return this;
         }
 
-        public Builder stop(String... stop) {
-            return stop(asList(stop));
+        public Builder stop(String ... stop) {
+            return this.stop(Arrays.asList(stop));
         }
 
         public Builder maxTokens(Integer maxTokens) {
@@ -548,7 +485,7 @@ public final class ChatCompletionRequest {
 
         public Builder logitBias(Map<String, Integer> logitBias) {
             if (logitBias != null) {
-                this.logitBias = unmodifiableMap(logitBias);
+                this.logitBias = Collections.unmodifiableMap(logitBias);
             }
             return this;
         }
@@ -560,8 +497,7 @@ public final class ChatCompletionRequest {
 
         public Builder responseFormat(ResponseFormatType responseFormatType) {
             if (responseFormatType != null) {
-                responseFormat =
-                        ResponseFormat.builder().type(responseFormatType).build();
+                this.responseFormat = ResponseFormat.builder().type(responseFormatType).build();
             }
             return this;
         }
@@ -580,13 +516,13 @@ public final class ChatCompletionRequest {
         @JsonSetter
         public Builder tools(List<Tool> tools) {
             if (tools != null) {
-                this.tools = unmodifiableList(tools);
+                this.tools = Collections.unmodifiableList(tools);
             }
             return this;
         }
 
-        public Builder tools(Tool... tools) {
-            return tools(asList(tools));
+        public Builder tools(Tool ... tools) {
+            return this.tools(Arrays.asList(tools));
         }
 
         public Builder toolChoice(ToolChoiceMode toolChoiceMode) {
@@ -595,7 +531,7 @@ public final class ChatCompletionRequest {
         }
 
         public Builder toolChoice(String functionName) {
-            return toolChoice(ToolChoice.from(functionName));
+            return this.toolChoice(ToolChoice.from(functionName));
         }
 
         public Builder toolChoice(Object toolChoice) {
@@ -615,7 +551,7 @@ public final class ChatCompletionRequest {
 
         public Builder metadata(Map<String, String> metadata) {
             if (metadata != null) {
-                this.metadata = unmodifiableMap(metadata);
+                this.metadata = Collections.unmodifiableMap(metadata);
             }
             return this;
         }
@@ -641,15 +577,15 @@ public final class ChatCompletionRequest {
         }
 
         @Deprecated
-        public Builder functions(Function... functions) {
-            return functions(asList(functions));
+        public Builder functions(Function ... functions) {
+            return this.functions(Arrays.asList(functions));
         }
 
         @JsonSetter
         @Deprecated
         public Builder functions(List<Function> functions) {
             if (functions != null) {
-                this.functions = unmodifiableList(functions);
+                this.functions = Collections.unmodifiableList(functions);
             }
             return this;
         }
@@ -678,3 +614,4 @@ public final class ChatCompletionRequest {
         }
     }
 }
+

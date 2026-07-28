@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.planner;
 
 import dev.langchain4j.agentic.agent.ErrorContext;
@@ -10,26 +13,26 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface AgenticService<T, A> {
+    public A build();
 
-    A build();
+    public T subAgents(Object ... var1);
 
-    T subAgents(Object... agents);
+    public T subAgents(Collection<?> var1);
 
-    T subAgents(Collection<?> agents);
+    public T beforeCall(Consumer<AgenticScope> var1);
 
-    T beforeCall(Consumer<AgenticScope> beforeCall);
+    public T name(String var1);
 
-    T name(String name);
+    public T description(String var1);
 
-    T description(String description);
+    public T outputKey(String var1);
 
-    T outputKey(String outputKey);
+    public T outputKey(Class<? extends TypedKey<?>> var1);
 
-    T outputKey(Class<? extends TypedKey<?>> outputKey);
+    public T output(Function<AgenticScope, Object> var1);
 
-    T output(Function<AgenticScope, Object> output);
+    public T errorHandler(Function<ErrorContext, ErrorRecoveryResult> var1);
 
-    T errorHandler(Function<ErrorContext, ErrorRecoveryResult> errorHandler);
-
-    T listener(AgentListener listeners);
+    public T listener(AgentListener var1);
 }
+

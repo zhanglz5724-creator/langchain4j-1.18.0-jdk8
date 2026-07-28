@@ -1,41 +1,88 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.googleai;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonIgnoreProperties(ignoreUnknown = true) public class UrlContextMetadata {
-    private final Object @JsonProperty("urlMetadata";
+import java.util.Objects;
 
-    public UrlContextMetadata(Object @JsonProperty("urlMetadata") {
-        this.@JsonProperty("urlMetadata" = @JsonProperty("urlMetadata";
+@JsonIgnoreProperties(ignoreUnknown=true)
+public final class UrlContextMetadata {
+    private final List<UrlMetadata> urlMetadata;
+
+    @JsonCreator
+    public UrlContextMetadata(@JsonProperty(value="urlMetadata") List<UrlMetadata> urlMetadata) {
+        this.urlMetadata = urlMetadata;
     }
 
-    public Object get@JsonProperty("urlMetadata"() {
-        return @JsonProperty("urlMetadata";
+    public List<UrlMetadata> urlMetadata() {
+        return this.urlMetadata;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UrlContextMetadata that = (UrlContextMetadata) o;
-        return java.util.Objects.equals(this.@JsonProperty("urlMetadata", that.@JsonProperty("urlMetadata");
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UrlContextMetadata)) {
+            return false;
+        }
+        UrlContextMetadata that = (UrlContextMetadata)o;
+        return Objects.equals(this.urlMetadata, that.urlMetadata);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(@JsonProperty("urlMetadata");
+        return Objects.hash(this.urlMetadata);
     }
 
-    @Override
     public String toString() {
-        return "UrlContextMetadata{"@JsonProperty("urlMetadata"=" + @JsonProperty("urlMetadata" + "}"";
+        return "UrlContextMetadata[urlMetadata=" + this.urlMetadata + "]";
     }
 
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    public static final class UrlMetadata {
+        private final String retrievedUrl;
+        private final String urlRetrievalStatus;
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record UrlMetadata(
-            @JsonProperty("retrievedUrl") String retrievedUrl,
-            @JsonProperty("urlRetrievalStatus") String urlRetrievalStatus) {}
+        @JsonCreator
+        public UrlMetadata(@JsonProperty(value="retrievedUrl") String retrievedUrl, @JsonProperty(value="urlRetrievalStatus") String urlRetrievalStatus) {
+            this.retrievedUrl = retrievedUrl;
+            this.urlRetrievalStatus = urlRetrievalStatus;
+        }
+
+        public String retrievedUrl() {
+            return this.retrievedUrl;
+        }
+
+        public String urlRetrievalStatus() {
+            return this.urlRetrievalStatus;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof UrlMetadata)) {
+                return false;
+            }
+            UrlMetadata that = (UrlMetadata)o;
+            return Objects.equals(this.retrievedUrl, that.retrievedUrl) && Objects.equals(this.urlRetrievalStatus, that.urlRetrievalStatus);
+        }
+
+        public int hashCode() {
+            return Objects.hash(this.retrievedUrl, this.urlRetrievalStatus);
+        }
+
+        public String toString() {
+            return "UrlMetadata[retrievedUrl=" + this.retrievedUrl + ", urlRetrievalStatus=" + this.urlRetrievalStatus + "]";
+        }
+    }
 }
+

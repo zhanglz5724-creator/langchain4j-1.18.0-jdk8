@@ -1,4 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.agent;
+
+import java.util.Objects;
+
 public class ErrorRecoveryResult {
     private final Type type;
     private final Object result;
@@ -8,35 +14,34 @@ public class ErrorRecoveryResult {
         this.result = result;
     }
 
-    public Type getType() {
-        return type;
+    public Type type() {
+        return this.type;
     }
 
-    public Object getResult() {
-        return result;
+    public Object result() {
+        return this.result;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ErrorRecoveryResult that = (ErrorRecoveryResult) o;
-        return java.util.Objects.equals(this.type, that.type) && java.util.Objects.equals(this.result, that.result);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ErrorRecoveryResult)) {
+            return false;
+        }
+        ErrorRecoveryResult other = (ErrorRecoveryResult)o;
+        if (!Objects.equals((Object)this.type, (Object)other.type)) {
+            return false;
+        }
+        return Objects.equals(this.result, other.result);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(type, result);
+        return Objects.hash(new Object[]{this.type, this.result});
     }
 
-    @Override
     public String toString() {
-        return "ErrorRecoveryResult{"type=" + type + , "result=" + result + "}"";
-    }
-
-
-    public enum Type {
-        THROW_EXCEPTION, RETURN_RESULT, RETRY
+        return "ErrorRecoveryResult{type=" + (Object)((Object)this.type) + ", result=" + this.result + "}";
     }
 
     public static ErrorRecoveryResult throwException() {
@@ -50,4 +55,12 @@ public class ErrorRecoveryResult {
     public static ErrorRecoveryResult result(Object result) {
         return new ErrorRecoveryResult(Type.RETURN_RESULT, result);
     }
+
+    public static enum Type {
+        THROW_EXCEPTION,
+        RETURN_RESULT,
+        RETRY;
+
+    }
 }
+

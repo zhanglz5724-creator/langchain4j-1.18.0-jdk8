@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.audio.transcription;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,17 +22,15 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.audio.transcription.AudioTokenUsage;
 import java.util.Objects;
 
-@JsonDeserialize(builder = OpenAiAudioTranscriptionResponse.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class OpenAiAudioTranscriptionResponse {
-
     @JsonProperty
     private final String text;
-
     @JsonProperty
     private final AudioTokenUsage usage;
 
@@ -28,50 +40,47 @@ public final class OpenAiAudioTranscriptionResponse {
     }
 
     public String text() {
-        return text;
+        return this.text;
     }
 
     public AudioTokenUsage usage() {
-        return usage;
+        return this.usage;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof OpenAiAudioTranscriptionResponse openAiAudioTranscriptionResponse
-                && equalTo(openAiAudioTranscriptionResponse);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof OpenAiAudioTranscriptionResponse && this.equalTo((OpenAiAudioTranscriptionResponse)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(OpenAiAudioTranscriptionResponse another) {
-        return Objects.equals(text, another.text) && Objects.equals(usage, another.usage);
+        return Objects.equals(this.text, another.text) && Objects.equals(this.usage, another.usage);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(text);
-        h += (h << 5) + Objects.hashCode(usage);
+        h += (h << 5) + Objects.hashCode(this.text);
+        h += (h << 5) + Objects.hashCode(this.usage);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "OpenAiAudioTranscriptionResponse{" + "text=" + text + ", usage=" + usage + "}";
+        return "OpenAiAudioTranscriptionResponse{text=" + this.text + ", usage=" + this.usage + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String text;
         private AudioTokenUsage usage;
 
@@ -90,3 +99,4 @@ public final class OpenAiAudioTranscriptionResponse {
         }
     }
 }
+

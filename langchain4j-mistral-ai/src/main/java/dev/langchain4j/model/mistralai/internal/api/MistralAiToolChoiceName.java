@@ -1,13 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.mistralai.internal.api;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public enum MistralAiToolChoiceName {
+    AUTO,
+    ANY,
+    NONE;
 
-    @JsonProperty("auto") AUTO,
-    @JsonProperty("any") ANY,
-    @JsonProperty("none") NONE;
-
-    MistralAiToolChoiceName() {
-    }
 }
+

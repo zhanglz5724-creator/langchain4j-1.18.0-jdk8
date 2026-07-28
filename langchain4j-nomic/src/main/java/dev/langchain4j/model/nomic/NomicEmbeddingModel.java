@@ -1,118 +1,92 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.nomic;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.time.Duration.ofSeconds;
-import static java.util.stream.Collectors.toList;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
+import dev.langchain4j.model.nomic.EmbeddingRequest;
+import dev.langchain4j.model.nomic.EmbeddingResponse;
+import dev.langchain4j.model.nomic.NomicClient;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
-/**
- * An integration with Nomic Atlas's Text Embeddings API.
- * See more details <a href="https://docs.nomic.ai/reference/endpoints/nomic-embed-text">here</a>.
- */
-public class NomicEmbeddingModel extends DimensionAwareEmbeddingModel {
-
+public class NomicEmbeddingModel
+extends DimensionAwareEmbeddingModel {
     private static final String DEFAULT_BASE_URL = "https://api-atlas.nomic.ai/v1/";
-
     private final NomicClient client;
     private final String modelName;
     private final String taskType;
     private final Integer maxSegmentsPerBatch;
     private final Integer maxRetries;
 
-    @Deprecated(forRemoval = true, since = "1.5.0")
-    public NomicEmbeddingModel(
-            String baseUrl,
-            String apiKey,
-            String modelName,
-            String taskType,
-            Integer maxSegmentsPerBatch,
-            Duration timeout,
-            Integer maxRetries,
-            Boolean logRequests,
-            Boolean logResponses) {
-        this.client = NomicClient.builder()
-                .baseUrl(getOrDefault(baseUrl, DEFAULT_BASE_URL))
-                .apiKey(ensureNotBlank(apiKey, "apiKey"))
-                .timeout(getOrDefault(timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(logRequests, false))
-                .logResponses(getOrDefault(logResponses, false))
-                .build();
-        this.modelName = ensureNotBlank(modelName, "modelName");
+    @Deprecated
+    public NomicEmbeddingModel(String baseUrl, String apiKey, String modelName, String taskType, Integer maxSegmentsPerBatch, Duration timeout, Integer maxRetries, Boolean logRequests, Boolean logResponses) {
+        this.client = NomicClient.builder().baseUrl((String)Utils.getOrDefault((Object)baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(ValidationUtils.ensureNotBlank((String)apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)logResponses, (Object)false)).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
         this.taskType = taskType;
-        this.maxSegmentsPerBatch = getOrDefault(maxSegmentsPerBatch, 500);
-        this.maxRetries = getOrDefault(maxRetries, 2);
+        this.maxSegmentsPerBatch = (Integer)Utils.getOrDefault((Object)maxSegmentsPerBatch, (Object)500);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)maxRetries, (Object)2);
     }
 
     public NomicEmbeddingModel(NomicEmbeddingModelBuilder builder) {
-        this.client = NomicClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.baseUrl, DEFAULT_BASE_URL))
-                .apiKey(ensureNotBlank(builder.apiKey, "apiKey"))
-                .timeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
+        this.client = NomicClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(ValidationUtils.ensureNotBlank((String)builder.apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false)).logger(builder.logger).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
         this.taskType = builder.taskType;
-        this.maxSegmentsPerBatch = getOrDefault(builder.maxSegmentsPerBatch, 500);
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.maxSegmentsPerBatch = (Integer)Utils.getOrDefault((Object)builder.maxSegmentsPerBatch, (Object)500);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
     public static NomicEmbeddingModelBuilder builder() {
         return new NomicEmbeddingModelBuilder();
     }
 
-    @Override
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-
-        List<String> texts = textSegments.stream().map(TextSegment::text).collect(toList());
-
-        return embedTexts(texts);
+        List<String> texts = textSegments.stream().map(TextSegment::text).collect(Collectors.toList());
+        return this.embedTexts(texts);
     }
 
-    @Override
     public String modelName() {
         return this.modelName;
     }
 
     private Response<List<Embedding>> embedTexts(List<String> texts) {
-
-        List<Embedding> embeddings = new ArrayList<>();
+        ArrayList<Embedding> embeddings = new ArrayList<Embedding>();
         int inputTokenCount = 0;
-
-        for (int i = 0; i < texts.size(); i += maxSegmentsPerBatch) {
-            List<String> batch = texts.subList(i, Math.min(i + maxSegmentsPerBatch, texts.size()));
-
-            EmbeddingRequest request = EmbeddingRequest.builder()
-                    .model(modelName)
-                    .texts(batch)
-                    .taskType(taskType)
-                    .build();
-
-            EmbeddingResponse response = withRetryMappingExceptions(() -> this.client.embed(request), maxRetries);
-
-            embeddings.addAll(getEmbeddings(response));
-            inputTokenCount += getTokenUsage(response);
+        for (int i = 0; i < texts.size(); i += this.maxSegmentsPerBatch.intValue()) {
+            List<String> batch = texts.subList(i, Math.min(i + this.maxSegmentsPerBatch, texts.size()));
+            EmbeddingRequest request = EmbeddingRequest.builder().model(this.modelName).texts(batch).taskType(this.taskType).build();
+            EmbeddingResponse response = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.embed(request), (int)this.maxRetries);
+            embeddings.addAll(this.getEmbeddings(response));
+            inputTokenCount += this.getTokenUsage(response).intValue();
         }
-
-        return Response.from(embeddings, new TokenUsage(inputTokenCount, 0));
+        return Response.from(embeddings, (TokenUsage)new TokenUsage(Integer.valueOf(inputTokenCount), Integer.valueOf(0)));
     }
 
     private List<Embedding> getEmbeddings(EmbeddingResponse response) {
-        return response.getEmbeddings().stream().map(Embedding::from).collect(toList());
+        return response.getEmbeddings().stream().map(Embedding::from).collect(Collectors.toList());
     }
 
     private Integer getTokenUsage(EmbeddingResponse response) {
@@ -135,7 +109,8 @@ public class NomicEmbeddingModel extends DimensionAwareEmbeddingModel {
         private Logger logger;
         private HttpClientBuilder httpClientBuilder;
 
-        NomicEmbeddingModelBuilder() {}
+        NomicEmbeddingModelBuilder() {
+        }
 
         public NomicEmbeddingModelBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -182,22 +157,11 @@ public class NomicEmbeddingModel extends DimensionAwareEmbeddingModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public NomicEmbeddingModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
-        /**
-         * Sets a custom HTTP client builder, allowing fine-grained control over the HTTP client
-         * configuration such as timeouts and proxy settings.
-         *
-         * @param httpClientBuilder the HTTP client builder
-         * @return {@code this}
-         */
         public NomicEmbeddingModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -208,11 +172,8 @@ public class NomicEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
 
         public String toString() {
-            return "NomicEmbeddingModel.NomicEmbeddingModelBuilder(baseUrl=" + this.baseUrl + ", apiKey="
-                    + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", taskType="
-                    + this.taskType + ", maxSegmentsPerBatch=" + this.maxSegmentsPerBatch + ", timeout=" + this.timeout
-                    + ", maxRetries=" + this.maxRetries + ", logRequests=" + this.logRequests + ", logResponses="
-                    + this.logResponses + ")";
+            return "NomicEmbeddingModel.NomicEmbeddingModelBuilder(baseUrl=" + this.baseUrl + ", apiKey=" + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", taskType=" + this.taskType + ", maxSegmentsPerBatch=" + this.maxSegmentsPerBatch + ", timeout=" + this.timeout + ", maxRetries=" + this.maxRetries + ", logRequests=" + this.logRequests + ", logResponses=" + this.logResponses + ")";
         }
     }
 }
+

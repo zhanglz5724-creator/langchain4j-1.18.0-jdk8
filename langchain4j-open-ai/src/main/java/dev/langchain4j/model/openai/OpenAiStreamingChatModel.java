@@ -1,33 +1,37 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils
+ *  dev.langchain4j.internal.MappingTrackingStreamingChatResponseHandler
+ *  dev.langchain4j.internal.ToolCallBuilder
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.StreamingChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.CompleteToolCall
+ *  dev.langchain4j.model.chat.response.PartialToolCall
+ *  dev.langchain4j.model.chat.response.StreamingChatResponseHandler
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.openai;
 
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onCompleteResponse;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onCompleteToolCall;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onPartialResponse;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onPartialThinking;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onPartialToolCall;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onUnmappedRawEvent;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.withLoggingExceptions;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNotNullOrEmpty;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.model.ModelProvider.OPEN_AI;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.DEFAULT_OPENAI_URL;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.DEFAULT_USER_AGENT;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.fromOpenAiResponseFormat;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.toOpenAiChatRequest;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.validate;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.time.Duration.ofSeconds;
-import static java.util.Arrays.asList;
-
-import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils;
 import dev.langchain4j.internal.MappingTrackingStreamingChatResponseHandler;
 import dev.langchain4j.internal.ToolCallBuilder;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
-import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -35,10 +39,15 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.PartialThinking;
+import dev.langchain4j.model.chat.response.CompleteToolCall;
 import dev.langchain4j.model.chat.response.PartialToolCall;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.chat.response.StreamingHandle;
+import dev.langchain4j.model.openai.OpenAiChatModelName;
+import dev.langchain4j.model.openai.OpenAiChatRequestParameters;
+import dev.langchain4j.model.openai.OpenAiStreamingResponseBuilder;
 import dev.langchain4j.model.openai.internal.OpenAiClient;
+import dev.langchain4j.model.openai.internal.OpenAiUtils;
 import dev.langchain4j.model.openai.internal.ParsedAndRawResponse;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionChoice;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest;
@@ -48,19 +57,17 @@ import dev.langchain4j.model.openai.internal.chat.FunctionCall;
 import dev.langchain4j.model.openai.internal.chat.ToolCall;
 import dev.langchain4j.model.openai.internal.shared.StreamOptions;
 import dev.langchain4j.model.openai.spi.OpenAiStreamingChatModelBuilderFactory;
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 
-/**
- * Represents an OpenAI language model with a chat completion interface, such as gpt-4o-mini and o3.
- * The model's response is streamed token by token and should be handled with {@link StreamingResponseHandler}.
- * You can find description of parameters <a href="https://platform.openai.com/docs/api-reference/chat/create">here</a>.
- */
-public class OpenAiStreamingChatModel implements StreamingChatModel {
-
+public class OpenAiStreamingChatModel
+implements StreamingChatModel {
     private final OpenAiClient client;
     private final OpenAiChatRequestParameters defaultRequestParameters;
     private final boolean strictJsonSchema;
@@ -73,227 +80,132 @@ public class OpenAiStreamingChatModel implements StreamingChatModel {
     private final List<ChatModelListener> listeners;
 
     public OpenAiStreamingChatModel(OpenAiStreamingChatModelBuilder builder) {
-        this.client = OpenAiClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.baseUrl, DEFAULT_OPENAI_URL))
-                .apiKey(builder.apiKey)
-                .organizationId(builder.organizationId)
-                .projectId(builder.projectId)
-                .connectTimeout(getOrDefault(builder.timeout, ofSeconds(15)))
-                .readTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .userAgent(DEFAULT_USER_AGENT)
-                .customHeaders(builder.customHeadersSupplier)
-                .customQueryParams(builder.customQueryParams)
-                .build();
-
         ChatRequestParameters commonParameters;
+        this.client = ((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)((OpenAiClient.Builder)OpenAiClient.builder().httpClientBuilder(builder.httpClientBuilder)).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)"https://api.openai.com/v1"))).apiKey(builder.apiKey)).organizationId(builder.organizationId)).projectId(builder.projectId)).connectTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(15L)))).readTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L)))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false))).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false))).logger(builder.logger)).userAgent("langchain4j-openai")).customHeaders(builder.customHeadersSupplier)).customQueryParams(builder.customQueryParams)).build();
         if (builder.defaultRequestParameters != null) {
-            validate(builder.defaultRequestParameters);
+            OpenAiUtils.validate(builder.defaultRequestParameters);
             commonParameters = builder.defaultRequestParameters;
         } else {
             commonParameters = DefaultChatRequestParameters.EMPTY;
         }
-
-        OpenAiChatRequestParameters openAiParameters;
-        if (builder.defaultRequestParameters instanceof OpenAiChatRequestParameters openAiChatRequestParameters) {
-            openAiParameters = openAiChatRequestParameters;
-        } else {
-            openAiParameters = OpenAiChatRequestParameters.EMPTY;
-        }
-
-        this.defaultRequestParameters = OpenAiChatRequestParameters.builder()
-                // common parameters
-                .modelName(getOrDefault(builder.modelName, commonParameters.modelName()))
-                .temperature(getOrDefault(builder.temperature, commonParameters.temperature()))
-                .topP(getOrDefault(builder.topP, commonParameters.topP()))
-                .frequencyPenalty(getOrDefault(builder.frequencyPenalty, commonParameters.frequencyPenalty()))
-                .presencePenalty(getOrDefault(builder.presencePenalty, commonParameters.presencePenalty()))
-                .maxOutputTokens(getOrDefault(builder.maxTokens, commonParameters.maxOutputTokens()))
-                .stopSequences(getOrDefault(builder.stop, commonParameters.stopSequences()))
-                .toolSpecifications(commonParameters.toolSpecifications())
-                .toolChoice(commonParameters.toolChoice())
-                .responseFormat(getOrDefault(builder.responseFormat, commonParameters.responseFormat()))
-                // OpenAI-specific parameters
-                .maxCompletionTokens(getOrDefault(builder.maxCompletionTokens, openAiParameters.maxCompletionTokens()))
-                .logitBias(getOrDefault(builder.logitBias, openAiParameters.logitBias()))
-                .parallelToolCalls(getOrDefault(builder.parallelToolCalls, openAiParameters.parallelToolCalls()))
-                .seed(getOrDefault(builder.seed, openAiParameters.seed()))
-                .user(getOrDefault(builder.user, openAiParameters.user()))
-                .store(getOrDefault(builder.store, openAiParameters.store()))
-                .metadata(getOrDefault(builder.metadata, openAiParameters.metadata()))
-                .serviceTier(getOrDefault(builder.serviceTier, openAiParameters.serviceTier()))
-                .reasoningEffort(getOrDefault(builder.reasoningEffort, openAiParameters.reasoningEffort()))
-                .customParameters(getOrDefault(builder.customParameters, openAiParameters.customParameters()))
-                .build();
-        this.strictJsonSchema = getOrDefault(builder.strictJsonSchema, false);
-        this.strictTools = getOrDefault(builder.strictTools, false);
-        this.returnThinking = getOrDefault(builder.returnThinking, false);
-        this.sendThinking = getOrDefault(builder.sendThinking, false);
-        this.thinkingFieldName = getOrDefault(builder.thinkingFieldName, "reasoning_content");
-        this.accumulateToolCallId = getOrDefault(builder.accumulateToolCallId, true);
-        this.useInputImageFormat = getOrDefault(builder.useInputImageFormat, false);
-        this.listeners = copy(builder.listeners);
+        OpenAiChatRequestParameters openAiParameters = builder.defaultRequestParameters instanceof OpenAiChatRequestParameters ? (OpenAiChatRequestParameters)builder.defaultRequestParameters : OpenAiChatRequestParameters.EMPTY;
+        this.defaultRequestParameters = ((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)((OpenAiChatRequestParameters.Builder)OpenAiChatRequestParameters.builder().modelName((String)Utils.getOrDefault((Object)builder.modelName, (Object)commonParameters.modelName()))).temperature((Double)Utils.getOrDefault((Object)builder.temperature, (Object)commonParameters.temperature()))).topP((Double)Utils.getOrDefault((Object)builder.topP, (Object)commonParameters.topP()))).frequencyPenalty((Double)Utils.getOrDefault((Object)builder.frequencyPenalty, (Object)commonParameters.frequencyPenalty()))).presencePenalty((Double)Utils.getOrDefault((Object)builder.presencePenalty, (Object)commonParameters.presencePenalty()))).maxOutputTokens((Integer)Utils.getOrDefault((Object)builder.maxTokens, (Object)commonParameters.maxOutputTokens()))).stopSequences(Utils.getOrDefault((List)builder.stop, (List)commonParameters.stopSequences()))).toolSpecifications(commonParameters.toolSpecifications())).toolChoice(commonParameters.toolChoice())).responseFormat((ResponseFormat)Utils.getOrDefault((Object)builder.responseFormat, (Object)commonParameters.responseFormat()))).maxCompletionTokens((Integer)Utils.getOrDefault((Object)builder.maxCompletionTokens, (Object)openAiParameters.maxCompletionTokens())).logitBias(Utils.getOrDefault((Map)builder.logitBias, openAiParameters.logitBias())).parallelToolCalls((Boolean)Utils.getOrDefault((Object)builder.parallelToolCalls, (Object)openAiParameters.parallelToolCalls())).seed((Integer)Utils.getOrDefault((Object)builder.seed, (Object)openAiParameters.seed())).user((String)Utils.getOrDefault((Object)builder.user, (Object)openAiParameters.user())).store((Boolean)Utils.getOrDefault((Object)builder.store, (Object)openAiParameters.store())).metadata(Utils.getOrDefault((Map)builder.metadata, openAiParameters.metadata())).serviceTier((String)Utils.getOrDefault((Object)builder.serviceTier, (Object)openAiParameters.serviceTier())).reasoningEffort((String)Utils.getOrDefault((Object)builder.reasoningEffort, (Object)openAiParameters.reasoningEffort())).customParameters(Utils.getOrDefault((Map)builder.customParameters, openAiParameters.customParameters())).build();
+        this.strictJsonSchema = (Boolean)Utils.getOrDefault((Object)builder.strictJsonSchema, (Object)false);
+        this.strictTools = (Boolean)Utils.getOrDefault((Object)builder.strictTools, (Object)false);
+        this.returnThinking = (Boolean)Utils.getOrDefault((Object)builder.returnThinking, (Object)false);
+        this.sendThinking = (Boolean)Utils.getOrDefault((Object)builder.sendThinking, (Object)false);
+        this.thinkingFieldName = (String)Utils.getOrDefault((Object)builder.thinkingFieldName, (Object)"reasoning_content");
+        this.accumulateToolCallId = (Boolean)Utils.getOrDefault((Object)builder.accumulateToolCallId, (Object)true);
+        this.useInputImageFormat = (Boolean)Utils.getOrDefault((Object)builder.useInputImageFormat, (Object)false);
+        this.listeners = Utils.copy((List)builder.listeners);
     }
 
-    @Override
     public OpenAiChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
-    @Override
     public void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
-
-        OpenAiChatRequestParameters parameters = (OpenAiChatRequestParameters) chatRequest.parameters();
-        validate(parameters);
-
-        ChatCompletionRequest openAiRequest = toOpenAiChatRequest(
-                        chatRequest,
-                        parameters,
-                        sendThinking,
-                        thinkingFieldName,
-                        strictTools,
-                        strictJsonSchema,
-                        useInputImageFormat)
-                .stream(true)
-                .streamOptions(StreamOptions.builder().includeUsage(true).build())
-                .build();
-
-        OpenAiStreamingResponseBuilder openAiResponseBuilder =
-                new OpenAiStreamingResponseBuilder(returnThinking, accumulateToolCallId);
+        OpenAiChatRequestParameters parameters = (OpenAiChatRequestParameters)chatRequest.parameters();
+        OpenAiUtils.validate((ChatRequestParameters)parameters);
+        ChatCompletionRequest openAiRequest = OpenAiUtils.toOpenAiChatRequest(chatRequest, parameters, this.sendThinking, this.thinkingFieldName, this.strictTools, this.strictJsonSchema, this.useInputImageFormat).stream(true).streamOptions(StreamOptions.builder().includeUsage(true).build()).build();
+        OpenAiStreamingResponseBuilder openAiResponseBuilder = new OpenAiStreamingResponseBuilder(this.returnThinking, this.accumulateToolCallId);
         ToolCallBuilder toolCallBuilder = new ToolCallBuilder();
-
-        MappingTrackingStreamingChatResponseHandler trackingHandler =
-                new MappingTrackingStreamingChatResponseHandler(handler);
-
-        client.chatCompletion(openAiRequest)
-                .onRawPartialResponse(parsedAndRawResponse -> {
-                    trackingHandler.resetMappingTracking();
-                    openAiResponseBuilder.append(parsedAndRawResponse);
-                    handle(parsedAndRawResponse, toolCallBuilder, trackingHandler);
-
-                    if (!trackingHandler.wasMapped()) {
-                        onUnmappedRawEvent(trackingHandler, parsedAndRawResponse.rawServerSentEvent());
-                    }
-                })
-                .onComplete(() -> {
-                    if (toolCallBuilder.hasRequests()) {
-                        onCompleteToolCall(trackingHandler, toolCallBuilder.buildAndReset());
-                    }
-
-                    ChatResponse completeResponse = openAiResponseBuilder.build();
-                    onCompleteResponse(trackingHandler, completeResponse);
-                })
-                .onError(throwable -> {
-                    RuntimeException mappedException = ExceptionMapper.DEFAULT.mapException(throwable);
-                    withLoggingExceptions(() -> handler.onError(mappedException));
-                })
-                .execute();
+        MappingTrackingStreamingChatResponseHandler trackingHandler = new MappingTrackingStreamingChatResponseHandler(handler);
+        this.client.chatCompletion(openAiRequest).onRawPartialResponse(parsedAndRawResponse -> {
+            trackingHandler.resetMappingTracking();
+            openAiResponseBuilder.append((ParsedAndRawResponse<ChatCompletionResponse>)parsedAndRawResponse);
+            this.handle((ParsedAndRawResponse<ChatCompletionResponse>)parsedAndRawResponse, toolCallBuilder, (StreamingChatResponseHandler)trackingHandler);
+            if (!trackingHandler.wasMapped()) {
+                InternalStreamingChatResponseHandlerUtils.onUnmappedRawEvent((StreamingChatResponseHandler)trackingHandler, (Object)parsedAndRawResponse.rawServerSentEvent());
+            }
+        }).onComplete(() -> {
+            if (toolCallBuilder.hasRequests()) {
+                InternalStreamingChatResponseHandlerUtils.onCompleteToolCall((StreamingChatResponseHandler)trackingHandler, (CompleteToolCall)toolCallBuilder.buildAndReset());
+            }
+            ChatResponse completeResponse = openAiResponseBuilder.build();
+            InternalStreamingChatResponseHandlerUtils.onCompleteResponse((StreamingChatResponseHandler)trackingHandler, (ChatResponse)completeResponse);
+        }).onError(throwable -> {
+            RuntimeException mappedException = ExceptionMapper.DEFAULT.mapException(throwable);
+            InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> handler.onError((Throwable)mappedException));
+        }).execute();
     }
 
-    private void handle(
-            ParsedAndRawResponse<ChatCompletionResponse> parsedAndRawResponse,
-            ToolCallBuilder toolCallBuilder,
-            StreamingChatResponseHandler handler) {
+    private void handle(ParsedAndRawResponse<ChatCompletionResponse> parsedAndRawResponse, ToolCallBuilder toolCallBuilder, StreamingChatResponseHandler handler) {
+        List<ToolCall> toolCalls;
         ChatCompletionResponse partialResponse = parsedAndRawResponse.parsedResponse();
         if (partialResponse == null) {
             return;
         }
-
         List<ChatCompletionChoice> choices = partialResponse.choices();
-        if (isNullOrEmpty(choices)) {
+        if (Utils.isNullOrEmpty(choices)) {
             return;
         }
-
         ChatCompletionChoice chatCompletionChoice = choices.get(0);
         if (chatCompletionChoice == null) {
             return;
         }
-
         Delta delta = chatCompletionChoice.delta();
         if (delta == null) {
             return;
         }
-
         String content = delta.content();
-        if (!isNullOrEmpty(content)) {
-            onPartialResponse(handler, content, parsedAndRawResponse.streamingHandle());
+        if (!Utils.isNullOrEmpty((String)content)) {
+            InternalStreamingChatResponseHandlerUtils.onPartialResponse((StreamingChatResponseHandler)handler, (String)content, (StreamingHandle)parsedAndRawResponse.streamingHandle());
         }
-
         String reasoningContent = delta.reasoningContent();
-        if (returnThinking && !isNullOrEmpty(reasoningContent)) {
-            onPartialThinking(handler, reasoningContent, parsedAndRawResponse.streamingHandle());
+        if (this.returnThinking && !Utils.isNullOrEmpty((String)reasoningContent)) {
+            InternalStreamingChatResponseHandlerUtils.onPartialThinking((StreamingChatResponseHandler)handler, (String)reasoningContent, (StreamingHandle)parsedAndRawResponse.streamingHandle());
         }
-
-        List<ToolCall> toolCalls = delta.toolCalls();
-        if (toolCalls != null) {
+        if ((toolCalls = delta.toolCalls()) != null) {
             for (ToolCall toolCall : toolCalls) {
-
                 int index;
                 if (toolCall.index() != null) {
                     index = toolCall.index();
                 } else {
                     index = toolCallBuilder.index();
-                    // When index is null and a different tool call id appears, increment the index
-                    if (toolCall.id() != null
-                            && toolCallBuilder.id() != null
-                            && !toolCallBuilder.id().equals(toolCall.id())) {
+                    if (toolCall.id() != null && toolCallBuilder.id() != null && !toolCallBuilder.id().equals(toolCall.id())) {
                         index = toolCallBuilder.index() + 1;
                     }
                 }
                 if (toolCallBuilder.index() != index) {
-                    onCompleteToolCall(handler, toolCallBuilder.buildAndReset());
-                    toolCallBuilder.updateIndex(index);
+                    InternalStreamingChatResponseHandlerUtils.onCompleteToolCall((StreamingChatResponseHandler)handler, (CompleteToolCall)toolCallBuilder.buildAndReset());
+                    toolCallBuilder.updateIndex(Integer.valueOf(index));
                 }
-
                 String id = toolCallBuilder.updateId(toolCall.id());
                 FunctionCall functionCall = toolCall.function();
                 String name = toolCallBuilder.updateName(functionCall == null ? null : functionCall.name());
-
                 String partialArguments = functionCall == null ? null : functionCall.arguments();
-                if (isNotNullOrEmpty(partialArguments)) {
-                    toolCallBuilder.appendArguments(partialArguments);
-
-                    PartialToolCall partialToolRequest = PartialToolCall.builder()
-                            .index(index)
-                            .id(id)
-                            .name(name)
-                            .partialArguments(partialArguments)
-                            .build();
-                    onPartialToolCall(handler, partialToolRequest, parsedAndRawResponse.streamingHandle());
-                }
+                if (!Utils.isNotNullOrEmpty((String)partialArguments)) continue;
+                toolCallBuilder.appendArguments(partialArguments);
+                PartialToolCall partialToolRequest = PartialToolCall.builder().index(index).id(id).name(name).partialArguments(partialArguments).build();
+                InternalStreamingChatResponseHandlerUtils.onPartialToolCall((StreamingChatResponseHandler)handler, (PartialToolCall)partialToolRequest, (StreamingHandle)parsedAndRawResponse.streamingHandle());
             }
         }
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return OPEN_AI;
+        return ModelProvider.OPEN_AI;
     }
 
     public static OpenAiStreamingChatModelBuilder builder() {
-        for (OpenAiStreamingChatModelBuilderFactory factory :
-                loadFactories(OpenAiStreamingChatModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(OpenAiStreamingChatModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OpenAiStreamingChatModelBuilderFactory factory = (OpenAiStreamingChatModelBuilderFactory)iterator.next();
+            return (OpenAiStreamingChatModelBuilder)factory.get();
         }
         return new OpenAiStreamingChatModelBuilder();
     }
 
     public static class OpenAiStreamingChatModelBuilder {
-
         private HttpClientBuilder httpClientBuilder;
         private String baseUrl;
         private String apiKey;
         private String organizationId;
         private String projectId;
-
         private ChatRequestParameters defaultRequestParameters;
         private String modelName;
         private Double temperature;
@@ -328,21 +240,11 @@ public class OpenAiStreamingChatModel implements StreamingChatModel {
         private Map<String, Object> customParameters;
         private List<ChatModelListener> listeners;
 
-        public OpenAiStreamingChatModelBuilder() {
-            // This is public so it can be extended
-        }
-
         public OpenAiStreamingChatModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
         }
 
-        /**
-         * Sets default common {@link ChatRequestParameters} or OpenAI-specific {@link OpenAiChatRequestParameters}.
-         * <br>
-         * When a parameter is set via an individual builder method (e.g., {@link #modelName(String)}),
-         * its value takes precedence over the same parameter set via {@link ChatRequestParameters}.
-         */
         public OpenAiStreamingChatModelBuilder defaultRequestParameters(ChatRequestParameters parameters) {
             this.defaultRequestParameters = parameters;
             return this;
@@ -423,11 +325,8 @@ public class OpenAiStreamingChatModel implements StreamingChatModel {
             return this;
         }
 
-        /**
-         * @see #responseFormat(ResponseFormat)
-         */
         public OpenAiStreamingChatModelBuilder responseFormat(String responseFormat) {
-            this.responseFormat = fromOpenAiResponseFormat(responseFormat);
+            this.responseFormat = OpenAiUtils.fromOpenAiResponseFormat(responseFormat);
             return this;
         }
 
@@ -476,93 +375,28 @@ public class OpenAiStreamingChatModel implements StreamingChatModel {
             return this;
         }
 
-        /**
-         * This setting is intended for <a href="https://api-docs.deepseek.com/guides/reasoning_model">DeepSeek</a>.
-         * <p>
-         * Controls whether to return thinking/reasoning text (if available) inside {@link AiMessage#thinking()}
-         * and whether to invoke the {@link StreamingChatResponseHandler#onPartialThinking(PartialThinking)} callback.
-         * Please note that this does not enable thinking/reasoning for the LLM;
-         * it only controls whether to parse the {@code reasoning_content} field from the API response
-         * and return it inside the {@link AiMessage}.
-         * <p>
-         * Disabled by default.
-         * If enabled, the thinking text will be stored within the {@link AiMessage} and may be persisted.
-         */
         public OpenAiStreamingChatModelBuilder returnThinking(Boolean returnThinking) {
             this.returnThinking = returnThinking;
             return this;
         }
 
-        /**
-         * This setting is intended for <a href="https://api-docs.deepseek.com/guides/reasoning_model">DeepSeek</a>.
-         * <p>
-         * Controls whether to include thinking/reasoning text in assistant messages when sending requests to the API.
-         * This is needed for some APIs (like DeepSeek) when using reasoning mode with tool calls.
-         * <p>
-         * Disabled by default.
-         * <p>
-         * When enabled, the reasoning content from previous assistant messages (stored in {@link AiMessage#thinking()})
-         * will be included in the request during message conversion to API format.
-         *
-         * @param sendThinking whether to send reasoning content
-         * @param fieldName the field name for reasoning content
-         * @return {@code this}
-         */
         public OpenAiStreamingChatModelBuilder sendThinking(Boolean sendThinking, String fieldName) {
             this.sendThinking = sendThinking;
             this.thinkingFieldName = fieldName;
             return this;
         }
 
-        /**
-         * This setting is intended for <a href="https://api-docs.deepseek.com/guides/reasoning_model">DeepSeek</a>.
-         * <p>
-         * Controls whether to include thinking/reasoning text in assistant messages when sending requests to the API.
-         * This is needed for some APIs (like DeepSeek) when using reasoning mode with tool calls.
-         * Uses the default field name "reasoning_content" for the reasoning content field.
-         * <p>
-         * Disabled by default.
-         * <p>
-         * When enabled, the reasoning content from previous assistant messages (stored in {@link AiMessage#thinking()})
-         * will be included in the request during message conversion to API format.
-         *
-         * @param sendThinking whether to send reasoning content
-         * @return {@code this}
-         */
         public OpenAiStreamingChatModelBuilder sendThinking(Boolean sendThinking) {
             this.sendThinking = sendThinking;
             this.thinkingFieldName = "reasoning_content";
             return this;
         }
 
-        /**
-         * Controls whether to accumulate tool call IDs in streaming responses.
-         * <p>
-         * This setting is useful when using OpenAI-compatible APIs (like DeepSeek or Qwen) that send
-         * the complete tool call ID in every streaming chunk, rather than sending it incrementally.
-         * <p>
-         * Enabled by default (true) for standard OpenAI behavior.
-         * Set to false for APIs like DeepSeek/Qwen that repeat the full ID in each chunk.
-         * <p>
-         * When enabled (true): IDs are accumulated across chunks (e.g., "abc" + "def" = "abcdef")
-         * When disabled (false): Each chunk's ID replaces the previous one (e.g., "abc" -> "abc")
-         *
-         * @param accumulateToolCallId whether to accumulate tool call IDs
-         * @return {@code this}
-         */
         public OpenAiStreamingChatModelBuilder accumulateToolCallId(Boolean accumulateToolCallId) {
             this.accumulateToolCallId = accumulateToolCallId;
             return this;
         }
 
-        /**
-         * Controls whether image content is sent using the {@code input_image} format.
-         * <p>
-         * Disabled by default, preserving the OpenAI Chat Completions {@code image_url} format.
-         *
-         * @param useInputImageFormat whether to send image content as {@code input_image}
-         * @return {@code this}
-         */
         public OpenAiStreamingChatModelBuilder useInputImageFormat(Boolean useInputImageFormat) {
             this.useInputImageFormat = useInputImageFormat;
             return this;
@@ -583,44 +417,26 @@ public class OpenAiStreamingChatModel implements StreamingChatModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public OpenAiStreamingChatModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
-        /**
-         * Sets custom HTTP headers.
-         */
         public OpenAiStreamingChatModelBuilder customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
             return this;
         }
 
-        /**
-         * Sets a supplier for custom HTTP headers.
-         * The supplier is called before each request, allowing dynamic header values.
-         * For example, this is useful for OAuth2 tokens that expire and need refreshing.
-         */
         public OpenAiStreamingChatModelBuilder customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
             return this;
         }
 
-        /**
-         * Sets custom URL query parameters
-         */
         public OpenAiStreamingChatModelBuilder customQueryParams(Map<String, String> customQueryParams) {
             this.customQueryParams = customQueryParams;
             return this;
         }
 
-        /**
-         * Sets custom HTTP body parameters
-         */
         public OpenAiStreamingChatModelBuilder customParameters(Map<String, Object> customParameters) {
             this.customParameters = customParameters;
             return this;
@@ -631,8 +447,8 @@ public class OpenAiStreamingChatModel implements StreamingChatModel {
             return this;
         }
 
-        public OpenAiStreamingChatModelBuilder listeners(ChatModelListener... listeners) {
-            return listeners(asList(listeners));
+        public OpenAiStreamingChatModelBuilder listeners(ChatModelListener ... listeners) {
+            return this.listeners(Arrays.asList(listeners));
         }
 
         public OpenAiStreamingChatModel build() {
@@ -640,3 +456,4 @@ public class OpenAiStreamingChatModel implements StreamingChatModel {
         }
     }
 }
+

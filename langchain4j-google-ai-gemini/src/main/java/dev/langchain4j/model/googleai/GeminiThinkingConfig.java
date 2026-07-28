@@ -1,47 +1,65 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.googleai;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonInclude(JsonInclude.Include.NON_EMPTY) public class GeminiThinkingConfig {
-    private final Object @JsonProperty("includeThoughts";
+import java.util.Objects;
 
-    public GeminiThinkingConfig(Object @JsonProperty("includeThoughts") {
-        this.@JsonProperty("includeThoughts" = @JsonProperty("includeThoughts";
+@JsonInclude(value=JsonInclude.Include.NON_EMPTY)
+public final class GeminiThinkingConfig {
+    private final Boolean includeThoughts;
+    private final Integer thinkingBudget;
+    private final String thinkingLevel;
+
+    @JsonCreator
+    public GeminiThinkingConfig(@JsonProperty(value="includeThoughts") Boolean includeThoughts, @JsonProperty(value="thinkingBudget") Integer thinkingBudget, @JsonProperty(value="thinkingLevel") String thinkingLevel) {
+        this.includeThoughts = includeThoughts;
+        this.thinkingBudget = thinkingBudget;
+        this.thinkingLevel = thinkingLevel;
     }
 
-    public Object get@JsonProperty("includeThoughts"() {
-        return @JsonProperty("includeThoughts";
+    public Boolean includeThoughts() {
+        return this.includeThoughts;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GeminiThinkingConfig that = (GeminiThinkingConfig) o;
-        return java.util.Objects.equals(this.@JsonProperty("includeThoughts", that.@JsonProperty("includeThoughts");
+    public Integer thinkingBudget() {
+        return this.thinkingBudget;
     }
 
-    @Override
-    public int hashCode() {
-        return java.util.Objects.hash(@JsonProperty("includeThoughts");
-    }
-
-    @Override
-    public String toString() {
-        return "GeminiThinkingConfig{"@JsonProperty("includeThoughts"=" + @JsonProperty("includeThoughts" + "}"";
-    }
-
-
-    public enum GeminiThinkingLevel {
-        MINIMAL,
-        LOW,
-        MEDIUM,
-        HIGH
+    public String thinkingLevel() {
+        return this.thinkingLevel;
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GeminiThinkingConfig)) {
+            return false;
+        }
+        GeminiThinkingConfig that = (GeminiThinkingConfig)o;
+        return Objects.equals(this.includeThoughts, that.includeThoughts) && Objects.equals(this.thinkingBudget, that.thinkingBudget) && Objects.equals(this.thinkingLevel, that.thinkingLevel);
+    }
+
+    public int hashCode() {
+        return Objects.hash(this.includeThoughts, this.thinkingBudget, this.thinkingLevel);
+    }
+
+    public String toString() {
+        return "GeminiThinkingConfig[includeThoughts=" + this.includeThoughts + ", thinkingBudget=" + this.thinkingBudget + ", thinkingLevel=" + this.thinkingLevel + "]";
     }
 
     public static class Builder {
@@ -70,7 +88,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
         }
 
         public GeminiThinkingConfig build() {
-            return new GeminiThinkingConfig(includeThoughts, thinkingBudget, thinkingLevel);
+            return new GeminiThinkingConfig(this.includeThoughts, this.thinkingBudget, this.thinkingLevel);
         }
     }
+
+    public static enum GeminiThinkingLevel {
+        MINIMAL,
+        LOW,
+        MEDIUM,
+        HIGH;
+
+    }
 }
+

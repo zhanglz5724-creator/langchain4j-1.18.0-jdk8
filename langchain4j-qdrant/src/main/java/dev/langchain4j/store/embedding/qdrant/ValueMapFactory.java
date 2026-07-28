@@ -1,85 +1,83 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  io.qdrant.client.ValueFactory
+ *  io.qdrant.client.grpc.JsonWithInt$Struct
+ *  io.qdrant.client.grpc.JsonWithInt$Struct$Builder
+ *  io.qdrant.client.grpc.JsonWithInt$Value
+ */
 package dev.langchain4j.store.embedding.qdrant;
 
+import io.qdrant.client.ValueFactory;
+import io.qdrant.client.grpc.JsonWithInt;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.qdrant.client.ValueFactory;
-import io.qdrant.client.grpc.JsonWithInt.Struct;
-import io.qdrant.client.grpc.JsonWithInt.Value;
-
-/**
- * Utility methods for building io.qdrant.client.grpc.JsonWithInt.Value from Java objects.
- *
- * @author Anush Shetty
- * @since 0.8.1
- */
 class ValueMapFactory {
+    private ValueMapFactory() {
+    }
 
-	private ValueMapFactory() {
-	}
+    public static Map<String, JsonWithInt.Value> valueMap(Map<String, Object> inputMap) {
+        return inputMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> ValueMapFactory.value(e.getValue())));
+    }
 
-	public static Map<String, Value> valueMap(Map<String, Object> inputMap) {
-		return inputMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> value(e.getValue())));
-	}
+    private static JsonWithInt.Value value(Object value) {
+        if (value == null) {
+            return ValueFactory.nullValue();
+        }
+        if (value.getClass().isArray()) {
+            int length = Array.getLength(value);
+            Object[] objectArray = new Object[length];
+            for (int i = 0; i < length; ++i) {
+                objectArray[i] = Array.get(value, i);
+            }
+            return ValueMapFactory.value(objectArray);
+        }
+        if (value instanceof Map) {
+            return ValueMapFactory.value((Map)value);
+        }
+        switch (value.getClass().getSimpleName()) {
+            case "UUID": {
+                return ValueFactory.value((String)value.toString());
+            }
+            case "String": {
+                return ValueFactory.value((String)((String)value));
+            }
+            case "Integer": {
+                return ValueFactory.value((long)((Integer)value).intValue());
+            }
+            case "Long": {
+                return ValueFactory.value((long)((Long)value));
+            }
+            case "Double": {
+                return ValueFactory.value((double)((Double)value));
+            }
+            case "Float": {
+                return ValueFactory.value((double)((Float)value).floatValue());
+            }
+            case "Boolean": {
+                return ValueFactory.value((boolean)((Boolean)value));
+            }
+        }
+        throw new IllegalArgumentException("Unsupported Qdrant value type: " + value.getClass());
+    }
 
-	@SuppressWarnings("unchecked")
-	private static Value value(Object value) {
+    private static JsonWithInt.Value value(Object[] elements) {
+        ArrayList<JsonWithInt.Value> values = new ArrayList<JsonWithInt.Value>(elements.length);
+        for (Object element : elements) {
+            values.add(ValueMapFactory.value(element));
+        }
+        return ValueFactory.list(values);
+    }
 
-		if (value == null) {
-			return ValueFactory.nullValue();
-		}
-
-		if (value.getClass().isArray()) {
-			int length = Array.getLength(value);
-			Object[] objectArray = new Object[length];
-			for (int i = 0; i < length; i++) {
-				objectArray[i] = Array.get(value, i);
-			}
-			return value(objectArray);
-		}
-
-		if (value instanceof Map) {
-			return value((Map<String, Object>) value);
-		}
-
-		switch (value.getClass().getSimpleName()) {
-      case "UUID":
-        return ValueFactory.value(value.toString());
-			case "String":
-				return ValueFactory.value((String) value);
-			case "Integer":
-        return ValueFactory.value((Integer) value);
-      case "Long":
-				return ValueFactory.value((Long) value);
-			case "Double":
-				return ValueFactory.value((Double) value);
-			case "Float":
-				return ValueFactory.value((Float) value);
-			case "Boolean":
-				return ValueFactory.value((Boolean) value);
-			default:
-				throw new IllegalArgumentException("Unsupported Qdrant value type: " + value.getClass());
-		}
-	}
-
-	private static Value value(Object[] elements) {
-		List<Value> values = new ArrayList<Value>(elements.length);
-
-		for (Object element : elements) {
-			values.add(value(element));
-		}
-
-		return ValueFactory.list(values);
-	}
-
-	private static Value value(Map<String, Object> inputMap) {
-		Struct.Builder structBuilder = Struct.newBuilder();
-		Map<String, Value> map = valueMap(inputMap);
-		structBuilder.putAllFields(map);
-		return Value.newBuilder().setStructValue(structBuilder).build();
-	}
-
+    private static JsonWithInt.Value value(Map<String, Object> inputMap) {
+        JsonWithInt.Struct.Builder structBuilder = JsonWithInt.Struct.newBuilder();
+        Map<String, JsonWithInt.Value> map = ValueMapFactory.valueMap(inputMap);
+        structBuilder.putAllFields(map);
+        return JsonWithInt.Value.newBuilder().setStructValue(structBuilder).build();
+    }
 }
+

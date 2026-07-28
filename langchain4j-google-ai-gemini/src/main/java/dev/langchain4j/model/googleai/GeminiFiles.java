@@ -1,36 +1,50 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  dev.langchain4j.http.client.HttpClient
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.http.client.HttpClientBuilderLoader
+ *  dev.langchain4j.http.client.HttpMethod
+ *  dev.langchain4j.http.client.HttpRequest
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  org.jspecify.annotations.Nullable
+ */
 package dev.langchain4j.model.googleai;
 
-import static dev.langchain4j.internal.Utils.firstNotNull;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.model.googleai.Json.fromJson;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.http.client.HttpClient;
+import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.http.client.HttpClientBuilderLoader;
+import dev.langchain4j.http.client.HttpMethod;
+import dev.langchain4j.http.client.HttpRequest;
+import dev.langchain4j.http.client.SuccessfulHttpResponse;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.googleai.Json;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Service for uploading and managing media files with Google AI Gemini.
- *
- * <p>
- * The Gemini models support multimodal inputs including text, images, audio, videos, and documents.
- * Use this API to upload media files when the total request size exceeds 20 MB.
- *
- * <p>
- * Files are stored for 48 hours and can be referenced in content generation requests using their URI.
- * The API supports up to 20 GB of files per project, with a maximum of 2 GB per individual file.
- * During the retention period, you can retrieve file metadata but cannot download the files directly.
- */
 public final class GeminiFiles {
     private static final String BASE_URL = "https://generativelanguage.googleapis.com";
     private static final String DELETE_FILE_PATH = "/v1beta";
@@ -39,305 +53,251 @@ public final class GeminiFiles {
     private static final String UPLOAD_PATH = "/upload/v1beta/files";
     private static final String API_KEY_HEADER_NAME = "x-goog-api-key";
     private static final String UPLOAD_URL_HEADER = "x-goog-upload-url";
-
     private final HttpClient httpClient;
     private final String baseUrl;
     private final String apiKey;
 
     private GeminiFiles(Builder builder) {
         this.apiKey = builder.apiKey;
-        this.httpClient = firstNotNull("httpClient", builder.httpClient, HttpClient.newHttpClient());
-        this.baseUrl = firstNotNull("baseUrl", builder.baseUrl, BASE_URL);
+        HttpClientBuilder httpClientBuilder = (HttpClientBuilder)Utils.firstNotNull((String)"httpClientBuilder", (Object[])new HttpClientBuilder[]{builder.httpClientBuilder, HttpClientBuilderLoader.loadHttpClientBuilder()});
+        this.httpClient = httpClientBuilder.build();
+        this.baseUrl = (String)Utils.firstNotNull((String)"baseUrl", (Object[])new String[]{builder.baseUrl, BASE_URL});
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Uploads a file to Gemini using the resumable upload protocol.
-     *
-     * <p><strong>Note:</strong> The Files API lets you store up to 20 GB of files per project, with a per-file
-     * maximum size of 2 GB. Files are stored for 48 hours.
-     *
-     * @param filePath    path to the file to upload
-     * @param displayName optional display name for the file
-     */
     public GeminiFile uploadFile(Path filePath, @Nullable String displayName) throws IOException, InterruptedException {
-        ensureNotNull(filePath, "filePath");
-        return uploadFile(
-                Files.readAllBytes(filePath),
-                detectMimeType(filePath),
-                displayName != null ? displayName : filePath.getFileName().toString());
+        ValidationUtils.ensureNotNull((Object)filePath, (String)"filePath");
+        return this.uploadFile(Files.readAllBytes(filePath), this.detectMimeType(filePath), displayName != null ? displayName : filePath.getFileName().toString());
     }
 
-    /**
-     * Uploads a file to Gemini using the resumable upload protocol.
-     *
-     * <p><strong>Note:</strong> The Files API lets you store up to 20 GB of files per project, with a per-file
-     * maximum size of 2 GB. Files are stored for 48 hours.
-     *
-     * @param fileBytes byte array that is the file to be uploaded
-     * @param mimeType  mimetype of the file that is being uploaded
-     * @param name      optional display name for the file
-     */
     public GeminiFile uploadFile(byte[] fileBytes, String mimeType, String name) throws InterruptedException {
-        ensureNotNull(fileBytes, "fileBytes");
-        ensureNotNull(mimeType, "mimeType");
-        ensureNotNull(name, "name");
-
-        // Step 1: Initial resumable request to get upload URL
-        String uploadUrl = initiateResumableUpload(fileBytes.length, mimeType, name);
-
-        // Step 2: Upload the actual file bytes
-        GeminiFileResponse response = uploadFileBytes(uploadUrl, fileBytes);
-
+        ValidationUtils.ensureNotNull((Object)fileBytes, (String)"fileBytes");
+        ValidationUtils.ensureNotNull((Object)mimeType, (String)"mimeType");
+        ValidationUtils.ensureNotNull((Object)name, (String)"name");
+        String uploadUrl = this.initiateResumableUpload(fileBytes.length, mimeType, name);
+        GeminiFileResponse response = this.uploadFileBytes(uploadUrl, fileBytes);
         return response.file();
     }
 
-    /**
-     * Retrieves metadata for a specific uploaded file.
-     *
-     * @param name the name of the file to retrieve metadata for (e.g., "files/abc123")
-     */
     public GeminiFile getMetadata(String name) throws IOException, InterruptedException {
-        ensureNotBlank(name, "name");
-
-        String url = baseUrl + GET_FILE_PATH + "/" + name;
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header(API_KEY_HEADER_NAME, apiKey)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        ValidationUtils.ensureNotBlank((String)name, (String)"name");
+        String url = this.baseUrl + "/v1beta" + "/" + name;
+        HttpRequest request = HttpRequest.builder().addHeader(API_KEY_HEADER_NAME, new String[]{this.apiKey}).method(HttpMethod.GET).url(url).build();
+        SuccessfulHttpResponse response = this.httpClient.execute(request);
         if (response.statusCode() != 200) {
-            throw new GeminiUploadFailureException(
-                    "Failed to retrieve metadata for file: " + name + ". Status code: " + response.statusCode());
+            throw new GeminiUploadFailureException("Failed to retrieve metadata for file: " + name + ". Status code: " + response.statusCode());
         }
-
-        return fromJson(response.body(), GeminiFile.class);
+        return Json.fromJson(response.body(), GeminiFile.class);
     }
 
-    /**
-     * Lists all uploaded files. Returns a list of uploaded files.
-     *
-     * <p><strong>Note:</strong> The Files API lets you store up to 20 GB of files per project, with a per-file
-     * maximum size of 2 GB. Files are stored for 48 hours.
-     */
     public List<GeminiFile> listFiles() throws IOException, InterruptedException {
-        String url = baseUrl + LIST_FILES_PATH;
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header(API_KEY_HEADER_NAME, apiKey)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        GeminiFilesListResponse listResponse = fromJson(response.body(), GeminiFilesListResponse.class);
-
+        String url = this.baseUrl + LIST_FILES_PATH;
+        HttpRequest request = HttpRequest.builder().addHeader(API_KEY_HEADER_NAME, new String[]{this.apiKey}).method(HttpMethod.GET).url(url).build();
+        SuccessfulHttpResponse response = this.httpClient.execute(request);
+        GeminiFilesListResponse listResponse = Json.fromJson(response.body(), GeminiFilesListResponse.class);
         return listResponse.files() != null ? listResponse.files() : Collections.emptyList();
     }
 
-    /**
-     * Deletes an uploaded file by name.
-     *
-     * @param name the name of the file to delete (e.g., "files/abc123")
-     */
     public void deleteFile(String name) throws IOException, InterruptedException {
-        ensureNotBlank(name, "name");
-
-        String url = baseUrl + DELETE_FILE_PATH + "/" + name;
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header(API_KEY_HEADER_NAME, apiKey)
-                .DELETE()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
+        ValidationUtils.ensureNotBlank((String)name, (String)"name");
+        String url = this.baseUrl + "/v1beta" + "/" + name;
+        HttpRequest request = HttpRequest.builder().addHeader(API_KEY_HEADER_NAME, new String[]{this.apiKey}).method(HttpMethod.DELETE).url(url).build();
+        SuccessfulHttpResponse response = this.httpClient.execute(request);
         if (!Arrays.asList(200, 204).contains(response.statusCode())) {
-            throw new GeminiUploadFailureException(
-                    "Failed to delete file: " + name + ". Status code: " + response.statusCode());
+            throw new GeminiUploadFailureException("Failed to delete file: " + name + ". Status code: " + response.statusCode());
         }
     }
 
-    /**
-     * Initiates a resumable upload session and returns the upload URL.
-     */
-    private String initiateResumableUpload(long contentLength, String mimeType, String displayName)
-            throws InterruptedException {
-        String url = baseUrl + UPLOAD_PATH;
-
+    private String initiateResumableUpload(long contentLength, String mimeType, String displayName) throws InterruptedException {
+        String url = this.baseUrl + UPLOAD_PATH;
         GeminiFileMetadata metadata = new GeminiFileMetadata(new GeminiFileMetadata.FileInfo(displayName));
         String jsonBody = Json.toJson(metadata);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .header("User-Agent", "LangChain4j")
-                .header(API_KEY_HEADER_NAME, apiKey)
-                .header("X-Goog-Upload-Protocol", "resumable")
-                .header("X-Goog-Upload-Command", "start")
-                .header("X-Goog-Upload-Header-Content-Length", String.valueOf(contentLength))
-                .header("X-Goog-Upload-Header-Content-Type", mimeType)
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
-
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            List<String> uploadUrlList = response.headers().allValues(UPLOAD_URL_HEADER);
-            if (uploadUrlList.isEmpty()
-                    || uploadUrlList.get(0) == null
-                    || uploadUrlList.get(0).isEmpty()) {
+            List uploadUrlList;
+            HttpRequest request = HttpRequest.builder().addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"LangChain4j"}).addHeader(API_KEY_HEADER_NAME, new String[]{this.apiKey}).addHeader("X-Goog-Upload-Protocol", new String[]{"resumable"}).addHeader("X-Goog-Upload-Command", new String[]{"start"}).addHeader("X-Goog-Upload-Header-Content-Length", new String[]{String.valueOf(contentLength)}).addHeader("X-Goog-Upload-Header-Content-Type", new String[]{mimeType}).method(HttpMethod.POST).url(url).body(jsonBody).build();
+            SuccessfulHttpResponse response = this.httpClient.execute(request);
+            Map responseHeaders = response.headers();
+            List list = uploadUrlList = responseHeaders != null ? (List)responseHeaders.get(UPLOAD_URL_HEADER) : null;
+            if (uploadUrlList == null || uploadUrlList.isEmpty() || uploadUrlList.get(0) == null || ((String)uploadUrlList.get(0)).isEmpty()) {
                 throw new IllegalStateException("Upload URL not found in response headers");
             }
-
-            return uploadUrlList.get(0).trim();
-        } catch (IOException e) {
+            return ((String)uploadUrlList.get(0)).trim();
+        }
+        catch (RuntimeException e) {
             throw new GeminiUploadFailureException("Failed to initiate resumable upload", e);
         }
     }
 
-    /**
-     * Uploads the file bytes to the provided upload URL.
-     */
     private GeminiFileResponse uploadFileBytes(String uploadUrl, byte[] fileBytes) throws InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(uploadUrl))
-                .header("X-Goog-Upload-Offset", "0")
-                .header("X-Goog-Upload-Command", "upload, finalize")
-                .POST(HttpRequest.BodyPublishers.ofByteArray(fileBytes))
-                .build();
-
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return fromJson(response.body(), GeminiFileResponse.class);
-        } catch (IOException e) {
+            URL url = new URL(uploadUrl);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("X-Goog-Upload-Offset", "0");
+            connection.setRequestProperty("X-Goog-Upload-Command", "upload, finalize");
+            connection.setDoOutput(true);
+            connection.setFixedLengthStreamingMode(fileBytes.length);
+            OutputStream os = connection.getOutputStream();
+            os.write(fileBytes);
+            os.flush();
+            os.close();
+            int statusCode = connection.getResponseCode();
+            String responseBody = statusCode >= 200 && statusCode < 300 ? new String(GeminiFiles.readAllBytes(connection.getInputStream()), StandardCharsets.UTF_8) : new String(GeminiFiles.readAllBytes(connection.getErrorStream()), StandardCharsets.UTF_8);
+            return Json.fromJson(responseBody, GeminiFileResponse.class);
+        }
+        catch (IOException e) {
             throw new GeminiUploadFailureException("Failed to upload file bytes", e);
         }
     }
 
-    /**
-     * Detects the MIME type of a file.
-     */
+    private static byte[] readAllBytes(InputStream in) throws IOException {
+        int n;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[8192];
+        while ((n = in.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, n);
+        }
+        buffer.flush();
+        return buffer.toByteArray();
+    }
+
     private String detectMimeType(Path filePath) throws IOException {
         String mimeType = Files.probeContentType(filePath);
         if (mimeType == null) {
-            // Fallback to application/octet-stream if MIME type cannot be detected
             mimeType = "application/octet-stream";
         }
         return mimeType;
     }
 
-    /**
-     * Request body for initiating a resumable upload.
-     */
-    private class GeminiFileMetadata {
-        private final Object @JsonProperty("file";
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    public static final class GeminiFile {
+        private final String name;
+        private final @Nullable String displayName;
+        private final String mimeType;
+        private final Long sizeBytes;
+        private final String createTime;
+        private final String updateTime;
+        private final String expirationTime;
+        private final String sha256Hash;
+        private final String uri;
+        private final String state;
 
-        public GeminiFileMetadata(Object @JsonProperty("file") {
-            this.@JsonProperty("file" = @JsonProperty("file";
+        @JsonCreator
+        public GeminiFile(@JsonProperty(value="name") String name, @JsonProperty(value="displayName") @Nullable String displayName, @JsonProperty(value="mimeType") String mimeType, @JsonProperty(value="sizeBytes") Long sizeBytes, @JsonProperty(value="createTime") String createTime, @JsonProperty(value="updateTime") String updateTime, @JsonProperty(value="expirationTime") String expirationTime, @JsonProperty(value="sha256Hash") String sha256Hash, @JsonProperty(value="uri") String uri, @JsonProperty(value="state") String state) {
+            this.name = name;
+            this.displayName = displayName;
+            this.mimeType = mimeType;
+            this.sizeBytes = sizeBytes;
+            this.createTime = createTime;
+            this.updateTime = updateTime;
+            this.expirationTime = expirationTime;
+            this.sha256Hash = sha256Hash;
+            this.uri = uri;
+            this.state = state;
         }
 
-        public Object get@JsonProperty("file"() {
-            return @JsonProperty("file";
+        public String name() {
+            return this.name;
         }
 
-        @Override
+        public @Nullable String displayName() {
+            return this.displayName;
+        }
+
+        public String mimeType() {
+            return this.mimeType;
+        }
+
+        public Long sizeBytes() {
+            return this.sizeBytes;
+        }
+
+        public String createTime() {
+            return this.createTime;
+        }
+
+        public String updateTime() {
+            return this.updateTime;
+        }
+
+        public String expirationTime() {
+            return this.expirationTime;
+        }
+
+        public String sha256Hash() {
+            return this.sha256Hash;
+        }
+
+        public String uri() {
+            return this.uri;
+        }
+
+        public String state() {
+            return this.state;
+        }
+
+        public boolean isActive() {
+            return "ACTIVE".equals(this.state);
+        }
+
+        public boolean isProcessing() {
+            return "PROCESSING".equals(this.state);
+        }
+
+        public boolean isFailed() {
+            return "FAILED".equals(this.state);
+        }
+
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            GeminiFileMetadata that = (GeminiFileMetadata) o;
-            return java.util.Objects.equals(this.@JsonProperty("file", that.@JsonProperty("file");
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiFile)) {
+                return false;
+            }
+            GeminiFile that = (GeminiFile)o;
+            return Objects.equals(this.name, that.name) && Objects.equals(this.displayName, that.displayName) && Objects.equals(this.mimeType, that.mimeType) && Objects.equals(this.sizeBytes, that.sizeBytes) && Objects.equals(this.createTime, that.createTime) && Objects.equals(this.updateTime, that.updateTime) && Objects.equals(this.expirationTime, that.expirationTime) && Objects.equals(this.sha256Hash, that.sha256Hash) && Objects.equals(this.uri, that.uri) && Objects.equals(this.state, that.state);
         }
 
-        @Override
         public int hashCode() {
-            return java.util.Objects.hash(@JsonProperty("file");
+            return Objects.hash(this.name, this.displayName, this.mimeType, this.sizeBytes, this.createTime, this.updateTime, this.expirationTime, this.sha256Hash, this.uri, this.state);
         }
 
-        @Override
         public String toString() {
-            return "GeminiFileMetadata{"@JsonProperty("file"=" + @JsonProperty("file" + "}"";
+            return "GeminiFile[name=" + this.name + ", displayName=" + this.displayName + ", mimeType=" + this.mimeType + ", sizeBytes=" + this.sizeBytes + ", createTime=" + this.createTime + ", updateTime=" + this.updateTime + ", expirationTime=" + this.expirationTime + ", sha256Hash=" + this.sha256Hash + ", uri=" + this.uri + ", state=" + this.state + "]";
         }
-
-        record FileInfo(@JsonProperty("display_name") String display_name) {}
     }
 
-    /**
-     * Response from the file upload containing file information.
-     */
-     class GeminiFileResponse {
-        private final Object @JsonProperty("file";
+    public static class Builder {
+        HttpClientBuilder httpClientBuilder;
+        String apiKey;
+        String baseUrl;
 
-        public GeminiFileResponse(Object @JsonProperty("file") {
-            this.@JsonProperty("file" = @JsonProperty("file";
+        public Builder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
+            this.httpClientBuilder = httpClientBuilder;
+            return this;
         }
 
-        public Object get@JsonProperty("file"() {
-            return @JsonProperty("file";
+        public Builder apiKey(String apiKey) {
+            this.apiKey = apiKey;
+            return this;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            GeminiFileResponse that = (GeminiFileResponse) o;
-            return java.util.Objects.equals(this.@JsonProperty("file", that.@JsonProperty("file");
+        public Builder baseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
         }
 
-        @Override
-        public int hashCode() {
-            return java.util.Objects.hash(@JsonProperty("file");
+        public GeminiFiles build() {
+            return new GeminiFiles(this);
         }
-
-        @Override
-        public String toString() {
-            return "GeminiFileResponse{"@JsonProperty("file"=" + @JsonProperty("file" + "}"";
-        }
-
     }
 
-    /**
-     * Response from listing files.
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonIgnoreProperties(ignoreUnknown = true) class GeminiFilesListResponse {
-        private final Object @JsonProperty("files";
-
-        public GeminiFilesListResponse(Object @JsonProperty("files") {
-            this.@JsonProperty("files" = @JsonProperty("files";
-        }
-
-        public Object get@JsonProperty("files"() {
-            return @JsonProperty("files";
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            GeminiFilesListResponse that = (GeminiFilesListResponse) o;
-            return java.util.Objects.equals(this.@JsonProperty("files", that.@JsonProperty("files");
-        }
-
-        @Override
-        public int hashCode() {
-            return java.util.Objects.hash(@JsonProperty("files");
-        }
-
-        @Override
-        public String toString() {
-            return "GeminiFilesListResponse{"@JsonProperty("files"=" + @JsonProperty("files" + "}"";
-        }
-
-    }
-
-    static class GeminiUploadFailureException extends RuntimeException {
+    static class GeminiUploadFailureException
+    extends RuntimeException {
         GeminiUploadFailureException(String message, Throwable cause) {
             super(message, cause);
         }
@@ -347,102 +307,133 @@ public final class GeminiFiles {
         }
     }
 
-    public static class Builder {
-        private String apiKey;
-        private HttpClient httpClient;
-        private String baseUrl;
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    static final class GeminiFilesListResponse {
+        private final List<GeminiFile> files;
 
-        /**
-         * Sets the API key for authentication.
-         *
-         * @param apiKey the API key (required)
-         * @return this builder
-         */
-        public Builder apiKey(String apiKey) {
-            this.apiKey = apiKey;
-            return this;
+        @JsonCreator
+        GeminiFilesListResponse(@JsonProperty(value="files") List<GeminiFile> files) {
+            this.files = files;
         }
 
-        /**
-         * Sets the HTTP client to use for requests.
-         *
-         * @param httpClient the HTTP client (optional, defaults to a new HttpClient)
-         * @return this builder
-         */
-        public Builder httpClient(HttpClient httpClient) {
-            this.httpClient = httpClient;
-            return this;
+        List<GeminiFile> files() {
+            return this.files;
         }
 
-        /**
-         * Sets the base URL for the API.
-         *
-         * @param baseUrl the base URL (optional, defaults to BASE_URL)
-         * @return this builder
-         */
-        public Builder baseUrl(String baseUrl) {
-            this.baseUrl = baseUrl;
-            return this;
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiFilesListResponse)) {
+                return false;
+            }
+            GeminiFilesListResponse that = (GeminiFilesListResponse)o;
+            return Objects.equals(this.files, that.files);
         }
 
-        /**
-         * Builds a new GeminiFiles instance.
-         *
-         * @return a new GeminiFiles instance
-         * @throws IllegalArgumentException if apiKey is blank
-         */
-        public GeminiFiles build() {
-            return new GeminiFiles(this);
+        public int hashCode() {
+            return Objects.hash(this.files);
+        }
+
+        public String toString() {
+            return "GeminiFilesListResponse[files=" + this.files + "]";
         }
     }
 
-    /**
-     * Represents a file uploaded to the Gemini API,
-     * <a href="https://ai.google.dev/gemini-api/docs/files">documentation</a>
-     *
-     * @param name           The name of the file. This is a required field.
-     * @param displayName    An optional display name for the file, which may be different from the actual file name.
-     * @param mimeType       The MIME type of the file, indicating the nature and format of the file content.
-     * @param sizeBytes      The size of the file in bytes.
-     * @param createTime     The timestamp indicating when the file was created, formatted as an ISO-8601 string.
-     * @param updateTime     The timestamp indicating when the file was last updated, formatted as an ISO 8601 string.
-     * @param expirationTime The timestamp indicating when the file will expire, formatted as an ISO-8601 string.
-     * @param sha256Hash     The SHA-256 hash of the file, used for integrity verification.
-     * @param uri            The URI where the file can be accessed.
-     * @param state          The current state of the file (e.g., active, deleted).
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonIgnoreProperties(ignoreUnknown = true) public class GeminiFile {
+    static final class GeminiFileResponse {
+        private final GeminiFile file;
 
-            @JsonProperty("name") String name,
-            @JsonProperty("displayName") @Nullable String displayName,
-            @JsonProperty("mimeType") String mimeType,
-            @JsonProperty("sizeBytes") Long sizeBytes,
-            @JsonProperty("createTime") String createTime,
-            @JsonProperty("updateTime") String updateTime,
-            @JsonProperty("expirationTime") String expirationTime,
-            @JsonProperty("sha256Hash") String sha256Hash,
-            @JsonProperty("uri") String uri,
-            @JsonProperty("state") String state) {
-        /**
-         * Returns whether the file is in ACTIVE state and ready to use.
-         */
-        public boolean isActive() {
-            return "ACTIVE".equals(state);
+        @JsonCreator
+        GeminiFileResponse(@JsonProperty(value="file") GeminiFile file) {
+            this.file = file;
         }
 
-        /**
-         * Returns whether the file is still processing.
-         */
-        public boolean isProcessing() {
-            return "PROCESSING".equals(state);
+        GeminiFile file() {
+            return this.file;
         }
 
-        /**
-         * Returns whether the file failed to process.
-         */
-        public boolean isFailed() {
-            return "FAILED".equals(state);
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiFileResponse)) {
+                return false;
+            }
+            GeminiFileResponse that = (GeminiFileResponse)o;
+            return Objects.equals(this.file, that.file);
+        }
+
+        public int hashCode() {
+            return Objects.hash(this.file);
+        }
+
+        public String toString() {
+            return "GeminiFileResponse[file=" + this.file + "]";
+        }
+    }
+
+    static final class GeminiFileMetadata {
+        private final FileInfo file;
+
+        @JsonCreator
+        GeminiFileMetadata(@JsonProperty(value="file") FileInfo file) {
+            this.file = file;
+        }
+
+        FileInfo file() {
+            return this.file;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiFileMetadata)) {
+                return false;
+            }
+            GeminiFileMetadata that = (GeminiFileMetadata)o;
+            return Objects.equals(this.file, that.file);
+        }
+
+        public int hashCode() {
+            return Objects.hash(this.file);
+        }
+
+        public String toString() {
+            return "GeminiFileMetadata[file=" + this.file + "]";
+        }
+
+        static final class FileInfo {
+            private final String displayName;
+
+            @JsonCreator
+            FileInfo(@JsonProperty(value="display_name") String displayName) {
+                this.displayName = displayName;
+            }
+
+            String displayName() {
+                return this.displayName;
+            }
+
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (!(o instanceof FileInfo)) {
+                    return false;
+                }
+                FileInfo that = (FileInfo)o;
+                return Objects.equals(this.displayName, that.displayName);
+            }
+
+            public int hashCode() {
+                return Objects.hash(this.displayName);
+            }
+
+            public String toString() {
+                return "FileInfo[displayName=" + this.displayName + "]";
+            }
         }
     }
 }
+

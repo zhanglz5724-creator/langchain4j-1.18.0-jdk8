@@ -1,33 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ *  org.reactivestreams.Subscription
+ */
 package dev.langchain4j.model.bedrock;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.response.StreamingHandle;
 import org.reactivestreams.Subscription;
 
-/**
- * @since 1.8.0
- */
-class BedrockStreamingHandle implements StreamingHandle {
-
+class BedrockStreamingHandle
+implements StreamingHandle {
     private final Subscription subscription;
     private volatile boolean isCancelled;
 
     BedrockStreamingHandle(Subscription subscription) {
-        this.subscription = ensureNotNull(subscription, "subscription");
+        this.subscription = (Subscription)ValidationUtils.ensureNotNull((Object)subscription, (String)"subscription");
     }
 
-    @Override
     public void cancel() {
-        isCancelled = true;
+        this.isCancelled = true;
         try {
-            subscription.cancel();
-        } catch (Exception ignored) {
+            this.subscription.cancel();
+        }
+        catch (Exception exception) {
+            // empty catch block
         }
     }
 
-    @Override
     public boolean isCancelled() {
-        return isCancelled;
+        return this.isCancelled;
     }
 }
+

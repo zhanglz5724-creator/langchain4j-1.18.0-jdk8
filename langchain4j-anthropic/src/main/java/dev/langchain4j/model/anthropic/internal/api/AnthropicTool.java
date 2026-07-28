@@ -1,22 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAnyGetter
+ *  com.fasterxml.jackson.annotation.JsonIgnore
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
+import dev.langchain4j.model.anthropic.internal.api.AnthropicCacheControl;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicToolSchema;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicTool {
-
     public String name;
     public String description;
     public AnthropicToolSchema inputSchema;
@@ -25,7 +35,8 @@ public class AnthropicTool {
     public Map<String, Object> customParameters;
     public Boolean strict;
 
-    public AnthropicTool() {}
+    public AnthropicTool() {
+    }
 
     public AnthropicTool(Builder builder) {
         this.name = builder.name;
@@ -33,15 +44,11 @@ public class AnthropicTool {
         this.inputSchema = builder.inputSchema;
         this.cacheControl = builder.cacheControl;
         this.customParameters = builder.customParameters;
-        this.strict= builder.strict;
+        this.strict = builder.strict;
     }
 
-    /**
-     * @deprecated please use {@link #AnthropicTool(Builder)} instead
-     */
-    @Deprecated(since = "1.10.0", forRemoval = true)
-    public AnthropicTool(
-            String name, String description, AnthropicToolSchema inputSchema, AnthropicCacheControl cacheControl) {
+    @Deprecated
+    public AnthropicTool(String name, String description, AnthropicToolSchema inputSchema, AnthropicCacheControl cacheControl) {
         this.name = name;
         this.description = description;
         this.inputSchema = inputSchema;
@@ -50,36 +57,23 @@ public class AnthropicTool {
 
     @JsonAnyGetter
     public Map<String, Object> customParameters() {
-        return customParameters;
+        return this.customParameters;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        AnthropicTool that = (AnthropicTool) o;
-        return Objects.equals(name, that.name)
-                && Objects.equals(description, that.description)
-                && Objects.equals(inputSchema, that.inputSchema)
-                && Objects.equals(cacheControl, that.cacheControl)
-                && Objects.equals(customParameters, that.customParameters)
-                && Objects.equals(strict, that.strict);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        AnthropicTool that = (AnthropicTool)o;
+        return Objects.equals(this.name, that.name) && Objects.equals(this.description, that.description) && Objects.equals(this.inputSchema, that.inputSchema) && Objects.equals(this.cacheControl, that.cacheControl) && Objects.equals(this.customParameters, that.customParameters) && Objects.equals(this.strict, that.strict);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(name, description, inputSchema, cacheControl, customParameters, strict);
+        return Objects.hash(this.name, this.description, this.inputSchema, this.cacheControl, this.customParameters, this.strict);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicTool{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", inputSchema=" + inputSchema +
-                ", cacheControl=" + cacheControl +
-                ", customParameters=" + customParameters +
-                ", strict=" + strict +
-                '}';
+        return "AnthropicTool{name='" + this.name + '\'' + ", description='" + this.description + '\'' + ", inputSchema=" + this.inputSchema + ", cacheControl=" + this.cacheControl + ", customParameters=" + this.customParameters + ", strict=" + this.strict + '}';
     }
 
     public static Builder builder() {
@@ -87,7 +81,6 @@ public class AnthropicTool {
     }
 
     public static class Builder {
-
         private String name;
         private String description;
         private AnthropicToolSchema inputSchema;
@@ -130,3 +123,4 @@ public class AnthropicTool {
         }
     }
 }
+

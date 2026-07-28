@@ -1,18 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.mcp.client;
-
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.mcp.client.McpResourceContents;
 import java.util.Base64;
 import java.util.Objects;
 
-/**
- * The 'BlobResourceContents' object from the MCP protocol schema.
- */
-public final class McpBlobResourceContents implements McpResourceContents {
-
+public final class McpBlobResourceContents
+implements McpResourceContents {
     private final String uri;
     private final String blob;
     private final String mimeType;
@@ -26,55 +30,48 @@ public final class McpBlobResourceContents implements McpResourceContents {
     }
 
     @JsonCreator
-    public McpBlobResourceContents(
-            @JsonProperty("uri") String uri,
-            @JsonProperty("blob") String blob,
-            @JsonProperty("mimeType") String mimeType
-    ) {
-        ensureNotNull(uri, "uri");
-        ensureNotNull(blob, "blob");
+    public McpBlobResourceContents(@JsonProperty(value="uri") String uri, @JsonProperty(value="blob") String blob, @JsonProperty(value="mimeType") String mimeType) {
+        ValidationUtils.ensureNotNull((Object)uri, (String)"uri");
+        ValidationUtils.ensureNotNull((Object)blob, (String)"blob");
         this.uri = uri;
         this.blob = blob;
         this.mimeType = mimeType;
     }
 
     @Override
-    public Type type() {
-        return Type.BLOB;
+    public McpResourceContents.Type type() {
+        return McpResourceContents.Type.BLOB;
     }
 
     public String uri() {
-        return uri;
+        return this.uri;
     }
 
     public String blob() {
-        return blob;
+        return this.blob;
     }
 
     public String mimeType() {
-        return mimeType;
+        return this.mimeType;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        McpBlobResourceContents that = (McpBlobResourceContents) obj;
-        return Objects.equals(this.uri, that.uri) &&
-                Objects.equals(this.blob, that.blob) &&
-                Objects.equals(this.mimeType, that.mimeType);
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        McpBlobResourceContents that = (McpBlobResourceContents)obj;
+        return Objects.equals(this.uri, that.uri) && Objects.equals(this.blob, that.blob) && Objects.equals(this.mimeType, that.mimeType);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(uri, blob, mimeType);
+        return Objects.hash(this.uri, this.blob, this.mimeType);
     }
 
-    @Override
     public String toString() {
-        return "McpBlobResourceContents[" +
-                "uri=" + uri + ", " +
-                "blob=" + blob + ", " +
-                "mimeType=" + mimeType + ']';
+        return "McpBlobResourceContents[uri=" + this.uri + ", blob=" + this.blob + ", mimeType=" + this.mimeType + ']';
     }
 }
+

@@ -1,20 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClient
+ *  dev.langchain4j.http.client.HttpRequest
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ *  dev.langchain4j.http.client.sse.CancellationUnsupportedHandle
+ *  dev.langchain4j.http.client.sse.ServerSentEvent
+ *  dev.langchain4j.http.client.sse.ServerSentEventContext
+ *  dev.langchain4j.http.client.sse.ServerSentEventListener
+ *  dev.langchain4j.http.client.sse.ServerSentEventParsingHandle
+ *  dev.langchain4j.http.client.sse.ServerSentEventParsingHandleUtils
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ */
 package dev.langchain4j.model.openai.internal;
 
 import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
+import dev.langchain4j.http.client.sse.CancellationUnsupportedHandle;
 import dev.langchain4j.http.client.sse.ServerSentEvent;
 import dev.langchain4j.http.client.sse.ServerSentEventContext;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
-import dev.langchain4j.http.client.sse.CancellationUnsupportedHandle;
+import dev.langchain4j.http.client.sse.ServerSentEventParsingHandle;
+import dev.langchain4j.http.client.sse.ServerSentEventParsingHandleUtils;
 import dev.langchain4j.model.chat.response.StreamingHandle;
-
+import dev.langchain4j.model.openai.internal.ErrorHandling;
+import dev.langchain4j.model.openai.internal.Json;
+import dev.langchain4j.model.openai.internal.ParsedAndRawResponse;
+import dev.langchain4j.model.openai.internal.ResponseHandle;
+import dev.langchain4j.model.openai.internal.StreamingCompletionHandling;
+import dev.langchain4j.model.openai.internal.StreamingResponseHandling;
 import java.util.function.Consumer;
 
-import static dev.langchain4j.http.client.sse.ServerSentEventParsingHandleUtils.toStreamingHandle;
-
 class StreamingRequestExecutor<Response> {
-
     private final HttpClient httpClient;
     private final HttpRequest streamingHttpRequest;
     private final Class<Response> responseClass;
@@ -25,34 +44,31 @@ class StreamingRequestExecutor<Response> {
         this.responseClass = responseClass;
     }
 
-    StreamingResponseHandling onPartialResponse(Consumer<ParsedAndRawResponse<Response>> partialResponseHandler) {
-
-        return new StreamingResponseHandling() {
+    StreamingResponseHandling onPartialResponse(final Consumer<ParsedAndRawResponse<Response>> partialResponseHandler) {
+        return new StreamingResponseHandling(){
 
             @Override
-            public StreamingCompletionHandling onComplete(Runnable streamingCompletionCallback) {
-                return new StreamingCompletionHandling() {
+            public StreamingCompletionHandling onComplete(final Runnable streamingCompletionCallback) {
+                return new StreamingCompletionHandling(){
 
                     @Override
-                    public ErrorHandling onError(Consumer<Throwable> errorHandler) {
-                        return new ErrorHandling() {
+                    public ErrorHandling onError(final Consumer<Throwable> errorHandler) {
+                        return new ErrorHandling(){
 
                             @Override
                             public ResponseHandle execute() {
-                                return stream(partialResponseHandler, streamingCompletionCallback, errorHandler);
+                                return StreamingRequestExecutor.this.stream(partialResponseHandler, streamingCompletionCallback, errorHandler);
                             }
                         };
                     }
 
                     @Override
                     public ErrorHandling ignoreErrors() {
-                        return new ErrorHandling() {
+                        return new ErrorHandling(){
 
                             @Override
                             public ResponseHandle execute() {
-                                return stream(partialResponseHandler, streamingCompletionCallback, (e) -> {
-                                    // intentionally ignoring because user called ignoreErrors()
-                                });
+                                return StreamingRequestExecutor.this.stream(partialResponseHandler, streamingCompletionCallback, e -> {});
                             }
                         };
                     }
@@ -60,67 +76,46 @@ class StreamingRequestExecutor<Response> {
             }
 
             @Override
-            public ErrorHandling onError(Consumer<Throwable> errorHandler) {
-                return new ErrorHandling() {
+            public ErrorHandling onError(final Consumer<Throwable> errorHandler) {
+                return new ErrorHandling(){
 
                     @Override
                     public ResponseHandle execute() {
-                        return stream(
-                                partialResponseHandler,
-                                () -> {
-                                    // intentionally ignoring because user did not provide callback
-                                },
-                                errorHandler);
+                        return StreamingRequestExecutor.this.stream(partialResponseHandler, () -> {}, errorHandler);
                     }
                 };
             }
 
             @Override
             public ErrorHandling ignoreErrors() {
-                return new ErrorHandling() {
+                return new ErrorHandling(){
 
                     @Override
                     public ResponseHandle execute() {
-                        return stream(
-                                partialResponseHandler,
-                                () -> {
-                                    // intentionally ignoring because user did not provide callback
-                                },
-                                (e) -> {
-                                    // intentionally ignoring because user called ignoreErrors()
-                                });
+                        return StreamingRequestExecutor.this.stream(partialResponseHandler, () -> {}, e -> {});
                     }
                 };
             }
         };
     }
 
-    private ResponseHandle stream(
-            Consumer<ParsedAndRawResponse<Response>> partialResponseHandler,
-            Runnable streamingCompletionCallback,
-            Consumer<Throwable> errorHandler) {
-
-        ServerSentEventListener listener = new ServerSentEventListener() {
-
+    private ResponseHandle stream(final Consumer<ParsedAndRawResponse<Response>> partialResponseHandler, final Runnable streamingCompletionCallback, final Consumer<Throwable> errorHandler) {
+        ServerSentEventListener listener = new ServerSentEventListener(){
             volatile SuccessfulHttpResponse response;
             volatile StreamingHandle streamingHandle;
 
-            @Override
             public void onOpen(SuccessfulHttpResponse response) {
                 this.response = response;
             }
 
-            @Override
             public void onEvent(ServerSentEvent event) {
-                onEvent(event, new ServerSentEventContext(new CancellationUnsupportedHandle()));
+                this.onEvent(event, new ServerSentEventContext((ServerSentEventParsingHandle)new CancellationUnsupportedHandle()));
             }
 
-            @Override
             public void onEvent(ServerSentEvent event, ServerSentEventContext context) {
-                if (streamingHandle == null) {
-                    streamingHandle = toStreamingHandle(context.parsingHandle());
+                if (this.streamingHandle == null) {
+                    this.streamingHandle = ServerSentEventParsingHandleUtils.toStreamingHandle((ServerSentEventParsingHandle)context.parsingHandle());
                 }
-
                 if ("[DONE]".equals(event.data())) {
                     return;
                 }
@@ -129,36 +124,29 @@ class StreamingRequestExecutor<Response> {
                         errorHandler.accept(new RuntimeException(event.data()));
                         return;
                     }
-                    Response parsedResponse = Json.fromJson(event.data(), responseClass);
+                    Object parsedResponse = Json.fromJson(event.data(), StreamingRequestExecutor.this.responseClass);
                     if (parsedResponse != null) {
-                        ParsedAndRawResponse parsedAndRawResponse = ParsedAndRawResponse.builder()
-                                .parsedResponse(parsedResponse)
-                                .rawHttpResponse(response)
-                                .rawServerSentEvent(event)
-                                .streamingHandle(streamingHandle)
-                                .build();
-                        partialResponseHandler.accept(parsedAndRawResponse); // do not handle exception, fail-fast
+                        ParsedAndRawResponse parsedAndRawResponse = ParsedAndRawResponse.builder().parsedResponse(parsedResponse).rawHttpResponse(this.response).rawServerSentEvent(event).streamingHandle(this.streamingHandle).build();
+                        partialResponseHandler.accept(parsedAndRawResponse);
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     errorHandler.accept(e);
                 }
             }
 
-            @Override
             public void onClose() {
-                if (streamingHandle == null || !streamingHandle.isCancelled()) {
+                if (this.streamingHandle == null || !this.streamingHandle.isCancelled()) {
                     streamingCompletionCallback.run();
                 }
             }
 
-            @Override
             public void onError(Throwable t) {
                 errorHandler.accept(t);
             }
         };
-
-        httpClient.execute(streamingHttpRequest, listener);
-
+        this.httpClient.execute(this.streamingHttpRequest, listener);
         return new ResponseHandle();
     }
 }
+

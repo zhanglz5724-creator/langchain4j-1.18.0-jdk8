@@ -1,9 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
 import java.time.LocalDateTime;
 
 public class McpServerListRequest {
-
     private final String cursor;
     private final Long limit;
     private final String search;
@@ -19,27 +21,31 @@ public class McpServerListRequest {
     }
 
     public String getCursor() {
-        return cursor;
+        return this.cursor;
     }
 
     public Long getLimit() {
-        return limit;
+        return this.limit;
     }
 
     public String getSearch() {
-        return search;
+        return this.search;
     }
 
     public LocalDateTime getUpdatedSince() {
-        return updatedSince;
+        return this.updatedSince;
     }
 
     public String getVersion() {
-        return version;
+        return this.version;
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public String toString() {
+        return "McpServerListRequest{cursor='" + this.cursor + '\'' + ", limit=" + this.limit + ", search='" + this.search + '\'' + ", updatedSince=" + this.updatedSince + ", version='" + this.version + '\'' + '}';
     }
 
     public static class Builder {
@@ -49,59 +55,34 @@ public class McpServerListRequest {
         private LocalDateTime updatedSince;
         private String version;
 
-        /**
-         * Pagination cursor.
-         */
         public Builder cursor(String cursor) {
             this.cursor = cursor;
             return this;
         }
 
-        /**
-         * Number of items per page. The default is 30.
-         */
         public Builder limit(Long limit) {
             this.limit = limit;
             return this;
         }
 
-        /**
-         * Search servers by name (substring match).
-         */
         public Builder search(String search) {
             this.search = search;
             return this;
         }
 
-        /**
-         * Only return servers updated since this date.
-         * The date and time should be in the UTC.
-         */
         public Builder updatedSince(LocalDateTime updatedSince) {
             this.updatedSince = updatedSince;
             return this;
         }
 
-        /**
-         * Filter by version ('latest' for latest version, or an exact version like '1.2.3').
-         */
         public Builder version(String version) {
             this.version = version;
             return this;
         }
 
         public McpServerListRequest build() {
-            return new McpServerListRequest(cursor, limit, search, updatedSince, version);
+            return new McpServerListRequest(this.cursor, this.limit, this.search, this.updatedSince, this.version);
         }
     }
-
-    @Override
-    public String toString() {
-        return "McpServerListRequest{" + "cursor='"
-                + cursor + '\'' + ", limit="
-                + limit + ", search='"
-                + search + '\'' + ", updatedSince="
-                + updatedSince + ", version='"
-                + version + '\'' + '}';
-    }
 }
+

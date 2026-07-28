@@ -1,60 +1,37 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.service.tool.ToolProvider
+ */
 package dev.langchain4j.skills;
 
 import dev.langchain4j.Experimental;
 import dev.langchain4j.service.tool.ToolProvider;
-
+import dev.langchain4j.skills.DefaultSkill;
+import dev.langchain4j.skills.SkillResource;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Collections;
 
-/**
- * Represents a skill that can be used by an LLM.
- * <p>
- * A skill has a mandatory {@link #name()} and {@link #description()} that the LLM always sees.
- * The LLM can read the full {@link #content()} and any {@link #resources()} on demand.
- * <p>
- * See more details <a href="https://agentskills.io">here</a>.
- */
 @Experimental
 public interface Skill {
+    public String name();
 
-    /**
-     * Returns the unique name of this skill.
-     * The LLM uses this name to identify the skill when selecting from the available skills.
-     */
-    String name();
+    public String description();
 
-    /**
-     * Returns a short description of what this skill does.
-     * Shown to the LLM so it can decide which skill is relevant for the current request.
-     */
-    String description();
+    public String content();
 
-    /**
-     * Returns the full instructions of this skill (e.g. the contents of a {@code SKILL.md} file).
-     */
-    String content();
-
-    /**
-     * Returns the optional list of additional resources associated with this skill
-     * (e.g. references, assets, templates, etc.).
-     *
-     * @return the list of resources, empty by default
-     */
-    default List<SkillResource> resources() {
-        return Collections.emptyList();
+    default public List<SkillResource> resources() {
+        return Arrays.asList(new SkillResource[0]);
     }
 
-    /**
-     * Returns the optional list of tool providers associated with this skill.
-     * These tool providers supply tools that will be exposed to the LLM when this skill is activated.
-     *
-     * @return the list of tool providers, empty by default
-     */
-    default List<ToolProvider> toolProviders() {
-        return Collections.emptyList();
+    default public List<ToolProvider> toolProviders() {
+        return Arrays.asList(new ToolProvider[0]);
     }
 
-    static DefaultSkill.Builder builder() {
+    public static DefaultSkill.Builder builder() {
         return new DefaultSkill.Builder();
     }
 }
+

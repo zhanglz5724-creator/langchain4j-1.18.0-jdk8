@@ -1,10 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.googleai;
 
 import dev.langchain4j.model.output.TokenUsage;
 import java.util.Objects;
 
-public class GoogleAiGeminiTokenUsage extends TokenUsage {
-
+public class GoogleAiGeminiTokenUsage
+extends TokenUsage {
     private final Integer cachedContentTokenCount;
     private final Integer thoughtsTokenCount;
 
@@ -15,65 +21,56 @@ public class GoogleAiGeminiTokenUsage extends TokenUsage {
     }
 
     public Integer cachedContentTokenCount() {
-        return cachedContentTokenCount;
+        return this.cachedContentTokenCount;
     }
 
     public Integer thoughtsTokenCount() {
-        return thoughtsTokenCount;
+        return this.thoughtsTokenCount;
     }
 
-    @Override
     public GoogleAiGeminiTokenUsage add(TokenUsage that) {
         if (that == null) {
             return this;
         }
-
-        return GoogleAiGeminiTokenUsage.builder()
-                .inputTokenCount(sum(this.inputTokenCount(), that.inputTokenCount()))
-                .outputTokenCount(sum(this.outputTokenCount(), that.outputTokenCount()))
-                .totalTokenCount(sum(this.totalTokenCount(), that.totalTokenCount()))
-                .cachedContentTokenCount(addCachedContentTokenCount(that))
-                .thoughtsTokenCount(addThoughtsTokenCount(that))
-                .build();
+        return GoogleAiGeminiTokenUsage.builder().inputTokenCount(GoogleAiGeminiTokenUsage.sum((Integer)this.inputTokenCount(), (Integer)that.inputTokenCount())).outputTokenCount(GoogleAiGeminiTokenUsage.sum((Integer)this.outputTokenCount(), (Integer)that.outputTokenCount())).totalTokenCount(GoogleAiGeminiTokenUsage.sum((Integer)this.totalTokenCount(), (Integer)that.totalTokenCount())).cachedContentTokenCount(this.addCachedContentTokenCount(that)).thoughtsTokenCount(this.addThoughtsTokenCount(that)).build();
     }
 
     private Integer addCachedContentTokenCount(TokenUsage that) {
-        if (that instanceof GoogleAiGeminiTokenUsage thatGeminiTokenUsage) {
-            return sum(this.cachedContentTokenCount, thatGeminiTokenUsage.cachedContentTokenCount);
+        if (that instanceof GoogleAiGeminiTokenUsage) {
+            GoogleAiGeminiTokenUsage thatGeminiTokenUsage = (GoogleAiGeminiTokenUsage)that;
+            return GoogleAiGeminiTokenUsage.sum((Integer)this.cachedContentTokenCount, (Integer)thatGeminiTokenUsage.cachedContentTokenCount);
         }
         return this.cachedContentTokenCount;
     }
 
     private Integer addThoughtsTokenCount(TokenUsage that) {
-        if (that instanceof GoogleAiGeminiTokenUsage thatGeminiTokenUsage) {
-            return sum(this.thoughtsTokenCount, thatGeminiTokenUsage.thoughtsTokenCount);
+        if (that instanceof GoogleAiGeminiTokenUsage) {
+            GoogleAiGeminiTokenUsage thatGeminiTokenUsage = (GoogleAiGeminiTokenUsage)that;
+            return GoogleAiGeminiTokenUsage.sum((Integer)this.thoughtsTokenCount, (Integer)thatGeminiTokenUsage.thoughtsTokenCount);
         }
         return this.thoughtsTokenCount;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        GoogleAiGeminiTokenUsage that = (GoogleAiGeminiTokenUsage) o;
-        return Objects.equals(cachedContentTokenCount, that.cachedContentTokenCount)
-                && Objects.equals(thoughtsTokenCount, that.thoughtsTokenCount);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        GoogleAiGeminiTokenUsage that = (GoogleAiGeminiTokenUsage)((Object)o);
+        return Objects.equals(this.cachedContentTokenCount, that.cachedContentTokenCount) && Objects.equals(this.thoughtsTokenCount, that.thoughtsTokenCount);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cachedContentTokenCount, thoughtsTokenCount);
+        return Objects.hash(super.hashCode(), this.cachedContentTokenCount, this.thoughtsTokenCount);
     }
 
-    @Override
     public String toString() {
-        return "GoogleAiGeminiTokenUsage {" + " inputTokenCount = "
-                + inputTokenCount() + ", outputTokenCount = "
-                + outputTokenCount() + ", totalTokenCount = "
-                + totalTokenCount() + ", cachedContentTokenCount = "
-                + cachedContentTokenCount + ", thoughtsTokenCount = "
-                + thoughtsTokenCount + " }";
+        return "GoogleAiGeminiTokenUsage { inputTokenCount = " + this.inputTokenCount() + ", outputTokenCount = " + this.outputTokenCount() + ", totalTokenCount = " + this.totalTokenCount() + ", cachedContentTokenCount = " + this.cachedContentTokenCount + ", thoughtsTokenCount = " + this.thoughtsTokenCount + " }";
     }
 
     public static Builder builder() {
@@ -81,7 +78,6 @@ public class GoogleAiGeminiTokenUsage extends TokenUsage {
     }
 
     public static class Builder {
-
         private Integer inputTokenCount;
         private Integer outputTokenCount;
         private Integer totalTokenCount;
@@ -118,3 +114,4 @@ public class GoogleAiGeminiTokenUsage extends TokenUsage {
         }
     }
 }
+

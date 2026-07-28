@@ -1,6 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.agent;
 
+import dev.langchain4j.agentic.agent.AgentInvocationException;
 import dev.langchain4j.agentic.scope.AgenticScope;
+import java.util.Objects;
+
 public class ErrorContext {
     private final String agentName;
     private final AgenticScope agenticScope;
@@ -12,36 +18,41 @@ public class ErrorContext {
         this.exception = exception;
     }
 
-    public String getAgentName() {
-        return agentName;
+    public String agentName() {
+        return this.agentName;
     }
 
-    public AgenticScope getAgenticScope() {
-        return agenticScope;
+    public AgenticScope agenticScope() {
+        return this.agenticScope;
     }
 
-    public AgentInvocationException getException() {
-        return exception;
+    public AgentInvocationException exception() {
+        return this.exception;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ErrorContext that = (ErrorContext) o;
-        return java.util.Objects.equals(this.agentName, that.agentName) && java.util.Objects.equals(this.agenticScope, that.agenticScope) && java.util.Objects.equals(this.exception, that.exception);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ErrorContext)) {
+            return false;
+        }
+        ErrorContext other = (ErrorContext)o;
+        if (!Objects.equals(this.agentName, other.agentName)) {
+            return false;
+        }
+        if (!Objects.equals(this.agenticScope, other.agenticScope)) {
+            return false;
+        }
+        return Objects.equals((Object)this.exception, (Object)other.exception);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(agentName, agenticScope, exception);
+        return Objects.hash(new Object[]{this.agentName, this.agenticScope, this.exception});
     }
 
-    @Override
     public String toString() {
-        return "ErrorContext{"agentName=" + agentName + , "agenticScope=" + agenticScope + , "exception=" + exception + "}"";
+        return "ErrorContext{agentName=" + this.agentName + ", agenticScope=" + this.agenticScope + ", exception=" + (Object)((Object)this.exception) + "}";
     }
-
-
-
 }
+

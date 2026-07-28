@@ -9,6 +9,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ class ChatMessageSerializerTest {
                 Arguments.of(
                         UserMessage.builder()
                                 .addContent(TextContent.from("hello"))
-                                .attributes(new LinkedHashMap<>() {
+                                .attributes(new LinkedHashMap<String,Object>() {
                                     {
                                         put("name", "Klaus");
                                         put("age", 42);
@@ -86,7 +87,7 @@ class ChatMessageSerializerTest {
                                         .name("weather")
                                         .arguments("{\"city\": \"Munich\"}")
                                         .build()))
-                                .attributes(new LinkedHashMap<>() {
+                                .attributes(new LinkedHashMap<String,Object>() {
                                     {
                                         put("name", "Klaus");
                                         put("age", 42);
@@ -117,7 +118,7 @@ class ChatMessageSerializerTest {
                                 .id("67890")
                                 .toolName("tool_search_tool")
                                 .text("Tools found: weather, time")
-                                .attributes(new LinkedHashMap<>() {
+                                .attributes(new LinkedHashMap<String,Object>() {
                                     {
                                         put("found_tools", Arrays.asList("weather", "time"));
                                     }
@@ -125,7 +126,7 @@ class ChatMessageSerializerTest {
                                 .build(),
                         "{\"id\":\"67890\",\"toolName\":\"tool_search_tool\",\"contents\":[{\"text\":\"Tools found: weather, time\",\"type\":\"TEXT\"}],\"attributes\":{\"found_tools\":[\"weather\", \"time\"]},\"type\":\"TOOL_EXECUTION_RESULT\"}"),
                 Arguments.of(
-                        CustomMessage.from(new LinkedHashMap<>() {
+                        CustomMessage.from(new LinkedHashMap<String,Object>() {
                             {
                                 put("k1", "v1");
                                 put("k2", "v2");
@@ -173,7 +174,7 @@ class ChatMessageSerializerTest {
         assertThat(deserialized.attributes()).isEmpty();
 
         deserialized.attributes().put("k", "v");
-        assertThat(deserialized.attributes()).containsExactly(Map.entry("k", "v"));
+        assertThat(deserialized.attributes()).containsExactly(new AbstractMap.SimpleEntry<>("k", "v"));
     }
 
     @Test

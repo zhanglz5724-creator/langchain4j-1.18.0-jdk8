@@ -1,52 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.pgvector;
 
+import dev.langchain4j.store.embedding.pgvector.JSONMetadataHandler;
+import dev.langchain4j.store.embedding.pgvector.MetadataStorageConfig;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- *  Handle metadata as JSONB column.
- */
-class JSONBMetadataHandler extends JSONMetadataHandler {
-
+class JSONBMetadataHandler
+extends JSONMetadataHandler {
     final String indexType;
 
-    /**
-     * MetadataHandler constructor
-     * @param config {@link MetadataStorageConfig} configuration
-     */
     public JSONBMetadataHandler(MetadataStorageConfig config) {
         super(config);
         if (!this.columnDefinition.getType().equals("jsonb")) {
             throw new RuntimeException("Your column definition type should be JSONB");
         }
-        indexType = config.indexType();
+        this.indexType = config.indexType();
     }
 
     @Override
     public void createMetadataIndexes(Statement statement, String table) {
-        String indexTypeSql = indexType == null ? "" : "USING " + indexType;
+        String indexTypeSql = this.indexType == null ? "" : "USING " + this.indexType;
         for (String str : this.indexes) {
             String index = str.trim();
-            String indexName = formatIndex(index);
+            String indexName = this.formatIndex(index);
             try {
-                String indexSql = String.format("create index if not exists %s_%s on %s %s (%s)",
-                        table, indexName, table, indexTypeSql, index);
+                String indexSql = String.format("create index if not exists %s_%s on %s %s (%s)", table, indexName, table, indexTypeSql, index);
                 statement.executeUpdate(indexSql);
-            } catch (SQLException e) {
+            }
+            catch (SQLException e) {
                 throw new RuntimeException(String.format("Cannot create index %s: %s", index, e));
             }
         }
     }
 
     String formatIndex(String index) {
-        // (metadata_b->'name')
-        String indexName;
-        if (index.contains("->")) {
-            indexName = columnName + "_" + index.substring(index.indexOf("->") + 2, index.length() - 1)
-                    .trim().replaceAll("'", "");
-        } else {
-            indexName = index.replaceAll(" ", "_");
-        }
+        String indexName = index.contains("->") ? this.columnName + "_" + index.substring(index.indexOf("->") + 2, index.length() - 1).trim().replaceAll("'", "") : index.replaceAll(" ", "_");
         return indexName;
     }
 }
+

@@ -1,113 +1,92 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters$Builder
+ */
 package dev.langchain4j.model.googleai;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.quoted;
-
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import java.util.Objects;
 
-public class GoogleAiGeminiChatRequestParameters extends DefaultChatRequestParameters {
-
-    public static final GoogleAiGeminiChatRequestParameters EMPTY =
-            GoogleAiGeminiChatRequestParameters.builder().build();
-
+public class GoogleAiGeminiChatRequestParameters
+extends DefaultChatRequestParameters {
+    public static final GoogleAiGeminiChatRequestParameters EMPTY = GoogleAiGeminiChatRequestParameters.builder().build();
     private final String aspectRatio;
     private final String imageSize;
     private final String cachedContentName;
 
     private GoogleAiGeminiChatRequestParameters(Builder builder) {
-        super(builder);
+        super((DefaultChatRequestParameters.Builder)builder);
         this.aspectRatio = builder.aspectRatio;
         this.imageSize = builder.imageSize;
         this.cachedContentName = builder.cachedContentName;
     }
 
     public String aspectRatio() {
-        return aspectRatio;
+        return this.aspectRatio;
     }
 
     public String imageSize() {
-        return imageSize;
+        return this.imageSize;
     }
 
-    /**
-     * The resource name of a previously created cache (e.g. {@code "cachedContents/abc123"}) to attach
-     * to this specific request, overriding any global {@code cachedContentName} configured on the
-     * {@link GoogleAiGeminiChatModel}/{@link GoogleAiGeminiStreamingChatModel}.
-     */
     public String cachedContentName() {
-        return cachedContentName;
+        return this.cachedContentName;
     }
 
-    @Override
     public GoogleAiGeminiChatRequestParameters overrideWith(ChatRequestParameters that) {
-        return GoogleAiGeminiChatRequestParameters.builder()
-                .overrideWith(this)
-                .overrideWith(that)
-                .build();
+        return GoogleAiGeminiChatRequestParameters.builder().overrideWith((ChatRequestParameters)this).overrideWith(that).build();
     }
 
-    @Override
     public GoogleAiGeminiChatRequestParameters defaultedBy(ChatRequestParameters that) {
-        return GoogleAiGeminiChatRequestParameters.builder()
-                .overrideWith(that)
-                .overrideWith(this)
-                .build();
+        return GoogleAiGeminiChatRequestParameters.builder().overrideWith(that).overrideWith((ChatRequestParameters)this).build();
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        GoogleAiGeminiChatRequestParameters that = (GoogleAiGeminiChatRequestParameters) o;
-        return Objects.equals(aspectRatio, that.aspectRatio)
-                && Objects.equals(imageSize, that.imageSize)
-                && Objects.equals(cachedContentName, that.cachedContentName);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        GoogleAiGeminiChatRequestParameters that = (GoogleAiGeminiChatRequestParameters)((Object)o);
+        return Objects.equals(this.aspectRatio, that.aspectRatio) && Objects.equals(this.imageSize, that.imageSize) && Objects.equals(this.cachedContentName, that.cachedContentName);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), aspectRatio, imageSize, cachedContentName);
+        return Objects.hash(super.hashCode(), this.aspectRatio, this.imageSize, this.cachedContentName);
     }
 
-    @Override
     public String toString() {
-        return "GoogleAiGeminiChatRequestParameters{" + "modelName="
-                + quoted(modelName()) + ", temperature="
-                + temperature() + ", topP="
-                + topP() + ", topK="
-                + topK() + ", frequencyPenalty="
-                + frequencyPenalty() + ", presencePenalty="
-                + presencePenalty() + ", maxOutputTokens="
-                + maxOutputTokens() + ", stopSequences="
-                + stopSequences() + ", toolSpecifications="
-                + toolSpecifications() + ", toolChoice="
-                + toolChoice() + ", responseFormat="
-                + responseFormat() + ", aspectRatio="
-                + quoted(aspectRatio) + ", imageSize="
-                + quoted(imageSize) + ", cachedContentName="
-                + quoted(cachedContentName) + '}';
+        return "GoogleAiGeminiChatRequestParameters{modelName=" + Utils.quoted((Object)this.modelName()) + ", temperature=" + this.temperature() + ", topP=" + this.topP() + ", topK=" + this.topK() + ", frequencyPenalty=" + this.frequencyPenalty() + ", presencePenalty=" + this.presencePenalty() + ", maxOutputTokens=" + this.maxOutputTokens() + ", stopSequences=" + this.stopSequences() + ", toolSpecifications=" + this.toolSpecifications() + ", toolChoice=" + this.toolChoice() + ", responseFormat=" + this.responseFormat() + ", aspectRatio=" + Utils.quoted((Object)this.aspectRatio) + ", imageSize=" + Utils.quoted((Object)this.imageSize) + ", cachedContentName=" + Utils.quoted((Object)this.cachedContentName) + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends DefaultChatRequestParameters.Builder<Builder> {
-
+    public static class Builder
+    extends DefaultChatRequestParameters.Builder<Builder> {
         private String aspectRatio;
         private String imageSize;
         private String cachedContentName;
 
-        @Override
         public Builder overrideWith(ChatRequestParameters parameters) {
             super.overrideWith(parameters);
-            if (parameters instanceof GoogleAiGeminiChatRequestParameters geminiParameters) {
-                aspectRatio(getOrDefault(geminiParameters.aspectRatio(), aspectRatio));
-                imageSize(getOrDefault(geminiParameters.imageSize(), imageSize));
-                cachedContentName(getOrDefault(geminiParameters.cachedContentName(), cachedContentName));
+            if (parameters instanceof GoogleAiGeminiChatRequestParameters) {
+                GoogleAiGeminiChatRequestParameters geminiParameters = (GoogleAiGeminiChatRequestParameters)parameters;
+                this.aspectRatio((String)Utils.getOrDefault((Object)geminiParameters.aspectRatio(), (Object)this.aspectRatio));
+                this.imageSize((String)Utils.getOrDefault((Object)geminiParameters.imageSize(), (Object)this.imageSize));
+                this.cachedContentName((String)Utils.getOrDefault((Object)geminiParameters.cachedContentName(), (Object)this.cachedContentName));
             }
             return this;
         }
@@ -118,7 +97,7 @@ public class GoogleAiGeminiChatRequestParameters extends DefaultChatRequestParam
         }
 
         public Builder imageAspectRatio(String imageAspectRatio) {
-            return aspectRatio(imageAspectRatio);
+            return this.aspectRatio(imageAspectRatio);
         }
 
         public Builder imageSize(String imageSize) {
@@ -131,9 +110,9 @@ public class GoogleAiGeminiChatRequestParameters extends DefaultChatRequestParam
             return this;
         }
 
-        @Override
         public GoogleAiGeminiChatRequestParameters build() {
             return new GoogleAiGeminiChatRequestParameters(this);
         }
     }
 }
+

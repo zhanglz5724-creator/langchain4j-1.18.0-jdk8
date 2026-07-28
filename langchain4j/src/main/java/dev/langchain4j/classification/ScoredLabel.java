@@ -1,48 +1,50 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.classification;
 
-import static dev.langchain4j.internal.Utils.quoted;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import java.util.Objects;
 
-/**
- * Represents a classification label with score.
- *
- * @param <L> The type of the label (e.g., String, Enum, etc.)
- */
 public class ScoredLabel<L> {
-
     private final L label;
     private final double score;
 
     public ScoredLabel(L label, double score) {
-        this.label = ensureNotNull(label, "label");
+        this.label = ValidationUtils.ensureNotNull(label, (String)"label");
         this.score = score;
     }
 
     public L label() {
-        return label;
+        return this.label;
     }
 
     public double score() {
-        return score;
+        return this.score;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof ScoredLabel<?> that)) return false;
-        return Objects.equals(this.label, that.label)
-                && Double.doubleToLongBits(this.score) == Double.doubleToLongBits(that.score);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ScoredLabel)) {
+            return false;
+        }
+        ScoredLabel that = (ScoredLabel)obj;
+        return Objects.equals(this.label, that.label) && Double.doubleToLongBits(this.score) == Double.doubleToLongBits(that.score);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(label, score);
+        return Objects.hash(this.label, this.score);
     }
 
-    @Override
     public String toString() {
-        return "ScoredLabel {" + " label = " + quoted(label) + ", score = " + score + " }";
+        return "ScoredLabel { label = " + Utils.quoted(this.label) + ", score = " + this.score + " }";
     }
 }
+

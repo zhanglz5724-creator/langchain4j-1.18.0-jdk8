@@ -1,36 +1,35 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.infinispan.protostream.MessageMarshaller
+ *  org.infinispan.protostream.MessageMarshaller$ProtoStreamReader
+ *  org.infinispan.protostream.MessageMarshaller$ProtoStreamWriter
+ */
 package dev.langchain4j.store.embedding.infinispan;
 
+import dev.langchain4j.store.embedding.infinispan.LangChainInfinispanItem;
+import dev.langchain4j.store.embedding.infinispan.LangChainMetadata;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.infinispan.protostream.MessageMarshaller;
 
-/**
- * Marshaller to read and write embeddings to Infinispan
- */
-public class LangChainItemMarshaller implements MessageMarshaller<LangChainInfinispanItem> {
-
+public class LangChainItemMarshaller
+implements MessageMarshaller<LangChainInfinispanItem> {
     private final String typeName;
 
-    /**
-     * Constructor for the LangChainItemMarshaller Marshaller
-     *
-     * @param typeName,      the full type of the protobuf entity
-     */
     public LangChainItemMarshaller(String typeName) {
         this.typeName = typeName;
     }
 
-    @Override
-    public LangChainInfinispanItem readFrom(ProtoStreamReader reader) throws IOException {
+    public LangChainInfinispanItem readFrom(MessageMarshaller.ProtoStreamReader reader) throws IOException {
         String id = reader.readString("id");
         String text = reader.readString("text");
         float[] embedding = reader.readFloats("embedding");
-        Set<LangChainMetadata> metadata = reader.readCollection("metadata", new HashSet<>(), LangChainMetadata.class);
-
-        Map<String, Object> metadataMap = new HashMap<>();
+        Set metadata = (Set)reader.readCollection("metadata", new HashSet(), LangChainMetadata.class);
+        HashMap<String, Object> metadataMap = new HashMap<String, Object>();
         if (metadata != null) {
             for (LangChainMetadata meta : metadata) {
                 metadataMap.put(meta.name(), meta.value());
@@ -39,21 +38,19 @@ public class LangChainItemMarshaller implements MessageMarshaller<LangChainInfin
         return new LangChainInfinispanItem(id, embedding, text, metadata, metadataMap);
     }
 
-    @Override
-    public void writeTo(ProtoStreamWriter writer, LangChainInfinispanItem item) throws IOException {
+    public void writeTo(MessageMarshaller.ProtoStreamWriter writer, LangChainInfinispanItem item) throws IOException {
         writer.writeString("id", item.id());
         writer.writeString("text", item.text());
         writer.writeFloats("embedding", item.embedding());
         writer.writeCollection("metadata", item.metadata(), LangChainMetadata.class);
     }
 
-    @Override
     public Class<? extends LangChainInfinispanItem> getJavaClass() {
         return LangChainInfinispanItem.class;
     }
 
-    @Override
     public String getTypeName() {
-        return typeName;
+        return this.typeName;
     }
 }
+

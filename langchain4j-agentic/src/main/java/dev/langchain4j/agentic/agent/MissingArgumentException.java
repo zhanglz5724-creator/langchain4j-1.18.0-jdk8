@@ -1,7 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.agent;
 
-public class MissingArgumentException extends AgentInvocationException {
+import dev.langchain4j.agentic.agent.AgentInvocationException;
 
+public class MissingArgumentException
+extends AgentInvocationException {
     private final String argumentName;
 
     public MissingArgumentException(String argumentName) {
@@ -10,6 +15,7 @@ public class MissingArgumentException extends AgentInvocationException {
     }
 
     public String argumentName() {
-        return argumentName;
+        return this.argumentName;
     }
 }
+

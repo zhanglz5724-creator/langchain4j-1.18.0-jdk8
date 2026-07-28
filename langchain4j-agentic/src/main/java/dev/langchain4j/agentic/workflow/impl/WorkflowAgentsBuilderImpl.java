@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.workflow.impl;
 
 import dev.langchain4j.agentic.UntypedAgent;
@@ -7,9 +10,16 @@ import dev.langchain4j.agentic.workflow.ParallelAgentService;
 import dev.langchain4j.agentic.workflow.ParallelMapperService;
 import dev.langchain4j.agentic.workflow.SequentialAgentService;
 import dev.langchain4j.agentic.workflow.WorkflowAgentsBuilder;
+import dev.langchain4j.agentic.workflow.impl.ConditionalAgentServiceImpl;
+import dev.langchain4j.agentic.workflow.impl.LoopAgentServiceImpl;
+import dev.langchain4j.agentic.workflow.impl.ParallelAgentServiceImpl;
+import dev.langchain4j.agentic.workflow.impl.ParallelMapperServiceImpl;
+import dev.langchain4j.agentic.workflow.impl.SequentialAgentServiceImpl;
 
-public enum WorkflowAgentsBuilderImpl implements WorkflowAgentsBuilder {
+public enum WorkflowAgentsBuilderImpl implements WorkflowAgentsBuilder
+{
     INSTANCE;
+
 
     @Override
     public SequentialAgentService<UntypedAgent> sequenceBuilder() {
@@ -17,7 +27,7 @@ public enum WorkflowAgentsBuilderImpl implements WorkflowAgentsBuilder {
     }
 
     @Override
-    public <T> SequentialAgentService<T> sequenceBuilder(final Class<T> agentServiceClass) {
+    public <T> SequentialAgentService<T> sequenceBuilder(Class<T> agentServiceClass) {
         return SequentialAgentServiceImpl.builder(agentServiceClass);
     }
 
@@ -27,7 +37,7 @@ public enum WorkflowAgentsBuilderImpl implements WorkflowAgentsBuilder {
     }
 
     @Override
-    public <T> ParallelAgentService<T> parallelBuilder(final Class<T> agentServiceClass) {
+    public <T> ParallelAgentService<T> parallelBuilder(Class<T> agentServiceClass) {
         return ParallelAgentServiceImpl.builder(agentServiceClass);
     }
 
@@ -37,7 +47,7 @@ public enum WorkflowAgentsBuilderImpl implements WorkflowAgentsBuilder {
     }
 
     @Override
-    public <T> LoopAgentService<T> loopBuilder(final Class<T> agentServiceClass) {
+    public <T> LoopAgentService<T> loopBuilder(Class<T> agentServiceClass) {
         return LoopAgentServiceImpl.builder(agentServiceClass);
     }
 
@@ -47,7 +57,7 @@ public enum WorkflowAgentsBuilderImpl implements WorkflowAgentsBuilder {
     }
 
     @Override
-    public <T> ConditionalAgentService<T> conditionalBuilder(final Class<T> agentServiceClass) {
+    public <T> ConditionalAgentService<T> conditionalBuilder(Class<T> agentServiceClass) {
         return ConditionalAgentServiceImpl.builder(agentServiceClass);
     }
 
@@ -57,7 +67,8 @@ public enum WorkflowAgentsBuilderImpl implements WorkflowAgentsBuilder {
     }
 
     @Override
-    public <T> ParallelMapperService<T> parallelMapperBuilder(final Class<T> agentServiceClass) {
+    public <T> ParallelMapperService<T> parallelMapperBuilder(Class<T> agentServiceClass) {
         return ParallelMapperServiceImpl.builder(agentServiceClass);
     }
 }
+

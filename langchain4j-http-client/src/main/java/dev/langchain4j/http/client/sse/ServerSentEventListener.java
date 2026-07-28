@@ -1,33 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ */
 package dev.langchain4j.http.client.sse;
 
 import dev.langchain4j.Experimental;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
+import dev.langchain4j.http.client.sse.ServerSentEvent;
+import dev.langchain4j.http.client.sse.ServerSentEventContext;
 
 public interface ServerSentEventListener {
-
-    default void onOpen(SuccessfulHttpResponse response) {}
-
-    /**
-     * Handles server-sent event.
-     *
-     * @since 1.8.0
-     */
-    @Experimental
-    default void onEvent(ServerSentEvent event, ServerSentEventContext context) {
-        onEvent(event);
+    default public void onOpen(SuccessfulHttpResponse response) {
     }
 
-    /**
-     * NOTE: This is an outdated method. If you want to use stream cancellation feature,
-     * implement and use {@link #onEvent(ServerSentEvent, ServerSentEventContext)} instead.
-     * <br>
-     * Handles server-sent event.
-     *
-     * @see #onEvent(ServerSentEvent, ServerSentEventContext)
-     */
-    default void onEvent(ServerSentEvent event) {}
+    @Experimental
+    default public void onEvent(ServerSentEvent event, ServerSentEventContext context) {
+        this.onEvent(event);
+    }
 
-    void onError(Throwable throwable);
+    default public void onEvent(ServerSentEvent event) {
+    }
 
-    default void onClose() {}
+    public void onError(Throwable var1);
+
+    default public void onClose() {
+    }
 }
+

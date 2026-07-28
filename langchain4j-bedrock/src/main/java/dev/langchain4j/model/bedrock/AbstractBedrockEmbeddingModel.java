@@ -1,13 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.embedding.listener.EmbeddingModelListener
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+ *  software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+ *  software.amazon.awssdk.core.SdkBytes
+ *  software.amazon.awssdk.regions.Region
+ *  software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient
+ *  software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClientBuilder
+ *  software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest
+ *  software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse
+ */
 package dev.langchain4j.model.bedrock;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-
-import static dev.langchain4j.internal.Utils.copy;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
+import dev.langchain4j.model.bedrock.BedrockEmbeddingResponse;
+import dev.langchain4j.model.bedrock.BedrockExceptionMapper;
+import dev.langchain4j.model.bedrock.Json;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.output.Response;
@@ -23,171 +49,103 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
+import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClientBuilder;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
 
 @Internal
-abstract class AbstractBedrockEmbeddingModel<T extends BedrockEmbeddingResponse> extends DimensionAwareEmbeddingModel {
-
+abstract class AbstractBedrockEmbeddingModel<T extends BedrockEmbeddingResponse>
+extends DimensionAwareEmbeddingModel {
     private static final Region DEFAULT_REGION = Region.US_EAST_1;
-    private static final AwsCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER =
-            DefaultCredentialsProvider.builder().build();
+    private static final AwsCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER = DefaultCredentialsProvider.builder().build();
     private static final Integer DEFAULT_MAX_RETRIES = 2;
-
     private volatile BedrockRuntimeClient client;
-
     private final Region region;
     private final AwsCredentialsProvider credentialsProvider;
     private final Integer maxRetries;
     private final List<EmbeddingModelListener> listeners;
 
     protected AbstractBedrockEmbeddingModel(AbstractBedrockEmbeddingModelBuilder<T, ?, ?> builder) {
-        this.client = builder.client;
-        this.listeners = copy(builder.listeners);
-
-        if (builder.isRegionSet) {
-            this.region = builder.region;
-        } else {
-            this.region = DEFAULT_REGION;
-        }
-
-        if (builder.isCredentialsProviderSet) {
-            this.credentialsProvider = builder.credentialsProvider;
-        } else {
-            this.credentialsProvider = DEFAULT_CREDENTIALS_PROVIDER;
-        }
-
-        if (builder.isMaxRetriesSet) {
-            this.maxRetries = builder.maxRetries;
-        } else {
-            this.maxRetries = DEFAULT_MAX_RETRIES;
-        }
+        this.client = ((AbstractBedrockEmbeddingModelBuilder)builder).client;
+        this.listeners = Utils.copy((List)((AbstractBedrockEmbeddingModelBuilder)builder).listeners);
+        this.region = ((AbstractBedrockEmbeddingModelBuilder)builder).isRegionSet ? ((AbstractBedrockEmbeddingModelBuilder)builder).region : DEFAULT_REGION;
+        this.credentialsProvider = ((AbstractBedrockEmbeddingModelBuilder)builder).isCredentialsProviderSet ? ((AbstractBedrockEmbeddingModelBuilder)builder).credentialsProvider : DEFAULT_CREDENTIALS_PROVIDER;
+        this.maxRetries = ((AbstractBedrockEmbeddingModelBuilder)builder).isMaxRetriesSet ? ((AbstractBedrockEmbeddingModelBuilder)builder).maxRetries : DEFAULT_MAX_RETRIES;
     }
 
     protected Response<List<Embedding>> doEmbedAll(List<TextSegment> textSegments) {
-        final List<Map<String, Object>> requestParameters = getRequestParameters(textSegments);
-        final List<T> responses = requestParameters.stream()
-                .map(Json::toJson)
-                .map(body -> withRetryMappingExceptions(() -> invoke(body), maxRetries, BedrockExceptionMapper.INSTANCE))
-                .map(invokeModelResponse -> invokeModelResponse.body().asUtf8String())
-                .map(response -> Json.fromJson(response, getResponseClassType()))
-                .collect(Collectors.toList());
-
+        List<Map<String, Object>> requestParameters = this.getRequestParameters(textSegments);
+        List responses = requestParameters.stream().map(Json::toJson).map(body -> (InvokeModelResponse)RetryUtils.withRetryMappingExceptions(() -> this.invoke((String)body), (int)this.maxRetries, (ExceptionMapper)BedrockExceptionMapper.INSTANCE)).map(invokeModelResponse -> invokeModelResponse.body().asUtf8String()).map(response -> (BedrockEmbeddingResponse)Json.fromJson(response, this.getResponseClassType())).collect(Collectors.toList());
         int totalInputToken = 0;
-        final List<Embedding> embeddings = new ArrayList<>();
-        for (T response : responses) {
-            embeddings.add(response.toEmbedding());
-            totalInputToken += response.getInputTextTokenCount();
+        ArrayList<Embedding> embeddings = new ArrayList<Embedding>();
+        for (BedrockEmbeddingResponse response2 : responses) {
+            embeddings.add(response2.toEmbedding());
+            totalInputToken += response2.getInputTextTokenCount();
         }
-
-        return Response.from(embeddings, new TokenUsage(totalInputToken));
+        return Response.from(embeddings, (TokenUsage)new TokenUsage(Integer.valueOf(totalInputToken)));
     }
 
-    /**
-     * Get request body
-     *
-     * @param textSegments Input texts to convert to embedding
-     * @return request body
-     */
-    protected abstract List<Map<String, Object>> getRequestParameters(final List<TextSegment> textSegments);
+    protected abstract List<Map<String, Object>> getRequestParameters(List<TextSegment> var1);
 
-    @Override
     public List<EmbeddingModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
         return ModelProvider.AMAZON_BEDROCK;
     }
 
-    @Override
     public String modelName() {
-        return getModelId();
+        return this.getModelId();
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public BedrockRuntimeClient getClient() {
-        if (client == null) {
-            synchronized (this) {
-                if (client == null) {
-                    client = initClient();
+        if (this.client == null) {
+            AbstractBedrockEmbeddingModel abstractBedrockEmbeddingModel = this;
+            synchronized (abstractBedrockEmbeddingModel) {
+                if (this.client == null) {
+                    this.client = this.initClient();
                 }
             }
         }
-        return client;
+        return this.client;
     }
 
-    /**
-     * Get model id
-     *
-     * @return model id
-     */
     protected abstract String getModelId();
 
-    /**
-     * Get response class type
-     *
-     * @return response class type
-     */
     protected abstract Class<T> getResponseClassType();
 
-    /**
-     * Invoke model
-     *
-     * @param body body
-     * @return invoke model response
-     */
-    protected InvokeModelResponse invoke(final String body) {
-
-        InvokeModelRequest invokeModelRequest = InvokeModelRequest.builder()
-                .modelId(getModelId())
-                .body(SdkBytes.fromString(body, Charset.defaultCharset()))
-                .build();
-        return getClient().invokeModel(invokeModelRequest);
+    protected InvokeModelResponse invoke(String body) {
+        InvokeModelRequest invokeModelRequest = (InvokeModelRequest)InvokeModelRequest.builder().modelId(this.getModelId()).body(SdkBytes.fromString((String)body, (Charset)Charset.defaultCharset())).build();
+        return this.getClient().invokeModel(invokeModelRequest);
     }
 
-    /**
-     * Create map with single entry
-     *
-     * @param key   key
-     * @param value value
-     * @return map
-     */
-    protected static Map<String, Object> of(final String key, final Object value) {
-        final Map<String, Object> map = new HashMap<>(1);
+    protected static Map<String, Object> of(String key, Object value) {
+        HashMap<String, Object> map = new HashMap<String, Object>(1);
         map.put(key, value);
-
         return map;
     }
 
-    /**
-     * Initialize bedrock client
-     *
-     * @return bedrock client
-     */
     private BedrockRuntimeClient initClient() {
-        return BedrockRuntimeClient.builder()
-                .region(region)
-                .credentialsProvider(credentialsProvider)
-                .build();
+        return (BedrockRuntimeClient)((BedrockRuntimeClientBuilder)((BedrockRuntimeClientBuilder)BedrockRuntimeClient.builder().region(this.region)).credentialsProvider(this.credentialsProvider)).build();
     }
 
     public Region getRegion() {
-        return region;
+        return this.region;
     }
 
     public AwsCredentialsProvider getCredentialsProvider() {
-        return credentialsProvider;
+        return this.credentialsProvider;
     }
 
     public Integer getMaxRetries() {
-        return maxRetries;
+        return this.maxRetries;
     }
 
-    public abstract static class AbstractBedrockEmbeddingModelBuilder<
-            T extends BedrockEmbeddingResponse,
-            C extends AbstractBedrockEmbeddingModel<T>,
-            B extends AbstractBedrockEmbeddingModelBuilder<T, C, B>> {
+    public static abstract class AbstractBedrockEmbeddingModelBuilder<T extends BedrockEmbeddingResponse, C extends AbstractBedrockEmbeddingModel<T>, B extends AbstractBedrockEmbeddingModelBuilder<T, C, B>> {
         private BedrockRuntimeClient client;
         private Region region;
         private boolean isRegionSet;
@@ -199,30 +157,30 @@ abstract class AbstractBedrockEmbeddingModel<T extends BedrockEmbeddingResponse>
 
         public B client(BedrockRuntimeClient client) {
             this.client = client;
-            return self();
+            return this.self();
         }
 
         public B listeners(List<EmbeddingModelListener> listeners) {
             this.listeners = listeners;
-            return self();
+            return this.self();
         }
 
         public B region(Region region) {
             this.region = region;
             this.isRegionSet = true;
-            return self();
+            return this.self();
         }
 
         public B credentialsProvider(AwsCredentialsProvider credentialsProvider) {
             this.credentialsProvider = credentialsProvider;
             this.isCredentialsProviderSet = true;
-            return self();
+            return this.self();
         }
 
         public B maxRetries(Integer maxRetries) {
             this.maxRetries = maxRetries;
             this.isMaxRetriesSet = true;
-            return self();
+            return this.self();
         }
 
         protected abstract B self();
@@ -230,3 +188,4 @@ abstract class AbstractBedrockEmbeddingModel<T extends BedrockEmbeddingResponse>
         public abstract C build();
     }
 }
+

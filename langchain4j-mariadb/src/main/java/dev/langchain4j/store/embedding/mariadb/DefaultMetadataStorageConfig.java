@@ -1,13 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.NonNull
+ */
 package dev.langchain4j.store.embedding.mariadb;
 
+import dev.langchain4j.store.embedding.mariadb.MetadataStorageConfig;
+import dev.langchain4j.store.embedding.mariadb.MetadataStorageMode;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.jspecify.annotations.NonNull;
 
-/**
- * Metadata configuration implementation
- */
-public class DefaultMetadataStorageConfig implements MetadataStorageConfig {
+public class DefaultMetadataStorageConfig
+implements MetadataStorageConfig {
     private final MetadataStorageMode storageMode;
     private final List<String> columnDefinitions;
     private final List<String> indexes;
@@ -18,51 +25,46 @@ public class DefaultMetadataStorageConfig implements MetadataStorageConfig {
         this.indexes = indexes;
     }
 
-    public MetadataStorageMode getStorageMode() {
-        return storageMode;
-    }
-
-    public List<String> getColumnDefinitions() {
-        return columnDefinitions;
-    }
-
-    public List<String> getIndexes() {
-        return indexes;
+    @Override
+    public MetadataStorageMode storageMode() {
+        return this.storageMode;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DefaultMetadataStorageConfig that = (DefaultMetadataStorageConfig) o;
-        return java.util.Objects.equals(this.storageMode, that.storageMode) && java.util.Objects.equals(this.columnDefinitions, that.columnDefinitions) && java.util.Objects.equals(this.indexes, that.indexes);
+    public List<String> columnDefinitions() {
+        return this.columnDefinitions;
     }
 
     @Override
-    public int hashCode() {
-        return java.util.Objects.hash(storageMode, columnDefinitions, indexes);
+    public List<String> indexes() {
+        return this.indexes;
     }
 
-    @Override
-    public String toString() {
-        return "DefaultMetadataStorageConfig{"storageMode=" + storageMode + , "columnDefinitions=" + columnDefinitions + , "indexes=" + indexes + "}"";
-    }
-
-
-    /**
-     * Default configuration
-     *
-     * @return Default configuration
-     */
     public static MetadataStorageConfig defaultConfig() {
-        return builder()
-                .storageMode(MetadataStorageMode.COMBINED_JSON)
-                .columnDefinitions(Collections.singletonList("metadata JSON NULL"))
-                .build();
+        return DefaultMetadataStorageConfig.builder().storageMode(MetadataStorageMode.COMBINED_JSON).columnDefinitions(Collections.singletonList("metadata JSON NULL")).build();
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DefaultMetadataStorageConfig)) {
+            return false;
+        }
+        DefaultMetadataStorageConfig that = (DefaultMetadataStorageConfig)o;
+        return Objects.equals((Object)this.storageMode, (Object)that.storageMode) && Objects.equals(this.columnDefinitions, that.columnDefinitions) && Objects.equals(this.indexes, that.indexes);
+    }
+
+    public int hashCode() {
+        return Objects.hash(new Object[]{this.storageMode, this.columnDefinitions, this.indexes});
+    }
+
+    public String toString() {
+        return "DefaultMetadataStorageConfig[storageMode=" + (Object)((Object)this.storageMode) + ", columnDefinitions=" + this.columnDefinitions + ", indexes=" + this.indexes + "]";
     }
 
     public static final class Builder {
@@ -70,27 +72,24 @@ public class DefaultMetadataStorageConfig implements MetadataStorageConfig {
         private List<String> columnDefinitions;
         private List<String> indexes;
 
-        @NonNull
-        public Builder storageMode(@NonNull MetadataStorageMode storageMode) {
+        public @NonNull Builder storageMode(@NonNull MetadataStorageMode storageMode) {
             this.storageMode = storageMode;
             return this;
         }
 
-        @NonNull
-        public Builder columnDefinitions(@NonNull List<String> columnDefinitions) {
+        public @NonNull Builder columnDefinitions(@NonNull List<String> columnDefinitions) {
             this.columnDefinitions = columnDefinitions;
             return this;
         }
 
-        @NonNull
-        public Builder indexes(@NonNull List<String> indexes) {
+        public @NonNull Builder indexes(@NonNull List<String> indexes) {
             this.indexes = indexes;
             return this;
         }
 
-        @NonNull
-        public DefaultMetadataStorageConfig build() {
+        public @NonNull DefaultMetadataStorageConfig build() {
             return new DefaultMetadataStorageConfig(this.storageMode, this.columnDefinitions, this.indexes);
         }
     }
 }
+

@@ -1,3 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.model.openai.internal.audio.transcription;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,28 +23,22 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.openai.internal.audio.transcription.AudioTokenDetailsUsage;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.quoted;
-
-@JsonDeserialize(builder = AudioTokenUsage.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AudioTokenUsage {
-
     @JsonProperty
     private final String type;
-
     @JsonProperty
     private final Integer totalTokens;
-
     @JsonProperty
     private final Integer inputTokens;
-
     @JsonProperty
     private final AudioTokenDetailsUsage inputTokenDetails;
-
     @JsonProperty
     private final Integer outputTokens;
 
@@ -42,101 +51,89 @@ public class AudioTokenUsage {
     }
 
     public String type() {
-        return type;
+        return this.type;
     }
 
     public Integer totalTokens() {
-        return totalTokens;
+        return this.totalTokens;
     }
 
     public Integer inputTokens() {
-        return inputTokens;
+        return this.inputTokens;
     }
 
     public AudioTokenDetailsUsage inputTokenDetails() {
-        return inputTokenDetails;
+        return this.inputTokenDetails;
     }
 
     public Integer outputTokens() {
-        return outputTokens;
+        return this.outputTokens;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof AudioTokenUsage audioTokenUsage && equalTo(audioTokenUsage);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof AudioTokenUsage && this.equalTo((AudioTokenUsage)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(AudioTokenUsage another) {
-        return Objects.equals(type, another.type)
-                && Objects.equals(totalTokens, another.totalTokens)
-                && Objects.equals(inputTokens, another.inputTokens)
-                && Objects.equals(inputTokenDetails, another.inputTokenDetails)
-                && Objects.equals(outputTokens, another.outputTokens);
+        return Objects.equals(this.type, another.type) && Objects.equals(this.totalTokens, another.totalTokens) && Objects.equals(this.inputTokens, another.inputTokens) && Objects.equals(this.inputTokenDetails, another.inputTokenDetails) && Objects.equals(this.outputTokens, another.outputTokens);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(type);
-        h += (h << 5) + Objects.hashCode(totalTokens);
-        h += (h << 5) + Objects.hashCode(inputTokens);
-        h += (h << 5) + Objects.hashCode(inputTokenDetails);
-        h += (h << 5) + Objects.hashCode(outputTokens);
+        h += (h << 5) + Objects.hashCode(this.type);
+        h += (h << 5) + Objects.hashCode(this.totalTokens);
+        h += (h << 5) + Objects.hashCode(this.inputTokens);
+        h += (h << 5) + Objects.hashCode(this.inputTokenDetails);
+        h += (h << 5) + Objects.hashCode(this.outputTokens);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "AudioTokenUsage{"
-                + " type = " + quoted(type)
-                + ", totalTokens = " + totalTokens
-                + " inputTokens = " + inputTokens
-                + ", inputTokenDetails = " + inputTokenDetails
-                + " outputTokens = " + outputTokens
-                + "}";
+        return "AudioTokenUsage{ type = " + Utils.quoted((Object)this.type) + ", totalTokens = " + this.totalTokens + " inputTokens = " + this.inputTokens + ", inputTokenDetails = " + this.inputTokenDetails + " outputTokens = " + this.outputTokens + "}";
     }
 
-    public static AudioTokenUsage.Builder builder() {
-        return new AudioTokenUsage.Builder();
+    public static Builder builder() {
+        return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Builder {
-
         private String type;
         private Integer totalTokens;
         private Integer inputTokens;
         private AudioTokenDetailsUsage inputTokenDetails;
         private Integer outputTokens;
 
-        public AudioTokenUsage.Builder type(String type) {
+        public Builder type(String type) {
             this.type = type;
             return this;
         }
 
-        public AudioTokenUsage.Builder totalTokens(Integer totalTokens) {
+        public Builder totalTokens(Integer totalTokens) {
             this.totalTokens = totalTokens;
             return this;
         }
 
-        public AudioTokenUsage.Builder inputTokens(Integer inputTokens) {
+        public Builder inputTokens(Integer inputTokens) {
             this.inputTokens = inputTokens;
             return this;
         }
 
-        public AudioTokenUsage.Builder inputTokenDetails(AudioTokenDetailsUsage inputTokenDetails) {
+        public Builder inputTokenDetails(AudioTokenDetailsUsage inputTokenDetails) {
             this.inputTokenDetails = inputTokenDetails;
             return this;
         }
 
-        public AudioTokenUsage.Builder outputTokens(Integer outputTokens) {
+        public Builder outputTokens(Integer outputTokens) {
             this.outputTokens = outputTokens;
             return this;
         }
@@ -146,3 +143,4 @@ public class AudioTokenUsage {
         }
     }
 }
+

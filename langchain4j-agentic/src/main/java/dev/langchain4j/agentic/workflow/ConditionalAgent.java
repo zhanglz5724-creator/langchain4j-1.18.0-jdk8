@@ -1,9 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.workflow;
 
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.scope.AgenticScope;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
+
 public class ConditionalAgent {
     private final String condition;
     private final Predicate<AgenticScope> predicate;
@@ -15,34 +20,41 @@ public class ConditionalAgent {
         this.agentInstances = agentInstances;
     }
 
-    public String getCondition() {
-        return condition;
+    public String condition() {
+        return this.condition;
     }
 
-    public Predicate<AgenticScope> getPredicate() {
-        return predicate;
+    public Predicate<AgenticScope> predicate() {
+        return this.predicate;
     }
 
-    public List<AgentInstance> getAgentInstances() {
-        return agentInstances;
+    public List<AgentInstance> agentInstances() {
+        return this.agentInstances;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ConditionalAgent that = (ConditionalAgent) o;
-        return java.util.Objects.equals(this.condition, that.condition) && java.util.Objects.equals(this.predicate, that.predicate) && java.util.Objects.equals(this.agentInstances, that.agentInstances);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ConditionalAgent)) {
+            return false;
+        }
+        ConditionalAgent other = (ConditionalAgent)o;
+        if (!Objects.equals(this.condition, other.condition)) {
+            return false;
+        }
+        if (!Objects.equals(this.predicate, other.predicate)) {
+            return false;
+        }
+        return Objects.equals(this.agentInstances, other.agentInstances);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(condition, predicate, agentInstances);
+        return Objects.hash(this.condition, this.predicate, this.agentInstances);
     }
 
-    @Override
     public String toString() {
-        return "ConditionalAgent{"condition=" + condition + , "predicate=" + predicate + , "agentInstances=" + agentInstances + "}"";
+        return "ConditionalAgent{condition=" + this.condition + ", predicate=" + this.predicate + ", agentInstances=" + this.agentInstances + "}";
     }
-
 }
+

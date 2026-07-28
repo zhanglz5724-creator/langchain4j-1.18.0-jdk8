@@ -1,11 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.embedding.EmbeddingModel
+ *  dev.langchain4j.model.output.Response
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.ovhai;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static java.util.stream.Collectors.toList;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.ovhai.internal.api.EmbeddingRequest;
@@ -13,55 +23,33 @@ import dev.langchain4j.model.ovhai.internal.api.EmbeddingResponse;
 import dev.langchain4j.model.ovhai.internal.client.DefaultOvhAiClient;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
-/**
- * @deprecated use {@code OpenAiEmbeddingModel} from {@code langchain4j-open-ai} module instead
- */
-@Deprecated(forRemoval = true, since = "1.14.0")
-public class OvhAiEmbeddingModel implements EmbeddingModel {
-
+@Deprecated
+public class OvhAiEmbeddingModel
+implements EmbeddingModel {
     private final DefaultOvhAiClient client;
     private final int maxRetries;
 
     private OvhAiEmbeddingModel(OvhAiEmbeddingModelBuilder builder) {
-        this.client = DefaultOvhAiClient.builder()
-                .baseUrl(builder.baseUrl)
-                .apiKey(builder.apiKey)
-                .timeout(getOrDefault(builder.timeout, Duration.ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .build();
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.client = ((DefaultOvhAiClient.Builder)((DefaultOvhAiClient.Builder)((DefaultOvhAiClient.Builder)((DefaultOvhAiClient.Builder)((DefaultOvhAiClient.Builder)((DefaultOvhAiClient.Builder)DefaultOvhAiClient.builder().baseUrl(builder.baseUrl)).apiKey(builder.apiKey)).timeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L)))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false))).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false))).logger(builder.logger)).build();
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
-    /**
-     * @deprecated Please use {@code builder()} instead, and explicitly set the baseUrl and,
-     * if necessary, other parameters.
-     * <b>The default value for baseUrl will be removed in future releases!</b>
-     */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public static OvhAiEmbeddingModel withApiKey(String apiKey) {
-        return builder().apiKey(apiKey).build();
+        return OvhAiEmbeddingModel.builder().apiKey(apiKey).build();
     }
 
     public static OvhAiEmbeddingModelBuilder builder() {
         return new OvhAiEmbeddingModelBuilder();
     }
 
-    @Override
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-
-        EmbeddingRequest request = EmbeddingRequest.builder()
-                .input(textSegments.stream().map(TextSegment::text).collect(toList()))
-                .build();
-
-        EmbeddingResponse response = withRetryMappingExceptions(() -> client.embed((request)), maxRetries);
-
-        List<Embedding> embeddings =
-                response.getEmbeddings().stream().map(Embedding::from).collect(toList());
-
+        EmbeddingRequest request = EmbeddingRequest.builder().input(textSegments.stream().map(TextSegment::text).collect(Collectors.toList())).build();
+        EmbeddingResponse response = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.embed(request), (int)this.maxRetries);
+        List embeddings = response.getEmbeddings().stream().map(Embedding::from).collect(Collectors.toList());
         return Response.from(embeddings);
     }
 
@@ -74,7 +62,8 @@ public class OvhAiEmbeddingModel implements EmbeddingModel {
         private Boolean logResponses;
         private Logger logger;
 
-        OvhAiEmbeddingModelBuilder() {}
+        OvhAiEmbeddingModelBuilder() {
+        }
 
         public OvhAiEmbeddingModelBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -106,10 +95,6 @@ public class OvhAiEmbeddingModel implements EmbeddingModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public OvhAiEmbeddingModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
@@ -120,10 +105,8 @@ public class OvhAiEmbeddingModel implements EmbeddingModel {
         }
 
         public String toString() {
-            return "OvhAiEmbeddingModel.OvhAiEmbeddingModelBuilder(baseUrl=" + this.baseUrl + ", apiKey="
-                    + (this.apiKey == null ? null : "********") + ", timeout=" + this.timeout + ", maxRetries="
-                    + this.maxRetries + ", logRequests=" + this.logRequests + ", logResponses=" + this.logResponses
-                    + ")";
+            return "OvhAiEmbeddingModel.OvhAiEmbeddingModelBuilder(baseUrl=" + this.baseUrl + ", apiKey=" + (this.apiKey == null ? null : "********") + ", timeout=" + this.timeout + ", maxRetries=" + this.maxRetries + ", logRequests=" + this.logRequests + ", logResponses=" + this.logResponses + ")";
         }
     }
 }
+

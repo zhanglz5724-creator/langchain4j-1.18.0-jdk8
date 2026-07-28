@@ -1,21 +1,33 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiEmbedding;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiUsage;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiEmbeddingResponse.MistralAiEmbeddingResponseBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralAiEmbeddingResponseBuilder.class)
 public class MistralAiEmbeddingResponse {
     private String id;
     private String object;
@@ -51,7 +63,6 @@ public class MistralAiEmbeddingResponse {
         return this.usage;
     }
 
-    @Override
     public int hashCode() {
         int hash = 7;
         hash = 53 * hash + Objects.hashCode(this.id);
@@ -62,81 +73,58 @@ public class MistralAiEmbeddingResponse {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        final MistralAiEmbeddingResponse other = (MistralAiEmbeddingResponse) obj;
-        return Objects.equals(this.id, other.id)
-                && Objects.equals(this.object, other.object)
-                && Objects.equals(this.model, other.model)
-                && Objects.equals(this.data, other.data)
-                && Objects.equals(this.usage, other.usage);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        MistralAiEmbeddingResponse other = (MistralAiEmbeddingResponse)obj;
+        return Objects.equals(this.id, other.id) && Objects.equals(this.object, other.object) && Objects.equals(this.model, other.model) && Objects.equals(this.data, other.data) && Objects.equals(this.usage, other.usage);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiEmbeddingResponse [", "]")
-                .add("id=" + this.getId())
-                .add("object=" + this.getObject())
-                .add("model=" + this.getModel())
-                .add("data=" + this.getData())
-                .add("usage=" + this.getUsage())
-                .toString();
+        return new StringJoiner(", ", "MistralAiEmbeddingResponse [", "]").add("id=" + this.getId()).add("object=" + this.getObject()).add("model=" + this.getModel()).add("data=" + this.getData()).add("usage=" + this.getUsage()).toString();
     }
 
     public static MistralAiEmbeddingResponseBuilder builder() {
         return new MistralAiEmbeddingResponseBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiEmbeddingResponseBuilder {
-
         private String id;
         private String object;
         private String model;
         private List<MistralAiEmbedding> data;
         private MistralAiUsage usage;
 
-        private MistralAiEmbeddingResponseBuilder() {}
+        private MistralAiEmbeddingResponseBuilder() {
+        }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingResponseBuilder id(String id) {
             this.id = id;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingResponseBuilder object(String object) {
             this.object = object;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingResponseBuilder model(String model) {
             this.model = model;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingResponseBuilder data(List<MistralAiEmbedding> data) {
             this.data = data;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingResponseBuilder usage(MistralAiUsage usage) {
             this.usage = usage;
             return this;
@@ -147,3 +135,4 @@ public class MistralAiEmbeddingResponse {
         }
     }
 }
+

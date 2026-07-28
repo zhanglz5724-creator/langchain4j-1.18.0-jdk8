@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,18 +22,17 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.chat.Message;
+import dev.langchain4j.model.openai.internal.chat.Role;
 import java.util.Objects;
 
-import static dev.langchain4j.model.openai.internal.chat.Role.TOOL;
-
-@JsonDeserialize(builder = ToolMessage.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public final class ToolMessage implements Message {
-
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+public final class ToolMessage
+implements Message {
     @JsonProperty
-    private final Role role = TOOL;
+    private final Role role = Role.TOOL;
     @JsonProperty
     private final String toolCallId;
     @JsonProperty
@@ -30,69 +43,58 @@ public final class ToolMessage implements Message {
         this.content = builder.content;
     }
 
+    @Override
     public Role role() {
-        return role;
+        return this.role;
     }
 
     public String toolCallId() {
-        return toolCallId;
+        return this.toolCallId;
     }
 
     public String content() {
-        return content;
+        return this.content;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof ToolMessage
-                && equalTo((ToolMessage) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof ToolMessage && this.equalTo((ToolMessage)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(ToolMessage another) {
-        return Objects.equals(role, another.role)
-                && Objects.equals(toolCallId, another.toolCallId)
-                && Objects.equals(content, another.content);
+        return Objects.equals((Object)this.role, (Object)another.role) && Objects.equals(this.toolCallId, another.toolCallId) && Objects.equals(this.content, another.content);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(role);
-        h += (h << 5) + Objects.hashCode(toolCallId);
-        h += (h << 5) + Objects.hashCode(content);
+        h += (h << 5) + Objects.hashCode((Object)this.role);
+        h += (h << 5) + Objects.hashCode(this.toolCallId);
+        h += (h << 5) + Objects.hashCode(this.content);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "ToolMessage{"
-                + "role=" + role
-                + ", toolCallId=" + toolCallId
-                + ", content=" + content
-                + "}";
+        return "ToolMessage{role=" + (Object)((Object)this.role) + ", toolCallId=" + this.toolCallId + ", content=" + this.content + "}";
     }
 
     public static ToolMessage from(String toolCallId, String content) {
-        return ToolMessage.builder()
-                .toolCallId(toolCallId)
-                .content(content)
-                .build();
+        return ToolMessage.builder().toolCallId(toolCallId).content(content).build();
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String toolCallId;
         private String content;
 
@@ -111,3 +113,4 @@ public final class ToolMessage implements Message {
         }
     }
 }
+

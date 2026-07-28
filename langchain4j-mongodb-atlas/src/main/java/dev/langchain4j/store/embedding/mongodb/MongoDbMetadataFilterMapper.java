@@ -1,3 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mongodb.client.model.Filters
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  dev.langchain4j.store.embedding.filter.comparison.ContainsString
+ *  dev.langchain4j.store.embedding.filter.comparison.IsEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsIn
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotIn
+ *  dev.langchain4j.store.embedding.filter.logical.And
+ *  dev.langchain4j.store.embedding.filter.logical.Not
+ *  dev.langchain4j.store.embedding.filter.logical.Or
+ *  org.bson.conversions.Bson
+ */
 package dev.langchain4j.store.embedding.mongodb;
 
 import com.mongodb.client.model.Filters;
@@ -18,36 +38,47 @@ import java.util.regex.Pattern;
 import org.bson.conversions.Bson;
 
 class MongoDbMetadataFilterMapper {
+    MongoDbMetadataFilterMapper() {
+    }
 
     public static Bson map(Filter filter) {
         if (filter instanceof IsEqualTo) {
-            return mapEqual((IsEqualTo) filter);
-        } else if (filter instanceof IsNotEqualTo) {
-            return mapNotEqual((IsNotEqualTo) filter);
-        } else if (filter instanceof IsGreaterThan) {
-            return mapGreaterThan((IsGreaterThan) filter);
-        } else if (filter instanceof IsGreaterThanOrEqualTo) {
-            return mapGreaterThanOrEqual((IsGreaterThanOrEqualTo) filter);
-        } else if (filter instanceof IsLessThan) {
-            return mapLessThan((IsLessThan) filter);
-        } else if (filter instanceof IsLessThanOrEqualTo) {
-            return mapLessThanOrEqual((IsLessThanOrEqualTo) filter);
-        } else if (filter instanceof IsIn) {
-            return mapIn((IsIn) filter);
-        } else if (filter instanceof IsNotIn) {
-            return mapNotIn((IsNotIn) filter);
-        } else if (filter instanceof And) {
-            return mapAnd((And) filter);
-        } else if (filter instanceof Or) {
-            return mapOr((Or) filter);
-        } else if (filter instanceof Not) {
-            return mapNot((Not) filter);
-        } else if (filter instanceof ContainsString) {
-            return mapContains((ContainsString) filter);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Unsupported filter type: " + filter.getClass().getName());
+            return MongoDbMetadataFilterMapper.mapEqual((IsEqualTo)filter);
         }
+        if (filter instanceof IsNotEqualTo) {
+            return MongoDbMetadataFilterMapper.mapNotEqual((IsNotEqualTo)filter);
+        }
+        if (filter instanceof IsGreaterThan) {
+            return MongoDbMetadataFilterMapper.mapGreaterThan((IsGreaterThan)filter);
+        }
+        if (filter instanceof IsGreaterThanOrEqualTo) {
+            return MongoDbMetadataFilterMapper.mapGreaterThanOrEqual((IsGreaterThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsLessThan) {
+            return MongoDbMetadataFilterMapper.mapLessThan((IsLessThan)filter);
+        }
+        if (filter instanceof IsLessThanOrEqualTo) {
+            return MongoDbMetadataFilterMapper.mapLessThanOrEqual((IsLessThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsIn) {
+            return MongoDbMetadataFilterMapper.mapIn((IsIn)filter);
+        }
+        if (filter instanceof IsNotIn) {
+            return MongoDbMetadataFilterMapper.mapNotIn((IsNotIn)filter);
+        }
+        if (filter instanceof And) {
+            return MongoDbMetadataFilterMapper.mapAnd((And)filter);
+        }
+        if (filter instanceof Or) {
+            return MongoDbMetadataFilterMapper.mapOr((Or)filter);
+        }
+        if (filter instanceof Not) {
+            return MongoDbMetadataFilterMapper.mapNot((Not)filter);
+        }
+        if (filter instanceof ContainsString) {
+            return MongoDbMetadataFilterMapper.mapContains((ContainsString)filter);
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private static String getFieldName(String key) {
@@ -55,50 +86,51 @@ class MongoDbMetadataFilterMapper {
     }
 
     private static Bson mapEqual(IsEqualTo filter) {
-        return Filters.eq(getFieldName(filter.key()), filter.comparisonValue());
+        return Filters.eq((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Object)filter.comparisonValue());
     }
 
     private static Bson mapNotEqual(IsNotEqualTo filter) {
-        return Filters.ne(getFieldName(filter.key()), filter.comparisonValue());
+        return Filters.ne((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Object)filter.comparisonValue());
     }
 
     private static Bson mapGreaterThan(IsGreaterThan filter) {
-        return Filters.gt(getFieldName(filter.key()), filter.comparisonValue());
+        return Filters.gt((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Object)filter.comparisonValue());
     }
 
     private static Bson mapGreaterThanOrEqual(IsGreaterThanOrEqualTo filter) {
-        return Filters.gte(getFieldName(filter.key()), filter.comparisonValue());
+        return Filters.gte((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Object)filter.comparisonValue());
     }
 
     private static Bson mapLessThan(IsLessThan filter) {
-        return Filters.lt(getFieldName(filter.key()), filter.comparisonValue());
+        return Filters.lt((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Object)filter.comparisonValue());
     }
 
     private static Bson mapLessThanOrEqual(IsLessThanOrEqualTo filter) {
-        return Filters.lte(getFieldName(filter.key()), filter.comparisonValue());
+        return Filters.lte((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Object)filter.comparisonValue());
     }
 
     private static Bson mapIn(IsIn filter) {
-        return Filters.in(getFieldName(filter.key()), filter.comparisonValues());
+        return Filters.in((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Iterable)filter.comparisonValues());
     }
 
     private static Bson mapNotIn(IsNotIn filter) {
-        return Filters.nin(getFieldName(filter.key()), filter.comparisonValues());
+        return Filters.nin((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (Iterable)filter.comparisonValues());
     }
 
     private static Bson mapAnd(And filter) {
-        return Filters.and(map(filter.left()), map(filter.right()));
+        return Filters.and((Bson[])new Bson[]{MongoDbMetadataFilterMapper.map(filter.left()), MongoDbMetadataFilterMapper.map(filter.right())});
     }
 
     private static Bson mapOr(Or filter) {
-        return Filters.or(map(filter.left()), map(filter.right()));
+        return Filters.or((Bson[])new Bson[]{MongoDbMetadataFilterMapper.map(filter.left()), MongoDbMetadataFilterMapper.map(filter.right())});
     }
 
     private static Bson mapNot(Not filter) {
-        return Filters.not(map(filter.expression()));
+        return Filters.not((Bson)MongoDbMetadataFilterMapper.map(filter.expression()));
     }
 
     private static Bson mapContains(ContainsString filter) {
-        return Filters.regex(getFieldName(filter.key()), Pattern.quote(filter.comparisonValue()));
+        return Filters.regex((String)MongoDbMetadataFilterMapper.getFieldName(filter.key()), (String)Pattern.quote(filter.comparisonValue()));
     }
 }
+

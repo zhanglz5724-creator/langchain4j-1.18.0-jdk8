@@ -1,3 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  dev.langchain4j.data.document.Metadata
+ */
 package dev.langchain4j.store.embedding.azure.search;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -5,18 +12,14 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class Document {
-
     private String id;
-
     private String content;
-
-    @JsonProperty("content_vector")
+    @JsonProperty(value="content_vector")
     private Collection<Float> contentVector;
-
     private Metadata metadata;
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -24,7 +27,7 @@ public class Document {
     }
 
     public String getContent() {
-        return content;
+        return this.content;
     }
 
     public void setContent(String content) {
@@ -32,7 +35,7 @@ public class Document {
     }
 
     public Collection<Float> getContentVector() {
-        return contentVector;
+        return this.contentVector;
     }
 
     public void setContentVector(Collection<Float> contentVector) {
@@ -40,7 +43,7 @@ public class Document {
     }
 
     public Metadata getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public void setMetadata(Metadata metadata) {
@@ -49,11 +52,10 @@ public class Document {
 
     public static class Metadata {
         private String source;
-
         private Collection<Attribute> attributes;
 
         public String getSource() {
-            return source;
+            return this.source;
         }
 
         public void setSource(String source) {
@@ -61,7 +63,7 @@ public class Document {
         }
 
         public Collection<Attribute> getAttributes() {
-            return attributes;
+            return this.attributes;
         }
 
         public void setAttributes(Collection<Attribute> attributes) {
@@ -69,23 +71,20 @@ public class Document {
         }
 
         public void setAttributes(dev.langchain4j.data.document.Metadata metadata) {
-            this.attributes = metadata.toMap().entrySet().stream()
-                    .map(entry -> {
-                        Document.Metadata.Attribute attribute = new Document.Metadata.Attribute();
-                        attribute.setKey(entry.getKey());
-                        attribute.setValue(entry.getValue().toString());
-                        return attribute;
-                    })
-                    .collect(Collectors.toList());
+            this.attributes = metadata.toMap().entrySet().stream().map(entry -> {
+                Attribute attribute = new Attribute();
+                attribute.setKey((String)entry.getKey());
+                attribute.setValue(entry.getValue().toString());
+                return attribute;
+            }).collect(Collectors.toList());
         }
 
         public static class Attribute {
             private String key;
-
             private String value;
 
             public String getKey() {
-                return key;
+                return this.key;
             }
 
             public void setKey(String key) {
@@ -93,7 +92,7 @@ public class Document {
             }
 
             public String getValue() {
-                return value;
+                return this.value;
             }
 
             public void setValue(String value) {
@@ -102,3 +101,4 @@ public class Document {
         }
     }
 }
+

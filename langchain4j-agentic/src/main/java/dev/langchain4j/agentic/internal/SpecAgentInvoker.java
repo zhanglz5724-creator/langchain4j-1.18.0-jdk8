@@ -1,13 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.internal;
 
+import dev.langchain4j.agentic.internal.AbstractAgentInvoker;
+import dev.langchain4j.agentic.internal.AgentInvocationArguments;
+import dev.langchain4j.agentic.internal.InternalAgent;
 import dev.langchain4j.agentic.scope.AgenticScope;
-
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.Collections;
 
-final class SpecAgentInvoker extends AbstractAgentInvoker {
-
+final class SpecAgentInvoker
+extends AbstractAgentInvoker {
     SpecAgentInvoker(Method method, InternalAgent agent) {
         super(method, agent);
     }
@@ -17,3 +21,4 @@ final class SpecAgentInvoker extends AbstractAgentInvoker {
         return new AgentInvocationArguments(Collections.emptyMap(), new Object[]{agenticScope});
     }
 }
+

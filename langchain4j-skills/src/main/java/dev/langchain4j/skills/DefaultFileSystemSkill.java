@@ -1,68 +1,70 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.skills;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import dev.langchain4j.Experimental;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.skills.AbstractSkill;
+import dev.langchain4j.skills.FileSystemSkill;
 import java.nio.file.Path;
 import java.util.Objects;
 
 @Experimental
-public class DefaultFileSystemSkill extends AbstractSkill implements FileSystemSkill {
-
+public class DefaultFileSystemSkill
+extends AbstractSkill
+implements FileSystemSkill {
     private final Path basePath;
 
     public DefaultFileSystemSkill(Builder builder) {
         super(builder);
-        this.basePath = ensureNotNull(builder.basePath, "basePath");
+        this.basePath = (Path)ValidationUtils.ensureNotNull((Object)builder.basePath, (String)"basePath");
     }
 
     @Override
     public Path basePath() {
-        return basePath;
+        return this.basePath;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DefaultFileSystemSkill that)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(basePath, that.basePath);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DefaultFileSystemSkill)) {
+            return false;
+        }
+        DefaultFileSystemSkill that = (DefaultFileSystemSkill)o;
+        if (!super.equals(o)) {
+            return false;
+        }
+        return Objects.equals(this.basePath, that.basePath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), basePath);
+        return Objects.hash(super.hashCode(), this.basePath);
     }
 
     @Override
     public String toString() {
-        return "DefaultFileSystemSkill {"
-                + " name = " + name()
-                + ", description = " + description()
-                + ", content = " + content()
-                + ", resources = " + resources()
-                + ", toolProviders = " + toolProviders()
-                + ", basePath = " + basePath
-                + " }";
+        return "DefaultFileSystemSkill { name = " + this.name() + ", description = " + this.description() + ", content = " + this.content() + ", resources = " + this.resources() + ", toolProviders = " + this.toolProviders() + ", basePath = " + this.basePath + " }";
     }
 
-    /**
-     * Returns a new builder pre-populated with the values from this skill.
-     * Useful for creating a modified copy, e.g. adding tools to a filesystem-loaded skill:
-     * <pre>{@code
-     * FileSystemSkill skillWithTools = skill.toBuilder().tools(new MyTools()).build();
-     * }</pre>
-     */
     public Builder toBuilder() {
-        return builder().copyFrom(this).basePath(basePath());
+        return ((Builder)DefaultFileSystemSkill.builder().copyFrom(this)).basePath(this.basePath());
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends AbstractSkill.BaseBuilder<Builder> {
-
+    public static class Builder
+    extends AbstractSkill.BaseBuilder<Builder> {
         private Path basePath;
 
         public Builder basePath(Path basePath) {
@@ -75,3 +77,4 @@ public class DefaultFileSystemSkill extends AbstractSkill implements FileSystemS
         }
     }
 }
+

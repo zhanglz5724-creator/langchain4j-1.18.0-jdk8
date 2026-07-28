@@ -1,23 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.EmbeddingMatch
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  io.weaviate.client.Config
+ *  io.weaviate.client.WeaviateAuthClient
+ *  io.weaviate.client.WeaviateClient
+ *  io.weaviate.client.base.Result
+ *  io.weaviate.client.base.WeaviateErrorMessage
+ *  io.weaviate.client.v1.auth.exception.AuthException
+ *  io.weaviate.client.v1.data.model.WeaviateObject
+ *  io.weaviate.client.v1.filters.WhereFilter
+ *  io.weaviate.client.v1.graphql.model.GraphQLError
+ *  io.weaviate.client.v1.graphql.model.GraphQLResponse
+ *  io.weaviate.client.v1.graphql.query.argument.NearVectorArgument
+ *  io.weaviate.client.v1.graphql.query.fields.Field
+ *  org.apache.commons.lang3.ArrayUtils
+ */
 package dev.langchain4j.store.embedding.weaviate;
-
-import static dev.langchain4j.internal.Utils.generateUUIDFrom;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.Utils.randomUUID;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static io.weaviate.client.v1.data.replication.model.ConsistencyLevel.QUORUM;
-import static java.util.Arrays.stream;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
@@ -30,13 +45,13 @@ import io.weaviate.client.base.Result;
 import io.weaviate.client.base.WeaviateErrorMessage;
 import io.weaviate.client.v1.auth.exception.AuthException;
 import io.weaviate.client.v1.data.model.WeaviateObject;
-import io.weaviate.client.v1.filters.Operator;
 import io.weaviate.client.v1.filters.WhereFilter;
 import io.weaviate.client.v1.graphql.model.GraphQLError;
 import io.weaviate.client.v1.graphql.model.GraphQLResponse;
 import io.weaviate.client.v1.graphql.query.argument.NearVectorArgument;
 import io.weaviate.client.v1.graphql.query.fields.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,15 +62,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 
-/**
- * Represents the <a href="https://weaviate.io/">Weaviate</a> vector database.
- * Current implementation assumes the cosine distance metric is used.
- */
-public class WeaviateEmbeddingStore implements EmbeddingStore<TextSegment> {
-
+public class WeaviateEmbeddingStore
+implements EmbeddingStore<TextSegment> {
     private static final String ADDITIONALS = "_additional";
     private static final String NULL_VALUE = "<null>";
-
     private final WeaviateClient client;
     private final String objectClass;
     private final boolean avoidDups;
@@ -64,183 +74,90 @@ public class WeaviateEmbeddingStore implements EmbeddingStore<TextSegment> {
     private final Collection<String> metadataKeys;
     private final String textFieldName;
 
-    /**
-     * Creates a new WeaviateEmbeddingStore instance.
-     *
-     * @param apiKey            Your Weaviate API key. Not required for local deployment.
-     * @param scheme            The scheme, e.g. "https" of cluster URL. Find in under Details of your Weaviate cluster.
-     * @param host              The host, e.g. "langchain4j-4jw7ufd9.weaviate.network" of cluster URL.
-     *                          Find in under Details of your Weaviate cluster.
-     * @param port              The port, e.g. 8080. This parameter is optional.
-     * @param objectClass       The object class you want to store, e.g. "MyGreatClass". Must start from an uppercase letter.
-     * @param avoidDups         If true (default), then <code>WeaviateEmbeddingStore</code> will generate a hashed ID based on
-     *                          provided text segment, which avoids duplicated entries in DB.
-     *                          If false, then random ID will be generated.
-     * @param consistencyLevel  Consistency level: ONE, QUORUM (default) or ALL. Find more details <a href="https://weaviate.io/developers/weaviate/concepts/replication-architecture/consistency#tunable-write-consistency">here</a>.
-     * @param metadataKeys      Metadata keys that should be persisted (optional)
-     * @param useGrpcForInserts Use GRPC instead of HTTP for batch inserts only. <b>You still need HTTP configured for search</b>
-     * @param securedGrpc       The GRPC connection is secured
-     * @param grpcPort          The port, e.g. 50051. This parameter is optional.
-     * @param textFieldName     The name of the field that contains the text of a {@link TextSegment}. Default is "text".
-     * @param metadataFieldName metadataFieldName The name of the field where {@link Metadata} entries are stored. Default is "_metadata". If set to empty string, {@link Metadata} entries will be stored in the root of the Weaviate object.
-     */
-    public WeaviateEmbeddingStore(
-            String apiKey,
-            String scheme,
-            String host,
-            Integer port,
-            Boolean useGrpcForInserts,
-            Boolean securedGrpc,
-            Integer grpcPort,
-            String objectClass,
-            Boolean avoidDups,
-            String consistencyLevel,
-            Collection<String> metadataKeys,
-            String textFieldName,
-            String metadataFieldName) {
+    public WeaviateEmbeddingStore(String apiKey, String scheme, String host, Integer port, Boolean useGrpcForInserts, Boolean securedGrpc, Integer grpcPort, String objectClass, Boolean avoidDups, String consistencyLevel, Collection<String> metadataKeys, String textFieldName, String metadataFieldName) {
         try {
-
-            Config config =
-                    new Config(ensureNotBlank(scheme, "scheme"), concatenate(ensureNotBlank(host, "host"), port));
-            if (getOrDefault(useGrpcForInserts, Boolean.FALSE)) {
-                config.setGRPCSecured(getOrDefault(securedGrpc, Boolean.FALSE));
-                config.setGRPCHost(host + ":" + getOrDefault(grpcPort, 50051));
+            Config config = new Config(ValidationUtils.ensureNotBlank((String)scheme, (String)"scheme"), WeaviateEmbeddingStore.concatenate(ValidationUtils.ensureNotBlank((String)host, (String)"host"), port));
+            if (((Boolean)Utils.getOrDefault((Object)useGrpcForInserts, (Object)Boolean.FALSE)).booleanValue()) {
+                config.setGRPCSecured(((Boolean)Utils.getOrDefault((Object)securedGrpc, (Object)Boolean.FALSE)).booleanValue());
+                config.setGRPCHost(host + ":" + Utils.getOrDefault((Object)grpcPort, (Object)50051));
             }
-            if (isNullOrBlank(apiKey)) {
-                this.client = new WeaviateClient(config);
-            } else {
-                this.client = WeaviateAuthClient.apiKey(config, apiKey);
-            }
-        } catch (AuthException e) {
+            this.client = Utils.isNullOrBlank((String)apiKey) ? new WeaviateClient(config) : WeaviateAuthClient.apiKey((Config)config, (String)apiKey);
+        }
+        catch (AuthException e) {
             throw new IllegalArgumentException(e);
         }
-        this.objectClass = getOrDefault(objectClass, "Default");
-        this.avoidDups = getOrDefault(avoidDups, true);
-        this.consistencyLevel = getOrDefault(consistencyLevel, QUORUM);
-        this.metadataFieldName = getOrDefault(metadataFieldName, "_metadata");
-        this.metadataKeys = getOrDefault(metadataKeys, Collections.emptyList());
-        this.textFieldName = getOrDefault(textFieldName, "text");
+        this.objectClass = (String)Utils.getOrDefault((Object)objectClass, (Object)"Default");
+        this.avoidDups = (Boolean)Utils.getOrDefault((Object)avoidDups, (Object)true);
+        this.consistencyLevel = (String)Utils.getOrDefault((Object)consistencyLevel, (Object)"QUORUM");
+        this.metadataFieldName = (String)Utils.getOrDefault((Object)metadataFieldName, (Object)"_metadata");
+        this.metadataKeys = (Collection)Utils.getOrDefault(metadataKeys, Collections.emptyList());
+        this.textFieldName = (String)Utils.getOrDefault((Object)textFieldName, (Object)"text");
     }
 
     private static String concatenate(String host, Integer port) {
         if (port == null) {
             return host;
-        } else {
-            return host + ":" + port;
         }
+        return host + ":" + port;
     }
 
     public static WeaviateEmbeddingStoreBuilder builder() {
         return new WeaviateEmbeddingStoreBuilder();
     }
 
-    @Override
     public String add(Embedding embedding) {
-        String id = randomUUID();
-        add(id, embedding);
+        String id = Utils.randomUUID();
+        this.add(id, embedding);
         return id;
     }
 
-    /**
-     * Adds a new embedding with provided ID to the store.
-     *
-     * @param id        the ID of the embedding to add in UUID format, since it's Weaviate requirement.
-     *                  See <a href="https://weaviate.io/developers/weaviate/manage-data/create#id">Weaviate docs</a> and
-     *                  <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID on Wikipedia</a>
-     * @param embedding the embedding to add
-     */
-    @Override
     public void add(String id, Embedding embedding) {
-        addAll(singletonList(id), singletonList(embedding), null);
+        this.addAll(Collections.singletonList(id), Collections.singletonList(embedding), null);
     }
 
-    @Override
     public String add(Embedding embedding, TextSegment textSegment) {
-        return addAll(singletonList(embedding), singletonList(textSegment)).stream()
-                .findFirst()
-                .orElse(null);
+        return this.addAll(Collections.singletonList(embedding), Collections.singletonList(textSegment)).stream().findFirst().orElse(null);
     }
 
-    @Override
     public List<String> addAll(List<Embedding> embeddings) {
-        return addAll(embeddings, null);
+        return this.addAll(embeddings, null);
     }
 
-    @Override
     public void removeAll(Collection<String> ids) {
-        ensureNotEmpty(ids, "ids");
-        client.batch()
-                .objectsBatchDeleter()
-                .withClassName(objectClass)
-                .withWhere(WhereFilter.builder()
-                        .path(new String[] {"id"})
-                        .operator(Operator.ContainsAny)
-                        .valueText(ids.toArray(new String[0]))
-                        .build())
-                .run();
+        ValidationUtils.ensureNotEmpty(ids, (String)"ids");
+        this.client.batch().objectsBatchDeleter().withClassName(this.objectClass).withWhere(WhereFilter.builder().path(new String[]{"id"}).operator("ContainsAny").valueText(ids.toArray(new String[0])).build()).run();
     }
 
-    @Override
     public void removeAll() {
-        List<WeaviateObject> objects =
-                client.data().objectsGetter().withClassName(objectClass).run().getResult();
-
+        List objects = (List)this.client.data().objectsGetter().withClassName(this.objectClass).run().getResult();
         if (objects == null || objects.isEmpty()) {
             return;
         }
-
         List<String> allIds = objects.stream().map(WeaviateObject::getId).collect(Collectors.toList());
-
-        removeAll(allIds);
+        this.removeAll(allIds);
     }
 
-    @Override
     public void remove(String id) {
-        ensureNotBlank(id, "id");
-
-        client.data().deleter().withClassName(objectClass).withID(id).run();
+        ValidationUtils.ensureNotBlank((String)id, (String)"id");
+        this.client.data().deleter().withClassName(this.objectClass).withID(id).run();
     }
 
-    @Override
     public void removeAll(Filter filter) {
-
-        ensureNotNull(filter, "filter");
-
-        // NOTE:
-        // Weaviate stores metadata inside nested "_metadata".
-        // WhereFilter cannot reliably filter nested map fields.
-        // Therefore we fallback to client-side filtering.
-
-        List<WeaviateObject> objects =
-                client.data().objectsGetter().withClassName(objectClass).run().getResult();
-
+        ValidationUtils.ensureNotNull((Object)filter, (String)"filter");
+        List objects = (List)this.client.data().objectsGetter().withClassName(this.objectClass).run().getResult();
         if (objects == null || objects.isEmpty()) {
             return;
         }
-
-        List<String> idsToDelete = objects.stream()
-                .filter(obj -> obj.getProperties() != null
-                        && matchesFilter(obj.getProperties(), metadataFieldName, textFieldName, filter))
-                .map(WeaviateObject::getId)
-                .collect(Collectors.toList());
-
+        List<String> idsToDelete = objects.stream().filter(obj -> obj.getProperties() != null && WeaviateEmbeddingStore.matchesFilter(obj.getProperties(), this.metadataFieldName, this.textFieldName, filter)).map(WeaviateObject::getId).collect(Collectors.toList());
         if (!idsToDelete.isEmpty()) {
-            removeAll(idsToDelete);
+            this.removeAll(idsToDelete);
         }
     }
 
-    /**
-     * Tests a stored object's properties against the given filter, mirroring the dual storage modes
-     * of {@link #toMetadata(Map)}. In nested mode the metadata is read from {@code metadataFieldName};
-     * in root mode ({@code metadataFieldName} is empty) the metadata is taken from the properties
-     * themselves, excluding the text field and Weaviate's internal index flags, which are not valid
-     * {@link Metadata} values.
-     */
-    static boolean matchesFilter(
-            Map<String, Object> properties, String metadataFieldName, String textFieldName, Filter filter) {
+    static boolean matchesFilter(Map<String, Object> properties, String metadataFieldName, String textFieldName, Filter filter) {
         Map<String, Object> metadata;
         if (metadataFieldName.isEmpty()) {
-            metadata = new HashMap<>(properties);
+            metadata = new HashMap<String, Object>(properties);
             metadata.remove(textFieldName);
             metadata.remove(ADDITIONALS);
             metadata.remove("indexFilterable");
@@ -251,140 +168,87 @@ public class WeaviateEmbeddingStore implements EmbeddingStore<TextSegment> {
             if (!(metadataObj instanceof Map)) {
                 return false;
             }
-            @SuppressWarnings("unchecked")
-            Map<String, Object> nested = (Map<String, Object>) metadataObj;
+            Map nested = (Map)metadataObj;
             metadata = nested;
         }
-
-        return filter.test(new Metadata(metadata));
+        return filter.test((Object)new Metadata(metadata));
     }
 
-    /**
-     * {@inheritDoc}
-     * The score inside {@link EmbeddingMatch} is Weaviate's certainty.
-     */
-    @Override
     public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
-
-        List<Field> fields = new ArrayList<>();
-        fields.add(Field.builder().name(textFieldName).build());
-        fields.add(Field.builder()
-                .name(ADDITIONALS)
-                .fields(
-                        Field.builder().name("id").build(),
-                        Field.builder().name("certainty").build(),
-                        Field.builder().name("vector").build())
-                .build());
-        if (!metadataKeys.isEmpty()) {
-            List<Field> metadataFields = new ArrayList<>();
-            for (String property : metadataKeys) {
+        Result result;
+        ArrayList<Object> fields = new ArrayList<Object>();
+        fields.add(Field.builder().name(this.textFieldName).build());
+        fields.add(Field.builder().name(ADDITIONALS).fields(new Field[]{Field.builder().name("id").build(), Field.builder().name("certainty").build(), Field.builder().name("vector").build()}).build());
+        if (!this.metadataKeys.isEmpty()) {
+            ArrayList<Field> metadataFields = new ArrayList<Field>();
+            for (String property : this.metadataKeys) {
                 metadataFields.add(Field.builder().name(property).build());
             }
-            if (!metadataFieldName.isEmpty()) {
-                fields.add(Field.builder()
-                        .name(metadataFieldName)
-                        .fields(metadataFields.toArray(new Field[0]))
-                        .build());
+            if (!this.metadataFieldName.isEmpty()) {
+                fields.add(Field.builder().name(this.metadataFieldName).fields(metadataFields.toArray(new Field[0])).build());
             } else {
                 fields.addAll(metadataFields);
             }
         }
-        Result<GraphQLResponse> result = client.graphQL()
-                .get()
-                .withClassName(objectClass)
-                .withFields(fields.toArray(new Field[0]))
-                .withNearVector(NearVectorArgument.builder()
-                        .vector(request.queryEmbedding().vectorAsList().toArray(new Float[0]))
-                        .certainty((float) request.minScore())
-                        .build())
-                .withLimit(request.maxResults())
-                .run();
-        if (result.hasErrors()) {
-            throw new IllegalArgumentException(result.getError().getMessages().stream()
-                    .map(WeaviateErrorMessage::getMessage)
-                    .collect(joining("\n")));
+        if ((result = this.client.graphQL().get().withClassName(this.objectClass).withFields(fields.toArray(new Field[0])).withNearVector(NearVectorArgument.builder().vector(request.queryEmbedding().vectorAsList().toArray(new Float[0])).certainty(Float.valueOf((float)request.minScore())).build()).withLimit(Integer.valueOf(request.maxResults())).run()).hasErrors()) {
+            throw new IllegalArgumentException(result.getError().getMessages().stream().map(WeaviateErrorMessage::getMessage).collect(Collectors.joining("\n")));
         }
-
-        GraphQLError[] errors = result.getResult().getErrors();
+        GraphQLError[] errors = ((GraphQLResponse)result.getResult()).getErrors();
         if (errors != null && errors.length > 0) {
-            throw new IllegalArgumentException(
-                    stream(errors).map(GraphQLError::getMessage).collect(joining("\n")));
+            throw new IllegalArgumentException(Arrays.stream(errors).map(GraphQLError::getMessage).collect(Collectors.joining("\n")));
         }
-
-        Optional<Map.Entry<String, Map>> resGetPart = ((Map<String, Map>)
-                        result.getResult().getData())
-                .entrySet().stream().findFirst();
+        Optional resGetPart = ((Map)((GraphQLResponse)result.getResult()).getData()).entrySet().stream().findFirst();
         if (!resGetPart.isPresent()) {
-            return new EmbeddingSearchResult<>(emptyList());
+            return new EmbeddingSearchResult(Collections.emptyList());
         }
-
-        Optional resItemsPart = resGetPart.get().getValue().entrySet().stream().findFirst();
+        Optional resItemsPart = ((Map)((Map.Entry)resGetPart.get()).getValue()).entrySet().stream().findFirst();
         if (!resItemsPart.isPresent()) {
-            return new EmbeddingSearchResult<>(emptyList());
+            return new EmbeddingSearchResult(Collections.emptyList());
         }
-
-        List<Map<String, ?>> resItems = ((Map.Entry<String, List<Map<String, ?>>>) resItemsPart.get()).getValue();
-
-        List<EmbeddingMatch<TextSegment>> matches =
-                resItems.stream().map(item -> toEmbeddingMatch(item)).collect(toList());
-        return new EmbeddingSearchResult<>(matches);
+        List resItems = (List)((Map.Entry)resItemsPart.get()).getValue();
+        List matches = resItems.stream().map(item -> this.toEmbeddingMatch((Map<String, ?>)item)).collect(Collectors.toList());
+        return new EmbeddingSearchResult(matches);
     }
 
-    @Override
     public void addAll(List<String> ids, List<Embedding> embeddings, List<TextSegment> embedded) {
         if (embedded != null && embeddings.size() != embedded.size()) {
             throw new IllegalArgumentException("The list of embeddings and embedded must have the same size");
         }
-
-        List<String> resIds = new ArrayList<>();
-        List<WeaviateObject> objects = new ArrayList<>();
-        for (int i = 0; i < embeddings.size(); i++) {
-            String id = ids != null
-                    ? ids.get(i)
-                    : avoidDups && embedded != null
-                            ? generateUUIDFrom(embedded.get(i).text())
-                            : randomUUID();
+        ArrayList<String> resIds = new ArrayList<String>();
+        ArrayList<WeaviateObject> objects = new ArrayList<WeaviateObject>();
+        for (int i = 0; i < embeddings.size(); ++i) {
+            String id = ids != null ? ids.get(i) : (this.avoidDups && embedded != null ? Utils.generateUUIDFrom((String)embedded.get(i).text()) : Utils.randomUUID());
             resIds.add(id);
-            objects.add(buildObject(id, embeddings.get(i), embedded != null ? embedded.get(i) : null));
+            objects.add(this.buildObject(id, embeddings.get(i), embedded != null ? embedded.get(i) : null));
         }
-        client.batch()
-                .objectsBatcher()
-                .withObjects(objects.toArray(new WeaviateObject[0]))
-                .withConsistencyLevel(consistencyLevel)
-                .run();
+        this.client.batch().objectsBatcher().withObjects(objects.toArray(new WeaviateObject[0])).withConsistencyLevel(this.consistencyLevel).run();
     }
 
     private WeaviateObject buildObject(String id, Embedding embedding, TextSegment segment) {
-        Map<String, Object> props = new HashMap<>();
-        Map<String, Object> metadata = prefillMetadata();
+        HashMap<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> metadata = this.prefillMetadata();
         if (segment != null) {
-            props.put(textFieldName, segment.text());
-            Map<String, Object> metadataMap = segment.metadata().toMap();
-            for (String metadataKey : metadataKeys) {
-                if (metadataMap.containsKey(metadataKey)) {
-                    Object metadataValue = metadataMap.get(metadataKey);
-                    metadata.put(metadataKey, Objects.toString(metadataValue, null));
-                }
+            props.put(this.textFieldName, segment.text());
+            Map metadataMap = segment.metadata().toMap();
+            for (String metadataKey : this.metadataKeys) {
+                if (!metadataMap.containsKey(metadataKey)) continue;
+                Object metadataValue = metadataMap.get(metadataKey);
+                metadata.put(metadataKey, Objects.toString(metadataValue, null));
             }
-            setMetadata(props, metadata);
+            this.setMetadata(props, metadata);
         } else {
-            props.put(textFieldName, "");
-            setMetadata(props, metadata);
+            props.put(this.textFieldName, "");
+            this.setMetadata(props, metadata);
         }
         props.put("indexFilterable", true);
         props.put("indexSearchable", true);
-        return WeaviateObject.builder()
-                .className(objectClass)
-                .id(id)
-                .vector(embedding.vectorAsList().toArray(ArrayUtils.EMPTY_FLOAT_OBJECT_ARRAY))
-                .properties(props)
-                .build();
+        return WeaviateObject.builder().className(this.objectClass).id(id).vector(embedding.vectorAsList().toArray(ArrayUtils.EMPTY_FLOAT_OBJECT_ARRAY)).properties(props).build();
     }
 
     private void setMetadata(Map<String, Object> props, Map<String, Object> metadata) {
         if (metadata != null && !metadata.isEmpty()) {
-            if (!metadataFieldName.isEmpty()) {
-                props.put(metadataFieldName, metadata);
+            if (!this.metadataFieldName.isEmpty()) {
+                props.put(this.metadataFieldName, metadata);
             } else {
                 props.putAll(metadata);
             }
@@ -392,54 +256,42 @@ public class WeaviateEmbeddingStore implements EmbeddingStore<TextSegment> {
     }
 
     private Map<String, Object> prefillMetadata() {
-        Map<String, Object> metadata = new HashMap<>(metadataKeys.size());
-        for (String property : metadataKeys) {
+        HashMap<String, Object> metadata = new HashMap<String, Object>(this.metadataKeys.size());
+        for (String property : this.metadataKeys) {
             metadata.put(property, NULL_VALUE);
         }
         return metadata;
     }
 
     private EmbeddingMatch<TextSegment> toEmbeddingMatch(Map<String, ?> item) {
-
-        Map<String, ?> additional = (Map<String, ?>) item.get(ADDITIONALS);
-        Double score = (Double) additional.get("certainty");
-        String embeddingId = (String) additional.get("id");
-        Embedding embedding = toEmbedding(additional);
-
-        String text = (String) item.get(textFieldName);
-        Metadata metadata = toMetadata(item);
-        TextSegment textSegment = isNullOrBlank(text) ? null : TextSegment.from(text, metadata);
-
-        return new EmbeddingMatch<>(score, embeddingId, embedding, textSegment);
+        Map additional = (Map)item.get(ADDITIONALS);
+        Double score = (Double)additional.get("certainty");
+        String embeddingId = (String)additional.get("id");
+        Embedding embedding = WeaviateEmbeddingStore.toEmbedding(additional);
+        String text = (String)item.get(this.textFieldName);
+        Metadata metadata = this.toMetadata(item);
+        TextSegment textSegment = Utils.isNullOrBlank((String)text) ? null : TextSegment.from((String)text, (Metadata)metadata);
+        return new EmbeddingMatch(score, embeddingId, embedding, (Object)textSegment);
     }
 
     private Metadata toMetadata(Map<String, ?> item) {
-        Map<String, ?> metadataMap = new HashMap<>();
-        if (metadataFieldName.isEmpty()) {
-            metadataMap = new HashMap<>(item);
-            // Remove text field from metadata if we store metadata in the root of the object
-            metadataMap.remove(textFieldName);
+        Map<Object, Object> metadataMap = new HashMap();
+        if (this.metadataFieldName.isEmpty()) {
+            metadataMap = new HashMap(item);
+            metadataMap.remove(this.textFieldName);
             metadataMap.remove(ADDITIONALS);
-        } else if (item.get(metadataFieldName) instanceof Map) {
-            metadataMap = (Map<String, ?>) item.get(metadataFieldName);
+        } else if (item.get(this.metadataFieldName) instanceof Map) {
+            metadataMap = (Map)item.get(this.metadataFieldName);
         }
-
-        if (!metadataKeys.isEmpty()) {
-            metadataMap.keySet().retainAll(metadataKeys);
+        if (!this.metadataKeys.isEmpty()) {
+            metadataMap.keySet().retainAll(this.metadataKeys);
         }
-
-        // Filter out null values from metadataMap
-        metadataMap = metadataMap.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry -> !NULL_VALUE.equals(entry.getValue()))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
+        metadataMap = metadataMap.entrySet().stream().filter(entry -> entry.getValue() != null).filter(entry -> !NULL_VALUE.equals(entry.getValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new Metadata(metadataMap);
     }
 
     private static Embedding toEmbedding(Map<String, ?> additional) {
-        List<Float> vector = ((List<Double>) additional.get("vector"))
-                .stream().map(Double::floatValue).collect(toList());
+        List vector = ((List)additional.get("vector")).stream().map(Double::floatValue).collect(Collectors.toList());
         return Embedding.from(vector);
     }
 
@@ -458,7 +310,8 @@ public class WeaviateEmbeddingStore implements EmbeddingStore<TextSegment> {
         private String textFieldName;
         private String metadataFieldName;
 
-        WeaviateEmbeddingStoreBuilder() {}
+        WeaviateEmbeddingStoreBuilder() {
+        }
 
         public WeaviateEmbeddingStoreBuilder apiKey(String apiKey) {
             this.apiKey = apiKey;
@@ -526,29 +379,12 @@ public class WeaviateEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
 
         public WeaviateEmbeddingStore build() {
-            return new WeaviateEmbeddingStore(
-                    this.apiKey,
-                    this.scheme,
-                    this.host,
-                    this.port,
-                    this.useGrpcForInserts,
-                    this.securedGrpc,
-                    this.grpcPort,
-                    this.objectClass,
-                    this.avoidDups,
-                    this.consistencyLevel,
-                    this.metadataKeys,
-                    this.textFieldName,
-                    this.metadataFieldName);
+            return new WeaviateEmbeddingStore(this.apiKey, this.scheme, this.host, this.port, this.useGrpcForInserts, this.securedGrpc, this.grpcPort, this.objectClass, this.avoidDups, this.consistencyLevel, this.metadataKeys, this.textFieldName, this.metadataFieldName);
         }
 
         public String toString() {
-            return "WeaviateEmbeddingStore.WeaviateEmbeddingStoreBuilder(apiKey=" + (this.apiKey == null ? null : "********") + ", scheme="
-                    + this.scheme + ", host=" + this.host + ", port=" + this.port + ", useGrpcForInserts="
-                    + this.useGrpcForInserts + ", securedGrpc=" + this.securedGrpc + ", grpcPort=" + this.grpcPort
-                    + ", objectClass=" + this.objectClass + ", avoidDups=" + this.avoidDups + ", consistencyLevel="
-                    + this.consistencyLevel + ", metadataKeys=" + this.metadataKeys + ", textFieldName="
-                    + this.textFieldName + ", metadataFieldName=" + this.metadataFieldName + ")";
+            return "WeaviateEmbeddingStore.WeaviateEmbeddingStoreBuilder(apiKey=" + (this.apiKey == null ? null : "********") + ", scheme=" + this.scheme + ", host=" + this.host + ", port=" + this.port + ", useGrpcForInserts=" + this.useGrpcForInserts + ", securedGrpc=" + this.securedGrpc + ", grpcPort=" + this.grpcPort + ", objectClass=" + this.objectClass + ", avoidDups=" + this.avoidDups + ", consistencyLevel=" + this.consistencyLevel + ", metadataKeys=" + this.metadataKeys + ", textFieldName=" + this.textFieldName + ", metadataFieldName=" + this.metadataFieldName + ")";
         }
     }
 }
+

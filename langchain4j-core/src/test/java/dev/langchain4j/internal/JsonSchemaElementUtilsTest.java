@@ -188,22 +188,21 @@ class JsonSchemaElementUtilsTest {
         Map<String, Object> map = toMap(person, false);
 
         // then
-        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace("""
-                {
-                   "type":"object",
-                   "properties":{
-                      "name":{
-                         "type":"string"
-                      },
-                      "age":{
-                         "type":"string"
-                      }
-                   },
-                   "required":[
-                      "name"
-                   ]
-                }
-                """);
+        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace("{\n" +
+"   \"type\":\"object\",\n" +
+"   \"properties\":{\n" +
+"      \"name\":{\n" +
+"         \"type\":\"string\"\n" +
+"      },\n" +
+"      \"age\":{\n" +
+"         \"type\":\"string\"\n" +
+"      }\n" +
+"   },\n" +
+"   \"required\":[\n" +
+"      \"name\"\n" +
+"   ]\n" +
+"}\n" +
+"\n");
     }
 
     @Test
@@ -220,45 +219,43 @@ class JsonSchemaElementUtilsTest {
         Map<String, Object> map = toMap(person, true);
 
         // then
-        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace("""
-                {
-                   "type":"object",
-                   "properties":{
-                      "name":{
-                         "type":"string"
-                      },
-                      "age":{
-                         "type":["string", "null"]
-                      }
-                   },
-                   "required":[
-                      "name", "age"
-                   ],
-                   "additionalProperties": false
-                }
-                """);
+        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace("{\n" +
+"   \"type\":\"object\",\n" +
+"   \"properties\":{\n" +
+"      \"name\":{\n" +
+"         \"type\":\"string\"\n" +
+"      },\n" +
+"      \"age\":{\n" +
+"         \"type\":[\"string\", \"null\"]\n" +
+"      }\n" +
+"   },\n" +
+"   \"required\":[\n" +
+"      \"name\", \"age\"\n" +
+"   ],\n" +
+"   \"additionalProperties\": false\n" +
+"}\n" +
+"\n");
     }
 
     @Test
     void nativeSchemaToMap() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        String rawJsonSchema = """
-        {
-            "additionalProperties": false,
-            "type" : "object",
-            "properties" : {
-              "$schema" : {
-                "type" : "string"
-              },
-              "name" : {
-                "type" : "string"
-              }
-            },
-            "required": [ "name" ]
-        }
-        """;
-        var nativeJson = JsonRawSchema.from(rawJsonSchema);
-        var map = toMap(nativeJson);
+        String rawJsonSchema = "{\n" +
+"    \"additionalProperties\": false,\n" +
+"    \"type\" : \"object\",\n" +
+"    \"properties\" : {\n" +
+"      \"$schema\" : {\n" +
+"        \"type\" : \"string\"\n" +
+"      },\n" +
+"      \"name\" : {\n" +
+"        \"type\" : \"string\"\n" +
+"      }\n" +
+"    },\n" +
+"    \"required\": [ \"name\" ]\n" +
+"}\n" +
+"\n";
+        JsonRawSchema nativeJson = JsonRawSchema.from(rawJsonSchema);
+        Map<String, Object> map = toMap(nativeJson);
         assertThat(mapper.writeValueAsString(map))
                 .as("injection of existing full-blown schemas as string are possible")
                 .isEqualToIgnoringWhitespace(rawJsonSchema);
@@ -403,16 +400,16 @@ class JsonSchemaElementUtilsTest {
                         .required("nested")
                         .build());
     }
+    // given
+    enum MyEnum {
+        A,
+        B,
+        C;
+    }
 
     @Test
     void should_create_schema_for_enum() {
 
-        // given
-        enum MyEnum {
-            A,
-            B,
-            C;
-        }
 
         // when
         JsonSchemaElement schema = jsonSchemaElementFrom(MyEnum.class);
@@ -421,21 +418,21 @@ class JsonSchemaElementUtilsTest {
         assertThat(schema)
                 .isEqualTo(JsonEnumSchema.builder().enumValues("A", "B", "C").build());
     }
+    // given
+    enum MyEnumWithToString {
+        A,
+        B,
+        C;
 
+        @Override
+        public String toString() {
+            return "[" + name() + "]";
+        }
+    }
     @Test
     void should_create_schema_for_enum_with_custom_toString() {
 
-        // given
-        enum MyEnumWithToString {
-            A,
-            B,
-            C;
 
-            @Override
-            public String toString() {
-                return "[" + name() + "]";
-            }
-        }
 
         assertThat(MyEnumWithToString.A.toString()).isEqualTo("[A]");
 

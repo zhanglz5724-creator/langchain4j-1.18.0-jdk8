@@ -1,32 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.http.client.sse;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.http.client.sse.ServerSentEventParsingHandle;
+import dev.langchain4j.internal.ValidationUtils;
 import java.io.InputStream;
 
-/**
- * @since 1.8.0
- */
-public class DefaultServerSentEventParsingHandle implements ServerSentEventParsingHandle {
-
+public class DefaultServerSentEventParsingHandle
+implements ServerSentEventParsingHandle {
     private final InputStream inputStream;
     private volatile boolean isCancelled;
 
     public DefaultServerSentEventParsingHandle(InputStream inputStream) {
-        this.inputStream = ensureNotNull(inputStream, "inputStream");
+        this.inputStream = (InputStream)ValidationUtils.ensureNotNull((Object)inputStream, (String)"inputStream");
     }
 
     @Override
     public void cancel() {
-        isCancelled = true;
+        this.isCancelled = true;
         try {
-            inputStream.close();
-        } catch (Exception ignored) {
+            this.inputStream.close();
+        }
+        catch (Exception exception) {
+            // empty catch block
         }
     }
 
     @Override
     public boolean isCancelled() {
-        return isCancelled;
+        return this.isCancelled;
     }
 }
+

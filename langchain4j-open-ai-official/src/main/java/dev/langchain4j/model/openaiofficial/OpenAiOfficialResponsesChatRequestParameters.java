@@ -1,24 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.models.Reasoning$Summary
+ *  com.openai.models.ReasoningEffort
+ *  com.openai.models.responses.Tool
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters$Builder
+ */
 package dev.langchain4j.model.openaiofficial;
 
 import com.openai.models.Reasoning;
 import com.openai.models.ReasoningEffort;
 import com.openai.models.responses.Tool;
 import dev.langchain4j.Experimental;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
-
 import java.util.List;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-
 @Experimental
-public class OpenAiOfficialResponsesChatRequestParameters extends DefaultChatRequestParameters {
-
-    public static final OpenAiOfficialResponsesChatRequestParameters EMPTY =
-            OpenAiOfficialResponsesChatRequestParameters.builder().build();
-
+public class OpenAiOfficialResponsesChatRequestParameters
+extends DefaultChatRequestParameters {
+    public static final OpenAiOfficialResponsesChatRequestParameters EMPTY = OpenAiOfficialResponsesChatRequestParameters.builder().build();
     private final String previousResponseId;
     private final Integer maxToolCalls;
     private final Boolean parallelToolCalls;
@@ -39,13 +47,13 @@ public class OpenAiOfficialResponsesChatRequestParameters extends DefaultChatReq
     private final List<Tool> serverTools;
 
     private OpenAiOfficialResponsesChatRequestParameters(Builder builder) {
-        super(builder);
+        super((DefaultChatRequestParameters.Builder)builder);
         this.previousResponseId = builder.previousResponseId;
         this.maxToolCalls = builder.maxToolCalls;
         this.parallelToolCalls = builder.parallelToolCalls;
         this.topLogprobs = builder.topLogprobs;
         this.truncation = builder.truncation;
-        this.include = copy(builder.include);
+        this.include = Utils.copy((List)builder.include);
         this.serviceTier = builder.serviceTier;
         this.safetyIdentifier = builder.safetyIdentifier;
         this.promptCacheKey = builder.promptCacheKey;
@@ -57,153 +65,113 @@ public class OpenAiOfficialResponsesChatRequestParameters extends DefaultChatReq
         this.store = builder.store;
         this.strictTools = builder.strictTools;
         this.strictJsonSchema = builder.strictJsonSchema;
-        this.serverTools = copy(builder.serverTools);
+        this.serverTools = Utils.copy((List)builder.serverTools);
     }
 
     public String previousResponseId() {
-        return previousResponseId;
+        return this.previousResponseId;
     }
 
     public Integer maxToolCalls() {
-        return maxToolCalls;
+        return this.maxToolCalls;
     }
 
     public Boolean parallelToolCalls() {
-        return parallelToolCalls;
+        return this.parallelToolCalls;
     }
 
     public Integer topLogprobs() {
-        return topLogprobs;
+        return this.topLogprobs;
     }
 
     public String truncation() {
-        return truncation;
+        return this.truncation;
     }
 
     public List<String> include() {
-        return include;
+        return this.include;
     }
 
     public String serviceTier() {
-        return serviceTier;
+        return this.serviceTier;
     }
 
     public String safetyIdentifier() {
-        return safetyIdentifier;
+        return this.safetyIdentifier;
     }
 
     public String promptCacheKey() {
-        return promptCacheKey;
+        return this.promptCacheKey;
     }
 
     public String promptCacheRetention() {
-        return promptCacheRetention;
+        return this.promptCacheRetention;
     }
 
     public ReasoningEffort reasoningEffort() {
-        return reasoningEffort;
+        return this.reasoningEffort;
     }
 
     public Reasoning.Summary reasoningSummary() {
-        return reasoningSummary;
+        return this.reasoningSummary;
     }
 
     public String textVerbosity() {
-        return textVerbosity;
+        return this.textVerbosity;
     }
 
     public Boolean streamIncludeObfuscation() {
-        return streamIncludeObfuscation;
+        return this.streamIncludeObfuscation;
     }
 
     public Boolean store() {
-        return store;
+        return this.store;
     }
 
     public Boolean strictTools() {
-        return strictTools;
+        return this.strictTools;
     }
 
     public Boolean strictJsonSchema() {
-        return strictJsonSchema;
+        return this.strictJsonSchema;
     }
 
     public List<Tool> serverTools() {
-        return serverTools;
+        return this.serverTools;
     }
 
-    @Override
     public OpenAiOfficialResponsesChatRequestParameters overrideWith(ChatRequestParameters that) {
-        return OpenAiOfficialResponsesChatRequestParameters.builder()
-                .overrideWith(this)
-                .overrideWith(that)
-                .build();
+        return OpenAiOfficialResponsesChatRequestParameters.builder().overrideWith((ChatRequestParameters)this).overrideWith(that).build();
     }
 
-    @Override
     public OpenAiOfficialResponsesChatRequestParameters defaultedBy(ChatRequestParameters that) {
-        return OpenAiOfficialResponsesChatRequestParameters.builder()
-                .overrideWith(that)
-                .overrideWith(this)
-                .build();
+        return OpenAiOfficialResponsesChatRequestParameters.builder().overrideWith(that).overrideWith((ChatRequestParameters)this).build();
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        OpenAiOfficialResponsesChatRequestParameters that = (OpenAiOfficialResponsesChatRequestParameters) o;
-        return Objects.equals(previousResponseId, that.previousResponseId)
-                && Objects.equals(maxToolCalls, that.maxToolCalls)
-                && Objects.equals(parallelToolCalls, that.parallelToolCalls)
-                && Objects.equals(topLogprobs, that.topLogprobs)
-                && Objects.equals(truncation, that.truncation)
-                && Objects.equals(include, that.include)
-                && Objects.equals(serviceTier, that.serviceTier)
-                && Objects.equals(safetyIdentifier, that.safetyIdentifier)
-                && Objects.equals(promptCacheKey, that.promptCacheKey)
-                && Objects.equals(promptCacheRetention, that.promptCacheRetention)
-                && Objects.equals(reasoningEffort, that.reasoningEffort)
-                && Objects.equals(reasoningSummary, that.reasoningSummary)
-                && Objects.equals(textVerbosity, that.textVerbosity)
-                && Objects.equals(streamIncludeObfuscation, that.streamIncludeObfuscation)
-                && Objects.equals(store, that.store)
-                && Objects.equals(strictTools, that.strictTools)
-                && Objects.equals(strictJsonSchema, that.strictJsonSchema)
-                && Objects.equals(serverTools, that.serverTools);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        OpenAiOfficialResponsesChatRequestParameters that = (OpenAiOfficialResponsesChatRequestParameters)((Object)o);
+        return Objects.equals(this.previousResponseId, that.previousResponseId) && Objects.equals(this.maxToolCalls, that.maxToolCalls) && Objects.equals(this.parallelToolCalls, that.parallelToolCalls) && Objects.equals(this.topLogprobs, that.topLogprobs) && Objects.equals(this.truncation, that.truncation) && Objects.equals(this.include, that.include) && Objects.equals(this.serviceTier, that.serviceTier) && Objects.equals(this.safetyIdentifier, that.safetyIdentifier) && Objects.equals(this.promptCacheKey, that.promptCacheKey) && Objects.equals(this.promptCacheRetention, that.promptCacheRetention) && Objects.equals(this.reasoningEffort, that.reasoningEffort) && Objects.equals(this.reasoningSummary, that.reasoningSummary) && Objects.equals(this.textVerbosity, that.textVerbosity) && Objects.equals(this.streamIncludeObfuscation, that.streamIncludeObfuscation) && Objects.equals(this.store, that.store) && Objects.equals(this.strictTools, that.strictTools) && Objects.equals(this.strictJsonSchema, that.strictJsonSchema) && Objects.equals(this.serverTools, that.serverTools);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(
-                super.hashCode(),
-                previousResponseId,
-                maxToolCalls,
-                parallelToolCalls,
-                topLogprobs,
-                truncation,
-                include,
-                serviceTier,
-                safetyIdentifier,
-                promptCacheKey,
-                promptCacheRetention,
-                reasoningEffort,
-                reasoningSummary,
-                textVerbosity,
-                streamIncludeObfuscation,
-                store,
-                strictTools,
-                strictJsonSchema,
-                serverTools);
+        return Objects.hash(super.hashCode(), this.previousResponseId, this.maxToolCalls, this.parallelToolCalls, this.topLogprobs, this.truncation, this.include, this.serviceTier, this.safetyIdentifier, this.promptCacheKey, this.promptCacheRetention, this.reasoningEffort, this.reasoningSummary, this.textVerbosity, this.streamIncludeObfuscation, this.store, this.strictTools, this.strictJsonSchema, this.serverTools);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends DefaultChatRequestParameters.Builder<Builder> {
-
+    public static class Builder
+    extends DefaultChatRequestParameters.Builder<Builder> {
         private String previousResponseId;
         private Integer maxToolCalls;
         private Boolean parallelToolCalls;
@@ -223,28 +191,28 @@ public class OpenAiOfficialResponsesChatRequestParameters extends DefaultChatReq
         private Boolean strictJsonSchema;
         private List<Tool> serverTools;
 
-        @Override
         public Builder overrideWith(ChatRequestParameters parameters) {
             super.overrideWith(parameters);
-            if (parameters instanceof OpenAiOfficialResponsesChatRequestParameters p) {
-                previousResponseId(getOrDefault(p.previousResponseId(), previousResponseId));
-                maxToolCalls(getOrDefault(p.maxToolCalls(), maxToolCalls));
-                parallelToolCalls(getOrDefault(p.parallelToolCalls(), parallelToolCalls));
-                topLogprobs(getOrDefault(p.topLogprobs(), topLogprobs));
-                truncation(getOrDefault(p.truncation(), truncation));
-                include(getOrDefault(p.include(), include));
-                serviceTier(getOrDefault(p.serviceTier(), serviceTier));
-                safetyIdentifier(getOrDefault(p.safetyIdentifier(), safetyIdentifier));
-                promptCacheKey(getOrDefault(p.promptCacheKey(), promptCacheKey));
-                promptCacheRetention(getOrDefault(p.promptCacheRetention(), promptCacheRetention));
-                reasoningEffort(getOrDefault(p.reasoningEffort(), reasoningEffort));
-                reasoningSummary(getOrDefault(p.reasoningSummary(), reasoningSummary));
-                textVerbosity(getOrDefault(p.textVerbosity(), textVerbosity));
-                streamIncludeObfuscation(getOrDefault(p.streamIncludeObfuscation(), streamIncludeObfuscation));
-                store(getOrDefault(p.store(), store));
-                strictTools(getOrDefault(p.strictTools(), strictTools));
-                strictJsonSchema(getOrDefault(p.strictJsonSchema(), strictJsonSchema));
-                serverTools(getOrDefault(p.serverTools(), serverTools));
+            if (parameters instanceof OpenAiOfficialResponsesChatRequestParameters) {
+                OpenAiOfficialResponsesChatRequestParameters p = (OpenAiOfficialResponsesChatRequestParameters)parameters;
+                this.previousResponseId((String)Utils.getOrDefault((Object)p.previousResponseId(), (Object)this.previousResponseId));
+                this.maxToolCalls((Integer)Utils.getOrDefault((Object)p.maxToolCalls(), (Object)this.maxToolCalls));
+                this.parallelToolCalls((Boolean)Utils.getOrDefault((Object)p.parallelToolCalls(), (Object)this.parallelToolCalls));
+                this.topLogprobs((Integer)Utils.getOrDefault((Object)p.topLogprobs(), (Object)this.topLogprobs));
+                this.truncation((String)Utils.getOrDefault((Object)p.truncation(), (Object)this.truncation));
+                this.include(Utils.getOrDefault(p.include(), this.include));
+                this.serviceTier((String)Utils.getOrDefault((Object)p.serviceTier(), (Object)this.serviceTier));
+                this.safetyIdentifier((String)Utils.getOrDefault((Object)p.safetyIdentifier(), (Object)this.safetyIdentifier));
+                this.promptCacheKey((String)Utils.getOrDefault((Object)p.promptCacheKey(), (Object)this.promptCacheKey));
+                this.promptCacheRetention((String)Utils.getOrDefault((Object)p.promptCacheRetention(), (Object)this.promptCacheRetention));
+                this.reasoningEffort((ReasoningEffort)Utils.getOrDefault((Object)p.reasoningEffort(), (Object)this.reasoningEffort));
+                this.reasoningSummary((Reasoning.Summary)Utils.getOrDefault((Object)p.reasoningSummary(), (Object)this.reasoningSummary));
+                this.textVerbosity((String)Utils.getOrDefault((Object)p.textVerbosity(), (Object)this.textVerbosity));
+                this.streamIncludeObfuscation((Boolean)Utils.getOrDefault((Object)p.streamIncludeObfuscation(), (Object)this.streamIncludeObfuscation));
+                this.store((Boolean)Utils.getOrDefault((Object)p.store(), (Object)this.store));
+                this.strictTools((Boolean)Utils.getOrDefault((Object)p.strictTools(), (Object)this.strictTools));
+                this.strictJsonSchema((Boolean)Utils.getOrDefault((Object)p.strictJsonSchema(), (Object)this.strictJsonSchema));
+                this.serverTools(Utils.getOrDefault(p.serverTools(), this.serverTools));
             }
             return this;
         }
@@ -339,9 +307,9 @@ public class OpenAiOfficialResponsesChatRequestParameters extends DefaultChatReq
             return this;
         }
 
-        @Override
         public OpenAiOfficialResponsesChatRequestParameters build() {
             return new OpenAiOfficialResponsesChatRequestParameters(this);
         }
     }
 }
+

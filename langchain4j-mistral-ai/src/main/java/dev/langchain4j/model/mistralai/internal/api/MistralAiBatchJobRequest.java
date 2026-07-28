@@ -1,24 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.mistralai.internal.api;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiChatCompletionRequest;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Request body for creating a batch job via the Mistral Batch API ({@code POST /v1/batch/jobs}).
- *
- * <p>Requests are submitted inline rather than by referencing an uploaded file. Each {@link Request}
- * pairs a {@code custom_id} with the body of a single {@code /v1/chat/completions} request; the
- * {@code custom_id} correlates the request with its result once the job has completed.</p>
- */
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class MistralAiBatchJobRequest {
-
     private final List<Request> requests;
     private final String endpoint;
     private final String model;
@@ -34,38 +34,58 @@ public class MistralAiBatchJobRequest {
     }
 
     public List<Request> getRequests() {
-        return requests;
+        return this.requests;
     }
 
     public String getEndpoint() {
-        return endpoint;
+        return this.endpoint;
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public Map<String, Object> getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public Integer getTimeoutHours() {
-        return timeoutHours;
+        return this.timeoutHours;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class Request {
+        private final String customId;
+        private final MistralAiChatCompletionRequest body;
 
+        public Request(String customId, MistralAiChatCompletionRequest body) {
+            this.customId = customId;
+            this.body = body;
+        }
+
+        public String getCustomId() {
+            return this.customId;
+        }
+
+        public MistralAiChatCompletionRequest getBody() {
+            return this.body;
+        }
+    }
+
+    public static class Builder {
         private List<Request> requests;
         private String endpoint;
         private String model;
         private Map<String, Object> metadata;
         private Integer timeoutHours;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder requests(List<Request> requests) {
             this.requests = requests;
@@ -96,29 +116,5 @@ public class MistralAiBatchJobRequest {
             return new MistralAiBatchJobRequest(this);
         }
     }
-
-    /**
-     * A single inline request within a batch job: a {@code custom_id} and the body of the underlying
-     * {@code /v1/chat/completions} request.
-     */
-    @JsonInclude(NON_NULL)
-    @JsonNaming(SnakeCaseStrategy.class)
-    public static class Request {
-
-        private final String customId;
-        private final MistralAiChatCompletionRequest body;
-
-        public Request(String customId, MistralAiChatCompletionRequest body) {
-            this.customId = customId;
-            this.body = body;
-        }
-
-        public String getCustomId() {
-            return customId;
-        }
-
-        public MistralAiChatCompletionRequest getBody() {
-            return body;
-        }
-    }
 }
+

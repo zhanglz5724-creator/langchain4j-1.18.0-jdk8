@@ -1,11 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.invocation.InvocationParameters
+ *  dev.langchain4j.model.input.structured.StructuredPrompt
+ *  dev.langchain4j.model.input.structured.StructuredPromptProcessor
+ */
 package dev.langchain4j.service;
 
-import static dev.langchain4j.service.IllegalConfigurationException.illegalConfiguration;
-
-import dev.langchain4j.invocation.InvocationParameters;
 import dev.langchain4j.Internal;
+import dev.langchain4j.invocation.InvocationParameters;
 import dev.langchain4j.model.input.structured.StructuredPrompt;
 import dev.langchain4j.model.input.structured.StructuredPromptProcessor;
+import dev.langchain4j.service.IllegalConfigurationException;
+import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.service.ParameterNameResolver;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.UserName;
+import dev.langchain4j.service.V;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -13,67 +26,45 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Utility class responsible for resolving variable names and values for prompt templates
- * by leveraging method parameters and their annotations.
- * <p>
- * This class is intended for internal use only and is designed to extract and map
- * parameter values to template variables in methods defined within AI services.
- */
 @Internal
 public class InternalReflectionVariableResolver {
-
-    private InternalReflectionVariableResolver() {}
+    private InternalReflectionVariableResolver() {
+    }
 
     public static Map<String, Object> findTemplateVariables(String template, Method method, Object[] args) {
         if (args == null) {
             return Collections.emptyMap();
         }
         Parameter[] parameters = method.getParameters();
-
-        Map<String, Object> variables = new HashMap<>();
-        for (int i = 0; i < args.length; i++) {
+        HashMap<String, Object> variables = new HashMap<String, Object>();
+        for (int i = 0; i < args.length; ++i) {
             Parameter parameter = parameters[i];
-            if (InvocationParameters.class.isAssignableFrom(parameter.getType())) {
-                continue;
-            }
+            if (InvocationParameters.class.isAssignableFrom(parameter.getType())) continue;
             Object variableValue = args[i];
             variables.put(ParameterNameResolver.name(parameter), variableValue);
-            if (variableValue instanceof Map<?, ?> variablesMap) {
-                variablesMap.entrySet().stream()
-                        .filter(e -> e.getKey().getClass() == String.class)
-                        .forEach(e -> variables.put((String) e.getKey(), e.getValue()));
-            }
+            if (!(variableValue instanceof Map)) continue;
+            Map variablesMap = (Map)variableValue;
+            variablesMap.entrySet().stream().filter(e -> e.getKey().getClass() == String.class).forEach(e -> variables.put((String)e.getKey(), e.getValue()));
         }
-
         if (template.contains("{{it}}") && !variables.containsKey("it")) {
-            String itValue = getValueOfVariableIt(parameters, args);
+            String itValue = InternalReflectionVariableResolver.getValueOfVariableIt(parameters, args);
             variables.put("it", itValue);
         }
-
         return variables;
     }
 
     private static String getValueOfVariableIt(Parameter[] parameters, Object[] args) {
         if (args != null) {
-            if (args.length == 1) {
-                Parameter parameter = parameters[0];
-                if (!parameter.isAnnotationPresent(MemoryId.class)
-                        && !parameter.isAnnotationPresent(UserMessage.class)
-                        && !parameter.isAnnotationPresent(UserName.class)
-                        && (!parameter.isAnnotationPresent(V.class) || isAnnotatedWithIt(parameter))) {
-                    return asString(args[0]);
-                }
+            Parameter parameter;
+            if (!(args.length != 1 || (parameter = parameters[0]).isAnnotationPresent(MemoryId.class) || parameter.isAnnotationPresent(UserMessage.class) || parameter.isAnnotationPresent(UserName.class) || parameter.isAnnotationPresent(V.class) && !InternalReflectionVariableResolver.isAnnotatedWithIt(parameter))) {
+                return InternalReflectionVariableResolver.asString(args[0]);
             }
-
-            for (int i = 0; i < args.length; i++) {
-                if (isAnnotatedWithIt(parameters[i])) {
-                    return asString(args[i]);
-                }
+            for (int i = 0; i < args.length; ++i) {
+                if (!InternalReflectionVariableResolver.isAnnotatedWithIt(parameters[i])) continue;
+                return InternalReflectionVariableResolver.asString(args[i]);
             }
         }
-
-        throw illegalConfiguration("Error: cannot find the value of the prompt template variable \"{{it}}\".");
+        throw IllegalConfigurationException.illegalConfiguration("Error: cannot find the value of the prompt template variable \"{{it}}\".");
     }
 
     private static boolean isAnnotatedWithIt(Parameter parameter) {
@@ -84,25 +75,26 @@ public class InternalReflectionVariableResolver {
     static String asString(Object arg) {
         if (arg == null) {
             return "null";
-        } else if (arg.getClass().isArray()) {
-            return arrayAsString(arg);
-        } else if (arg.getClass().isAnnotationPresent(StructuredPrompt.class)) {
-            return StructuredPromptProcessor.toPrompt(arg).text();
-        } else {
-            return arg.toString();
         }
+        if (arg.getClass().isArray()) {
+            return InternalReflectionVariableResolver.arrayAsString(arg);
+        }
+        if (arg.getClass().isAnnotationPresent(StructuredPrompt.class)) {
+            return StructuredPromptProcessor.toPrompt((Object)arg).text();
+        }
+        return arg.toString();
     }
 
     private static String arrayAsString(Object arg) {
         StringBuilder sb = new StringBuilder("[");
         int length = Array.getLength(arg);
-        for (int i = 0; i < length; i++) {
-            sb.append(asString(Array.get(arg, i)));
-            if (i < length - 1) {
-                sb.append(", ");
-            }
+        for (int i = 0; i < length; ++i) {
+            sb.append(InternalReflectionVariableResolver.asString(Array.get(arg, i)));
+            if (i >= length - 1) continue;
+            sb.append(", ");
         }
         sb.append("]");
         return sb.toString();
     }
 }
+

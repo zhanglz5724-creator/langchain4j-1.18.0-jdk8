@@ -1,14 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.voyageai;
 
 import java.util.List;
 
-/**
- * Wire request for Voyage's multimodal embeddings endpoint ({@code /multimodalembeddings}).
- * Each input carries an ordered list of content blocks (text / image) that are fused into a single embedding.
- * Field names are serialized in snake_case by {@link VoyageAiJsonUtils}.
- */
 class MultimodalEmbeddingRequest {
-
     private List<MultimodalInput> inputs;
     private String model;
     private String inputType;
@@ -22,77 +19,26 @@ class MultimodalEmbeddingRequest {
     }
 
     public List<MultimodalInput> getInputs() {
-        return inputs;
+        return this.inputs;
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public String getInputType() {
-        return inputType;
+        return this.inputType;
     }
 
     public Boolean getTruncation() {
-        return truncation;
+        return this.truncation;
     }
 
     static Builder builder() {
         return new Builder();
     }
 
-    static class Builder {
-
-        private List<MultimodalInput> inputs;
-        private String model;
-        private String inputType;
-        private Boolean truncation;
-
-        Builder inputs(List<MultimodalInput> inputs) {
-            this.inputs = inputs;
-            return this;
-        }
-
-        Builder model(String model) {
-            this.model = model;
-            return this;
-        }
-
-        Builder inputType(String inputType) {
-            this.inputType = inputType;
-            return this;
-        }
-
-        Builder truncation(Boolean truncation) {
-            this.truncation = truncation;
-            return this;
-        }
-
-        MultimodalEmbeddingRequest build() {
-            return new MultimodalEmbeddingRequest(inputs, model, inputType, truncation);
-        }
-    }
-
-    /** A single input: an ordered list of {@link ContentBlock}s fused into one embedding. */
-    static class MultimodalInput {
-
-        private final List<ContentBlock> content;
-
-        MultimodalInput(List<ContentBlock> content) {
-            this.content = content;
-        }
-
-        public List<ContentBlock> getContent() {
-            return content;
-        }
-    }
-
-    /**
-     * One content part. {@code type} is one of {@code text}, {@code image_url}, {@code image_base64};
-     * exactly one of the value fields is populated (nulls are omitted from the JSON).
-     */
     static class ContentBlock {
-
         private final String type;
         private final String text;
         private final String imageUrl;
@@ -118,19 +64,66 @@ class MultimodalEmbeddingRequest {
         }
 
         public String getType() {
-            return type;
+            return this.type;
         }
 
         public String getText() {
-            return text;
+            return this.text;
         }
 
         public String getImageUrl() {
-            return imageUrl;
+            return this.imageUrl;
         }
 
         public String getImageBase64() {
-            return imageBase64;
+            return this.imageBase64;
+        }
+    }
+
+    static class MultimodalInput {
+        private final List<ContentBlock> content;
+
+        MultimodalInput(List<ContentBlock> content) {
+            this.content = content;
+        }
+
+        public List<ContentBlock> getContent() {
+            return this.content;
+        }
+    }
+
+    static class Builder {
+        private List<MultimodalInput> inputs;
+        private String model;
+        private String inputType;
+        private Boolean truncation;
+
+        Builder() {
+        }
+
+        Builder inputs(List<MultimodalInput> inputs) {
+            this.inputs = inputs;
+            return this;
+        }
+
+        Builder model(String model) {
+            this.model = model;
+            return this;
+        }
+
+        Builder inputType(String inputType) {
+            this.inputType = inputType;
+            return this;
+        }
+
+        Builder truncation(Boolean truncation) {
+            this.truncation = truncation;
+            return this;
+        }
+
+        MultimodalEmbeddingRequest build() {
+            return new MultimodalEmbeddingRequest(this.inputs, this.model, this.inputType, this.truncation);
         }
     }
 }
+

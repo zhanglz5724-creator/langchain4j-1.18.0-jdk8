@@ -1,22 +1,33 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonRawValue
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicCacheControl;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicMessageContent;
 import java.util.Objects;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-public class AnthropicToolUseContent extends AnthropicMessageContent {
-
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class AnthropicToolUseContent
+extends AnthropicMessageContent {
     public String id;
     public String name;
-
-    @com.fasterxml.jackson.annotation.JsonRawValue
+    @JsonRawValue
     public String input;
 
     public AnthropicToolUseContent(String id, String name, String input) {
@@ -35,23 +46,23 @@ public class AnthropicToolUseContent extends AnthropicMessageContent {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        AnthropicToolUseContent that = (AnthropicToolUseContent) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(input, that.input);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AnthropicToolUseContent that = (AnthropicToolUseContent)o;
+        return Objects.equals(this.id, that.id) && Objects.equals(this.name, that.name) && Objects.equals(this.input, that.input);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id, name, input);
+        return Objects.hash(super.hashCode(), this.id, this.name, this.input);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicToolUseContent{" + "input="
-                + input + ", type='"
-                + type + '\'' + ", cacheControl="
-                + cacheControl + '}';
+        return "AnthropicToolUseContent{input=" + this.input + ", type='" + this.type + '\'' + ", cacheControl=" + this.cacheControl + '}';
     }
 
     public static Builder builder() {
@@ -59,7 +70,6 @@ public class AnthropicToolUseContent extends AnthropicMessageContent {
     }
 
     public static class Builder {
-
         private String id;
         private String name;
         private String input;
@@ -86,7 +96,8 @@ public class AnthropicToolUseContent extends AnthropicMessageContent {
         }
 
         public AnthropicToolUseContent build() {
-            return new AnthropicToolUseContent(id, name, input, cacheControl);
+            return new AnthropicToolUseContent(this.id, this.name, this.input, this.cacheControl);
         }
     }
 }
+

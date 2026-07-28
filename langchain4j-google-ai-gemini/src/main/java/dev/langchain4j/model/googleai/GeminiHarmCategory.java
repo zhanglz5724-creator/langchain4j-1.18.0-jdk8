@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.googleai;
 
 public enum GeminiHarmCategory {
@@ -5,5 +8,7 @@ public enum GeminiHarmCategory {
     HARM_CATEGORY_SEXUALLY_EXPLICIT,
     HARM_CATEGORY_DANGEROUS_CONTENT,
     HARM_CATEGORY_HARASSMENT,
-    HARM_CATEGORY_CIVIC_INTEGRITY
+    HARM_CATEGORY_CIVIC_INTEGRITY;
+
 }
+

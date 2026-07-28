@@ -1,7 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  dev.langchain4j.store.embedding.filter.comparison.ContainsString
+ *  dev.langchain4j.store.embedding.filter.comparison.IsEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsIn
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotIn
+ *  dev.langchain4j.store.embedding.filter.logical.And
+ *  dev.langchain4j.store.embedding.filter.logical.Not
+ *  dev.langchain4j.store.embedding.filter.logical.Or
+ */
 package dev.langchain4j.rag.content.retriever.azure.cosmos.nosql;
 
-import static java.lang.String.format;
-
+import dev.langchain4j.rag.content.retriever.azure.cosmos.nosql.AzureCosmosDBNoSqlFilterMapper;
+import dev.langchain4j.rag.content.retriever.azure.cosmos.nosql.FullTextContains;
+import dev.langchain4j.rag.content.retriever.azure.cosmos.nosql.FullTextContainsAll;
+import dev.langchain4j.rag.content.retriever.azure.cosmos.nosql.FullTextContainsAny;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.comparison.ContainsString;
 import dev.langchain4j.store.embedding.filter.comparison.IsEqualTo;
@@ -18,37 +38,30 @@ import dev.langchain4j.store.embedding.filter.logical.Or;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-/**
- * Maps {@link Filter} objects to Azure Cosmos DB NoSQL filter strings.
- * Supports standard comparison operators and full-text search functions.
- */
-public class DefaultAzureCosmosDBNoSqlFilterMapper implements AzureCosmosDBNoSqlFilterMapper {
-
-    public DefaultAzureCosmosDBNoSqlFilterMapper() {}
-
+public class DefaultAzureCosmosDBNoSqlFilterMapper
+implements AzureCosmosDBNoSqlFilterMapper {
     @Override
     public String map(Filter filter) {
-        if (filter == null) return "";
-
-        if (isLogicalOperator(filter)) {
-            return mapLogicalOperator(filter);
-        } else {
-            return mapComparisonFilter(filter);
+        if (filter == null) {
+            return "";
         }
+        if (this.isLogicalOperator(filter)) {
+            return this.mapLogicalOperator(filter);
+        }
+        return this.mapComparisonFilter(filter);
     }
 
     private String mapLogicalOperator(Filter operator) {
         if (operator instanceof And) {
-            return format(getLogicalFormat(operator), map(((And) operator).left()), map(((And) operator).right()));
+            return String.format(this.getLogicalFormat(operator), this.map(((And)operator).left()), this.map(((And)operator).right()));
         }
         if (operator instanceof Or) {
-            return format(getLogicalFormat(operator), map(((Or) operator).left()), map(((Or) operator).right()));
+            return String.format(this.getLogicalFormat(operator), this.map(((Or)operator).left()), this.map(((Or)operator).right()));
         }
         if (operator instanceof Not) {
-            return format(getLogicalFormat(operator), map(((Not) operator).expression()));
+            return String.format(this.getLogicalFormat(operator), this.map(((Not)operator).expression()));
         }
-        throw new UnsupportedOperationException(
-                "Unsupported filter type: " + operator.getClass().getName());
+        throw new UnsupportedOperationException("Unsupported filter type: " + operator.getClass().getName());
     }
 
     private boolean isLogicalOperator(Filter filter) {
@@ -56,94 +69,129 @@ public class DefaultAzureCosmosDBNoSqlFilterMapper implements AzureCosmosDBNoSql
     }
 
     private String mapComparisonFilter(Filter filter) {
-        if (filter instanceof IsEqualTo) return mapIsEqualTo((IsEqualTo) filter);
-        if (filter instanceof IsNotEqualTo) return mapIsNotEqualTo((IsNotEqualTo) filter);
-        if (filter instanceof IsGreaterThan) return mapIsGreaterThan((IsGreaterThan) filter);
-        if (filter instanceof IsGreaterThanOrEqualTo) return mapIsGreaterThanOrEqualTo((IsGreaterThanOrEqualTo) filter);
-        if (filter instanceof IsLessThan) return mapIsLessThan((IsLessThan) filter);
-        if (filter instanceof IsLessThanOrEqualTo) return mapIsLessThanOrEqualTo((IsLessThanOrEqualTo) filter);
-        if (filter instanceof IsIn) return mapIsIn((IsIn) filter);
-        if (filter instanceof IsNotIn) return mapIsNotIn((IsNotIn) filter);
-        if (filter instanceof ContainsString) return mapContainsString((ContainsString) filter);
-
-        // Full-text search operators
-        if (filter instanceof FullTextContains) return mapFullTextContains((FullTextContains) filter);
-        if (filter instanceof FullTextContainsAll) return mapFullTextContainsAll((FullTextContainsAll) filter);
-        if (filter instanceof FullTextContainsAny) return mapFullTextContainsAny((FullTextContainsAny) filter);
-
-        throw new UnsupportedOperationException(
-                "Unsupported filter type: " + filter.getClass().getName());
+        if (filter instanceof IsEqualTo) {
+            return this.mapIsEqualTo((IsEqualTo)filter);
+        }
+        if (filter instanceof IsNotEqualTo) {
+            return this.mapIsNotEqualTo((IsNotEqualTo)filter);
+        }
+        if (filter instanceof IsGreaterThan) {
+            return this.mapIsGreaterThan((IsGreaterThan)filter);
+        }
+        if (filter instanceof IsGreaterThanOrEqualTo) {
+            return this.mapIsGreaterThanOrEqualTo((IsGreaterThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsLessThan) {
+            return this.mapIsLessThan((IsLessThan)filter);
+        }
+        if (filter instanceof IsLessThanOrEqualTo) {
+            return this.mapIsLessThanOrEqualTo((IsLessThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsIn) {
+            return this.mapIsIn((IsIn)filter);
+        }
+        if (filter instanceof IsNotIn) {
+            return this.mapIsNotIn((IsNotIn)filter);
+        }
+        if (filter instanceof ContainsString) {
+            return this.mapContainsString((ContainsString)filter);
+        }
+        if (filter instanceof FullTextContains) {
+            return this.mapFullTextContains((FullTextContains)filter);
+        }
+        if (filter instanceof FullTextContainsAll) {
+            return this.mapFullTextContainsAll((FullTextContainsAll)filter);
+        }
+        if (filter instanceof FullTextContainsAny) {
+            return this.mapFullTextContainsAny((FullTextContainsAny)filter);
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private String getLogicalFormat(Filter filter) {
-        if (filter instanceof And) return "(%s AND %s)";
-        if (filter instanceof Or) return "(%s OR %s)";
-        if (filter instanceof Not) return "(NOT %s)";
-        throw new UnsupportedOperationException(
-                "Unsupported filter type: " + filter.getClass().getName());
+        if (filter instanceof And) {
+            return "(%s AND %s)";
+        }
+        if (filter instanceof Or) {
+            return "(%s OR %s)";
+        }
+        if (filter instanceof Not) {
+            return "(NOT %s)";
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private String getComparisonFormat(Filter filter) {
-        if (filter instanceof IsEqualTo) return "c.%s = %s";
-        if (filter instanceof IsGreaterThan) return "c.%s > %s";
-        if (filter instanceof IsGreaterThanOrEqualTo) return "c.%s >= %s";
-        if (filter instanceof IsLessThan) return "c.%s < %s";
-        if (filter instanceof IsLessThanOrEqualTo) return "c.%s <= %s";
-        if (filter instanceof ContainsString) return "CONTAINS(c.%s, %s)";
-        throw new UnsupportedOperationException(
-                "Unsupported filter type: " + filter.getClass().getName());
+        if (filter instanceof IsEqualTo) {
+            return "c.%s = %s";
+        }
+        if (filter instanceof IsGreaterThan) {
+            return "c.%s > %s";
+        }
+        if (filter instanceof IsGreaterThanOrEqualTo) {
+            return "c.%s >= %s";
+        }
+        if (filter instanceof IsLessThan) {
+            return "c.%s < %s";
+        }
+        if (filter instanceof IsLessThanOrEqualTo) {
+            return "c.%s <= %s";
+        }
+        if (filter instanceof ContainsString) {
+            return "CONTAINS(c.%s, %s)";
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private String mapIsEqualTo(IsEqualTo filter) {
-        return format(getComparisonFormat(filter), filter.key(), formatValue(filter.comparisonValue()));
+        return String.format(this.getComparisonFormat((Filter)filter), filter.key(), this.formatValue(filter.comparisonValue()));
     }
 
     private String mapIsNotEqualTo(IsNotEqualTo filter) {
-        return map(Filter.not(new IsEqualTo(filter.key(), filter.comparisonValue())));
+        return this.map(Filter.not((Filter)new IsEqualTo(filter.key(), filter.comparisonValue())));
     }
 
     private String mapIsGreaterThan(IsGreaterThan filter) {
-        return format(getComparisonFormat(filter), filter.key(), formatValue(filter.comparisonValue()));
+        return String.format(this.getComparisonFormat((Filter)filter), filter.key(), this.formatValue(filter.comparisonValue()));
     }
 
     private String mapIsGreaterThanOrEqualTo(IsGreaterThanOrEqualTo filter) {
-        return format(getComparisonFormat(filter), filter.key(), formatValue(filter.comparisonValue()));
+        return String.format(this.getComparisonFormat((Filter)filter), filter.key(), this.formatValue(filter.comparisonValue()));
     }
 
     private String mapIsLessThan(IsLessThan filter) {
-        return format(getComparisonFormat(filter), filter.key(), formatValue(filter.comparisonValue()));
+        return String.format(this.getComparisonFormat((Filter)filter), filter.key(), this.formatValue(filter.comparisonValue()));
     }
 
     private String mapIsLessThanOrEqualTo(IsLessThanOrEqualTo filter) {
-        return format(getComparisonFormat(filter), filter.key(), formatValue(filter.comparisonValue()));
+        return String.format(this.getComparisonFormat((Filter)filter), filter.key(), this.formatValue(filter.comparisonValue()));
     }
 
     private String mapIsIn(IsIn filter) {
-        String values = mapInValues(filter.comparisonValues());
-        return format("c.%s IN (%s)", filter.key(), values);
+        String values = this.mapInValues(filter.comparisonValues());
+        return String.format("c.%s IN (%s)", filter.key(), values);
     }
 
     private String mapIsNotIn(IsNotIn filter) {
-        return map(Filter.not(new IsIn(filter.key(), filter.comparisonValues())));
+        return this.map(Filter.not((Filter)new IsIn(filter.key(), filter.comparisonValues())));
     }
 
     private String mapContainsString(ContainsString filter) {
-        return format(getComparisonFormat(filter), filter.key(), formatValue(filter.comparisonValue()));
+        return String.format(this.getComparisonFormat((Filter)filter), filter.key(), this.formatValue(filter.comparisonValue()));
     }
 
-    // Full-text search mappings
     private String mapFullTextContains(FullTextContains filter) {
-        return format("FullTextContains(c.%s, %s)", filter.key(), formatValue(filter.searchTerm()));
+        return String.format("FullTextContains(c.%s, %s)", filter.key(), this.formatValue(filter.searchTerm()));
     }
 
     private String mapFullTextContainsAll(FullTextContainsAll filter) {
         String terms = filter.searchTerms().stream().map(this::formatValue).collect(Collectors.joining(", "));
-        return format("FullTextContainsAll(c.%s, %s)", filter.key(), terms);
+        return String.format("FullTextContainsAll(c.%s, %s)", filter.key(), terms);
     }
 
     private String mapFullTextContainsAny(FullTextContainsAny filter) {
         String terms = filter.searchTerms().stream().map(this::formatValue).collect(Collectors.joining(", "));
-        return format("FullTextContainsAny(c.%s, %s)", filter.key(), terms);
+        return String.format("FullTextContainsAny(c.%s, %s)", filter.key(), terms);
     }
 
     private String mapInValues(Collection<?> comparisonValues) {
@@ -152,9 +200,10 @@ public class DefaultAzureCosmosDBNoSqlFilterMapper implements AzureCosmosDBNoSql
 
     private String formatValue(Object value) {
         if (value instanceof String) {
-            String escaped = ((String) value).replace("\\", "\\\\").replace("\"", "\\\"");
+            String escaped = ((String)value).replace("\\", "\\\\").replace("\"", "\\\"");
             return "\"" + escaped + "\"";
         }
         return value.toString();
     }
 }
+

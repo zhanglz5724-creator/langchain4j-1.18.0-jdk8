@@ -1,27 +1,42 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.language.LanguageModel
+ *  dev.langchain4j.model.openai.internal.OpenAiClient
+ *  dev.langchain4j.model.openai.internal.OpenAiUtils
+ *  dev.langchain4j.model.openai.internal.completion.CompletionChoice
+ *  dev.langchain4j.model.openai.internal.completion.CompletionRequest
+ *  dev.langchain4j.model.openai.internal.completion.CompletionResponse
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.localai;
 
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.localai.spi.LocalAiLanguageModelBuilderFactory;
 import dev.langchain4j.model.openai.internal.OpenAiClient;
+import dev.langchain4j.model.openai.internal.OpenAiUtils;
+import dev.langchain4j.model.openai.internal.completion.CompletionChoice;
 import dev.langchain4j.model.openai.internal.completion.CompletionRequest;
 import dev.langchain4j.model.openai.internal.completion.CompletionResponse;
+import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.spi.ServiceHelper;
+import java.time.Duration;
+import java.util.Iterator;
 import org.slf4j.Logger;
 
-import java.time.Duration;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.finishReasonFrom;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.time.Duration.ofSeconds;
-
-/**
- * See <a href="https://localai.io/features/text-generation/">LocalAI documentation</a> for more details.
- */
-public class LocalAiLanguageModel implements LanguageModel {
-
+public class LocalAiLanguageModel
+implements LanguageModel {
     private final OpenAiClient client;
     private final String modelName;
     private final Double temperature;
@@ -29,29 +44,13 @@ public class LocalAiLanguageModel implements LanguageModel {
     private final Integer maxTokens;
     private final Integer maxRetries;
 
-    @Deprecated(forRemoval = true, since = "1.5.0")
-    public LocalAiLanguageModel(String baseUrl,
-                                String modelName,
-                                Double temperature,
-                                Double topP,
-                                Integer maxTokens,
-                                Duration timeout,
-                                Integer maxRetries,
-                                Boolean logRequests,
-                                Boolean logResponses) {
-
+    @Deprecated
+    public LocalAiLanguageModel(String baseUrl, String modelName, Double temperature, Double topP, Integer maxTokens, Duration timeout, Integer maxRetries, Boolean logRequests, Boolean logResponses) {
         temperature = temperature == null ? 0.7 : temperature;
-        timeout = timeout == null ? ofSeconds(60) : timeout;
+        timeout = timeout == null ? Duration.ofSeconds(60L) : timeout;
         maxRetries = maxRetries == null ? 3 : maxRetries;
-
-        this.client = OpenAiClient.builder()
-                .baseUrl(ensureNotBlank(baseUrl, "baseUrl"))
-                .connectTimeout(timeout)
-                .readTimeout(timeout)
-                .logRequests(logRequests)
-                .logResponses(logResponses)
-                .build();
-        this.modelName = ensureNotBlank(modelName, "modelName");
+        this.client = OpenAiClient.builder().baseUrl(ValidationUtils.ensureNotBlank((String)baseUrl, (String)"baseUrl")).connectTimeout(timeout).readTimeout(timeout).logRequests(logRequests).logResponses(logResponses).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
         this.temperature = temperature;
         this.topP = topP;
         this.maxTokens = maxTokens;
@@ -59,43 +58,25 @@ public class LocalAiLanguageModel implements LanguageModel {
     }
 
     public LocalAiLanguageModel(LocalAiLanguageModelBuilder builder) {
-        this.client = OpenAiClient.builder()
-                .baseUrl(ensureNotBlank(builder.baseUrl, "baseUrl"))
-                .connectTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .readTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .logger(builder.logger)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.temperature = getOrDefault(builder.temperature, 0.7);
+        this.client = OpenAiClient.builder().baseUrl(ValidationUtils.ensureNotBlank((String)builder.baseUrl, (String)"baseUrl")).connectTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).readTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests(builder.logRequests).logResponses(builder.logResponses).logger(builder.logger).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.temperature = (Double)Utils.getOrDefault((Object)builder.temperature, (Object)0.7);
         this.topP = builder.topP;
         this.maxTokens = builder.maxTokens;
-        this.maxRetries = getOrDefault(builder.maxRetries, 3);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)3);
     }
-    @Override
+
     public Response<String> generate(String prompt) {
-
-        CompletionRequest request = CompletionRequest.builder()
-                .model(modelName)
-                .prompt(prompt)
-                .temperature(temperature)
-                .topP(topP)
-                .maxTokens(maxTokens)
-                .build();
-
-        CompletionResponse response = withRetryMappingExceptions(() -> client.completion(request).execute(), maxRetries);
-
-        return Response.from(
-                response.text(),
-                null,
-                finishReasonFrom(response.choices().get(0).finishReason())
-        );
+        CompletionRequest request = CompletionRequest.builder().model(this.modelName).prompt(prompt).temperature(this.temperature).topP(this.topP).maxTokens(this.maxTokens).build();
+        CompletionResponse response = (CompletionResponse)RetryUtils.withRetryMappingExceptions(() -> (CompletionResponse)this.client.completion(request).execute(), (int)this.maxRetries);
+        return Response.from((Object)response.text(), null, (FinishReason)OpenAiUtils.finishReasonFrom((String)((CompletionChoice)response.choices().get(0)).finishReason()));
     }
 
     public static LocalAiLanguageModelBuilder builder() {
-        for (LocalAiLanguageModelBuilderFactory factory : loadFactories(LocalAiLanguageModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(LocalAiLanguageModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            LocalAiLanguageModelBuilderFactory factory = (LocalAiLanguageModelBuilderFactory)iterator.next();
+            return (LocalAiLanguageModelBuilder)factory.get();
         }
         return new LocalAiLanguageModelBuilder();
     }
@@ -111,10 +92,6 @@ public class LocalAiLanguageModel implements LanguageModel {
         private Boolean logRequests;
         private Boolean logResponses;
         private Logger logger;
-
-        public LocalAiLanguageModelBuilder() {
-            // This is public so it can be extended
-        }
 
         public LocalAiLanguageModelBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -161,10 +138,6 @@ public class LocalAiLanguageModel implements LanguageModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public LocalAiLanguageModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
@@ -179,3 +152,4 @@ public class LocalAiLanguageModel implements LanguageModel {
         }
     }
 }
+

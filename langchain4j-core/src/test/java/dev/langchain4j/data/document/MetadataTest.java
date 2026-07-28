@@ -377,7 +377,7 @@ class MetadataTest implements WithAssertions {
         assertThat(new Metadata().put("k1", "v1").putAll(Collections.singletonMap("k1", "v2")).toMap())
                 .isEqualTo(Collections.singletonMap("k1", "v2"));
 
-        assertThatThrownBy(() -> new Metadata().putAll(new HashMap<>() {{ put("k", null); }}))
+        assertThatThrownBy(() -> new Metadata().putAll(new HashMap<String,Object>() {{ put("k", null); }}))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() -> new Metadata().putAll(Collections.singletonMap("k", new Object())))

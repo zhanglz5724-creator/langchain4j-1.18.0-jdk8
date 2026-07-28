@@ -1,12 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.workersai.client;
 
-/**
- * Wrapper for the chat completion response.
- */
-public class WorkersAiChatCompletionResponse extends WorkersAiTextCompletionResponse {
+import dev.langchain4j.model.workersai.client.WorkersAiTextCompletionResponse;
 
-    /**
-     * Default constructor.
-     */
-    public WorkersAiChatCompletionResponse() {}
+public class WorkersAiChatCompletionResponse
+extends WorkersAiTextCompletionResponse {
 }
+

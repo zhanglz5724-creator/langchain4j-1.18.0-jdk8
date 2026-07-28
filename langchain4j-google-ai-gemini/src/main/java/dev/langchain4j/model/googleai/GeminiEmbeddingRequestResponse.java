@@ -1,114 +1,212 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.googleai;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.langchain4j.model.googleai.GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse.GeminiEmbeddingResponseValues;
+import dev.langchain4j.model.googleai.GeminiContent;
+import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
 import java.util.List;
+import java.util.Objects;
 
 public final class GeminiEmbeddingRequestResponse {
-    private GeminiEmbeddingRequestResponse() {}
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonIgnoreProperties(ignoreUnknown = true) class GeminiEmbeddingRequest {
-
-            @JsonProperty("model") String model,
-            @JsonProperty("content") GeminiContent content,
-            @JsonProperty("taskType") GoogleAiEmbeddingModel.TaskType taskType,
-            @JsonProperty("title") String title,
+    private GeminiEmbeddingRequestResponse() {
     }
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonIgnoreProperties(ignoreUnknown = true) public class GeminiEmbeddingResponse {
-        private final Object @JsonProperty("embedding";
 
-        public GeminiEmbeddingResponse(Object @JsonProperty("embedding") {
-            this.@JsonProperty("embedding" = @JsonProperty("embedding";
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    static final class GeminiBatchEmbeddingResponse {
+        private final List<GeminiEmbeddingResponse.GeminiEmbeddingResponseValues> embeddings;
+
+        @JsonCreator
+        GeminiBatchEmbeddingResponse(@JsonProperty(value="embeddings") List<GeminiEmbeddingResponse.GeminiEmbeddingResponseValues> embeddings) {
+            this.embeddings = embeddings;
         }
 
-        public Object get@JsonProperty("embedding"() {
-            return @JsonProperty("embedding";
+        List<GeminiEmbeddingResponse.GeminiEmbeddingResponseValues> embeddings() {
+            return this.embeddings;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            GeminiEmbeddingResponse that = (GeminiEmbeddingResponse) o;
-            return java.util.Objects.equals(this.@JsonProperty("embedding", that.@JsonProperty("embedding");
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiBatchEmbeddingResponse)) {
+                return false;
+            }
+            GeminiBatchEmbeddingResponse that = (GeminiBatchEmbeddingResponse)o;
+            return Objects.equals(this.embeddings, that.embeddings);
         }
 
-        @Override
         public int hashCode() {
-            return java.util.Objects.hash(@JsonProperty("embedding");
+            return Objects.hash(this.embeddings);
         }
 
-        @Override
         public String toString() {
-            return "GeminiEmbeddingResponse{"@JsonProperty("embedding"=" + @JsonProperty("embedding" + "}"";
+            return "GeminiBatchEmbeddingResponse[embeddings=" + this.embeddings + "]";
         }
-
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public record GeminiEmbeddingResponseValues(
-                @JsonProperty("values") List<Float> values) {}
     }
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonIgnoreProperties(ignoreUnknown = true) class GeminiBatchEmbeddingRequest {
-        private final Object @JsonProperty("requests";
 
-        public GeminiBatchEmbeddingRequest(Object @JsonProperty("requests") {
-            this.@JsonProperty("requests" = @JsonProperty("requests";
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    static final class GeminiBatchEmbeddingRequest {
+        private final List<GeminiEmbeddingRequest> requests;
+
+        @JsonCreator
+        GeminiBatchEmbeddingRequest(@JsonProperty(value="requests") List<GeminiEmbeddingRequest> requests) {
+            this.requests = requests;
         }
 
-        public Object get@JsonProperty("requests"() {
-            return @JsonProperty("requests";
+        List<GeminiEmbeddingRequest> requests() {
+            return this.requests;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            GeminiBatchEmbeddingRequest that = (GeminiBatchEmbeddingRequest) o;
-            return java.util.Objects.equals(this.@JsonProperty("requests", that.@JsonProperty("requests");
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiBatchEmbeddingRequest)) {
+                return false;
+            }
+            GeminiBatchEmbeddingRequest that = (GeminiBatchEmbeddingRequest)o;
+            return Objects.equals(this.requests, that.requests);
         }
 
-        @Override
         public int hashCode() {
-            return java.util.Objects.hash(@JsonProperty("requests");
+            return Objects.hash(this.requests);
         }
 
-        @Override
         public String toString() {
-            return "GeminiBatchEmbeddingRequest{"@JsonProperty("requests"=" + @JsonProperty("requests" + "}"";
+            return "GeminiBatchEmbeddingRequest[requests=" + this.requests + "]";
         }
-
     }
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonIgnoreProperties(ignoreUnknown = true) class GeminiBatchEmbeddingResponse {
-        private final Object @JsonProperty("embeddings";
 
-        public GeminiBatchEmbeddingResponse(Object @JsonProperty("embeddings") {
-            this.@JsonProperty("embeddings" = @JsonProperty("embeddings";
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    public static final class GeminiEmbeddingResponse {
+        private final GeminiEmbeddingResponseValues embedding;
+
+        @JsonCreator
+        public GeminiEmbeddingResponse(@JsonProperty(value="embedding") GeminiEmbeddingResponseValues embedding) {
+            this.embedding = embedding;
         }
 
-        public Object get@JsonProperty("embeddings"() {
-            return @JsonProperty("embeddings";
+        public GeminiEmbeddingResponseValues embedding() {
+            return this.embedding;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            GeminiBatchEmbeddingResponse that = (GeminiBatchEmbeddingResponse) o;
-            return java.util.Objects.equals(this.@JsonProperty("embeddings", that.@JsonProperty("embeddings");
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiEmbeddingResponse)) {
+                return false;
+            }
+            GeminiEmbeddingResponse that = (GeminiEmbeddingResponse)o;
+            return Objects.equals(this.embedding, that.embedding);
         }
 
-        @Override
         public int hashCode() {
-            return java.util.Objects.hash(@JsonProperty("embeddings");
+            return Objects.hash(this.embedding);
         }
 
-        @Override
         public String toString() {
-            return "GeminiBatchEmbeddingResponse{"@JsonProperty("embeddings"=" + @JsonProperty("embeddings" + "}"";
+            return "GeminiEmbeddingResponse[embedding=" + this.embedding + "]";
         }
 
+        @JsonIgnoreProperties(ignoreUnknown=true)
+        public static final class GeminiEmbeddingResponseValues {
+            private final List<Float> values;
+
+            @JsonCreator
+            public GeminiEmbeddingResponseValues(@JsonProperty(value="values") List<Float> values) {
+                this.values = values;
+            }
+
+            public List<Float> values() {
+                return this.values;
+            }
+
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (!(o instanceof GeminiEmbeddingResponseValues)) {
+                    return false;
+                }
+                GeminiEmbeddingResponseValues that = (GeminiEmbeddingResponseValues)o;
+                return Objects.equals(this.values, that.values);
+            }
+
+            public int hashCode() {
+                return Objects.hash(this.values);
+            }
+
+            public String toString() {
+                return "GeminiEmbeddingResponseValues[values=" + this.values + "]";
+            }
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    static final class GeminiEmbeddingRequest {
+        private final String model;
+        private final GeminiContent content;
+        private final GoogleAiEmbeddingModel.TaskType taskType;
+        private final String title;
+        private final Integer outputDimensionality;
+
+        @JsonCreator
+        GeminiEmbeddingRequest(@JsonProperty(value="model") String model, @JsonProperty(value="content") GeminiContent content, @JsonProperty(value="taskType") GoogleAiEmbeddingModel.TaskType taskType, @JsonProperty(value="title") String title, @JsonProperty(value="outputDimensionality") Integer outputDimensionality) {
+            this.model = model;
+            this.content = content;
+            this.taskType = taskType;
+            this.title = title;
+            this.outputDimensionality = outputDimensionality;
+        }
+
+        String model() {
+            return this.model;
+        }
+
+        GeminiContent content() {
+            return this.content;
+        }
+
+        GoogleAiEmbeddingModel.TaskType taskType() {
+            return this.taskType;
+        }
+
+        String title() {
+            return this.title;
+        }
+
+        Integer outputDimensionality() {
+            return this.outputDimensionality;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeminiEmbeddingRequest)) {
+                return false;
+            }
+            GeminiEmbeddingRequest that = (GeminiEmbeddingRequest)o;
+            return Objects.equals(this.model, that.model) && Objects.equals(this.content, that.content) && this.taskType == that.taskType && Objects.equals(this.title, that.title) && Objects.equals(this.outputDimensionality, that.outputDimensionality);
+        }
+
+        public int hashCode() {
+            return Objects.hash(new Object[]{this.model, this.content, this.taskType, this.title, this.outputDimensionality});
+        }
+
+        public String toString() {
+            return "GeminiEmbeddingRequest[model=" + this.model + ", content=" + this.content + ", taskType=" + (Object)((Object)this.taskType) + ", title=" + this.title + ", outputDimensionality=" + this.outputDimensionality + "]";
+        }
     }
 }
+

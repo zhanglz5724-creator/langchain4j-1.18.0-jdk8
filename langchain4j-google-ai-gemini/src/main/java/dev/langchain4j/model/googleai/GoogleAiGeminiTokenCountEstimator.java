@@ -1,10 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.TokenCountEstimator
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.googleai;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.googleai.PartsAndContentsMapper.fromMessageToGContent;
-import static java.util.Collections.singletonList;
 
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -12,102 +22,78 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.TokenCountEstimator;
+import dev.langchain4j.model.googleai.FunctionMapper;
+import dev.langchain4j.model.googleai.GeminiContent;
+import dev.langchain4j.model.googleai.GeminiCountTokensRequest;
+import dev.langchain4j.model.googleai.GeminiCountTokensResponse;
+import dev.langchain4j.model.googleai.GeminiGenerateContentRequest;
+import dev.langchain4j.model.googleai.GeminiService;
+import dev.langchain4j.model.googleai.PartsAndContentsMapper;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 
-public class GoogleAiGeminiTokenCountEstimator implements TokenCountEstimator {
-
+public class GoogleAiGeminiTokenCountEstimator
+implements TokenCountEstimator {
     private final GeminiService geminiService;
     private final String modelName;
     private final Integer maxRetries;
 
     public GoogleAiGeminiTokenCountEstimator(Builder builder) {
-        this.geminiService = new GeminiService(
-                builder.httpClientBuilder,
-                builder.apiKey,
-                builder.baseUrl,
-                getOrDefault(builder.logRequestsAndResponses, false),
-                getOrDefault(builder.logRequests, false),
-                getOrDefault(builder.logResponses, false),
-                builder.logger,
-                builder.timeout,
-                null);
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.geminiService = new GeminiService(builder.httpClientBuilder, builder.apiKey, builder.baseUrl, (Boolean)Utils.getOrDefault((Object)builder.logRequestsAndResponses, (Object)false), (Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false), (Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false), builder.logger, builder.timeout, null);
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public int estimateTokenCountInText(String text) {
-        return estimateTokenCountInMessages(singletonList(UserMessage.from(text)));
+        return this.estimateTokenCountInMessages(Collections.singletonList(UserMessage.from((String)text)));
     }
 
-    @Override
     public int estimateTokenCountInMessage(ChatMessage message) {
-        return estimateTokenCountInMessages(singletonList(message));
+        return this.estimateTokenCountInMessages(Collections.singletonList(message));
     }
 
     public int estimateTokenCountInToolExecutionRequests(Iterable<ToolExecutionRequest> toolExecutionRequests) {
-        List<ToolExecutionRequest> allToolRequests = new LinkedList<>();
+        LinkedList allToolRequests = new LinkedList();
         toolExecutionRequests.forEach(allToolRequests::add);
-
-        return estimateTokenCountInMessage(AiMessage.from(allToolRequests));
+        return this.estimateTokenCountInMessage((ChatMessage)AiMessage.from(allToolRequests));
     }
 
-    @Override
     public int estimateTokenCountInMessages(Iterable<ChatMessage> messages) {
-        List<ChatMessage> allMessages = new LinkedList<>();
+        LinkedList<ChatMessage> allMessages = new LinkedList<ChatMessage>();
         messages.forEach(allMessages::add);
-
-        List<GeminiContent> geminiContentList = fromMessageToGContent(allMessages, null, false);
+        List<GeminiContent> geminiContentList = PartsAndContentsMapper.fromMessageToGContent(allMessages, null, false);
         GeminiCountTokensRequest countTokensRequest = new GeminiCountTokensRequest(geminiContentList, null);
-
-        return estimateTokenCount(countTokensRequest);
+        return this.estimateTokenCount(countTokensRequest);
     }
 
     public int estimateTokenCountInToolSpecifications(Iterable<ToolSpecification> toolSpecifications) {
-        List<ToolSpecification> allTools = new LinkedList<>();
+        LinkedList<ToolSpecification> allTools = new LinkedList<ToolSpecification>();
         toolSpecifications.forEach(allTools::add);
-
-        GeminiContent dummyContent = new GeminiContent(
-                // This string contains 2 tokens
-                singletonList(
-                        GeminiContent.GeminiPart.builder().text("Dummy content").build()),
-                null);
-
-        GeminiCountTokensRequest countTokensRequestWithDummyContent = new GeminiCountTokensRequest(
-                null,
-                GeminiGenerateContentRequest.builder()
-                        .model("models/" + this.modelName)
-                        .contents(singletonList(dummyContent))
-                        .tools(FunctionMapper.fromToolSpecsToGTools(allTools, false, false, false, false, false))
-                        .build());
-
-        // The API doesn't allow us to make a request to count the tokens of the tool specifications only.
-        // Instead, we take the approach of adding a dummy content in the request, and subtract the tokens for the dummy
-        // request.
-        // The string "Dummy content" accounts for 2 tokens. So let's subtract 2 from the overall count.
-        return estimateTokenCount(countTokensRequestWithDummyContent) - 2;
+        GeminiContent dummyContent = new GeminiContent(Collections.singletonList(GeminiContent.GeminiPart.builder().text("Dummy content").build()), null);
+        GeminiCountTokensRequest countTokensRequestWithDummyContent = new GeminiCountTokensRequest(null, GeminiGenerateContentRequest.builder().model("models/" + this.modelName).contents(Collections.singletonList(dummyContent)).tools(FunctionMapper.fromToolSpecsToGTools(allTools, false, false, false, false, false)).build());
+        return this.estimateTokenCount(countTokensRequestWithDummyContent) - 2;
     }
 
     private int estimateTokenCount(GeminiCountTokensRequest countTokensRequest) {
-        GeminiCountTokensResponse countTokensResponse = withRetryMappingExceptions(
-                () -> this.geminiService.countTokens(this.modelName, countTokensRequest), this.maxRetries);
+        GeminiCountTokensResponse countTokensResponse = (GeminiCountTokensResponse)RetryUtils.withRetryMappingExceptions(() -> this.geminiService.countTokens(this.modelName, countTokensRequest), (int)this.maxRetries);
         return countTokensResponse.totalTokens();
     }
 
     public static class Builder {
-
         private HttpClientBuilder httpClientBuilder;
         private String modelName;
         private String apiKey;
-
         private String baseUrl;
         private Boolean logRequestsAndResponses;
         private Boolean logRequests;
@@ -116,7 +102,8 @@ public class GoogleAiGeminiTokenCountEstimator implements TokenCountEstimator {
         private Duration timeout;
         private Integer maxRetries;
 
-        Builder() {}
+        Builder() {
+        }
 
         public Builder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
@@ -153,10 +140,6 @@ public class GoogleAiGeminiTokenCountEstimator implements TokenCountEstimator {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public Builder logger(Logger logger) {
             this.logger = logger;
             return this;
@@ -177,3 +160,4 @@ public class GoogleAiGeminiTokenCountEstimator implements TokenCountEstimator {
         }
     }
 }
+

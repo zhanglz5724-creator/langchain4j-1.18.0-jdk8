@@ -1,75 +1,41 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicContent;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicDiagnostics;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicUsage;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Response object from the Anthropic Create Message API.
- * <p>
- * Contains the model's response including generated content, usage statistics,
- * and metadata about the completion.
- */
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicCreateMessageResponse {
-
-    /**
-     * Unique identifier for this message.
-     */
     public String id;
-
-    /**
-     * The type of response (typically "message").
-     */
     public String type;
-
-    /**
-     * The role of the responder (typically "assistant").
-     */
     public String role;
-
-    /**
-     * The content blocks in the response.
-     */
     public List<AnthropicContent> content;
-
-    /**
-     * The model that generated the response.
-     */
     public String model;
-
-    /**
-     * The reason the model stopped generating (e.g., "end_turn", "max_tokens", "tool_use").
-     */
     public String stopReason;
-
-    /**
-     * The stop sequence that caused generation to stop, if applicable.
-     */
     public String stopSequence;
-
-    /**
-     * Token usage statistics for the request and response.
-     */
     public AnthropicUsage usage;
-
-    /**
-     * Result of a (beta) cache-diagnostics comparison; {@code null} when not requested,
-     * not yet available, or no divergence was found. See {@link AnthropicDiagnostics}.
-     */
     public AnthropicDiagnostics diagnostics;
 
-    /**
-     * Default constructor.
-     */
-    public AnthropicCreateMessageResponse() {}
+    public AnthropicCreateMessageResponse() {
+    }
 
     private AnthropicCreateMessageResponse(Builder builder) {
         this.id = builder.id;
@@ -83,53 +49,29 @@ public class AnthropicCreateMessageResponse {
         this.diagnostics = builder.diagnostics;
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id, type, role, content, model, stopReason, stopSequence, usage, diagnostics);
+        return Objects.hash(this.id, this.type, this.role, this.content, this.model, this.stopReason, this.stopSequence, this.usage, this.diagnostics);
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof AnthropicCreateMessageResponse)) return false;
-        AnthropicCreateMessageResponse that = (AnthropicCreateMessageResponse) obj;
-        return Objects.equals(id, that.id)
-                && Objects.equals(type, that.type)
-                && Objects.equals(role, that.role)
-                && Objects.equals(content, that.content)
-                && Objects.equals(model, that.model)
-                && Objects.equals(stopReason, that.stopReason)
-                && Objects.equals(stopSequence, that.stopSequence)
-                && Objects.equals(usage, that.usage)
-                && Objects.equals(diagnostics, that.diagnostics);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof AnthropicCreateMessageResponse)) {
+            return false;
+        }
+        AnthropicCreateMessageResponse that = (AnthropicCreateMessageResponse)obj;
+        return Objects.equals(this.id, that.id) && Objects.equals(this.type, that.type) && Objects.equals(this.role, that.role) && Objects.equals(this.content, that.content) && Objects.equals(this.model, that.model) && Objects.equals(this.stopReason, that.stopReason) && Objects.equals(this.stopSequence, that.stopSequence) && Objects.equals(this.usage, that.usage) && Objects.equals(this.diagnostics, that.diagnostics);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicCreateMessageResponse{" + "id='"
-                + id + '\'' + ", type='"
-                + type + '\'' + ", role='"
-                + role + '\'' + ", content="
-                + content + ", model='"
-                + model + '\'' + ", stopReason='"
-                + stopReason + '\'' + ", stopSequence='"
-                + stopSequence + '\'' + ", usage="
-                + usage + ", diagnostics="
-                + diagnostics + '}';
+        return "AnthropicCreateMessageResponse{id='" + this.id + '\'' + ", type='" + this.type + '\'' + ", role='" + this.role + '\'' + ", content=" + this.content + ", model='" + this.model + '\'' + ", stopReason='" + this.stopReason + '\'' + ", stopSequence='" + this.stopSequence + '\'' + ", usage=" + this.usage + ", diagnostics=" + this.diagnostics + '}';
     }
 
-    /**
-     * Creates a new builder for constructing {@link AnthropicCreateMessageResponse} instances.
-     *
-     * @return a new {@link Builder} instance
-     */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Builder for constructing {@link AnthropicCreateMessageResponse} instances.
-     */
     public static class Builder {
         private String id;
         private String type;
@@ -141,112 +83,54 @@ public class AnthropicCreateMessageResponse {
         private AnthropicUsage usage;
         private AnthropicDiagnostics diagnostics;
 
-        /**
-         * Sets the unique identifier.
-         *
-         * @param id the message identifier
-         * @return this builder for chaining
-         */
         public Builder id(String id) {
             this.id = id;
             return this;
         }
 
-        /**
-         * Sets the response type.
-         *
-         * @param type the response type
-         * @return this builder for chaining
-         */
         public Builder type(String type) {
             this.type = type;
             return this;
         }
 
-        /**
-         * Sets the role.
-         *
-         * @param role the role
-         * @return this builder for chaining
-         */
         public Builder role(String role) {
             this.role = role;
             return this;
         }
 
-        /**
-         * Sets the content blocks.
-         *
-         * @param content the content blocks
-         * @return this builder for chaining
-         */
         public Builder content(List<AnthropicContent> content) {
             this.content = content;
             return this;
         }
 
-        /**
-         * Sets the model name.
-         *
-         * @param model the model name
-         * @return this builder for chaining
-         */
         public Builder model(String model) {
             this.model = model;
             return this;
         }
 
-        /**
-         * Sets the stop reason.
-         *
-         * @param stopReason the stop reason
-         * @return this builder for chaining
-         */
         public Builder stopReason(String stopReason) {
             this.stopReason = stopReason;
             return this;
         }
 
-        /**
-         * Sets the stop sequence.
-         *
-         * @param stopSequence the stop sequence
-         * @return this builder for chaining
-         */
         public Builder stopSequence(String stopSequence) {
             this.stopSequence = stopSequence;
             return this;
         }
 
-        /**
-         * Sets the usage statistics.
-         *
-         * @param usage the usage statistics
-         * @return this builder for chaining
-         */
         public Builder usage(AnthropicUsage usage) {
             this.usage = usage;
             return this;
         }
 
-        /**
-         * Sets the cache-diagnostics result.
-         *
-         * @param diagnostics the cache-diagnostics result
-         * @return this builder for chaining
-         */
         public Builder diagnostics(AnthropicDiagnostics diagnostics) {
             this.diagnostics = diagnostics;
             return this;
         }
 
-        /**
-         * Builds the {@link AnthropicCreateMessageResponse} instance.
-         *
-         * @return a new {@link AnthropicCreateMessageResponse} instance
-         */
         public AnthropicCreateMessageResponse build() {
             return new AnthropicCreateMessageResponse(this);
         }
     }
 }
+

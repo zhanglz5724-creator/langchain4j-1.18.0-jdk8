@@ -1,15 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpClientMessage;
+import dev.langchain4j.mcp.protocol.McpClientMethod;
+import dev.langchain4j.mcp.protocol.McpClientParams;
 
-/**
- * Corresponds to the {@code JSONRPCNotification} type from the MCP schema.
- */
 @Internal
-public class McpClientNotification extends McpClientMessage {
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+public class McpClientNotification
+extends McpClientMessage {
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
     private McpClientParams params;
 
     public McpClientNotification(McpClientMethod method) {
@@ -17,10 +25,11 @@ public class McpClientNotification extends McpClientMessage {
     }
 
     public McpClientParams getParams() {
-        return params;
+        return this.params;
     }
 
     public void setParams(McpClientParams params) {
         this.params = params;
     }
 }
+

@@ -1,273 +1,101 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.pgvector.PGvector
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.EmbeddingMatch
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  org.postgresql.ds.PGSimpleDataSource
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.store.embedding.pgvector;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.Utils.randomUUID;
-import static dev.langchain4j.internal.ValidationUtils.ensureGreaterThanZero;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.internal.ValidationUtils.ensureTrue;
-import static java.lang.String.join;
-import static java.util.Collections.nCopies;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 
 import com.pgvector.PGvector;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.filter.Filter;
+import dev.langchain4j.store.embedding.pgvector.DefaultMetadataStorageConfig;
+import dev.langchain4j.store.embedding.pgvector.MetadataHandler;
+import dev.langchain4j.store.embedding.pgvector.MetadataHandlerFactory;
+import dev.langchain4j.store.embedding.pgvector.MetadataStorageConfig;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.sql.DataSource;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * PGVector EmbeddingStore Implementation
- * <p>
- * Only cosine similarity is used.
- * Only ivfflat index is used.
- */
-public class PgVectorEmbeddingStore implements EmbeddingStore<TextSegment> {
-
-    /**
-     * Search modes for the embedding store.
-     */
-    public enum SearchMode {
-        VECTOR,
-        HYBRID
-    }
-
+public class PgVectorEmbeddingStore
+implements EmbeddingStore<TextSegment> {
     private static final Logger log = LoggerFactory.getLogger(PgVectorEmbeddingStore.class);
-
     private static final String DEFAULT_TEXT_SEARCH_CONFIG = "simple";
-    /**
-     * Default {@code k} parameter used by the Reciprocal Rank Fusion (RRF) algorithm when
-     * combining embedding and full-text search rankings.
-     */
     private static final int DEFAULT_RRF_K = 60;
-
-    /**
-     * Datasource used to create the store
-     */
     protected final DataSource datasource;
-    /**
-     * Embeddings table name
-     */
     protected final String table;
-
-    /**
-     * Flag to do not execute the {@code CREATE VECTOR EXTENSION} when retrieving a PGVector connection
-     */
     private final boolean skipCreateVectorExtension;
-
-    /**
-     * Metadata handler
-     */
     final MetadataHandler metadataHandler;
-
-    /**
-     * Search mode
-     */
     private final SearchMode searchMode;
-
-    /**
-     * PostgreSQL text search configuration to use for full-text search operations,
-     * such as determining language-specific parsing and stemming.
-     */
     private final String textSearchConfig;
-
-    /**
-     * RRF k parameter (instance-level, configurable via builder). If null, DEFAULT_RRF_K used.
-     */
     private final int rrfK;
 
-    /**
-     * Constructor for PgVectorEmbeddingStore Class
-     *
-     * @param datasource            The datasource to use
-     * @param table                 The database table
-     * @param dimension             The vector dimension
-     * @param useIndex              Should use <a href="https://github.com/pgvector/pgvector#ivfflat">IVFFlat</a> index
-     * @param indexListSize         The IVFFlat number of lists
-     * @param createTable           Should create table automatically
-     * @param dropTableFirst        Should drop table first, usually for testing
-     * @param metadataStorageConfig The {@link MetadataStorageConfig} config.
-     * @param searchMode            The search mode to use (null for default)
-     * @param textSearchConfig      PostgreSQL text search configuration (null for default)
-     * @param rrfK                  RRF k parameter (null for default)
-     */
-    protected PgVectorEmbeddingStore(
-            DataSource datasource,
-            String table,
-            Integer dimension,
-            Boolean useIndex,
-            Integer indexListSize,
-            Boolean createTable,
-            Boolean dropTableFirst,
-            MetadataStorageConfig metadataStorageConfig,
-            SearchMode searchMode,
-            String textSearchConfig,
-            Integer rrfK) {
-
-        this(new DatasourceBuilder()
-                .datasource(datasource)
-                .table(table)
-                .dimension(dimension)
-                .useIndex(useIndex)
-                .indexListSize(indexListSize)
-                .createTable(createTable)
-                .dropTableFirst(dropTableFirst)
-                .skipCreateVectorExtension(null)
-                .metadataStorageConfig(metadataStorageConfig)
-                .searchMode(searchMode)
-                .textSearchConfig(textSearchConfig)
-                .rrfK(rrfK));
+    protected PgVectorEmbeddingStore(DataSource datasource, String table, Integer dimension, Boolean useIndex, Integer indexListSize, Boolean createTable, Boolean dropTableFirst, MetadataStorageConfig metadataStorageConfig, SearchMode searchMode, String textSearchConfig, Integer rrfK) {
+        this(new DatasourceBuilder().datasource(datasource).table(table).dimension(dimension).useIndex(useIndex).indexListSize(indexListSize).createTable(createTable).dropTableFirst(dropTableFirst).skipCreateVectorExtension(null).metadataStorageConfig(metadataStorageConfig).searchMode(searchMode).textSearchConfig(textSearchConfig).rrfK(rrfK));
     }
 
-    /**
-     * Constructor for PgVectorEmbeddingStore Class
-     *
-     * @param datasource            The datasource to use
-     * @param table                 The database table
-     * @param dimension             The vector dimension
-     * @param useIndex              Should use <a href="https://github.com/pgvector/pgvector#ivfflat">IVFFlat</a> index
-     * @param indexListSize         The IVFFlat number of lists
-     * @param createTable           Should create table automatically
-     * @param dropTableFirst        Should drop table first, usually for testing
-     * @param metadataStorageConfig The {@link MetadataStorageConfig} config.
-     */
-    protected PgVectorEmbeddingStore(
-            DataSource datasource,
-            String table,
-            Integer dimension,
-            Boolean useIndex,
-            Integer indexListSize,
-            Boolean createTable,
-            Boolean dropTableFirst,
-            MetadataStorageConfig metadataStorageConfig) {
-        this(
-                datasource,
-                table,
-                dimension,
-                useIndex,
-                indexListSize,
-                createTable,
-                dropTableFirst,
-                metadataStorageConfig,
-                null,
-                null,
-                null);
+    protected PgVectorEmbeddingStore(DataSource datasource, String table, Integer dimension, Boolean useIndex, Integer indexListSize, Boolean createTable, Boolean dropTableFirst, MetadataStorageConfig metadataStorageConfig) {
+        this(datasource, table, dimension, useIndex, indexListSize, createTable, dropTableFirst, metadataStorageConfig, null, null, null);
     }
 
-    /**
-     * Constructor for PgVectorEmbeddingStore Class
-     * Use this builder when you don't have datasource management.
-     *
-     * @param host                  The database host
-     * @param port                  The database port
-     * @param user                  The database user
-     * @param password              The database password
-     * @param database              The database name
-     * @param table                 The database table
-     * @param dimension             The vector dimension
-     * @param useIndex              Should use <a href="https://github.com/pgvector/pgvector#ivfflat">IVFFlat</a> index
-     * @param indexListSize         The IVFFlat number of lists
-     * @param createTable           Should create table automatically
-     * @param dropTableFirst        Should drop table first, usually for testing
-     * @param metadataStorageConfig The {@link MetadataStorageConfig} config.
-     */
-    @SuppressWarnings("unused")
-    protected PgVectorEmbeddingStore(
-            String host,
-            Integer port,
-            String user,
-            String password,
-            String database,
-            String table,
-            Integer dimension,
-            Boolean useIndex,
-            Integer indexListSize,
-            Boolean createTable,
-            Boolean dropTableFirst,
-            MetadataStorageConfig metadataStorageConfig) {
-        this(
-                createDataSource(host, port, user, password, database),
-                table,
-                dimension,
-                useIndex,
-                indexListSize,
-                createTable,
-                dropTableFirst,
-                metadataStorageConfig);
+    protected PgVectorEmbeddingStore(String host, Integer port, String user, String password, String database, String table, Integer dimension, Boolean useIndex, Integer indexListSize, Boolean createTable, Boolean dropTableFirst, MetadataStorageConfig metadataStorageConfig) {
+        this(PgVectorEmbeddingStore.createDataSource(host, port, user, password, database), table, dimension, useIndex, indexListSize, createTable, dropTableFirst, metadataStorageConfig);
     }
 
-    /**
-     * New constructor that takes the builder itself.
-     * This is the entry point for enhanced configuration (searchMode, textSearchConfig, rrfK and skipCreateVectorExtension).
-     *
-     * @param builder The builder containing all configuration
-     */
     protected PgVectorEmbeddingStore(PgVectorEmbeddingStoreBuilder builder) {
-        this(new DatasourceBuilder()
-                .datasource(
-                        createDataSource(builder.host, builder.port, builder.user, builder.password, builder.database))
-                .table(builder.table)
-                .dimension(builder.dimension)
-                .useIndex(builder.useIndex)
-                .indexListSize(builder.indexListSize)
-                .createTable(builder.createTable)
-                .dropTableFirst(builder.dropTableFirst)
-                .skipCreateVectorExtension(builder.skipCreateVectorExtension)
-                .metadataStorageConfig(builder.metadataStorageConfig)
-                .searchMode(builder.searchMode)
-                .textSearchConfig(builder.textSearchConfig)
-                .rrfK(builder.rrfK));
+        this(new DatasourceBuilder().datasource(PgVectorEmbeddingStore.createDataSource(builder.host, builder.port, builder.user, builder.password, builder.database)).table(builder.table).dimension(builder.dimension).useIndex(builder.useIndex).indexListSize(builder.indexListSize).createTable(builder.createTable).dropTableFirst(builder.dropTableFirst).skipCreateVectorExtension(builder.skipCreateVectorExtension).metadataStorageConfig(builder.metadataStorageConfig).searchMode(builder.searchMode).textSearchConfig(builder.textSearchConfig).rrfK(builder.rrfK));
     }
 
-    /**
-     * New constructor that takes the DatasourceBuilder.
-     * This is the entry point for enhanced configuration (searchMode, textSearchConfig, rrfK and skipCreateVectorExtension).
-     *
-     * @param builder The builder containing all configuration
-     */
     protected PgVectorEmbeddingStore(DatasourceBuilder builder) {
-        super();
-        this.datasource = ensureNotNull(builder.datasource, "datasource");
-        this.table = ensureNotBlank(builder.table, "table");
-        MetadataStorageConfig config =
-                getOrDefault(builder.metadataStorageConfig, DefaultMetadataStorageConfig.defaultConfig());
+        this.datasource = (DataSource)ValidationUtils.ensureNotNull((Object)builder.datasource, (String)"datasource");
+        this.table = ValidationUtils.ensureNotBlank((String)builder.table, (String)"table");
+        MetadataStorageConfig config = (MetadataStorageConfig)Utils.getOrDefault((Object)builder.metadataStorageConfig, (Object)DefaultMetadataStorageConfig.defaultConfig());
         this.metadataHandler = MetadataHandlerFactory.get(config);
-        boolean useIndex = getOrDefault(builder.useIndex, false);
-        boolean createTable = getOrDefault(builder.createTable, true);
-        boolean dropTableFirst = getOrDefault(builder.dropTableFirst, false);
-        this.skipCreateVectorExtension = getOrDefault(builder.skipCreateVectorExtension, false);
-        this.searchMode = getOrDefault(builder.searchMode, SearchMode.VECTOR);
-        this.textSearchConfig = getOrDefault(builder.textSearchConfig, DEFAULT_TEXT_SEARCH_CONFIG);
-        this.rrfK = ensureGreaterThanZero(getOrDefault(builder.rrfK, DEFAULT_RRF_K), "rrfK");
-
+        boolean useIndex = (Boolean)Utils.getOrDefault((Object)builder.useIndex, (Object)false);
+        boolean createTable = (Boolean)Utils.getOrDefault((Object)builder.createTable, (Object)true);
+        boolean dropTableFirst = (Boolean)Utils.getOrDefault((Object)builder.dropTableFirst, (Object)false);
+        this.skipCreateVectorExtension = (Boolean)Utils.getOrDefault((Object)builder.skipCreateVectorExtension, (Object)false);
+        this.searchMode = (SearchMode)((Object)Utils.getOrDefault((Object)((Object)builder.searchMode), (Object)((Object)SearchMode.VECTOR)));
+        this.textSearchConfig = (String)Utils.getOrDefault((Object)builder.textSearchConfig, (Object)DEFAULT_TEXT_SEARCH_CONFIG);
+        this.rrfK = ValidationUtils.ensureGreaterThanZero((Integer)((Integer)Utils.getOrDefault((Object)builder.rrfK, (Object)60)), (String)"rrfK");
         if (useIndex || createTable || dropTableFirst) {
-            initTable(dropTableFirst, createTable, useIndex, builder.dimension, builder.indexListSize);
+            this.initTable(dropTableFirst, createTable, useIndex, builder.dimension, builder.indexListSize);
         }
     }
 
@@ -278,24 +106,21 @@ public class PgVectorEmbeddingStore implements EmbeddingStore<TextSegment> {
         this.skipCreateVectorExtension = false;
         this.searchMode = SearchMode.VECTOR;
         this.textSearchConfig = DEFAULT_TEXT_SEARCH_CONFIG;
-        this.rrfK = DEFAULT_RRF_K;
+        this.rrfK = 60;
     }
 
-    private static DataSource createDataSource(
-            String host, Integer port, String user, String password, String database) {
-        host = ensureNotBlank(host, "host");
-        port = ensureGreaterThanZero(port, "port");
-        user = ensureNotBlank(user, "user");
-        password = ensureNotBlank(password, "password");
-        database = ensureNotBlank(database, "database");
-
+    private static DataSource createDataSource(String host, Integer port, String user, String password, String database) {
+        host = ValidationUtils.ensureNotBlank((String)host, (String)"host");
+        port = ValidationUtils.ensureGreaterThanZero((Integer)port, (String)"port");
+        user = ValidationUtils.ensureNotBlank((String)user, (String)"user");
+        password = ValidationUtils.ensureNotBlank((String)password, (String)"password");
+        database = ValidationUtils.ensureNotBlank((String)database, (String)"database");
         PGSimpleDataSource source = new PGSimpleDataSource();
-        source.setServerNames(new String[] {host});
-        source.setPortNumbers(new int[] {port});
+        source.setServerNames(new String[]{host});
+        source.setPortNumbers(new int[]{port});
         source.setDatabaseName(database);
         source.setUser(user);
         source.setPassword(password);
-
         return source;
     }
 
@@ -307,166 +132,110 @@ public class PgVectorEmbeddingStore implements EmbeddingStore<TextSegment> {
         return new PgVectorEmbeddingStoreBuilder();
     }
 
-    /**
-     * Initialize metadata table following configuration
-     *
-     * @param dropTableFirst Should drop table first, usually for testing
-     * @param createTable    Should create table automatically
-     * @param useIndex       Should use <a href="https://github.com/pgvector/pgvector#ivfflat">IVFFlat</a> index
-     * @param dimension      The vector dimension
-     * @param indexListSize  The IVFFlat number of lists
-     */
-    protected void initTable(
-            Boolean dropTableFirst, Boolean createTable, Boolean useIndex, Integer dimension, Integer indexListSize) {
+    protected void initTable(Boolean dropTableFirst, Boolean createTable, Boolean useIndex, Integer dimension, Integer indexListSize) {
         String query = "init";
-        try (Connection connection = getConnection();
-                Statement statement = connection.createStatement()) {
-            if (dropTableFirst) {
-                statement.executeUpdate(String.format("DROP TABLE IF EXISTS %s", table));
+        try (Connection connection = this.getConnection();
+             Statement statement = connection.createStatement();){
+            if (dropTableFirst.booleanValue()) {
+                statement.executeUpdate(String.format("DROP TABLE IF EXISTS %s", this.table));
             }
-            if (createTable) {
-                query = String.format(
-                        "CREATE TABLE IF NOT EXISTS %s (embedding_id UUID PRIMARY KEY, "
-                                + "embedding vector(%s), text TEXT NULL, %s )",
-                        table,
-                        ensureGreaterThanZero(dimension, "dimension"),
-                        metadataHandler.columnDefinitionsString());
+            if (createTable.booleanValue()) {
+                query = String.format("CREATE TABLE IF NOT EXISTS %s (embedding_id UUID PRIMARY KEY, embedding vector(%s), text TEXT NULL, %s )", this.table, ValidationUtils.ensureGreaterThanZero((Integer)dimension, (String)"dimension"), this.metadataHandler.columnDefinitionsString());
                 statement.executeUpdate(query);
-                metadataHandler.createMetadataIndexes(statement, table);
+                this.metadataHandler.createMetadataIndexes(statement, this.table);
             }
-            String cleanTableName = computeCleanTableName();
-            if (searchMode == SearchMode.HYBRID) {
+            String cleanTableName = this.computeCleanTableName();
+            if (this.searchMode == SearchMode.HYBRID) {
                 String ftsIndexName = cleanTableName + "_text_fts_gin_index";
-                query = String.format(
-                        "CREATE INDEX IF NOT EXISTS %s ON %s " + "USING gin (to_tsvector('%s', coalesce(text, '')))",
-                        ftsIndexName, table, textSearchConfig);
+                query = String.format("CREATE INDEX IF NOT EXISTS %s ON %s USING gin (to_tsvector('%s', coalesce(text, '')))", ftsIndexName, this.table, this.textSearchConfig);
                 statement.executeUpdate(query);
             }
-            if (useIndex) {
-                final String indexName = cleanTableName + "_ivfflat_index";
-                query = String.format(
-                        "CREATE INDEX IF NOT EXISTS %s ON %s " + "USING ivfflat (embedding vector_cosine_ops) "
-                                + "WITH (lists = %s)",
-                        indexName, table, ensureGreaterThanZero(indexListSize, "indexListSize"));
+            if (useIndex.booleanValue()) {
+                String indexName = cleanTableName + "_ivfflat_index";
+                query = String.format("CREATE INDEX IF NOT EXISTS %s ON %s USING ivfflat (embedding vector_cosine_ops) WITH (lists = %s)", indexName, this.table, ValidationUtils.ensureGreaterThanZero((Integer)indexListSize, (String)"indexListSize"));
                 statement.executeUpdate(query);
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(String.format("Failed to execute '%s'", query), e);
         }
     }
 
     private String computeCleanTableName() {
-        int lastDotIndex = table.lastIndexOf('.');
-        return lastDotIndex >= 0 ? table.substring(lastDotIndex + 1) : table;
+        int lastDotIndex = this.table.lastIndexOf(46);
+        return lastDotIndex >= 0 ? this.table.substring(lastDotIndex + 1) : this.table;
     }
 
-    /**
-     * Adds a given embedding to the store.
-     *
-     * @param embedding The embedding to be added to the store.
-     * @return The auto-generated ID associated with the added embedding.
-     */
-    @Override
     public String add(Embedding embedding) {
-        String id = randomUUID();
-        addInternal(id, embedding, null);
+        String id = Utils.randomUUID();
+        this.addInternal(id, embedding, null);
         return id;
     }
 
-    /**
-     * Adds a given embedding to the store.
-     *
-     * @param id        The unique identifier for the embedding to be added.
-     * @param embedding The embedding to be added to the store.
-     */
-    @Override
     public void add(String id, Embedding embedding) {
-        addInternal(id, embedding, null);
+        this.addInternal(id, embedding, null);
     }
 
-    /**
-     * Adds a given embedding and the corresponding content that has been embedded to the store.
-     *
-     * @param embedding   The embedding to be added to the store.
-     * @param textSegment Original content that was embedded.
-     * @return The auto-generated ID associated with the added embedding.
-     */
-    @Override
     public String add(Embedding embedding, TextSegment textSegment) {
-        String id = randomUUID();
-        addInternal(id, embedding, textSegment);
+        String id = Utils.randomUUID();
+        this.addInternal(id, embedding, textSegment);
         return id;
     }
 
-    /**
-     * Adds multiple embeddings to the store.
-     *
-     * @param embeddings A list of embeddings to be added to the store.
-     * @return A list of auto-generated IDs associated with the added embeddings.
-     */
-    @Override
     public List<String> addAll(List<Embedding> embeddings) {
-        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).collect(toList());
-        addAll(ids, embeddings, null);
+        List<String> ids = embeddings.stream().map(ignored -> Utils.randomUUID()).collect(Collectors.toList());
+        this.addAll(ids, embeddings, null);
         return ids;
     }
 
-    @Override
     public void removeAll(Collection<String> ids) {
-        ensureNotEmpty(ids, "ids");
-        String sql = String.format("DELETE FROM %s WHERE embedding_id = ANY (?)", table);
-        try (Connection connection = getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            Array array = connection.createArrayOf(
-                    "uuid", ids.stream().map(UUID::fromString).toArray());
+        ValidationUtils.ensureNotEmpty(ids, (String)"ids");
+        String sql = String.format("DELETE FROM %s WHERE embedding_id = ANY (?)", this.table);
+        try (Connection connection = this.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);){
+            Array array = connection.createArrayOf("uuid", ids.stream().map(UUID::fromString).toArray());
             statement.setArray(1, array);
             statement.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
     public void removeAll(Filter filter) {
-        ensureNotNull(filter, "filter");
-        String whereClause = metadataHandler.whereClause(filter);
-        String sql = String.format("DELETE FROM %s WHERE %s", table, whereClause);
-        try (Connection connection = getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        ValidationUtils.ensureNotNull((Object)filter, (String)"filter");
+        String whereClause = this.metadataHandler.whereClause(filter);
+        String sql = String.format("DELETE FROM %s WHERE %s", this.table, whereClause);
+        try (Connection connection = this.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);){
             statement.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
     public void removeAll() {
-        try (Connection connection = getConnection();
-                Statement statement = connection.createStatement()) {
-            statement.executeUpdate(String.format("TRUNCATE TABLE %s", table));
-        } catch (SQLException e) {
+        try (Connection connection = this.getConnection();
+             Statement statement = connection.createStatement();){
+            statement.executeUpdate(String.format("TRUNCATE TABLE %s", this.table));
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) {@link Embedding}s.
-     * <br>
-     * All search criteria are defined inside the {@link EmbeddingSearchRequest}.
-     * <br>
-     * {@link EmbeddingSearchRequest#filter()} is used to filter by meta dada.
-     *
-     * @param request A request to search in an {@link EmbeddingStore}. Contains all search criteria.
-     * @return An {@link EmbeddingSearchResult} containing all found {@link Embedding}s.
-     */
-    @Override
     public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
-        SearchMode mode = getOrDefault(searchMode, SearchMode.VECTOR);
-
-        return switch (mode) {
-            case VECTOR -> embeddingOnlySearch(request);
-            case HYBRID -> hybridSearch(request);
-        };
+        SearchMode mode = (SearchMode)((Object)Utils.getOrDefault((Object)((Object)this.searchMode), (Object)((Object)SearchMode.VECTOR)));
+        switch (mode) {
+            case VECTOR: {
+                return this.embeddingOnlySearch(request);
+            }
+            case HYBRID: {
+                return this.hybridSearch(request);
+            }
+        }
+        throw new IllegalStateException("Unknown search mode: " + (Object)((Object)mode));
     }
 
     private EmbeddingSearchResult<TextSegment> embeddingOnlySearch(EmbeddingSearchRequest request) {
@@ -474,323 +243,135 @@ public class PgVectorEmbeddingStore implements EmbeddingStore<TextSegment> {
         int maxResults = request.maxResults();
         double minScore = request.minScore();
         Filter filter = request.filter();
-
-        List<EmbeddingMatch<TextSegment>> result = new ArrayList<>();
-        try (Connection connection = getConnection()) {
+        ArrayList<EmbeddingMatch> result = new ArrayList<EmbeddingMatch>();
+        try (Connection connection = this.getConnection();){
             String referenceVector = Arrays.toString(referenceEmbedding.vector());
-            String whereClause = (filter == null) ? "" : metadataHandler.whereClause(filter);
-            whereClause = (whereClause.isEmpty()) ? "" : "AND " + whereClause;
-            String query = String.format(
-                    "SELECT (2 - (embedding <=> '%s')) / 2 AS score, embedding_id, embedding, text, %s FROM %s "
-                            + "WHERE round(cast(float8 (embedding <=> '%s') as numeric), 8) <= round(2 - 2 * %s, 8) %s "
-                            + "ORDER BY embedding <=> '%s' LIMIT %s;",
-                    referenceVector,
-                    join(",", metadataHandler.columnsNames()),
-                    table,
-                    referenceVector,
-                    minScore,
-                    whereClause,
-                    referenceVector,
-                    maxResults);
-            try (PreparedStatement selectStmt = connection.prepareStatement(query)) {
-                try (ResultSet resultSet = selectStmt.executeQuery()) {
-                    while (resultSet.next()) {
-                        double score = resultSet.getDouble("score");
-                        String embeddingId = resultSet.getString("embedding_id");
-
-                        PGvector vector = (PGvector) resultSet.getObject("embedding");
-                        Embedding embedding = new Embedding(vector.toArray());
-
-                        String text = resultSet.getString("text");
-                        TextSegment textSegment = null;
-                        if (isNotNullOrBlank(text)) {
-                            Metadata metadata = metadataHandler.fromResultSet(resultSet);
-                            textSegment = TextSegment.from(text, metadata);
-                        }
-                        result.add(new EmbeddingMatch<>(score, embeddingId, embedding, textSegment));
+            String whereClause = filter == null ? "" : this.metadataHandler.whereClause(filter);
+            whereClause = whereClause.isEmpty() ? "" : "AND " + whereClause;
+            String query = String.format("SELECT (2 - (embedding <=> '%s')) / 2 AS score, embedding_id, embedding, text, %s FROM %s WHERE round(cast(float8 (embedding <=> '%s') as numeric), 8) <= round(2 - 2 * %s, 8) %s ORDER BY embedding <=> '%s' LIMIT %s;", referenceVector, String.join((CharSequence)",", this.metadataHandler.columnsNames()), this.table, referenceVector, minScore, whereClause, referenceVector, maxResults);
+            try (PreparedStatement selectStmt = connection.prepareStatement(query);
+                 ResultSet resultSet = selectStmt.executeQuery();){
+                while (resultSet.next()) {
+                    double score = resultSet.getDouble("score");
+                    String embeddingId = resultSet.getString("embedding_id");
+                    PGvector vector = (PGvector)resultSet.getObject("embedding");
+                    Embedding embedding = new Embedding(vector.toArray());
+                    String text = resultSet.getString("text");
+                    TextSegment textSegment = null;
+                    if (Utils.isNotNullOrBlank((String)text)) {
+                        Metadata metadata = this.metadataHandler.fromResultSet(resultSet);
+                        textSegment = TextSegment.from((String)text, (Metadata)metadata);
                     }
+                    result.add(new EmbeddingMatch(Double.valueOf(score), embeddingId, embedding, (Object)textSegment));
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return new EmbeddingSearchResult<>(result);
+        return new EmbeddingSearchResult(result);
     }
 
     private EmbeddingSearchResult<TextSegment> hybridSearch(EmbeddingSearchRequest request) {
         Embedding referenceEmbedding = request.queryEmbedding();
         String keywordQuery = request.query();
-
-        if (isNullOrBlank(keywordQuery)) {
-            throw new RuntimeException(
-                    "For HYBRID search mode, the query must be provided in the EmbeddingSearchRequest");
+        if (Utils.isNullOrBlank((String)keywordQuery)) {
+            throw new RuntimeException("For HYBRID search mode, the query must be provided in the EmbeddingSearchRequest");
         }
-
         int maxResults = request.maxResults();
         double minScore = request.minScore();
         Filter filter = request.filter();
-
-        List<EmbeddingMatch<TextSegment>> result = new ArrayList<>();
-
-        try (Connection connection = getConnection()) {
+        ArrayList<EmbeddingMatch> result = new ArrayList<EmbeddingMatch>();
+        try (Connection connection = this.getConnection();){
             String referenceVector = Arrays.toString(referenceEmbedding.vector());
-
-            String filterCondition = (filter == null) ? "" : metadataHandler.whereClause(filter);
+            String filterCondition = filter == null ? "" : this.metadataHandler.whereClause(filter);
             String vectorWhere = filterCondition.isEmpty() ? "" : "WHERE " + filterCondition;
             String keywordWhere = filterCondition.isEmpty() ? "" : " AND " + filterCondition;
-
-            List<String> metadataCols = metadataHandler.columnsNames();
-            String rawMetadataCols = metadataCols.isEmpty() ? "" : ", " + String.join(", ", metadataCols);
-
+            List<String> metadataCols = this.metadataHandler.columnsNames();
+            String rawMetadataCols = metadataCols.isEmpty() ? "" : ", " + String.join((CharSequence)", ", metadataCols);
             String coalescedMetadataCols = "";
             if (!metadataCols.isEmpty()) {
-                coalescedMetadataCols = ", "
-                        + metadataCols.stream()
-                                .map(col -> String.format("COALESCE(v.%1$s, k.%1$s) AS %1$s", col))
-                                .collect(java.util.stream.Collectors.joining(", "));
+                coalescedMetadataCols = ", " + metadataCols.stream().map(col -> String.format("COALESCE(v.%1$s, k.%1$s) AS %1$s", col)).collect(Collectors.joining(", "));
             }
-
-            String sql = String.format(
-                    """
-                     WITH vector_search AS (
-                       SELECT
-                         embedding_id, embedding, text %1$s,
-                         RANK() OVER (ORDER BY embedding <=> '%2$s') AS rnk
-                       FROM %3$s
-                       %4$s
-                       ORDER BY embedding <=> '%2$s'
-                       LIMIT %5$d
-                     ), keyword_search AS (
-                       SELECT
-                         embedding_id, embedding, text %1$s,
-                         RANK() OVER (ORDER BY ts_rank(to_tsvector('%6$s', coalesce(text, '')), plainto_tsquery('%6$s', ?)) DESC) AS rnk
-                       FROM %3$s
-                       WHERE to_tsvector('%6$s', coalesce(text, '')) @@ plainto_tsquery('%6$s', ?)
-                         %7$s
-                       ORDER BY ts_rank(to_tsvector('%6$s', coalesce(text, '')), plainto_tsquery('%6$s', ?)) DESC
-                       LIMIT %5$d
-                     )
-                     SELECT * FROM (
-                       SELECT
-                         COALESCE(v.embedding_id, k.embedding_id) AS embedding_id,
-                         COALESCE(v.embedding, k.embedding) AS embedding,
-                         COALESCE(v.text, k.text) AS text
-                         %8$s,
-                         COALESCE(1.0 / (%9$d + v.rnk), 0.0) + COALESCE(1.0 / (%9$d + k.rnk), 0.0) AS score
-                       FROM vector_search v
-                       FULL OUTER JOIN keyword_search k ON v.embedding_id = k.embedding_id
-                     ) ranked
-                     WHERE ranked.score >= ?
-                     ORDER BY ranked.score DESC
-                     LIMIT %10$d;
-                     """,
-                    rawMetadataCols,
-                    referenceVector,
-                    table,
-                    vectorWhere,
-                    Math.max(maxResults, rrfK),
-                    textSearchConfig,
-                    keywordWhere,
-                    coalescedMetadataCols,
-                    rrfK,
-                    maxResults);
-
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            String sql = String.format(" WITH vector_search AS (\n   SELECT\n     embedding_id, embedding, text %1$s,\n     RANK() OVER (ORDER BY embedding <=> '%2$s') AS rnk\n   FROM %3$s\n   %4$s\n   ORDER BY embedding <=> '%2$s'\n   LIMIT %5$d\n ), keyword_search AS (\n   SELECT\n     embedding_id, embedding, text %1$s,\n     RANK() OVER (ORDER BY ts_rank(to_tsvector('%6$s', coalesce(text, '')), plainto_tsquery('%6$s', ?)) DESC) AS rnk\n   FROM %3$s\n   WHERE to_tsvector('%6$s', coalesce(text, '')) @@ plainto_tsquery('%6$s', ?)\n     %7$s\n   ORDER BY ts_rank(to_tsvector('%6$s', coalesce(text, '')), plainto_tsquery('%6$s', ?)) DESC\n   LIMIT %5$d\n )\n SELECT * FROM (\n   SELECT\n     COALESCE(v.embedding_id, k.embedding_id) AS embedding_id,\n     COALESCE(v.embedding, k.embedding) AS embedding,\n     COALESCE(v.text, k.text) AS text\n     %8$s,\n     COALESCE(1.0 / (%9$d + v.rnk), 0.0) + COALESCE(1.0 / (%9$d + k.rnk), 0.0) AS score\n   FROM vector_search v\n   FULL OUTER JOIN keyword_search k ON v.embedding_id = k.embedding_id\n ) ranked\n WHERE ranked.score >= ?\n ORDER BY ranked.score DESC\n LIMIT %10$d;", rawMetadataCols, referenceVector, this.table, vectorWhere, Math.max(maxResults, this.rrfK), this.textSearchConfig, keywordWhere, coalescedMetadataCols, this.rrfK, maxResults);
+            try (PreparedStatement stmt = connection.prepareStatement(sql);){
                 stmt.setString(1, keywordQuery);
                 stmt.setString(2, keywordQuery);
                 stmt.setString(3, keywordQuery);
                 stmt.setDouble(4, minScore);
-
-                try (ResultSet rs = stmt.executeQuery()) {
+                try (ResultSet rs = stmt.executeQuery();){
                     while (rs.next()) {
                         double score = rs.getDouble("score");
                         String embeddingId = rs.getString("embedding_id");
-
-                        PGvector vector = (PGvector) rs.getObject("embedding");
+                        PGvector vector = (PGvector)rs.getObject("embedding");
                         Embedding embedding = new Embedding(vector.toArray());
-
                         String text = rs.getString("text");
                         TextSegment textSegment = null;
-                        if (isNotNullOrBlank(text)) {
-                            Metadata metadata = metadataHandler.fromResultSet(rs);
-                            textSegment = TextSegment.from(text, metadata);
+                        if (Utils.isNotNullOrBlank((String)text)) {
+                            Metadata metadata = this.metadataHandler.fromResultSet(rs);
+                            textSegment = TextSegment.from((String)text, (Metadata)metadata);
                         }
-                        result.add(new EmbeddingMatch<>(score, embeddingId, embedding, textSegment));
+                        result.add(new EmbeddingMatch(Double.valueOf(score), embeddingId, embedding, (Object)textSegment));
                     }
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return new EmbeddingSearchResult<>(result);
+        return new EmbeddingSearchResult(result);
     }
 
     private void addInternal(String id, Embedding embedding, TextSegment embedded) {
-        addAll(singletonList(id), singletonList(embedding), embedded == null ? null : singletonList(embedded));
+        this.addAll(Collections.singletonList(id), Collections.singletonList(embedding), embedded == null ? null : Collections.singletonList(embedded));
     }
 
-    @Override
     public void addAll(List<String> ids, List<Embedding> embeddings, List<TextSegment> embedded) {
-        if (isNullOrEmpty(ids) || isNullOrEmpty(embeddings)) {
+        if (Utils.isNullOrEmpty(ids) || Utils.isNullOrEmpty(embeddings)) {
             log.info("Empty embeddings - no ops");
             return;
         }
-        ensureTrue(ids.size() == embeddings.size(), "ids size is not equal to embeddings size");
-        ensureTrue(
-                embedded == null || embeddings.size() == embedded.size(),
-                "embeddings size is not equal to embedded size");
-
-        try (Connection connection = getConnection()) {
-            String query = String.format(
-                    "INSERT INTO %s (embedding_id, embedding, text, %s) VALUES (?, ?, ?, %s)"
-                            + "ON CONFLICT (embedding_id) DO UPDATE SET "
-                            + "embedding = EXCLUDED.embedding,"
-                            + "text = EXCLUDED.text,"
-                            + "%s;",
-                    table,
-                    join(",", metadataHandler.columnsNames()),
-                    join(",", nCopies(metadataHandler.columnsNames().size(), "?")),
-                    metadataHandler.insertClause());
-            try (PreparedStatement upsertStmt = connection.prepareStatement(query)) {
+        ValidationUtils.ensureTrue((ids.size() == embeddings.size() ? 1 : 0) != 0, (String)"ids size is not equal to embeddings size");
+        ValidationUtils.ensureTrue((embedded == null || embeddings.size() == embedded.size() ? 1 : 0) != 0, (String)"embeddings size is not equal to embedded size");
+        try (Connection connection = this.getConnection();){
+            String query = String.format("INSERT INTO %s (embedding_id, embedding, text, %s) VALUES (?, ?, ?, %s)ON CONFLICT (embedding_id) DO UPDATE SET embedding = EXCLUDED.embedding,text = EXCLUDED.text,%s;", this.table, String.join((CharSequence)",", this.metadataHandler.columnsNames()), String.join((CharSequence)",", Collections.nCopies(this.metadataHandler.columnsNames().size(), "?")), this.metadataHandler.insertClause());
+            try (PreparedStatement upsertStmt = connection.prepareStatement(query);){
                 for (int i = 0; i < ids.size(); ++i) {
                     upsertStmt.setObject(1, UUID.fromString(ids.get(i)));
                     upsertStmt.setObject(2, new PGvector(embeddings.get(i).vector()));
-
                     if (embedded != null && embedded.get(i) != null) {
                         upsertStmt.setObject(3, embedded.get(i).text());
-                        metadataHandler.setMetadata(
-                                upsertStmt, 4, embedded.get(i).metadata());
+                        this.metadataHandler.setMetadata(upsertStmt, 4, embedded.get(i).metadata());
                     } else {
-                        upsertStmt.setNull(3, Types.VARCHAR);
-                        IntStream.range(4, 4 + metadataHandler.columnsNames().size())
-                                .forEach(j -> {
-                                    try {
-                                        upsertStmt.setNull(j, Types.OTHER);
-                                    } catch (SQLException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                });
+                        upsertStmt.setNull(3, 12);
+                        IntStream.range(4, 4 + this.metadataHandler.columnsNames().size()).forEach(j -> {
+                            try {
+                                upsertStmt.setNull(j, 1111);
+                            }
+                            catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
                     }
                     upsertStmt.addBatch();
                 }
                 upsertStmt.executeBatch();
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     * Datasource connection
-     * Creates the vector extension and add the vector type if it does not exist.
-     * Could be overridden in case extension creation and adding type is done at datasource initialization step.
-     *
-     * @return Datasource connection
-     * @throws SQLException exception
-     */
     protected Connection getConnection() throws SQLException {
-        Connection connection = datasource.getConnection();
-        // Find a way to do the following code in connection initialization.
-        // Here we assume the datasource could handle a connection pool
-        // and we should add the vector type on each connection
-        if (!skipCreateVectorExtension) {
-            try (Statement statement = connection.createStatement()) {
+        Connection connection = this.datasource.getConnection();
+        if (!this.skipCreateVectorExtension) {
+            try (Statement statement = connection.createStatement();){
                 statement.executeUpdate("CREATE EXTENSION IF NOT EXISTS vector");
             }
         }
-        PGvector.addVectorType(connection);
+        PGvector.addVectorType((Connection)connection);
         return connection;
-    }
-
-    public static class DatasourceBuilder {
-        private DataSource datasource;
-        private String table;
-        private Integer dimension;
-        private Boolean useIndex;
-        private Integer indexListSize;
-        private Boolean createTable;
-        private Boolean dropTableFirst;
-        private Boolean skipCreateVectorExtension;
-        private MetadataStorageConfig metadataStorageConfig;
-        private SearchMode searchMode;
-        private String textSearchConfig;
-        private Integer rrfK;
-
-        DatasourceBuilder() {}
-
-        public DatasourceBuilder datasource(DataSource datasource) {
-            this.datasource = datasource;
-            return this;
-        }
-
-        public DatasourceBuilder table(String table) {
-            this.table = table;
-            return this;
-        }
-
-        public DatasourceBuilder dimension(Integer dimension) {
-            this.dimension = dimension;
-            return this;
-        }
-
-        public DatasourceBuilder useIndex(Boolean useIndex) {
-            this.useIndex = useIndex;
-            return this;
-        }
-
-        public DatasourceBuilder indexListSize(Integer indexListSize) {
-            this.indexListSize = indexListSize;
-            return this;
-        }
-
-        public DatasourceBuilder createTable(Boolean createTable) {
-            this.createTable = createTable;
-            return this;
-        }
-
-        public DatasourceBuilder dropTableFirst(Boolean dropTableFirst) {
-            this.dropTableFirst = dropTableFirst;
-            return this;
-        }
-
-        public DatasourceBuilder skipCreateVectorExtension(Boolean skipCreateVectorExtension) {
-            this.skipCreateVectorExtension = skipCreateVectorExtension;
-            return this;
-        }
-
-        public DatasourceBuilder metadataStorageConfig(MetadataStorageConfig metadataStorageConfig) {
-            this.metadataStorageConfig = metadataStorageConfig;
-            return this;
-        }
-
-        public DatasourceBuilder searchMode(SearchMode searchMode) {
-            this.searchMode = searchMode;
-            return this;
-        }
-
-        public DatasourceBuilder textSearchConfig(String textSearchConfig) {
-            this.textSearchConfig = textSearchConfig;
-            return this;
-        }
-
-        public DatasourceBuilder rrfK(Integer rrfK) {
-            this.rrfK = rrfK;
-            return this;
-        }
-
-        public PgVectorEmbeddingStore build() {
-            return new PgVectorEmbeddingStore(this);
-        }
-
-        public String toString() {
-            return "PgVectorEmbeddingStore.DatasourceBuilder(datasource=" + this.datasource + ", table=" + this.table
-                    + ", dimension=" + this.dimension + ", useIndex=" + this.useIndex + ", indexListSize="
-                    + this.indexListSize + ", createTable=" + this.createTable + ", dropTableFirst="
-                    + this.dropTableFirst + ", skipCreateVectorExtension=" + this.skipCreateVectorExtension
-                    + ", metadataStorageConfig=" + this.metadataStorageConfig + ", searchMode=" + this.searchMode
-                    + ", textSearchConfig=" + this.textSearchConfig + ", rrfK=" + this.rrfK + ")";
-        }
     }
 
     public static class PgVectorEmbeddingStoreBuilder {
@@ -811,7 +392,8 @@ public class PgVectorEmbeddingStore implements EmbeddingStore<TextSegment> {
         private String textSearchConfig;
         private Integer rrfK;
 
-        PgVectorEmbeddingStoreBuilder() {}
+        PgVectorEmbeddingStoreBuilder() {
+        }
 
         public PgVectorEmbeddingStoreBuilder host(String host) {
             this.host = host;
@@ -898,14 +480,100 @@ public class PgVectorEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
 
         public String toString() {
-            return "PgVectorEmbeddingStore.PgVectorEmbeddingStoreBuilder(host=" + this.host + ", port=" + this.port
-                    + ", user=" + this.user + ", password=" + (this.password == null ? null : "********")
-                    + ", database=" + this.database + ", table="
-                    + this.table + ", dimension=" + this.dimension + ", useIndex=" + this.useIndex + ", indexListSize="
-                    + this.indexListSize + ", createTable=" + this.createTable + ", dropTableFirst="
-                    + this.dropTableFirst + ", skipCreateVectorExtension=" + this.skipCreateVectorExtension
-                    + ", metadataStorageConfig=" + this.metadataStorageConfig + ", searchMode=" + this.searchMode
-                    + ", textSearchConfig=" + this.textSearchConfig + ", rrfK=" + this.rrfK + ")";
+            return "PgVectorEmbeddingStore.PgVectorEmbeddingStoreBuilder(host=" + this.host + ", port=" + this.port + ", user=" + this.user + ", password=" + (this.password == null ? null : "********") + ", database=" + this.database + ", table=" + this.table + ", dimension=" + this.dimension + ", useIndex=" + this.useIndex + ", indexListSize=" + this.indexListSize + ", createTable=" + this.createTable + ", dropTableFirst=" + this.dropTableFirst + ", skipCreateVectorExtension=" + this.skipCreateVectorExtension + ", metadataStorageConfig=" + this.metadataStorageConfig + ", searchMode=" + (Object)((Object)this.searchMode) + ", textSearchConfig=" + this.textSearchConfig + ", rrfK=" + this.rrfK + ")";
         }
     }
+
+    public static class DatasourceBuilder {
+        private DataSource datasource;
+        private String table;
+        private Integer dimension;
+        private Boolean useIndex;
+        private Integer indexListSize;
+        private Boolean createTable;
+        private Boolean dropTableFirst;
+        private Boolean skipCreateVectorExtension;
+        private MetadataStorageConfig metadataStorageConfig;
+        private SearchMode searchMode;
+        private String textSearchConfig;
+        private Integer rrfK;
+
+        DatasourceBuilder() {
+        }
+
+        public DatasourceBuilder datasource(DataSource datasource) {
+            this.datasource = datasource;
+            return this;
+        }
+
+        public DatasourceBuilder table(String table) {
+            this.table = table;
+            return this;
+        }
+
+        public DatasourceBuilder dimension(Integer dimension) {
+            this.dimension = dimension;
+            return this;
+        }
+
+        public DatasourceBuilder useIndex(Boolean useIndex) {
+            this.useIndex = useIndex;
+            return this;
+        }
+
+        public DatasourceBuilder indexListSize(Integer indexListSize) {
+            this.indexListSize = indexListSize;
+            return this;
+        }
+
+        public DatasourceBuilder createTable(Boolean createTable) {
+            this.createTable = createTable;
+            return this;
+        }
+
+        public DatasourceBuilder dropTableFirst(Boolean dropTableFirst) {
+            this.dropTableFirst = dropTableFirst;
+            return this;
+        }
+
+        public DatasourceBuilder skipCreateVectorExtension(Boolean skipCreateVectorExtension) {
+            this.skipCreateVectorExtension = skipCreateVectorExtension;
+            return this;
+        }
+
+        public DatasourceBuilder metadataStorageConfig(MetadataStorageConfig metadataStorageConfig) {
+            this.metadataStorageConfig = metadataStorageConfig;
+            return this;
+        }
+
+        public DatasourceBuilder searchMode(SearchMode searchMode) {
+            this.searchMode = searchMode;
+            return this;
+        }
+
+        public DatasourceBuilder textSearchConfig(String textSearchConfig) {
+            this.textSearchConfig = textSearchConfig;
+            return this;
+        }
+
+        public DatasourceBuilder rrfK(Integer rrfK) {
+            this.rrfK = rrfK;
+            return this;
+        }
+
+        public PgVectorEmbeddingStore build() {
+            return new PgVectorEmbeddingStore(this);
+        }
+
+        public String toString() {
+            return "PgVectorEmbeddingStore.DatasourceBuilder(datasource=" + this.datasource + ", table=" + this.table + ", dimension=" + this.dimension + ", useIndex=" + this.useIndex + ", indexListSize=" + this.indexListSize + ", createTable=" + this.createTable + ", dropTableFirst=" + this.dropTableFirst + ", skipCreateVectorExtension=" + this.skipCreateVectorExtension + ", metadataStorageConfig=" + this.metadataStorageConfig + ", searchMode=" + (Object)((Object)this.searchMode) + ", textSearchConfig=" + this.textSearchConfig + ", rrfK=" + this.rrfK + ")";
+        }
+    }
+
+    public static enum SearchMode {
+        VECTOR,
+        HYBRID;
+
+    }
 }
+

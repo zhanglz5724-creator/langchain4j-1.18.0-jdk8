@@ -1,14 +1,49 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.ChatRequestValidationUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.StreamingResponseHandler
+ *  dev.langchain4j.model.chat.StreamingChatModel
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.chat.response.StreamingChatResponseHandler
+ *  dev.langchain4j.model.openai.OpenAiStreamingResponseBuilder
+ *  dev.langchain4j.model.openai.internal.OpenAiClient
+ *  dev.langchain4j.model.openai.internal.OpenAiUtils
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionChoice
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest$Builder
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionResponse
+ *  dev.langchain4j.model.openai.internal.chat.Delta
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.localai;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.ChatRequestValidationUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
-import dev.langchain4j.internal.ChatRequestValidationUtils;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
@@ -16,183 +51,116 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.localai.spi.LocalAiStreamingChatModelBuilderFactory;
 import dev.langchain4j.model.openai.OpenAiStreamingResponseBuilder;
 import dev.langchain4j.model.openai.internal.OpenAiClient;
+import dev.langchain4j.model.openai.internal.OpenAiUtils;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionChoice;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionResponse;
 import dev.langchain4j.model.openai.internal.chat.Delta;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.spi.ServiceHelper;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import org.slf4j.Logger;
 
-import java.time.Duration;
-import java.util.List;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.chat.request.ToolChoice.REQUIRED;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.convertResponse;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.toFunctions;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.toOpenAiMessages;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.time.Duration.ofSeconds;
-import static java.util.Collections.singletonList;
-
-/**
- * See <a href="https://localai.io/features/text-generation/">LocalAI documentation</a> for more details.
- */
-public class LocalAiStreamingChatModel implements StreamingChatModel {
-
+public class LocalAiStreamingChatModel
+implements StreamingChatModel {
     private final OpenAiClient client;
     private final String modelName;
     private final Double temperature;
     private final Double topP;
     private final Integer maxTokens;
 
-    @Deprecated(forRemoval = true, since = "1.5.0")
-    public LocalAiStreamingChatModel(String baseUrl,
-                                     String modelName,
-                                     Double temperature,
-                                     Double topP,
-                                     Integer maxTokens,
-                                     Duration timeout,
-                                     Boolean logRequests,
-                                     Boolean logResponses) {
-
+    @Deprecated
+    public LocalAiStreamingChatModel(String baseUrl, String modelName, Double temperature, Double topP, Integer maxTokens, Duration timeout, Boolean logRequests, Boolean logResponses) {
         temperature = temperature == null ? 0.7 : temperature;
-        timeout = timeout == null ? ofSeconds(60) : timeout;
-
-        this.client = OpenAiClient.builder()
-                .baseUrl(ensureNotBlank(baseUrl, "baseUrl"))
-                .connectTimeout(timeout)
-                .readTimeout(timeout)
-                .logRequests(logRequests)
-                .logResponses(logResponses)
-                .build();
-        this.modelName = ensureNotBlank(modelName, "modelName");
+        timeout = timeout == null ? Duration.ofSeconds(60L) : timeout;
+        this.client = OpenAiClient.builder().baseUrl(ValidationUtils.ensureNotBlank((String)baseUrl, (String)"baseUrl")).connectTimeout(timeout).readTimeout(timeout).logRequests(logRequests).logResponses(logResponses).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
         this.temperature = temperature;
         this.topP = topP;
         this.maxTokens = maxTokens;
     }
 
     public LocalAiStreamingChatModel(LocalAiStreamingChatModelBuilder builder) {
-        this.client = OpenAiClient.builder()
-                .baseUrl(ensureNotBlank(builder.baseUrl, "baseUrl"))
-                .connectTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .readTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .logger(builder.logger)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.temperature = getOrDefault(builder.temperature, 0.7);
+        this.client = OpenAiClient.builder().baseUrl(ValidationUtils.ensureNotBlank((String)builder.baseUrl, (String)"baseUrl")).connectTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).readTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests(builder.logRequests).logResponses(builder.logResponses).logger(builder.logger).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.temperature = (Double)Utils.getOrDefault((Object)builder.temperature, (Object)0.7);
         this.topP = builder.topP;
         this.maxTokens = builder.maxTokens;
     }
 
-    @Override
-    public void chat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
+    public void chat(ChatRequest chatRequest, final StreamingChatResponseHandler handler) {
         ChatRequestParameters parameters = chatRequest.parameters();
-        ChatRequestValidationUtils.validateParameters(parameters);
-        ChatRequestValidationUtils.validate(parameters.responseFormat());
+        ChatRequestValidationUtils.validateParameters((ChatRequestParameters)parameters);
+        ChatRequestValidationUtils.validate((ResponseFormat)parameters.responseFormat());
+        StreamingResponseHandler<AiMessage> legacyHandler = new StreamingResponseHandler<AiMessage>(){
 
-        StreamingResponseHandler<AiMessage> legacyHandler = new StreamingResponseHandler<>() {
-
-            @Override
             public void onNext(String token) {
                 handler.onPartialResponse(token);
             }
 
-            @Override
             public void onComplete(Response<AiMessage> response) {
-                ChatResponse chatResponse = ChatResponse.builder()
-                        .aiMessage(response.content())
-                        .metadata(ChatResponseMetadata.builder()
-                                .tokenUsage(response.tokenUsage())
-                                .finishReason(response.finishReason())
-                                .build())
-                        .build();
+                ChatResponse chatResponse = ChatResponse.builder().aiMessage((AiMessage)response.content()).metadata(ChatResponseMetadata.builder().tokenUsage(response.tokenUsage()).finishReason(response.finishReason()).build()).build();
                 handler.onCompleteResponse(chatResponse);
             }
 
-            @Override
             public void onError(Throwable error) {
                 handler.onError(error);
             }
         };
-
-        List<ToolSpecification> toolSpecifications = parameters.toolSpecifications();
-        if (isNullOrEmpty(toolSpecifications)) {
-            generate(chatRequest.messages(), legacyHandler);
-        } else {
-            if (parameters.toolChoice() == REQUIRED) {
-                if (toolSpecifications.size() != 1) {
-                    throw new UnsupportedFeatureException(
-                            String.format("%s.%s is currently supported only when there is a single tool",
-                                    ToolChoice.class.getSimpleName(), REQUIRED.name()));
-                }
-                generate(chatRequest.messages(), toolSpecifications.get(0), legacyHandler);
-            } else {
-                generate(chatRequest.messages(), toolSpecifications, legacyHandler);
+        List toolSpecifications = parameters.toolSpecifications();
+        if (Utils.isNullOrEmpty((Collection)toolSpecifications)) {
+            this.generate(chatRequest.messages(), legacyHandler);
+        } else if (parameters.toolChoice() == ToolChoice.REQUIRED) {
+            if (toolSpecifications.size() != 1) {
+                throw new UnsupportedFeatureException(String.format("%s.%s is currently supported only when there is a single tool", ToolChoice.class.getSimpleName(), ToolChoice.REQUIRED.name()));
             }
+            this.generate((List<ChatMessage>)chatRequest.messages(), (ToolSpecification)toolSpecifications.get(0), legacyHandler);
+        } else {
+            this.generate((List<ChatMessage>)chatRequest.messages(), toolSpecifications, legacyHandler);
         }
     }
 
     private void generate(List<ChatMessage> messages, StreamingResponseHandler<AiMessage> handler) {
-        generate(messages, null, null, handler);
+        this.generate(messages, null, null, handler);
     }
 
     private void generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications, StreamingResponseHandler<AiMessage> handler) {
-        generate(messages, toolSpecifications, null, handler);
+        this.generate(messages, toolSpecifications, null, handler);
     }
 
     private void generate(List<ChatMessage> messages, ToolSpecification toolSpecification, StreamingResponseHandler<AiMessage> handler) {
-        generate(messages, singletonList(toolSpecification), toolSpecification, handler);
+        this.generate(messages, Collections.singletonList(toolSpecification), toolSpecification, handler);
     }
 
-    private void generate(List<ChatMessage> messages,
-                          List<ToolSpecification> toolSpecifications,
-                          ToolSpecification toolThatMustBeExecuted,
-                          StreamingResponseHandler<AiMessage> handler
-    ) {
-        ChatCompletionRequest.Builder requestBuilder = ChatCompletionRequest.builder()
-                .stream(true)
-                .model(modelName)
-                .messages(toOpenAiMessages(messages))
-                .temperature(temperature)
-                .topP(topP)
-                .maxTokens(maxTokens);
-
+    private void generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications, ToolSpecification toolThatMustBeExecuted, StreamingResponseHandler<AiMessage> handler) {
+        ChatCompletionRequest.Builder requestBuilder = ChatCompletionRequest.builder().stream(Boolean.valueOf(true)).model(this.modelName).messages(OpenAiUtils.toOpenAiMessages(messages)).temperature(this.temperature).topP(this.topP).maxTokens(this.maxTokens);
         if (toolSpecifications != null && !toolSpecifications.isEmpty()) {
-            requestBuilder.functions(toFunctions(toolSpecifications));
+            requestBuilder.functions(OpenAiUtils.toFunctions(toolSpecifications));
         }
         if (toolThatMustBeExecuted != null) {
             requestBuilder.functionCall(toolThatMustBeExecuted.name());
         }
-
         ChatCompletionRequest request = requestBuilder.build();
-
         OpenAiStreamingResponseBuilder responseBuilder = new OpenAiStreamingResponseBuilder();
-
-        client.chatCompletion(request)
-                .onPartialResponse(partialResponse -> {
-                    responseBuilder.append(partialResponse);
-                    handle(partialResponse, handler);
-                })
-                .onComplete(() -> {
-                    ChatResponse chatResponse = responseBuilder.build();
-                    handler.onComplete(convertResponse(chatResponse));
-                })
-                .onError(handler::onError)
-                .execute();
+        this.client.chatCompletion(request).onPartialResponse(partialResponse -> {
+            responseBuilder.append(partialResponse);
+            LocalAiStreamingChatModel.handle(partialResponse, handler);
+        }).onComplete(() -> {
+            ChatResponse chatResponse = responseBuilder.build();
+            handler.onComplete(OpenAiUtils.convertResponse((ChatResponse)chatResponse));
+        }).onError(arg_0 -> handler.onError(arg_0)).execute();
     }
 
-    private static void handle(ChatCompletionResponse partialResponse,
-                               StreamingResponseHandler<AiMessage> handler) {
-        List<ChatCompletionChoice> choices = partialResponse.choices();
-        if (isNullOrEmpty(choices)) {
+    private static void handle(ChatCompletionResponse partialResponse, StreamingResponseHandler<AiMessage> handler) {
+        List choices = partialResponse.choices();
+        if (Utils.isNullOrEmpty((Collection)choices)) {
             return;
         }
-        Delta delta = choices.get(0).delta();
+        Delta delta = ((ChatCompletionChoice)choices.get(0)).delta();
         String content = delta.content();
         if (content != null) {
             handler.onNext(content);
@@ -200,8 +168,10 @@ public class LocalAiStreamingChatModel implements StreamingChatModel {
     }
 
     public static LocalAiStreamingChatModelBuilder builder() {
-        for (LocalAiStreamingChatModelBuilderFactory factory : loadFactories(LocalAiStreamingChatModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(LocalAiStreamingChatModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            LocalAiStreamingChatModelBuilderFactory factory = (LocalAiStreamingChatModelBuilderFactory)iterator.next();
+            return (LocalAiStreamingChatModelBuilder)factory.get();
         }
         return new LocalAiStreamingChatModelBuilder();
     }
@@ -216,10 +186,6 @@ public class LocalAiStreamingChatModel implements StreamingChatModel {
         private Boolean logRequests;
         private Boolean logResponses;
         private Logger logger;
-
-        public LocalAiStreamingChatModelBuilder() {
-            // This is public so it can be extended
-        }
 
         public LocalAiStreamingChatModelBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -270,3 +236,4 @@ public class LocalAiStreamingChatModel implements StreamingChatModel {
         }
     }
 }
+

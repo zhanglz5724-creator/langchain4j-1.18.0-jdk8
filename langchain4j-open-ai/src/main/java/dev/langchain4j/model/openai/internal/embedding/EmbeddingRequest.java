@@ -1,7 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAnyGetter
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.embedding;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,30 +24,26 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonDeserialize(builder = EmbeddingRequest.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class EmbeddingRequest {
-
     @JsonProperty
     private final String model;
-
     @JsonProperty
     private final List<String> input;
-
     @JsonProperty
     private final Integer dimensions;
-
     @JsonProperty
     private final String user;
-
     @JsonProperty
     private final String encodingFormat;
-
     private final Map<String, Object> customParameters;
 
     public EmbeddingRequest(Builder builder) {
@@ -48,82 +56,68 @@ public final class EmbeddingRequest {
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public List<String> input() {
-        return input;
+        return this.input;
     }
 
     public Integer dimensions() {
-        return dimensions;
+        return this.dimensions;
     }
 
     public String user() {
-        return user;
+        return this.user;
     }
 
     public String encodingFormat() {
-        return encodingFormat;
+        return this.encodingFormat;
     }
 
     @JsonAnyGetter
     public Map<String, Object> customParameters() {
-        return customParameters;
+        return this.customParameters;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof EmbeddingRequest && equalTo((EmbeddingRequest) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof EmbeddingRequest && this.equalTo((EmbeddingRequest)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(EmbeddingRequest another) {
-        return Objects.equals(model, another.model)
-                && Objects.equals(input, another.input)
-                && Objects.equals(dimensions, another.dimensions)
-                && Objects.equals(user, another.user)
-                && Objects.equals(encodingFormat, another.encodingFormat)
-                && Objects.equals(customParameters, another.customParameters);
+        return Objects.equals(this.model, another.model) && Objects.equals(this.input, another.input) && Objects.equals(this.dimensions, another.dimensions) && Objects.equals(this.user, another.user) && Objects.equals(this.encodingFormat, another.encodingFormat) && Objects.equals(this.customParameters, another.customParameters);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(model);
-        h += (h << 5) + Objects.hashCode(input);
-        h += (h << 5) + Objects.hashCode(dimensions);
-        h += (h << 5) + Objects.hashCode(user);
-        h += (h << 5) + Objects.hashCode(encodingFormat);
-        h += (h << 5) + Objects.hashCode(customParameters);
+        h += (h << 5) + Objects.hashCode(this.model);
+        h += (h << 5) + Objects.hashCode(this.input);
+        h += (h << 5) + Objects.hashCode(this.dimensions);
+        h += (h << 5) + Objects.hashCode(this.user);
+        h += (h << 5) + Objects.hashCode(this.encodingFormat);
+        h += (h << 5) + Objects.hashCode(this.customParameters);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "EmbeddingRequest{"
-                + "model=" + model
-                + ", input=" + input
-                + ", dimensions=" + dimensions
-                + ", user=" + user
-                + ", encodingFormat=" + encodingFormat
-                + ", customParameters=" + customParameters
-                + "}";
+        return "EmbeddingRequest{model=" + this.model + ", input=" + this.input + ", dimensions=" + this.dimensions + ", user=" + this.user + ", encodingFormat=" + this.encodingFormat + ", customParameters=" + this.customParameters + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String model;
         private List<String> input;
         private Integer dimensions;
@@ -136,13 +130,13 @@ public final class EmbeddingRequest {
             return this;
         }
 
-        public Builder input(String... input) {
-            return input(asList(input));
+        public Builder input(String ... input) {
+            return this.input(Arrays.asList(input));
         }
 
         public Builder input(List<String> input) {
             if (input != null) {
-                this.input = unmodifiableList(input);
+                this.input = Collections.unmodifiableList(input);
             }
             return this;
         }
@@ -172,3 +166,4 @@ public final class EmbeddingRequest {
         }
     }
 }
+

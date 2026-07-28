@@ -1,6 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
-public interface Message {
+import dev.langchain4j.model.openai.internal.chat.Role;
 
-    Role role();
+public interface Message {
+    public Role role();
 }
+

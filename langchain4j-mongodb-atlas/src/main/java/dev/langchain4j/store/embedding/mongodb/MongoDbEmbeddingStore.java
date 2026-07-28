@@ -1,20 +1,35 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mongodb.MongoClientSettings
+ *  com.mongodb.MongoCommandException
+ *  com.mongodb.MongoDriverInformation
+ *  com.mongodb.client.AggregateIterable
+ *  com.mongodb.client.MongoClient
+ *  com.mongodb.client.MongoCollection
+ *  com.mongodb.client.MongoDatabase
+ *  com.mongodb.client.model.CreateCollectionOptions
+ *  com.mongodb.client.model.Filters
+ *  com.mongodb.client.result.InsertManyResult
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  org.bson.Document
+ *  org.bson.codecs.configuration.CodecProvider
+ *  org.bson.codecs.configuration.CodecRegistries
+ *  org.bson.codecs.configuration.CodecRegistry
+ *  org.bson.codecs.pojo.PojoCodecProvider
+ *  org.bson.conversions.Bson
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.store.embedding.mongodb;
-
-import static com.mongodb.client.model.Aggregates.*;
-import static com.mongodb.client.model.Projections.*;
-import static com.mongodb.client.model.search.SearchPath.fieldPath;
-import static com.mongodb.client.model.search.VectorSearchOptions.approximateVectorSearchOptions;
-import static dev.langchain4j.internal.Utils.*;
-import static dev.langchain4j.internal.ValidationUtils.*;
-import static dev.langchain4j.store.embedding.mongodb.IndexMapping.defaultIndexMapping;
-import static dev.langchain4j.store.embedding.mongodb.MappingUtils.*;
-import static dev.langchain4j.store.embedding.mongodb.MappingUtils.fromIndexMapping;
-import static dev.langchain4j.store.embedding.mongodb.MappingUtils.toMongoDbDocument;
-import static dev.langchain4j.store.embedding.mongodb.MongoDbMetadataFilterMapper.map;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCommandException;
@@ -25,131 +40,71 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.SearchIndexModel;
-import com.mongodb.client.model.SearchIndexType;
-import com.mongodb.client.model.search.VectorSearchOptions;
 import com.mongodb.client.result.InsertManyResult;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.filter.Filter;
+import dev.langchain4j.store.embedding.mongodb.IndexMapping;
+import dev.langchain4j.store.embedding.mongodb.MappingUtils;
+import dev.langchain4j.store.embedding.mongodb.MongoDbDocument;
+import dev.langchain4j.store.embedding.mongodb.MongoDbMatchedDocument;
+import dev.langchain4j.store.embedding.mongodb.MongoDbMetadataFilterMapper;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import java.util.Collections;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecProvider;
+import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Represents a <a href="https://www.mongodb.com/">MongoDB</a> indexed collection as an embedding store.
- * <p>
- * More <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/">info</a>
- * on using MongoDb vector search.
- * <p>
- * <a href="https://www.mongodb.com/developer/products/atlas/semantic-search-mongodb-atlas-vector-search/">tutorial</a>
- * how to use vector search with MongoDB Atlas (great starting point).
- * <p>
- * To deploy a local instance of Atlas, see
- * <a href="https://www.mongodb.com/docs/atlas/cli/current/atlas-cli-deploy-local/">this guide</a>.
- * <p>
- * If you are using a free tier, {@code #createIndex = true} might not be supported,
- * so you will need to create an index manually.
- * In your Atlas web console go to: DEPLOYMENT -&gt; Database -&gt; {your cluster} -&gt; Atlas Search tab
- * -&gt; Create Index Search -&gt; "JSON Editor" under "Atlas Vector Search" (not "Atlas Search") -&gt; Next
- * -&gt; Select your database in the left pane -&gt; Insert the following JSON into the right pane
- * (set "numDimensions" and additional metadata fields to desired values)
- * <pre>
- * {
- *   "fields" : [ {
- *     "type" : "vector",
- *     "path" : "embedding",
- *     "numDimensions" : 384,
- *     "similarity" : "cosine"
- *   }, {
- *     "type" : "filter",
- *     "path" : "metadata.test-key"
- *   } ]
- * }
- * </pre>
- * -&gt; Next -&gt; Create Search Index
- */
-public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
-
-    /**
-     * Reflective reference to MongoClient.appendMetadata method (available since driver version 5.6.0).
-     */
+public class MongoDbEmbeddingStore
+implements EmbeddingStore<TextSegment> {
     private static Method APPEND_METADATA;
-
-    static {
-        try {
-            APPEND_METADATA = MongoClient.class.getMethod("appendMetadata", MongoDriverInformation.class);
-        } catch (NoSuchMethodException e) {
-            // Method doesn't exist (older driver version)
-        }
-    }
-
     private static final int SECONDS_TO_WAIT_FOR_INDEX = 20;
-
-    private static final Logger log = LoggerFactory.getLogger(MongoDbEmbeddingStore.class);
-
+    private static final Logger log;
     private final MongoCollection<MongoDbDocument> collection;
-
+    private final MongoDatabase database;
     private final String indexName;
     private final long maxResultRatio;
     private final Bson globalPrefilter;
 
-    public MongoDbEmbeddingStore(
-            MongoClient mongoClient,
-            String databaseName,
-            String collectionName,
-            String indexName,
-            Long maxResultRatio,
-            CreateCollectionOptions createCollectionOptions,
-            Bson filter,
-            IndexMapping indexMapping,
-            Boolean createIndex) {
-        mongoClient = ensureNotNull(mongoClient, "mongoClient");
-        databaseName = ensureNotNull(databaseName, "databaseName");
-        collectionName = ensureNotNull(collectionName, "collectionName");
-        createIndex = getOrDefault(createIndex, false);
-        this.indexName = ensureNotNull(indexName, "indexName");
-        this.maxResultRatio = getOrDefault(maxResultRatio, 10L);
-
-        CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder()
-                .register(MongoDbDocument.class, MongoDbMatchedDocument.class)
-                .build());
-        CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
-        appendMongoClientMetadata(mongoClient);
-
-        // create collection if not exist
+    public MongoDbEmbeddingStore(MongoClient mongoClient, String databaseName, String collectionName, String indexName, Long maxResultRatio, CreateCollectionOptions createCollectionOptions, Bson filter, IndexMapping indexMapping, Boolean createIndex) {
+        mongoClient = (MongoClient)ValidationUtils.ensureNotNull((Object)mongoClient, (String)"mongoClient");
+        databaseName = (String)ValidationUtils.ensureNotNull((Object)databaseName, (String)"databaseName");
+        collectionName = (String)ValidationUtils.ensureNotNull((Object)collectionName, (String)"collectionName");
+        createIndex = (Boolean)Utils.getOrDefault((Object)createIndex, (Object)false);
+        this.indexName = (String)ValidationUtils.ensureNotNull((Object)indexName, (String)"indexName");
+        this.maxResultRatio = (Long)Utils.getOrDefault((Object)maxResultRatio, (Object)10L);
+        CodecRegistry pojoCodecRegistry = CodecRegistries.fromProviders((CodecProvider[])new CodecProvider[]{PojoCodecProvider.builder().register(new Class[]{MongoDbDocument.class, MongoDbMatchedDocument.class}).build()});
+        CodecRegistry codecRegistry = CodecRegistries.fromRegistries((CodecRegistry[])new CodecRegistry[]{MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry});
+        MongoDbEmbeddingStore.appendMongoClientMetadata(mongoClient);
         MongoDatabase database = mongoClient.getDatabase(databaseName);
-        if (!isCollectionExist(database, collectionName)) {
-            createCollection(
-                    database, collectionName, getOrDefault(createCollectionOptions, new CreateCollectionOptions()));
+        if (!this.isCollectionExist(database, collectionName)) {
+            this.createCollection(database, collectionName, (CreateCollectionOptions)Utils.getOrDefault((Object)createCollectionOptions, (Object)new CreateCollectionOptions()));
         }
-
-        this.collection =
-                database.getCollection(collectionName, MongoDbDocument.class).withCodecRegistry(codecRegistry);
+        this.collection = database.getCollection(collectionName, MongoDbDocument.class).withCodecRegistry(codecRegistry);
+        this.database = database;
         this.globalPrefilter = filter;
-
-        if (!indexExists(this.indexName)) {
-            if (createIndex) {
-                createIndex(this.indexName, getOrDefault(indexMapping, defaultIndexMapping()));
+        if (!this.indexExists(this.indexName)) {
+            if (createIndex.booleanValue()) {
+                this.createIndex(this.indexName, (IndexMapping)Utils.getOrDefault((Object)indexMapping, (Object)IndexMapping.defaultIndexMapping()));
             } else {
-                throw new RuntimeException(String.format(
-                        "Search Index '%s' not found and must be created via createIndex(true), or manually as a vector search index (not a regular index), via the createSearchIndexes command",
-                        this.indexName));
+                throw new RuntimeException(String.format("Search Index '%s' not found and must be created via createIndex(true), or manually as a vector search index (not a regular index), via the createSearchIndexes command", this.indexName));
             }
         }
     }
@@ -158,8 +113,169 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         return new Builder();
     }
 
-    public static class Builder {
+    public String add(Embedding embedding) {
+        String id = Utils.randomUUID();
+        this.add(id, embedding);
+        return id;
+    }
 
+    public void add(String id, Embedding embedding) {
+        this.addInternal(id, embedding, null);
+    }
+
+    public String add(Embedding embedding, TextSegment textSegment) {
+        String id = Utils.randomUUID();
+        this.addInternal(id, embedding, textSegment);
+        return id;
+    }
+
+    public List<String> addAll(List<Embedding> embeddings) {
+        List<String> ids = embeddings.stream().map(ignored -> Utils.randomUUID()).collect(Collectors.toList());
+        this.addAll(ids, embeddings, null);
+        return ids;
+    }
+
+    public void removeAll() {
+        this.collection.deleteMany(Filters.empty());
+    }
+
+    public void removeAll(Collection<String> ids) {
+        ValidationUtils.ensureNotEmpty(ids, (String)"ids");
+        this.collection.deleteMany(Filters.in((String)"_id", ids));
+    }
+
+    public void removeAll(Filter filter) {
+        ValidationUtils.ensureNotNull((Object)filter, (String)"filter");
+        this.collection.deleteMany(MongoDbMetadataFilterMapper.map(filter));
+    }
+
+    public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
+        List queryVector = request.queryEmbedding().vectorAsList().stream().map(Float::doubleValue).collect(Collectors.toList());
+        long numCandidates = (long)request.maxResults() * this.maxResultRatio;
+        Bson postFilter = null;
+        if (request.minScore() > 0.0) {
+            postFilter = Filters.gte((String)"score", (Object)request.minScore());
+        }
+        if (request.filter() != null) {
+            Bson newFilter = MongoDbMetadataFilterMapper.map(request.filter());
+            postFilter = postFilter == null ? newFilter : Filters.and((Bson[])new Bson[]{postFilter, newFilter});
+        }
+        ArrayList<Document> pipeline = new ArrayList<Document>();
+        Document vectorSearchStage = new Document("$vectorSearch", (Object)new Document().append("index", (Object)this.indexName).append("path", (Object)"embedding").append("queryVector", queryVector).append("numCandidates", (Object)numCandidates).append("limit", (Object)request.maxResults()));
+        if (this.globalPrefilter != null) {
+            ((Document)vectorSearchStage.get((Object)"$vectorSearch", Document.class)).append("filter", (Object)this.globalPrefilter);
+        }
+        pipeline.add(vectorSearchStage);
+        pipeline.add(new Document("$project", (Object)new Document().append("embedding", (Object)1).append("metadata", (Object)1).append("text", (Object)1).append("score", (Object)new Document("$meta", (Object)"vectorSearchScore"))));
+        if (postFilter != null) {
+            pipeline.add(new Document("$match", (Object)postFilter));
+        }
+        try {
+            AggregateIterable results = this.collection.aggregate(pipeline, MongoDbMatchedDocument.class);
+            List result = StreamSupport.stream(results.spliterator(), false).map(MappingUtils::toEmbeddingMatch).collect(Collectors.toList());
+            return new EmbeddingSearchResult(result);
+        }
+        catch (MongoCommandException e) {
+            log.error("Error in MongoDBEmbeddingStore.search", (Throwable)e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addInternal(String id, Embedding embedding, TextSegment embedded) {
+        this.addAll(Collections.singletonList(id), Collections.singletonList(embedding), embedded == null ? null : Collections.singletonList(embedded));
+    }
+
+    public void addAll(List<String> ids, List<Embedding> embeddings, List<TextSegment> embedded) {
+        if (Utils.isNullOrEmpty(ids) || Utils.isNullOrEmpty(embeddings)) {
+            log.info("do not add empty embeddings to MongoDB Atlas");
+            return;
+        }
+        ValidationUtils.ensureTrue((ids.size() == embeddings.size() ? 1 : 0) != 0, (String)"ids size is not equal to embeddings size");
+        ValidationUtils.ensureTrue((embedded == null || embeddings.size() == embedded.size() ? 1 : 0) != 0, (String)"embeddings size is not equal to embedded size");
+        ArrayList<MongoDbDocument> documents = new ArrayList<MongoDbDocument>(ids.size());
+        for (int i = 0; i < ids.size(); ++i) {
+            String id = ids.get(i);
+            MongoDbDocument document = MappingUtils.toMongoDbDocument(id, embeddings.get(i), embedded == null ? null : embedded.get(i));
+            documents.add(document);
+        }
+        InsertManyResult result = this.collection.insertMany(documents);
+        if (!result.wasAcknowledged()) {
+            String errMsg = String.format("[MongoDbEmbeddingStore] Add document failed, Document=%s", documents);
+            log.error(errMsg);
+            throw new RuntimeException(errMsg);
+        }
+    }
+
+    private boolean isCollectionExist(MongoDatabase database, String collectionName) {
+        return StreamSupport.stream(database.listCollectionNames().spliterator(), false).anyMatch(collectionName::equals);
+    }
+
+    private void createCollection(MongoDatabase database, String collectionName, CreateCollectionOptions createCollectionOptions) {
+        database.createCollection(collectionName, createCollectionOptions);
+    }
+
+    private boolean indexExists(String indexName) {
+        Document indexRecord = MongoDbEmbeddingStore.indexRecord(this.collection, indexName);
+        return indexRecord != null && !indexRecord.getString((Object)"status").equals("DOES_NOT_EXIST");
+    }
+
+    private static Document indexRecord(MongoCollection<MongoDbDocument> collection, String indexName) {
+        return StreamSupport.stream(collection.listSearchIndexes().spliterator(), false).filter(index -> indexName.equals(index.getString((Object)"name"))).findAny().orElse(null);
+    }
+
+    private void createIndex(String indexName, IndexMapping indexMapping) {
+        Document indexDefinition = new Document("name", (Object)indexName).append("type", (Object)"vectorSearch").append("definition", (Object)MappingUtils.fromIndexMapping(indexMapping));
+        Document cmd = new Document("createSearchIndexes", (Object)this.collection.getNamespace().getCollectionName()).append("indexes", Collections.singletonList(indexDefinition));
+        this.database.runCommand((Bson)cmd);
+        MongoDbEmbeddingStore.waitForIndex(this.collection, indexName);
+    }
+
+    static void waitForIndex(MongoCollection<MongoDbDocument> collection, String indexName) {
+        long startTime = System.nanoTime();
+        long timeoutNanos = TimeUnit.SECONDS.toNanos(20L);
+        while (System.nanoTime() - startTime < timeoutNanos) {
+            Document indexRecord = MongoDbEmbeddingStore.indexRecord(collection, indexName);
+            if (indexRecord != null) {
+                if ("FAILED".equals(indexRecord.getString((Object)"status"))) {
+                    throw new RuntimeException("Search index has failed status.");
+                }
+                if (indexRecord.getBoolean((Object)"queryable").booleanValue()) {
+                    return;
+                }
+            }
+            try {
+                Thread.sleep(100L);
+            }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
+        }
+        log.warn("Index {} was not created or did not exit INITIAL_SYNC within {} seconds", (Object)indexName, (Object)20);
+    }
+
+    private static void appendMongoClientMetadata(MongoClient mongoClient) {
+        if (APPEND_METADATA != null) {
+            try {
+                APPEND_METADATA.invoke(mongoClient, MongoDriverInformation.builder().driverName("langchain4j-mongodb").build());
+            }
+            catch (IllegalAccessException | InvocationTargetException e) {
+                log.warn("langchain4j-mongodb metadata could not be added to MongoClient");
+            }
+        }
+    }
+
+    static {
+        try {
+            APPEND_METADATA = MongoClient.class.getMethod("appendMetadata", MongoDriverInformation.class);
+        }
+        catch (NoSuchMethodException noSuchMethodException) {
+            // empty catch block
+        }
+        log = LoggerFactory.getLogger(MongoDbEmbeddingStore.class);
+    }
+
+    public static class Builder {
         private MongoClient mongoClient;
         private String databaseName;
         private String collectionName;
@@ -168,17 +284,8 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         private CreateCollectionOptions createCollectionOptions;
         private Bson filter;
         private IndexMapping indexMapping;
-        /**
-         * Whether MongoDB Atlas is deployed in cloud
-         *
-         * <p>if true, you need to create index in <a href="https://cloud.mongodb.com/">MongoDB Atlas</a></p>
-         * <p>if false, {@link MongoDbEmbeddingStore} will create collection and index automatically</p>
-         */
         private Boolean createIndex;
 
-        /**
-         * Build Mongo Client, Please close the client to release resources after usage
-         */
         public Builder fromClient(MongoClient mongoClient) {
             this.mongoClient = mongoClient;
             return this;
@@ -209,248 +316,24 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
             return this;
         }
 
-        /**
-         * Document query filter, all fields included in filter must be contained in {@link IndexMapping#metadataFieldNames}
-         *
-         * <p>For example:</p>
-         *
-         * <ul>
-         *     <li>AND filter: Filters.and(Filters.in("type", asList("TXT", "md")), Filters.eqFull("test-key", "test-value"))</li>
-         *     <li>OR filter: Filters.or(Filters.in("type", asList("TXT", "md")), Filters.eqFull("test-key", "test-value"))</li>
-         * </ul>
-         *
-         * @param filter document query filter
-         * @return builder
-         */
         public Builder filter(Bson filter) {
             this.filter = filter;
             return this;
         }
 
-        /**
-         * set MongoDB search index fields mapping
-         *
-         * <p>if {@link Builder#createIndex} is true, then indexMapping not work</p>
-         *
-         * @param indexMapping MongoDB search index fields mapping
-         * @return builder
-         */
         public Builder indexMapping(IndexMapping indexMapping) {
             this.indexMapping = indexMapping;
             return this;
         }
 
-        /**
-         * Set whether in production mode, production mode will not create index automatically
-         *
-         * <p>default value is false</p>
-         *
-         * @param createIndex whether in production mode
-         * @return builder
-         */
         public Builder createIndex(Boolean createIndex) {
             this.createIndex = createIndex;
             return this;
         }
 
         public MongoDbEmbeddingStore build() {
-            return new MongoDbEmbeddingStore(
-                    mongoClient,
-                    databaseName,
-                    collectionName,
-                    indexName,
-                    maxResultRatio,
-                    createCollectionOptions,
-                    filter,
-                    indexMapping,
-                    createIndex);
-        }
-    }
-
-    @Override
-    public String add(Embedding embedding) {
-        String id = randomUUID();
-        add(id, embedding);
-        return id;
-    }
-
-    @Override
-    public void add(String id, Embedding embedding) {
-        addInternal(id, embedding, null);
-    }
-
-    @Override
-    public String add(Embedding embedding, TextSegment textSegment) {
-        String id = randomUUID();
-        addInternal(id, embedding, textSegment);
-        return id;
-    }
-
-    @Override
-    public List<String> addAll(List<Embedding> embeddings) {
-        List<String> ids = embeddings.stream().map(ignored -> randomUUID()).collect(toList());
-        addAll(ids, embeddings, null);
-        return ids;
-    }
-
-    @Override
-    public void removeAll() {
-        collection.deleteMany(Filters.empty());
-    }
-
-    @Override
-    public void removeAll(Collection<String> ids) {
-        ensureNotEmpty(ids, "ids");
-        collection.deleteMany(Filters.in("_id", ids));
-    }
-
-    @Override
-    public void removeAll(Filter filter) {
-        ensureNotNull(filter, "filter");
-        collection.deleteMany(map(filter));
-    }
-
-    @Override
-    public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
-        List<Double> queryVector = request.queryEmbedding().vectorAsList().stream()
-                .map(Float::doubleValue)
-                .collect(toList());
-        long numCandidates = request.maxResults() * maxResultRatio;
-
-        Bson postFilter = null;
-        if (request.minScore() > 0) {
-            postFilter = Filters.gte("score", request.minScore());
-        }
-        if (request.filter() != null) {
-            Bson newFilter = map(request.filter());
-            postFilter = postFilter == null ? newFilter : Filters.and(postFilter, newFilter);
-        }
-
-        VectorSearchOptions vectorSearchOptions = this.globalPrefilter == null
-                ? approximateVectorSearchOptions(numCandidates)
-                : approximateVectorSearchOptions(numCandidates).filter(this.globalPrefilter);
-
-        ArrayList<Bson> pipeline = new ArrayList<>();
-        pipeline.add(vectorSearch(
-                fieldPath("embedding"), queryVector, indexName, request.maxResults(), vectorSearchOptions));
-        pipeline.add(project(fields(metaVectorSearchScore("score"), include("embedding", "metadata", "text"))));
-        if (postFilter != null) {
-            Bson match = match(postFilter);
-            pipeline.add(match);
-        }
-
-        try {
-            AggregateIterable<MongoDbMatchedDocument> results =
-                    collection.aggregate(pipeline, MongoDbMatchedDocument.class);
-            List<EmbeddingMatch<TextSegment>> result = StreamSupport.stream(results.spliterator(), false)
-                    .map(MappingUtils::toEmbeddingMatch)
-                    .collect(toList());
-            return new EmbeddingSearchResult<>(result);
-        } catch (MongoCommandException e) {
-            log.error("Error in MongoDBEmbeddingStore.search", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void addInternal(String id, Embedding embedding, TextSegment embedded) {
-        addAll(singletonList(id), singletonList(embedding), embedded == null ? null : singletonList(embedded));
-    }
-
-    @Override
-    public void addAll(List<String> ids, List<Embedding> embeddings, List<TextSegment> embedded) {
-        if (isNullOrEmpty(ids) || isNullOrEmpty(embeddings)) {
-            log.info("do not add empty embeddings to MongoDB Atlas");
-            return;
-        }
-        ensureTrue(ids.size() == embeddings.size(), "ids size is not equal to embeddings size");
-        ensureTrue(
-                embedded == null || embeddings.size() == embedded.size(),
-                "embeddings size is not equal to embedded size");
-
-        List<MongoDbDocument> documents = new ArrayList<>(ids.size());
-        for (int i = 0; i < ids.size(); i++) {
-            String id = ids.get(i);
-            MongoDbDocument document =
-                    toMongoDbDocument(id, embeddings.get(i), embedded == null ? null : embedded.get(i));
-            documents.add(document);
-        }
-
-        InsertManyResult result = collection.insertMany(documents);
-        if (!result.wasAcknowledged()) {
-            String errMsg = String.format("[MongoDbEmbeddingStore] Add document failed, Document=%s", documents);
-            log.error(errMsg);
-            throw new RuntimeException(errMsg);
-        }
-    }
-
-    private boolean isCollectionExist(MongoDatabase database, String collectionName) {
-        return StreamSupport.stream(database.listCollectionNames().spliterator(), false)
-                .anyMatch(collectionName::equals);
-    }
-
-    private void createCollection(
-            MongoDatabase database, String collectionName, CreateCollectionOptions createCollectionOptions) {
-        database.createCollection(collectionName, createCollectionOptions);
-    }
-
-    private boolean indexExists(String indexName) {
-        Document indexRecord = indexRecord(collection, indexName);
-        return indexRecord != null && !indexRecord.getString("status").equals("DOES_NOT_EXIST");
-    }
-
-    private static Document indexRecord(MongoCollection<MongoDbDocument> collection, String indexName) {
-        return StreamSupport.stream(collection.listSearchIndexes().spliterator(), false)
-                .filter(index -> indexName.equals(index.getString("name")))
-                .findAny()
-                .orElse(null);
-    }
-
-    private void createIndex(String indexName, IndexMapping indexMapping) {
-        collection.createSearchIndexes(Collections.singletonList(new SearchIndexModel(indexName, fromIndexMapping(indexMapping), SearchIndexType.vectorSearch())));
-
-        waitForIndex(collection, indexName);
-    }
-
-    static void waitForIndex(MongoCollection<MongoDbDocument> collection, String indexName) {
-        long startTime = System.nanoTime();
-        long timeoutNanos = TimeUnit.SECONDS.toNanos(SECONDS_TO_WAIT_FOR_INDEX);
-        while (System.nanoTime() - startTime < timeoutNanos) {
-            Document indexRecord = indexRecord(collection, indexName);
-            if (indexRecord != null) {
-                if ("FAILED".equals(indexRecord.getString("status"))) {
-                    throw new RuntimeException("Search index has failed status.");
-                }
-                if (indexRecord.getBoolean("queryable")) {
-                    return;
-                }
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
-            }
-        }
-        log.warn(
-                "Index {} was not created or did not exit INITIAL_SYNC within {} seconds",
-                indexName,
-                SECONDS_TO_WAIT_FOR_INDEX);
-    }
-
-    private static void appendMongoClientMetadata(final MongoClient mongoClient) {
-        // append metadata to mongo client
-        // in case when driver version is lower than 5.6.0, appendMetadata method does not exist
-        if (APPEND_METADATA != null) {
-            try {
-                APPEND_METADATA.invoke(
-                        mongoClient,
-                        MongoDriverInformation.builder()
-                                .driverName("langchain4j-mongodb")
-                                .build());
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                // ignore exception, failed to append metadata should not block normal usage
-                log.warn("langchain4j-mongodb metadata could not be added to MongoClient");
-            }
+            return new MongoDbEmbeddingStore(this.mongoClient, this.databaseName, this.collectionName, this.indexName, this.maxResultRatio, this.createCollectionOptions, this.filter, this.indexMapping, this.createIndex);
         }
     }
 }
+

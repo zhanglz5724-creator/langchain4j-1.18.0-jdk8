@@ -1,17 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.exception.ToolArgumentsException
+ *  dev.langchain4j.exception.ToolExecutionException
+ *  dev.langchain4j.internal.Json
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.service.tool.ToolExecutor
+ */
 package dev.langchain4j.skills;
-
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.Utils.toBase64;
 
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.exception.ToolArgumentsException;
 import dev.langchain4j.exception.ToolExecutionException;
 import dev.langchain4j.internal.Json;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.service.tool.ToolExecutor;
 import java.util.Map;
 
-abstract class AbstractSkillToolExecutor implements ToolExecutor {
-
+abstract class AbstractSkillToolExecutor
+implements ToolExecutor {
     protected final boolean throwToolArgumentsExceptions;
 
     protected AbstractSkillToolExecutor(boolean throwToolArgumentsExceptions) {
@@ -20,36 +29,37 @@ abstract class AbstractSkillToolExecutor implements ToolExecutor {
 
     protected Map<String, Object> parseArguments(String json) {
         try {
-            return Json.fromJson(json, Map.class);
-        } catch (Exception e) {
-            String message = String.format("Failed to parse tool arguments: '%s' (base64: '%s')", json, toBase64(json));
-            throwException(message, e);
-            return null; // unreachable
+            return (Map)Json.fromJson((String)json, Map.class);
+        }
+        catch (Exception e) {
+            String message = String.format("Failed to parse tool arguments: '%s' (base64: '%s')", json, Utils.toBase64((String)json));
+            this.throwException(message, e);
+            return null;
         }
     }
 
     protected String getRequiredArgument(String argumentName, Map<String, Object> arguments) {
-        Object value = isNullOrEmpty(arguments) ? null : arguments.get(argumentName);
+        Object value;
+        Object object = value = Utils.isNullOrEmpty(arguments) ? null : arguments.get(argumentName);
         if (value == null) {
-            throwException(String.format("Missing required tool argument '%s'", argumentName));
+            this.throwException(String.format("Missing required tool argument '%s'", argumentName));
         }
         return value.toString();
     }
 
     protected void throwException(String message) {
-        throwException(message, null);
+        this.throwException(message, null);
     }
 
     protected void throwException(String message, Exception e) {
-        if (throwToolArgumentsExceptions) {
-            throw e == null ? new ToolArgumentsException(message) : new ToolArgumentsException(message, e);
-        } else {
-            throw e == null ? new ToolExecutionException(message) : new ToolExecutionException(message, e);
+        if (this.throwToolArgumentsExceptions) {
+            throw e == null ? new ToolArgumentsException(message) : new ToolArgumentsException(message, (Throwable)e);
         }
+        throw e == null ? new ToolExecutionException(message) : new ToolExecutionException(message, (Throwable)e);
     }
 
-    @Override
     public String execute(ToolExecutionRequest request, Object memoryId) {
         throw new IllegalStateException("executeWithContext must be called instead");
     }
 }
+

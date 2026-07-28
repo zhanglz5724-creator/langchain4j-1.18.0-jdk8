@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.googleai;
 
 enum GeminiType {
@@ -9,8 +12,9 @@ enum GeminiType {
     OBJECT,
     NULL;
 
-    @Override
+
     public String toString() {
         return this.name().toLowerCase();
     }
 }
+

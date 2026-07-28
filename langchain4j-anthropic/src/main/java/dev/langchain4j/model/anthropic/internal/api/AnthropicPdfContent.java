@@ -1,18 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicMessageContent;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicPdfContentSource;
 import java.util.Objects;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-public class AnthropicPdfContent extends AnthropicMessageContent {
-
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class AnthropicPdfContent
+extends AnthropicMessageContent {
     public AnthropicPdfContentSource source;
 
     public AnthropicPdfContent(AnthropicPdfContentSource source) {
@@ -39,20 +49,26 @@ public class AnthropicPdfContent extends AnthropicMessageContent {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        AnthropicPdfContent that = (AnthropicPdfContent) o;
-        return Objects.equals(source, that.source);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AnthropicPdfContent that = (AnthropicPdfContent)o;
+        return Objects.equals(this.source, that.source);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), source);
+        return Objects.hash(super.hashCode(), this.source);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicPdfContent{" + "source=" + source + '}';
+        return "AnthropicPdfContent{source=" + this.source + '}';
     }
 }
+

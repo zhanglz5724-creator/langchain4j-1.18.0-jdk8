@@ -1,11 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.exception.LangChain4jException
+ */
 package dev.langchain4j.service;
 
 import dev.langchain4j.exception.LangChain4jException;
 
-import static java.lang.String.format;
-
-public class IllegalConfigurationException extends LangChain4jException {
-
+public class IllegalConfigurationException
+extends LangChain4jException {
     public IllegalConfigurationException(String message) {
         super(message);
     }
@@ -14,7 +18,8 @@ public class IllegalConfigurationException extends LangChain4jException {
         return new IllegalConfigurationException(message);
     }
 
-    public static IllegalConfigurationException illegalConfiguration(String format, Object... args) {
-        return new IllegalConfigurationException(format(format, args));
+    public static IllegalConfigurationException illegalConfiguration(String format, Object ... args) {
+        return new IllegalConfigurationException(String.format(format, args));
     }
 }
+

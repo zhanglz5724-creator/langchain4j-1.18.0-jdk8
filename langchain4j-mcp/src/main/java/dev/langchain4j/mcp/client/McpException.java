@@ -1,12 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.exception.LangChain4jException
+ */
 package dev.langchain4j.mcp.client;
 
 import dev.langchain4j.exception.LangChain4jException;
 
-/**
- * A business exception raised over the MCP protocol
- */
-public class McpException extends LangChain4jException {
-
+public class McpException
+extends LangChain4jException {
     private final int errorCode;
     private final String errorMessage;
 
@@ -17,10 +20,11 @@ public class McpException extends LangChain4jException {
     }
 
     public int errorCode() {
-        return errorCode;
+        return this.errorCode;
     }
 
     public String errorMessage() {
-        return errorMessage;
+        return this.errorMessage;
     }
 }
+

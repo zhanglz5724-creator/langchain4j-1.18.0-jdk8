@@ -1,30 +1,33 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.JsonNode
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import dev.langchain4j.mcp.registryclient.model.McpOfficialMeta;
 import java.util.Map;
 
 public class McpMeta {
-
-    @JsonProperty("io.modelcontextprotocol.registry/official")
+    @JsonProperty(value="io.modelcontextprotocol.registry/official")
     private McpOfficialMeta official;
-
-    @JsonProperty("io.modelcontextprotocol.registry/publisher-provided")
+    @JsonProperty(value="io.modelcontextprotocol.registry/publisher-provided")
     private Map<String, JsonNode> publisherProvided;
 
     public McpOfficialMeta getOfficial() {
-        return official;
+        return this.official;
     }
 
     public Map<String, JsonNode> getPublisherProvided() {
-        return publisherProvided;
+        return this.publisherProvided;
     }
 
-    @Override
     public String toString() {
-        return "McpMeta{" +
-                "official=" + official +
-                ", publisherProvided=" + publisherProvided +
-                '}';
+        return "McpMeta{official=" + this.official + ", publisherProvided=" + this.publisherProvided + '}';
     }
 }
+

@@ -1,12 +1,54 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.auth.oauth2.GoogleCredentials
+ *  com.google.genai.Client
+ *  com.google.genai.types.BatchJob
+ *  com.google.genai.types.BatchJobDestination
+ *  com.google.genai.types.BatchJobSource
+ *  com.google.genai.types.Blob
+ *  com.google.genai.types.CancelBatchJobConfig
+ *  com.google.genai.types.Content
+ *  com.google.genai.types.CreateBatchJobConfig
+ *  com.google.genai.types.DeleteBatchJobConfig
+ *  com.google.genai.types.File
+ *  com.google.genai.types.GenerateContentConfig
+ *  com.google.genai.types.GenerateContentConfig$Builder
+ *  com.google.genai.types.GenerateContentResponse
+ *  com.google.genai.types.GetBatchJobConfig
+ *  com.google.genai.types.ImageConfig
+ *  com.google.genai.types.ImageConfig$Builder
+ *  com.google.genai.types.InlinedRequest
+ *  com.google.genai.types.InlinedResponse
+ *  com.google.genai.types.JobError
+ *  com.google.genai.types.JobState
+ *  com.google.genai.types.JobState$Known
+ *  com.google.genai.types.Part
+ *  com.google.genai.types.SafetySetting
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.batch.BatchError
+ *  dev.langchain4j.model.batch.BatchItemResult
+ *  dev.langchain4j.model.batch.BatchPage
+ *  dev.langchain4j.model.batch.BatchPagination
+ *  dev.langchain4j.model.batch.BatchRequest
+ *  dev.langchain4j.model.batch.BatchResponse
+ *  dev.langchain4j.model.batch.BatchResponse$Builder
+ *  dev.langchain4j.model.batch.BatchState
+ *  dev.langchain4j.model.image.BatchImageModel
+ *  dev.langchain4j.model.output.Response
+ */
 package dev.langchain4j.model.google.genai;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
 import com.google.genai.types.BatchJob;
+import com.google.genai.types.BatchJobDestination;
 import com.google.genai.types.BatchJobSource;
 import com.google.genai.types.Blob;
 import com.google.genai.types.CancelBatchJobConfig;
@@ -19,12 +61,17 @@ import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.GetBatchJobConfig;
 import com.google.genai.types.ImageConfig;
 import com.google.genai.types.InlinedRequest;
+import com.google.genai.types.InlinedResponse;
+import com.google.genai.types.JobError;
 import com.google.genai.types.JobState;
-import com.google.genai.types.JobState.Known;
 import com.google.genai.types.Part;
 import com.google.genai.types.SafetySetting;
 import dev.langchain4j.Experimental;
 import dev.langchain4j.data.image.Image;
+import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.batch.BatchError;
 import dev.langchain4j.model.batch.BatchItemResult;
 import dev.langchain4j.model.batch.BatchPage;
@@ -32,6 +79,9 @@ import dev.langchain4j.model.batch.BatchPagination;
 import dev.langchain4j.model.batch.BatchRequest;
 import dev.langchain4j.model.batch.BatchResponse;
 import dev.langchain4j.model.batch.BatchState;
+import dev.langchain4j.model.google.genai.GoogleGenAiBatchUtils;
+import dev.langchain4j.model.google.genai.GoogleGenAiClientFactory;
+import dev.langchain4j.model.google.genai.GoogleGenAiExceptionMapper;
 import dev.langchain4j.model.image.BatchImageModel;
 import dev.langchain4j.model.output.Response;
 import java.time.Duration;
@@ -40,22 +90,19 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
-/**
- * Provides an interface for interacting with the Google GenAI Batch API for Image generation models.
- */
 @Experimental
-public final class GoogleGenAiBatchImageModel implements BatchImageModel {
-
+public final class GoogleGenAiBatchImageModel
+implements BatchImageModel {
     private final Client client;
     private final String modelName;
     private final Integer maxRetries;
-
     private final List<SafetySetting> safetySettings;
     private final String aspectRatio;
     private final String imageSize;
@@ -63,231 +110,123 @@ public final class GoogleGenAiBatchImageModel implements BatchImageModel {
     private final Map<String, String> labels;
 
     private GoogleGenAiBatchImageModel(Builder builder) {
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.maxRetries = getOrDefault(builder.maxRetries, 3);
-        this.safetySettings = builder.safetySettings != null ? new ArrayList<>(builder.safetySettings) : null;
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)3);
+        this.safetySettings = builder.safetySettings != null ? new ArrayList(builder.safetySettings) : null;
         this.aspectRatio = builder.aspectRatio;
         this.imageSize = builder.imageSize;
         this.personGeneration = builder.personGeneration;
-        this.labels = builder.labels != null ? new HashMap<>(builder.labels) : null;
-
-        this.client = builder.client != null
-                ? builder.client
-                : GoogleGenAiClientFactory.createClient(
-                        builder.apiKey,
-                        builder.googleCredentials,
-                        builder.projectId,
-                        builder.location,
-                        builder.timeout,
-                        builder.customHeaders,
-                        builder.apiEndpoint);
+        this.labels = builder.labels != null ? new HashMap(builder.labels) : null;
+        this.client = builder.client != null ? builder.client : GoogleGenAiClientFactory.createClient(builder.apiKey, builder.googleCredentials, builder.projectId, builder.location, builder.timeout, builder.customHeaders, builder.apiEndpoint);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public BatchResponse<Response<Image>> submit(BatchRequest<String> request) {
-        String timestamp = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
-                .withZone(ZoneId.systemDefault())
-                .format(Instant.now());
-        return submit("batch-image-job-" + timestamp, request.requests());
+        String timestamp = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss").withZone(ZoneId.systemDefault()).format(Instant.now());
+        return this.submit("batch-image-job-" + timestamp, request.requests());
     }
 
-    @Override
     public BatchResponse<Response<Image>> retrieve(String batchId) {
-        BatchJob batchJob =
-                client.batches.get(batchId, GetBatchJobConfig.builder().build());
-        return processResponse(batchJob);
+        BatchJob batchJob = this.client.batches.get(batchId, GetBatchJobConfig.builder().build());
+        return this.processResponse(batchJob);
     }
 
-    @Override
     public void cancel(String batchId) {
-        client.batches.cancel(batchId, CancelBatchJobConfig.builder().build());
+        this.client.batches.cancel(batchId, CancelBatchJobConfig.builder().build());
     }
 
-    @Override
     public BatchPage<Response<Image>> list(BatchPagination pagination) {
         Integer pageSize = pagination != null ? pagination.pageSize() : null;
         String pageToken = pagination != null ? pagination.pageToken() : null;
-        return GoogleGenAiBatchUtils.listBatchJobs(client, pageSize, pageToken, this::processResponse);
+        return GoogleGenAiBatchUtils.listBatchJobs(this.client, pageSize, pageToken, this::processResponse);
     }
 
-    /**
-     * Creates and enqueues a batch of image generation requests for asynchronous processing.
-     *
-     * @param displayName a user-defined name for the batch
-     * @param prompts     a list of image generation prompt strings to be processed in the batch
-     * @return a {@link BatchResponse} representing the initial state of the batch operation
-     */
     public BatchResponse<Response<Image>> submit(String displayName, List<String> prompts) {
-        List<InlinedRequest> inlinedRequests = prompts.stream()
-                .map(prompt -> createInlinedRequest(new ImageGenerationRequest(prompt)))
-                .collect(Collectors.toList());
-
-        BatchJobSource src =
-                BatchJobSource.builder().inlinedRequests(inlinedRequests).build();
-
-        CreateBatchJobConfig config =
-                CreateBatchJobConfig.builder().displayName(displayName).build();
-
-        BatchJob batchJob = withRetryMappingExceptions(
-                () -> client.batches.create(modelName, src, config), maxRetries, GoogleGenAiExceptionMapper.INSTANCE);
-        return processResponse(batchJob);
+        List inlinedRequests = prompts.stream().map(prompt -> this.createInlinedRequest(new ImageGenerationRequest((String)prompt))).collect(Collectors.toList());
+        BatchJobSource src = BatchJobSource.builder().inlinedRequests(inlinedRequests).build();
+        CreateBatchJobConfig config = CreateBatchJobConfig.builder().displayName(displayName).build();
+        BatchJob batchJob = (BatchJob)RetryUtils.withRetryMappingExceptions(() -> this.client.batches.create(this.modelName, src, config), (int)this.maxRetries, (ExceptionMapper)GoogleGenAiExceptionMapper.INSTANCE);
+        return this.processResponse(batchJob);
     }
 
-    /**
-     * Creates a batch of image generation requests from an uploaded file.
-     *
-     * @param displayName a user-defined name for the batch
-     * @param file        the Google GenAI File object representing the uploaded file containing batch requests
-     * @return a {@link BatchResponse} representing the initial state of the batch operation
-     */
     public BatchResponse<Response<Image>> submit(String displayName, File file) {
-        BatchJobSource src = BatchJobSource.builder()
-                .fileName(file.name().isPresent() ? file.name().get() : null)
-                .build();
-
-        CreateBatchJobConfig config =
-                CreateBatchJobConfig.builder().displayName(displayName).build();
-
-        BatchJob batchJob = withRetryMappingExceptions(
-                () -> client.batches.create(modelName, src, config), maxRetries, GoogleGenAiExceptionMapper.INSTANCE);
-        return processResponse(batchJob);
+        BatchJobSource src = BatchJobSource.builder().fileName(file.name().isPresent() ? (String)file.name().get() : null).build();
+        CreateBatchJobConfig config = CreateBatchJobConfig.builder().displayName(displayName).build();
+        BatchJob batchJob = (BatchJob)RetryUtils.withRetryMappingExceptions(() -> this.client.batches.create(this.modelName, src, config), (int)this.maxRetries, (ExceptionMapper)GoogleGenAiExceptionMapper.INSTANCE);
+        return this.processResponse(batchJob);
     }
 
-    /**
-     * Deletes a batch job from the system.
-     */
     public void deleteBatchJob(String batchId) {
-        client.batches.delete(batchId, DeleteBatchJobConfig.builder().build());
+        this.client.batches.delete(batchId, DeleteBatchJobConfig.builder().build());
     }
 
     private InlinedRequest createInlinedRequest(ImageGenerationRequest request) {
-        Content content = Content.builder()
-                .parts(Collections.singletonList(Part.fromText(request.prompt())))
-                .build();
-
-        GenerateContentConfig.Builder configBuilder =
-                GenerateContentConfig.builder().responseModalities(Collections.singletonList("IMAGE"));
-
-        if (safetySettings != null && !safetySettings.isEmpty()) {
-            configBuilder.safetySettings(safetySettings);
+        Content content = Content.builder().parts(Collections.singletonList(Part.fromText((String)request.prompt()))).build();
+        GenerateContentConfig.Builder configBuilder = GenerateContentConfig.builder().responseModalities(Collections.singletonList("IMAGE"));
+        if (this.safetySettings != null && !this.safetySettings.isEmpty()) {
+            configBuilder.safetySettings(this.safetySettings);
         }
-
-        if (aspectRatio != null || imageSize != null || personGeneration != null) {
+        if (this.aspectRatio != null || this.imageSize != null || this.personGeneration != null) {
             ImageConfig.Builder imageConfigBuilder = ImageConfig.builder();
-            if (aspectRatio != null) {
-                imageConfigBuilder.aspectRatio(aspectRatio);
+            if (this.aspectRatio != null) {
+                imageConfigBuilder.aspectRatio(this.aspectRatio);
             }
-            if (imageSize != null) {
-                imageConfigBuilder.imageSize(imageSize);
+            if (this.imageSize != null) {
+                imageConfigBuilder.imageSize(this.imageSize);
             }
-            if (personGeneration != null) {
-                imageConfigBuilder.personGeneration(personGeneration);
+            if (this.personGeneration != null) {
+                imageConfigBuilder.personGeneration(this.personGeneration);
             }
             configBuilder.imageConfig(imageConfigBuilder.build());
         }
-
-        if (labels != null && !labels.isEmpty()) {
-            configBuilder.labels(labels);
+        if (this.labels != null && !this.labels.isEmpty()) {
+            configBuilder.labels(this.labels);
         }
-
-        return InlinedRequest.builder()
-                .contents(Collections.singletonList(content))
-                .config(configBuilder.build())
-                .build();
+        return InlinedRequest.builder().contents(Collections.singletonList(content)).config(configBuilder.build()).build();
     }
 
     private BatchResponse<Response<Image>> processResponse(BatchJob batchJob) {
         String jobName = batchJob.name().orElse("unknown");
-        Known state = batchJob.state().map(JobState::knownEnum).orElse(Known.JOB_STATE_UNSPECIFIED);
-
+        JobState.Known state = batchJob.state().map(JobState::knownEnum).orElse(JobState.Known.JOB_STATE_UNSPECIFIED);
         BatchState translatedState = GoogleGenAiBatchUtils.toBatchState(state);
-
-        BatchResponse.Builder<Response<Image>> builder =
-                BatchResponse.<Response<Image>>builder().batchId(jobName).state(translatedState);
-
-        if (state == Known.JOB_STATE_SUCCEEDED) {
-            List<BatchItemResult<Response<Image>>> results = new ArrayList<>();
-            if (batchJob.dest().isPresent()
-                    && batchJob.dest().get().inlinedResponses().isPresent()) {
-                List<InlinedRequest> inlinedResponses = batchJob.dest().get().inlinedResponses().get();
-                for (InlinedRequest inlined : inlinedResponses) {
+        BatchResponse.Builder builder = BatchResponse.builder().batchId(jobName).state(translatedState);
+        if (state == JobState.Known.JOB_STATE_SUCCEEDED) {
+            ArrayList<BatchItemResult> results = new ArrayList<BatchItemResult>();
+            if (batchJob.dest().isPresent() && ((BatchJobDestination)batchJob.dest().get()).inlinedResponses().isPresent()) {
+                List inlinedResponses = (List)((BatchJobDestination)batchJob.dest().get()).inlinedResponses().get();
+                for (InlinedResponse inlined : inlinedResponses) {
                     if (inlined.response().isPresent()) {
-                        GenerateContentResponse response = inlined.response().get();
+                        GenerateContentResponse response = (GenerateContentResponse)inlined.response().get();
                         boolean imageAdded = false;
                         if (response.parts() != null && !response.parts().isEmpty()) {
                             for (Part part : response.parts()) {
-                                if (part.inlineData().isPresent()) {
-                                    Blob blob = part.inlineData().get();
-                                    if (blob.data().isPresent()) {
-                                        byte[] bytes = blob.data().get();
-                                        String base64Data = Base64.getEncoder().encodeToString(bytes);
-                                        String mimeType = blob.mimeType().orElse("image/png");
-
-                                        Image image = Image.builder()
-                                                .base64Data(base64Data)
-                                                .mimeType(mimeType)
-                                                .build();
-                                        results.add(BatchItemResult.success(Response.from(image)));
-                                        imageAdded = true;
-                                        break; // Process one image per response for now
-                                    }
-                                }
+                                Blob blob;
+                                if (!part.inlineData().isPresent() || !(blob = (Blob)part.inlineData().get()).data().isPresent()) continue;
+                                byte[] bytes = (byte[])blob.data().get();
+                                String base64Data = Base64.getEncoder().encodeToString(bytes);
+                                String mimeType = blob.mimeType().orElse("image/png");
+                                Image image = Image.builder().base64Data(base64Data).mimeType(mimeType).build();
+                                results.add(BatchItemResult.success((Object)Response.from((Object)image)));
+                                imageAdded = true;
+                                break;
                             }
                         }
-                        if (!imageAdded) {
-                            results.add(BatchItemResult.failure(
-                                    new BatchError(0, "No image data found in response", new ArrayList<>())));
-                        }
-                    } else if (inlined.error().isPresent()) {
-                        results.add(BatchItemResult.failure(GoogleGenAiBatchUtils.toBatchError(
-                                inlined.error().get())));
+                        if (imageAdded) continue;
+                        results.add(BatchItemResult.failure((BatchError)new BatchError(0, "No image data found in response", new ArrayList())));
+                        continue;
                     }
+                    if (!inlined.error().isPresent()) continue;
+                    results.add(BatchItemResult.failure((BatchError)GoogleGenAiBatchUtils.toBatchError((JobError)inlined.error().get())));
                 }
             }
             builder.results(results);
-        } else if (state == Known.JOB_STATE_FAILED) {
-            builder.results(Collections.singletonList(BatchItemResult.failure(
-                    GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
+        } else if (state == JobState.Known.JOB_STATE_FAILED) {
+            builder.results(Collections.singletonList(BatchItemResult.failure((BatchError)GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
         }
-
         return builder.build();
-    }
-    public class ImageGenerationRequest {
-        private final String prompt;
-
-        public ImageGenerationRequest(String prompt) {
-            this.prompt = prompt;
-        }
-
-        public String getPrompt() {
-            return prompt;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ImageGenerationRequest that = (ImageGenerationRequest) o;
-            return java.util.Objects.equals(this.prompt, that.prompt);
-        }
-
-        @Override
-        public int hashCode() {
-            return java.util.Objects.hash(prompt);
-        }
-
-        @Override
-        public String toString() {
-            return "ImageGenerationRequest{"prompt=" + prompt + "}"";
-        }
-
-        public ImageGenerationRequest {
-            ensureNotBlank(prompt, "prompt");
-        }
     }
 
     public static class Builder {
@@ -386,4 +325,37 @@ public final class GoogleGenAiBatchImageModel implements BatchImageModel {
             return new GoogleGenAiBatchImageModel(this);
         }
     }
+
+    public static final class ImageGenerationRequest {
+        private final String prompt;
+
+        public ImageGenerationRequest(String prompt) {
+            ValidationUtils.ensureNotBlank((String)prompt, (String)"prompt");
+            this.prompt = prompt;
+        }
+
+        public String prompt() {
+            return this.prompt;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ImageGenerationRequest)) {
+                return false;
+            }
+            ImageGenerationRequest that = (ImageGenerationRequest)o;
+            return Objects.equals(this.prompt, that.prompt);
+        }
+
+        public int hashCode() {
+            return Objects.hash(this.prompt);
+        }
+
+        public String toString() {
+            return "ImageGenerationRequest[prompt=" + this.prompt + "]";
+        }
+    }
 }
+

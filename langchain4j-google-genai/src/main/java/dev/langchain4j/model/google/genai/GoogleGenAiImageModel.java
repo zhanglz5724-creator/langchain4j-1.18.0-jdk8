@@ -1,10 +1,36 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.core.type.TypeReference
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  com.google.auth.oauth2.GoogleCredentials
+ *  com.google.genai.Client
+ *  com.google.genai.types.Blob
+ *  com.google.genai.types.Candidate
+ *  com.google.genai.types.Content
+ *  com.google.genai.types.GenerateContentConfig
+ *  com.google.genai.types.GenerateContentConfig$Builder
+ *  com.google.genai.types.GenerateContentResponse
+ *  com.google.genai.types.GoogleSearch
+ *  com.google.genai.types.GroundingMetadata
+ *  com.google.genai.types.ImageConfig
+ *  com.google.genai.types.ImageConfig$Builder
+ *  com.google.genai.types.Part
+ *  com.google.genai.types.SafetySetting
+ *  com.google.genai.types.Tool
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.image.ImageModel
+ *  dev.langchain4j.model.output.Response
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.model.google.genai;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,26 +49,28 @@ import com.google.genai.types.SafetySetting;
 import com.google.genai.types.Tool;
 import dev.langchain4j.Experimental;
 import dev.langchain4j.data.image.Image;
+import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.google.genai.GoogleGenAiClientFactory;
+import dev.langchain4j.model.google.genai.GoogleGenAiExceptionMapper;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.output.Response;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Represents a Google GenAI model for image generation and editing using the official com.google.genai SDK.
- */
 @Experimental
-public class GoogleGenAiImageModel implements ImageModel {
-
+public class GoogleGenAiImageModel
+implements ImageModel {
     private static final Logger log = LoggerFactory.getLogger(GoogleGenAiImageModel.class);
-
     private final Client client;
     private final String modelName;
     private final Integer maxRetries;
@@ -54,126 +82,91 @@ public class GoogleGenAiImageModel implements ImageModel {
     private final Map<String, String> labels;
     private final boolean logRequests;
     private final boolean logResponses;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private GoogleGenAiImageModel(Builder builder) {
-        this.client = builder.client != null
-                ? builder.client
-                : GoogleGenAiClientFactory.createClient(
-                        builder.apiKey,
-                        builder.googleCredentials,
-                        builder.projectId,
-                        builder.location,
-                        builder.timeout,
-                        builder.customHeaders,
-                        builder.apiEndpoint);
-
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.maxRetries = getOrDefault(builder.maxRetries, 3);
-        this.safetySettings = copy(builder.safetySettings);
-        this.useGoogleSearchGrounding = getOrDefault(builder.useGoogleSearchGrounding, false);
+        this.client = builder.client != null ? builder.client : GoogleGenAiClientFactory.createClient(builder.apiKey, builder.googleCredentials, builder.projectId, builder.location, builder.timeout, builder.customHeaders, builder.apiEndpoint);
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)3);
+        this.safetySettings = Utils.copy((List)builder.safetySettings);
+        this.useGoogleSearchGrounding = (Boolean)Utils.getOrDefault((Object)builder.useGoogleSearchGrounding, (Object)false);
         this.aspectRatio = builder.aspectRatio;
         this.imageSize = builder.imageSize;
         this.personGeneration = builder.personGeneration;
-        this.labels = builder.labels != null ? new HashMap<>(builder.labels) : null;
-        this.logRequests = getOrDefault(builder.logRequests, false);
-        this.logResponses = getOrDefault(builder.logResponses, false);
+        this.labels = builder.labels != null ? new HashMap(builder.labels) : null;
+        this.logRequests = (Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false);
+        this.logResponses = (Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public Response<Image> generate(String prompt) {
-        ensureNotBlank(prompt, "prompt");
-
-        Content content =
-                Content.builder().parts(Collections.singletonList(Part.fromText(prompt))).build();
-
-        return generateImageResponse(Collections.singletonList(content));
+        ValidationUtils.ensureNotBlank((String)prompt, (String)"prompt");
+        Content content = Content.builder().parts(Collections.singletonList(Part.fromText((String)prompt))).build();
+        return this.generateImageResponse(Collections.singletonList(content));
     }
 
-    @Override
     public Response<Image> edit(Image image, String prompt) {
-        ensureNotNull(image, "image");
-        ensureNotBlank(prompt, "prompt");
-
-        List<Part> parts = new ArrayList<>();
-        parts.add(Part.fromText(prompt));
-        parts.add(createImagePart(image));
-
+        ValidationUtils.ensureNotNull((Object)image, (String)"image");
+        ValidationUtils.ensureNotBlank((String)prompt, (String)"prompt");
+        ArrayList<Part> parts = new ArrayList<Part>();
+        parts.add(Part.fromText((String)prompt));
+        parts.add(this.createImagePart(image));
         Content content = Content.builder().parts(parts).build();
-
-        return generateImageResponse(Collections.singletonList(content));
+        return this.generateImageResponse(Collections.singletonList(content));
     }
 
-    @Override
     public Response<Image> edit(Image image, Image mask, String prompt) {
-        ensureNotNull(image, "image");
-        ensureNotNull(mask, "mask");
-        ensureNotBlank(prompt, "prompt");
-
-        List<Part> parts = new ArrayList<>();
-        parts.add(Part.fromText(prompt));
-        parts.add(createImagePart(image));
-        parts.add(createImagePart(mask));
-
+        ValidationUtils.ensureNotNull((Object)image, (String)"image");
+        ValidationUtils.ensureNotNull((Object)mask, (String)"mask");
+        ValidationUtils.ensureNotBlank((String)prompt, (String)"prompt");
+        ArrayList<Part> parts = new ArrayList<Part>();
+        parts.add(Part.fromText((String)prompt));
+        parts.add(this.createImagePart(image));
+        parts.add(this.createImagePart(mask));
         Content content = Content.builder().parts(parts).build();
-
-        return generateImageResponse(Collections.singletonList(content));
+        return this.generateImageResponse(Collections.singletonList(content));
     }
 
     private Response<Image> generateImageResponse(List<Content> contents) {
-        GenerateContentConfig config = createGenerateContentConfig();
-
-        if (logRequests) {
-            log.info("Request:\n- model: {}\n- contents: {}\n- config: {}", modelName, contents, config);
+        GenerateContentConfig config = this.createGenerateContentConfig();
+        if (this.logRequests) {
+            log.info("Request:\n- model: {}\n- contents: {}\n- config: {}", new Object[]{this.modelName, contents, config});
         }
-
-        GenerateContentResponse response = withRetryMappingExceptions(
-                () -> client.models.generateContent(modelName, contents, config),
-                maxRetries,
-                GoogleGenAiExceptionMapper.INSTANCE);
-
-        Response<Image> imageResponse = toResponse(response);
-
-        if (logResponses) {
-            log.info("Response:\n- model: {}\n- response: {}", modelName, imageResponse);
+        GenerateContentResponse response = (GenerateContentResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.models.generateContent(this.modelName, contents, config), (int)this.maxRetries, (ExceptionMapper)GoogleGenAiExceptionMapper.INSTANCE);
+        Response<Image> imageResponse = this.toResponse(response);
+        if (this.logResponses) {
+            log.info("Response:\n- model: {}\n- response: {}", (Object)this.modelName, imageResponse);
         }
-
         return imageResponse;
     }
 
     private GenerateContentConfig createGenerateContentConfig() {
-        GenerateContentConfig.Builder configBuilder =
-                GenerateContentConfig.builder().responseModalities(Collections.singletonList("IMAGE"));
-
-        if (!safetySettings.isEmpty()) {
-            configBuilder.safetySettings(safetySettings);
+        GenerateContentConfig.Builder configBuilder = GenerateContentConfig.builder().responseModalities(Collections.singletonList("IMAGE"));
+        if (!this.safetySettings.isEmpty()) {
+            configBuilder.safetySettings(this.safetySettings);
         }
-
-        if (useGoogleSearchGrounding) {
+        if (this.useGoogleSearchGrounding) {
             configBuilder.tools(Collections.singletonList(Tool.builder().googleSearch(GoogleSearch.builder().build()).build()));
         }
-
-        if (aspectRatio != null || imageSize != null || personGeneration != null) {
+        if (this.aspectRatio != null || this.imageSize != null || this.personGeneration != null) {
             ImageConfig.Builder imageConfigBuilder = ImageConfig.builder();
-            if (aspectRatio != null) {
-                imageConfigBuilder.aspectRatio(aspectRatio);
+            if (this.aspectRatio != null) {
+                imageConfigBuilder.aspectRatio(this.aspectRatio);
             }
-            if (imageSize != null) {
-                imageConfigBuilder.imageSize(imageSize);
+            if (this.imageSize != null) {
+                imageConfigBuilder.imageSize(this.imageSize);
             }
-            if (personGeneration != null) {
-                imageConfigBuilder.personGeneration(personGeneration);
+            if (this.personGeneration != null) {
+                imageConfigBuilder.personGeneration(this.personGeneration);
             }
             configBuilder.imageConfig(imageConfigBuilder.build());
         }
-
-        if (labels != null && !labels.isEmpty()) {
-            configBuilder.labels(labels);
+        if (this.labels != null && !this.labels.isEmpty()) {
+            configBuilder.labels(this.labels);
         }
-
         return configBuilder.build();
     }
 
@@ -183,55 +176,38 @@ public class GoogleGenAiImageModel implements ImageModel {
         if (mimeType == null || mimeType.trim().isEmpty()) {
             mimeType = "image/png";
         }
-
         if (base64Data == null && image.url() != null) {
-            return Part.fromUri(image.url().toString(), mimeType);
+            return Part.fromUri((String)image.url().toString(), (String)mimeType);
         }
-
-        byte[] imageBytes = Base64.getDecoder().decode(ensureNotBlank(base64Data, "image.base64Data"));
-        return Part.fromBytes(imageBytes, mimeType);
+        byte[] imageBytes = Base64.getDecoder().decode(ValidationUtils.ensureNotBlank((String)base64Data, (String)"image.base64Data"));
+        return Part.fromBytes((byte[])imageBytes, (String)mimeType);
     }
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     private Response<Image> toResponse(GenerateContentResponse response) {
+        Candidate candidate;
         if (response.parts() == null || response.parts().isEmpty()) {
             throw new RuntimeException("No image generated in response");
         }
-
-        Map<String, Object> metadata = new HashMap<>();
-        if (response.candidates().isPresent() && !response.candidates().get().isEmpty()) {
-            Candidate candidate = response.candidates().get().get(0);
-            if (candidate.groundingMetadata().isPresent()) {
-                GroundingMetadata gm = candidate.groundingMetadata().get();
-                try {
-                    Map<String, Object> groundingMap =
-                            OBJECT_MAPPER.readValue(gm.toJson(), new TypeReference<Map<String, Object>>() {});
-                    metadata.put("groundingMetadata", groundingMap);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to parse grounding metadata", e);
-                }
+        HashMap<String, Map> metadata = new HashMap<String, Map>();
+        if (response.candidates().isPresent() && !((List)response.candidates().get()).isEmpty() && (candidate = (Candidate)((List)response.candidates().get()).get(0)).groundingMetadata().isPresent()) {
+            GroundingMetadata gm = (GroundingMetadata)candidate.groundingMetadata().get();
+            try {
+                Map groundingMap = (Map)OBJECT_MAPPER.readValue(gm.toJson(), (TypeReference)new TypeReference<Map<String, Object>>(){});
+                metadata.put("groundingMetadata", groundingMap);
+            }
+            catch (Exception e) {
+                throw new RuntimeException("Failed to parse grounding metadata", e);
             }
         }
-
         for (Part part : response.parts()) {
-            if (part.inlineData().isPresent()) {
-                Blob blob = part.inlineData().get();
-                if (blob.data().isPresent()) {
-                    byte[] bytes = blob.data().get();
-                    String base64Data = Base64.getEncoder().encodeToString(bytes);
-                    String mimeType = blob.mimeType().orElse("image/png");
-
-                    Image image = Image.builder()
-                            .base64Data(base64Data)
-                            .mimeType(mimeType)
-                            .build();
-
-                    return Response.from(image, null, null, metadata);
-                }
-            }
+            Blob blob;
+            if (!part.inlineData().isPresent() || !(blob = (Blob)part.inlineData().get()).data().isPresent()) continue;
+            byte[] bytes = (byte[])blob.data().get();
+            String base64Data = Base64.getEncoder().encodeToString(bytes);
+            String mimeType = blob.mimeType().orElse("image/png");
+            Image image = Image.builder().base64Data(base64Data).mimeType(mimeType).build();
+            return Response.from((Object)image, null, null, metadata);
         }
-
         throw new RuntimeException("No image data found in response");
     }
 
@@ -356,3 +332,4 @@ public class GoogleGenAiImageModel implements ImageModel {
         }
     }
 }
+

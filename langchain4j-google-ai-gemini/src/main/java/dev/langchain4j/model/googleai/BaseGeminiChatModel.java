@@ -1,17 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ResponseFormatType
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.request.json.JsonEnumSchema
+ *  dev.langchain4j.model.chat.request.json.JsonRawSchema
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.TokenUsage
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.googleai;
-
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.copyIfNotNull;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.googleai.FinishReasonMapper.fromGFinishReasonToFinishReason;
-import static dev.langchain4j.model.googleai.FunctionMapper.fromToolSpecsToGTools;
-import static dev.langchain4j.model.googleai.PartsAndContentsMapper.fromGPartsToAiMessage;
-import static dev.langchain4j.model.googleai.PartsAndContentsMapper.fromMessageToGContent;
-import static dev.langchain4j.model.googleai.SchemaMapper.fromJsonSchemaToGSchema;
-import static dev.langchain4j.model.output.FinishReason.TOOL_EXECUTION;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
@@ -22,18 +35,39 @@ import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.request.json.JsonEnumSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.googleai.GeminiGenerateContentRequest.GeminiToolConfig;
-import dev.langchain4j.model.googleai.GeminiGenerateContentResponse.GeminiCandidate;
-import dev.langchain4j.model.googleai.GeminiGenerateContentResponse.GeminiUsageMetadata;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
+import dev.langchain4j.model.googleai.FinishReasonMapper;
+import dev.langchain4j.model.googleai.FunctionMapper;
+import dev.langchain4j.model.googleai.GeminiContent;
+import dev.langchain4j.model.googleai.GeminiFunctionCallingConfig;
+import dev.langchain4j.model.googleai.GeminiGenerateContentRequest;
+import dev.langchain4j.model.googleai.GeminiGenerateContentResponse;
+import dev.langchain4j.model.googleai.GeminiGenerationConfig;
+import dev.langchain4j.model.googleai.GeminiHarmBlockThreshold;
+import dev.langchain4j.model.googleai.GeminiHarmCategory;
+import dev.langchain4j.model.googleai.GeminiMediaResolutionLevel;
+import dev.langchain4j.model.googleai.GeminiMode;
+import dev.langchain4j.model.googleai.GeminiRole;
+import dev.langchain4j.model.googleai.GeminiSafetySetting;
+import dev.langchain4j.model.googleai.GeminiSchema;
+import dev.langchain4j.model.googleai.GeminiService;
+import dev.langchain4j.model.googleai.GeminiThinkingConfig;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatRequestParameters;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatResponseMetadata;
+import dev.langchain4j.model.googleai.GoogleAiGeminiTokenUsage;
+import dev.langchain4j.model.googleai.Json;
+import dev.langchain4j.model.googleai.PartsAndContentsMapper;
+import dev.langchain4j.model.googleai.SchemaMapper;
+import dev.langchain4j.model.googleai.UrlContextMetadata;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.Collections;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
@@ -57,272 +91,155 @@ class BaseGeminiChatModel {
     protected final Boolean enableEnhancedCivicAnswers;
     protected final GeminiMediaResolutionLevel mediaResolution;
     protected final boolean mediaResolutionPerPartEnabled;
-
     protected final GoogleAiGeminiChatRequestParameters defaultRequestParameters;
 
     protected BaseGeminiChatModel(GoogleAiGeminiChatModelBaseBuilder<?> builder, GeminiService geminiService) {
         this.geminiService = geminiService;
-
         this.functionCallingConfig = builder.functionCallingConfig;
-        this.allowCodeExecution = getOrDefault(builder.allowCodeExecution, false);
-        this.allowGoogleSearch = getOrDefault(builder.allowGoogleSearch, false);
-        this.allowGoogleMaps = getOrDefault(builder.allowGoogleMaps, false);
-        this.retrieveGoogleMapsWidgetToken = getOrDefault(builder.retrieveGoogleMapsWidgetToken, false);
-        this.allowUrlContext = getOrDefault(builder.allowUrlContext, false);
-        this.includeCodeExecutionOutput = getOrDefault(builder.includeCodeExecutionOutput, false);
-        this.safetySettings = copyIfNotNull(builder.safetySettings);
-        this.listeners = copy(builder.listeners);
+        this.allowCodeExecution = (Boolean)Utils.getOrDefault((Object)builder.allowCodeExecution, (Object)false);
+        this.allowGoogleSearch = (Boolean)Utils.getOrDefault((Object)builder.allowGoogleSearch, (Object)false);
+        this.allowGoogleMaps = (Boolean)Utils.getOrDefault((Object)builder.allowGoogleMaps, (Object)false);
+        this.retrieveGoogleMapsWidgetToken = (Boolean)Utils.getOrDefault((Object)builder.retrieveGoogleMapsWidgetToken, (Object)false);
+        this.allowUrlContext = (Boolean)Utils.getOrDefault((Object)builder.allowUrlContext, (Object)false);
+        this.includeCodeExecutionOutput = (Boolean)Utils.getOrDefault((Object)builder.includeCodeExecutionOutput, (Object)false);
+        this.safetySettings = Utils.copyIfNotNull(builder.safetySettings);
+        this.listeners = Utils.copy(builder.listeners);
         this.thinkingConfig = builder.thinkingConfig;
         this.returnThinking = builder.returnThinking;
-        this.sendThinking = getOrDefault(builder.sendThinking, false);
+        this.sendThinking = (Boolean)Utils.getOrDefault((Object)builder.sendThinking, (Object)false);
         this.seed = builder.seed;
-        this.responseLogprobs = getOrDefault(builder.responseLogprobs, false);
-        this.enableEnhancedCivicAnswers = getOrDefault(builder.enableEnhancedCivicAnswers, false);
+        this.responseLogprobs = (Boolean)Utils.getOrDefault((Object)builder.responseLogprobs, (Object)false);
+        this.enableEnhancedCivicAnswers = (Boolean)Utils.getOrDefault((Object)builder.enableEnhancedCivicAnswers, (Object)false);
         this.logprobs = builder.logprobs;
         this.mediaResolution = builder.mediaResolution;
-        this.mediaResolutionPerPartEnabled = getOrDefault(builder.mediaResolutionPerPartEnabled, false);
-
-        ChatRequestParameters commonParameters;
-        if (builder.defaultRequestParameters != null) {
-            commonParameters = builder.defaultRequestParameters;
-        } else {
-            commonParameters = DefaultChatRequestParameters.EMPTY;
-        }
-
-        GoogleAiGeminiChatRequestParameters geminiParameters =
-                builder.defaultRequestParameters instanceof GoogleAiGeminiChatRequestParameters googleAiParameters
-                        ? googleAiParameters
-                        : GoogleAiGeminiChatRequestParameters.EMPTY;
-
-        this.defaultRequestParameters = GoogleAiGeminiChatRequestParameters.builder()
-                // common parameters
-                .modelName(getOrDefault(builder.modelName, commonParameters.modelName()))
-                .temperature(getOrDefault(builder.temperature, commonParameters.temperature()))
-                .topP(getOrDefault(builder.topP, commonParameters.topP()))
-                .topK(getOrDefault(builder.topK, commonParameters.topK()))
-                .frequencyPenalty(getOrDefault(builder.frequencyPenalty, commonParameters.frequencyPenalty()))
-                .presencePenalty(getOrDefault(builder.presencePenalty, commonParameters.presencePenalty()))
-                .maxOutputTokens(getOrDefault(builder.maxOutputTokens, commonParameters.maxOutputTokens()))
-                .stopSequences(getOrDefault(builder.stopSequences, commonParameters.stopSequences()))
-                .toolSpecifications(commonParameters.toolSpecifications())
-                .toolChoice(getOrDefault(toToolChoice(functionCallingConfig), commonParameters.toolChoice()))
-                .responseFormat(getOrDefault(builder.responseFormat, commonParameters.responseFormat()))
-                // Gemini-specific parameters
-                .aspectRatio(getOrDefault(builder.aspectRatio, geminiParameters.aspectRatio()))
-                .imageSize(getOrDefault(builder.imageSize, geminiParameters.imageSize()))
-                .cachedContentName(getOrDefault(builder.cachedContentName, geminiParameters.cachedContentName()))
-                .build();
+        this.mediaResolutionPerPartEnabled = (Boolean)Utils.getOrDefault((Object)builder.mediaResolutionPerPartEnabled, (Object)false);
+        ChatRequestParameters commonParameters = builder.defaultRequestParameters != null ? builder.defaultRequestParameters : DefaultChatRequestParameters.EMPTY;
+        GoogleAiGeminiChatRequestParameters geminiParameters = builder.defaultRequestParameters instanceof GoogleAiGeminiChatRequestParameters ? (GoogleAiGeminiChatRequestParameters)builder.defaultRequestParameters : GoogleAiGeminiChatRequestParameters.EMPTY;
+        this.defaultRequestParameters = ((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)((GoogleAiGeminiChatRequestParameters.Builder)GoogleAiGeminiChatRequestParameters.builder().modelName((String)Utils.getOrDefault((Object)builder.modelName, (Object)commonParameters.modelName()))).temperature((Double)Utils.getOrDefault((Object)builder.temperature, (Object)commonParameters.temperature()))).topP((Double)Utils.getOrDefault((Object)builder.topP, (Object)commonParameters.topP()))).topK((Integer)Utils.getOrDefault((Object)builder.topK, (Object)commonParameters.topK()))).frequencyPenalty((Double)Utils.getOrDefault((Object)builder.frequencyPenalty, (Object)commonParameters.frequencyPenalty()))).presencePenalty((Double)Utils.getOrDefault((Object)builder.presencePenalty, (Object)commonParameters.presencePenalty()))).maxOutputTokens((Integer)Utils.getOrDefault((Object)builder.maxOutputTokens, (Object)commonParameters.maxOutputTokens()))).stopSequences(Utils.getOrDefault(builder.stopSequences, (List)commonParameters.stopSequences()))).toolSpecifications(commonParameters.toolSpecifications())).toolChoice((ToolChoice)Utils.getOrDefault((Object)BaseGeminiChatModel.toToolChoice(this.functionCallingConfig), (Object)commonParameters.toolChoice()))).responseFormat((ResponseFormat)Utils.getOrDefault((Object)builder.responseFormat, (Object)commonParameters.responseFormat()))).aspectRatio((String)Utils.getOrDefault((Object)builder.aspectRatio, (Object)geminiParameters.aspectRatio())).imageSize((String)Utils.getOrDefault((Object)builder.imageSize, (Object)geminiParameters.imageSize())).cachedContentName((String)Utils.getOrDefault((Object)builder.cachedContentName, (Object)geminiParameters.cachedContentName())).build();
     }
 
     protected static GeminiService buildGeminiService(GoogleAiGeminiChatModelBaseBuilder<?> builder) {
-        return new GeminiService(
-                builder.httpClientBuilder,
-                builder.apiKey,
-                builder.baseUrl,
-                getOrDefault(builder.logRequestsAndResponses, false),
-                getOrDefault(builder.logRequests, false),
-                getOrDefault(builder.logResponses, false),
-                builder.logger,
-                builder.timeout,
-                builder.customHeadersSupplier);
+        return new GeminiService(builder.httpClientBuilder, builder.apiKey, builder.baseUrl, (Boolean)Utils.getOrDefault((Object)builder.logRequestsAndResponses, (Object)false), (Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false), (Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false), builder.logger, builder.timeout, builder.customHeadersSupplier);
     }
 
     protected GeminiGenerateContentRequest createGenerateContentRequest(ChatRequest chatRequest) {
-        GoogleAiGeminiChatRequestParameters parameters = (GoogleAiGeminiChatRequestParameters) chatRequest.parameters();
-        GeminiGenerationConfig.GeminiImageConfig effectiveImageConfig =
-                buildImageConfig(parameters.aspectRatio(), parameters.imageSize());
-
+        GoogleAiGeminiChatRequestParameters parameters = (GoogleAiGeminiChatRequestParameters)chatRequest.parameters();
+        GeminiGenerationConfig.GeminiImageConfig effectiveImageConfig = BaseGeminiChatModel.buildImageConfig(parameters.aspectRatio(), parameters.imageSize());
         GeminiContent systemInstruction = new GeminiContent(Collections.emptyList(), GeminiRole.MODEL.toString());
-        List<GeminiContent> geminiContentList = fromMessageToGContent(
-                chatRequest.messages(), systemInstruction, sendThinking, mediaResolutionPerPartEnabled);
-
+        List<GeminiContent> geminiContentList = PartsAndContentsMapper.fromMessageToGContent(chatRequest.messages(), systemInstruction, this.sendThinking, this.mediaResolutionPerPartEnabled);
         ResponseFormat responseFormat = chatRequest.responseFormat();
         GeminiSchema schema = null;
-        Map<String, Object> rawSchema = null;
-
-        if (responseFormat != null) {
-            if (responseFormat.jsonSchema() != null) {
-                if (responseFormat.jsonSchema().rootElement() instanceof JsonRawSchema jsonRawSchema) {
-                    rawSchema = Json.fromJson(jsonRawSchema.schema(), Map.class);
-                } else {
-                    schema = fromJsonSchemaToGSchema(responseFormat.jsonSchema());
-                }
+        Map rawSchema = null;
+        if (responseFormat != null && responseFormat.jsonSchema() != null) {
+            if (responseFormat.jsonSchema().rootElement() instanceof JsonRawSchema) {
+                JsonRawSchema jsonRawSchema = (JsonRawSchema)responseFormat.jsonSchema().rootElement();
+                rawSchema = Json.fromJson(jsonRawSchema.schema(), Map.class);
+            } else {
+                schema = SchemaMapper.fromJsonSchemaToGSchema(responseFormat.jsonSchema());
             }
         }
-
-        return GeminiGenerateContentRequest.builder()
-                .contents(geminiContentList)
-                .systemInstruction(!systemInstruction.parts().isEmpty() ? systemInstruction : null)
-                .generationConfig(GeminiGenerationConfig.builder()
-                        .candidateCount(1) // Multiple candidates aren't supported by langchain4j
-                        .maxOutputTokens(parameters.maxOutputTokens())
-                        .responseMimeType(computeMimeType(responseFormat))
-                        .responseSchema(schema)
-                        .responseJsonSchema(rawSchema)
-                        .stopSequences(parameters.stopSequences())
-                        .temperature(parameters.temperature())
-                        .topK(parameters.topK())
-                        .seed(seed)
-                        .topP(parameters.topP())
-                        .presencePenalty(parameters.presencePenalty())
-                        .frequencyPenalty(parameters.frequencyPenalty())
-                        .responseLogprobs(responseLogprobs)
-                        .enableEnhancedCivicAnswers(enableEnhancedCivicAnswers)
-                        .logprobs(logprobs)
-                        .thinkingConfig(this.thinkingConfig)
-                        .mediaResolution(this.mediaResolution)
-                        .imageConfig(effectiveImageConfig)
-                        .build())
-                .safetySettings(this.safetySettings)
-                .tools(fromToolSpecsToGTools(
-                        chatRequest.toolSpecifications(),
-                        this.allowCodeExecution,
-                        this.allowGoogleSearch,
-                        this.allowUrlContext,
-                        this.allowGoogleMaps,
-                        this.retrieveGoogleMapsWidgetToken))
-                .toolConfig(toToolConfig(parameters.toolChoice(), this.functionCallingConfig))
-                .cachedContent(parameters.cachedContentName())
-                .build();
+        return GeminiGenerateContentRequest.builder().contents(geminiContentList).systemInstruction(!systemInstruction.parts().isEmpty() ? systemInstruction : null).generationConfig(GeminiGenerationConfig.builder().candidateCount(1).maxOutputTokens(parameters.maxOutputTokens()).responseMimeType(BaseGeminiChatModel.computeMimeType(responseFormat)).responseSchema(schema).responseJsonSchema(rawSchema).stopSequences(parameters.stopSequences()).temperature(parameters.temperature()).topK(parameters.topK()).seed(this.seed).topP(parameters.topP()).presencePenalty(parameters.presencePenalty()).frequencyPenalty(parameters.frequencyPenalty()).responseLogprobs(this.responseLogprobs).enableEnhancedCivicAnswers(this.enableEnhancedCivicAnswers).logprobs(this.logprobs).thinkingConfig(this.thinkingConfig).mediaResolution(this.mediaResolution).imageConfig(effectiveImageConfig).build()).safetySettings(this.safetySettings).tools(FunctionMapper.fromToolSpecsToGTools(chatRequest.toolSpecifications(), this.allowCodeExecution, this.allowGoogleSearch, this.allowUrlContext, this.allowGoogleMaps, this.retrieveGoogleMapsWidgetToken)).toolConfig(this.toToolConfig(parameters.toolChoice(), this.functionCallingConfig)).cachedContent(parameters.cachedContentName()).build();
     }
 
-    private GeminiToolConfig toToolConfig(ToolChoice toolChoice, GeminiFunctionCallingConfig functionCallingConfig) {
+    private GeminiGenerateContentRequest.GeminiToolConfig toToolConfig(ToolChoice toolChoice, GeminiFunctionCallingConfig functionCallingConfig) {
         if (toolChoice == null && functionCallingConfig == null) {
             return null;
         }
-
-        GeminiMode geminiMode = Optional.ofNullable(functionCallingConfig)
-                .map(GeminiFunctionCallingConfig::getMode)
-                .orElse(null);
-        List<String> allowedFunctionNames = Optional.ofNullable(functionCallingConfig)
-                .map(GeminiFunctionCallingConfig::getAllowedFunctionNames)
-                .orElse(null);
-
+        GeminiMode geminiMode = Optional.ofNullable(functionCallingConfig).map(GeminiFunctionCallingConfig::getMode).orElse(null);
+        List allowedFunctionNames = Optional.ofNullable(functionCallingConfig).map(GeminiFunctionCallingConfig::getAllowedFunctionNames).orElse(null);
         if (toolChoice != null) {
-            geminiMode = toGeminiMode(toolChoice);
+            geminiMode = BaseGeminiChatModel.toGeminiMode(toolChoice);
         }
-
-        return new GeminiToolConfig(new GeminiFunctionCallingConfig(geminiMode, allowedFunctionNames));
+        return new GeminiGenerateContentRequest.GeminiToolConfig(new GeminiFunctionCallingConfig(geminiMode, allowedFunctionNames));
     }
 
     protected static String computeMimeType(ResponseFormat responseFormat) {
-        if (responseFormat == null || ResponseFormatType.TEXT.equals(responseFormat.type())) {
+        if (responseFormat == null || ResponseFormatType.TEXT.equals((Object)responseFormat.type())) {
             return "text/plain";
         }
-
-        if (ResponseFormatType.JSON.equals(responseFormat.type())
-                && responseFormat.jsonSchema() != null
-                && responseFormat.jsonSchema().rootElement() != null
-                && responseFormat.jsonSchema().rootElement() instanceof JsonEnumSchema) {
+        if (ResponseFormatType.JSON.equals((Object)responseFormat.type()) && responseFormat.jsonSchema() != null && responseFormat.jsonSchema().rootElement() != null && responseFormat.jsonSchema().rootElement() instanceof JsonEnumSchema) {
             return "text/x.enum";
         }
-
         return "application/json";
     }
 
     private static GeminiMode toGeminiMode(ToolChoice toolChoice) {
-        return switch (toolChoice) {
-            case AUTO -> GeminiMode.AUTO;
-            case REQUIRED -> GeminiMode.ANY;
-            case NONE -> GeminiMode.NONE;
-        };
+        switch (toolChoice) {
+            case AUTO: {
+                return GeminiMode.AUTO;
+            }
+            case REQUIRED: {
+                return GeminiMode.ANY;
+            }
+            case NONE: {
+                return GeminiMode.NONE;
+            }
+        }
+        throw new IllegalArgumentException("Unknown tool choice: " + toolChoice);
     }
 
     private static ToolChoice toToolChoice(GeminiFunctionCallingConfig config) {
         if (config == null || config.getMode() == null) {
             return null;
         }
-
-        return switch (config.getMode()) {
-            case AUTO -> ToolChoice.AUTO;
-            case ANY -> ToolChoice.REQUIRED;
-            case NONE, VALIDATED -> null;
-        };
+        switch (config.getMode()) {
+            case AUTO: {
+                return ToolChoice.AUTO;
+            }
+            case ANY: {
+                return ToolChoice.REQUIRED;
+            }
+            case NONE: 
+            case VALIDATED: {
+                return null;
+            }
+        }
+        throw new IllegalArgumentException("Unknown mode: " + (Object)((Object)config.getMode()));
     }
 
     private static GeminiGenerationConfig.GeminiImageConfig buildImageConfig(String aspectRatio, String imageSize) {
         if (aspectRatio == null && imageSize == null) {
             return null;
         }
-        return GeminiGenerationConfig.GeminiImageConfig.builder()
-                .aspectRatio(aspectRatio)
-                .imageSize(imageSize)
-                .build();
+        return GeminiGenerationConfig.GeminiImageConfig.builder().aspectRatio(aspectRatio).imageSize(imageSize).build();
     }
 
     protected ChatResponse processResponse(GeminiGenerateContentResponse geminiResponse) {
-        GeminiCandidate firstCandidate = geminiResponse.candidates().get(0);
-        AiMessage aiMessage = createAiMessage(firstCandidate);
-
-        FinishReason finishReason = fromGFinishReasonToFinishReason(firstCandidate.finishReason());
+        GeminiGenerateContentResponse.GeminiCandidate firstCandidate = geminiResponse.candidates().get(0);
+        AiMessage aiMessage = this.createAiMessage(firstCandidate);
+        FinishReason finishReason = FinishReasonMapper.fromGFinishReasonToFinishReason(firstCandidate.finishReason());
         if (aiMessage != null && aiMessage.hasToolExecutionRequests()) {
-            finishReason = TOOL_EXECUTION;
+            finishReason = FinishReason.TOOL_EXECUTION;
         }
-
-        return ChatResponse.builder()
-                .aiMessage(aiMessage)
-                .metadata(GoogleAiGeminiChatResponseMetadata.builder()
-                        .id(geminiResponse.responseId())
-                        .modelName(geminiResponse.modelVersion())
-                        .tokenUsage(createTokenUsage(geminiResponse.usageMetadata()))
-                        .finishReason(finishReason)
-                        .groundingMetadata(
-                                geminiResponse.groundingMetadata() != null
-                                        ? geminiResponse.groundingMetadata()
-                                        : firstCandidate.groundingMetadata())
-                        .urlContextMetadata(
-                                firstCandidate.urlContextMetadata() != null
-                                        ? toUrlContextMetadata(firstCandidate.urlContextMetadata())
-                                        : null)
-                        .build())
-                .build();
+        return ChatResponse.builder().aiMessage(aiMessage).metadata((ChatResponseMetadata)((GoogleAiGeminiChatResponseMetadata.Builder)((GoogleAiGeminiChatResponseMetadata.Builder)((GoogleAiGeminiChatResponseMetadata.Builder)((GoogleAiGeminiChatResponseMetadata.Builder)GoogleAiGeminiChatResponseMetadata.builder().id(geminiResponse.responseId())).modelName(geminiResponse.modelVersion())).tokenUsage(this.createTokenUsage(geminiResponse.usageMetadata()))).finishReason(finishReason)).groundingMetadata(geminiResponse.groundingMetadata() != null ? geminiResponse.groundingMetadata() : firstCandidate.groundingMetadata()).urlContextMetadata(firstCandidate.urlContextMetadata() != null ? this.toUrlContextMetadata(firstCandidate.urlContextMetadata()) : null).build()).build();
     }
 
-    protected AiMessage createAiMessage(GeminiCandidate candidate) {
+    protected AiMessage createAiMessage(GeminiGenerateContentResponse.GeminiCandidate candidate) {
         if (candidate == null || candidate.content() == null) {
-            return fromGPartsToAiMessage(Collections.emptyList(), includeCodeExecutionOutput, returnThinking);
+            return PartsAndContentsMapper.fromGPartsToAiMessage(Collections.emptyList(), this.includeCodeExecutionOutput, this.returnThinking);
         }
-
-        return fromGPartsToAiMessage(candidate.content().parts(), includeCodeExecutionOutput, returnThinking);
+        return PartsAndContentsMapper.fromGPartsToAiMessage(candidate.content().parts(), this.includeCodeExecutionOutput, this.returnThinking);
     }
 
-    protected TokenUsage createTokenUsage(GeminiUsageMetadata tokenCounts) {
-        return GoogleAiGeminiTokenUsage.builder()
-                .inputTokenCount(tokenCounts.promptTokenCount())
-                .outputTokenCount(tokenCounts.candidatesTokenCount())
-                .totalTokenCount(tokenCounts.totalTokenCount())
-                .cachedContentTokenCount(tokenCounts.cachedContentTokenCount())
-                .thoughtsTokenCount(tokenCounts.thoughtsTokenCount())
-                .build();
+    protected TokenUsage createTokenUsage(GeminiGenerateContentResponse.GeminiUsageMetadata tokenCounts) {
+        return GoogleAiGeminiTokenUsage.builder().inputTokenCount(tokenCounts.promptTokenCount()).outputTokenCount(tokenCounts.candidatesTokenCount()).totalTokenCount(tokenCounts.totalTokenCount()).cachedContentTokenCount(tokenCounts.cachedContentTokenCount()).thoughtsTokenCount(tokenCounts.thoughtsTokenCount()).build();
     }
 
-    private UrlContextMetadata toUrlContextMetadata(
-            GeminiGenerateContentResponse.GeminiUrlContextMetadata geminiUrlContextMetadata) {
+    private UrlContextMetadata toUrlContextMetadata(GeminiGenerateContentResponse.GeminiUrlContextMetadata geminiUrlContextMetadata) {
         if (geminiUrlContextMetadata == null || geminiUrlContextMetadata.urlMetadata() == null) {
             return null;
         }
-        return new UrlContextMetadata(geminiUrlContextMetadata.urlMetadata().stream()
-                .map(this::toUrlMetadata)
-                .collect(Collectors.toList()));
+        return new UrlContextMetadata(geminiUrlContextMetadata.urlMetadata().stream().map(this::toUrlMetadata).collect(Collectors.toList()));
     }
 
-    private UrlContextMetadata.UrlMetadata toUrlMetadata(
-            GeminiGenerateContentResponse.GeminiUrlMetadata geminiUrlMetadata) {
+    private UrlContextMetadata.UrlMetadata toUrlMetadata(GeminiGenerateContentResponse.GeminiUrlMetadata geminiUrlMetadata) {
         if (geminiUrlMetadata == null) {
             return null;
         }
-        return new UrlContextMetadata.UrlMetadata(
-                geminiUrlMetadata.retrievedUrl(),
-                geminiUrlMetadata.urlRetrievalStatus() != null
-                        ? geminiUrlMetadata.urlRetrievalStatus().toString()
-                        : null);
+        return new UrlContextMetadata.UrlMetadata(geminiUrlMetadata.retrievedUrl(), geminiUrlMetadata.urlRetrievalStatus() != null ? geminiUrlMetadata.urlRetrievalStatus().toString() : null);
     }
 
-    /**
-     * Base builder class containing shared properties and methods for Google AI Gemini chat models.
-     */
-    public abstract static class GoogleAiGeminiChatModelBaseBuilder<B extends GoogleAiGeminiChatModelBaseBuilder<B>> {
-
+    public static abstract class GoogleAiGeminiChatModelBaseBuilder<B extends GoogleAiGeminiChatModelBaseBuilder<B>> {
         protected HttpClientBuilder httpClientBuilder;
         protected ChatRequestParameters defaultRequestParameters;
         protected String apiKey;
@@ -364,437 +281,228 @@ class BaseGeminiChatModel {
         protected String cachedContentName;
         protected Supplier<Map<String, String>> customHeadersSupplier;
 
-        @SuppressWarnings("unchecked")
         protected B builder() {
-            return (B) this;
+            return (B)this;
         }
 
         public B httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Sets default common {@link ChatRequestParameters} or
-         * Gemini-specific {@link GoogleAiGeminiChatRequestParameters}.
-         * <br>
-         * When a parameter is set via an individual builder method (e.g., {@link #modelName(String)}),
-         * its value takes precedence over the same parameter set via {@link ChatRequestParameters}.
-         */
         public B defaultRequestParameters(ChatRequestParameters defaultRequestParameters) {
             this.defaultRequestParameters = defaultRequestParameters;
-            return builder();
+            return this.builder();
         }
 
         public B apiKey(String apiKey) {
             this.apiKey = apiKey;
-            return builder();
+            return this.builder();
         }
 
         public B baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
-            return builder();
+            return this.builder();
         }
 
         public B modelName(String modelName) {
             this.modelName = modelName;
-            return builder();
+            return this.builder();
         }
 
         public B timeout(Duration timeout) {
             this.timeout = timeout;
-            return builder();
+            return this.builder();
         }
 
         public B listeners(List<ChatModelListener> listeners) {
             this.listeners = listeners;
-            return builder();
+            return this.builder();
         }
 
         public B includeCodeExecutionOutput(Boolean includeCodeExecutionOutput) {
             this.includeCodeExecutionOutput = includeCodeExecutionOutput;
-            return builder();
+            return this.builder();
         }
 
         public B logRequestsAndResponses(Boolean logRequestsAndResponses) {
             this.logRequestsAndResponses = logRequestsAndResponses;
-            return builder();
+            return this.builder();
         }
 
         public B logRequests(Boolean logRequests) {
             this.logRequests = logRequests;
-            return builder();
+            return this.builder();
         }
 
         public B logResponses(Boolean logResponses) {
             this.logResponses = logResponses;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public B logger(Logger logger) {
             this.logger = logger;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Tool configuration for any Tool specified in the request.
-         */
         public B toolConfig(GeminiFunctionCallingConfig toolConfig) {
             this.functionCallingConfig = toolConfig;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Configuration for any Tool specified in the request, including an allow list of functions that can be called.
-         */
-        public B toolConfig(GeminiMode mode, String... allowedFunctionNames) {
+        public B toolConfig(GeminiMode mode, String ... allowedFunctionNames) {
             this.functionCallingConfig = new GeminiFunctionCallingConfig(mode, Arrays.asList(allowedFunctionNames));
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * A list of unique SafetySetting instances for blocking unsafe content. This will be enforced on the
-         * {@code GenerateContentRequest.contents} and {@code GenerateContentResponse.candidates}. There should not
-         * be more than one setting for each SafetyCategory type. The API will block any contents and responses that
-         * fail to meet the thresholds set by these settings.
-         */
         public B safetySettings(Map<GeminiHarmCategory, GeminiHarmBlockThreshold> safetySettingMap) {
-            this.safetySettings = safetySettingMap.entrySet().stream()
-                    .map(entry -> new GeminiSafetySetting(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
-            return builder();
+            this.safetySettings = safetySettingMap.entrySet().stream().map(entry -> new GeminiSafetySetting((GeminiHarmCategory)((Object)((Object)entry.getKey())), (GeminiHarmBlockThreshold)((Object)((Object)entry.getValue())))).collect(Collectors.toList());
+            return this.builder();
         }
 
-        /**
-         * Controls the randomness of the output.
-         *
-         * <p><strong>Note:</strong> The default value varies by model, see the {@code Model.temperature} attribute
-         * of the Model returned from the getModel function.</p>
-         */
         public B temperature(Double temperature) {
             this.temperature = temperature;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * The maximum number of tokens to consider when sampling. The models use Top-p (nucleus) sampling or a
-         * combination of Top-k and nucleus sampling. Top-k sampling considers the set of topK most probable tokens.
-         * Models running with nucleus sampling don't allow topK setting.
-         *
-         * <p><strong>Note:</strong> The default value varies by Model and is specified by theModel.top_k attribute
-         * returned from the getModel function. An empty topK attribute indicates that the model doesn't apply
-         * top-k sampling and doesn't allow setting topK on requests.</p>
-         *
-         */
         public B topK(Integer topK) {
             this.topK = topK;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Seed used in decoding. If not set, the request uses a randomly generated seed.
-         */
         public B seed(Integer seed) {
             this.seed = seed;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * The maximum cumulative probability of tokens to consider when sampling. The model uses combined Top-k and
-         * Top-p (nucleus) sampling.
-         *
-         * <p>Tokens are sorted based on their assigned probabilities so that only the most likely tokens are
-         * considered. Top-k sampling directly limits the maximum number of tokens to consider, while Nucleus sampling
-         * limits the number of tokens based on the cumulative probability.</p>
-         *
-         * <p><strong>Note:</strong> The default value varies by Model and is specified by theModel.top_p attribute
-         * returned from the getModel function. An empty topK attribute indicates that the model doesn't apply
-         * top-k sampling and doesn't allow setting topK on requests.</p>
-         */
         public B topP(Double topP) {
             this.topP = topP;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Frequency penalty applied to the next token's {@code logprobs}, multiplied by the number of times each token
-         * has been seen in the respponse so far.
-         *
-         * <p>A positive penalty will discourage the use of tokens that have already been used, proportional to the
-         * number of times the token has been used: The more a token is used, the more difficult it is for the model
-         * to use that token again increasing the vocabulary of responses.</p>
-         *
-         * <p><strong>Caution:</strong>A negative penalty will encourage the model to reuse tokens proportional to the
-         * number of times the token has been used. Small negative values will reduce the vocabulary of a response.
-         * Larger negative values will cause the model to start repeating a common token until it hits the
-         * {@code maxOutputTokens} limit.</p>
-         */
         public B frequencyPenalty(Double frequencyPenalty) {
             this.frequencyPenalty = frequencyPenalty;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Presence penalty applied to the next token's {@code logprobs} if the token has already been seen in the response.
-         *
-         * <p>This penalty is binary on/off and not dependent on the number of times the token is used
-         * (after the first). Use frequencyPenalty for a penalty that increases with each use.</p>
-         *
-         * <ul>
-         *  <li>A positive penalty will discourage the use of tokens that have already been used in the response,
-         *  increasing the vocabulary.</li>
-         *  <li>A negative penalty will encourage the use of tokens that have already been used in the response,
-         *  decreasing the vocabulary.</li>
-         * </ul>
-         */
         public B presencePenalty(Double presencePenalty) {
             this.presencePenalty = presencePenalty;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * The maximum number of tokens to include in a response candidate.
-         *
-         * <p><strong>>Note:</strong> The default value varies by model, see the Model.output_token_limit attribute of
-         * the Model returned from the getModel function.</p>
-         */
         public B maxOutputTokens(Integer maxOutputTokens) {
             this.maxOutputTokens = maxOutputTokens;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Sets the {@code responseMimeType} and optionally {@code responseSchema} if
-         * {@link ResponseFormat#jsonSchema()} is set.
-         */
         public B responseFormat(ResponseFormat responseFormat) {
             this.responseFormat = responseFormat;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * The set of character sequences (up to 5) that will stop output generation. If specified, the API will
-         * stop at the first appearance of a stop_sequence. The stop sequence will not be included as
-         * part of the response.
-         */
         public B stopSequences(List<String> stopSequences) {
             this.stopSequences = stopSequences;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Enabled <a href="https://ai.google.dev/gemini-api/docs/code-execution">codeExecution tool</a> in Gemini.
-         */
         public B allowCodeExecution(Boolean allowCodeExecution) {
             this.allowCodeExecution = allowCodeExecution;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Enabled <a href="https://ai.google.dev/gemini-api/docs/google-search">Google Search tool</a> in Gemini.
-         */
         public B allowGoogleSearch(Boolean allowGoogleSearch) {
             this.allowGoogleSearch = allowGoogleSearch;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Enables <a href="https://ai.google.dev/gemini-api/docs/maps-grounding">Google Maps tool</a> in Gemini.
-         */
         public B allowGoogleMaps(Boolean allowGoogleMaps) {
             this.allowGoogleMaps = allowGoogleMaps;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Retrieve the Google Maps widget <a href="https://ai.google.dev/gemini-api/docs/maps-grounding#display_the_google_maps_contextual_widget">context token</a> in the response for use with the Google Maps JS API.
-         */
         public B retrieveGoogleMapsWidgetToken(Boolean retrieveGoogleMapsWidgetToken) {
             this.retrieveGoogleMapsWidgetToken = retrieveGoogleMapsWidgetToken;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Enabled <a href="https://ai.google.dev/gemini-api/docs/url-context">Url Context tool</a> in Gemini.
-         */
         public B allowUrlContext(Boolean allowUrlContext) {
             this.allowUrlContext = allowUrlContext;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Safety setting, affecting the safety-blocking behavior. Passing a safety setting for a category changes the
-         * allowed probability that content is blocked
-         */
         public B safetySettings(List<GeminiSafetySetting> safetySettings) {
             this.safetySettings = safetySettings;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Specifies the config to enable <a href="https://ai.google.dev/gemini-api/docs/thinking">thinking</a>.
-         *
-         * @see #returnThinking(Boolean)
-         * @see #sendThinking(Boolean)
-         */
         public B thinkingConfig(GeminiThinkingConfig thinkingConfig) {
             this.thinkingConfig = thinkingConfig;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Controls whether to return thinking/reasoning text (if available) inside {@link AiMessage#thinking()}.
-         * Please note that this does not enable thinking/reasoning for the LLM;
-         * it only controls whether to parse the {@code thought} block from the API response
-         * and return it inside the {@link AiMessage}.
-         * <p>
-         * Disabled by default.
-         * If enabled, the thinking text will be stored within the {@link AiMessage} and may be persisted.
-         * If enabled, thinking signatures will also be stored and returned inside the {@link AiMessage#attributes()}.
-         * <p>
-         * Please note that when {@code returnThinking} is not set (is {@code null}) and {@code thinkingConfig} is set,
-         * thinking/reasoning text will be prepended to the actual response inside the {@link AiMessage#text()} field.
-         *
-         * @see #thinkingConfig(GeminiThinkingConfig)
-         * @see #sendThinking(Boolean)
-         */
         public B returnThinking(Boolean returnThinking) {
             this.returnThinking = returnThinking;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Controls whether to send thinking/reasoning text to the LLM in follow-up requests.
-         *
-         * <p>
-         * Disabled by default.
-         * If enabled, the contents of {@link AiMessage#thinking()} will be sent in the API request.
-         * If enabled, thinking signatures (inside the {@link AiMessage#attributes()}) will also be sent.</p>
-         *
-         * @see #thinkingConfig(GeminiThinkingConfig)
-         * @see #returnThinking(Boolean)
-         */
         public B sendThinking(Boolean sendThinking) {
             this.sendThinking = sendThinking;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * If true, export the logprobs results in response.
-         */
         public B responseLogprobs(Boolean responseLogprobs) {
             this.responseLogprobs = responseLogprobs;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Only valid if responseLogprobs=True. This sets the number of top logprobs to return at each decoding step in
-         * the Candidate.logprobs_result. The number must be in the range of [0, 20].
-         */
         public B logprobs(Integer logprobs) {
             this.logprobs = logprobs;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Enables enhanced civic answers. It may not be available for all models.
-         */
         public B enableEnhancedCivicAnswers(Boolean enableEnhancedCivicAnswers) {
             this.enableEnhancedCivicAnswers = enableEnhancedCivicAnswers;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Sets the media resolution level for controlling how the Gemini API processes media inputs
-         * like images, videos, and PDF documents.
-         */
         public B mediaResolution(GeminiMediaResolutionLevel mediaResolution) {
             this.mediaResolution = mediaResolution;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Enables per-part media resolution mapping from {@link dev.langchain4j.data.message.ImageContent.DetailLevel}
-         * to {@link GeminiMediaResolutionLevel}.
-         *
-         * <p>When enabled, the {@code DetailLevel} set on each {@link dev.langchain4j.data.message.ImageContent}
-         * will be mapped to the corresponding {@code GeminiMediaResolutionLevel} and set on the per-part level.
-         * This is only supported by Gemini 3 models for now.</p>
-         *
-         * <p>The mapping is as follows:</p>
-         * <ul>
-         *   <li>{@code LOW} → {@code MEDIA_RESOLUTION_LOW}</li>
-         *   <li>{@code MEDIUM} → {@code MEDIA_RESOLUTION_MEDIUM}</li>
-         *   <li>{@code HIGH} → {@code MEDIA_RESOLUTION_HIGH}</li>
-         *   <li>{@code ULTRA_HIGH} → {@code MEDIA_RESOLUTION_ULTRA_HIGH}</li>
-         *   <li>{@code AUTO} → {@code MEDIA_RESOLUTION_UNSPECIFIED}</li>
-         * </ul>
-         *
-         * <p>Disabled by default. When disabled, the global {@link #mediaResolution(GeminiMediaResolutionLevel)}
-         * setting will be used for all media parts.</p>
-         *
-         * @see <a href="https://ai.google.dev/gemini-api/docs/media-resolution">Media Resolution Documentation</a>
-         */
         public B mediaResolutionPerPartEnabled(Boolean mediaResolutionPerPartEnabled) {
             this.mediaResolutionPerPartEnabled = mediaResolutionPerPartEnabled;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Sets the target aspect ratio for generated images.
-         * This is serialized to {@code generationConfig.imageConfig.aspectRatio}.
-         */
         public B aspectRatio(String aspectRatio) {
             this.aspectRatio = aspectRatio;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Alias for {@link #aspectRatio(String)}.
-         */
         public B imageAspectRatio(String imageAspectRatio) {
-            return aspectRatio(imageAspectRatio);
+            return this.aspectRatio(imageAspectRatio);
         }
 
-        /**
-         * Sets the target image size for generated images.
-         * This is serialized to {@code generationConfig.imageConfig.imageSize}.
-         */
         public B imageSize(String imageSize) {
             this.imageSize = imageSize;
-            return builder();
+            return this.builder();
         }
 
-        /**
-         * Sets the resource name of a previously created cache (e.g. {@code "cachedContents/abc123"}) to attach
-         * to every {@code generateContent} / {@code streamGenerateContent} request issued by this model. The cached
-         * context (system instructions, documents, etc.) will be reused server-side, reducing latency and token
-         * cost.
-         *
-         * <p>This integration does not manage the cache lifecycle (create / list / delete); callers are expected
-         * to create the cache out of band via the
-         * <a href="https://ai.google.dev/gemini-api/docs/caching">Gemini context caching API</a> and pass the
-         * returned resource name here.</p>
-         *
-         * <p>Can be overridden per-request via {@link GoogleAiGeminiChatRequestParameters#cachedContentName()}.</p>
-         */
         public B cachedContentName(String cachedContentName) {
             this.cachedContentName = cachedContentName;
-            return builder();
+            return this.builder();
         }
 
         public B customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
-            return builder();
+            return this.builder();
         }
 
         public B customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
-            return builder();
+            return this.builder();
         }
     }
 }
+

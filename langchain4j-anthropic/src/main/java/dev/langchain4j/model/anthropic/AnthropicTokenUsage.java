@@ -1,9 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.anthropic;
 
 import dev.langchain4j.model.output.TokenUsage;
 
-public class AnthropicTokenUsage extends TokenUsage {
-
+public class AnthropicTokenUsage
+extends TokenUsage {
     private final Integer cacheCreationInputTokens;
     private final Integer cacheReadInputTokens;
 
@@ -13,63 +19,39 @@ public class AnthropicTokenUsage extends TokenUsage {
         this.cacheReadInputTokens = builder.cacheReadInputTokens;
     }
 
-    /**
-     * Returns The total cached token created count, or null if unknown.
-     *
-     * @return The total cached token created count, or null if unknown.
-     */
     public Integer cacheCreationInputTokens() {
-        return cacheCreationInputTokens;
+        return this.cacheCreationInputTokens;
     }
 
-    /**
-     * Returns The total cached token read count, or null if unknown.
-     *
-     * @return The total cached token read count, or null if unknown.
-     */
     public Integer cacheReadInputTokens() {
-        return cacheReadInputTokens;
+        return this.cacheReadInputTokens;
     }
 
-    @Override
     public AnthropicTokenUsage add(TokenUsage that) {
         if (that == null) {
             return this;
         }
-
-        return builder()
-                .inputTokenCount(sum(this.inputTokenCount(), that.inputTokenCount()))
-                .outputTokenCount(sum(this.outputTokenCount(), that.outputTokenCount()))
-                .cacheCreationInputTokens(addCacheCreationInputTokens(that))
-                .cacheReadInputTokens(addCacheReadInputTokens(that))
-                .build();
+        return AnthropicTokenUsage.builder().inputTokenCount(AnthropicTokenUsage.sum((Integer)this.inputTokenCount(), (Integer)that.inputTokenCount())).outputTokenCount(AnthropicTokenUsage.sum((Integer)this.outputTokenCount(), (Integer)that.outputTokenCount())).cacheCreationInputTokens(this.addCacheCreationInputTokens(that)).cacheReadInputTokens(this.addCacheReadInputTokens(that)).build();
     }
 
     private Integer addCacheCreationInputTokens(TokenUsage that) {
-        if (that instanceof AnthropicTokenUsage thatAnthropicTokenUsage) {
-            return sum(this.cacheCreationInputTokens, thatAnthropicTokenUsage.cacheCreationInputTokens);
-        } else {
-            return this.cacheCreationInputTokens;
+        if (that instanceof AnthropicTokenUsage) {
+            AnthropicTokenUsage thatAnthropicTokenUsage = (AnthropicTokenUsage)that;
+            return AnthropicTokenUsage.sum((Integer)this.cacheCreationInputTokens, (Integer)thatAnthropicTokenUsage.cacheCreationInputTokens);
         }
+        return this.cacheCreationInputTokens;
     }
 
     private Integer addCacheReadInputTokens(TokenUsage that) {
-        if (that instanceof AnthropicTokenUsage thatAnthropicTokenUsage) {
-            return sum(this.cacheReadInputTokens, thatAnthropicTokenUsage.cacheReadInputTokens);
-        } else {
-            return this.cacheReadInputTokens;
+        if (that instanceof AnthropicTokenUsage) {
+            AnthropicTokenUsage thatAnthropicTokenUsage = (AnthropicTokenUsage)that;
+            return AnthropicTokenUsage.sum((Integer)this.cacheReadInputTokens, (Integer)thatAnthropicTokenUsage.cacheReadInputTokens);
         }
+        return this.cacheReadInputTokens;
     }
 
-    @Override
     public String toString() {
-        return "AnthropicTokenUsage {" +
-                " inputTokenCount = " + inputTokenCount() +
-                ", outputTokenCount = " + outputTokenCount() +
-                ", totalTokenCount = " + totalTokenCount() +
-                ", cacheCreationInputTokens = " + cacheCreationInputTokens +
-                ", cacheReadInputTokens = " + cacheReadInputTokens +
-                " }";
+        return "AnthropicTokenUsage { inputTokenCount = " + this.inputTokenCount() + ", outputTokenCount = " + this.outputTokenCount() + ", totalTokenCount = " + this.totalTokenCount() + ", cacheCreationInputTokens = " + this.cacheCreationInputTokens + ", cacheReadInputTokens = " + this.cacheReadInputTokens + " }";
     }
 
     public static Builder builder() {
@@ -77,7 +59,6 @@ public class AnthropicTokenUsage extends TokenUsage {
     }
 
     public static class Builder {
-
         private Integer inputTokenCount;
         private Integer outputTokenCount;
         private Integer cacheCreationInputTokens;
@@ -108,3 +89,4 @@ public class AnthropicTokenUsage extends TokenUsage {
         }
     }
 }
+

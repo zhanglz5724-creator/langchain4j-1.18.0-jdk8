@@ -1,6 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -8,15 +18,16 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiCategories;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiCategoryScores;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiModerationResult.MistralModerationResultBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralModerationResultBuilder.class)
 public class MistralAiModerationResult {
-
     private final MistralAiCategories categories;
     private final MistralAiCategoryScores categoryScores;
 
@@ -26,14 +37,13 @@ public class MistralAiModerationResult {
     }
 
     public MistralAiCategories getCategories() {
-        return categories;
+        return this.categories;
     }
 
     public MistralAiCategoryScores getCategoryScores() {
-        return categoryScores;
+        return this.categoryScores;
     }
 
-    @Override
     public int hashCode() {
         int hash = 3;
         hash = 83 * hash + Objects.hashCode(this.categories);
@@ -41,37 +51,37 @@ public class MistralAiModerationResult {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        final MistralAiModerationResult other = (MistralAiModerationResult) obj;
-        return Objects.equals(this.categories, other.categories)
-                && Objects.equals(this.categoryScores, other.categoryScores);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        MistralAiModerationResult other = (MistralAiModerationResult)obj;
+        return Objects.equals(this.categories, other.categories) && Objects.equals(this.categoryScores, other.categoryScores);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiModerationResult [", "]")
-                .add("categories=" + this.getCategories())
-                .add("categoryScores=" + this.getCategoryScores())
-                .toString();
+        return new StringJoiner(", ", "MistralAiModerationResult [", "]").add("categories=" + this.getCategories()).add("categoryScores=" + this.getCategoryScores()).toString();
     }
 
     public static MistralModerationResultBuilder builder() {
         return new MistralModerationResultBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralModerationResultBuilder {
-
         private MistralAiCategories categories;
         private MistralAiCategoryScores categoryScores;
 
-        private MistralModerationResultBuilder() {}
+        private MistralModerationResultBuilder() {
+        }
 
         public MistralModerationResultBuilder categories(MistralAiCategories categories) {
             this.categories = categories;
@@ -88,3 +98,4 @@ public class MistralAiModerationResult {
         }
     }
 }
+

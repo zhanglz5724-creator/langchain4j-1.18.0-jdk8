@@ -1,31 +1,42 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.observability;
 
+import dev.langchain4j.agentic.observability.AfterAgentToolExecution;
+import dev.langchain4j.agentic.observability.AgentInvocationError;
+import dev.langchain4j.agentic.observability.AgentRequest;
+import dev.langchain4j.agentic.observability.AgentResponse;
+import dev.langchain4j.agentic.observability.BeforeAgentToolExecution;
 import dev.langchain4j.agentic.scope.AgenticScope;
 
-/**
- * Listener interface for monitoring agent invocations.
- */
 public interface AgentListener {
+    default public void beforeAgentInvocation(AgentRequest agentRequest) {
+    }
 
-    default void beforeAgentInvocation(AgentRequest agentRequest) { }
-    default void afterAgentInvocation(AgentResponse agentResponse) { }
-    default void onAgentInvocationError(AgentInvocationError agentInvocationError) { }
+    default public void afterAgentInvocation(AgentResponse agentResponse) {
+    }
 
-    default void afterAgenticScopeCreated(AgenticScope agenticScope) { }
-    default void beforeAgenticScopeDestroyed(AgenticScope agenticScope) { }
+    default public void onAgentInvocationError(AgentInvocationError agentInvocationError) {
+    }
 
-    default void onAgenticSystemSuspended(AgenticScope agenticScope) { }
+    default public void afterAgenticScopeCreated(AgenticScope agenticScope) {
+    }
 
-    default void beforeAgentToolExecution(BeforeAgentToolExecution beforeAgentToolExecution) { }
-    default void afterAgentToolExecution(AfterAgentToolExecution afterAgentToolExecution) { }
+    default public void beforeAgenticScopeDestroyed(AgenticScope agenticScope) {
+    }
 
-    /**
-     * Indicates whether this listener should be used only to the agent where it is registered (default)
-     * or also inherited by its subagents.
-     *
-     * @return true if the listener should be inherited by sub-agents, false otherwise
-     */
-    default boolean inheritedBySubagents() {
+    default public void onAgenticSystemSuspended(AgenticScope agenticScope) {
+    }
+
+    default public void beforeAgentToolExecution(BeforeAgentToolExecution beforeAgentToolExecution) {
+    }
+
+    default public void afterAgentToolExecution(AfterAgentToolExecution afterAgentToolExecution) {
+    }
+
+    default public boolean inheritedBySubagents() {
         return false;
     }
 }
+

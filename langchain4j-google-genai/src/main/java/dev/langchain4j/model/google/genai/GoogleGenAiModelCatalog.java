@@ -1,6 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.auth.oauth2.GoogleCredentials
+ *  com.google.genai.Client
+ *  com.google.genai.types.ListModelsConfig
+ *  com.google.genai.types.Model
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.catalog.ModelCatalog
+ *  dev.langchain4j.model.catalog.ModelDescription
+ *  dev.langchain4j.model.catalog.ModelDescription$Builder
+ *  dev.langchain4j.model.catalog.ModelType
+ */
 package dev.langchain4j.model.google.genai;
-
-import static dev.langchain4j.model.ModelProvider.GOOGLE_GENAI;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
@@ -10,103 +22,65 @@ import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.catalog.ModelCatalog;
 import dev.langchain4j.model.catalog.ModelDescription;
 import dev.langchain4j.model.catalog.ModelType;
+import dev.langchain4j.model.google.genai.GoogleGenAiClientFactory;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Google GenAI implementation of {@link ModelCatalog}.
- *
- * <p>Uses the Gemini Models API to dynamically discover available models.
- *
- * <p>Example:
- * <pre>{@code
- * GoogleGenAiModelCatalog catalog = GoogleGenAiModelCatalog.builder()
- *     .apiKey(System.getenv("GOOGLE_AI_GEMINI_API_KEY"))
- *     .build();
- *
- * List<ModelDescription> models = catalog.listModels();
- * }</pre>
- */
-public class GoogleGenAiModelCatalog implements ModelCatalog {
-
+public class GoogleGenAiModelCatalog
+implements ModelCatalog {
     private final Client client;
 
     private GoogleGenAiModelCatalog(Builder builder) {
-        this.client = builder.client != null
-                ? builder.client
-                : GoogleGenAiClientFactory.createClient(
-                        builder.apiKey,
-                        builder.credentials,
-                        builder.projectId,
-                        builder.location,
-                        builder.timeout,
-                        builder.customHeaders,
-                        builder.apiEndpoint);
+        this.client = builder.client != null ? builder.client : GoogleGenAiClientFactory.createClient(builder.apiKey, builder.credentials, builder.projectId, builder.location, builder.timeout, builder.customHeaders, builder.apiEndpoint);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public List<ModelDescription> listModels() {
-        List<ModelDescription> allModels = new ArrayList<>();
-
-        client.models.list(ListModelsConfig.builder().build()).forEach(modelInfo -> {
-            allModels.add(mapToModelDescription(modelInfo));
-        });
-
+        ArrayList<ModelDescription> allModels = new ArrayList<ModelDescription>();
+        this.client.models.list(ListModelsConfig.builder().build()).forEach(modelInfo -> allModels.add(this.mapToModelDescription((Model)modelInfo)));
         return allModels;
     }
 
-    @Override
     public ModelProvider provider() {
-        return GOOGLE_GENAI;
+        return ModelProvider.GOOGLE_GENAI;
     }
 
     private ModelDescription mapToModelDescription(Model modelInfo) {
-        ModelDescription.Builder builder = ModelDescription.builder().provider(GOOGLE_GENAI);
-
+        ModelDescription.Builder builder = ModelDescription.builder().provider(ModelProvider.GOOGLE_GENAI);
         if (modelInfo.name().isPresent()) {
-            String name = modelInfo.name().get();
+            String name = (String)modelInfo.name().get();
             String id = name.startsWith("models/") ? name.substring(7) : name;
             builder.name(id);
         }
-
-        if (modelInfo.displayName().isPresent()
-                && !modelInfo.displayName().get().isEmpty()) {
-            builder.displayName(modelInfo.displayName().get());
+        if (modelInfo.displayName().isPresent() && !((String)modelInfo.displayName().get()).isEmpty()) {
+            builder.displayName((String)modelInfo.displayName().get());
         }
-
         if (modelInfo.description().isPresent()) {
-            builder.description(modelInfo.description().get());
+            builder.description((String)modelInfo.description().get());
         }
-
         if (modelInfo.inputTokenLimit().isPresent()) {
-            builder.maxInputTokens(modelInfo.inputTokenLimit().get());
+            builder.maxInputTokens((Integer)modelInfo.inputTokenLimit().get());
         }
-
         if (modelInfo.outputTokenLimit().isPresent()) {
-            builder.maxOutputTokens(modelInfo.outputTokenLimit().get());
+            builder.maxOutputTokens((Integer)modelInfo.outputTokenLimit().get());
         }
-
-        // Determine model type based on supported generation methods
         if (modelInfo.supportedActions().isPresent()) {
-            List<String> actions = modelInfo.supportedActions().get();
+            List actions = (List)modelInfo.supportedActions().get();
             if (actions.contains("generateContent")) {
                 builder.type(ModelType.CHAT);
             } else if (actions.contains("embedContent")) {
                 builder.type(ModelType.EMBEDDING);
             }
         }
-
         return builder.build();
     }
 
     public static class Builder {
-
         private String apiKey;
         private GoogleCredentials credentials;
         private String projectId;
@@ -161,3 +135,4 @@ public class GoogleGenAiModelCatalog implements ModelCatalog {
         }
     }
 }
+

@@ -1,127 +1,70 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.ibm.watsonx.ai.embedding.EmbeddingParameters
+ *  com.ibm.watsonx.ai.embedding.EmbeddingResponse
+ *  com.ibm.watsonx.ai.embedding.EmbeddingResponse$Result
+ *  com.ibm.watsonx.ai.embedding.EmbeddingService
+ *  com.ibm.watsonx.ai.embedding.EmbeddingService$Builder
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.model.embedding.EmbeddingModel
+ *  dev.langchain4j.model.output.Response
+ */
 package dev.langchain4j.model.watsonx;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 import com.ibm.watsonx.ai.embedding.EmbeddingParameters;
 import com.ibm.watsonx.ai.embedding.EmbeddingResponse;
-import com.ibm.watsonx.ai.embedding.EmbeddingResponse.Result;
 import com.ibm.watsonx.ai.embedding.EmbeddingService;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.watsonx.WatsonxBuilder;
+import dev.langchain4j.model.watsonx.WatsonxExceptionMapper;
 import java.util.List;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-/**
- * A {@link EmbeddingModel} implementation that integrates IBM watsonx.ai with LangChain4j.
- * <p>
- * <b>Example usage:</b>
- *
- * <pre>{@code
- * EmbeddingModel embeddingModel = WatsonxEmbeddingModel.builder()
- *     .baseUrl("https://...") // or use CloudRegion
- *     .apiKey("...")
- *     .projectId("...")
- *     .modelName("ibm/granite-embedding-278m-multilingual")
- *     .build();
- * }</pre>
- *
- */
-public class WatsonxEmbeddingModel implements EmbeddingModel {
-
+public class WatsonxEmbeddingModel
+implements EmbeddingModel {
     private final EmbeddingService embeddingService;
     private final String modelName;
 
     private WatsonxEmbeddingModel(Builder builder) {
-
-        EmbeddingService.Builder embeddingServiceBuilder = nonNull(builder.authenticator)
-                ? EmbeddingService.builder().authenticator(builder.authenticator)
-                : EmbeddingService.builder().apiKey(builder.apiKey);
-
-        embeddingService = embeddingServiceBuilder
-                .baseUrl(builder.baseUrl)
-                .modelId(builder.modelName)
-                .version(builder.version)
-                .projectId(builder.projectId)
-                .spaceId(builder.spaceId)
-                .timeout(builder.timeout)
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .httpClient(builder.httpClient)
-                .verifySsl(builder.verifySsl)
-                .build();
+        EmbeddingService.Builder embeddingServiceBuilder = Objects.nonNull(builder.authenticator) ? (EmbeddingService.Builder)EmbeddingService.builder().authenticator(builder.authenticator) : (EmbeddingService.Builder)EmbeddingService.builder().apiKey(builder.apiKey);
+        this.embeddingService = ((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)((EmbeddingService.Builder)embeddingServiceBuilder.baseUrl(builder.baseUrl)).modelId(builder.modelName)).version(builder.version)).projectId(builder.projectId)).spaceId(builder.spaceId)).timeout(builder.timeout)).logRequests(builder.logRequests)).logResponses(builder.logResponses)).httpClient(builder.httpClient)).verifySsl(builder.verifySsl)).build();
         this.modelName = builder.modelName;
     }
 
-    @Override
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-        return embedAll(textSegments, null);
+        return this.embedAll(textSegments, null);
     }
 
-    @Override
     public String modelName() {
         return this.modelName;
     }
 
-    /**
-     * Embeds the text content of a list of TextSegment using the specified {@link EmbeddingParameters}.
-     *
-     * @param textSegments the text segments to embed.
-     * @param parameters the embedding parameters to use.
-     * @return the embeddings.
-     */
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments, EmbeddingParameters parameters) {
-
-        if (isNull(textSegments) || textSegments.isEmpty()) return Response.from(Collections.emptyList());
-
-        List<String> inputs = textSegments.stream().map(TextSegment::text).collect(Collectors.toList());
-
-        EmbeddingResponse response = WatsonxExceptionMapper.INSTANCE.withExceptionMapper(
-                () -> embeddingService.embedding(inputs, parameters));
-
-        return Response.from(response.results().stream()
-                .map(Result::embedding)
-                .map(Embedding::from)
-                .collect(Collectors.toList()));
+        if (Objects.isNull(textSegments) || textSegments.isEmpty()) {
+            return Response.from((Object)List.of());
+        }
+        List inputs = textSegments.stream().map(TextSegment::text).toList();
+        EmbeddingResponse response = (EmbeddingResponse)WatsonxExceptionMapper.INSTANCE.withExceptionMapper(() -> this.embeddingService.embedding(inputs, parameters));
+        return Response.from((Object)response.results().stream().map(EmbeddingResponse.Result::embedding).map(Embedding::from).toList());
     }
 
-    /**
-     * Returns a new {@link Builder} instance.
-     * <p>
-     * <b>Example usage:</b>
-     *
-     * <pre>{@code
-     * EmbeddingModel embeddingModel = WatsonxEmbeddingModel.builder()
-     *     .baseUrl("https://...") // or use CloudRegion
-     *     .apiKey("...")
-     *     .projectId("...")
-     *     .modelName("ibm/granite-embedding-278m-multilingual")
-     *     .build();
-     * }</pre>
-     *
-     * @return {@link Builder} instance.
-     */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Builder class for constructing {@link WatsonxEmbeddingModel} instances with configurable parameters.
-     */
-    public static class Builder extends WatsonxBuilder<Builder> {
+    public static class Builder
+    extends WatsonxBuilder<Builder> {
         private String modelName;
 
-        private Builder() {}
+        private Builder() {
+        }
 
-        /**
-         * Sets the watsonx.ai embedding model ID, e.g. {@code "ibm/slate-125m-english-rtrvr"}.
-         *
-         * @param modelName the model ID
-         * @return {@code this}
-         */
         public Builder modelName(String modelName) {
             this.modelName = modelName;
             return this;
@@ -132,3 +75,4 @@ public class WatsonxEmbeddingModel implements EmbeddingModel {
         }
     }
 }
+

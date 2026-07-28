@@ -1,28 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.planner;
 
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.buildAgentFeatures;
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.checkReturnType;
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.configureOutput;
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.invokeStatic;
-import static dev.langchain4j.agentic.internal.AgentUtil.getAnnotatedMethodOnClass;
-import static dev.langchain4j.agentic.internal.AgentUtil.validateAgentClass;
-
-import java.lang.reflect.Method;
-import java.util.function.Supplier;
+import dev.langchain4j.agentic.declarative.DeclarativeUtil;
 import dev.langchain4j.agentic.declarative.PlannerSupplier;
 import dev.langchain4j.agentic.internal.AbstractServiceBuilder;
+import dev.langchain4j.agentic.internal.AgentUtil;
+import dev.langchain4j.agentic.planner.Planner;
+import dev.langchain4j.agentic.planner.PlannerBasedService;
+import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-public class PlannerBasedServiceImpl<T> extends AbstractServiceBuilder<T, PlannerBasedService<T>> implements PlannerBasedService<T> {
-
+public class PlannerBasedServiceImpl<T>
+extends AbstractServiceBuilder<T, PlannerBasedService<T>>
+implements PlannerBasedService<T> {
     private Supplier<Planner> plannerSupplier;
 
     public PlannerBasedServiceImpl(Class<T> agentServiceClass, Method agenticMethod) {
         super(agentServiceClass, agenticMethod);
-        configurePlanner(agentServiceClass);
+        this.configurePlanner(agentServiceClass);
     }
 
     public static <T> PlannerBasedService<T> builder(Class<T> agentServiceClass) {
-        return new PlannerBasedServiceImpl<>(agentServiceClass, validateAgentClass(agentServiceClass, false));
+        return new PlannerBasedServiceImpl<T>(agentServiceClass, AgentUtil.validateAgentClass(agentServiceClass, false));
     }
 
     @Override
@@ -38,20 +40,19 @@ public class PlannerBasedServiceImpl<T> extends AbstractServiceBuilder<T, Planne
 
     @Override
     public T build() {
-        return build(plannerSupplier);
+        return this.build(this.plannerSupplier);
     }
 
     private void configurePlanner(Class<T> agentServiceClass) {
-        configureOutput(agentServiceClass, this);
-        buildAgentFeatures(agentServiceClass, this);
-
-        getAnnotatedMethodOnClass(agentServiceClass, PlannerSupplier.class)
-                .ifPresentOrElse(
-                        method -> {
-                            checkReturnType(method, Planner.class);
-                            planner(() -> invokeStatic(method));
-                        },
-                        () -> new IllegalArgumentException(
-                                "A planner agent requires a method annotated with @PlannerSupplier that returns the Planner instance."));
+        DeclarativeUtil.configureOutput(agentServiceClass, this);
+        DeclarativeUtil.buildAgentFeatures(agentServiceClass, this);
+        Optional<Method> suppliedPlanner = AgentUtil.getAnnotatedMethodOnClass(agentServiceClass, PlannerSupplier.class);
+        if (!suppliedPlanner.isPresent()) {
+            throw new IllegalArgumentException("A planner agent requires a method annotated with @PlannerSupplier that returns the Planner instance.");
+        }
+        Method method = suppliedPlanner.get();
+        DeclarativeUtil.checkReturnType(method, Planner.class);
+        this.planner(() -> (Planner)DeclarativeUtil.invokeStatic(method, new Object[0]));
     }
 }
+

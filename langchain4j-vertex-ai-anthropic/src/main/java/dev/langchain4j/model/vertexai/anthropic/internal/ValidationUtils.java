@@ -1,16 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.vertexai.anthropic.internal;
 
-/**
- * Utility class for common validation and listener notification methods.
- */
 public final class ValidationUtils {
-
-    /**
-     * Validates that maxTokens is within acceptable range.
-     */
     public static Integer validateMaxTokens(Integer maxTokens) {
         if (maxTokens == null) {
-            return Constants.DEFAULT_MAX_TOKENS;
+            return 4096;
         }
         if (maxTokens < 1 || maxTokens > 200000) {
             throw new IllegalArgumentException("maxTokens must be between 1 and 200000");
@@ -18,9 +14,6 @@ public final class ValidationUtils {
         return maxTokens;
     }
 
-    /**
-     * Validates that temperature is within acceptable range.
-     */
     public static Double validateTemperature(Double temperature) {
         if (temperature == null) {
             return null;
@@ -31,9 +24,6 @@ public final class ValidationUtils {
         return temperature;
     }
 
-    /**
-     * Validates that topP is within acceptable range.
-     */
     public static Double validateTopP(Double topP) {
         if (topP == null) {
             return null;
@@ -44,9 +34,6 @@ public final class ValidationUtils {
         return topP;
     }
 
-    /**
-     * Validates that topK is within acceptable range.
-     */
     public static Integer validateTopK(Integer topK) {
         if (topK == null) {
             return null;
@@ -57,3 +44,4 @@ public final class ValidationUtils {
         return topK;
     }
 }
+

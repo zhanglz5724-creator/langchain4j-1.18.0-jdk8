@@ -1,9 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  dev.langchain4j.store.embedding.filter.comparison.IsEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsIn
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotIn
+ *  dev.langchain4j.store.embedding.filter.logical.And
+ *  dev.langchain4j.store.embedding.filter.logical.Not
+ *  dev.langchain4j.store.embedding.filter.logical.Or
+ */
 package dev.langchain4j.store.embedding.mariadb;
 
-import static java.lang.String.format;
-
 import dev.langchain4j.store.embedding.filter.Filter;
-import dev.langchain4j.store.embedding.filter.comparison.*;
+import dev.langchain4j.store.embedding.filter.comparison.IsEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan;
+import dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsIn;
+import dev.langchain4j.store.embedding.filter.comparison.IsLessThan;
+import dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsNotIn;
 import dev.langchain4j.store.embedding.filter.logical.And;
 import dev.langchain4j.store.embedding.filter.logical.Not;
 import dev.langchain4j.store.embedding.filter.logical.Or;
@@ -12,98 +34,109 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 abstract class MariaDbFilterMapper {
+    MariaDbFilterMapper() {
+    }
 
     public String map(Filter filter) {
         if (filter instanceof IsEqualTo) {
-            return mapEqual((IsEqualTo) filter);
-        } else if (filter instanceof IsNotEqualTo) {
-            return mapNotEqual((IsNotEqualTo) filter);
-        } else if (filter instanceof IsGreaterThan) {
-            return mapGreaterThan((IsGreaterThan) filter);
-        } else if (filter instanceof IsGreaterThanOrEqualTo) {
-            return mapGreaterThanOrEqual((IsGreaterThanOrEqualTo) filter);
-        } else if (filter instanceof IsLessThan) {
-            return mapLessThan((IsLessThan) filter);
-        } else if (filter instanceof IsLessThanOrEqualTo) {
-            return mapLessThanOrEqual((IsLessThanOrEqualTo) filter);
-        } else if (filter instanceof IsIn) {
-            return mapIn((IsIn) filter);
-        } else if (filter instanceof IsNotIn) {
-            return mapNotIn((IsNotIn) filter);
-        } else if (filter instanceof And) {
-            return mapAnd((And) filter);
-        } else if (filter instanceof Not) {
-            return mapNot((Not) filter);
-        } else if (filter instanceof Or) {
-            return mapOr((Or) filter);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Unsupported filter type: " + filter.getClass().getName());
+            return this.mapEqual((IsEqualTo)filter);
         }
+        if (filter instanceof IsNotEqualTo) {
+            return this.mapNotEqual((IsNotEqualTo)filter);
+        }
+        if (filter instanceof IsGreaterThan) {
+            return this.mapGreaterThan((IsGreaterThan)filter);
+        }
+        if (filter instanceof IsGreaterThanOrEqualTo) {
+            return this.mapGreaterThanOrEqual((IsGreaterThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsLessThan) {
+            return this.mapLessThan((IsLessThan)filter);
+        }
+        if (filter instanceof IsLessThanOrEqualTo) {
+            return this.mapLessThanOrEqual((IsLessThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsIn) {
+            return this.mapIn((IsIn)filter);
+        }
+        if (filter instanceof IsNotIn) {
+            return this.mapNotIn((IsNotIn)filter);
+        }
+        if (filter instanceof And) {
+            return this.mapAnd((And)filter);
+        }
+        if (filter instanceof Not) {
+            return this.mapNot((Not)filter);
+        }
+        if (filter instanceof Or) {
+            return this.mapOr((Or)filter);
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private String mapEqual(IsEqualTo isEqualTo) {
-        String key = formatKey(isEqualTo.key());
-        return format("%s is not null and %s = %s", key, key, formatValue(isEqualTo.comparisonValue()));
+        String key = this.formatKey(isEqualTo.key());
+        return String.format("%s is not null and %s = %s", key, key, this.formatValue(isEqualTo.comparisonValue()));
     }
 
     private String mapNotEqual(IsNotEqualTo isNotEqualTo) {
-        String key = formatKey(isNotEqualTo.key());
-        return format("(%s is null or %s != %s)", key, key, formatValue(isNotEqualTo.comparisonValue()));
+        String key = this.formatKey(isNotEqualTo.key());
+        return String.format("(%s is null or %s != %s)", key, key, this.formatValue(isNotEqualTo.comparisonValue()));
     }
 
     private String mapGreaterThan(IsGreaterThan isGreaterThan) {
-        return format("%s > %s", formatKey(isGreaterThan.key()), formatValue(isGreaterThan.comparisonValue()));
+        return String.format("%s > %s", this.formatKey(isGreaterThan.key()), this.formatValue(isGreaterThan.comparisonValue()));
     }
 
     private String mapGreaterThanOrEqual(IsGreaterThanOrEqualTo isGreaterThanOrEqualTo) {
-        return format(
-                "%s >= %s",
-                formatKey(isGreaterThanOrEqualTo.key()), formatValue(isGreaterThanOrEqualTo.comparisonValue()));
+        return String.format("%s >= %s", this.formatKey(isGreaterThanOrEqualTo.key()), this.formatValue(isGreaterThanOrEqualTo.comparisonValue()));
     }
 
     private String mapLessThan(IsLessThan isLessThan) {
-        return format("%s < %s", formatKey(isLessThan.key()), formatValue(isLessThan.comparisonValue()));
+        return String.format("%s < %s", this.formatKey(isLessThan.key()), this.formatValue(isLessThan.comparisonValue()));
     }
 
     private String mapLessThanOrEqual(IsLessThanOrEqualTo isLessThanOrEqualTo) {
-        return format(
-                "%s <= %s", formatKey(isLessThanOrEqualTo.key()), formatValue(isLessThanOrEqualTo.comparisonValue()));
+        return String.format("%s <= %s", this.formatKey(isLessThanOrEqualTo.key()), this.formatValue(isLessThanOrEqualTo.comparisonValue()));
     }
 
     private String mapIn(IsIn isIn) {
-        return format("%s in %s", formatKey(isIn.key()), formatValue(isIn.comparisonValues()));
+        return String.format("%s in %s", this.formatKey(isIn.key()), this.formatValue(isIn.comparisonValues()));
     }
 
     private String mapNotIn(IsNotIn isNotIn) {
-        String key = formatKey(isNotIn.key());
-        return format("(%s is null or %s not in %s)", key, key, formatValue(isNotIn.comparisonValues()));
+        String key = this.formatKey(isNotIn.key());
+        return String.format("(%s is null or %s not in %s)", key, key, this.formatValue(isNotIn.comparisonValues()));
     }
 
     private String mapAnd(And and) {
-        return format("%s and %s", map(and.left()), map(and.right()));
+        return String.format("%s and %s", this.map(and.left()), this.map(and.right()));
     }
 
     private String mapNot(Not not) {
-        return format("not (%s)", map(not.expression()));
+        return String.format("not (%s)", this.map(not.expression()));
     }
 
     private String mapOr(Or or) {
-        return format("(%s or %s)", map(or.left()), map(or.right()));
+        return String.format("(%s or %s)", this.map(or.left()), this.map(or.right()));
     }
 
-    abstract String formatKey(String key);
+    abstract String formatKey(String var1);
 
     String formatValue(Object value) {
-        if (value instanceof final Collection<?> vals) {
+        if (value instanceof Collection) {
+            Collection vals = (Collection)value;
             return "(" + vals.stream().map(this::formatValue).collect(Collectors.joining(",")) + ")";
-        } else if (value instanceof String stringValue) {
-            final String escapedValue = stringValue.replace("\\", "\\\\").replace("'", "''");
-            return "'" + escapedValue + "'";
-        } else if (value instanceof UUID) {
-            return "'" + value + "'";
-        } else {
-            return value.toString();
         }
+        if (value instanceof String) {
+            String stringValue = (String)value;
+            String escapedValue = stringValue.replace("\\", "\\\\").replace("'", "''");
+            return "'" + escapedValue + "'";
+        }
+        if (value instanceof UUID) {
+            return "'" + value + "'";
+        }
+        return value.toString();
     }
 }
+

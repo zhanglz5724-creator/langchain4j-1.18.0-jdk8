@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.shared;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,14 +22,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
 import java.util.Objects;
 
-@JsonDeserialize(builder = PromptTokensDetails.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class PromptTokensDetails {
-
     @JsonProperty
     private final Integer cachedTokens;
 
@@ -24,47 +36,42 @@ public final class PromptTokensDetails {
     }
 
     public Integer cachedTokens() {
-        return cachedTokens;
+        return this.cachedTokens;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof PromptTokensDetails
-                && equalTo((PromptTokensDetails) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof PromptTokensDetails && this.equalTo((PromptTokensDetails)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(PromptTokensDetails another) {
-        return Objects.equals(cachedTokens, another.cachedTokens);
+        return Objects.equals(this.cachedTokens, another.cachedTokens);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(cachedTokens);
+        h += (h << 5) + Objects.hashCode(this.cachedTokens);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "PromptTokensDetails{"
-                + "cachedTokens=" + cachedTokens
-                + "}";
+        return "PromptTokensDetails{cachedTokens=" + this.cachedTokens + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private Integer cachedTokens;
 
         public Builder cachedTokens(Integer cachedTokens) {
@@ -77,3 +84,4 @@ public final class PromptTokensDetails {
         }
     }
 }
+

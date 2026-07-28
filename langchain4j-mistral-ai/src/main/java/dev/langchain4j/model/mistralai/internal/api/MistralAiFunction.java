@@ -1,20 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiParameters;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiFunction.MistralAiFunctionBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralAiFunctionBuilder.class)
 public class MistralAiFunction {
     private String name;
     private String description;
@@ -42,7 +53,6 @@ public class MistralAiFunction {
         this.name = name;
     }
 
-    @Override
     public int hashCode() {
         int hash = 3;
         hash = 79 * hash + Objects.hashCode(this.name);
@@ -51,58 +61,46 @@ public class MistralAiFunction {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        final MistralAiFunction other = (MistralAiFunction) obj;
-        return Objects.equals(this.name, other.name)
-                && Objects.equals(this.description, other.description)
-                && Objects.equals(this.parameters, other.parameters);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        MistralAiFunction other = (MistralAiFunction)obj;
+        return Objects.equals(this.name, other.name) && Objects.equals(this.description, other.description) && Objects.equals(this.parameters, other.parameters);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiFunction [", "]")
-                .add("name=" + this.getName())
-                .add("description=" + this.getDescription())
-                .add("parameters=" + this.getParameters())
-                .toString();
+        return new StringJoiner(", ", "MistralAiFunction [", "]").add("name=" + this.getName()).add("description=" + this.getDescription()).add("parameters=" + this.getParameters()).toString();
     }
 
-    public static MistralAiFunction.MistralAiFunctionBuilder builder() {
-        return new MistralAiFunction.MistralAiFunctionBuilder();
+    public static MistralAiFunctionBuilder builder() {
+        return new MistralAiFunctionBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiFunctionBuilder {
         private String name;
         private String description;
         private MistralAiParameters parameters;
 
-        private MistralAiFunctionBuilder() {}
+        private MistralAiFunctionBuilder() {
+        }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiFunctionBuilder name(String name) {
             this.name = name;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiFunctionBuilder description(String description) {
             this.description = description;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiFunctionBuilder parameters(MistralAiParameters parameters) {
             this.parameters = parameters;
             return this;
@@ -113,3 +111,4 @@ public class MistralAiFunction {
         }
     }
 }
+

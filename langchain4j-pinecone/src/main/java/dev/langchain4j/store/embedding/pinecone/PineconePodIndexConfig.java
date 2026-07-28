@@ -1,22 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ *  io.pinecone.clients.Pinecone
+ */
 package dev.langchain4j.store.embedding.pinecone;
 
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.store.embedding.pinecone.PineconeIndexConfig;
 import io.pinecone.clients.Pinecone;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-public class PineconePodIndexConfig implements PineconeIndexConfig {
-
+public class PineconePodIndexConfig
+implements PineconeIndexConfig {
     private final Integer dimension;
     private final String environment;
     private final String podType;
 
-    PineconePodIndexConfig(Integer dimension,
-                           String environment,
-                           String podType) {
-        environment = ensureNotNull(environment, "environment");
-        podType = ensureNotNull(podType, "podType");
-        ensureNotNull(dimension, "dimension");
-
+    PineconePodIndexConfig(Integer dimension, String environment, String podType) {
+        environment = (String)ValidationUtils.ensureNotNull((Object)environment, (String)"environment");
+        podType = (String)ValidationUtils.ensureNotNull((Object)podType, (String)"podType");
+        ValidationUtils.ensureNotNull((Object)dimension, (String)"dimension");
         this.dimension = dimension;
         this.environment = environment;
         this.podType = podType;
@@ -24,9 +28,9 @@ public class PineconePodIndexConfig implements PineconeIndexConfig {
 
     @Override
     public void createIndex(Pinecone pinecone, String index) {
-        ensureNotNull(index, "index");
-        ensureNotNull(pinecone, "pinecone");
-        pinecone.createPodsIndex(index, dimension, environment, podType, "cosine");
+        ValidationUtils.ensureNotNull((Object)index, (String)"index");
+        ValidationUtils.ensureNotNull((Object)pinecone, (String)"pinecone");
+        pinecone.createPodsIndex(index, this.dimension, this.environment, this.podType, "cosine");
     }
 
     public static Builder builder() {
@@ -34,7 +38,6 @@ public class PineconePodIndexConfig implements PineconeIndexConfig {
     }
 
     public static class Builder {
-
         private Integer dimension;
         private String environment;
         private String podType;
@@ -55,7 +58,8 @@ public class PineconePodIndexConfig implements PineconeIndexConfig {
         }
 
         public PineconePodIndexConfig build() {
-            return new PineconePodIndexConfig(dimension, environment, podType);
+            return new PineconePodIndexConfig(this.dimension, this.environment, this.podType);
         }
     }
 }
+

@@ -1,31 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.JsonNode
+ */
 package dev.langchain4j.mcp.client.logging;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-
+import dev.langchain4j.mcp.client.logging.McpLogLevel;
 import java.util.Objects;
 
 public class McpLogMessage {
-
     private final McpLogLevel level;
     private final String logger;
     private final JsonNode data;
 
     @JsonCreator
-    public McpLogMessage(
-            @JsonProperty("level") McpLogLevel level,
-            @JsonProperty("logger") String logger,
-            @JsonProperty("data") JsonNode data
-    ) {
+    public McpLogMessage(@JsonProperty(value="level") McpLogLevel level, @JsonProperty(value="logger") String logger, @JsonProperty(value="data") JsonNode data) {
         this.level = level;
         this.logger = logger;
         this.data = data;
     }
 
-    /**
-     * Parses a McpLogMessage from the contents of the 'params' object inside a 'notifications/message' message.
-     */
     public static McpLogMessage fromJson(JsonNode json) {
         McpLogLevel level = McpLogLevel.from(json.get("level").asText());
         JsonNode loggerNode = json.get("logger");
@@ -35,37 +35,34 @@ public class McpLogMessage {
     }
 
     public McpLogLevel level() {
-        return level;
+        return this.level;
     }
 
     public String logger() {
-        return logger;
+        return this.logger;
     }
 
     public JsonNode data() {
-        return data;
+        return this.data;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        McpLogMessage that = (McpLogMessage) obj;
-        return Objects.equals(this.level, that.level) &&
-                Objects.equals(this.logger, that.logger) &&
-                Objects.equals(this.data, that.data);
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        McpLogMessage that = (McpLogMessage)obj;
+        return Objects.equals((Object)this.level, (Object)that.level) && Objects.equals(this.logger, that.logger) && Objects.equals(this.data, that.data);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(level, logger, data);
+        return Objects.hash(new Object[]{this.level, this.logger, this.data});
     }
 
-    @Override
     public String toString() {
-        return "McpLogMessage[" +
-                "level=" + level + ", " +
-                "logger=" + logger + ", " +
-                "data=" + data + ']';
+        return "McpLogMessage[level=" + (Object)((Object)this.level) + ", logger=" + this.logger + ", data=" + this.data + ']';
     }
 }
+

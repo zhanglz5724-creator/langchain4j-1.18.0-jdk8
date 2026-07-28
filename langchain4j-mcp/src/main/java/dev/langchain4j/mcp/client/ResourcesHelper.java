@@ -1,35 +1,50 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.databind.JsonNode
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.mcp.client;
 
-import static dev.langchain4j.mcp.client.DefaultMcpClient.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
+import dev.langchain4j.mcp.client.DefaultMcpClient;
+import dev.langchain4j.mcp.client.IllegalResponseException;
+import dev.langchain4j.mcp.client.McpBlobResourceContents;
+import dev.langchain4j.mcp.client.McpErrorHelper;
+import dev.langchain4j.mcp.client.McpReadResourceResult;
+import dev.langchain4j.mcp.client.McpResource;
+import dev.langchain4j.mcp.client.McpResourceContents;
+import dev.langchain4j.mcp.client.McpResourceTemplate;
+import dev.langchain4j.mcp.client.McpTextResourceContents;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class ResourcesHelper {
-
     private static final Logger log = LoggerFactory.getLogger(ResourcesHelper.class);
+
+    ResourcesHelper() {
+    }
 
     static List<McpResource> parseResourceRefs(JsonNode mcpMessage) {
         McpErrorHelper.checkForErrors(mcpMessage);
         if (mcpMessage.has("result")) {
             JsonNode resultNode = mcpMessage.get("result");
             if (resultNode.has("resources")) {
-                List<McpResource> resourceRefs = new ArrayList<>();
+                ArrayList<McpResource> resourceRefs = new ArrayList<McpResource>();
                 for (JsonNode resourceNode : resultNode.get("resources")) {
-                    resourceRefs.add(OBJECT_MAPPER.convertValue(resourceNode, McpResource.class));
+                    resourceRefs.add((McpResource)DefaultMcpClient.OBJECT_MAPPER.convertValue((Object)resourceNode, McpResource.class));
                 }
                 return resourceRefs;
-            } else {
-                log.warn("Result does not contain 'resources' element: {}", resultNode);
-                throw new IllegalResponseException("Result does not contain 'resources' element");
             }
-        } else {
-            log.warn("Result does not contain 'result' element: {}", mcpMessage);
-            throw new IllegalResponseException("Result does not contain 'result' element");
+            log.warn("Result does not contain 'resources' element: {}", (Object)resultNode);
+            throw new IllegalResponseException("Result does not contain 'resources' element");
         }
+        log.warn("Result does not contain 'result' element: {}", (Object)mcpMessage);
+        throw new IllegalResponseException("Result does not contain 'result' element");
     }
 
     static McpReadResourceResult parseResourceContents(JsonNode mcpMessage) {
@@ -37,29 +52,25 @@ class ResourcesHelper {
         if (mcpMessage.has("result")) {
             JsonNode resultNode = mcpMessage.get("result");
             if (resultNode.has("contents")) {
-                List<McpResourceContents> resourceContentsList = new ArrayList<>();
+                ArrayList<McpResourceContents> resourceContentsList = new ArrayList<McpResourceContents>();
                 for (JsonNode resourceNode : resultNode.get("contents")) {
+                    String mimeType;
                     String uri = resourceNode.get("uri").asText();
-                    String mimeType = resourceNode.get("mimeType") != null
-                            ? resourceNode.get("mimeType").asText()
-                            : null;
+                    String string = mimeType = resourceNode.get("mimeType") != null ? resourceNode.get("mimeType").asText() : null;
                     if (resourceNode.has("text")) {
-                        resourceContentsList.add(new McpTextResourceContents(
-                                uri, resourceNode.get("text").asText(), mimeType));
-                    } else if (resourceNode.has("blob")) {
-                        resourceContentsList.add(new McpBlobResourceContents(
-                                uri, resourceNode.get("blob").asText(), mimeType));
+                        resourceContentsList.add(new McpTextResourceContents(uri, resourceNode.get("text").asText(), mimeType));
+                        continue;
                     }
+                    if (!resourceNode.has("blob")) continue;
+                    resourceContentsList.add(new McpBlobResourceContents(uri, resourceNode.get("blob").asText(), mimeType));
                 }
                 return new McpReadResourceResult(resourceContentsList);
-            } else {
-                log.warn("Result does not contain 'contents' element: {}", resultNode);
-                throw new IllegalResponseException("Result does not contain 'resources' element");
             }
-        } else {
-            log.warn("Result does not contain 'result' element: {}", mcpMessage);
-            throw new IllegalResponseException("Result does not contain 'result' element");
+            log.warn("Result does not contain 'contents' element: {}", (Object)resultNode);
+            throw new IllegalResponseException("Result does not contain 'resources' element");
         }
+        log.warn("Result does not contain 'result' element: {}", (Object)mcpMessage);
+        throw new IllegalResponseException("Result does not contain 'result' element");
     }
 
     static List<McpResourceTemplate> parseResourceTemplateRefs(JsonNode mcpMessage) {
@@ -67,19 +78,17 @@ class ResourcesHelper {
         if (mcpMessage.has("result")) {
             JsonNode resultNode = mcpMessage.get("result");
             if (resultNode.has("resourceTemplates")) {
-                List<McpResourceTemplate> resourceTemplateRefs = new ArrayList<>();
+                ArrayList<McpResourceTemplate> resourceTemplateRefs = new ArrayList<McpResourceTemplate>();
                 for (JsonNode resourceTemplateNode : resultNode.get("resourceTemplates")) {
-                    resourceTemplateRefs.add(
-                            OBJECT_MAPPER.convertValue(resourceTemplateNode, McpResourceTemplate.class));
+                    resourceTemplateRefs.add((McpResourceTemplate)DefaultMcpClient.OBJECT_MAPPER.convertValue((Object)resourceTemplateNode, McpResourceTemplate.class));
                 }
                 return resourceTemplateRefs;
-            } else {
-                log.warn("Result does not contain 'resourceTemplates' element: {}", resultNode);
-                throw new IllegalResponseException("Result does not contain 'resourceTemplates' element");
             }
-        } else {
-            log.warn("Result does not contain 'result' element: {}", mcpMessage);
-            throw new IllegalResponseException("Result does not contain 'result' element");
+            log.warn("Result does not contain 'resourceTemplates' element: {}", (Object)resultNode);
+            throw new IllegalResponseException("Result does not contain 'resourceTemplates' element");
         }
+        log.warn("Result does not contain 'result' element: {}", (Object)mcpMessage);
+        throw new IllegalResponseException("Result does not contain 'result' element");
     }
 }
+

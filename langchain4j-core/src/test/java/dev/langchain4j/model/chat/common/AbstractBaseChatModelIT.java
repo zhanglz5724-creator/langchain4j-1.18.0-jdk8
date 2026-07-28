@@ -1364,18 +1364,17 @@ public abstract class AbstractBaseChatModelIT<M> {
     @EnabledIf("supportsJsonResponseFormatWithRawSchema")
     protected void should_respect_JsonRawSchema_responseFormat(M model) {
         String rawSchema =
-                """
-            {
-                "$schema": "http://json-schema.org/draft-07/schema#",
-                "type": "object",
-                "properties": {
-                    "city": {
-                        "type": "string"
-                    }
-                },
-                "required": ["city"],
-                "additionalProperties": false
-            }""";
+                "{\n" +
+"    \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n" +
+"    \"type\": \"object\",\n" +
+"    \"properties\": {\n" +
+"        \"city\": {\n" +
+"            \"type\": \"string\"\n" +
+"        }\n" +
+"    },\n" +
+"    \"required\": [\"city\"],\n" +
+"    \"additionalProperties\": false\n" +
+"}\n";
 
         ResponseFormat schemaFormat = ResponseFormat.builder()
                 .type(ResponseFormatType.JSON)

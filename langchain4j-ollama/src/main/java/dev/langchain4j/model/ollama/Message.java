@@ -1,21 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAnyGetter
+ *  com.fasterxml.jackson.annotation.JsonAnySetter
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.ollama.Role;
+import dev.langchain4j.model.ollama.ToolCall;
 import java.util.List;
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class Message {
-
     private Role role;
     private String content;
     private String thinking;
@@ -23,7 +34,8 @@ class Message {
     private List<ToolCall> toolCalls;
     private Map<String, Object> additionalFields;
 
-    Message() {}
+    Message() {
+    }
 
     Message(Builder builder) {
         this.role = builder.role;
@@ -39,7 +51,7 @@ class Message {
     }
 
     public Role getRole() {
-        return role;
+        return this.role;
     }
 
     public void setRole(Role role) {
@@ -47,7 +59,7 @@ class Message {
     }
 
     public String getContent() {
-        return content;
+        return this.content;
     }
 
     public void setContent(String content) {
@@ -55,7 +67,7 @@ class Message {
     }
 
     public List<String> getImages() {
-        return images;
+        return this.images;
     }
 
     public void setImages(List<String> images) {
@@ -63,7 +75,7 @@ class Message {
     }
 
     public List<ToolCall> getToolCalls() {
-        return toolCalls;
+        return this.toolCalls;
     }
 
     public void setToolCalls(List<ToolCall> toolCalls) {
@@ -72,7 +84,7 @@ class Message {
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalFields() {
-        return additionalFields;
+        return this.additionalFields;
     }
 
     @JsonAnySetter
@@ -81,7 +93,7 @@ class Message {
     }
 
     public String getThinking() {
-        return thinking;
+        return this.thinking;
     }
 
     public void setThinking(String thinking) {
@@ -89,13 +101,15 @@ class Message {
     }
 
     static class Builder {
-
         private Role role;
         private String content;
         private String thinking;
         private List<String> images;
         private List<ToolCall> toolCalls;
         private Map<String, Object> additionalFields;
+
+        Builder() {
+        }
 
         Builder role(Role role) {
             this.role = role;
@@ -132,3 +146,4 @@ class Message {
         }
     }
 }
+

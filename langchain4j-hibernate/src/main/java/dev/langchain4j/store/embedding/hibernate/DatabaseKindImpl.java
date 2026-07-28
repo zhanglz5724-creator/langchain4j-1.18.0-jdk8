@@ -1,13 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.hibernate;
 
+import dev.langchain4j.store.embedding.hibernate.DatabaseKind;
+import dev.langchain4j.store.embedding.hibernate.DistanceFunction;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-/**
- *
- */
-class DatabaseKindImpl implements DatabaseKind {
+class DatabaseKindImpl
+implements DatabaseKind {
     private final String[] jdbcUrlParts;
     private final TemplatePart[] templateParts;
     private final VectorIndexExporter indexExporter;
@@ -18,22 +21,21 @@ class DatabaseKindImpl implements DatabaseKind {
     }
 
     public DatabaseKindImpl(String jdbcUrlTemplate, VectorIndexExporter indexExporter, String setupSql) {
-        final StringTokenizer tokenizer = new StringTokenizer(jdbcUrlTemplate, "{");
-        final ArrayList<String> jdbcUrlParts = new ArrayList<>();
-        final ArrayList<TemplatePart> templateParts = new ArrayList<>();
+        StringTokenizer tokenizer = new StringTokenizer(jdbcUrlTemplate, "{");
+        ArrayList<String> jdbcUrlParts = new ArrayList<String>();
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>();
         while (tokenizer.hasMoreTokens()) {
-            final String token = tokenizer.nextToken();
+            String token = tokenizer.nextToken();
             if (templateParts.size() < jdbcUrlParts.size()) {
-                final int partEnd = token.indexOf('}');
+                int partEnd = token.indexOf(125);
                 if (partEnd == -1) {
                     throw new IllegalArgumentException("Invalid JDBC URL template: " + jdbcUrlTemplate);
                 }
-                templateParts.add(
-                        TemplatePart.valueOf(token.substring(0, partEnd).toUpperCase(Locale.ROOT)));
+                templateParts.add(TemplatePart.valueOf(token.substring(0, partEnd).toUpperCase(Locale.ROOT)));
                 jdbcUrlParts.add(token.substring(partEnd + 1));
-            } else {
-                jdbcUrlParts.add(token);
+                continue;
             }
+            jdbcUrlParts.add(token);
         }
         this.jdbcUrlParts = jdbcUrlParts.toArray(new String[0]);
         this.templateParts = templateParts.toArray(new TemplatePart[0]);
@@ -41,53 +43,53 @@ class DatabaseKindImpl implements DatabaseKind {
         this.setupSql = setupSql;
     }
 
-    interface VectorIndexExporter {
-        String createIndexDDL(
-                DistanceFunction distanceFunction,
-                String indexType,
-                String table,
-                String embeddingColumn,
-                String indexOptions);
-    }
-
     @Override
-    public String createIndexDDL(
-            final DistanceFunction distanceFunction,
-            final String indexType,
-            final String table,
-            final String embeddingColumn,
-            final String indexOptions) {
-        return indexExporter.createIndexDDL(distanceFunction, indexType, table, embeddingColumn, indexOptions);
+    public String createIndexDDL(DistanceFunction distanceFunction, String indexType, String table, String embeddingColumn, String indexOptions) {
+        return this.indexExporter.createIndexDDL(distanceFunction, indexType, table, embeddingColumn, indexOptions);
     }
 
     @Override
     public String getSetupSql() {
-        return setupSql;
+        return this.setupSql;
     }
 
     @Override
-    public String createJdbcUrl(final String host, final int port, final String database) {
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < jdbcUrlParts.length - 1; i++) {
-            builder.append(jdbcUrlParts[i]);
-            switch (templateParts[i]) {
-                case HOST -> builder.append(host);
-                case PORT -> builder.append(port);
-                case DATABASE -> builder.append(database);
+    public String createJdbcUrl(String host, int port, String database) {
+        StringBuilder builder = new StringBuilder();
+        block5: for (int i = 0; i < this.jdbcUrlParts.length - 1; ++i) {
+            builder.append(this.jdbcUrlParts[i]);
+            switch (this.templateParts[i]) {
+                case HOST: {
+                    builder.append(host);
+                    continue block5;
+                }
+                case PORT: {
+                    builder.append(port);
+                    continue block5;
+                }
+                case DATABASE: {
+                    builder.append(database);
+                }
             }
         }
-        builder.append(jdbcUrlParts[jdbcUrlParts.length - 1]);
+        builder.append(this.jdbcUrlParts[this.jdbcUrlParts.length - 1]);
         return builder.toString();
     }
 
     @Override
-    public boolean isJdbcUrl(final String jdbcUrl) {
-        return jdbcUrl.startsWith(jdbcUrlParts[0]);
+    public boolean isJdbcUrl(String jdbcUrl) {
+        return jdbcUrl.startsWith(this.jdbcUrlParts[0]);
     }
 
-    enum TemplatePart {
+    static interface VectorIndexExporter {
+        public String createIndexDDL(DistanceFunction var1, String var2, String var3, String var4, String var5);
+    }
+
+    static enum TemplatePart {
         HOST,
         PORT,
-        DATABASE
+        DATABASE;
+
     }
 }
+

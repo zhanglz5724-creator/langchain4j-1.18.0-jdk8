@@ -1,19 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.hibernate.annotations.JdbcTypeCode
+ */
 package dev.langchain4j.store.embedding.hibernate;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
-/**
- * Marks the persistent attribute of an {@code @Entity} that represents
- * the text for which an embedding vector is created.
- */
-@Target({METHOD, FIELD})
-@Retention(RUNTIME)
-@JdbcTypeCode(SqlTypes.LONG32VARCHAR)
-public @interface EmbeddedText {}
+@Target(value={ElementType.METHOD, ElementType.FIELD})
+@Retention(value=RetentionPolicy.RUNTIME)
+@JdbcTypeCode(value=4001)
+public @interface EmbeddedText {
+}
+

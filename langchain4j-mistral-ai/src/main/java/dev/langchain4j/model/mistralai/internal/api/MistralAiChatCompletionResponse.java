@@ -1,23 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiChatCompletionChoice;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiUsage;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiChatCompletionResponse.MistralAiChatCompletionResponseBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralAiChatCompletionResponseBuilder.class)
 public class MistralAiChatCompletionResponse {
-
     private String id;
     private String object;
     private Integer created;
@@ -58,7 +69,6 @@ public class MistralAiChatCompletionResponse {
         return this.usage;
     }
 
-    @Override
     public int hashCode() {
         int hash = 7;
         hash = 97 * hash + Objects.hashCode(this.id);
@@ -70,44 +80,29 @@ public class MistralAiChatCompletionResponse {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
-        final MistralAiChatCompletionResponse other = (MistralAiChatCompletionResponse) obj;
-        return Objects.equals(this.id, other.id)
-                && Objects.equals(this.object, other.object)
-                && Objects.equals(this.model, other.model)
-                && Objects.equals(this.created, other.created)
-                && Objects.equals(this.choices, other.choices)
-                && Objects.equals(this.usage, other.usage);
+        MistralAiChatCompletionResponse other = (MistralAiChatCompletionResponse)obj;
+        return Objects.equals(this.id, other.id) && Objects.equals(this.object, other.object) && Objects.equals(this.model, other.model) && Objects.equals(this.created, other.created) && Objects.equals(this.choices, other.choices) && Objects.equals(this.usage, other.usage);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiChatCompletionResponse [", "]")
-                .add("id=" + this.getId())
-                .add(", object=" + this.getObject())
-                .add(", created=" + this.getCreated())
-                .add(", model=" + this.getModel())
-                .add(", choices=" + this.getChoices())
-                .add(", usage=" + this.getUsage())
-                .toString();
+        return new StringJoiner(", ", "MistralAiChatCompletionResponse [", "]").add("id=" + this.getId()).add(", object=" + this.getObject()).add(", created=" + this.getCreated()).add(", model=" + this.getModel()).add(", choices=" + this.getChoices()).add(", usage=" + this.getUsage()).toString();
     }
 
     public static MistralAiChatCompletionResponseBuilder builder() {
         return new MistralAiChatCompletionResponseBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiChatCompletionResponseBuilder {
-
         private String id;
         private String object;
         private Integer created;
@@ -115,7 +110,8 @@ public class MistralAiChatCompletionResponse {
         private List<MistralAiChatCompletionChoice> choices;
         private MistralAiUsage usage;
 
-        private MistralAiChatCompletionResponseBuilder() {}
+        private MistralAiChatCompletionResponseBuilder() {
+        }
 
         public MistralAiChatCompletionResponseBuilder id(String id) {
             this.id = id;
@@ -152,3 +148,4 @@ public class MistralAiChatCompletionResponse {
         }
     }
 }
+

@@ -1,6 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
-
-import static java.util.Collections.unmodifiableList;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,23 +22,20 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@JsonDeserialize(builder = LogProb.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class LogProb {
-
     @JsonProperty
     private final String token;
-
     @JsonProperty
     private final Double logprob;
-
     @JsonProperty
     private final List<Integer> bytes;
-
     @JsonProperty
     private final List<LogProb> topLogprobs;
 
@@ -38,67 +47,57 @@ public final class LogProb {
     }
 
     public String token() {
-        return token;
+        return this.token;
     }
 
     public Double logprob() {
-        return logprob;
+        return this.logprob;
     }
 
     public List<Integer> bytes() {
-        return bytes;
+        return this.bytes;
     }
 
     public List<LogProb> topLogprobs() {
-        return topLogprobs;
+        return this.topLogprobs;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof LogProb && equalTo((LogProb) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof LogProb && this.equalTo((LogProb)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(LogProb another) {
-        return Objects.equals(token, another.token)
-                && Objects.equals(logprob, another.logprob)
-                && Objects.equals(bytes, another.bytes)
-                && Objects.equals(topLogprobs, another.topLogprobs);
+        return Objects.equals(this.token, another.token) && Objects.equals(this.logprob, another.logprob) && Objects.equals(this.bytes, another.bytes) && Objects.equals(this.topLogprobs, another.topLogprobs);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(token);
-        h += (h << 5) + Objects.hashCode(logprob);
-        h += (h << 5) + Objects.hashCode(bytes);
-        h += (h << 5) + Objects.hashCode(topLogprobs);
+        h += (h << 5) + Objects.hashCode(this.token);
+        h += (h << 5) + Objects.hashCode(this.logprob);
+        h += (h << 5) + Objects.hashCode(this.bytes);
+        h += (h << 5) + Objects.hashCode(this.topLogprobs);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "LogProb{"
-                + "token=" + token
-                + ", logprob=" + logprob
-                + ", bytes=" + bytes
-                + ", topLogprobs=" + topLogprobs
-                + "}";
+        return "LogProb{token=" + this.token + ", logprob=" + this.logprob + ", bytes=" + this.bytes + ", topLogprobs=" + this.topLogprobs + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String token;
         private Double logprob;
         private List<Integer> bytes;
@@ -116,14 +115,14 @@ public final class LogProb {
 
         public Builder bytes(List<Integer> bytes) {
             if (bytes != null) {
-                this.bytes = unmodifiableList(bytes);
+                this.bytes = Collections.unmodifiableList(bytes);
             }
             return this;
         }
 
         public Builder topLogprobs(List<LogProb> topLogprobs) {
             if (topLogprobs != null) {
-                this.topLogprobs = unmodifiableList(topLogprobs);
+                this.topLogprobs = Collections.unmodifiableList(topLogprobs);
             }
             return this;
         }
@@ -133,3 +132,4 @@ public final class LogProb {
         }
     }
 }
+

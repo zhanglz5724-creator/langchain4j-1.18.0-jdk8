@@ -1,23 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static dev.langchain4j.model.anthropic.internal.api.AnthropicToolChoiceType.AUTO;
-import static dev.langchain4j.model.anthropic.internal.api.AnthropicToolChoiceType.TOOL;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicToolChoiceType;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicToolChoice {
-
     @JsonProperty
-    private AnthropicToolChoiceType type = AUTO;
-
+    private AnthropicToolChoiceType type = AnthropicToolChoiceType.AUTO;
     @JsonProperty
     private String name;
-
     @JsonProperty
     private Boolean disableParallelToolUse;
 
@@ -36,31 +41,24 @@ public class AnthropicToolChoice {
     }
 
     public static AnthropicToolChoice from(AnthropicToolChoiceType type, Boolean disableParallelToolUse) {
-        return new Builder()
-                .type(type)
-                .disableParallelToolUse(disableParallelToolUse)
-                .build();
+        return new Builder().type(type).disableParallelToolUse(disableParallelToolUse).build();
     }
 
     public static AnthropicToolChoice from(String functionName) {
-        return new Builder().name(functionName).type(TOOL).build();
+        return new Builder().name(functionName).type(AnthropicToolChoiceType.TOOL).build();
     }
 
     public static AnthropicToolChoice from(String functionName, Boolean disableParallelToolUse) {
-        return new Builder()
-                .name(functionName)
-                .type(TOOL)
-                .disableParallelToolUse(disableParallelToolUse)
-                .build();
+        return new Builder().name(functionName).type(AnthropicToolChoiceType.TOOL).disableParallelToolUse(disableParallelToolUse).build();
     }
 
     public static final class Builder {
-
         private AnthropicToolChoiceType type;
         private String name;
         private Boolean disableParallelToolUse;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder name(String name) {
             this.name = name;
@@ -82,3 +80,4 @@ public class AnthropicToolChoice {
         }
     }
 }
+

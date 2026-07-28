@@ -1,33 +1,43 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonSerialize
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import dev.langchain4j.model.ollama.FormatSerializer;
+import dev.langchain4j.model.ollama.Message;
+import dev.langchain4j.model.ollama.Options;
+import dev.langchain4j.model.ollama.Tool;
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class OllamaChatRequest {
-
     private String model;
     private List<Message> messages;
     private Options options;
-
-    @JsonSerialize(using = FormatSerializer.class)
+    @JsonSerialize(using=FormatSerializer.class)
     private String format;
-
     private Boolean stream;
     private List<Tool> tools;
     private Integer keepAlive;
-
     private Boolean think;
 
-    OllamaChatRequest() {}
+    OllamaChatRequest() {
+    }
 
     OllamaChatRequest(Builder builder) {
         this.model = builder.model;
@@ -45,7 +55,7 @@ class OllamaChatRequest {
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -53,7 +63,7 @@ class OllamaChatRequest {
     }
 
     public List<Message> getMessages() {
-        return messages;
+        return this.messages;
     }
 
     public void setMessages(List<Message> messages) {
@@ -61,7 +71,7 @@ class OllamaChatRequest {
     }
 
     public Options getOptions() {
-        return options;
+        return this.options;
     }
 
     public void setOptions(Options options) {
@@ -69,7 +79,7 @@ class OllamaChatRequest {
     }
 
     public String getFormat() {
-        return format;
+        return this.format;
     }
 
     public void setFormat(String format) {
@@ -77,7 +87,7 @@ class OllamaChatRequest {
     }
 
     public Boolean getStream() {
-        return stream;
+        return this.stream;
     }
 
     public void setStream(Boolean stream) {
@@ -85,7 +95,7 @@ class OllamaChatRequest {
     }
 
     public List<Tool> getTools() {
-        return tools;
+        return this.tools;
     }
 
     public void setTools(List<Tool> tools) {
@@ -93,7 +103,7 @@ class OllamaChatRequest {
     }
 
     public Integer getKeepAlive() {
-        return keepAlive;
+        return this.keepAlive;
     }
 
     public void setKeepAlive(Integer keepAlive) {
@@ -101,7 +111,7 @@ class OllamaChatRequest {
     }
 
     public Boolean getThink() {
-        return think;
+        return this.think;
     }
 
     public void setThink(Boolean think) {
@@ -109,7 +119,6 @@ class OllamaChatRequest {
     }
 
     static class Builder {
-
         private String model;
         private List<Message> messages;
         private Options options;
@@ -118,6 +127,9 @@ class OllamaChatRequest {
         private List<Tool> tools;
         private Integer keepAlive;
         private Boolean think;
+
+        Builder() {
+        }
 
         Builder model(String model) {
             this.model = model;
@@ -164,3 +176,4 @@ class OllamaChatRequest {
         }
     }
 }
+

@@ -1,10 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.openai;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class LogProb {
-
     private final String token;
     private final Double logprob;
     private final List<Integer> bytes;
@@ -18,52 +20,43 @@ public final class LogProb {
     }
 
     public String token() {
-        return token;
+        return this.token;
     }
 
     public Double logprob() {
-        return logprob;
+        return this.logprob;
     }
 
     public List<Integer> bytes() {
-        return bytes;
+        return this.bytes;
     }
 
     public List<LogProb> topLogprobs() {
-        return topLogprobs;
+        return this.topLogprobs;
     }
 
-    @Override
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof LogProb && equalTo((LogProb) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof LogProb && this.equalTo((LogProb)another);
     }
 
     private boolean equalTo(LogProb another) {
-        return Objects.equals(token, another.token)
-                && Objects.equals(logprob, another.logprob)
-                && Objects.equals(bytes, another.bytes)
-                && Objects.equals(topLogprobs, another.topLogprobs);
+        return Objects.equals(this.token, another.token) && Objects.equals(this.logprob, another.logprob) && Objects.equals(this.bytes, another.bytes) && Objects.equals(this.topLogprobs, another.topLogprobs);
     }
 
-    @Override
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(token);
-        h += (h << 5) + Objects.hashCode(logprob);
-        h += (h << 5) + Objects.hashCode(bytes);
-        h += (h << 5) + Objects.hashCode(topLogprobs);
+        h += (h << 5) + Objects.hashCode(this.token);
+        h += (h << 5) + Objects.hashCode(this.logprob);
+        h += (h << 5) + Objects.hashCode(this.bytes);
+        h += (h << 5) + Objects.hashCode(this.topLogprobs);
         return h;
     }
 
-    @Override
     public String toString() {
-        return "LogProb{"
-                + "token=" + token
-                + ", logprob=" + logprob
-                + ", bytes=" + bytes
-                + ", topLogprobs=" + topLogprobs
-                + "}";
+        return "LogProb{token=" + this.token + ", logprob=" + this.logprob + ", bytes=" + this.bytes + ", topLogprobs=" + this.topLogprobs + "}";
     }
 
     public static Builder builder() {
@@ -71,7 +64,6 @@ public final class LogProb {
     }
 
     public static class Builder {
-
         private String token;
         private Double logprob;
         private List<Integer> bytes;
@@ -102,3 +94,4 @@ public final class LogProb {
         }
     }
 }
+

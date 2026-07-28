@@ -1,9 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.vertexai;
 
 import java.util.List;
 
 class VertexAiChatInstance {
-
     private final String context;
     private final List<Message> messages;
 
@@ -13,7 +15,6 @@ class VertexAiChatInstance {
     }
 
     static class Message {
-
         private final String author;
         private final String content;
 
@@ -23,3 +24,4 @@ class VertexAiChatInstance {
         }
     }
 }
+

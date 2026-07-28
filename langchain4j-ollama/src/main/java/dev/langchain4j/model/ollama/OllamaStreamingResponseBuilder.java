@@ -1,96 +1,74 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.internal.ToolCallBuilder
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.ollama;
-
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.model.ollama.InternalOllamaHelper.chatResponseMetadataFrom;
-import static dev.langchain4j.model.ollama.InternalOllamaHelper.toFinishReason;
-import static dev.langchain4j.model.output.FinishReason.TOOL_EXECUTION;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.internal.ToolCallBuilder;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.ollama.InternalOllamaHelper;
+import dev.langchain4j.model.ollama.Message;
+import dev.langchain4j.model.ollama.OllamaChatResponse;
+import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 
-/**
- * This class needs to be thread safe because it is called when a streaming result comes back
- * and there is no guarantee that this thread will be the same as the one that initiated the request,
- * in fact it almost certainly won't be.
- */
 class OllamaStreamingResponseBuilder {
-
     private final StringBuffer contentBuilder = new StringBuffer();
-
     private final boolean returnThinking;
     private final StringBuffer thinkingBuilder;
-
     private final ToolCallBuilder toolCallBuilder;
-
     private volatile String modelName;
     private volatile TokenUsage tokenUsage;
 
     OllamaStreamingResponseBuilder(ToolCallBuilder toolCallBuilder, boolean returnThinking) {
         this.toolCallBuilder = toolCallBuilder;
         this.returnThinking = returnThinking;
-        if (returnThinking) {
-            this.thinkingBuilder = new StringBuffer();
-        } else {
-            this.thinkingBuilder = null;
-        }
+        this.thinkingBuilder = returnThinking ? new StringBuffer() : null;
     }
 
     void append(OllamaChatResponse partialResponse) {
+        Message message;
         if (partialResponse == null) {
             return;
         }
-
-        if (modelName == null && partialResponse.getModel() != null) {
-            modelName = partialResponse.getModel();
+        if (this.modelName == null && partialResponse.getModel() != null) {
+            this.modelName = partialResponse.getModel();
         }
-
         if (partialResponse.getEvalCount() != null && partialResponse.getPromptEvalCount() != null) {
             this.tokenUsage = new TokenUsage(partialResponse.getPromptEvalCount(), partialResponse.getEvalCount());
         }
-
-        Message message = partialResponse.getMessage();
-        if (message == null) {
+        if ((message = partialResponse.getMessage()) == null) {
             return;
         }
-
         String content = message.getContent();
         if (content != null) {
-            contentBuilder.append(content);
+            this.contentBuilder.append(content);
         }
-
         String thinking = message.getThinking();
-        if (returnThinking && thinking != null) {
-            thinkingBuilder.append(thinking);
+        if (this.returnThinking && thinking != null) {
+            this.thinkingBuilder.append(thinking);
         }
     }
 
     ChatResponse build(OllamaChatResponse ollamaChatResponse) {
-        String text = contentBuilder.toString();
-
+        String text = this.contentBuilder.toString();
         String thinking = null;
-        if (returnThinking) {
-            thinking = thinkingBuilder.toString();
+        if (this.returnThinking) {
+            thinking = this.thinkingBuilder.toString();
         }
-
-        if (toolCallBuilder.hasRequests()) {
-            return ChatResponse.builder()
-                    .aiMessage(AiMessage.builder()
-                            .text(isNullOrEmpty(text) ? null : text)
-                            .thinking(isNullOrEmpty(thinking) ? null : thinking)
-                            .toolExecutionRequests(toolCallBuilder.allRequests())
-                            .build())
-                    .metadata(chatResponseMetadataFrom(modelName, TOOL_EXECUTION, tokenUsage))
-                    .build();
+        if (this.toolCallBuilder.hasRequests()) {
+            return ChatResponse.builder().aiMessage(AiMessage.builder().text(Utils.isNullOrEmpty((String)text) ? null : text).thinking(Utils.isNullOrEmpty((String)thinking) ? null : thinking).toolExecutionRequests(this.toolCallBuilder.allRequests()).build()).metadata(InternalOllamaHelper.chatResponseMetadataFrom(this.modelName, FinishReason.TOOL_EXECUTION, this.tokenUsage)).build();
         }
-
-        return ChatResponse.builder()
-                .aiMessage(AiMessage.builder()
-                        .text(isNullOrEmpty(text) ? null : text)
-                        .thinking(isNullOrEmpty(thinking) ? null : thinking)
-                        .build())
-                .metadata(chatResponseMetadataFrom(modelName, toFinishReason(ollamaChatResponse), tokenUsage))
-                .build();
+        return ChatResponse.builder().aiMessage(AiMessage.builder().text(Utils.isNullOrEmpty((String)text) ? null : text).thinking(Utils.isNullOrEmpty((String)thinking) ? null : thinking).build()).metadata(InternalOllamaHelper.chatResponseMetadataFrom(this.modelName, InternalOllamaHelper.toFinishReason(ollamaChatResponse), this.tokenUsage)).build();
     }
 }
+

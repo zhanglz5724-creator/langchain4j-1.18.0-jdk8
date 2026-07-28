@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.guardrail.InputGuardrail
+ *  dev.langchain4j.guardrail.InputGuardrailRequest
+ *  dev.langchain4j.guardrail.InputGuardrailResult
+ *  dev.langchain4j.guardrail.OutputGuardrail
+ *  dev.langchain4j.guardrail.OutputGuardrailRequest
+ *  dev.langchain4j.guardrail.OutputGuardrailResult
+ *  dev.langchain4j.guardrail.config.InputGuardrailsConfig
+ *  dev.langchain4j.guardrail.config.OutputGuardrailsConfig
+ */
 package dev.langchain4j.service.guardrail;
 
 import dev.langchain4j.data.message.UserMessage;
@@ -7,239 +21,84 @@ import dev.langchain4j.guardrail.InputGuardrailResult;
 import dev.langchain4j.guardrail.OutputGuardrail;
 import dev.langchain4j.guardrail.OutputGuardrailRequest;
 import dev.langchain4j.guardrail.OutputGuardrailResult;
-import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.guardrail.config.InputGuardrailsConfig;
+import dev.langchain4j.guardrail.config.OutputGuardrailsConfig;
+import dev.langchain4j.service.guardrail.GuardrailServiceBuilder;
 import dev.langchain4j.service.guardrail.spi.GuardrailServiceBuilderFactory;
-import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.ServiceLoader;
-import java.util.Collections;
 
-/**
- * Defines a service for executing guardrails associated with methods in an AI service.
- * Guardrails are constraints or validations applied either to input or output of a method.
- */
 public interface GuardrailService {
-    /**
-     * Retrieves the class representing the AI service to which the guardrails apply.
-     *
-     * @return The {@code Class} object representing the AI service.
-     */
-    Class<?> aiServiceClass();
+    public Class<?> aiServiceClass();
 
-    /**
-     * Executes the input guardrails associated with a given {@link Method}
-     *
-     * @param method The method whose input guardrails are to be executed.
-     * @param request The parameters to validate against the input guardrails. Must not be null.
-     * @return The result of executing the input guardrails, encapsulated in an {@code InputGuardrailResult}.
-     * If no guardrails are associated with the method, a successful result is returned by default.
-     * @param <MethodKey>> The type of the method key, representing a unique identifier for methods.
-     */
-    <MethodKey> InputGuardrailResult executeInputGuardrails(MethodKey method, InputGuardrailRequest request);
+    public <MethodKey> InputGuardrailResult executeInputGuardrails(MethodKey var1, InputGuardrailRequest var2);
 
-    /**
-     * Executes the input guardrails associated with the given method and parameters,
-     * and retrieves a modified or validated {@link UserMessage} based on the result.
-     *
-     * @param <MethodKey> The type of the method key, representing a unique identifier for methods.
-     * @param method The method whose input guardrails are to be executed. Nullable.
-     * @param request The parameters to validate against the input guardrails. Must not be null.
-     * @return A {@link UserMessage} derived from the provided parameters and the result
-     *         of the input guardrails execution. If guardrails are applied successfully,
-     *         a potentially rewritten user message is returned. If no guardrails are
-     *         associated with the method, the original user message is returned.
-     */
-    default <MethodKey> UserMessage executeGuardrails(MethodKey method, InputGuardrailRequest request) {
-        return executeInputGuardrails(method, request).userMessage(request);
+    default public <MethodKey> UserMessage executeGuardrails(MethodKey method, InputGuardrailRequest request) {
+        return this.executeInputGuardrails(method, request).userMessage(request);
     }
 
-    /**
-     * Executes the output guardrails associated with a given {@code Method}.
-     *
-     * @param method The method whose output guardrails are to be executed.
-     * @param request The parameters to validate against the output guardrails. Must not be null.
-     * @return The result of executing the output guardrails, encapsulated in an {@code OutputGuardrailResult}.
-     * If no guardrails are associated with the method, a successful result is returned by default.
-     * @param <MethodKey>> The type of the method key, representing a unique identifier for methods.
-     */
-    <MethodKey> OutputGuardrailResult executeOutputGuardrails(MethodKey method, OutputGuardrailRequest request);
+    public <MethodKey> OutputGuardrailResult executeOutputGuardrails(MethodKey var1, OutputGuardrailRequest var2);
 
-    /**
-     * Whether or not a method has any input guardrails associated with it
-     * @param method The method
-     * @return {@code true} If {@code method} has input guardrails. {@code false} otherwise
-     * @param <MethodKey>> The type of the method key, representing a unique identifier for methods.
-     */
-    <MethodKey> boolean hasInputGuardrails(MethodKey method);
+    public <MethodKey> boolean hasInputGuardrails(MethodKey var1);
 
-    /**
-     * Whether or not a method has any output guardrails associated with it
-     * @param method The method
-     * @return {@code true} If {@code method} has output guardrails. {@code false} otherwise
-     * @param <MethodKey>> The type of the method key, representing a unique identifier for methods.
-     */
-    <MethodKey> boolean hasOutputGuardrails(MethodKey method);
+    public <MethodKey> boolean hasOutputGuardrails(MethodKey var1);
 
-    /**
-     * Executes the guardrails associated with a given method and parameters, returning the appropriate response.
-     *
-     * @param <MethodKey> The type of the method key, representing a unique identifier for methods.
-     * @param <T> The type of response to produce
-     * @param method The method whose output guardrails are to be executed. Nullable.
-     * @param request The parameters to validate against the output guardrails. Must not be null.
-     * @return A {@link ChatResponse} that encapsulates the output of executing the guardrails based on the provided parameters.
-     */
-    default <MethodKey, T> T executeGuardrails(MethodKey method, OutputGuardrailRequest request) {
-        return executeOutputGuardrails(method, request).response(request);
+    default public <MethodKey, T> T executeGuardrails(MethodKey method, OutputGuardrailRequest request) {
+        return (T)this.executeOutputGuardrails(method, request).response(request);
     }
 
-    /**
-     * Creates a new instance of {@link Builder} for the specified AI service class.
-     * <p>
-     *     Attempts to retrieve an instance through a {@link dev.langchain4j.service.guardrail.spi.GuardrailServiceBuilderFactory}, if available.
-     *     If no factory is present, it uses its own default instance.
-     * </p>
-     *
-     * @param aiServiceClass The {@code Class} object representing the AI service for which the builder is being created.
-     * @return A {@link Builder} instance initialized with the specified AI service class.
-     */
-    static Builder builder(Class<?> aiServiceClass) {
-        return ServiceLoader.load(GuardrailServiceBuilderFactory.class)
-                .findFirst()
-                .map(builderFactory -> builderFactory.getBuilder(aiServiceClass))
-                .orElseGet(() -> new GuardrailServiceBuilder(aiServiceClass));
+    public static Builder builder(Class<?> aiServiceClass) {
+        Iterator<GuardrailServiceBuilderFactory> it = ServiceLoader.load(GuardrailServiceBuilderFactory.class).iterator();
+        if (it.hasNext()) {
+            return it.next().getBuilder(aiServiceClass);
+        }
+        return new GuardrailServiceBuilder(aiServiceClass);
     }
 
-    /**
-     * Builder class for building {@link GuardrailService} instances
-     */
-    interface Builder {
-        /**
-         * Configures the input guardrails for the builder.
-         *
-         * @param config The configuration for input guardrails. Must not be null.
-         * @return The current instance of {@link Builder} for method chaining.
-         * @throws IllegalArgumentException if {@code config} is null.
-         */
-        Builder inputGuardrailsConfig(dev.langchain4j.guardrail.config.InputGuardrailsConfig config);
+    public static interface Builder {
+        public Builder inputGuardrailsConfig(InputGuardrailsConfig var1);
 
-        /**
-         * Configures the output guardrails for the Builder.
-         *
-         * @param config The configuration for output guardrails. Must not be null.
-         * @return The current instance of {@link Builder} for method chaining.
-         * @throws IllegalArgumentException if {@code config} is null.
-         */
-        Builder outputGuardrailsConfig(dev.langchain4j.guardrail.config.OutputGuardrailsConfig config);
+        public Builder outputGuardrailsConfig(OutputGuardrailsConfig var1);
 
-        /**
-         * Configures the classes of input guardrails for the Builder. Existing input guardrail classes will be cleared.
-         *
-         * @param guardrailClasses A list of classes implementing the {@link InputGuardrail} interface to be used
-         *                         as input guardrails. May be {@code null}.
-         * @param <I> The type of {@link InputGuardrail}
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        <I extends InputGuardrail> Builder inputGuardrailClasses(List<Class<? extends I>> guardrailClasses);
+        public <I extends InputGuardrail> Builder inputGuardrailClasses(List<Class<? extends I>> var1);
 
-        /**
-         * Configures the classes of input guardrails for the Builder.
-         * Existing input guardrail classes will be cleared.
-         *
-         * @param guardrailClasses An array of classes implementing the {@link InputGuardrail} interface to be used
-         *                         as input guardrails. May be {@code null}.
-         * @param <I> The type of {@link InputGuardrail}
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        default <I extends InputGuardrail> Builder inputGuardrailClasses(Class<? extends I>... guardrailClasses) {
-            return Optional.ofNullable(guardrailClasses)
-                    .map(g -> inputGuardrailClasses(Collections.singletonList(g)))
-                    .orElse(this);
+        default public <I extends InputGuardrail> Builder inputGuardrailClasses(Class<? extends I> ... guardrailClasses) {
+            if (guardrailClasses != null) {
+                return this.inputGuardrailClasses(Arrays.asList(guardrailClasses));
+            }
+            return this;
         }
 
-        /**
-         * Configures the classes of output guardrails for the Builder.
-         * Existing output guardrail classes will be cleared.
-         *
-         * @param guardrailClasses A list of classes implementing the {@link OutputGuardrail} interface to be used
-         *                         as output guardrails. May be {@code null}.
-         * @param <O> The type of {@link OutputGuardrail}
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        <O extends OutputGuardrail> Builder outputGuardrailClasses(List<Class<? extends O>> guardrailClasses);
+        public <O extends OutputGuardrail> Builder outputGuardrailClasses(List<Class<? extends O>> var1);
 
-        /**
-         * Configures the classes of output guardrails for the Builder.
-         * Existing output guardrail classes will be cleared.
-         *
-         * @param guardrailClasses An array of classes implementing the {@link OutputGuardrail} interface to be used
-         *                         as output guardrails. May be {@code null}.
-         * @param <O> The type of {@link OutputGuardrail}
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        default <O extends OutputGuardrail> Builder outputGuardrailClasses(Class<? extends O>... guardrailClasses) {
-            return Optional.ofNullable(guardrailClasses)
-                    .map(g -> outputGuardrailClasses(Collections.singletonList(g)))
-                    .orElse(this);
+        default public <O extends OutputGuardrail> Builder outputGuardrailClasses(Class<? extends O> ... guardrailClasses) {
+            if (guardrailClasses != null) {
+                return this.outputGuardrailClasses(Arrays.asList(guardrailClasses));
+            }
+            return this;
         }
 
-        /**
-         * Sets the input guardrails for the Builder. Existing input guardrails
-         * will be cleared, and the provided input guardrails will be added.
-         *
-         * @param guardrails A list of input guardrails implementing the {@link InputGuardrail} interface.
-         *                   Can be {@code null}, in which case no guardrails will be added.
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        <I extends InputGuardrail> Builder inputGuardrails(List<I> guardrails);
+        public <I extends InputGuardrail> Builder inputGuardrails(List<I> var1);
 
-        /**
-         * Configures the input guardrails for the Builder.
-         *
-         * @param guardrails An array of input guardrails implementing the {@link InputGuardrail} interface.
-         *                   May be {@code null}, in which case no guardrails will be added.
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        default <I extends InputGuardrail> Builder inputGuardrails(I... guardrails) {
-            return Optional.ofNullable(guardrails)
-                    .map(ig -> inputGuardrails(Collections.singletonList(ig)))
-                    .orElse(this);
+        default public <I extends InputGuardrail> Builder inputGuardrails(I ... guardrails) {
+            if (guardrails != null) {
+                return this.inputGuardrails(Arrays.asList(guardrails));
+            }
+            return this;
         }
 
-        /**
-         * Sets the output guardrails for the Builder. Existing output guardrails
-         * will be cleared, and the provided output guardrails will be added.
-         *
-         * @param guardrails A list of output guardrails implementing the {@link OutputGuardrail}
-         *                   interface. Can be {@code null}, in which case no guardrails will be added.
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        <O extends OutputGuardrail> Builder outputGuardrails(List<O> guardrails);
+        public <O extends OutputGuardrail> Builder outputGuardrails(List<O> var1);
 
-        /**
-         * Configures the output guardrails for the Builder.
-         *
-         * @param guardrails An array of output guardrails implementing the {@link OutputGuardrail} interface.
-         *                   May be {@code null}, in which case no guardrails will be added.
-         * @return The current instance of {@link Builder} for method chaining.
-         */
-        default <O extends OutputGuardrail> Builder outputGuardrails(O... guardrails) {
-            return Optional.ofNullable(guardrails)
-                    .map(og -> outputGuardrails(Collections.singletonList(og)))
-                    .orElse(this);
+        default public <O extends OutputGuardrail> Builder outputGuardrails(O ... guardrails) {
+            if (guardrails != null) {
+                return this.outputGuardrails(Arrays.asList(guardrails));
+            }
+            return this;
         }
 
-        /**
-         * Builds and returns an instance of {@link GuardrailService}.
-         * This method configures input and output guardrails at the service level
-         * using the provided class-level or method-level annotations. If no
-         * method-level annotations are present, it defers to class-level annotations,
-         * and if those are absent, it uses the settings defined in the builder.
-         *
-         * @return an instance of {@link GuardrailService} configured with appropriate
-         * input and output guardrails.
-         */
-        GuardrailService build();
+        public GuardrailService build();
     }
 }
+

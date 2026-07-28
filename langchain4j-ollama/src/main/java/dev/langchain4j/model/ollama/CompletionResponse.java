@@ -1,17 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class CompletionResponse {
-
     private String model;
     private String createdAt;
     private String response;
@@ -21,17 +28,10 @@ class CompletionResponse {
     private Integer evalCount;
     private String error;
 
-    CompletionResponse() {}
+    CompletionResponse() {
+    }
 
-    CompletionResponse(
-            String model,
-            String createdAt,
-            String response,
-            String image,
-            Boolean done,
-            Integer promptEvalCount,
-            Integer evalCount,
-            String error) {
+    CompletionResponse(String model, String createdAt, String response, String image, Boolean done, Integer promptEvalCount, Integer evalCount, String error) {
         this.model = model;
         this.createdAt = createdAt;
         this.response = response;
@@ -43,7 +43,7 @@ class CompletionResponse {
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -51,7 +51,7 @@ class CompletionResponse {
     }
 
     public String getCreatedAt() {
-        return createdAt;
+        return this.createdAt;
     }
 
     public void setCreatedAt(String createdAt) {
@@ -59,7 +59,7 @@ class CompletionResponse {
     }
 
     public Boolean getDone() {
-        return done;
+        return this.done;
     }
 
     public void setDone(Boolean done) {
@@ -67,7 +67,7 @@ class CompletionResponse {
     }
 
     public String getResponse() {
-        return response;
+        return this.response;
     }
 
     public void setResponse(String response) {
@@ -75,7 +75,7 @@ class CompletionResponse {
     }
 
     public String getImage() {
-        return image;
+        return this.image;
     }
 
     public void setImage(String image) {
@@ -83,7 +83,7 @@ class CompletionResponse {
     }
 
     public Integer getPromptEvalCount() {
-        return promptEvalCount;
+        return this.promptEvalCount;
     }
 
     public void setPromptEvalCount(Integer promptEvalCount) {
@@ -91,7 +91,7 @@ class CompletionResponse {
     }
 
     public Integer getEvalCount() {
-        return evalCount;
+        return this.evalCount;
     }
 
     public void setEvalCount(Integer evalCount) {
@@ -99,7 +99,7 @@ class CompletionResponse {
     }
 
     public String getError() {
-        return error;
+        return this.error;
     }
 
     public void setError(String error) {
@@ -107,7 +107,6 @@ class CompletionResponse {
     }
 
     static class Builder {
-
         private String model;
         private String createdAt;
         private String response;
@@ -116,6 +115,9 @@ class CompletionResponse {
         private Integer promptEvalCount;
         private Integer evalCount;
         private String error;
+
+        Builder() {
+        }
 
         Builder model(String model) {
             this.model = model;
@@ -158,7 +160,8 @@ class CompletionResponse {
         }
 
         CompletionResponse build() {
-            return new CompletionResponse(model, createdAt, response, image, done, promptEvalCount, evalCount, error);
+            return new CompletionResponse(this.model, this.createdAt, this.response, this.image, this.done, this.promptEvalCount, this.evalCount, this.error);
         }
     }
 }
+

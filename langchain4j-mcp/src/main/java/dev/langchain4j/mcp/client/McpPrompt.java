@@ -1,92 +1,81 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.mcp.client;
-
-import static dev.langchain4j.internal.Utils.copy;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.mcp.client.McpIcon;
+import dev.langchain4j.mcp.client.McpPromptArgument;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Collections;
 
-/**
- * The 'Prompt' object from the MCP protocol schema.
- * It describes a declaration of a prompt, not its actual contents.
- * It contains a name, description and a list of arguments relevant for rendering an instance of the prompt.
- */
 public class McpPrompt {
-
     private final String name;
     private final String description;
     private final List<McpPromptArgument> arguments;
     private final Map<String, Object> metadata;
     private final List<McpIcon> icons;
 
-    public McpPrompt(
-            @JsonProperty("name") String name,
-            @JsonProperty("description") String description,
-            @JsonProperty("arguments") List<McpPromptArgument> arguments) {
+    public McpPrompt(@JsonProperty(value="name") String name, @JsonProperty(value="description") String description, @JsonProperty(value="arguments") List<McpPromptArgument> arguments) {
         this(name, description, arguments, null, null);
     }
 
     @JsonCreator
-    public McpPrompt(
-            @JsonProperty("name") String name,
-            @JsonProperty("description") String description,
-            @JsonProperty("arguments") List<McpPromptArgument> arguments,
-            @JsonProperty("_meta") Map<String, Object> metadata,
-            @JsonProperty("icons") List<McpIcon> icons) {
+    public McpPrompt(@JsonProperty(value="name") String name, @JsonProperty(value="description") String description, @JsonProperty(value="arguments") List<McpPromptArgument> arguments, @JsonProperty(value="_meta") Map<String, Object> metadata, @JsonProperty(value="icons") List<McpIcon> icons) {
         this.name = name;
         this.description = description;
         this.arguments = arguments;
-        this.metadata = copy(metadata);
-        this.icons = icons == null ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(icons);
+        this.metadata = Utils.copy(metadata);
+        this.icons = icons == null ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<McpIcon>(icons));
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
     public String description() {
-        return description;
+        return this.description;
     }
 
     public List<McpPromptArgument> arguments() {
-        return arguments;
+        return this.arguments;
     }
 
     public Map<String, Object> metadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public List<McpIcon> icons() {
-        return icons;
+        return this.icons;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        McpPrompt that = (McpPrompt) obj;
-        return Objects.equals(this.name, that.name)
-                && Objects.equals(this.description, that.description)
-                && Objects.equals(this.arguments, that.arguments)
-                && Objects.equals(this.metadata, that.metadata)
-                && Objects.equals(this.icons, that.icons);
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        McpPrompt that = (McpPrompt)obj;
+        return Objects.equals(this.name, that.name) && Objects.equals(this.description, that.description) && Objects.equals(this.arguments, that.arguments) && Objects.equals(this.metadata, that.metadata) && Objects.equals(this.icons, that.icons);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(name, description, arguments, metadata, icons);
+        return Objects.hash(this.name, this.description, this.arguments, this.metadata, this.icons);
     }
 
-    @Override
     public String toString() {
-        return "McpPrompt[" + "name="
-                + name + ", " + "description="
-                + description + ", " + "arguments="
-                + arguments + ", " + "metadata="
-                + metadata + ", " + "icons="
-                + icons + ']';
+        return "McpPrompt[name=" + this.name + ", description=" + this.description + ", arguments=" + this.arguments + ", metadata=" + this.metadata + ", icons=" + this.icons + ']';
     }
 }
+

@@ -1,17 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.exception.LangChain4jException
+ *  dev.langchain4j.model.moderation.Moderation
+ */
 package dev.langchain4j.service;
 
 import dev.langchain4j.exception.LangChain4jException;
 import dev.langchain4j.model.moderation.Moderation;
 
-/**
- * Thrown when content moderation fails, i.e.,
- * when content is flagged by the moderation model.
- *
- * @see Moderate
- * @see dev.langchain4j.model.moderation.ModerationModel
- */
-public class ModerationException extends LangChain4jException {
-
+public class ModerationException
+extends LangChain4jException {
     private final Moderation moderation;
 
     public ModerationException(String message, Moderation moderation) {
@@ -20,6 +20,7 @@ public class ModerationException extends LangChain4jException {
     }
 
     public Moderation moderation() {
-        return moderation;
+        return this.moderation;
     }
 }
+

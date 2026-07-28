@@ -1,14 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpJsonRpcMessage;
 
-/**
- * Corresponds to the {@code JSONRPCError} type from the MCP schema.
- */
 @Internal
-public class McpErrorResponse extends McpJsonRpcMessage {
-
+public class McpErrorResponse
+extends McpJsonRpcMessage {
     private final Error error;
 
     public McpErrorResponse(Long id, Error error) {
@@ -17,12 +23,11 @@ public class McpErrorResponse extends McpJsonRpcMessage {
     }
 
     public Error getError() {
-        return error;
+        return this.error;
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
     public static class Error {
-
         private final int code;
         private final String message;
         private final Object data;
@@ -34,15 +39,16 @@ public class McpErrorResponse extends McpJsonRpcMessage {
         }
 
         public int getCode() {
-            return code;
+            return this.code;
         }
 
         public String getMessage() {
-            return message;
+            return this.message;
         }
 
         public Object getData() {
-            return data;
+            return this.data;
         }
     }
 }
+

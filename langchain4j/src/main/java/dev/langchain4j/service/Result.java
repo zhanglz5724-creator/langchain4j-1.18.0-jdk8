@@ -1,35 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.TokenUsage
+ *  dev.langchain4j.rag.content.Content
+ */
 package dev.langchain4j.service;
 
-import static dev.langchain4j.internal.Utils.copy;
-
-import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.service.tool.ToolExecution;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
-/**
- * Represents the result of an AI Service invocation.
- * It contains actual content (LLM response) and additional information associated with it,
- * such as:
- * <pre>
- * - Aggregate {@link TokenUsage} over all calls to the {@link ChatModel}
- * - {@link FinishReason} of the final {@link ChatResponse}
- * - sources ({@link Content}s) retrieved during RAG retrieval
- * - all executed tools (both requests and results)
- * - all intermediate {@link ChatResponse}s
- * - final {@link ChatResponse}
- * </pre>
- *
- * @param <T> The type of the content. Can be of any return type supported by AI Services,
- *            such as String, Enum, MyCustomPojo, etc.
- */
 public class Result<T> {
-
     private final T content;
     private final TokenUsage tokenUsage;
     private final List<Content> sources;
@@ -38,92 +28,59 @@ public class Result<T> {
     private final List<ChatResponse> intermediateResponses;
     private final ChatResponse finalResponse;
 
-    /**
-     * @since 1.2.0
-     */
     public Result(ResultBuilder<T> builder) {
-        this.content = builder.content;
-        this.tokenUsage = builder.tokenUsage;
-        this.sources = copy(builder.sources);
-        this.finishReason = builder.finishReason;
-        this.toolExecutions = copy(builder.toolExecutions);
-        this.intermediateResponses = copy(builder.intermediateResponses);
-        this.finalResponse = builder.finalResponse;
+        this.content = ((ResultBuilder)builder).content;
+        this.tokenUsage = ((ResultBuilder)builder).tokenUsage;
+        this.sources = Utils.copy((List)((ResultBuilder)builder).sources);
+        this.finishReason = ((ResultBuilder)builder).finishReason;
+        this.toolExecutions = Utils.copy((List)((ResultBuilder)builder).toolExecutions);
+        this.intermediateResponses = Utils.copy((List)((ResultBuilder)builder).intermediateResponses);
+        this.finalResponse = ((ResultBuilder)builder).finalResponse;
     }
 
-    public Result(
-            T content,
-            TokenUsage tokenUsage,
-            List<Content> sources,
-            FinishReason finishReason,
-            List<ToolExecution> toolExecutions) {
+    public Result(T content, TokenUsage tokenUsage, List<Content> sources, FinishReason finishReason, List<ToolExecution> toolExecutions) {
         this.content = content;
         this.tokenUsage = tokenUsage;
-        this.sources = copy(sources);
+        this.sources = Utils.copy(sources);
         this.finishReason = finishReason;
-        this.toolExecutions = copy(toolExecutions);
+        this.toolExecutions = Utils.copy(toolExecutions);
         this.intermediateResponses = Collections.emptyList();
         this.finalResponse = null;
     }
 
     public static <T> ResultBuilder<T> builder() {
-        return new ResultBuilder<>();
+        return new ResultBuilder();
     }
 
     public T content() {
-        return content;
+        return this.content;
     }
 
-    /**
-     * Returns aggregate token usage over all calls to the {@link ChatModel}.
-     */
     public TokenUsage tokenUsage() {
-        return tokenUsage;
+        return this.tokenUsage;
     }
 
-    /**
-     * Returns all sources returned during RAG retrieval.
-     */
     public List<Content> sources() {
-        return sources;
+        return this.sources;
     }
 
-    /**
-     * Returns finish reason of the final {@link ChatModel} response (taken from {@link #finalResponse()}).
-     */
     public FinishReason finishReason() {
-        return finishReason;
+        return this.finishReason;
     }
 
-    /**
-     * Returns all tool executions that happened during AI Service invocation.
-     */
     public List<ToolExecution> toolExecutions() {
-        return toolExecutions;
+        return this.toolExecutions;
     }
 
-    /**
-     * Returns all intermediate chat responses that were returned by the {@link ChatModel}.
-     * All of these responses contain {@link ToolExecutionRequest}s.
-     *
-     * @since 1.2.0
-     */
     public List<ChatResponse> intermediateResponses() {
-        return intermediateResponses;
+        return this.intermediateResponses;
     }
 
-    /**
-     * Returns final chat response returned by the {@link ChatModel}.
-     * This response does not contain {@link ToolExecutionRequest}s.
-     *
-     * @since 1.2.0
-     */
     public ChatResponse finalResponse() {
-        return finalResponse;
+        return this.finalResponse;
     }
 
     public static class ResultBuilder<T> {
-
         private T content;
         private TokenUsage tokenUsage;
         private List<Content> sources;
@@ -132,7 +89,8 @@ public class Result<T> {
         private List<ChatResponse> intermediateResponses;
         private ChatResponse finalResponse;
 
-        ResultBuilder() {}
+        ResultBuilder() {
+        }
 
         public ResultBuilder<T> content(T content) {
             this.content = content;
@@ -159,24 +117,19 @@ public class Result<T> {
             return this;
         }
 
-        /**
-         * @since 1.2.0
-         */
         public ResultBuilder<T> intermediateResponses(List<ChatResponse> intermediateResponses) {
             this.intermediateResponses = intermediateResponses;
             return this;
         }
 
-        /**
-         * @since 1.2.0
-         */
         public ResultBuilder<T> finalResponse(ChatResponse finalResponse) {
             this.finalResponse = finalResponse;
             return this;
         }
 
         public Result<T> build() {
-            return new Result<>(this);
+            return new Result(this);
         }
     }
 }
+

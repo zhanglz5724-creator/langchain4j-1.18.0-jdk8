@@ -1,42 +1,43 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.ollama.OllamaDateDeserializer;
+import dev.langchain4j.model.ollama.OllamaModelDetails;
 import java.time.OffsetDateTime;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class RunningOllamaModel {
-
     private String name;
     private String model;
     private Long size;
     private String digest;
     private OllamaModelDetails details;
-
-    @JsonDeserialize(using = OllamaDateDeserializer.class)
+    @JsonDeserialize(using=OllamaDateDeserializer.class)
     private OffsetDateTime expiresAt;
-
     private Long sizeVram;
     private Integer contextLength;
 
-    RunningOllamaModel() {}
+    RunningOllamaModel() {
+    }
 
-    RunningOllamaModel(
-            String name,
-            String model,
-            Long size,
-            OllamaModelDetails details,
-            String digest,
-            OffsetDateTime expiresAt,
-            Long sizeVram,
-            Integer contextLength) {
+    RunningOllamaModel(String name, String model, Long size, OllamaModelDetails details, String digest, OffsetDateTime expiresAt, Long sizeVram, Integer contextLength) {
         this.name = name;
         this.model = model;
         this.size = size;
@@ -48,7 +49,7 @@ public class RunningOllamaModel {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -56,7 +57,7 @@ public class RunningOllamaModel {
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -64,7 +65,7 @@ public class RunningOllamaModel {
     }
 
     public Long getSize() {
-        return size;
+        return this.size;
     }
 
     public void setSize(Long size) {
@@ -72,7 +73,7 @@ public class RunningOllamaModel {
     }
 
     public String getDigest() {
-        return digest;
+        return this.digest;
     }
 
     public void setDigest(String digest) {
@@ -80,7 +81,7 @@ public class RunningOllamaModel {
     }
 
     public OllamaModelDetails getDetails() {
-        return details;
+        return this.details;
     }
 
     public void setDetails(OllamaModelDetails details) {
@@ -88,7 +89,7 @@ public class RunningOllamaModel {
     }
 
     public OffsetDateTime getExpiresAt() {
-        return expiresAt;
+        return this.expiresAt;
     }
 
     public void setExpiresAt(OffsetDateTime expiresAt) {
@@ -96,7 +97,7 @@ public class RunningOllamaModel {
     }
 
     public Long getSizeVram() {
-        return sizeVram;
+        return this.sizeVram;
     }
 
     public void setSizeVram(Long sizeVram) {
@@ -104,7 +105,7 @@ public class RunningOllamaModel {
     }
 
     public Integer getContextLength() {
-        return contextLength;
+        return this.contextLength;
     }
 
     public void setContextLength(Integer contextLength) {
@@ -116,7 +117,6 @@ public class RunningOllamaModel {
     }
 
     static class Builder {
-
         private String name;
         private String model;
         private Long size;
@@ -125,6 +125,9 @@ public class RunningOllamaModel {
         private OffsetDateTime expiresAt;
         private Long sizeVram;
         private Integer contextLength;
+
+        Builder() {
+        }
 
         Builder name(String name) {
             this.name = name;
@@ -167,7 +170,8 @@ public class RunningOllamaModel {
         }
 
         RunningOllamaModel build() {
-            return new RunningOllamaModel(name, model, size, details, digest, expiresAt, sizeVram, contextLength);
+            return new RunningOllamaModel(this.name, this.model, this.size, this.details, this.digest, this.expiresAt, this.sizeVram, this.contextLength);
         }
     }
 }
+

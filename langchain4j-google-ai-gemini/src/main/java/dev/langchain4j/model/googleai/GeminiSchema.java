@@ -1,38 +1,35 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnore
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.googleai;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.model.googleai.GeminiType;
 import java.util.List;
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown=true)
 class GeminiSchema {
     private GeminiType type;
     private String format;
     private String description;
     private Boolean nullable;
-
-    @JsonProperty("enum")
+    @JsonProperty(value="enum")
     private List<String> enumeration;
-
     private String maxItems;
     private Map<String, GeminiSchema> properties;
     private List<String> required;
     private GeminiSchema items;
     private List<GeminiSchema> anyOf;
 
-    GeminiSchema(
-            GeminiType type,
-            String format,
-            String description,
-            Boolean nullable,
-            List<String> enumeration,
-            String maxItems,
-            Map<String, GeminiSchema> properties,
-            List<String> required,
-            GeminiSchema items,
-            List<GeminiSchema> anyOf) {
+    GeminiSchema(GeminiType type, String format, String description, Boolean nullable, List<String> enumeration, String maxItems, Map<String, GeminiSchema> properties, List<String> required, GeminiSchema items, List<GeminiSchema> anyOf) {
         this.type = type;
         this.format = format;
         this.description = description;
@@ -130,83 +127,99 @@ class GeminiSchema {
         this.anyOf = anyOf;
     }
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof GeminiSchema)) return false;
-        final GeminiSchema other = (GeminiSchema) o;
-        if (!other.canEqual((Object) this)) return false;
-        final Object this$type = this.getType();
-        final Object other$type = other.getType();
-        if (this$type == null ? other$type != null : !this$type.equals(other$type)) return false;
-        final Object this$format = this.getFormat();
-        final Object other$format = other.getFormat();
-        if (this$format == null ? other$format != null : !this$format.equals(other$format)) return false;
-        final Object this$description = this.getDescription();
-        final Object other$description = other.getDescription();
-        if (this$description == null ? other$description != null : !this$description.equals(other$description))
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof GeminiSchema)) {
             return false;
-        final Object this$nullable = this.getNullable();
-        final Object other$nullable = other.getNullable();
-        if (this$nullable == null ? other$nullable != null : !this$nullable.equals(other$nullable)) return false;
-        final Object this$enumeration = this.getEnumeration();
-        final Object other$enumeration = other.getEnumeration();
-        if (this$enumeration == null ? other$enumeration != null : !this$enumeration.equals(other$enumeration))
+        }
+        GeminiSchema other = (GeminiSchema)o;
+        if (!other.canEqual(this)) {
             return false;
-        final Object this$maxItems = this.getMaxItems();
-        final Object other$maxItems = other.getMaxItems();
-        if (this$maxItems == null ? other$maxItems != null : !this$maxItems.equals(other$maxItems)) return false;
-        final Object this$properties = this.getProperties();
-        final Object other$properties = other.getProperties();
-        if (this$properties == null ? other$properties != null : !this$properties.equals(other$properties))
+        }
+        GeminiType this$type = this.getType();
+        GeminiType other$type = other.getType();
+        if (this$type == null ? other$type != null : !((Object)((Object)this$type)).equals((Object)other$type)) {
             return false;
-        final Object this$required = this.getRequired();
-        final Object other$required = other.getRequired();
-        if (this$required == null ? other$required != null : !this$required.equals(other$required)) return false;
-        final Object this$items = this.getItems();
-        final Object other$items = other.getItems();
-        if (this$items == null ? other$items != null : !this$items.equals(other$items)) return false;
-        final Object this$anyOf = this.getAnyOf();
-        final Object other$anyOf = other.getAnyOf();
-        if (this$anyOf == null ? other$anyOf != null : !this$anyOf.equals(other$anyOf)) return false;
-
-        return true;
+        }
+        String this$format = this.getFormat();
+        String other$format = other.getFormat();
+        if (this$format == null ? other$format != null : !this$format.equals(other$format)) {
+            return false;
+        }
+        String this$description = this.getDescription();
+        String other$description = other.getDescription();
+        if (this$description == null ? other$description != null : !this$description.equals(other$description)) {
+            return false;
+        }
+        Boolean this$nullable = this.getNullable();
+        Boolean other$nullable = other.getNullable();
+        if (this$nullable == null ? other$nullable != null : !((Object)this$nullable).equals(other$nullable)) {
+            return false;
+        }
+        List<String> this$enumeration = this.getEnumeration();
+        List<String> other$enumeration = other.getEnumeration();
+        if (this$enumeration == null ? other$enumeration != null : !((Object)this$enumeration).equals(other$enumeration)) {
+            return false;
+        }
+        String this$maxItems = this.getMaxItems();
+        String other$maxItems = other.getMaxItems();
+        if (this$maxItems == null ? other$maxItems != null : !this$maxItems.equals(other$maxItems)) {
+            return false;
+        }
+        Map<String, GeminiSchema> this$properties = this.getProperties();
+        Map<String, GeminiSchema> other$properties = other.getProperties();
+        if (this$properties == null ? other$properties != null : !((Object)this$properties).equals(other$properties)) {
+            return false;
+        }
+        List<String> this$required = this.getRequired();
+        List<String> other$required = other.getRequired();
+        if (this$required == null ? other$required != null : !((Object)this$required).equals(other$required)) {
+            return false;
+        }
+        GeminiSchema this$items = this.getItems();
+        GeminiSchema other$items = other.getItems();
+        if (this$items == null ? other$items != null : !((Object)this$items).equals(other$items)) {
+            return false;
+        }
+        List<GeminiSchema> this$anyOf = this.getAnyOf();
+        List<GeminiSchema> other$anyOf = other.getAnyOf();
+        return !(this$anyOf == null ? other$anyOf != null : !((Object)this$anyOf).equals(other$anyOf));
     }
 
-    protected boolean canEqual(final Object other) {
+    protected boolean canEqual(Object other) {
         return other instanceof GeminiSchema;
     }
 
     public int hashCode() {
-        final int PRIME = 59;
+        int PRIME = 59;
         int result = 1;
-        final Object $type = this.getType();
-        result = result * PRIME + ($type == null ? 43 : $type.hashCode());
-        final Object $format = this.getFormat();
-        result = result * PRIME + ($format == null ? 43 : $format.hashCode());
-        final Object $description = this.getDescription();
-        result = result * PRIME + ($description == null ? 43 : $description.hashCode());
-        final Object $nullable = this.getNullable();
-        result = result * PRIME + ($nullable == null ? 43 : $nullable.hashCode());
-        final Object $enumeration = this.getEnumeration();
-        result = result * PRIME + ($enumeration == null ? 43 : $enumeration.hashCode());
-        final Object $maxItems = this.getMaxItems();
-        result = result * PRIME + ($maxItems == null ? 43 : $maxItems.hashCode());
-        final Object $properties = this.getProperties();
-        result = result * PRIME + ($properties == null ? 43 : $properties.hashCode());
-        final Object $required = this.getRequired();
-        result = result * PRIME + ($required == null ? 43 : $required.hashCode());
-        final Object $items = this.getItems();
-        result = result * PRIME + ($items == null ? 43 : $items.hashCode());
-        final Object $anyOf = this.getAnyOf();
-        result = result * PRIME + ($anyOf == null ? 43 : $anyOf.hashCode());
+        GeminiType $type = this.getType();
+        result = result * 59 + ($type == null ? 43 : ((Object)((Object)$type)).hashCode());
+        String $format = this.getFormat();
+        result = result * 59 + ($format == null ? 43 : $format.hashCode());
+        String $description = this.getDescription();
+        result = result * 59 + ($description == null ? 43 : $description.hashCode());
+        Boolean $nullable = this.getNullable();
+        result = result * 59 + ($nullable == null ? 43 : ((Object)$nullable).hashCode());
+        List<String> $enumeration = this.getEnumeration();
+        result = result * 59 + ($enumeration == null ? 43 : ((Object)$enumeration).hashCode());
+        String $maxItems = this.getMaxItems();
+        result = result * 59 + ($maxItems == null ? 43 : $maxItems.hashCode());
+        Map<String, GeminiSchema> $properties = this.getProperties();
+        result = result * 59 + ($properties == null ? 43 : ((Object)$properties).hashCode());
+        List<String> $required = this.getRequired();
+        result = result * 59 + ($required == null ? 43 : ((Object)$required).hashCode());
+        GeminiSchema $items = this.getItems();
+        result = result * 59 + ($items == null ? 43 : ((Object)$items).hashCode());
+        List<GeminiSchema> $anyOf = this.getAnyOf();
+        result = result * 59 + ($anyOf == null ? 43 : ((Object)$anyOf).hashCode());
         return result;
     }
 
     public String toString() {
-        return "GeminiSchema(type=" + this.getType() + ", format=" + this.getFormat() + ", description="
-                + this.getDescription() + ", nullable=" + this.getNullable() + ", enumeration=" + this.getEnumeration()
-                + ", maxItems=" + this.getMaxItems() + ", properties=" + this.getProperties() + ", required="
-                + this.getRequired() + ", items=" + this.getItems() + ", anyOf=" + this.getAnyOf() + ")";
+        return "GeminiSchema(type=" + (Object)((Object)this.getType()) + ", format=" + this.getFormat() + ", description=" + this.getDescription() + ", nullable=" + this.getNullable() + ", enumeration=" + this.getEnumeration() + ", maxItems=" + this.getMaxItems() + ", properties=" + this.getProperties() + ", required=" + this.getRequired() + ", items=" + this.getItems() + ", anyOf=" + this.getAnyOf() + ")";
     }
 
     public static class GeminiSchemaBuilder {
@@ -221,7 +234,8 @@ class GeminiSchema {
         private GeminiSchema items;
         private List<GeminiSchema> anyOf;
 
-        GeminiSchemaBuilder() {}
+        GeminiSchemaBuilder() {
+        }
 
         public GeminiSchemaBuilder type(GeminiType type) {
             this.type = type;
@@ -274,24 +288,12 @@ class GeminiSchema {
         }
 
         public GeminiSchema build() {
-            return new GeminiSchema(
-                    this.type,
-                    this.format,
-                    this.description,
-                    this.nullable,
-                    this.enumeration,
-                    this.maxItems,
-                    this.properties,
-                    this.required,
-                    this.items,
-                    this.anyOf);
+            return new GeminiSchema(this.type, this.format, this.description, this.nullable, this.enumeration, this.maxItems, this.properties, this.required, this.items, this.anyOf);
         }
 
         public String toString() {
-            return "GeminiSchema.GeminiSchemaBuilder(type=" + this.type + ", format=" + this.format + ", description="
-                    + this.description + ", nullable=" + this.nullable + ", enumeration=" + this.enumeration
-                    + ", maxItems=" + this.maxItems + ", properties=" + this.properties + ", required=" + this.required
-                    + ", items=" + this.items + ", anyOf=" + this.anyOf + ")";
+            return "GeminiSchema.GeminiSchemaBuilder(type=" + (Object)((Object)this.type) + ", format=" + this.format + ", description=" + this.description + ", nullable=" + this.nullable + ", enumeration=" + this.enumeration + ", maxItems=" + this.maxItems + ", properties=" + this.properties + ", required=" + this.required + ", items=" + this.items + ", anyOf=" + this.anyOf + ")";
         }
     }
 }
+

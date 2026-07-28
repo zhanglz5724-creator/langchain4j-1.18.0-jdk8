@@ -1,164 +1,76 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ *  oracle.jdbc.OracleType
+ */
 package dev.langchain4j.store.embedding.oracle;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.store.embedding.oracle.CreateOption;
+import dev.langchain4j.store.embedding.oracle.EmbeddingTable;
+import dev.langchain4j.store.embedding.oracle.Index;
+import dev.langchain4j.store.embedding.oracle.IndexBuilder;
+import dev.langchain4j.store.embedding.oracle.SQLFilters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import oracle.jdbc.OracleType;
 
-/**
- * <p>
- *   This index builder allows you to configure indexes on one or several keys of the
- *   metadata column of the {@link EmbeddingTable}.
- * </p>
- * <p>
- *   It configures a function-based index using the same function used by the store
- *   to filter using the metadata column.
- * </p>
- */
-public class JSONIndexBuilder extends IndexBuilder<JSONIndexBuilder> {
-
-    /**
-     * Indicates whether the index is unique.
-     */
+public class JSONIndexBuilder
+extends IndexBuilder<JSONIndexBuilder> {
     private boolean isUnique;
-
-    /**
-     * Indicates whether the index is a bitmap index.
-     */
     private boolean isBitmap;
-
-    /**
-     * Create option for the index, by default create if not exists;
-     */
     private CreateOption createOption = CreateOption.CREATE_IF_NOT_EXISTS;
-
-    /**
-     * List of index expressions of the index. An expression is added for
-     * each JSON key that is indexed.
-     */
     private final List<MetadataKey> indexExpressions = new ArrayList<MetadataKey>();
 
-    /**
-     * Use ASC or DESC to indicate whether the index should be created in ascending or
-     * descending order. Indexes on character data are created in ascending or descending
-     * order of the character values in the database character set.
-     */
-    public enum Order {
-        /**
-         * Create the index on ascending order.
-         */
-        ASC,
-        /**
-         * Create the index on descending order.
-         */
-        DESC
+    JSONIndexBuilder() {
     }
 
-    JSONIndexBuilder() {}
-
-    /**
-     * Specify UNIQUE to indicate that the value of the column (or columns) upon
-     * which the index is based must be unique.
-     * Note that you cannot specify both UNIQUE and BITMAP.
-     *
-     * @param isUnique True if the index should be UNIQUE otherwise false;
-     * @return This builder.
-     */
     public JSONIndexBuilder isUnique(boolean isUnique) {
         this.isUnique = isUnique;
         return this;
     }
 
-    /**
-     * Specify BITMAP to indicate that index is to be created with a bitmap for each
-     * distinct key, rather than indexing each row separately.
-     *
-     * @param isBitmap True if the index should be BITMAP otherwise false;
-     * @return This builder.
-     */
     public JSONIndexBuilder isBitmap(boolean isBitmap) {
         this.isBitmap = isBitmap;
         return this;
     }
 
-    /**
-     * Adds a column expression to the index expression that allows you to index the
-     * value of a given key of the JSON column.
-     *
-     * @param key   The key to index.
-     * @param keyType The java class of the metadata column.
-     * @param order The order the index should be created in.
-     * @return This builder.
-     * @throws IllegalArgumentException If the key is null or empty, if the sqlType is null or if the order is null
-     */
     public JSONIndexBuilder key(String key, Class<?> keyType, Order order) {
-        ensureNotBlank(key, "key");
-        ensureNotNull(keyType, "sqlType");
-        ensureNotNull(order, "order");
-        indexExpressions.add(new MetadataKey(key, keyType, order));
+        ValidationUtils.ensureNotBlank((String)key, (String)"key");
+        ValidationUtils.ensureNotNull(keyType, (String)"sqlType");
+        ValidationUtils.ensureNotNull((Object)((Object)order), (String)"order");
+        this.indexExpressions.add(new MetadataKey(key, keyType, order));
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Index build() {
         return new Index(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     String getCreateIndexStatement(EmbeddingTable embeddingTable) {
-        return "CREATE " + (isUnique ? " UNIQUE " : "")
-                + (isBitmap ? " BITMAP " : "")
-                + " INDEX "
-                + (createOption == CreateOption.CREATE_IF_NOT_EXISTS ? " IF NOT EXISTS " : "")
-                + getIndexName(embeddingTable)
-                + " ON "
-                + embeddingTable.name() + "("
-                + getIndexExpression(embeddingTable) + ")";
+        return "CREATE " + (this.isUnique ? " UNIQUE " : "") + (this.isBitmap ? " BITMAP " : "") + " INDEX " + (this.createOption == CreateOption.CREATE_IF_NOT_EXISTS ? " IF NOT EXISTS " : "") + this.getIndexName(embeddingTable) + " ON " + embeddingTable.name() + "(" + this.getIndexExpression(embeddingTable) + ")";
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     *   The index name id generated by concatenating "_METADATA_" and the indexed key
-     *   names separated by an underscore character to the embedding table name.
-     * </p>
-     */
     @Override
     String getIndexName(EmbeddingTable embeddingTable) {
-        if (indexName == null) {
-            indexName = buildIndexName(
-                    embeddingTable.name(),
-                    "_METADATA_"
-                            + this.indexExpressions.stream()
-                                    .map(metadataKey -> metadataKey.getKey().toUpperCase())
-                                    .collect(Collectors.joining("_")));
+        if (this.indexName == null) {
+            this.indexName = this.buildIndexName(embeddingTable.name(), "_METADATA_" + this.indexExpressions.stream().map(metadataKey -> metadataKey.getKey().toUpperCase()).collect(Collectors.joining("_")));
         }
-        return indexName;
+        return this.indexName;
     }
 
     private String getIndexExpression(EmbeddingTable embeddingTable) {
-        return indexExpressions.stream()
-                .map(metadataKey -> {
-                    OracleType oracleType = SQLFilters.toOracleType(metadataKey.keyType);
-                    return embeddingTable.mapMetadataKey(metadataKey.key, oracleType) + " " + metadataKey.order;
-                })
-                .collect(Collectors.joining(","));
+        return this.indexExpressions.stream().map(metadataKey -> {
+            OracleType oracleType = SQLFilters.toOracleType(metadataKey.keyType);
+            return embeddingTable.mapMetadataKey(metadataKey.key, oracleType) + " " + metadataKey.order;
+        }).collect(Collectors.joining(","));
     }
 
-    /**
-     * Private class that represents the index expression of the index. It contains
-     * three members: the JSON key, the java data type if the key and the order in
-     * which the key should be indexed (ASC or DESC).
-     */
     private class MetadataKey {
         private String key;
         private Class<?> keyType;
@@ -171,15 +83,22 @@ public class JSONIndexBuilder extends IndexBuilder<JSONIndexBuilder> {
         }
 
         public String getKey() {
-            return key;
+            return this.key;
         }
 
         public Order getOrder() {
-            return order;
+            return this.order;
         }
 
         public Class<?> getKeyType() {
-            return keyType;
+            return this.keyType;
         }
     }
+
+    public static enum Order {
+        ASC,
+        DESC;
+
+    }
 }
+

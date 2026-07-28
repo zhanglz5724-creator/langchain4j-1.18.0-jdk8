@@ -1,17 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.ollama.Function;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class Tool {
-
     private String type;
     private Function function;
 
@@ -28,7 +36,7 @@ class Tool {
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public void setType(String type) {
@@ -36,7 +44,7 @@ class Tool {
     }
 
     public Function getFunction() {
-        return function;
+        return this.function;
     }
 
     public void setFunction(Function function) {
@@ -44,9 +52,11 @@ class Tool {
     }
 
     static class Builder {
-
         private final String type = "function";
         private Function function;
+
+        Builder() {
+        }
 
         Builder function(Function function) {
             this.function = function;
@@ -54,7 +64,8 @@ class Tool {
         }
 
         Tool build() {
-            return new Tool(type, function);
+            return new Tool("function", this.function);
         }
     }
 }
+

@@ -1,4 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.scope;
+
+import java.util.Objects;
+
 public class AgenticScopeKey {
     private final String agentId;
     private final Object memoryId;
@@ -8,30 +14,34 @@ public class AgenticScopeKey {
         this.memoryId = memoryId;
     }
 
-    public String getAgentId() {
-        return agentId;
+    public String agentId() {
+        return this.agentId;
     }
 
-    public Object getMemoryId() {
-        return memoryId;
+    public Object memoryId() {
+        return this.memoryId;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AgenticScopeKey that = (AgenticScopeKey) o;
-        return java.util.Objects.equals(this.agentId, that.agentId) && java.util.Objects.equals(this.memoryId, that.memoryId);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AgenticScopeKey)) {
+            return false;
+        }
+        AgenticScopeKey other = (AgenticScopeKey)o;
+        if (!Objects.equals(this.agentId, other.agentId)) {
+            return false;
+        }
+        return Objects.equals(this.memoryId, other.memoryId);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(agentId, memoryId);
+        return Objects.hash(this.agentId, this.memoryId);
     }
 
-    @Override
     public String toString() {
-        return "AgenticScopeKey{"agentId=" + agentId + , "memoryId=" + memoryId + "}"";
+        return "AgenticScopeKey{agentId=" + this.agentId + ", memoryId=" + this.memoryId + "}";
     }
-
 }
+

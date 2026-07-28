@@ -1,6 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.openai.internal;
 
-public interface ErrorHandling {
+import dev.langchain4j.model.openai.internal.ResponseHandle;
 
-    ResponseHandle execute();
+public interface ErrorHandling {
+    public ResponseHandle execute();
 }
+

@@ -1,25 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.service.output;
-
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.service.TypeUtils.getRawClass;
-import static dev.langchain4j.service.TypeUtils.resolveFirstGenericParameterClass;
-import static dev.langchain4j.service.TypeUtils.resolveFirstGenericParameterType;
-import static dev.langchain4j.service.TypeUtils.typeHasRawClass;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.TypeUtils;
+import dev.langchain4j.service.output.DefaultOutputParserFactory;
+import dev.langchain4j.service.output.OutputParser;
+import dev.langchain4j.service.output.OutputParserFactory;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
 
 @Internal
 public class ServiceOutputParser {
-
     private final OutputParserFactory outputParserFactory;
 
     public ServiceOutputParser() {
@@ -27,88 +40,63 @@ public class ServiceOutputParser {
     }
 
     ServiceOutputParser(OutputParserFactory outputParserFactory) {
-        this.outputParserFactory = ensureNotNull(outputParserFactory, "outputParserFactory");
+        this.outputParserFactory = (OutputParserFactory)ValidationUtils.ensureNotNull((Object)outputParserFactory, (String)"outputParserFactory");
     }
 
     public Object parse(ChatResponse chatResponse, Type returnType) {
-
-        if (typeHasRawClass(returnType, Result.class)) {
-            // In the case of returnType = Result<List<String>>, returnType will be set to List<String>
-            returnType = resolveFirstGenericParameterType(returnType);
+        Class<?> rawClass;
+        if (TypeUtils.typeHasRawClass(returnType, Result.class)) {
+            returnType = TypeUtils.resolveFirstGenericParameterType(returnType);
         }
-
-        Class<?> rawClass = getRawClass(returnType);
-
-        if (rawClass == Response.class) {
-            // legacy
-            return Response.from(chatResponse.aiMessage(), chatResponse.tokenUsage(), chatResponse.finishReason());
+        if ((rawClass = TypeUtils.getRawClass(returnType)) == Response.class) {
+            return Response.from((Object)chatResponse.aiMessage(), (TokenUsage)chatResponse.tokenUsage(), (FinishReason)chatResponse.finishReason());
         }
-
-        if (rawClass == void.class || rawClass == Void.class) {
+        if (rawClass == Void.TYPE || rawClass == Void.class) {
             return null;
         }
-
         AiMessage aiMessage = chatResponse.aiMessage();
         if (rawClass == AiMessage.class) {
             return aiMessage;
         }
-
-        return parseText(returnType, rawClass, aiMessage.text());
+        return this.parseText(returnType, rawClass, aiMessage.text());
     }
 
     public Object parseText(Type returnType, String text) {
-        return parseText(returnType, getRawClass(returnType), text);
+        return this.parseText(returnType, TypeUtils.getRawClass(returnType), text);
     }
 
     private Object parseText(Type returnType, Class<?> rawClass, String text) {
         if (rawClass == String.class) {
             return text;
         }
-
-        Class<?> typeArgumentClass = resolveFirstGenericParameterClass(returnType);
-        OutputParser<?> outputParser = outputParserFactory.get(rawClass, typeArgumentClass);
+        Class<?> typeArgumentClass = TypeUtils.resolveFirstGenericParameterClass(returnType);
+        OutputParser<?> outputParser = this.outputParserFactory.get(rawClass, typeArgumentClass);
         return outputParser.parse(text);
     }
 
     public Optional<JsonSchema> jsonSchema(Type returnType) {
-
-        if (typeHasRawClass(returnType, Result.class)) {
-            // In the case of returnType = Result<List<String>>, returnType will be set to List<String>
-            returnType = resolveFirstGenericParameterType(returnType);
+        if (TypeUtils.typeHasRawClass(returnType, Result.class)) {
+            returnType = TypeUtils.resolveFirstGenericParameterType(returnType);
         }
-
-        // In the case of returnType = List<String> these two would be set like:
-        // rawClass = List.class
-        // typeArgumentClass = String.class
-        Class<?> rawClass = getRawClass(returnType);
-        Class<?> typeArgumentClass = resolveFirstGenericParameterClass(returnType);
-
-        if (schemaNotRequired(rawClass)) {
+        Class<?> rawClass = TypeUtils.getRawClass(returnType);
+        Class<?> typeArgumentClass = TypeUtils.resolveFirstGenericParameterClass(returnType);
+        if (ServiceOutputParser.schemaNotRequired(rawClass)) {
             return Optional.empty();
         }
-
-        OutputParser<?> outputParser = outputParserFactory.get(rawClass, typeArgumentClass);
+        OutputParser<?> outputParser = this.outputParserFactory.get(rawClass, typeArgumentClass);
         return outputParser.jsonSchema();
     }
 
     public String outputFormatInstructions(Type returnType) {
-
-        if (typeHasRawClass(returnType, Result.class)) {
-            // In the case of returnType = Result<List<String>>, returnType will be set to List<String>
-            returnType = resolveFirstGenericParameterType(returnType);
+        if (TypeUtils.typeHasRawClass(returnType, Result.class)) {
+            returnType = TypeUtils.resolveFirstGenericParameterType(returnType);
         }
-
-        // In the case of returnType = List<String> these two would be set like:
-        // rawClass = List.class
-        // typeArgumentClass = String.class
-        Class<?> rawClass = getRawClass(returnType);
-        Class<?> typeArgumentClass = resolveFirstGenericParameterClass(returnType);
-
-        if (schemaNotRequired(rawClass)) {
+        Class<?> rawClass = TypeUtils.getRawClass(returnType);
+        Class<?> typeArgumentClass = TypeUtils.resolveFirstGenericParameterClass(returnType);
+        if (ServiceOutputParser.schemaNotRequired(rawClass)) {
             return "";
         }
-
-        OutputParser<?> outputParser = outputParserFactory.get(rawClass, typeArgumentClass);
+        OutputParser<?> outputParser = this.outputParserFactory.get(rawClass, typeArgumentClass);
         String formatInstructions = outputParser.formatInstructions();
         if (!formatInstructions.startsWith("\nYou must")) {
             formatInstructions = "\nYou must answer strictly in the following format: " + formatInstructions;
@@ -117,12 +105,7 @@ public class ServiceOutputParser {
     }
 
     private static boolean schemaNotRequired(Class<?> type) {
-        return type == String.class
-                || type == AiMessage.class
-                || type == TokenStream.class
-                || type == Response.class
-                || type == Map.class
-                || type == void.class
-                || type == Void.class;
+        return type == String.class || type == AiMessage.class || type == TokenStream.class || type == Response.class || type == Map.class || type == Void.TYPE || type == Void.class;
     }
 }
+

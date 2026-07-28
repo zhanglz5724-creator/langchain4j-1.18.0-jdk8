@@ -1,10 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -12,12 +22,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiEmbedding.MistralAiEmbeddingBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralAiEmbeddingBuilder.class)
 public class MistralAiEmbedding {
-
     private String object;
     private List<Float> embedding;
     private Integer index;
@@ -40,7 +49,6 @@ public class MistralAiEmbedding {
         return this.index;
     }
 
-    @Override
     public int hashCode() {
         int hash = 5;
         hash = 97 * hash + Objects.hashCode(this.object);
@@ -49,63 +57,46 @@ public class MistralAiEmbedding {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
-        final MistralAiEmbedding other = (MistralAiEmbedding) obj;
-        return Objects.equals(this.object, other.object)
-                && Objects.equals(this.embedding, other.embedding)
-                && Objects.equals(this.index, other.index);
+        MistralAiEmbedding other = (MistralAiEmbedding)obj;
+        return Objects.equals(this.object, other.object) && Objects.equals(this.embedding, other.embedding) && Objects.equals(this.index, other.index);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiEmbedding [", "]")
-                .add("object=" + this.getObject())
-                .add("embedding=" + this.getEmbedding())
-                .add("index=" + this.getIndex())
-                .toString();
+        return new StringJoiner(", ", "MistralAiEmbedding [", "]").add("object=" + this.getObject()).add("embedding=" + this.getEmbedding()).add("index=" + this.getIndex()).toString();
     }
 
     public static MistralAiEmbeddingBuilder builder() {
         return new MistralAiEmbeddingBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiEmbeddingBuilder {
-
         private String object;
         private List<Float> embedding;
         private Integer index;
 
-        private MistralAiEmbeddingBuilder() {}
+        private MistralAiEmbeddingBuilder() {
+        }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingBuilder object(String object) {
             this.object = object;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingBuilder embedding(List<Float> embedding) {
             this.embedding = embedding;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiEmbeddingBuilder index(Integer index) {
             this.index = index;
             return this;
@@ -116,3 +107,4 @@ public class MistralAiEmbedding {
         }
     }
 }
+

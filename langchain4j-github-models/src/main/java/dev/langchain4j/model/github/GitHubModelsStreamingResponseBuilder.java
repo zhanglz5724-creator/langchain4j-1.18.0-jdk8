@@ -1,3 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.azure.ai.inference.models.CompletionsFinishReason
+ *  com.azure.ai.inference.models.StreamingChatChoiceUpdate
+ *  com.azure.ai.inference.models.StreamingChatCompletionsUpdate
+ *  com.azure.ai.inference.models.StreamingChatResponseMessageUpdate
+ *  com.azure.ai.inference.models.StreamingChatResponseToolCallUpdate
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.github;
 
 import com.azure.ai.inference.models.CompletionsFinishReason;
@@ -7,81 +23,64 @@ import com.azure.ai.inference.models.StreamingChatResponseMessageUpdate;
 import com.azure.ai.inference.models.StreamingChatResponseToolCallUpdate;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.github.InternalGitHubModelHelper;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
-
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.model.github.InternalGitHubModelHelper.finishReasonFrom;
-import static java.util.stream.Collectors.toList;
-
-/**
- * This class needs to be thread safe because it is called when a streaming result comes back
- * and there is no guarantee that this thread will be the same as the one that initiated the request,
- * in fact it almost certainly won't be.
- */
 class GitHubModelsStreamingResponseBuilder {
-
     private final StringBuffer contentBuilder = new StringBuffer();
     private int inputTokenCount = 0;
     private int outputTokenCount = 0;
     private String toolExecutionsIndex = "call_undefined";
-    private final Map<String, ToolExecutionRequestBuilder> toolExecutionRequestBuilderHashMap = new HashMap<>();
+    private final Map<String, ToolExecutionRequestBuilder> toolExecutionRequestBuilderHashMap = new HashMap<String, ToolExecutionRequestBuilder>();
     private volatile CompletionsFinishReason azureFinishReason;
 
-    public GitHubModelsStreamingResponseBuilder() {
-    }
-
     public void append(StreamingChatCompletionsUpdate streamingChatCompletionsUpdate) {
+        StreamingChatResponseMessageUpdate delta;
+        List choices;
         if (streamingChatCompletionsUpdate == null) {
             return;
         }
         if (streamingChatCompletionsUpdate.getUsage() != null) {
-            inputTokenCount = streamingChatCompletionsUpdate.getUsage().getPromptTokens();
-            outputTokenCount = streamingChatCompletionsUpdate.getUsage().getCompletionTokens();
+            this.inputTokenCount = streamingChatCompletionsUpdate.getUsage().getPromptTokens();
+            this.outputTokenCount = streamingChatCompletionsUpdate.getUsage().getCompletionTokens();
         }
-
-        List<StreamingChatChoiceUpdate> choices = streamingChatCompletionsUpdate.getChoices();
-        if (isNullOrEmpty(choices)) {
+        if (Utils.isNullOrEmpty((Collection)(choices = streamingChatCompletionsUpdate.getChoices()))) {
             return;
         }
-
-        StreamingChatChoiceUpdate chatCompletionChoice = choices.get(0);
+        StreamingChatChoiceUpdate chatCompletionChoice = (StreamingChatChoiceUpdate)choices.get(0);
         if (chatCompletionChoice == null) {
             return;
         }
-
         CompletionsFinishReason finishReason = chatCompletionChoice.getFinishReason();
         if (finishReason != null) {
             this.azureFinishReason = finishReason;
         }
-
-        StreamingChatResponseMessageUpdate delta = chatCompletionChoice.getDelta();
-        if (delta == null) {
+        if ((delta = chatCompletionChoice.getDelta()) == null) {
             return;
         }
-
         String content = delta.getContent();
         if (content != null) {
-            contentBuilder.append(content);
+            this.contentBuilder.append(content);
             return;
         }
-
         if (delta.getToolCalls() != null && !delta.getToolCalls().isEmpty()) {
             for (StreamingChatResponseToolCallUpdate toolCall : delta.getToolCalls()) {
                 ToolExecutionRequestBuilder toolExecutionRequestBuilder;
                 if (toolCall.getId() != null) {
-                    toolExecutionsIndex = toolCall.getId();
+                    this.toolExecutionsIndex = toolCall.getId();
                     toolExecutionRequestBuilder = new ToolExecutionRequestBuilder();
-                    toolExecutionRequestBuilder.idBuilder.append(toolExecutionsIndex);
-                    toolExecutionRequestBuilderHashMap.put(toolExecutionsIndex, toolExecutionRequestBuilder);
+                    toolExecutionRequestBuilder.idBuilder.append(this.toolExecutionsIndex);
+                    this.toolExecutionRequestBuilderHashMap.put(this.toolExecutionsIndex, toolExecutionRequestBuilder);
                 } else {
-                    toolExecutionRequestBuilder = toolExecutionRequestBuilderHashMap.get(toolExecutionsIndex);
+                    toolExecutionRequestBuilder = this.toolExecutionRequestBuilderHashMap.get(this.toolExecutionsIndex);
                     if (toolExecutionRequestBuilder == null) {
                         throw new IllegalStateException("Function without an id defined in the tool call");
                     }
@@ -89,54 +88,34 @@ class GitHubModelsStreamingResponseBuilder {
                 if (toolCall.getFunction().getName() != null) {
                     toolExecutionRequestBuilder.nameBuilder.append(toolCall.getFunction().getName());
                 }
-                if (toolCall.getFunction().getArguments() != null) {
-                    toolExecutionRequestBuilder.argumentsBuilder.append(toolCall.getFunction().getArguments());
-                }
+                if (toolCall.getFunction().getArguments() == null) continue;
+                toolExecutionRequestBuilder.argumentsBuilder.append(toolCall.getFunction().getArguments());
             }
         }
     }
 
     public Response<AiMessage> build() {
-        String content = contentBuilder.toString();
-        TokenUsage tokenUsage = new TokenUsage(inputTokenCount, outputTokenCount);
-        FinishReason finishReason = finishReasonFrom(azureFinishReason);
-
-        if (toolExecutionRequestBuilderHashMap.isEmpty()) {
-
-            if (isNullOrBlank(content)) {
+        String content = this.contentBuilder.toString();
+        TokenUsage tokenUsage = new TokenUsage(Integer.valueOf(this.inputTokenCount), Integer.valueOf(this.outputTokenCount));
+        FinishReason finishReason = InternalGitHubModelHelper.finishReasonFrom(this.azureFinishReason);
+        if (this.toolExecutionRequestBuilderHashMap.isEmpty()) {
+            if (Utils.isNullOrBlank((String)content)) {
                 return null;
-            } else {
-                return Response.from(
-                        AiMessage.from(content),
-                        tokenUsage,
-                        finishReason
-                );
             }
-        } else {
-            List<ToolExecutionRequest> toolExecutionRequests = toolExecutionRequestBuilderHashMap.values().stream()
-                    .map(it -> ToolExecutionRequest.builder()
-                            .id(it.idBuilder.toString())
-                            .name(it.nameBuilder.toString())
-                            .arguments(it.argumentsBuilder.toString())
-                            .build())
-                    .collect(toList());
-
-            AiMessage aiMessage = isNullOrBlank(content)
-                    ? AiMessage.from(toolExecutionRequests)
-                    : AiMessage.from(content, toolExecutionRequests);
-
-            return Response.from(
-                    aiMessage,
-                    tokenUsage,
-                    finishReason
-            );
+            return Response.from((Object)AiMessage.from((String)content), (TokenUsage)tokenUsage, (FinishReason)finishReason);
         }
+        List toolExecutionRequests = this.toolExecutionRequestBuilderHashMap.values().stream().map(it -> ToolExecutionRequest.builder().id(((ToolExecutionRequestBuilder)it).idBuilder.toString()).name(((ToolExecutionRequestBuilder)it).nameBuilder.toString()).arguments(((ToolExecutionRequestBuilder)it).argumentsBuilder.toString()).build()).collect(Collectors.toList());
+        AiMessage aiMessage = Utils.isNullOrBlank((String)content) ? AiMessage.from(toolExecutionRequests) : AiMessage.from((String)content, toolExecutionRequests);
+        return Response.from((Object)aiMessage, (TokenUsage)tokenUsage, (FinishReason)finishReason);
     }
 
     private static class ToolExecutionRequestBuilder {
-
         private final StringBuffer idBuilder = new StringBuffer();
         private final StringBuffer nameBuilder = new StringBuffer();
         private final StringBuffer argumentsBuilder = new StringBuffer();
+
+        private ToolExecutionRequestBuilder() {
+        }
     }
 }
+

@@ -1,11 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.mistralai.internal.api;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public enum MistralAiToolType {
+    FUNCTION;
 
-    @JsonProperty("function") FUNCTION;
-
-    MistralAiToolType() {
-    }
 }
+

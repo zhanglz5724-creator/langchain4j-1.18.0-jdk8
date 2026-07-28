@@ -1,13 +1,43 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.core.JsonProcessingException
+ *  com.fasterxml.jackson.databind.JsonNode
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  com.fasterxml.jackson.databind.SerializationFeature
+ *  com.google.auth.oauth2.GoogleCredentials
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.AiMessage$Builder
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.StreamingChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.CompleteToolCall
+ *  dev.langchain4j.model.chat.response.StreamingChatResponseHandler
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.TokenUsage
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.model.vertexai.anthropic;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.ModelProvider.*;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.auth.oauth2.GoogleCredentials;
-import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
@@ -15,10 +45,13 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.CompleteToolCall;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
-import dev.langchain4j.model.vertexai.anthropic.internal.Constants;
+import dev.langchain4j.model.vertexai.anthropic.VertexAiAnthropicExceptionMapper;
 import dev.langchain4j.model.vertexai.anthropic.internal.ValidationUtils;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent;
 import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicRequest;
 import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicResponse;
 import dev.langchain4j.model.vertexai.anthropic.internal.client.StreamingResponseHandler;
@@ -29,18 +62,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Represents a Google Vertex AI Anthropic language model with a streaming chat completion interface.
- * Supports Claude models through Vertex AI's Model Garden.
- */
-public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, Closeable {
-
+public class VertexAiAnthropicStreamingChatModel
+implements StreamingChatModel,
+Closeable {
     private static final Logger logger = LoggerFactory.getLogger(VertexAiAnthropicStreamingChatModel.class);
-
     private final VertexAiAnthropicClient client;
     private final ChatRequestParameters defaultRequestParameters;
     private final Boolean logRequests;
@@ -49,69 +77,43 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
     private final List<ChatModelListener> listeners;
 
     public VertexAiAnthropicStreamingChatModel(VertexAiAnthropicStreamingChatModelBuilder builder) {
-        ChatRequestParameters commonParameters = builder.defaultRequestParameters != null
-                ? builder.defaultRequestParameters
-                : DefaultChatRequestParameters.EMPTY;
-
-        String modelName = ensureNotBlank(getOrDefault(builder.modelName, commonParameters.modelName()), "modelName");
-
-        this.client = new VertexAiAnthropicClient(
-                ensureNotBlank(builder.project, "project"),
-                ensureNotBlank(builder.location, "location"),
-                modelName,
-                builder.credentials);
-        this.defaultRequestParameters = DefaultChatRequestParameters.builder()
-                .modelName(modelName)
-                .maxOutputTokens(
-                        ValidationUtils.validateMaxTokens(getOrDefault(builder.maxTokens, commonParameters.maxOutputTokens())))
-                .temperature(
-                        ValidationUtils.validateTemperature(getOrDefault(builder.temperature, commonParameters.temperature())))
-                .topP(ValidationUtils.validateTopP(getOrDefault(builder.topP, commonParameters.topP())))
-                .topK(ValidationUtils.validateTopK(getOrDefault(builder.topK, commonParameters.topK())))
-                .stopSequences(getOrDefault(builder.stopSequences, commonParameters.stopSequences()))
-                .toolSpecifications(commonParameters.toolSpecifications())
-                .toolChoice(commonParameters.toolChoice())
-                .responseFormat(commonParameters.responseFormat())
-                .build();
-        this.logRequests = getOrDefault(builder.logRequests, false);
-        this.logResponses = getOrDefault(builder.logResponses, false);
-        this.enablePromptCaching = getOrDefault(builder.enablePromptCaching, false);
-        this.listeners = builder.listeners != null ? Collections.unmodifiableList(new ArrayList<>(builder.listeners) : Collections.emptyList();
+        ChatRequestParameters commonParameters = builder.defaultRequestParameters != null ? builder.defaultRequestParameters : DefaultChatRequestParameters.EMPTY;
+        String modelName = dev.langchain4j.internal.ValidationUtils.ensureNotBlank((String)((String)Utils.getOrDefault((Object)builder.modelName, (Object)commonParameters.modelName())), (String)"modelName");
+        this.client = new VertexAiAnthropicClient(dev.langchain4j.internal.ValidationUtils.ensureNotBlank((String)builder.project, (String)"project"), dev.langchain4j.internal.ValidationUtils.ensureNotBlank((String)builder.location, (String)"location"), modelName, builder.credentials);
+        this.defaultRequestParameters = DefaultChatRequestParameters.builder().modelName(modelName).maxOutputTokens(ValidationUtils.validateMaxTokens((Integer)Utils.getOrDefault((Object)builder.maxTokens, (Object)commonParameters.maxOutputTokens()))).temperature(ValidationUtils.validateTemperature((Double)Utils.getOrDefault((Object)builder.temperature, (Object)commonParameters.temperature()))).topP(ValidationUtils.validateTopP((Double)Utils.getOrDefault((Object)builder.topP, (Object)commonParameters.topP()))).topK(ValidationUtils.validateTopK((Integer)Utils.getOrDefault((Object)builder.topK, (Object)commonParameters.topK()))).stopSequences(Utils.getOrDefault((List)builder.stopSequences, (List)commonParameters.stopSequences())).toolSpecifications(commonParameters.toolSpecifications()).toolChoice(commonParameters.toolChoice()).responseFormat(commonParameters.responseFormat()).build();
+        this.logRequests = (Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false);
+        this.logResponses = (Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false);
+        this.enablePromptCaching = (Boolean)Utils.getOrDefault((Object)builder.enablePromptCaching, (Object)false);
+        this.listeners = builder.listeners != null ? new ArrayList(builder.listeners) : new ArrayList();
     }
 
-    @Override
     public ChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
-    @Override
     public void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
-        // Validate that JSON response format is not used (not supported)
         ChatRequestParameters parameters = chatRequest.parameters();
         if (parameters.responseFormat() != null) {
             try {
-                handler.onError(new dev.langchain4j.exception.UnsupportedFeatureException(
-                        "JSON response format is not supported by Vertex AI Anthropic"));
-            } catch (Exception userException) {
-                logger.warn("User's onError handler threw an exception, ignoring", userException);
+                handler.onError((Throwable)new UnsupportedFeatureException("JSON response format is not supported by Vertex AI Anthropic"));
+            }
+            catch (Exception userException) {
+                logger.warn("User's onError handler threw an exception, ignoring", (Throwable)userException);
             }
             return;
         }
-
         try {
-            String requestModelName = determineRequestModelName(chatRequest.parameters());
-            AnthropicRequest anthropicRequest = buildAnthropicRequest(chatRequest, requestModelName);
-
-            logRequestIfEnabled(requestModelName, chatRequest.parameters().modelName(), anthropicRequest);
-
-            client.generateContentStreaming(anthropicRequest, requestModelName,
-                    createStreamingResponseHandler(handler));
-
-        } catch (Exception e) {
+            String requestModelName = this.determineRequestModelName(chatRequest.parameters());
+            AnthropicRequest anthropicRequest = this.buildAnthropicRequest(chatRequest, requestModelName);
+            this.logRequestIfEnabled(requestModelName, chatRequest.parameters().modelName(), anthropicRequest);
+            this.client.generateContentStreaming(anthropicRequest, requestModelName, this.createStreamingResponseHandler(handler));
+        }
+        catch (Exception e) {
             try {
-                handler.onError(VertexAiAnthropicExceptionMapper.INSTANCE.mapException(e));
-            } catch (Exception userException) {
-                logger.warn("User's onError handler threw an exception, ignoring", userException);
+                handler.onError((Throwable)VertexAiAnthropicExceptionMapper.INSTANCE.mapException(e));
+            }
+            catch (Exception userException) {
+                logger.warn("User's onError handler threw an exception, ignoring", (Throwable)userException);
             }
         }
     }
@@ -122,55 +124,45 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
 
     private AnthropicRequest buildAnthropicRequest(ChatRequest chatRequest, String requestModelName) {
         ChatRequestParameters parameters = chatRequest.parameters();
-        List<ChatMessage> messages = chatRequest.messages();
-        List<ToolSpecification> toolSpecifications = parameters.toolSpecifications();
-
-        return AnthropicRequestMapper.toRequest(
-                requestModelName,
-                messages,
-                toolSpecifications,
-                parameters.toolChoice(),
-                parameters.maxOutputTokens(),
-                parameters.temperature(),
-                parameters.topP(),
-                parameters.topK(),
-                parameters.stopSequences(),
-                enablePromptCaching);
+        List messages = chatRequest.messages();
+        List toolSpecifications = parameters.toolSpecifications();
+        return AnthropicRequestMapper.toRequest(requestModelName, messages, toolSpecifications, parameters.toolChoice(), parameters.maxOutputTokens(), parameters.temperature(), parameters.topP(), parameters.topK(), parameters.stopSequences(), this.enablePromptCaching);
     }
 
     private void logRequestIfEnabled(String requestModelName, String parameterModelName, AnthropicRequest anthropicRequest) {
-        if (logRequests) {
-            logger.debug("Using model name: {}", requestModelName);
-            logger.debug("Anthropic streaming request: {}", anthropicRequest);
+        if (this.logRequests.booleanValue()) {
+            logger.debug("Using model name: {}", (Object)requestModelName);
+            logger.debug("Anthropic streaming request: {}", (Object)anthropicRequest);
         }
     }
 
-    private StreamingResponseHandler createStreamingResponseHandler(StreamingChatResponseHandler handler) {
-        return new StreamingResponseHandler() {
+    private StreamingResponseHandler createStreamingResponseHandler(final StreamingChatResponseHandler handler) {
+        return new StreamingResponseHandler(){
             private final StringBuilder currentText = new StringBuilder();
-            private final List<dev.langchain4j.agent.tool.ToolExecutionRequest> toolCalls = new ArrayList<>();
+            private final List<ToolExecutionRequest> toolCalls = new ArrayList<ToolExecutionRequest>();
             private AnthropicResponse fullResponse;
 
             @Override
             public void onResponse(AnthropicResponse response) {
                 this.fullResponse = response;
-                extractToolCallsFromResponse(response);
+                this.extractToolCallsFromResponse(response);
             }
 
             @Override
             public void onChunk(String jsonChunk) {
                 try {
-                    if (logResponses) {
-                        logger.debug("Anthropic streaming chunk: {}", jsonChunk);
+                    if (VertexAiAnthropicStreamingChatModel.this.logResponses.booleanValue()) {
+                        logger.debug("Anthropic streaming chunk: {}", (Object)jsonChunk);
                     }
-
-                    processStreamingChunk(jsonChunk, handler);
-                } catch (Exception e) {
-                    logger.error("Error processing streaming chunk", e);
+                    this.processStreamingChunk(jsonChunk, handler);
+                }
+                catch (Exception e) {
+                    logger.error("Error processing streaming chunk", (Throwable)e);
                     try {
-                        handler.onError(e);
-                    } catch (Exception userException) {
-                        logger.warn("User's onError handler threw an exception, ignoring", userException);
+                        handler.onError((Throwable)e);
+                    }
+                    catch (Exception userException) {
+                        logger.warn("User's onError handler threw an exception, ignoring", (Throwable)userException);
                     }
                 }
             }
@@ -178,13 +170,15 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
             @Override
             public void onComplete() {
                 try {
-                    sendCompleteToolCalls(handler);
-                    sendCompleteResponse(handler);
-                } catch (Exception e) {
+                    this.sendCompleteToolCalls(handler);
+                    this.sendCompleteResponse(handler);
+                }
+                catch (Exception e) {
                     try {
-                        handler.onError(e);
-                    } catch (Exception userException) {
-                        logger.warn("User's onError handler threw an exception, ignoring", userException);
+                        handler.onError((Throwable)e);
+                    }
+                    catch (Exception userException) {
+                        logger.warn("User's onError handler threw an exception, ignoring", (Throwable)userException);
                     }
                 }
             }
@@ -192,169 +186,150 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
             @Override
             public void onError(Throwable error) {
                 try {
-                    handler.onError(VertexAiAnthropicExceptionMapper.INSTANCE.mapException(error));
-                } catch (Exception userException) {
-                    logger.warn("User's onError handler threw an exception, ignoring", userException);
+                    handler.onError((Throwable)VertexAiAnthropicExceptionMapper.INSTANCE.mapException(error));
+                }
+                catch (Exception userException) {
+                    logger.warn("User's onError handler threw an exception, ignoring", (Throwable)userException);
                 }
             }
 
             private void extractToolCallsFromResponse(AnthropicResponse response) {
                 if (response.content != null) {
-                    logger.debug("Processing {} content blocks from response", response.content.size());
-                    for (dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent content : response.content) {
-                        logger.debug("Content block: type={}, name={}, id={}", content.type, content.name, content.id);
-                        if (isToolUseContent(content)) {
-                            processToolContent(content);
-                        }
+                    logger.debug("Processing {} content blocks from response", (Object)response.content.size());
+                    for (AnthropicContent content : response.content) {
+                        logger.debug("Content block: type={}, name={}, id={}", new Object[]{content.type, content.name, content.id});
+                        if (!this.isToolUseContent(content)) continue;
+                        this.processToolContent(content);
                     }
-                    logger.debug("Total tool calls extracted: {}", toolCalls.size());
+                    logger.debug("Total tool calls extracted: {}", (Object)this.toolCalls.size());
                 }
             }
 
-            private boolean isToolUseContent(dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent content) {
-                return Constants.TOOL_USE_CONTENT_TYPE.equals(content.type) && content.name != null;
+            private boolean isToolUseContent(AnthropicContent content) {
+                return "tool_use".equals(content.type) && content.name != null;
             }
 
-            private void processToolContent(dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicContent content) {
+            private void processToolContent(AnthropicContent content) {
                 try {
-                    String arguments = serializeToolArguments(content.input);
-                    dev.langchain4j.agent.tool.ToolExecutionRequest toolRequest =
-                            dev.langchain4j.agent.tool.ToolExecutionRequest.builder()
-                                    .id(content.id)
-                                    .name(content.name)
-                                    .arguments(arguments)
-                                    .build();
-                    toolCalls.add(toolRequest);
-                    logger.debug("Added tool call: {}", toolRequest);
-                } catch (Exception e) {
-                    logger.warn("Failed to serialize tool arguments for {}: {}", content.name, e.getMessage());
+                    String arguments = this.serializeToolArguments(content.input);
+                    ToolExecutionRequest toolRequest = ToolExecutionRequest.builder().id(content.id).name(content.name).arguments(arguments).build();
+                    this.toolCalls.add(toolRequest);
+                    logger.debug("Added tool call: {}", (Object)toolRequest);
+                }
+                catch (Exception e) {
+                    logger.warn("Failed to serialize tool arguments for {}: {}", (Object)content.name, (Object)e.getMessage());
                 }
             }
 
-            private String serializeToolArguments(Object input) throws com.fasterxml.jackson.core.JsonProcessingException {
+            private String serializeToolArguments(Object input) throws JsonProcessingException {
                 if (input == null) {
                     return "{}";
                 }
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                mapper.enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.enable(SerializationFeature.INDENT_OUTPUT);
                 return mapper.writeValueAsString(input);
             }
 
-            private void processStreamingChunk(String jsonChunk, StreamingChatResponseHandler handler) {
+            private void processStreamingChunk(String jsonChunk, StreamingChatResponseHandler handler2) {
                 if (jsonChunk.contains("\"type\":\"content_block_delta\"")) {
-                    handleTextDelta(jsonChunk, handler);
+                    this.handleTextDelta(jsonChunk, handler2);
                 } else if (jsonChunk.contains("\"type\":\"content_block_start\"")) {
-                    handleToolCallStart(jsonChunk);
+                    this.handleToolCallStart(jsonChunk);
                 } else if (jsonChunk.contains("\"type\":\"content_block_stop\"")) {
-                    handleContentBlockStop(jsonChunk);
+                    this.handleContentBlockStop(jsonChunk);
                 }
             }
 
-            private void handleTextDelta(String jsonChunk, StreamingChatResponseHandler handler) {
-                String textDelta = extractTextDelta(jsonChunk);
+            private void handleTextDelta(String jsonChunk, StreamingChatResponseHandler handler2) {
+                String textDelta = this.extractTextDelta(jsonChunk);
                 if (textDelta != null && !textDelta.isEmpty()) {
-                    currentText.append(textDelta);
+                    this.currentText.append(textDelta);
                     try {
-                        handler.onPartialResponse(textDelta);
-                    } catch (Exception userException) {
-                        handler.onError(userException);
+                        handler2.onPartialResponse(textDelta);
+                    }
+                    catch (Exception userException) {
+                        handler2.onError((Throwable)userException);
                     }
                 }
             }
 
             private String extractTextDelta(String jsonChunk) {
                 try {
-                    com.fasterxml.jackson.databind.ObjectMapper mapper = 
-                            new com.fasterxml.jackson.databind.ObjectMapper();
-                    com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(jsonChunk);
-                    
-                    com.fasterxml.jackson.databind.JsonNode deltaNode = rootNode.get("delta");
-                    if (deltaNode != null && !deltaNode.isNull()) {
-                        com.fasterxml.jackson.databind.JsonNode textNode = deltaNode.get("text");
-                        if (textNode != null && !textNode.isNull() && textNode.isTextual()) {
-                            return textNode.asText();
-                        }
+                    JsonNode textNode;
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode rootNode = mapper.readTree(jsonChunk);
+                    JsonNode deltaNode = rootNode.get("delta");
+                    if (deltaNode != null && !deltaNode.isNull() && (textNode = deltaNode.get("text")) != null && !textNode.isNull() && textNode.isTextual()) {
+                        return textNode.asText();
                     }
-                } catch (Exception e) {
-                    logger.warn("Failed to extract text delta from chunk: {}", jsonChunk, e);
+                }
+                catch (Exception e) {
+                    logger.warn("Failed to extract text delta from chunk: {}", (Object)jsonChunk, (Object)e);
                 }
                 return null;
             }
 
             private void handleToolCallStart(String jsonChunk) {
-                if (Boolean.TRUE.equals(logResponses)) {
-                    logger.debug("Tool call started in chunk: {}", jsonChunk);
+                if (Boolean.TRUE.equals(VertexAiAnthropicStreamingChatModel.this.logResponses)) {
+                    logger.debug("Tool call started in chunk: {}", (Object)jsonChunk);
                 }
             }
 
             private void handleContentBlockStop(String jsonChunk) {
-                if (Boolean.TRUE.equals(logResponses)) {
-                    logger.debug("Content block stopped in chunk: {}", jsonChunk);
+                if (Boolean.TRUE.equals(VertexAiAnthropicStreamingChatModel.this.logResponses)) {
+                    logger.debug("Content block stopped in chunk: {}", (Object)jsonChunk);
                 }
             }
 
-            private void sendCompleteToolCalls(StreamingChatResponseHandler handler) {
-                if (!toolCalls.isEmpty()) {
-                    for (int i = 0; i < toolCalls.size(); i++) {
-                        dev.langchain4j.agent.tool.ToolExecutionRequest toolRequest = toolCalls.get(i);
-                        dev.langchain4j.model.chat.response.CompleteToolCall completeToolCall =
-                                new dev.langchain4j.model.chat.response.CompleteToolCall(i, toolRequest);
-                        logger.debug("Calling onCompleteToolCall for index {}: {}", i, toolRequest);
-                        handler.onCompleteToolCall(completeToolCall);
+            private void sendCompleteToolCalls(StreamingChatResponseHandler handler2) {
+                if (!this.toolCalls.isEmpty()) {
+                    for (int i = 0; i < this.toolCalls.size(); ++i) {
+                        ToolExecutionRequest toolRequest = this.toolCalls.get(i);
+                        CompleteToolCall completeToolCall = new CompleteToolCall(i, toolRequest);
+                        logger.debug("Calling onCompleteToolCall for index {}: {}", (Object)i, (Object)toolRequest);
+                        handler2.onCompleteToolCall(completeToolCall);
                     }
                 }
             }
 
-            private void sendCompleteResponse(StreamingChatResponseHandler handler) {
-                if (fullResponse != null) {
-                    sendMappedResponse(handler);
+            private void sendCompleteResponse(StreamingChatResponseHandler handler2) {
+                if (this.fullResponse != null) {
+                    this.sendMappedResponse(handler2);
                 } else {
-                    sendFallbackResponse(handler);
+                    this.sendFallbackResponse(handler2);
                 }
             }
 
-            private void sendMappedResponse(StreamingChatResponseHandler handler) {
-                ChatResponse chatResponse = AnthropicResponseMapper.toChatResponse(fullResponse);
-                logger.debug(
-                        "ChatResponse from mapper: toolExecutionRequests.size()={}",
-                        chatResponse.aiMessage().toolExecutionRequests().size());
-                logger.debug(
-                        "About to call onCompleteResponse with: {}",
-                        chatResponse.aiMessage().toolExecutionRequests());
-                handler.onCompleteResponse(chatResponse);
+            private void sendMappedResponse(StreamingChatResponseHandler handler2) {
+                ChatResponse chatResponse = AnthropicResponseMapper.toChatResponse(this.fullResponse);
+                logger.debug("ChatResponse from mapper: toolExecutionRequests.size()={}", (Object)chatResponse.aiMessage().toolExecutionRequests().size());
+                logger.debug("About to call onCompleteResponse with: {}", (Object)chatResponse.aiMessage().toolExecutionRequests());
+                handler2.onCompleteResponse(chatResponse);
             }
 
-            private void sendFallbackResponse(StreamingChatResponseHandler handler) {
-                AiMessage.Builder aiMessageBuilder = AiMessage.builder().text(currentText.toString());
-                if (!toolCalls.isEmpty()) {
-                    aiMessageBuilder.toolExecutionRequests(toolCalls);
+            private void sendFallbackResponse(StreamingChatResponseHandler handler2) {
+                AiMessage.Builder aiMessageBuilder = AiMessage.builder().text(this.currentText.toString());
+                if (!this.toolCalls.isEmpty()) {
+                    aiMessageBuilder.toolExecutionRequests(this.toolCalls);
                 }
-
-                ChatResponse fallbackResponse = ChatResponse.builder()
-                        .aiMessage(aiMessageBuilder.build())
-                        .tokenUsage(new TokenUsage(currentText.length() / 4, currentText.length() / 4))
-                        .finishReason(dev.langchain4j.model.output.FinishReason.STOP)
-                        .build();
-
-                handler.onCompleteResponse(fallbackResponse);
+                ChatResponse fallbackResponse = ChatResponse.builder().aiMessage(aiMessageBuilder.build()).tokenUsage(new TokenUsage(Integer.valueOf(this.currentText.length() / 4), Integer.valueOf(this.currentText.length() / 4))).finishReason(FinishReason.STOP).build();
+                handler2.onCompleteResponse(fallbackResponse);
             }
         };
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return GOOGLE_VERTEX_AI_ANTHROPIC;
+        return ModelProvider.GOOGLE_VERTEX_AI_ANTHROPIC;
     }
 
     @Override
     public void close() throws IOException {
-        if (client != null) {
-            client.close();
+        if (this.client != null) {
+            this.client.close();
         }
     }
 
@@ -388,15 +363,6 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
             return this;
         }
 
-        /**
-         * Sets default common {@link ChatRequestParameters}.
-         * <br>
-         * When a parameter is set via both an individual builder method (e.g., {@link #modelName(String)})
-         * and {@link ChatRequestParameters}, the individual builder method takes precedence.
-         *
-         * @param parameters default common {@link ChatRequestParameters}
-         * @return this builder
-         */
         public VertexAiAnthropicStreamingChatModelBuilder defaultRequestParameters(ChatRequestParameters parameters) {
             this.defaultRequestParameters = parameters;
             return this;
@@ -447,26 +413,11 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
             return this;
         }
 
-        /**
-         * Enables prompt caching for Claude models. When enabled, the model will automatically
-         * cache prompts to reduce latency and costs for repeated similar requests.
-         * Only supported by Claude models that support prompt caching.
-         *
-         * @param enablePromptCaching whether to enable prompt caching
-         * @return this builder
-         */
         public VertexAiAnthropicStreamingChatModelBuilder enablePromptCaching(Boolean enablePromptCaching) {
             this.enablePromptCaching = enablePromptCaching;
             return this;
         }
 
-        /**
-         * Sets the Google credentials to use for authentication.
-         * If not provided, the client will use Application Default Credentials.
-         *
-         * @param credentials the Google credentials to use
-         * @return this builder
-         */
         public VertexAiAnthropicStreamingChatModelBuilder credentials(GoogleCredentials credentials) {
             this.credentials = credentials;
             return this;
@@ -477,3 +428,4 @@ public class VertexAiAnthropicStreamingChatModel implements StreamingChatModel, 
         }
     }
 }
+

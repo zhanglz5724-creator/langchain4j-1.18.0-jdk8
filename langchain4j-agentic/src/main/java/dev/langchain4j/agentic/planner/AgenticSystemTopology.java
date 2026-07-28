@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.planner;
 
 public enum AgenticSystemTopology {
@@ -8,5 +11,7 @@ public enum AgenticSystemTopology {
     PARALLEL,
     LOOP,
     ROUTER,
-    STAR
+    STAR;
+
 }
+

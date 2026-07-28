@@ -1,20 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.huggingface.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import java.util.Objects;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-@Deprecated(forRemoval = true, since = "1.7.0-beta13")
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@Deprecated
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Parameters {
-
     private final Integer topK;
     private final Double topP;
     private final Double temperature;
@@ -37,53 +43,33 @@ public class Parameters {
         this.doSample = builder.doSample;
     }
 
-    @Override
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof Parameters
-                && equalTo((Parameters) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof Parameters && this.equalTo((Parameters)another);
     }
 
     private boolean equalTo(Parameters another) {
-        return Objects.equals(topK, another.topK)
-                && Objects.equals(topP, another.topP)
-                && Objects.equals(temperature, another.temperature)
-                && Objects.equals(repetitionPenalty, another.repetitionPenalty)
-                && Objects.equals(maxNewTokens, another.maxNewTokens)
-                && Objects.equals(maxTime, another.maxTime)
-                && Objects.equals(returnFullText, another.returnFullText)
-                && Objects.equals(numReturnSequences, another.numReturnSequences)
-                && Objects.equals(doSample, another.doSample);
+        return Objects.equals(this.topK, another.topK) && Objects.equals(this.topP, another.topP) && Objects.equals(this.temperature, another.temperature) && Objects.equals(this.repetitionPenalty, another.repetitionPenalty) && Objects.equals(this.maxNewTokens, another.maxNewTokens) && Objects.equals(this.maxTime, another.maxTime) && Objects.equals(this.returnFullText, another.returnFullText) && Objects.equals(this.numReturnSequences, another.numReturnSequences) && Objects.equals(this.doSample, another.doSample);
     }
 
-    @Override
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(topK);
-        h += (h << 5) + Objects.hashCode(topP);
-        h += (h << 5) + Objects.hashCode(temperature);
-        h += (h << 5) + Objects.hashCode(repetitionPenalty);
-        h += (h << 5) + Objects.hashCode(maxNewTokens);
-        h += (h << 5) + Objects.hashCode(maxTime);
-        h += (h << 5) + Objects.hashCode(returnFullText);
-        h += (h << 5) + Objects.hashCode(numReturnSequences);
-        h += (h << 5) + Objects.hashCode(doSample);
+        h += (h << 5) + Objects.hashCode(this.topK);
+        h += (h << 5) + Objects.hashCode(this.topP);
+        h += (h << 5) + Objects.hashCode(this.temperature);
+        h += (h << 5) + Objects.hashCode(this.repetitionPenalty);
+        h += (h << 5) + Objects.hashCode(this.maxNewTokens);
+        h += (h << 5) + Objects.hashCode(this.maxTime);
+        h += (h << 5) + Objects.hashCode(this.returnFullText);
+        h += (h << 5) + Objects.hashCode(this.numReturnSequences);
+        h += (h << 5) + Objects.hashCode(this.doSample);
         return h;
     }
 
-    @Override
     public String toString() {
-        return "TextGenerationRequest {"
-                + " topK = " + topK
-                + ", topP = " + topP
-                + ", temperature = " + temperature
-                + ", repetitionPenalty = " + repetitionPenalty
-                + ", maxNewTokens = " + maxNewTokens
-                + ", maxTime = " + maxTime
-                + ", returnFullText = " + returnFullText
-                + ", numReturnSequences = " + numReturnSequences
-                + ", doSample = " + doSample
-                + " }";
+        return "TextGenerationRequest { topK = " + this.topK + ", topP = " + this.topP + ", temperature = " + this.temperature + ", repetitionPenalty = " + this.repetitionPenalty + ", maxNewTokens = " + this.maxNewTokens + ", maxTime = " + this.maxTime + ", returnFullText = " + this.returnFullText + ", numReturnSequences = " + this.numReturnSequences + ", doSample = " + this.doSample + " }";
     }
 
     public static Builder builder() {
@@ -91,7 +77,6 @@ public class Parameters {
     }
 
     public static final class Builder {
-
         private Integer topK;
         private Double topP;
         private Double temperature;
@@ -152,3 +137,4 @@ public class Parameters {
         }
     }
 }
+

@@ -1,3 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.databind.JsonNode
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.mcp.client.transport;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -5,6 +13,7 @@ import dev.langchain4j.mcp.client.McpRoot;
 import dev.langchain4j.mcp.client.logging.McpLogMessage;
 import dev.langchain4j.mcp.client.progress.McpProgressHandler;
 import dev.langchain4j.mcp.client.progress.McpProgressNotification;
+import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.protocol.McpPingResponse;
 import dev.langchain4j.mcp.protocol.McpRootsListResponse;
 import dev.langchain4j.mcp.protocol.McpServerMethod;
@@ -18,14 +27,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Handles incoming messages from the MCP server. Transport implementations
- * should call the "handle" method on each received message. A transport also has
- * to call "startOperation" before starting an operation that requires a response
- * to register its ID in the map of pending operations.
- */
 public class McpOperationHandler {
-
     private final Map<Long, CompletableFuture<JsonNode>> pendingOperations;
     private static final Logger log = LoggerFactory.getLogger(McpOperationHandler.class);
     private final McpTransport transport;
@@ -40,19 +42,7 @@ public class McpOperationHandler {
     private final Runnable onServerRootsList;
     private final BiConsumer<Long, String> onServerCancelled;
 
-    public McpOperationHandler(
-            Map<Long, CompletableFuture<JsonNode>> pendingOperations,
-            Supplier<List<McpRoot>> roots,
-            McpTransport transport,
-            Consumer<McpLogMessage> logMessageConsumer,
-            Runnable onToolListUpdate,
-            Runnable onResourceListUpdate,
-            Runnable onPromptListUpdate,
-            Consumer<String> onResourceUpdate,
-            McpProgressHandler progressHandler,
-            Runnable onServerPing,
-            Runnable onServerRootsList,
-            BiConsumer<Long, String> onServerCancelled) {
+    public McpOperationHandler(Map<Long, CompletableFuture<JsonNode>> pendingOperations, Supplier<List<McpRoot>> roots, McpTransport transport, Consumer<McpLogMessage> logMessageConsumer, Runnable onToolListUpdate, Runnable onResourceListUpdate, Runnable onPromptListUpdate, Consumer<String> onResourceUpdate, McpProgressHandler progressHandler, Runnable onServerPing, Runnable onServerRootsList, BiConsumer<Long, String> onServerCancelled) {
         this.pendingOperations = pendingOperations;
         this.transport = transport;
         this.logMessageConsumer = logMessageConsumer;
@@ -69,148 +59,158 @@ public class McpOperationHandler {
 
     public void handle(JsonNode message) {
         if (message.has("id")) {
-            handleMessageWithId(message);
+            this.handleMessageWithId(message);
         } else if (message.has("method")) {
-            handleNotification(message);
+            this.handleNotification(message);
         }
     }
 
     private void handleMessageWithId(JsonNode message) {
-        long messageId = message.get("id").asLong();
-        if (message.has("result") || message.has("error")) {
-            // response to a client-initiated operation
-            CompletableFuture<JsonNode> op = pendingOperations.remove(messageId);
-            if (op != null) {
-                op.complete(message);
-            } else {
-                log.warn("Received response for unknown message id: {}", messageId);
-            }
-        } else if (message.has("method")) {
-            // server-initiated request requiring a response
-            McpServerMethod method = McpServerMethod.from(message.get("method").asText());
-            if (method == null) {
-                log.warn("Received response for unknown message id: {}", messageId);
-                return;
-            }
-            switch (method) {
-                case PING:
-                    transport.executeOperationWithoutResponse(new McpPingResponse(messageId));
-                    if (onServerPing != null) {
-                        onServerPing.run();
+        block10: {
+            long messageId;
+            block11: {
+                block9: {
+                    messageId = message.get("id").asLong();
+                    if (!message.has("result") && !message.has("error")) break block9;
+                    CompletableFuture<JsonNode> op = this.pendingOperations.remove(messageId);
+                    if (op != null) {
+                        op.complete(message);
+                    } else {
+                        log.warn("Received response for unknown message id: {}", (Object)messageId);
                     }
-                    break;
-                case ROOTS_LIST:
-                    transport.executeOperationWithoutResponse(new McpRootsListResponse(messageId, roots.get()));
-                    if (onServerRootsList != null) {
-                        onServerRootsList.run();
+                    break block10;
+                }
+                if (!message.has("method")) break block11;
+                McpServerMethod method = McpServerMethod.from(message.get("method").asText());
+                if (method == null) {
+                    log.warn("Received response for unknown message id: {}", (Object)messageId);
+                    return;
+                }
+                switch (method) {
+                    case PING: {
+                        this.transport.executeOperationWithoutResponse(new McpPingResponse(messageId));
+                        if (this.onServerPing != null) {
+                            this.onServerPing.run();
+                            break;
+                        }
+                        break block10;
                     }
-                    break;
-                default:
-                    log.warn("Received response for unknown message id: {}", messageId);
+                    case ROOTS_LIST: {
+                        this.transport.executeOperationWithoutResponse(new McpRootsListResponse((Long)messageId, this.roots.get()));
+                        if (this.onServerRootsList != null) {
+                            this.onServerRootsList.run();
+                            break;
+                        }
+                        break block10;
+                    }
+                    default: {
+                        log.warn("Received response for unknown message id: {}", (Object)messageId);
+                        break;
+                    }
+                }
+                break block10;
             }
-        } else {
-            log.warn("Received response for unknown message id: {}", messageId);
+            log.warn("Received response for unknown message id: {}", (Object)messageId);
         }
     }
 
     private void handleNotification(JsonNode message) {
         McpServerMethod method = McpServerMethod.from(message.get("method").asText());
         if (method == null) {
-            log.warn("Received unknown message: {}", message);
+            log.warn("Received unknown message: {}", (Object)message);
             return;
         }
         switch (method) {
-            case NOTIFICATION_MESSAGE:
-                handleLogMessage(message);
+            case NOTIFICATION_MESSAGE: {
+                this.handleLogMessage(message);
                 break;
-            case NOTIFICATION_TOOLS_LIST_CHANGED:
-                onToolListUpdate.run();
+            }
+            case NOTIFICATION_TOOLS_LIST_CHANGED: {
+                this.onToolListUpdate.run();
                 break;
-            case NOTIFICATION_RESOURCES_LIST_CHANGED:
-                if (onResourceListUpdate != null) {
-                    onResourceListUpdate.run();
-                }
+            }
+            case NOTIFICATION_RESOURCES_LIST_CHANGED: {
+                if (this.onResourceListUpdate == null) break;
+                this.onResourceListUpdate.run();
                 break;
-            case NOTIFICATION_PROMPTS_LIST_CHANGED:
-                if (onPromptListUpdate != null) {
-                    onPromptListUpdate.run();
-                }
+            }
+            case NOTIFICATION_PROMPTS_LIST_CHANGED: {
+                if (this.onPromptListUpdate == null) break;
+                this.onPromptListUpdate.run();
                 break;
-            case NOTIFICATION_RESOURCES_UPDATED:
-                handleResourceUpdatedNotification(message);
+            }
+            case NOTIFICATION_RESOURCES_UPDATED: {
+                this.handleResourceUpdatedNotification(message);
                 break;
-            case NOTIFICATION_PROGRESS:
-                handleProgressNotification(message);
+            }
+            case NOTIFICATION_PROGRESS: {
+                this.handleProgressNotification(message);
                 break;
-            case NOTIFICATION_CANCELLED:
-                handleCancelledNotification(message);
+            }
+            case NOTIFICATION_CANCELLED: {
+                this.handleCancelledNotification(message);
                 break;
-            default:
-                log.warn("Received unknown message: {}", message);
+            }
+            default: {
+                log.warn("Received unknown message: {}", (Object)message);
+            }
         }
     }
 
     private void handleCancelledNotification(JsonNode message) {
         JsonNode params = message.get("params");
         if (params == null || !params.has("requestId")) {
-            log.warn("Received cancelled notification without requestId: {}", message);
+            log.warn("Received cancelled notification without requestId: {}", (Object)message);
             return;
         }
         long requestId = params.get("requestId").asLong();
         String reason = params.has("reason") ? params.get("reason").asText() : null;
-        CompletableFuture<JsonNode> pending = pendingOperations.remove(requestId);
+        CompletableFuture<JsonNode> pending = this.pendingOperations.remove(requestId);
         if (pending != null) {
-            String message1 = reason != null
-                    ? "Request " + requestId + " was cancelled by the server: " + reason
-                    : "Request " + requestId + " was cancelled by the server";
+            String message1 = reason != null ? "Request " + requestId + " was cancelled by the server: " + reason : "Request " + requestId + " was cancelled by the server";
             pending.completeExceptionally(new CancellationException(message1));
         } else {
-            log.debug(
-                    "Received cancelled notification for unknown or already completed request id: {} (reason: {})",
-                    requestId,
-                    reason);
+            log.debug("Received cancelled notification for unknown or already completed request id: {} (reason: {})", (Object)requestId, (Object)reason);
         }
-        if (onServerCancelled != null) {
-            onServerCancelled.accept(requestId, reason);
+        if (this.onServerCancelled != null) {
+            this.onServerCancelled.accept(requestId, reason);
         }
     }
 
     private void handleLogMessage(JsonNode message) {
         if (message.has("params")) {
-            if (logMessageConsumer != null) {
-                logMessageConsumer.accept(McpLogMessage.fromJson(message.get("params")));
+            if (this.logMessageConsumer != null) {
+                this.logMessageConsumer.accept(McpLogMessage.fromJson(message.get("params")));
             }
         } else {
-            log.warn("Received log message without params: {}", message);
+            log.warn("Received log message without params: {}", (Object)message);
         }
     }
 
     private void handleResourceUpdatedNotification(JsonNode message) {
-        if (onResourceUpdate != null
-                && message.has("params")
-                && message.get("params").has("uri")) {
+        if (this.onResourceUpdate != null && message.has("params") && message.get("params").has("uri")) {
             String uri = message.get("params").get("uri").asText();
-            onResourceUpdate.accept(uri);
+            this.onResourceUpdate.accept(uri);
         } else if (message.has("params") && !message.get("params").has("uri")) {
-            log.warn("Received resource updated notification without uri: {}", message);
+            log.warn("Received resource updated notification without uri: {}", (Object)message);
         }
     }
 
     private void handleProgressNotification(JsonNode message) {
-        if (progressHandler != null && message.has("params")) {
-            progressHandler.onProgress(McpProgressNotification.fromJson(message.get("params")));
+        if (this.progressHandler != null && message.has("params")) {
+            this.progressHandler.onProgress(McpProgressNotification.fromJson(message.get("params")));
         }
     }
 
     public void startOperation(Long id, CompletableFuture<JsonNode> future) {
-        pendingOperations.put(id, future);
+        this.pendingOperations.put(id, future);
     }
 
     public synchronized void cancelAllPendingOperations(String reason) {
-        for (CompletableFuture<JsonNode> future : pendingOperations.values()) {
-            future.completeExceptionally(
-                    new IllegalStateException("Operation cancelled due to transport failure: " + reason));
+        for (CompletableFuture<JsonNode> future : this.pendingOperations.values()) {
+            future.completeExceptionally(new IllegalStateException("Operation cancelled due to transport failure: " + reason));
         }
-        pendingOperations.clear();
+        this.pendingOperations.clear();
     }
 }
+

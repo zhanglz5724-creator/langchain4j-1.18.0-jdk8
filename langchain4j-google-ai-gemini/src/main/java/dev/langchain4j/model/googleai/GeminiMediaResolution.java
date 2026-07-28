@@ -1,45 +1,54 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.googleai;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.model.googleai.GeminiMediaResolutionLevel;
+import java.util.Objects;
 
-/**
- * Represents the media resolution settings for a content part.
- * This is used for per-part media resolution setting (Gemini 3 only).
- *
- * @see <a href="https://ai.google.dev/gemini-api/docs/media-resolution">Media Resolution Documentation</a>
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonInclude(JsonInclude.Include.NON_NULL) class GeminiMediaResolution {
-    private final Object @JsonProperty("level";
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+final class GeminiMediaResolution {
+    private final GeminiMediaResolutionLevel level;
 
-    public GeminiMediaResolution(Object @JsonProperty("level") {
-        this.@JsonProperty("level" = @JsonProperty("level";
+    @JsonCreator
+    GeminiMediaResolution(@JsonProperty(value="level") GeminiMediaResolutionLevel level) {
+        this.level = level;
     }
 
-    public Object get@JsonProperty("level"() {
-        return @JsonProperty("level";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GeminiMediaResolution that = (GeminiMediaResolution) o;
-        return java.util.Objects.equals(this.@JsonProperty("level", that.@JsonProperty("level");
-    }
-
-    @Override
-    public int hashCode() {
-        return java.util.Objects.hash(@JsonProperty("level");
-    }
-
-    @Override
-    public String toString() {
-        return "GeminiMediaResolution{"@JsonProperty("level"=" + @JsonProperty("level" + "}"";
+    GeminiMediaResolutionLevel level() {
+        return this.level;
     }
 
     static GeminiMediaResolution of(GeminiMediaResolutionLevel level) {
         return level != null ? new GeminiMediaResolution(level) : null;
     }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GeminiMediaResolution)) {
+            return false;
+        }
+        GeminiMediaResolution that = (GeminiMediaResolution)o;
+        return this.level == that.level;
+    }
+
+    public int hashCode() {
+        return Objects.hash(new Object[]{this.level});
+    }
+
+    public String toString() {
+        return "GeminiMediaResolution[level=" + (Object)((Object)this.level) + "]";
+    }
 }
+

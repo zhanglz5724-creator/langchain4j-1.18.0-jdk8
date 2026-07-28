@@ -1,19 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters$Builder
+ */
 package dev.langchain4j.model.openai;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.quoted;
-
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
+import dev.langchain4j.model.openai.OpenAiChatModelName;
 import java.util.Map;
 import java.util.Objects;
 
-public class OpenAiChatRequestParameters extends DefaultChatRequestParameters {
-
-    public static final OpenAiChatRequestParameters EMPTY =
-            OpenAiChatRequestParameters.builder().build();
-
+public class OpenAiChatRequestParameters
+extends DefaultChatRequestParameters {
+    public static final OpenAiChatRequestParameters EMPTY = OpenAiChatRequestParameters.builder().build();
     private final Integer maxCompletionTokens;
     private final Map<String, Integer> logitBias;
     private final Boolean parallelToolCalls;
@@ -28,157 +33,105 @@ public class OpenAiChatRequestParameters extends DefaultChatRequestParameters {
     private final Map<String, Object> customParameters;
 
     private OpenAiChatRequestParameters(Builder builder) {
-        super(builder);
+        super((DefaultChatRequestParameters.Builder)builder);
         this.maxCompletionTokens = builder.maxCompletionTokens;
-        this.logitBias = copy(builder.logitBias);
+        this.logitBias = Utils.copy((Map)builder.logitBias);
         this.parallelToolCalls = builder.parallelToolCalls;
         this.seed = builder.seed;
         this.user = builder.user;
         this.store = builder.store;
-        this.metadata = copy(builder.metadata);
+        this.metadata = Utils.copy((Map)builder.metadata);
         this.serviceTier = builder.serviceTier;
         this.reasoningEffort = builder.reasoningEffort;
         this.logprobs = builder.logprobs;
         this.topLogprobs = builder.topLogprobs;
-        this.customParameters = copy(builder.customParameters);
+        this.customParameters = Utils.copy((Map)builder.customParameters);
     }
 
     public Integer maxCompletionTokens() {
-        return maxCompletionTokens;
+        return this.maxCompletionTokens;
     }
 
     public Map<String, Integer> logitBias() {
-        return logitBias;
+        return this.logitBias;
     }
 
     public Boolean parallelToolCalls() {
-        return parallelToolCalls;
+        return this.parallelToolCalls;
     }
 
     public Integer seed() {
-        return seed;
+        return this.seed;
     }
 
     public String user() {
-        return user;
+        return this.user;
     }
 
     public Boolean store() {
-        return store;
+        return this.store;
     }
 
     public Map<String, String> metadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public String serviceTier() {
-        return serviceTier;
+        return this.serviceTier;
     }
 
     public String reasoningEffort() {
-        return reasoningEffort;
+        return this.reasoningEffort;
     }
 
     public Boolean logprobs() {
-        return logprobs;
+        return this.logprobs;
     }
 
     public Integer topLogprobs() {
-        return topLogprobs;
+        return this.topLogprobs;
     }
 
     public Map<String, Object> customParameters() {
-        return customParameters;
+        return this.customParameters;
     }
 
-    @Override
     public OpenAiChatRequestParameters overrideWith(ChatRequestParameters that) {
-        return OpenAiChatRequestParameters.builder()
-                .overrideWith(this)
-                .overrideWith(that)
-                .build();
+        return OpenAiChatRequestParameters.builder().overrideWith((ChatRequestParameters)this).overrideWith(that).build();
     }
 
-    @Override
     public OpenAiChatRequestParameters defaultedBy(ChatRequestParameters that) {
-        return OpenAiChatRequestParameters.builder()
-                .overrideWith(that)
-                .overrideWith(this)
-                .build();
+        return OpenAiChatRequestParameters.builder().overrideWith(that).overrideWith((ChatRequestParameters)this).build();
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        OpenAiChatRequestParameters that = (OpenAiChatRequestParameters) o;
-        return Objects.equals(maxCompletionTokens, that.maxCompletionTokens)
-                && Objects.equals(logitBias, that.logitBias)
-                && Objects.equals(parallelToolCalls, that.parallelToolCalls)
-                && Objects.equals(seed, that.seed)
-                && Objects.equals(user, that.user)
-                && Objects.equals(store, that.store)
-                && Objects.equals(metadata, that.metadata)
-                && Objects.equals(serviceTier, that.serviceTier)
-                && Objects.equals(reasoningEffort, that.reasoningEffort)
-                && Objects.equals(logprobs, that.logprobs)
-                && Objects.equals(topLogprobs, that.topLogprobs)
-                && Objects.equals(customParameters, that.customParameters);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        OpenAiChatRequestParameters that = (OpenAiChatRequestParameters)((Object)o);
+        return Objects.equals(this.maxCompletionTokens, that.maxCompletionTokens) && Objects.equals(this.logitBias, that.logitBias) && Objects.equals(this.parallelToolCalls, that.parallelToolCalls) && Objects.equals(this.seed, that.seed) && Objects.equals(this.user, that.user) && Objects.equals(this.store, that.store) && Objects.equals(this.metadata, that.metadata) && Objects.equals(this.serviceTier, that.serviceTier) && Objects.equals(this.reasoningEffort, that.reasoningEffort) && Objects.equals(this.logprobs, that.logprobs) && Objects.equals(this.topLogprobs, that.topLogprobs) && Objects.equals(this.customParameters, that.customParameters);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(
-                super.hashCode(),
-                maxCompletionTokens,
-                logitBias,
-                parallelToolCalls,
-                seed,
-                user,
-                store,
-                metadata,
-                serviceTier,
-                reasoningEffort,
-                logprobs,
-                topLogprobs,
-                customParameters);
+        return Objects.hash(super.hashCode(), this.maxCompletionTokens, this.logitBias, this.parallelToolCalls, this.seed, this.user, this.store, this.metadata, this.serviceTier, this.reasoningEffort, this.logprobs, this.topLogprobs, this.customParameters);
     }
 
-    @Override
     public String toString() {
-        return "OpenAiChatRequestParameters{" + "modelName="
-                + quoted(modelName()) + ", temperature="
-                + temperature() + ", topP="
-                + topP() + ", topK="
-                + topK() + ", frequencyPenalty="
-                + frequencyPenalty() + ", presencePenalty="
-                + presencePenalty() + ", maxOutputTokens="
-                + maxOutputTokens() + ", stopSequences="
-                + stopSequences() + ", toolSpecifications="
-                + toolSpecifications() + ", toolChoice="
-                + toolChoice() + ", responseFormat="
-                + responseFormat() + ", maxCompletionTokens="
-                + maxCompletionTokens + ", logitBias="
-                + logitBias + ", parallelToolCalls="
-                + parallelToolCalls + ", seed="
-                + seed + ", user="
-                + quoted(user) + ", store="
-                + store + ", metadata="
-                + metadata + ", serviceTier="
-                + quoted(serviceTier) + ", reasoningEffort="
-                + quoted(reasoningEffort) + ", logprobs="
-                + logprobs + ", topLogprobs="
-                + topLogprobs + ", customParameters="
-                + customParameters + '}';
+        return "OpenAiChatRequestParameters{modelName=" + Utils.quoted((Object)this.modelName()) + ", temperature=" + this.temperature() + ", topP=" + this.topP() + ", topK=" + this.topK() + ", frequencyPenalty=" + this.frequencyPenalty() + ", presencePenalty=" + this.presencePenalty() + ", maxOutputTokens=" + this.maxOutputTokens() + ", stopSequences=" + this.stopSequences() + ", toolSpecifications=" + this.toolSpecifications() + ", toolChoice=" + this.toolChoice() + ", responseFormat=" + this.responseFormat() + ", maxCompletionTokens=" + this.maxCompletionTokens + ", logitBias=" + this.logitBias + ", parallelToolCalls=" + this.parallelToolCalls + ", seed=" + this.seed + ", user=" + Utils.quoted((Object)this.user) + ", store=" + this.store + ", metadata=" + this.metadata + ", serviceTier=" + Utils.quoted((Object)this.serviceTier) + ", reasoningEffort=" + Utils.quoted((Object)this.reasoningEffort) + ", logprobs=" + this.logprobs + ", topLogprobs=" + this.topLogprobs + ", customParameters=" + this.customParameters + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends DefaultChatRequestParameters.Builder<Builder> {
-
+    public static class Builder
+    extends DefaultChatRequestParameters.Builder<Builder> {
         private Integer maxCompletionTokens;
         private Map<String, Integer> logitBias;
         private Boolean parallelToolCalls;
@@ -192,28 +145,28 @@ public class OpenAiChatRequestParameters extends DefaultChatRequestParameters {
         private Integer topLogprobs;
         private Map<String, Object> customParameters;
 
-        @Override
         public Builder overrideWith(ChatRequestParameters parameters) {
             super.overrideWith(parameters);
-            if (parameters instanceof OpenAiChatRequestParameters openAiParameters) {
-                maxCompletionTokens(getOrDefault(openAiParameters.maxCompletionTokens(), maxCompletionTokens));
-                logitBias(getOrDefault(openAiParameters.logitBias(), logitBias));
-                parallelToolCalls(getOrDefault(openAiParameters.parallelToolCalls(), parallelToolCalls));
-                seed(getOrDefault(openAiParameters.seed(), seed));
-                user(getOrDefault(openAiParameters.user(), user));
-                store(getOrDefault(openAiParameters.store(), store));
-                metadata(getOrDefault(openAiParameters.metadata(), metadata));
-                serviceTier(getOrDefault(openAiParameters.serviceTier(), serviceTier));
-                reasoningEffort(getOrDefault(openAiParameters.reasoningEffort(), reasoningEffort));
-                logprobs(getOrDefault(openAiParameters.logprobs(), logprobs));
-                topLogprobs(getOrDefault(openAiParameters.topLogprobs(), topLogprobs));
-                customParameters(getOrDefault(openAiParameters.customParameters(), customParameters));
+            if (parameters instanceof OpenAiChatRequestParameters) {
+                OpenAiChatRequestParameters openAiParameters = (OpenAiChatRequestParameters)parameters;
+                this.maxCompletionTokens((Integer)Utils.getOrDefault((Object)openAiParameters.maxCompletionTokens(), (Object)this.maxCompletionTokens));
+                this.logitBias(Utils.getOrDefault(openAiParameters.logitBias(), this.logitBias));
+                this.parallelToolCalls((Boolean)Utils.getOrDefault((Object)openAiParameters.parallelToolCalls(), (Object)this.parallelToolCalls));
+                this.seed((Integer)Utils.getOrDefault((Object)openAiParameters.seed(), (Object)this.seed));
+                this.user((String)Utils.getOrDefault((Object)openAiParameters.user(), (Object)this.user));
+                this.store((Boolean)Utils.getOrDefault((Object)openAiParameters.store(), (Object)this.store));
+                this.metadata(Utils.getOrDefault(openAiParameters.metadata(), this.metadata));
+                this.serviceTier((String)Utils.getOrDefault((Object)openAiParameters.serviceTier(), (Object)this.serviceTier));
+                this.reasoningEffort((String)Utils.getOrDefault((Object)openAiParameters.reasoningEffort(), (Object)this.reasoningEffort));
+                this.logprobs((Boolean)Utils.getOrDefault((Object)openAiParameters.logprobs(), (Object)this.logprobs));
+                this.topLogprobs((Integer)Utils.getOrDefault((Object)openAiParameters.topLogprobs(), (Object)this.topLogprobs));
+                this.customParameters(Utils.getOrDefault(openAiParameters.customParameters(), this.customParameters));
             }
             return this;
         }
 
         public Builder modelName(OpenAiChatModelName modelName) {
-            return super.modelName(modelName == null ? null : modelName.toString());
+            return (Builder)super.modelName(modelName == null ? null : modelName.toString());
         }
 
         public Builder maxCompletionTokens(Integer maxCompletionTokens) {
@@ -276,9 +229,9 @@ public class OpenAiChatRequestParameters extends DefaultChatRequestParameters {
             return this;
         }
 
-        @Override
         public OpenAiChatRequestParameters build() {
             return new OpenAiChatRequestParameters(this);
         }
     }
 }
+

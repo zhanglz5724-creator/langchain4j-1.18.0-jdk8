@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.store.embedding.chroma;
 
 import dev.langchain4j.Internal;
@@ -6,25 +12,22 @@ import java.util.Map;
 
 @Internal
 class CreateCollectionRequest {
-
     private final String name;
     private final Map<String, Object> metadata;
 
-    /**
-     * Currently, cosine distance is always used as the distance method for chroma implementation
-     */
     public CreateCollectionRequest(String name) {
         this.name = name;
-        HashMap<String, Object> metadata = new HashMap<>();
+        HashMap<String, Object> metadata = new HashMap<String, Object>();
         metadata.put("hnsw:space", "cosine");
         this.metadata = metadata;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public Map<String, Object> getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 }
+

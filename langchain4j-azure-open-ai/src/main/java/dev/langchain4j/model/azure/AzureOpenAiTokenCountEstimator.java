@@ -1,15 +1,35 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.core.JsonProcessingException
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  com.knuddels.jtokkit.Encodings
+ *  com.knuddels.jtokkit.api.Encoding
+ *  com.knuddels.jtokkit.api.EncodingRegistry
+ *  com.knuddels.jtokkit.api.EncodingType
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.data.message.SystemMessage
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.message.ToolExecutionResultMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.internal.Exceptions
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.TokenCountEstimator
+ */
 package dev.langchain4j.model.azure;
-
-import static com.knuddels.jtokkit.api.EncodingType.O200K_BASE;
-import static dev.langchain4j.internal.Exceptions.illegalArgument;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
+import com.knuddels.jtokkit.api.EncodingType;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
@@ -19,192 +39,158 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.internal.Exceptions;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.TokenCountEstimator;
+import dev.langchain4j.model.azure.AzureOpenAiChatModelName;
+import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModelName;
+import dev.langchain4j.model.azure.AzureOpenAiLanguageModelName;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * This class can be used to estimate the cost (in tokens) before calling OpenAI or when using streaming.
- * Magic numbers present in this class were found empirically while testing.
- * There are integration tests in place that are making sure that the calculations here are very close to that of OpenAI.
- */
-public class AzureOpenAiTokenCountEstimator implements TokenCountEstimator {
-
+public class AzureOpenAiTokenCountEstimator
+implements TokenCountEstimator {
     private static final EncodingRegistry ENCODING_REGISTRY = Encodings.newDefaultEncodingRegistry();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     private final String modelName;
     private final Encoding encoding;
 
-    /**
-     * Creates an instance of the {@code AzureOpenAiTokenCountEstimator} for a given {@link AzureOpenAiChatModelName}.
-     */
     public AzureOpenAiTokenCountEstimator(AzureOpenAiChatModelName modelName) {
         this(modelName.modelType());
     }
 
-    /**
-     * Creates an instance of the {@code AzureOpenAiTokenCountEstimator} for a given {@link AzureOpenAiEmbeddingModelName}.
-     */
     public AzureOpenAiTokenCountEstimator(AzureOpenAiEmbeddingModelName modelName) {
         this(modelName.modelType());
     }
 
-    /**
-     * Creates an instance of the {@code AzureOpenAiTokenCountEstimator} for a given {@link AzureOpenAiLanguageModelName}.
-     */
     public AzureOpenAiTokenCountEstimator(AzureOpenAiLanguageModelName modelName) {
         this(modelName.modelType());
     }
 
-    /**
-     * Creates an instance of the {@code AzureOpenAiTokenCountEstimator} for a given model name.
-     */
     public AzureOpenAiTokenCountEstimator(String modelName) {
-        this.modelName = ensureNotBlank(modelName, "modelName");
-        if (modelName.startsWith("o") || modelName.startsWith("gpt-4.")) {
-            // temporary fix until https://github.com/knuddelsgmbh/jtokkit/pull/118 is released
-            this.encoding = ENCODING_REGISTRY.getEncoding(O200K_BASE);
-        } else {
-            this.encoding = ENCODING_REGISTRY.getEncodingForModel(modelName).orElseThrow(unknownModelException());
-        }
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
+        this.encoding = modelName.startsWith("o") || modelName.startsWith("gpt-4.") ? ENCODING_REGISTRY.getEncoding(EncodingType.O200K_BASE) : (Encoding)ENCODING_REGISTRY.getEncodingForModel(modelName).orElseThrow(this.unknownModelException());
     }
 
     public int estimateTokenCountInText(String text) {
-        return encoding.countTokensOrdinary(text);
+        return this.encoding.countTokensOrdinary(text);
     }
 
-    @Override
     public int estimateTokenCountInMessage(ChatMessage message) {
-        int tokenCount = 1; // 1 token for role
-        tokenCount += 3; // extra tokens per each message
-
+        int tokenCount = 1;
+        tokenCount += 3;
         if (message instanceof SystemMessage) {
-            tokenCount += estimateTokenCountIn((SystemMessage) message);
+            tokenCount += this.estimateTokenCountIn((SystemMessage)message);
         } else if (message instanceof UserMessage) {
-            tokenCount += estimateTokenCountIn((UserMessage) message);
+            tokenCount += this.estimateTokenCountIn((UserMessage)message);
         } else if (message instanceof AiMessage) {
-            tokenCount += estimateTokenCountIn((AiMessage) message);
+            tokenCount += this.estimateTokenCountIn((AiMessage)message);
         } else if (message instanceof ToolExecutionResultMessage) {
-            tokenCount += estimateTokenCountIn((ToolExecutionResultMessage) message);
+            tokenCount += this.estimateTokenCountIn((ToolExecutionResultMessage)message);
         } else {
             throw new IllegalArgumentException("Unknown message type: " + message);
         }
-
         return tokenCount;
     }
 
     private int estimateTokenCountIn(SystemMessage systemMessage) {
-        return estimateTokenCountInText(systemMessage.text());
+        return this.estimateTokenCountInText(systemMessage.text());
     }
 
     private int estimateTokenCountIn(UserMessage userMessage) {
         int tokenCount = 0;
-
         for (Content content : userMessage.contents()) {
             if (content instanceof TextContent) {
-                tokenCount += estimateTokenCountInText(((TextContent) content).text());
-            } else if (content instanceof ImageContent imageContent) {
-                tokenCount += estimateImageTokens(imageContent);
-            } else {
-                throw illegalArgument("Unknown content type: " + content);
+                tokenCount += this.estimateTokenCountInText(((TextContent)content).text());
+                continue;
             }
+            if (content instanceof ImageContent) {
+                ImageContent imageContent = (ImageContent)content;
+                tokenCount += this.estimateImageTokens(imageContent);
+                continue;
+            }
+            throw Exceptions.illegalArgument((String)("Unknown content type: " + content), (Object[])new Object[0]);
         }
-
         if (userMessage.name() != null) {
-            tokenCount += 1; // extra tokens per name
-            tokenCount += estimateTokenCountInText(userMessage.name());
+            ++tokenCount;
+            tokenCount += this.estimateTokenCountInText(userMessage.name());
         }
-
         return tokenCount;
     }
 
-    /**
-     * Estimates tokens for image content based on detail level.
-     * <p>
-     * Based on OpenAI documentation:
-     * <ul>
-     *   <li>LOW: 85 tokens (fixed)</li>
-     *   <li>HIGH: 85 base + 170 tokens per 512x512 tile (typically 765 for 1024x1024)</li>
-     *   <li>AUTO: defaults to HIGH for images larger than 512x512</li>
-     * </ul>
-     * Since we don't have image dimensions, we use conservative estimates for HIGH/AUTO.
-     *
-     * @see <a href="https://platform.openai.com/docs/guides/vision">OpenAI Vision documentation</a>
-     */
     private int estimateImageTokens(ImageContent imageContent) {
-        return switch (imageContent.detailLevel()) {
-            case LOW -> 85;
-            case MEDIUM -> 400; // conservative estimate between LOW and HIGH
-            case HIGH, ULTRA_HIGH, AUTO -> 765; // typical for 1024x1024 image
-        };
+        switch (imageContent.detailLevel()) {
+            case LOW: {
+                return 85;
+            }
+            case MEDIUM: {
+                return 400;
+            }
+            case HIGH: 
+            case ULTRA_HIGH: 
+            case AUTO: {
+                return 765;
+            }
+        }
+        throw new IllegalArgumentException("Unknown detail level: " + imageContent.detailLevel());
     }
 
     private int estimateTokenCountIn(AiMessage aiMessage) {
         int tokenCount = 0;
-
         if (aiMessage.text() != null) {
-            tokenCount += estimateTokenCountInText(aiMessage.text());
+            tokenCount += this.estimateTokenCountInText(aiMessage.text());
         }
-
         if (aiMessage.hasToolExecutionRequests()) {
             tokenCount += 6;
             if (aiMessage.toolExecutionRequests().size() == 1) {
-                tokenCount -= 1;
-                ToolExecutionRequest toolExecutionRequest =
-                        aiMessage.toolExecutionRequests().get(0);
-                tokenCount += estimateTokenCountInText(toolExecutionRequest.name()) * 2;
-                tokenCount += estimateTokenCountInText(toolExecutionRequest.arguments());
+                --tokenCount;
+                ToolExecutionRequest toolExecutionRequest = (ToolExecutionRequest)aiMessage.toolExecutionRequests().get(0);
+                tokenCount += this.estimateTokenCountInText(toolExecutionRequest.name()) * 2;
+                tokenCount += this.estimateTokenCountInText(toolExecutionRequest.arguments());
             } else {
                 tokenCount += 15;
                 for (ToolExecutionRequest toolExecutionRequest : aiMessage.toolExecutionRequests()) {
                     tokenCount += 7;
-                    tokenCount += estimateTokenCountInText(toolExecutionRequest.name());
-
-                    if (isNullOrBlank(toolExecutionRequest.arguments())) {
-                        continue;
-                    }
-
+                    tokenCount += this.estimateTokenCountInText(toolExecutionRequest.name());
+                    if (Utils.isNullOrBlank((String)toolExecutionRequest.arguments())) continue;
                     try {
-                        Map<?, ?> arguments = OBJECT_MAPPER.readValue(toolExecutionRequest.arguments(), Map.class);
-                        for (Map.Entry<?, ?> argument : arguments.entrySet()) {
+                        Map arguments = (Map)OBJECT_MAPPER.readValue(toolExecutionRequest.arguments(), Map.class);
+                        for (Map.Entry argument : arguments.entrySet()) {
                             tokenCount += 2;
-                            tokenCount += estimateTokenCountInText(String.valueOf(argument.getKey()));
-                            tokenCount += estimateTokenCountInText(String.valueOf(argument.getValue()));
+                            tokenCount += this.estimateTokenCountInText(String.valueOf(argument.getKey()));
+                            tokenCount += this.estimateTokenCountInText(String.valueOf(argument.getValue()));
                         }
-                    } catch (JsonProcessingException e) {
+                    }
+                    catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
         }
-
-        if (modelName.startsWith("o4")) {
+        if (this.modelName.startsWith("o4")) {
             tokenCount += 2;
         }
-
         return tokenCount;
     }
 
     private int estimateTokenCountIn(ToolExecutionResultMessage toolExecutionResultMessage) {
-        return estimateTokenCountInText(toolExecutionResultMessage.text());
+        return this.estimateTokenCountInText(toolExecutionResultMessage.text());
     }
 
-    @Override
     public int estimateTokenCountInMessages(Iterable<ChatMessage> messages) {
-        // see https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
-
-        int tokenCount = 3; // every reply is primed with <|start|>assistant<|message|>
+        int tokenCount = 3;
         for (ChatMessage message : messages) {
-            tokenCount += estimateTokenCountInMessage(message);
+            tokenCount += this.estimateTokenCountInMessage(message);
         }
-        if (modelName.startsWith("o")) {
-            tokenCount -= 1;
+        if (this.modelName.startsWith("o")) {
+            --tokenCount;
         }
         return tokenCount;
     }
 
     private Supplier<IllegalArgumentException> unknownModelException() {
-        return () -> illegalArgument("Model '%s' is unknown to jtokkit", modelName);
+        return () -> Exceptions.illegalArgument((String)"Model '%s' is unknown to jtokkit", (Object[])new Object[]{this.modelName});
     }
 }
+

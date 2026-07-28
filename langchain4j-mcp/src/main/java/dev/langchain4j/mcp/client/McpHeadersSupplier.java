@@ -1,11 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.mcp.client;
 
+import dev.langchain4j.mcp.client.McpCallContext;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * A functional interface that supplies HTTP headers for MCP client requests
- * based on the given {@link McpCallContext}.
- */
 @FunctionalInterface
-public interface McpHeadersSupplier extends Function<McpCallContext, Map<String, String>> {}
+public interface McpHeadersSupplier
+extends Function<McpCallContext, Map<String, String>> {
+}
+

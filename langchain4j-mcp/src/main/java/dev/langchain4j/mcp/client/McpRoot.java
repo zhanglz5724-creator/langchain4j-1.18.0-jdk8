@@ -1,4 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.mcp.client;
+
+import java.util.Objects;
+
 public class McpRoot {
     private final String name;
     private final String uri;
@@ -8,30 +14,34 @@ public class McpRoot {
         this.uri = uri;
     }
 
-    public String getName() {
-        return name;
+    public String name() {
+        return this.name;
     }
 
-    public String getUri() {
-        return uri;
+    public String uri() {
+        return this.uri;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        McpRoot that = (McpRoot) o;
-        return java.util.Objects.equals(this.name, that.name) && java.util.Objects.equals(this.uri, that.uri);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof McpRoot)) {
+            return false;
+        }
+        McpRoot other = (McpRoot)o;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        return Objects.equals(this.uri, other.uri);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(name, uri);
+        return Objects.hash(this.name, this.uri);
     }
 
-    @Override
     public String toString() {
-        return "McpRoot{"name=" + name + , "uri=" + uri + "}"";
+        return "McpRoot{name=" + Objects.toString(this.name) + ", uri=" + Objects.toString(this.uri) + "}";
     }
-
 }
+

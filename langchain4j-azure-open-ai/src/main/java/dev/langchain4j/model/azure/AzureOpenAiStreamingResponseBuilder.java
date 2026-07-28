@@ -1,26 +1,45 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.azure.ai.openai.models.ChatChoice
+ *  com.azure.ai.openai.models.ChatCompletions
+ *  com.azure.ai.openai.models.ChatResponseMessage
+ *  com.azure.ai.openai.models.Choice
+ *  com.azure.ai.openai.models.Completions
+ *  com.azure.ai.openai.models.CompletionsFinishReason
+ *  com.azure.ai.openai.models.CompletionsUsage
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.internal.ToolCallBuilder
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.azure;
 
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.model.azure.InternalAzureOpenAiHelper.finishReasonFrom;
-
-import com.azure.ai.openai.models.*;
+import com.azure.ai.openai.models.ChatChoice;
+import com.azure.ai.openai.models.ChatCompletions;
+import com.azure.ai.openai.models.ChatResponseMessage;
+import com.azure.ai.openai.models.Choice;
+import com.azure.ai.openai.models.Completions;
+import com.azure.ai.openai.models.CompletionsFinishReason;
+import com.azure.ai.openai.models.CompletionsUsage;
 import dev.langchain4j.Internal;
-import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.internal.ToolCallBuilder;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.azure.InternalAzureOpenAiHelper;
+import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
-import java.util.List;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
-/**
- * This class needs to be thread safe because it is called when a streaming result comes back
- * and there is no guarantee that this thread will be the same as the one that initiated the request,
- * in fact it almost certainly won't be.
- */
 @Internal
 class AzureOpenAiStreamingResponseBuilder {
-
     private final StringBuffer contentBuilder = new StringBuffer();
     private final ToolCallBuilder toolCallBuilder;
     private volatile TokenUsage tokenUsage;
@@ -35,86 +54,69 @@ class AzureOpenAiStreamingResponseBuilder {
     }
 
     void append(ChatCompletions completions) {
+        ChatResponseMessage delta;
+        List choices;
         if (completions == null) {
             return;
         }
-
         CompletionsUsage usage = completions.getUsage();
         if (usage != null) {
-            tokenUsage = new TokenUsage(usage.getPromptTokens(), usage.getCompletionTokens());
+            this.tokenUsage = new TokenUsage(Integer.valueOf(usage.getPromptTokens()), Integer.valueOf(usage.getCompletionTokens()));
         }
-
-        List<ChatChoice> choices = completions.getChoices();
-        if (isNullOrEmpty(choices)) {
+        if (Utils.isNullOrEmpty((Collection)(choices = completions.getChoices()))) {
             return;
         }
-
-        ChatChoice chatCompletionChoice = choices.get(0);
+        ChatChoice chatCompletionChoice = (ChatChoice)choices.get(0);
         if (chatCompletionChoice == null) {
             return;
         }
-
         CompletionsFinishReason finishReason = chatCompletionChoice.getFinishReason();
         if (finishReason != null) {
             this.finishReason = finishReason;
         }
-
-        com.azure.ai.openai.models.ChatResponseMessage delta = chatCompletionChoice.getDelta();
-        if (delta == null) {
+        if ((delta = chatCompletionChoice.getDelta()) == null) {
             return;
         }
-
         String content = delta.getContent();
         if (content != null) {
-            contentBuilder.append(content);
+            this.contentBuilder.append(content);
         }
     }
 
     void append(Completions completions) {
+        String token;
+        List choices;
         if (completions == null) {
             return;
         }
-
         CompletionsUsage usage = completions.getUsage();
         if (usage != null) {
-            tokenUsage = new TokenUsage(usage.getPromptTokens(), usage.getCompletionTokens());
+            this.tokenUsage = new TokenUsage(Integer.valueOf(usage.getPromptTokens()), Integer.valueOf(usage.getCompletionTokens()));
         }
-
-        List<Choice> choices = completions.getChoices();
-        if (isNullOrEmpty(choices)) {
+        if (Utils.isNullOrEmpty((Collection)(choices = completions.getChoices()))) {
             return;
         }
-
-        Choice completionChoice = choices.get(0);
+        Choice completionChoice = (Choice)choices.get(0);
         if (completionChoice == null) {
             return;
         }
-
         CompletionsFinishReason completionsFinishReason = completionChoice.getFinishReason();
         if (completionsFinishReason != null) {
             this.finishReason = completionsFinishReason;
         }
-
-        String token = completionChoice.getText();
-        if (token != null) {
-            contentBuilder.append(token);
+        if ((token = completionChoice.getText()) != null) {
+            this.contentBuilder.append(token);
         }
     }
 
     Response<AiMessage> build() {
-
-        String content = contentBuilder.toString();
-
-        List<ToolExecutionRequest> toolExecutionRequests = Collections.emptyList();
-        if (toolCallBuilder != null) {
-            toolExecutionRequests = toolCallBuilder.allRequests();
+        String content = this.contentBuilder.toString();
+        List toolExecutionRequests = Collections.emptyList();
+        if (this.toolCallBuilder != null) {
+            toolExecutionRequests = this.toolCallBuilder.allRequests();
         }
-
-        AiMessage aiMessage = AiMessage.builder()
-                .text(content.isEmpty() ? null : content)
-                .toolExecutionRequests(toolExecutionRequests)
-                .build();
-
-        return Response.from(aiMessage, tokenUsage, finishReasonFrom(finishReason));
+        AiMessage aiMessage = AiMessage.builder().text(content.isEmpty() ? null : content).toolExecutionRequests(toolExecutionRequests).build();
+        return Response.from((Object)aiMessage, (TokenUsage)this.tokenUsage, (FinishReason)InternalAzureOpenAiHelper.finishReasonFrom(this.finishReason));
     }
 }
+

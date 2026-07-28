@@ -1,47 +1,61 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+ *  software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+ *  software.amazon.awssdk.core.SdkBytes
+ *  software.amazon.awssdk.regions.Region
+ *  software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient
+ *  software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClientBuilder
+ *  software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest
+ *  software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse
+ */
 package dev.langchain4j.model.bedrock;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.bedrock.Json.fromJson;
-import static dev.langchain4j.model.bedrock.Json.toJson;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
-import static software.amazon.awssdk.regions.Region.US_EAST_1;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.bedrock.BedrockCohereEmbeddingResponse;
+import dev.langchain4j.model.bedrock.BedrockExceptionMapper;
+import dev.langchain4j.model.bedrock.Json;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Collections;
 import java.util.stream.Collectors;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
+import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClientBuilder;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
 
-/**
- * Bedrock Cohere embedding model with support for both versions:
- * {@code cohere.embed-english-v3} and {@code cohere.embed-multilingual-v3}
- * <br>
- * See more details <a href="https://docs.cohere.com/v2/docs/amazon-bedrock">here</a> and
- * <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-embed.html">here</a>.
- */
-public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
-
+public class BedrockCohereEmbeddingModel
+extends DimensionAwareEmbeddingModel {
     private static final int DEFAULT_MAX_SEGMENTS_PER_BATCH = 96;
     private static final String INPUT_TOKEN_COUNT_HEADER = "x-amzn-bedrock-input-token-count";
-
     private final BedrockRuntimeClient client;
     private final String model;
     private final String inputType;
@@ -50,55 +64,36 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
     private final int maxSegmentsPerBatch;
 
     public BedrockCohereEmbeddingModel(Builder builder) {
-        this.client = getOrDefault(builder.client, () -> initClient(builder));
-        this.model = ensureNotBlank(builder.model, "model");
-        this.inputType = ensureNotBlank(builder.inputType, "inputType");
+        this.client = (BedrockRuntimeClient)Utils.getOrDefault((Object)builder.client, () -> this.initClient(builder));
+        this.model = ValidationUtils.ensureNotBlank((String)builder.model, (String)"model");
+        this.inputType = ValidationUtils.ensureNotBlank((String)builder.inputType, (String)"inputType");
         this.truncate = builder.truncate;
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
-        this.maxSegmentsPerBatch = getOrDefault(builder.maxSegmentsPerBatch, DEFAULT_MAX_SEGMENTS_PER_BATCH);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
+        this.maxSegmentsPerBatch = (Integer)Utils.getOrDefault((Object)builder.maxSegmentsPerBatch, (Object)96);
     }
 
     private BedrockRuntimeClient initClient(Builder builder) {
-        return BedrockRuntimeClient.builder()
-                .region(getOrDefault(builder.region, US_EAST_1))
-                .credentialsProvider(getOrDefault(
-                        builder.credentialsProvider,
-                        () -> DefaultCredentialsProvider.builder().build()))
-                .build();
+        return (BedrockRuntimeClient)((BedrockRuntimeClientBuilder)((BedrockRuntimeClientBuilder)BedrockRuntimeClient.builder().region((Region)Utils.getOrDefault((Object)builder.region, (Object)Region.US_EAST_1))).credentialsProvider((AwsCredentialsProvider)Utils.getOrDefault((Object)builder.credentialsProvider, () -> DefaultCredentialsProvider.builder().build()))).build();
     }
 
-    @Override
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-        List<Embedding> embeddings = new ArrayList<>();
+        ArrayList embeddings = new ArrayList();
         Integer inputTokenCount = null;
-
-        for (int i = 0; i < textSegments.size(); i += maxSegmentsPerBatch) {
-            List<TextSegment> batch = textSegments.subList(i, Math.min(textSegments.size(), i + maxSegmentsPerBatch));
-            Map<String, Object> requestParameters = toRequestParameters(batch);
-            String requestJson = toJson(requestParameters);
-
-            InvokeModelResponse invokeModelResponse =
-                    withRetryMappingExceptions(() -> invoke(requestJson), maxRetries, BedrockExceptionMapper.INSTANCE);
-
+        for (int i = 0; i < textSegments.size(); i += this.maxSegmentsPerBatch) {
+            List<TextSegment> batch = textSegments.subList(i, Math.min(textSegments.size(), i + this.maxSegmentsPerBatch));
+            Map<String, Object> requestParameters = this.toRequestParameters(batch);
+            String requestJson = Json.toJson(requestParameters);
+            InvokeModelResponse invokeModelResponse = (InvokeModelResponse)RetryUtils.withRetryMappingExceptions(() -> this.invoke(requestJson), (int)this.maxRetries, (ExceptionMapper)BedrockExceptionMapper.INSTANCE);
             String responseJson = invokeModelResponse.body().asUtf8String();
-            BedrockCohereEmbeddingResponse embeddingResponse =
-                    fromJson(responseJson, BedrockCohereEmbeddingResponse.class);
-
-            embeddings.addAll(stream(embeddingResponse.getEmbeddings().getFloatEmbeddings())
-                    .map(Embedding::from)
-                    .collect(Collectors.toList()));
-            inputTokenCount = sum(
-                    inputTokenCount,
-                    inputTokenCountFrom(invokeModelResponse).orElse(embeddingResponse.getInputTextTokenCount()));
+            BedrockCohereEmbeddingResponse embeddingResponse = Json.fromJson(responseJson, BedrockCohereEmbeddingResponse.class);
+            embeddings.addAll(Arrays.stream(embeddingResponse.getEmbeddings().getFloatEmbeddings()).map(Embedding::from).collect(Collectors.toList()));
+            inputTokenCount = this.sum(inputTokenCount, this.inputTokenCountFrom(invokeModelResponse).orElse(embeddingResponse.getInputTextTokenCount()));
         }
-
-        return Response.from(embeddings, tokenUsageFrom(inputTokenCount));
+        return Response.from(embeddings, (TokenUsage)this.tokenUsageFrom(inputTokenCount));
     }
 
     private Optional<Integer> inputTokenCountFrom(InvokeModelResponse response) {
-        return response.sdkHttpResponse()
-                .firstMatchingHeader(INPUT_TOKEN_COUNT_HEADER)
-                .map(Integer::parseInt);
+        return response.sdkHttpResponse().firstMatchingHeader(INPUT_TOKEN_COUNT_HEADER).map(Integer::parseInt);
     }
 
     private TokenUsage tokenUsageFrom(Integer inputTokenCount) {
@@ -116,28 +111,72 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
     }
 
     private Map<String, Object> toRequestParameters(List<TextSegment> textSegments) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("texts", textSegments.stream().map(TextSegment::text).collect(toList()));
-        parameters.put("input_type", inputType);
-        parameters.put("truncate", truncate);
+        HashMap<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("texts", textSegments.stream().map(TextSegment::text).collect(Collectors.toList()));
+        parameters.put("input_type", this.inputType);
+        parameters.put("truncate", this.truncate);
         parameters.put("embedding_types", Collections.singletonList("float"));
         return parameters;
     }
 
     private InvokeModelResponse invoke(String body) {
-        InvokeModelRequest invokeModelRequest = InvokeModelRequest.builder()
-                .modelId(model)
-                .body(SdkBytes.fromString(body, Charset.defaultCharset()))
-                .build();
-        return client.invokeModel(invokeModelRequest);
+        InvokeModelRequest invokeModelRequest = (InvokeModelRequest)InvokeModelRequest.builder().modelId(this.model).body(SdkBytes.fromString((String)body, (Charset)Charset.defaultCharset())).build();
+        return this.client.invokeModel(invokeModelRequest);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    public static enum Truncate {
+        NONE("NONE"),
+        START("START"),
+        END("END");
 
+        private final String value;
+
+        private Truncate(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    public static enum InputType {
+        SEARCH_DOCUMENT("search_document"),
+        SEARCH_QUERY("search_query"),
+        CLASSIFICATION("classification"),
+        CLUSTERING("clustering");
+
+        private final String value;
+
+        private InputType(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    public static enum Model {
+        COHERE_EMBED_ENGLISH_V3("cohere.embed-english-v3"),
+        COHERE_EMBED_MULTILINGUAL_V3("cohere.embed-multilingual-v3");
+
+        private final String value;
+
+        private Model(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    public static class Builder {
         private String model;
         private String inputType;
         private String truncate;
@@ -148,7 +187,7 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         private Integer maxSegmentsPerBatch;
 
         public Builder model(Model model) {
-            return model(model.getValue());
+            return this.model(model.getValue());
         }
 
         public Builder model(String model) {
@@ -157,7 +196,7 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
 
         public Builder inputType(InputType inputType) {
-            return inputType(inputType.getValue());
+            return this.inputType(inputType.getValue());
         }
 
         public Builder inputType(String inputType) {
@@ -166,7 +205,7 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
 
         public Builder truncate(Truncate truncate) {
-            return truncate(truncate.getValue());
+            return this.truncate(truncate.getValue());
         }
 
         public Builder truncate(String truncate) {
@@ -203,52 +242,5 @@ public class BedrockCohereEmbeddingModel extends DimensionAwareEmbeddingModel {
             return new BedrockCohereEmbeddingModel(this);
         }
     }
-
-    public enum Model {
-        COHERE_EMBED_ENGLISH_V3("cohere.embed-english-v3"),
-        COHERE_EMBED_MULTILINGUAL_V3("cohere.embed-multilingual-v3");
-
-        private final String value;
-
-        Model(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
-    public enum InputType {
-        SEARCH_DOCUMENT("search_document"),
-        SEARCH_QUERY("search_query"),
-        CLASSIFICATION("classification"),
-        CLUSTERING("clustering");
-
-        private final String value;
-
-        InputType(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
-    public enum Truncate {
-        NONE("NONE"),
-        START("START"),
-        END("END");
-
-        private final String value;
-
-        Truncate(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
 }
+

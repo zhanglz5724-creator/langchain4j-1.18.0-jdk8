@@ -1,53 +1,53 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnore
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.data.document.loader.oracle;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Document loader file preference
- *
- * To specify a table, dbms_vector_chain.utl_to_text expects the following JSON:
- * {"owner": "owner", "tablename": "table name", "colname": "column name"}
- */
 public class TablePreference {
     private String owner;
     private String tablename;
     private String colname;
 
-    public TablePreference() {}
-
     @JsonIgnore
     public boolean isValid() {
-        return owner != null && tablename != null && colname != null;
+        return this.owner != null && this.tablename != null && this.colname != null;
     }
 
-    @JsonProperty("owner")
+    @JsonProperty(value="owner")
     public void setOwner(String owner) {
         this.owner = owner;
     }
 
-    @JsonProperty("tablename")
+    @JsonProperty(value="tablename")
     public void setTableName(String tablename) {
         this.tablename = tablename;
     }
 
-    @JsonProperty("colname")
+    @JsonProperty(value="colname")
     public void setColumnName(String colname) {
         this.colname = colname;
     }
 
-    @JsonProperty("owner")
+    @JsonProperty(value="owner")
     public String getOwner() {
-        return owner;
+        return this.owner;
     }
 
-    @JsonProperty("tablename")
+    @JsonProperty(value="tablename")
     public String getTableName() {
-        return tablename;
+        return this.tablename;
     }
 
-    @JsonProperty("colname")
+    @JsonProperty(value="colname")
     public String getColumnName() {
-        return colname;
+        return this.colname;
     }
 }
+

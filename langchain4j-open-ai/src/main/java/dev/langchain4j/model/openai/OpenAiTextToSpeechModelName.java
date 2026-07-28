@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ */
 package dev.langchain4j.model.openai;
 
 import dev.langchain4j.Experimental;
@@ -11,12 +17,12 @@ public enum OpenAiTextToSpeechModelName {
 
     private final String stringValue;
 
-    OpenAiTextToSpeechModelName(String stringValue) {
+    private OpenAiTextToSpeechModelName(String stringValue) {
         this.stringValue = stringValue;
     }
 
-    @Override
     public String toString() {
-        return stringValue;
+        return this.stringValue;
     }
 }
+

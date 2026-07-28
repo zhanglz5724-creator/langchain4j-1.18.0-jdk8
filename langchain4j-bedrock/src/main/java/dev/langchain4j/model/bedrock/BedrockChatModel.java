@@ -1,115 +1,109 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  org.slf4j.Logger
+ *  software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+ *  software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+ *  software.amazon.awssdk.core.interceptor.ExecutionInterceptor
+ *  software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient
+ *  software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClientBuilder
+ *  software.amazon.awssdk.services.bedrockruntime.model.CacheTTL
+ *  software.amazon.awssdk.services.bedrockruntime.model.ConverseRequest
+ *  software.amazon.awssdk.services.bedrockruntime.model.ConverseResponse
+ */
 package dev.langchain4j.model.bedrock;
 
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.ModelProvider.AMAZON_BEDROCK;
-import static java.util.Objects.isNull;
-
+import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
+import dev.langchain4j.model.bedrock.AbstractBedrockChatModel;
+import dev.langchain4j.model.bedrock.AwsLoggingInterceptor;
+import dev.langchain4j.model.bedrock.BedrockCachePointPlacement;
+import dev.langchain4j.model.bedrock.BedrockChatRequestParameters;
+import dev.langchain4j.model.bedrock.BedrockChatResponseMetadata;
+import dev.langchain4j.model.bedrock.BedrockCustomHeadersInterceptor;
+import dev.langchain4j.model.bedrock.BedrockExceptionMapper;
+import dev.langchain4j.model.bedrock.BedrockGuardrailConfiguration;
+import dev.langchain4j.model.bedrock.BedrockServiceTier;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.core.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
+import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClientBuilder;
 import software.amazon.awssdk.services.bedrockruntime.model.CacheTTL;
 import software.amazon.awssdk.services.bedrockruntime.model.ConverseRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.ConverseResponse;
 
-/**
- * BedrockChatModel uses the Bedrock ConverseAPI.
- *
- * @see <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference.html">https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference.html</a>
- */
-public class BedrockChatModel extends AbstractBedrockChatModel implements ChatModel {
-
+public class BedrockChatModel
+extends AbstractBedrockChatModel
+implements ChatModel {
     private final BedrockRuntimeClient client;
     private final Integer maxRetries;
 
     public BedrockChatModel(String modelId) {
-        this(builder().modelId(modelId));
+        this((Builder)BedrockChatModel.builder().modelId(modelId));
     }
 
     public BedrockChatModel(Builder builder) {
         super(builder);
-        this.client = isNull(builder.client)
-                ? createClient(
-                        getOrDefault(builder.logRequests, false),
-                        getOrDefault(builder.logResponses, false),
-                        builder.logger)
-                : builder.client;
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.client = Objects.isNull(builder.client) ? this.createClient((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false), (Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false), builder.logger) : builder.client;
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
-    @Override
     public ChatResponse doChat(ChatRequest request) {
-        validate(request.parameters());
-
-        ConverseRequest converseRequest = buildConverseRequest(request);
-
-        ConverseResponse converseResponse = withRetryMappingExceptions(
-                () -> client.converse(converseRequest), maxRetries, BedrockExceptionMapper.INSTANCE);
-
-        return ChatResponse.builder()
-                .aiMessage(aiMessageFrom(converseResponse))
-                .metadata(BedrockChatResponseMetadata.builder()
-                        .id(converseResponse.responseMetadata().requestId())
-                        .finishReason(finishReasonFrom(converseResponse.stopReason()))
-                        .tokenUsage(tokenUsageFrom(converseResponse.usage()))
-                        .modelName(converseRequest.modelId())
-                        .guardrailAssessmentSummary(guardrailAssessmentSummaryFrom(converseResponse.trace()))
-                        .build())
-                .build();
+        BedrockChatModel.validate(request.parameters());
+        ConverseRequest converseRequest = this.buildConverseRequest(request);
+        ConverseResponse converseResponse = (ConverseResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.converse(converseRequest), (int)this.maxRetries, (ExceptionMapper)BedrockExceptionMapper.INSTANCE);
+        return ChatResponse.builder().aiMessage(this.aiMessageFrom(converseResponse)).metadata((ChatResponseMetadata)((BedrockChatResponseMetadata.Builder)((BedrockChatResponseMetadata.Builder)((BedrockChatResponseMetadata.Builder)((BedrockChatResponseMetadata.Builder)BedrockChatResponseMetadata.builder().id(converseResponse.responseMetadata().requestId())).finishReason(this.finishReasonFrom(converseResponse.stopReason()))).tokenUsage(this.tokenUsageFrom(converseResponse.usage()))).modelName(converseRequest.modelId())).guardrailAssessmentSummary(this.guardrailAssessmentSummaryFrom(converseResponse.trace())).build()).build();
     }
 
-    @Override
     public BedrockChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
     private ConverseRequest buildConverseRequest(ChatRequest chatRequest) {
-        BedrockChatRequestParameters parameters = (BedrockChatRequestParameters) chatRequest.parameters();
-
+        BedrockChatRequestParameters parameters = (BedrockChatRequestParameters)chatRequest.parameters();
         BedrockCachePointPlacement cachePointPlacement = parameters.cachePointPlacement();
         CacheTTL cacheTtl = parameters.cacheTtl();
         BedrockGuardrailConfiguration bedrockGuardrailConfiguration = parameters.bedrockGuardrailConfiguration();
         BedrockServiceTier bedrockServiceTier = parameters.serviceTier();
-
-        // Validate total cache points don't exceed AWS limit
-        boolean hasTools = chatRequest.toolSpecifications() != null
-                && !chatRequest.toolSpecifications().isEmpty();
-        validateTotalCachePoints(chatRequest.messages(), cachePointPlacement, hasTools);
-
-        return ConverseRequest.builder()
-                .modelId(chatRequest.modelName())
-                .inferenceConfig(inferenceConfigFrom(chatRequest.parameters()))
-                .system(extractSystemMessages(chatRequest.messages(), cachePointPlacement, cacheTtl))
-                .messages(extractRegularMessages(chatRequest.messages(), cachePointPlacement, cacheTtl))
-                .toolConfig(extractToolConfigurationFrom(chatRequest, cachePointPlacement, cacheTtl))
-                .additionalModelRequestFields(additionalRequestModelFieldsFrom(chatRequest.parameters()))
-                .guardrailConfig(guardrailConfigFrom(bedrockGuardrailConfiguration))
-                .outputConfig(outputConfigFrom(chatRequest.responseFormat()))
-                .serviceTier(serviceTierFor(bedrockServiceTier))
-                .build();
+        boolean hasTools = chatRequest.toolSpecifications() != null && !chatRequest.toolSpecifications().isEmpty();
+        this.validateTotalCachePoints(chatRequest.messages(), cachePointPlacement, hasTools);
+        return (ConverseRequest)ConverseRequest.builder().modelId(chatRequest.modelName()).inferenceConfig(this.inferenceConfigFrom(chatRequest.parameters())).system(this.extractSystemMessages(chatRequest.messages(), cachePointPlacement, cacheTtl)).messages(this.extractRegularMessages(chatRequest.messages(), cachePointPlacement, cacheTtl)).toolConfig(this.extractToolConfigurationFrom(chatRequest, cachePointPlacement, cacheTtl)).additionalModelRequestFields(this.additionalRequestModelFieldsFrom(chatRequest.parameters())).guardrailConfig(this.guardrailConfigFrom(bedrockGuardrailConfiguration)).outputConfig(BedrockChatModel.outputConfigFrom(chatRequest.responseFormat())).serviceTier(this.serviceTierFor(bedrockServiceTier)).build();
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public Set<Capability> supportedCapabilities() {
-        return supportedCapabilities;
+        return this.supportedCapabilities;
     }
 
-    @Override
     public ModelProvider provider() {
-        return AMAZON_BEDROCK;
+        return ModelProvider.AMAZON_BEDROCK;
     }
 
     public static Builder builder() {
@@ -117,21 +111,19 @@ public class BedrockChatModel extends AbstractBedrockChatModel implements ChatMo
     }
 
     private BedrockRuntimeClient createClient(boolean logRequests, boolean logResponses, Logger logger) {
-        return BedrockRuntimeClient.builder()
-                .region(this.region)
-                .credentialsProvider(DefaultCredentialsProvider.create())
-                .overrideConfiguration(config -> {
-                    config.apiCallTimeout(this.timeout);
-                    if (logRequests || logResponses)
-                        config.addExecutionInterceptor(new AwsLoggingInterceptor(logRequests, logResponses, logger));
-                    if (customHeadersSupplier != null)
-                        config.addExecutionInterceptor(new BedrockCustomHeadersInterceptor(customHeadersSupplier));
-                })
-                .build();
+        return (BedrockRuntimeClient)((BedrockRuntimeClientBuilder)((BedrockRuntimeClientBuilder)((BedrockRuntimeClientBuilder)BedrockRuntimeClient.builder().region(this.region)).credentialsProvider((AwsCredentialsProvider)DefaultCredentialsProvider.create())).overrideConfiguration(config -> {
+            config.apiCallTimeout(this.timeout);
+            if (logRequests || logResponses) {
+                config.addExecutionInterceptor((ExecutionInterceptor)new AwsLoggingInterceptor(logRequests, logResponses, logger));
+            }
+            if (this.customHeadersSupplier != null) {
+                config.addExecutionInterceptor((ExecutionInterceptor)new BedrockCustomHeadersInterceptor(this.customHeadersSupplier));
+            }
+        })).build();
     }
 
-    public static class Builder extends AbstractBuilder<Builder> {
-
+    public static class Builder
+    extends AbstractBedrockChatModel.AbstractBuilder<Builder> {
         private BedrockRuntimeClient client;
         private Integer maxRetries;
 
@@ -150,3 +142,4 @@ public class BedrockChatModel extends AbstractBedrockChatModel implements ChatMo
         }
     }
 }
+

@@ -1,33 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.core.http.AsyncStreamResponse
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ */
 package dev.langchain4j.model.openaiofficial;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
 import com.openai.core.http.AsyncStreamResponse;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.response.StreamingHandle;
 
-/**
- * @since 1.8.0
- */
-class OpenAiOfficialStreamingHandle implements StreamingHandle {
-
+class OpenAiOfficialStreamingHandle
+implements StreamingHandle {
     private final AsyncStreamResponse<?> asyncStreamResponse;
     private volatile boolean isCancelled;
 
     OpenAiOfficialStreamingHandle(AsyncStreamResponse<?> asyncStreamResponse) {
-        this.asyncStreamResponse = ensureNotNull(asyncStreamResponse, "asyncStreamResponse");
+        this.asyncStreamResponse = (AsyncStreamResponse)ValidationUtils.ensureNotNull(asyncStreamResponse, (String)"asyncStreamResponse");
     }
 
-    @Override
     public void cancel() {
-        isCancelled = true;
+        this.isCancelled = true;
         try {
-            asyncStreamResponse.close();
-        } catch (Exception ignored) {
+            this.asyncStreamResponse.close();
+        }
+        catch (Exception exception) {
+            // empty catch block
         }
     }
 
-    @Override
     public boolean isCancelled() {
-        return isCancelled;
+        return this.isCancelled;
     }
 }
+

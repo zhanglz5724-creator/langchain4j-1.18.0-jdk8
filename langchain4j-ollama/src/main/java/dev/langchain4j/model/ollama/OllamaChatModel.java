@@ -1,85 +1,83 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.spi.ServiceHelper
+ */
 package dev.langchain4j.model.ollama;
 
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.ModelProvider.OLLAMA;
-import static dev.langchain4j.model.ollama.InternalOllamaHelper.aiMessageFrom;
-import static dev.langchain4j.model.ollama.InternalOllamaHelper.chatResponseMetadataFrom;
-import static dev.langchain4j.model.ollama.InternalOllamaHelper.toOllamaChatRequest;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.ollama.InternalOllamaHelper;
+import dev.langchain4j.model.ollama.OllamaBaseChatModel;
+import dev.langchain4j.model.ollama.OllamaChatRequest;
+import dev.langchain4j.model.ollama.OllamaChatRequestParameters;
+import dev.langchain4j.model.ollama.OllamaChatResponse;
 import dev.langchain4j.model.ollama.spi.OllamaChatModelBuilderFactory;
+import dev.langchain4j.spi.ServiceHelper;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-/**
- * <a href="https://github.com/jmorganca/ollama/blob/main/docs/api.md">Ollama API reference</a>
- * <br>
- * <a href="https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values">Ollama API parameters</a>.
- */
-public class OllamaChatModel extends OllamaBaseChatModel implements ChatModel {
-
+public class OllamaChatModel
+extends OllamaBaseChatModel
+implements ChatModel {
     private final int maxRetries;
 
     public OllamaChatModel(OllamaChatModelBuilder builder) {
-        init(builder);
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.init(builder);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
-    @Override
     public ChatResponse doChat(ChatRequest chatRequest) {
-        validate(chatRequest.parameters());
-
-        OllamaChatRequest ollamaChatRequest = toOllamaChatRequest(chatRequest, false);
-        OllamaChatResponse ollamaChatResponse =
-                withRetryMappingExceptions(() -> client.chat(ollamaChatRequest), maxRetries);
-
-        return ChatResponse.builder()
-                .aiMessage(aiMessageFrom(ollamaChatResponse.getMessage(), this.returnThinking))
-                .metadata(chatResponseMetadataFrom(ollamaChatResponse))
-                .build();
+        this.validate(chatRequest.parameters());
+        OllamaChatRequest ollamaChatRequest = InternalOllamaHelper.toOllamaChatRequest(chatRequest, false);
+        OllamaChatResponse ollamaChatResponse = (OllamaChatResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.chat(ollamaChatRequest), (int)this.maxRetries);
+        return ChatResponse.builder().aiMessage(InternalOllamaHelper.aiMessageFrom(ollamaChatResponse.getMessage(), this.returnThinking)).metadata(InternalOllamaHelper.chatResponseMetadataFrom(ollamaChatResponse)).build();
     }
 
-    @Override
     public OllamaChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return OLLAMA;
+        return ModelProvider.OLLAMA;
     }
 
-    @Override
     public Set<Capability> supportedCapabilities() {
-        return supportedCapabilities;
+        return this.supportedCapabilities;
     }
 
     public static OllamaChatModelBuilder builder() {
-        for (OllamaChatModelBuilderFactory factory : loadFactories(OllamaChatModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(OllamaChatModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OllamaChatModelBuilderFactory factory = (OllamaChatModelBuilderFactory)iterator.next();
+            return (OllamaChatModelBuilder)factory.get();
         }
         return new OllamaChatModelBuilder();
     }
 
-    public static class OllamaChatModelBuilder extends Builder<OllamaChatModel, OllamaChatModelBuilder> {
-
+    public static class OllamaChatModelBuilder
+    extends OllamaBaseChatModel.Builder<OllamaChatModel, OllamaChatModelBuilder> {
         private Integer maxRetries;
-
-        public OllamaChatModelBuilder() {
-            // This is public so it can be extended
-        }
 
         @Override
         protected OllamaChatModelBuilder self() {
@@ -97,3 +95,4 @@ public class OllamaChatModel extends OllamaBaseChatModel implements ChatModel {
         }
     }
 }
+

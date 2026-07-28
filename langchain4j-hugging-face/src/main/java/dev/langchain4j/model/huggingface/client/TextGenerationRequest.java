@@ -1,21 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.model.huggingface.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.huggingface.client.Options;
+import dev.langchain4j.model.huggingface.client.Parameters;
 import java.util.Objects;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import static dev.langchain4j.internal.Utils.quoted;
-
-@Deprecated(forRemoval = true, since = "1.7.0-beta13")
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@Deprecated
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TextGenerationRequest {
-
     private final String inputs;
     private final Parameters parameters;
     private final Options options;
@@ -27,46 +36,38 @@ public class TextGenerationRequest {
     }
 
     public String getInputs() {
-        return inputs;
+        return this.inputs;
     }
 
     public Parameters getParameters() {
-        return parameters;
+        return this.parameters;
     }
 
     public Options getOptions() {
-        return options;
+        return this.options;
     }
 
-    @Override
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof TextGenerationRequest
-                && equalTo((TextGenerationRequest) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof TextGenerationRequest && this.equalTo((TextGenerationRequest)another);
     }
 
     private boolean equalTo(TextGenerationRequest another) {
-        return Objects.equals(inputs, another.inputs)
-                && Objects.equals(parameters, another.parameters)
-                && Objects.equals(options, another.options);
+        return Objects.equals(this.inputs, another.inputs) && Objects.equals(this.parameters, another.parameters) && Objects.equals(this.options, another.options);
     }
 
-    @Override
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(inputs);
-        h += (h << 5) + Objects.hashCode(parameters);
-        h += (h << 5) + Objects.hashCode(options);
+        h += (h << 5) + Objects.hashCode(this.inputs);
+        h += (h << 5) + Objects.hashCode(this.parameters);
+        h += (h << 5) + Objects.hashCode(this.options);
         return h;
     }
 
-    @Override
     public String toString() {
-        return "TextGenerationRequest {"
-                + " inputs = " + quoted(inputs)
-                + ", parameters = " + parameters
-                + ", options = " + options
-                + " }";
+        return "TextGenerationRequest { inputs = " + Utils.quoted((Object)this.inputs) + ", parameters = " + this.parameters + ", options = " + this.options + " }";
     }
 
     public static Builder builder() {
@@ -74,7 +75,6 @@ public class TextGenerationRequest {
     }
 
     public static final class Builder {
-
         private String inputs;
         private Parameters parameters;
         private Options options;
@@ -99,3 +99,4 @@ public class TextGenerationRequest {
         }
     }
 }
+

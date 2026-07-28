@@ -1,14 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ContentType
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.embedding.EmbeddingModel
+ *  dev.langchain4j.model.embedding.EmbeddingModelListenerUtils
+ *  dev.langchain4j.model.embedding.listener.EmbeddingModelListener
+ *  dev.langchain4j.model.embedding.request.EmbeddingInput
+ *  dev.langchain4j.model.embedding.request.EmbeddingInputType
+ *  dev.langchain4j.model.embedding.request.EmbeddingParameter
+ *  dev.langchain4j.model.embedding.request.EmbeddingRequest
+ *  dev.langchain4j.model.embedding.request.EmbeddingRequestParameters
+ *  dev.langchain4j.model.embedding.response.EmbeddingResponse
+ *  dev.langchain4j.model.embedding.response.EmbeddingResponseMetadata
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.cohere;
 
-import static dev.langchain4j.internal.ExceptionMapper.mappingException;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.time.Duration.ofSeconds;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
-
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.data.image.Image;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ContentType;
 import dev.langchain4j.data.message.ImageContent;
@@ -16,7 +41,15 @@ import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.exception.UnsupportedFeatureException;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.ModelProvider;
+import dev.langchain4j.model.cohere.CohereClient;
+import dev.langchain4j.model.cohere.EmbedRequest;
+import dev.langchain4j.model.cohere.EmbedResponse;
+import dev.langchain4j.model.cohere.EmbedV2Request;
+import dev.langchain4j.model.cohere.EmbedV2Response;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModelListenerUtils;
@@ -32,22 +65,18 @@ import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
-/**
- * An implementation of an {@link EmbeddingModel} that uses
- * <a href="https://docs.cohere.com/docs/embed">Cohere Embed API</a>.
- */
-public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
-
+public class CohereEmbeddingModel
+extends DimensionAwareEmbeddingModel {
     private static final String DEFAULT_BASE_URL = "https://api.cohere.ai/v1/";
     private static final int DEFAULT_MAX_SEGMENTS_PER_BATCH = 96;
-
     private final CohereClient client;
     private final CohereClient v2Client;
     private final String modelName;
@@ -55,169 +84,100 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
     private final int maxSegmentsPerBatch;
     private final List<EmbeddingModelListener> listeners;
 
-    @Deprecated(forRemoval = true, since = "1.4.0")
-    public CohereEmbeddingModel(
-            String baseUrl,
-            String apiKey,
-            String modelName,
-            String inputType,
-            Duration timeout,
-            Boolean logRequests,
-            Boolean logResponses,
-            Integer maxSegmentsPerBatch) {
-        String resolvedBaseUrl = getOrDefault(baseUrl, DEFAULT_BASE_URL);
-        this.client = CohereClient.builder()
-                .baseUrl(resolvedBaseUrl)
-                .apiKey(ensureNotBlank(apiKey, "apiKey"))
-                .timeout(getOrDefault(timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(logRequests, false))
-                .logResponses(getOrDefault(logResponses, false))
-                .build();
-        this.v2Client = CohereClient.builder()
-                .baseUrl(toV2BaseUrl(resolvedBaseUrl))
-                .apiKey(ensureNotBlank(apiKey, "apiKey"))
-                .timeout(getOrDefault(timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(logRequests, false))
-                .logResponses(getOrDefault(logResponses, false))
-                .build();
+    @Deprecated
+    public CohereEmbeddingModel(String baseUrl, String apiKey, String modelName, String inputType, Duration timeout, Boolean logRequests, Boolean logResponses, Integer maxSegmentsPerBatch) {
+        String resolvedBaseUrl = (String)Utils.getOrDefault((Object)baseUrl, (Object)DEFAULT_BASE_URL);
+        this.client = CohereClient.builder().baseUrl(resolvedBaseUrl).apiKey(ValidationUtils.ensureNotBlank((String)apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)logResponses, (Object)false)).build();
+        this.v2Client = CohereClient.builder().baseUrl(CohereEmbeddingModel.toV2BaseUrl(resolvedBaseUrl)).apiKey(ValidationUtils.ensureNotBlank((String)apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)logResponses, (Object)false)).build();
         this.modelName = modelName;
         this.inputType = inputType;
-        this.maxSegmentsPerBatch = getOrDefault(maxSegmentsPerBatch, DEFAULT_MAX_SEGMENTS_PER_BATCH);
+        this.maxSegmentsPerBatch = (Integer)Utils.getOrDefault((Object)maxSegmentsPerBatch, (Object)96);
         this.listeners = Collections.emptyList();
     }
 
     public CohereEmbeddingModel(CohereEmbeddingModelBuilder builder) {
-        String baseUrl = getOrDefault(builder.baseUrl, DEFAULT_BASE_URL);
-        this.client = CohereClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(baseUrl)
-                .apiKey(ensureNotBlank(builder.apiKey, "apiKey"))
-                .timeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .build();
-        this.v2Client = CohereClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.v2BaseUrl, toV2BaseUrl(baseUrl)))
-                .apiKey(ensureNotBlank(builder.apiKey, "apiKey"))
-                .timeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .build();
+        String baseUrl = (String)Utils.getOrDefault((Object)builder.baseUrl, (Object)DEFAULT_BASE_URL);
+        this.client = CohereClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl(baseUrl).apiKey(ValidationUtils.ensureNotBlank((String)builder.apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false)).logger(builder.logger).build();
+        this.v2Client = CohereClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl((String)Utils.getOrDefault((Object)builder.v2BaseUrl, (Object)CohereEmbeddingModel.toV2BaseUrl(baseUrl))).apiKey(ValidationUtils.ensureNotBlank((String)builder.apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false)).logger(builder.logger).build();
         this.modelName = builder.modelName;
         this.inputType = builder.inputType;
-        this.maxSegmentsPerBatch = getOrDefault(builder.maxSegmentsPerBatch, DEFAULT_MAX_SEGMENTS_PER_BATCH);
-        this.listeners = copy(builder.listeners);
+        this.maxSegmentsPerBatch = (Integer)Utils.getOrDefault((Object)builder.maxSegmentsPerBatch, (Object)96);
+        this.listeners = Utils.copy((List)builder.listeners);
     }
 
-    @Override
     public List<EmbeddingModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
         return ModelProvider.COHERE;
     }
 
-    /**
-     * @deprecated Please use {@code builder()} instead, and explicitly set the model name and,
-     * if necessary, other parameters.
-     */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public static CohereEmbeddingModel withApiKey(String apiKey) {
-        return builder().apiKey(apiKey).build();
+        return CohereEmbeddingModel.builder().apiKey(apiKey).build();
     }
 
     public static CohereEmbeddingModelBuilder builder() {
         return new CohereEmbeddingModelBuilder();
     }
 
-    @Override
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-        return EmbeddingModelListenerUtils.withListeners(this, textSegments, () -> {
-            List<String> texts = textSegments.stream().map(TextSegment::text).collect(toList());
-            return embedTexts(texts);
+        return EmbeddingModelListenerUtils.withListeners((EmbeddingModel)this, textSegments, () -> {
+            List<String> texts = textSegments.stream().map(TextSegment::text).collect(Collectors.toList());
+            return this.embedTexts(texts);
         });
     }
 
-    @Override
     public String modelName() {
         return this.modelName;
     }
 
-    @Override
     public Set<ContentType> supportedContentTypes() {
-        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE)));
+        return new HashSet<ContentType>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE));
     }
 
-    @Override
     public Set<EmbeddingParameter<?>> supportedParameters() {
         return Collections.singleton(EmbeddingRequestParameters.INPUT_TYPE);
     }
 
-    /**
-     * Embeds via Cohere's v2 embed endpoint ({@code /v2/embed}), which handles both text and images
-     * (Embed v4). Each {@link EmbeddingInput} may interleave text and image parts into a single embedding.
-     */
-    @Override
     public EmbeddingResponse doEmbed(EmbeddingRequest request) {
-
-        String effectiveInputType = getOrDefault(toCohereInputType(request.inputType()), inputType);
-
-        List<Embedding> embeddings = new ArrayList<>();
+        String effectiveInputType = (String)Utils.getOrDefault((Object)CohereEmbeddingModel.toCohereInputType(request.inputType()), (Object)this.inputType);
+        ArrayList embeddings = new ArrayList();
         int inputTokens = 0;
-
-        List<EmbeddingInput> inputs = request.inputs();
-        for (int i = 0; i < inputs.size(); i += maxSegmentsPerBatch) {
-            List<EmbeddingInput> batch = inputs.subList(i, Math.min(i + maxSegmentsPerBatch, inputs.size()));
-
-            EmbedV2Response response = mappingException(() -> v2Client.embedV2(buildV2Request(batch, effectiveInputType)));
-
+        List inputs = request.inputs();
+        for (int i = 0; i < inputs.size(); i += this.maxSegmentsPerBatch) {
+            List batch = inputs.subList(i, Math.min(i + this.maxSegmentsPerBatch, inputs.size()));
+            EmbedV2Response response = (EmbedV2Response)ExceptionMapper.mappingException(() -> this.v2Client.embedV2(this.buildV2Request(batch, effectiveInputType)));
             if (response.getEmbeddings() != null && response.getEmbeddings().getFloatEmbeddings() != null) {
-                embeddings.addAll(response.getEmbeddings().getFloatEmbeddings().stream()
-                        .map(Embedding::from)
-                        .collect(toList()));
+                embeddings.addAll(response.getEmbeddings().getFloatEmbeddings().stream().map(Embedding::from).collect(Collectors.toList()));
             }
-            inputTokens += v2TokenUsage(response);
+            inputTokens += CohereEmbeddingModel.v2TokenUsage(response);
         }
-
-        return EmbeddingResponse.builder()
-                .embeddings(embeddings)
-                .metadata(EmbeddingResponseMetadata.builder()
-                        .modelName(modelName)
-                        .tokenUsage(new TokenUsage(inputTokens, 0))
-                        .build())
-                .build();
+        return EmbeddingResponse.builder().embeddings(embeddings).metadata(EmbeddingResponseMetadata.builder().modelName(this.modelName).tokenUsage(new TokenUsage(Integer.valueOf(inputTokens), Integer.valueOf(0))).build()).build();
     }
 
     EmbedV2Request buildV2Request(List<EmbeddingInput> inputs, String resolvedInputType) {
-        return EmbedV2Request.builder()
-                .model(modelName)
-                .inputType(resolvedInputType)
-                .embeddingTypes(Collections.singletonList("float"))
-                .inputs(inputs.stream().map(this::toV2Input).collect(toList()))
-                .build();
+        return EmbedV2Request.builder().model(this.modelName).inputType(resolvedInputType).embeddingTypes(Arrays.asList("float")).inputs(inputs.stream().map(this::toV2Input).collect(Collectors.toList())).build();
     }
 
     private EmbedV2Request.V2Input toV2Input(EmbeddingInput input) {
-        return new EmbedV2Request.V2Input(
-                input.contents().stream().map(this::toV2Content).collect(toList()));
+        return new EmbedV2Request.V2Input(input.contents().stream().map(this::toV2Content).collect(Collectors.toList()));
     }
 
     private EmbedV2Request.V2Content toV2Content(Content content) {
-        if (content instanceof TextContent textContent) {
+        if (content instanceof TextContent) {
+            TextContent textContent = (TextContent)content;
             return EmbedV2Request.V2Content.text(textContent.text());
         }
-        if (content instanceof ImageContent imageContent) {
+        if (content instanceof ImageContent) {
+            ImageContent imageContent = (ImageContent)content;
             Image image = imageContent.image();
             if (image.url() != null) {
                 return EmbedV2Request.V2Content.imageUrl(image.url().toString());
             }
             if (image.base64Data() != null) {
-                String dataUrl = "data:" + getOrDefault(image.mimeType(), "image/png") + ";base64," + image.base64Data();
+                String dataUrl = "data:" + (String)Utils.getOrDefault((Object)image.mimeType(), (Object)"image/png") + ";base64," + image.base64Data();
                 return EmbedV2Request.V2Content.imageUrl(dataUrl);
             }
             throw new UnsupportedFeatureException("ImageContent must have either a URL or base64 data");
@@ -229,10 +189,15 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         if (inputType == null) {
             return null;
         }
-        return switch (inputType) {
-            case QUERY -> "search_query";
-            case DOCUMENT -> "search_document";
-        };
+        switch (inputType) {
+            case QUERY: {
+                return "search_query";
+            }
+            case DOCUMENT: {
+                return "search_document";
+            }
+        }
+        throw new IllegalArgumentException("Unknown input type: " + inputType);
     }
 
     private static String toV2BaseUrl(String v1BaseUrl) {
@@ -240,46 +205,31 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
     }
 
     private static int v2TokenUsage(EmbedV2Response response) {
-        if (response.getMeta() != null
-                && response.getMeta().getBilledUnits() != null
-                && response.getMeta().getBilledUnits().getInputTokens() != null) {
+        if (response.getMeta() != null && response.getMeta().getBilledUnits() != null && response.getMeta().getBilledUnits().getInputTokens() != null) {
             return response.getMeta().getBilledUnits().getInputTokens();
         }
         return 0;
     }
 
     private Response<List<Embedding>> embedTexts(List<String> texts) {
-
-        List<Embedding> embeddings = new ArrayList<>();
+        ArrayList<Embedding> embeddings = new ArrayList<Embedding>();
         Integer totalTokenUsage = 0;
-
-        for (int i = 0; i < texts.size(); i += maxSegmentsPerBatch) {
-
-            List<String> batch = texts.subList(i, Math.min(i + maxSegmentsPerBatch, texts.size()));
-
-            EmbedRequest request = EmbedRequest.builder()
-                    .texts(batch)
-                    .inputType(inputType)
-                    .model(modelName)
-                    .build();
-
-            EmbedResponse response = mappingException(() -> this.client.embed(request));
-
-            embeddings.addAll(getEmbeddings(response));
-            totalTokenUsage += getTokenUsage(response);
+        for (int i = 0; i < texts.size(); i += this.maxSegmentsPerBatch) {
+            List<String> batch = texts.subList(i, Math.min(i + this.maxSegmentsPerBatch, texts.size()));
+            EmbedRequest request = EmbedRequest.builder().texts(batch).inputType(this.inputType).model(this.modelName).build();
+            EmbedResponse response = (EmbedResponse)ExceptionMapper.mappingException(() -> this.client.embed(request));
+            embeddings.addAll(CohereEmbeddingModel.getEmbeddings(response));
+            totalTokenUsage = totalTokenUsage + CohereEmbeddingModel.getTokenUsage(response);
         }
-
-        return Response.from(embeddings, new TokenUsage(totalTokenUsage, 0));
+        return Response.from(embeddings, (TokenUsage)new TokenUsage(totalTokenUsage, Integer.valueOf(0)));
     }
 
     private static List<Embedding> getEmbeddings(EmbedResponse response) {
-        return stream(response.getEmbeddings()).map(Embedding::from).collect(toList());
+        return Arrays.stream(response.getEmbeddings()).map(Embedding::from).collect(Collectors.toList());
     }
 
     private static Integer getTokenUsage(EmbedResponse response) {
-        if (response.getMeta() != null
-                && response.getMeta().getBilledUnits() != null
-                && response.getMeta().getBilledUnits().getInputTokens() != null) {
+        if (response.getMeta() != null && response.getMeta().getBilledUnits() != null && response.getMeta().getBilledUnits().getInputTokens() != null) {
             return response.getMeta().getBilledUnits().getInputTokens();
         }
         return 0;
@@ -299,15 +249,9 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         private Integer maxSegmentsPerBatch;
         private List<EmbeddingModelListener> listeners;
 
-        CohereEmbeddingModelBuilder() {}
+        CohereEmbeddingModelBuilder() {
+        }
 
-        /**
-         * Sets a custom HTTP client builder, allowing fine-grained control over the HTTP client
-         * configuration such as timeouts and proxy settings.
-         *
-         * @param httpClientBuilder the HTTP client builder
-         * @return {@code this}
-         */
         public CohereEmbeddingModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -323,12 +267,6 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
             return this;
         }
 
-        /**
-         * Base URL of Cohere's v2 embed endpoint, used by {@link #embed(EmbeddingRequest)} (the multimodal
-         * Embed v4 path). Defaults to {@link #baseUrl(String)} with {@code /v1} replaced by {@code /v2}. Set this
-         * explicitly when using a custom {@link #baseUrl(String)} from which the {@code /v2} URL cannot be derived
-         * (for example a proxy whose path does not contain {@code /v1}).
-         */
         public CohereEmbeddingModelBuilder v2BaseUrl(String v2BaseUrl) {
             this.v2BaseUrl = v2BaseUrl;
             return this;
@@ -364,10 +302,6 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public CohereEmbeddingModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
@@ -383,11 +317,8 @@ public class CohereEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
 
         public String toString() {
-            return "CohereEmbeddingModel.CohereEmbeddingModelBuilder(baseUrl=" + this.baseUrl + ", apiKey="
-                    + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", inputType="
-                    + this.inputType + ", timeout=" + this.timeout + ", logRequests=" + this.logRequests
-                    + ", logResponses=" + this.logResponses + ", maxSegmentsPerBatch=" + this.maxSegmentsPerBatch
-                    + ")";
+            return "CohereEmbeddingModel.CohereEmbeddingModelBuilder(baseUrl=" + this.baseUrl + ", apiKey=" + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", inputType=" + this.inputType + ", timeout=" + this.timeout + ", logRequests=" + this.logRequests + ", logResponses=" + this.logResponses + ", maxSegmentsPerBatch=" + this.maxSegmentsPerBatch + ")";
         }
     }
 }
+

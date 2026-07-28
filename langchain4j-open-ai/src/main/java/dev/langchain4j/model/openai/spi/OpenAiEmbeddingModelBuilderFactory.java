@@ -1,13 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.model.openai.spi;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
-
 import java.util.function.Supplier;
 
-/**
- * A factory for building {@link dev.langchain4j.model.openai.OpenAiEmbeddingModel.OpenAiEmbeddingModelBuilder} instances.
- */
 @Internal
-public interface OpenAiEmbeddingModelBuilderFactory extends Supplier<OpenAiEmbeddingModel.OpenAiEmbeddingModelBuilder> {
+public interface OpenAiEmbeddingModelBuilderFactory
+extends Supplier<OpenAiEmbeddingModel.OpenAiEmbeddingModelBuilder> {
 }
+

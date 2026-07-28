@@ -1,13 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonValue
+ */
 package dev.langchain4j.model.ovhai.internal.api;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import java.util.List;
 
-/**
- * @deprecated use {@code EmbeddingRequest} from {@code langchain4j-open-ai} module instead
- */
-@Deprecated(forRemoval = true, since = "1.14.0")
+@Deprecated
 public class EmbeddingRequest {
     @JsonValue
     private List<String> input;
@@ -31,26 +33,31 @@ public class EmbeddingRequest {
         this.input = input;
     }
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof EmbeddingRequest)) return false;
-        final EmbeddingRequest other = (EmbeddingRequest) o;
-        if (!other.canEqual((Object) this)) return false;
-        final Object this$input = this.getInput();
-        final Object other$input = other.getInput();
-        if (this$input == null ? other$input != null : !this$input.equals(other$input)) return false;
-        return true;
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof EmbeddingRequest)) {
+            return false;
+        }
+        EmbeddingRequest other = (EmbeddingRequest)o;
+        if (!other.canEqual(this)) {
+            return false;
+        }
+        List<String> this$input = this.getInput();
+        List<String> other$input = other.getInput();
+        return !(this$input == null ? other$input != null : !((Object)this$input).equals(other$input));
     }
 
-    protected boolean canEqual(final Object other) {
+    protected boolean canEqual(Object other) {
         return other instanceof EmbeddingRequest;
     }
 
     public int hashCode() {
-        final int PRIME = 59;
+        int PRIME = 59;
         int result = 1;
-        final Object $input = this.getInput();
-        result = result * PRIME + ($input == null ? 43 : $input.hashCode());
+        List<String> $input = this.getInput();
+        result = result * 59 + ($input == null ? 43 : ((Object)$input).hashCode());
         return result;
     }
 
@@ -78,3 +85,4 @@ public class EmbeddingRequest {
         }
     }
 }
+

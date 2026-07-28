@@ -1,7 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  co.elastic.clients.elasticsearch.ElasticsearchClient
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.model.embedding.EmbeddingModel
+ *  dev.langchain4j.rag.content.Content
+ *  dev.langchain4j.rag.content.ContentMetadata
+ *  dev.langchain4j.rag.content.retriever.ContentRetriever
+ *  dev.langchain4j.rag.query.Query
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  org.elasticsearch.client.RestClient
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.rag.content.retriever.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -16,58 +34,24 @@ import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchConfiguration;
 import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchConfigurationFullText;
 import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchConfigurationHybrid;
 import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchConfigurationKnn;
-import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchConfigurationScript;
 import dev.langchain4j.store.embedding.filter.Filter;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Represents an <a href="https://www.elastic.co/">Elasticsearch</a> index as a {@link ContentRetriever}.
- * @see ElasticsearchConfigurationScript for the exact brute force implementation (slower - 100% accurate)
- * @see ElasticsearchConfigurationKnn for the knn search implementation (faster - approximative)
- * @see ElasticsearchConfigurationFullText for full text search (non vector)
- * @see ElasticsearchConfigurationHybrid for hybrid search (semantic and text search combined)
- * <br>
- * Supports storing {@link Metadata} and filtering by it using {@link Filter}
- * (provided inside {@link EmbeddingSearchRequest}).
- */
-public class ElasticsearchContentRetriever extends AbstractElasticsearchEmbeddingStore implements ContentRetriever {
-
+public class ElasticsearchContentRetriever
+extends AbstractElasticsearchEmbeddingStore
+implements ContentRetriever {
     private static final Logger log = LoggerFactory.getLogger(ElasticsearchContentRetriever.class);
     private final EmbeddingModel embeddingModel;
     private final int maxResults;
     private final double minScore;
     private final Filter filter;
 
-    /**
-     * Creates an instance of ElasticsearchContentRetriever using a RestClient.
-     *
-     * @param configuration  Elasticsearch retriever configuration to use (knn, script, full text, hybrid, hybrid with reranker)
-     * @param restClient     Elasticsearch Rest Client (mandatory)
-     * @param indexName      Elasticsearch index name (optional). Default value: "default".
-     *                       Index will be created automatically if not exists.
-     * @param embeddingModel Embedding model to be used by the retriever
-     * @param maxResults     Maximum number of results to retrieve
-     * @param minScore       Minimum score threshold for retrieved results
-     * @param filter         Filter to apply during retrieval
-     * @deprecated Use {@link #ElasticsearchContentRetriever(ElasticsearchConfiguration, ElasticsearchClient, String, EmbeddingModel, int, double, Filter)} instead.
-     */
-    // TODO Remove this method and the import of elasticsearch-rest-client in pom.xml
-    @Deprecated(forRemoval = true)
-    public ElasticsearchContentRetriever(
-            ElasticsearchConfiguration configuration,
-            RestClient restClient,
-            String indexName,
-            EmbeddingModel embeddingModel,
-            final int maxResults,
-            final double minScore,
-            final Filter filter) {
+    @Deprecated(forRemoval=true)
+    public ElasticsearchContentRetriever(ElasticsearchConfiguration configuration, RestClient restClient, String indexName, EmbeddingModel embeddingModel, int maxResults, double minScore, Filter filter) {
         this.embeddingModel = embeddingModel;
         this.maxResults = maxResults;
         this.minScore = minScore;
@@ -75,26 +59,7 @@ public class ElasticsearchContentRetriever extends AbstractElasticsearchEmbeddin
         this.initialize(configuration, restClient, indexName);
     }
 
-    /**
-     * Creates an instance of ElasticsearchContentRetriever using an ElasticsearchClient.
-     *
-     * @param configuration  Elasticsearch retriever configuration to use (knn, script, full text, hybrid, hybrid with reranker)
-     * @param client         Elasticsearch Client (mandatory)
-     * @param indexName      Elasticsearch index name (optional). Default value: "default".
-     *                       Index will be created automatically if not exists.
-     * @param embeddingModel Embedding model to be used by the retriever
-     * @param maxResults     Maximum number of results to retrieve
-     * @param minScore       Minimum score threshold for retrieved results
-     * @param filter         Filter to apply during retrieval
-     */
-    public ElasticsearchContentRetriever(
-            ElasticsearchConfiguration configuration,
-            ElasticsearchClient client,
-            String indexName,
-            EmbeddingModel embeddingModel,
-            final int maxResults,
-            final double minScore,
-            final Filter filter) {
+    public ElasticsearchContentRetriever(ElasticsearchConfiguration configuration, ElasticsearchClient client, String indexName, EmbeddingModel embeddingModel, int maxResults, double minScore, Filter filter) {
         this.embeddingModel = embeddingModel;
         this.maxResults = maxResults;
         this.minScore = minScore;
@@ -102,45 +67,22 @@ public class ElasticsearchContentRetriever extends AbstractElasticsearchEmbeddin
         this.initialize(configuration, client, indexName);
     }
 
-    @Override
-    public List<Content> retrieve(final Query query) {
-        if (configuration instanceof ElasticsearchConfigurationFullText) {
+    public List<Content> retrieve(Query query) {
+        if (this.configuration instanceof ElasticsearchConfigurationFullText) {
             log.debug("Using a full text search query");
-            return this.fullTextSearch(query.text()).stream()
-                    .map(t -> Content.from(
-                            t,
-                            Collections.unmodifiableMap(new HashMap<>() {{
-    put(ContentMetadata.SCORE, t.metadata().getDouble(ContentMetadata.SCORE.name()));
-    put(ContentMetadata.EMBEDDING_ID, t.metadata().getString(ContentMetadata.EMBEDDING_ID.name()));
-}})))
-                    .collect(Collectors.toList());
+            return this.fullTextSearch(query.text()).stream().map(t -> Content.from((TextSegment)t, (Map)Map.of((Object)ContentMetadata.SCORE, (Object)t.metadata().getDouble(ContentMetadata.SCORE.name()), (Object)ContentMetadata.EMBEDDING_ID, (Object)t.metadata().getString(ContentMetadata.EMBEDDING_ID.name())))).toList();
         }
-        Embedding referenceEmbedding = embeddingModel.embed(query.text()).content();
-        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                .queryEmbedding(referenceEmbedding)
-                .maxResults(maxResults)
-                .minScore(minScore)
-                .filter(filter)
-                .build();
-
-        if (configuration instanceof ElasticsearchConfigurationHybrid) {
-            return mapResultsToContentList(this.hybridSearch(request, query.text()));
+        Embedding referenceEmbedding = (Embedding)this.embeddingModel.embed(query.text()).content();
+        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder().queryEmbedding(referenceEmbedding).maxResults(Integer.valueOf(this.maxResults)).minScore(Double.valueOf(this.minScore)).filter(this.filter).build();
+        if (this.configuration instanceof ElasticsearchConfigurationHybrid) {
+            return this.mapResultsToContentList(this.hybridSearch(request, query.text()));
         }
-
-        return mapResultsToContentList(this.search(request));
+        return this.mapResultsToContentList(this.search(request));
     }
 
     private List<Content> mapResultsToContentList(EmbeddingSearchResult<TextSegment> searchResult) {
-        List<Content> result = searchResult.matches().stream()
-                .filter(f -> f.score() >= minScore)
-                .map(m -> Content.from(
-                        m.embedded(),
-                        Collections.unmodifiableMap(new HashMap<>() {{
-    put(ContentMetadata.SCORE, m.score());
-    put(ContentMetadata.EMBEDDING_ID, m.embeddingId());
-}})))
-                .collect(Collectors.toList());
-        log.debug("Found [{}] relevant documents in Elasticsearch index [{}].", result.size(), indexName);
+        List result = searchResult.matches().stream().filter(f -> f.score() >= this.minScore).map(m -> Content.from((TextSegment)((TextSegment)m.embedded()), (Map)Map.of((Object)ContentMetadata.SCORE, (Object)m.score(), (Object)ContentMetadata.EMBEDDING_ID, (Object)m.embeddingId()))).toList();
+        log.debug("Found [{}] relevant documents in Elasticsearch index [{}].", (Object)result.size(), (Object)this.indexName);
         return result;
     }
 
@@ -149,50 +91,31 @@ public class ElasticsearchContentRetriever extends AbstractElasticsearchEmbeddin
     }
 
     public static class Builder {
-
         private RestClient restClient;
         private ElasticsearchClient client;
         private String indexName = "default";
-        private ElasticsearchConfiguration configuration =
-                ElasticsearchConfigurationKnn.builder().build();
+        private ElasticsearchConfiguration configuration = ElasticsearchConfigurationKnn.builder().build();
         private EmbeddingModel embeddingModel;
         private int maxResults;
         private double minScore;
         private Filter filter;
 
-        /**
-         * @param restClient Elasticsearch RestClient.
-         * @return builder
-         * @deprecated Use {@link #client(ElasticsearchClient)} instead.
-         */
-        @Deprecated(forRemoval = true)
+        @Deprecated(forRemoval=true)
         public Builder restClient(RestClient restClient) {
             this.restClient = restClient;
             return this;
         }
 
-        /**
-         * @param client Elasticsearch Client.
-         * @return builder
-         */
         public Builder client(ElasticsearchClient client) {
             this.client = client;
             return this;
         }
 
-        /**
-         * @param indexName Elasticsearch index name (optional). Default value: "default".
-         * @return builder
-         */
         public Builder indexName(String indexName) {
             this.indexName = indexName;
             return this;
         }
 
-        /**
-         * @param configuration the configuration to use
-         * @return builder
-         */
         public Builder configuration(ElasticsearchConfiguration configuration) {
             this.configuration = configuration;
             return this;
@@ -219,14 +142,12 @@ public class ElasticsearchContentRetriever extends AbstractElasticsearchEmbeddin
         }
 
         public ElasticsearchContentRetriever build() {
-            if (client != null) {
-                return new ElasticsearchContentRetriever(
-                        configuration, client, indexName, embeddingModel, maxResults, minScore, filter);
+            if (this.client != null) {
+                return new ElasticsearchContentRetriever(this.configuration, this.client, this.indexName, this.embeddingModel, this.maxResults, this.minScore, this.filter);
             }
-            log.warn(
-                    "Using RestClient is deprecated and will be removed in future versions. Please use Elasticsearch Client instead (see client() method).");
-            return new ElasticsearchContentRetriever(
-                    configuration, restClient, indexName, embeddingModel, maxResults, minScore, filter);
+            log.warn("Using RestClient is deprecated and will be removed in future versions. Please use Elasticsearch Client instead (see client() method).");
+            return new ElasticsearchContentRetriever(this.configuration, this.restClient, this.indexName, this.embeddingModel, this.maxResults, this.minScore, this.filter);
         }
     }
 }
+

@@ -1,31 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
+import dev.langchain4j.mcp.registryclient.model.McpHeader;
 import java.util.List;
 
 public class McpRemote {
-
     private List<McpHeader> headers;
     private String type;
     private String url;
 
     public List<McpHeader> getHeaders() {
-        return headers;
+        return this.headers;
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public String getUrl() {
-        return url;
+        return this.url;
     }
 
-    @Override
     public String toString() {
-        return "McpRemote{" +
-                "headers=" + headers +
-                ", type='" + type + '\'' +
-                ", url='" + url + '\'' +
-                '}';
+        return "McpRemote{headers=" + this.headers + ", type='" + this.type + '\'' + ", url='" + this.url + '\'' + '}';
     }
 }
+

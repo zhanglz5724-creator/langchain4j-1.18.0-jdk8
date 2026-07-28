@@ -1,3 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agentic.UntypedAgent
+ *  dev.langchain4j.agentic.agent.MissingArgumentException
+ *  dev.langchain4j.agentic.internal.AgentInvocationArguments
+ *  dev.langchain4j.agentic.internal.AgentInvoker
+ *  dev.langchain4j.agentic.internal.InternalAgent
+ *  dev.langchain4j.agentic.observability.AgentListener
+ *  dev.langchain4j.agentic.planner.AgentArgument
+ *  dev.langchain4j.agentic.planner.AgentInstance
+ *  dev.langchain4j.agentic.planner.AgenticSystemTopology
+ *  dev.langchain4j.agentic.planner.Planner
+ *  dev.langchain4j.agentic.scope.AgenticScope
+ */
 package dev.langchain4j.agentic.mcp;
 
 import dev.langchain4j.agentic.UntypedAgent;
@@ -5,6 +21,7 @@ import dev.langchain4j.agentic.agent.MissingArgumentException;
 import dev.langchain4j.agentic.internal.AgentInvocationArguments;
 import dev.langchain4j.agentic.internal.AgentInvoker;
 import dev.langchain4j.agentic.internal.InternalAgent;
+import dev.langchain4j.agentic.mcp.McpClientInstance;
 import dev.langchain4j.agentic.observability.AgentListener;
 import dev.langchain4j.agentic.planner.AgentArgument;
 import dev.langchain4j.agentic.planner.AgentInstance;
@@ -15,22 +32,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
-public class McpClientAgentInvoker implements AgentInvoker {
-
+public class McpClientAgentInvoker
+implements AgentInvoker {
     private String agentId;
     private final String[] inputKeys;
-
     private final McpClientInstance mcpClientInstance;
-
     private final String toolName;
     private final String toolDescription;
     private final Method method;
-
     private InternalAgent parent;
 
     public McpClientAgentInvoker(McpClientInstance mcpClientInstance, Method method) {
@@ -38,88 +49,67 @@ public class McpClientAgentInvoker implements AgentInvoker {
         this.mcpClientInstance = mcpClientInstance;
         this.toolName = mcpClientInstance.toolName();
         this.toolDescription = mcpClientInstance.toolDescription();
-        this.agentId = name();
-        this.inputKeys = inputKeys(mcpClientInstance);
+        this.agentId = this.name();
+        this.inputKeys = this.inputKeys(mcpClientInstance);
     }
 
     private String[] inputKeys(McpClientInstance mcpClientInstance) {
-        return isUntyped()
-                ? mcpClientInstance.inputKeys()
-                : Stream.of(method.getParameters())
-                        .map(AgentInvoker::parameterName)
-                        .toArray(String[]::new);
+        return this.isUntyped() ? mcpClientInstance.inputKeys() : (String[])Stream.of(this.method.getParameters()).map(AgentInvoker::parameterName).toArray(String[]::new);
     }
 
-    @Override
     public String name() {
-        return toolName;
+        return this.toolName;
     }
 
-    @Override
     public String agentId() {
-        return agentId;
+        return this.agentId;
     }
 
-    @Override
     public String description() {
-        return toolDescription;
+        return this.toolDescription;
     }
 
-    @Override
     public Class<?> type() {
         return Object.class;
     }
 
-    @Override
     public Class<? extends Planner> plannerType() {
         return null;
     }
 
-    @Override
     public Type outputType() {
         return Object.class;
     }
 
-    @Override
     public String outputKey() {
-        return mcpClientInstance.outputKey();
+        return this.mcpClientInstance.outputKey();
     }
 
-    @Override
     public boolean async() {
-        return mcpClientInstance.async();
+        return this.mcpClientInstance.async();
     }
 
-    @Override
     public Method method() {
-        return method;
+        return this.method;
     }
 
-    @Override
     public List<AgentArgument> arguments() {
-        return Stream.of(inputKeys)
-                .map(input -> new AgentArgument(Object.class, input))
-                .collect(Collectors.toList());
+        return Stream.of(this.inputKeys).map(input -> new AgentArgument(Object.class, input)).toList();
     }
 
-    @Override
     public List<AgentInstance> subagents() {
-        return Collections.emptyList();
+        return List.of();
     }
 
-    @Override
     public AgentInvocationArguments toInvocationArguments(AgenticScope agenticScope) {
-        return isUntyped()
-                ? new AgentInvocationArguments(agenticScope.state(), new Object[] {agenticScope.state()})
-                : agentInvocationArguments(agenticScope);
+        return this.isUntyped() ? new AgentInvocationArguments(agenticScope.state(), new Object[]{agenticScope.state()}) : this.agentInvocationArguments(agenticScope);
     }
 
     private AgentInvocationArguments agentInvocationArguments(AgenticScope agenticScope) {
-        Map<String, Object> namedArgs = new HashMap<>();
-        Object[] positionalArgs = new Object[inputKeys.length];
-
+        HashMap<String, Object> namedArgs = new HashMap<String, Object>();
+        Object[] positionalArgs = new Object[this.inputKeys.length];
         int i = 0;
-        for (String argName : inputKeys) {
+        for (String argName : this.inputKeys) {
             Object argValue = agenticScope.readState(argName);
             if (argValue == null) {
                 throw new MissingArgumentException(argName);
@@ -131,36 +121,31 @@ public class McpClientAgentInvoker implements AgentInvoker {
     }
 
     private boolean isUntyped() {
-        return method.getDeclaringClass() == UntypedAgent.class;
+        return this.method.getDeclaringClass() == UntypedAgent.class;
     }
 
-    @Override
     public AgentListener listener() {
-        return mcpClientInstance.listener();
+        return this.mcpClientInstance.listener();
     }
 
-    @Override
     public AgenticSystemTopology topology() {
-        return mcpClientInstance.topology();
+        return this.mcpClientInstance.topology();
     }
 
-    @Override
     public AgentInstance parent() {
-        return parent;
+        return this.parent;
     }
 
-    @Override
     public void setParent(InternalAgent parent) {
         this.parent = parent;
     }
 
-    @Override
     public void registerInheritedParentListener(AgentListener parentListener) {
-        mcpClientInstance.registerInheritedParentListener(parentListener);
+        this.mcpClientInstance.registerInheritedParentListener(parentListener);
     }
 
-    @Override
     public void appendId(String idSuffix) {
         this.agentId = this.agentId + idSuffix;
     }
 }
+

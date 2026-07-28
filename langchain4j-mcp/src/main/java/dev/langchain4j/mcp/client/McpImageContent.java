@@ -1,65 +1,67 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ImageContent
+ */
 package dev.langchain4j.mcp.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
-
+import dev.langchain4j.mcp.client.McpPromptContent;
 import java.util.Objects;
 
-/**
- * The 'ImageContent' object from the MCP protocol schema.
- */
-public final class McpImageContent implements McpPromptContent {
-
+public final class McpImageContent
+implements McpPromptContent {
     private final String data;
     private final String mimeType;
 
     @JsonCreator
-    public McpImageContent(
-            @JsonProperty("data") String data,
-            @JsonProperty("mimeType") String mimeType
-    ) {
+    public McpImageContent(@JsonProperty(value="data") String data, @JsonProperty(value="mimeType") String mimeType) {
         this.data = data;
         this.mimeType = mimeType;
     }
 
     @Override
-    public Type type() {
-        return Type.IMAGE;
+    public McpPromptContent.Type type() {
+        return McpPromptContent.Type.IMAGE;
     }
 
     @Override
     public Content toContent() {
-        return ImageContent.from(data, mimeType);
+        return ImageContent.from((String)this.data, (String)this.mimeType);
     }
 
     public String data() {
-        return data;
+        return this.data;
     }
 
     public String mimeType() {
-        return mimeType;
+        return this.mimeType;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        McpImageContent that = (McpImageContent) obj;
-        return Objects.equals(this.data, that.data) &&
-                Objects.equals(this.mimeType, that.mimeType);
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        McpImageContent that = (McpImageContent)obj;
+        return Objects.equals(this.data, that.data) && Objects.equals(this.mimeType, that.mimeType);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(data, mimeType);
+        return Objects.hash(this.data, this.mimeType);
     }
 
-    @Override
     public String toString() {
-        return "McpImageContent[" +
-                "data=" + data + ", " +
-                "mimeType=" + mimeType + ']';
+        return "McpImageContent[data=" + this.data + ", mimeType=" + this.mimeType + ']';
     }
 }
+

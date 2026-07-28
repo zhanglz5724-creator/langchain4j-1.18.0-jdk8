@@ -1,78 +1,84 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpClientParams;
+import dev.langchain4j.mcp.protocol.McpImplementation;
 
-/**
- * Corresponds to the {@code params} of the {@code InitializeRequest} type from the MCP schema.
- */
 @Internal
-public class McpInitializeParams extends McpClientParams {
-
+public class McpInitializeParams
+extends McpClientParams {
     private String protocolVersion;
     private Capabilities capabilities;
     private McpImplementation clientInfo;
 
     public String getProtocolVersion() {
-        return protocolVersion;
+        return this.protocolVersion;
     }
 
-    public void setProtocolVersion(final String protocolVersion) {
+    public void setProtocolVersion(String protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 
     public Capabilities getCapabilities() {
-        return capabilities;
+        return this.capabilities;
     }
 
-    public void setCapabilities(final Capabilities capabilities) {
+    public void setCapabilities(Capabilities capabilities) {
         this.capabilities = capabilities;
     }
 
     public McpImplementation getClientInfo() {
-        return clientInfo;
+        return this.clientInfo;
     }
 
-    public void setClientInfo(final McpImplementation clientInfo) {
+    public void setClientInfo(McpImplementation clientInfo) {
         this.clientInfo = clientInfo;
     }
 
     public static class Capabilities {
-
         private Roots roots;
-
-        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @JsonInclude(value=JsonInclude.Include.NON_NULL)
         private Sampling sampling;
 
         public Roots getRoots() {
-            return roots;
+            return this.roots;
         }
 
-        public void setRoots(final Roots roots) {
+        public void setRoots(Roots roots) {
             this.roots = roots;
         }
 
         public Sampling getSampling() {
-            return sampling;
+            return this.sampling;
         }
 
-        public void setSampling(final Sampling sampling) {
+        public void setSampling(Sampling sampling) {
             this.sampling = sampling;
         }
 
-        public static class Roots {
+        public static class Sampling {
+        }
 
+        public static class Roots {
             private boolean listChanged;
 
             public boolean isListChanged() {
-                return listChanged;
+                return this.listChanged;
             }
 
-            public void setListChanged(final boolean listChanged) {
+            public void setListChanged(boolean listChanged) {
                 this.listChanged = listChanged;
             }
         }
-
-        public static class Sampling {}
     }
 }
+

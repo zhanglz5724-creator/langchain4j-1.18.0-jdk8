@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.store.embedding.chroma;
 
 import dev.langchain4j.Internal;
@@ -7,7 +13,6 @@ import java.util.Map;
 
 @Internal
 class AddEmbeddingsRequest {
-
     private final List<String> ids;
     private final List<float[]> embeddings;
     private final List<String> documents;
@@ -21,19 +26,19 @@ class AddEmbeddingsRequest {
     }
 
     public List<String> getIds() {
-        return ids;
+        return this.ids;
     }
 
     public List<float[]> getEmbeddings() {
-        return embeddings;
+        return this.embeddings;
     }
 
     public List<String> getDocuments() {
-        return documents;
+        return this.documents;
     }
 
     public List<Map<String, Object>> getMetadatas() {
-        return metadatas;
+        return this.metadatas;
     }
 
     public static Builder builder() {
@@ -41,11 +46,10 @@ class AddEmbeddingsRequest {
     }
 
     public static class Builder {
-
-        private List<String> ids = new ArrayList<>();
-        private List<float[]> embeddings = new ArrayList<>();
-        private List<String> documents = new ArrayList<>();
-        private List<Map<String, Object>> metadatas = new ArrayList<>();
+        private List<String> ids = new ArrayList<String>();
+        private List<float[]> embeddings = new ArrayList<float[]>();
+        private List<String> documents = new ArrayList<String>();
+        private List<Map<String, Object>> metadatas = new ArrayList<Map<String, Object>>();
 
         public Builder ids(List<String> ids) {
             if (ids != null) {
@@ -80,3 +84,4 @@ class AddEmbeddingsRequest {
         }
     }
 }
+

@@ -1,21 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.node.ObjectNode
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpClientParams;
 
-/**
- * Corresponds to the {@code params} of the {@code CallToolRequest} type from the MCP schema.
- */
 @Internal
-public class McpCallToolParams extends McpClientParams {
-
+public class McpCallToolParams
+extends McpClientParams {
     private String name;
-
-    @JsonInclude(JsonInclude.Include.ALWAYS)
+    @JsonInclude(value=JsonInclude.Include.ALWAYS)
     private ObjectNode arguments;
 
-    public McpCallToolParams() {}
+    public McpCallToolParams() {
+    }
 
     public McpCallToolParams(String name, ObjectNode arguments) {
         this.name = name;
@@ -23,7 +30,7 @@ public class McpCallToolParams extends McpClientParams {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -31,10 +38,11 @@ public class McpCallToolParams extends McpClientParams {
     }
 
     public ObjectNode getArguments() {
-        return arguments;
+        return this.arguments;
     }
 
     public void setArguments(ObjectNode arguments) {
         this.arguments = arguments;
     }
 }
+

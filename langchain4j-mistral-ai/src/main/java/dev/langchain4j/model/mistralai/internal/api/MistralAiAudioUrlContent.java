@@ -1,19 +1,29 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import static dev.langchain4j.internal.Utils.quoted;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiMessageContent;
 import java.util.Objects;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class MistralAiAudioUrlContent extends MistralAiMessageContent {
-
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class MistralAiAudioUrlContent
+extends MistralAiMessageContent {
     public String inputAudio;
 
     public MistralAiAudioUrlContent(String inputAudio) {
@@ -23,19 +33,23 @@ public class MistralAiAudioUrlContent extends MistralAiMessageContent {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        MistralAiAudioUrlContent that = (MistralAiAudioUrlContent) o;
-        return inputAudio.equals(that.inputAudio);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        MistralAiAudioUrlContent that = (MistralAiAudioUrlContent)o;
+        return this.inputAudio.equals(that.inputAudio);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), inputAudio);
+        return Objects.hash(super.hashCode(), this.inputAudio);
     }
 
-    @Override
     public String toString() {
-        return "MistralAiAudioUrlContent{" + "inputAudio=" + inputAudio + ", type=" + quoted(type) + '}';
+        return "MistralAiAudioUrlContent{inputAudio=" + this.inputAudio + ", type=" + Utils.quoted((Object)this.type) + '}';
     }
 }
+

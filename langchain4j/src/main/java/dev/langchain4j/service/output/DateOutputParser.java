@@ -1,17 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.service.output;
 
 import dev.langchain4j.Internal;
-
+import dev.langchain4j.service.output.OutputParser;
+import dev.langchain4j.service.output.OutputParsingException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Internal
-class DateOutputParser implements OutputParser<Date> {
-
+class DateOutputParser
+implements OutputParser<Date> {
     private static final String DATE_PATTERN = "yyyy-MM-dd";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+
+    DateOutputParser() {
+    }
 
     @Override
     public Date parse(String string) {
@@ -21,7 +31,8 @@ class DateOutputParser implements OutputParser<Date> {
         try {
             LocalDate localDate = LocalDate.parse(string.trim(), FORMATTER);
             return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new OutputParsingException(String.format("Cannot parse '%s' into java.util.Date", string), e);
         }
     }
@@ -31,3 +42,4 @@ class DateOutputParser implements OutputParser<Date> {
         return DATE_PATTERN;
     }
 }
+

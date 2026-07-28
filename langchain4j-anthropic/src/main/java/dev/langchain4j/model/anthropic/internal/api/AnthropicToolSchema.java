@@ -1,37 +1,40 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicToolSchema {
-
     public String type = "object";
-
-    @JsonProperty("additionalProperties")
+    @JsonProperty(value="additionalProperties")
     public Boolean additionalProperties;
-
     public Map<String, Map<String, Object>> properties;
     public List<String> required;
-
-    @JsonProperty("$defs")
+    @JsonProperty(value="$defs")
     public Map<String, Map<String, Object>> defs;
 
-    public AnthropicToolSchema() {}
+    public AnthropicToolSchema() {
+    }
 
-    /**
-     * @deprecated please use {@link #AnthropicToolSchema(Builder)} instead
-     */
     @Deprecated
     public AnthropicToolSchema(String type, Map<String, Map<String, Object>> properties, List<String> required) {
         this.type = type;
@@ -47,31 +50,20 @@ public class AnthropicToolSchema {
         this.defs = builder.defs;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        AnthropicToolSchema that = (AnthropicToolSchema) o;
-        return Objects.equals(type, that.type)
-                && Objects.equals(additionalProperties, that.additionalProperties)
-                && Objects.equals(properties, that.properties)
-                && Objects.equals(required, that.required)
-                && Objects.equals(defs, that.defs);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        AnthropicToolSchema that = (AnthropicToolSchema)o;
+        return Objects.equals(this.type, that.type) && Objects.equals(this.additionalProperties, that.additionalProperties) && Objects.equals(this.properties, that.properties) && Objects.equals(this.required, that.required) && Objects.equals(this.defs, that.defs);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(type, additionalProperties, properties, required, defs);
+        return Objects.hash(this.type, this.additionalProperties, this.properties, this.required, this.defs);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicToolSchema{"
-                + "type='" + type + '\''
-                + ", additionalProperties=" + additionalProperties
-                + ", properties=" + properties
-                + ", required=" + required
-                + ", defs=" + defs
-                + '}';
+        return "AnthropicToolSchema{type='" + this.type + '\'' + ", additionalProperties=" + this.additionalProperties + ", properties=" + this.properties + ", required=" + this.required + ", defs=" + this.defs + '}';
     }
 
     public static Builder builder() {
@@ -79,7 +71,6 @@ public class AnthropicToolSchema {
     }
 
     public static class Builder {
-
         private String type = "object";
         private Boolean additionalProperties;
         private Map<String, Map<String, Object>> properties;
@@ -116,3 +107,4 @@ public class AnthropicToolSchema {
         }
     }
 }
+

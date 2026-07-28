@@ -1,24 +1,51 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.azure.AzureOpenAIServiceVersion
+ *  com.openai.client.OpenAIClient
+ *  com.openai.credential.Credential
+ *  com.openai.models.ChatModel
+ *  com.openai.models.chat.completions.ChatCompletion
+ *  com.openai.models.chat.completions.ChatCompletion$Choice
+ *  com.openai.models.chat.completions.ChatCompletion$Choice$FinishReason
+ *  com.openai.models.chat.completions.ChatCompletion$ServiceTier
+ *  com.openai.models.chat.completions.ChatCompletionCreateParams
+ *  com.openai.models.completions.CompletionUsage
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.TokenCountEstimator
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.output.FinishReason
+ */
 package dev.langchain4j.model.openaiofficial;
-
-import static dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper.aiMessageFrom;
-import static dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper.finishReasonFrom;
-import static dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper.toOpenAiChatCompletionCreateParams;
-import static dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper.tokenUsageFrom;
 
 import com.openai.azure.AzureOpenAIServiceVersion;
 import com.openai.client.OpenAIClient;
 import com.openai.credential.Credential;
+import com.openai.models.ChatModel;
 import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.completions.CompletionUsage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.TokenCountEstimator;
 import dev.langchain4j.model.chat.Capability;
-import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
+import dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialBaseChatModel;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialChatRequestParameters;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialChatResponseMetadata;
 import dev.langchain4j.model.output.FinishReason;
 import java.net.Proxy;
 import java.time.Duration;
@@ -26,104 +53,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel implements ChatModel {
-
+public class OpenAiOfficialChatModel
+extends OpenAiOfficialBaseChatModel
+implements dev.langchain4j.model.chat.ChatModel {
     public OpenAiOfficialChatModel(Builder builder) {
-
         this.client = builder.openAIClient;
-        init(
-                builder.baseUrl,
-                builder.apiKey,
-                builder.credential,
-                builder.microsoftFoundryDeploymentName,
-                builder.azureOpenAIServiceVersion,
-                builder.organizationId,
-                builder.isMicrosoftFoundry,
-                builder.isGitHubModels,
-                builder.defaultRequestParameters,
-                builder.modelName,
-                builder.temperature,
-                builder.topP,
-                builder.stop,
-                builder.maxCompletionTokens,
-                builder.presencePenalty,
-                builder.frequencyPenalty,
-                builder.logitBias,
-                builder.responseFormat,
-                builder.strictJsonSchema,
-                builder.seed,
-                builder.user,
-                builder.strictTools,
-                builder.parallelToolCalls,
-                builder.store,
-                builder.metadata,
-                builder.serviceTier,
-                builder.timeout,
-                builder.maxRetries,
-                builder.proxy,
-                builder.tokenCountEstimator,
-                builder.customHeaders,
-                builder.listeners,
-                builder.capabilities,
-                false);
+        this.init(builder.baseUrl, builder.apiKey, builder.credential, builder.microsoftFoundryDeploymentName, builder.azureOpenAIServiceVersion, builder.organizationId, builder.isMicrosoftFoundry, builder.isGitHubModels, builder.defaultRequestParameters, builder.modelName, builder.temperature, builder.topP, builder.stop, builder.maxCompletionTokens, builder.presencePenalty, builder.frequencyPenalty, builder.logitBias, builder.responseFormat, builder.strictJsonSchema, builder.seed, builder.user, builder.strictTools, builder.parallelToolCalls, builder.store, builder.metadata, builder.serviceTier, builder.timeout, builder.maxRetries, builder.proxy, builder.tokenCountEstimator, builder.customHeaders, builder.listeners, builder.capabilities, false);
         this.modelName = builder.modelName;
     }
 
-    @Override
     public ChatResponse doChat(ChatRequest chatRequest) {
-
-        OpenAiOfficialChatRequestParameters parameters = (OpenAiOfficialChatRequestParameters) chatRequest.parameters();
-        InternalOpenAiOfficialHelper.validate(parameters);
-
-        ChatCompletionCreateParams chatCompletionCreateParams = toOpenAiChatCompletionCreateParams(
-                        chatRequest, parameters, strictTools, strictJsonSchema)
-                .build();
-
-        if (modelProvider.equals(ModelProvider.MICROSOFT_FOUNDRY)
-                || modelProvider.equals(ModelProvider.GITHUB_MODELS)) {
-            if (!parameters.modelName().equals(this.modelName)) {
-                // The model name can't be changed in Microsoft Foundry, where it's part of the URL.
-                throw new UnsupportedFeatureException("Modifying the modelName is not supported");
-            }
+        OpenAiOfficialChatRequestParameters parameters = (OpenAiOfficialChatRequestParameters)chatRequest.parameters();
+        InternalOpenAiOfficialHelper.validate((ChatRequestParameters)parameters);
+        ChatCompletionCreateParams chatCompletionCreateParams = InternalOpenAiOfficialHelper.toOpenAiChatCompletionCreateParams(chatRequest, parameters, this.strictTools, this.strictJsonSchema).build();
+        if ((this.modelProvider.equals((Object)ModelProvider.MICROSOFT_FOUNDRY) || this.modelProvider.equals((Object)ModelProvider.GITHUB_MODELS)) && !parameters.modelName().equals(this.modelName)) {
+            throw new UnsupportedFeatureException("Modifying the modelName is not supported");
         }
-
-        // Unlike other LangChain4j modules, this doesn't use the `withRetry` method because the OpenAI SDK already has
-        // retry logic included
-        ChatCompletion chatCompletion = client.chat().completions().create(chatCompletionCreateParams);
-
-        OpenAiOfficialChatResponseMetadata.Builder responseMetadataBuilder =
-                OpenAiOfficialChatResponseMetadata.builder()
-                        .id(chatCompletion.id())
-                        .modelName(chatCompletion.model())
-                        .created(chatCompletion.created());
-
+        ChatCompletion chatCompletion = this.client.chat().completions().create(chatCompletionCreateParams);
+        OpenAiOfficialChatResponseMetadata.Builder responseMetadataBuilder = ((OpenAiOfficialChatResponseMetadata.Builder)((OpenAiOfficialChatResponseMetadata.Builder)OpenAiOfficialChatResponseMetadata.builder().id(chatCompletion.id())).modelName(chatCompletion.model())).created(chatCompletion.created());
         if (!chatCompletion.choices().isEmpty()) {
-            final ChatCompletion.Choice choice = chatCompletion.choices().get(0);
-            responseMetadataBuilder.finishReason(finishReasonFrom(choice.finishReason()));
-
-            if (choice.message().toolCalls().isPresent()
-                    && choice.finishReason().equals(ChatCompletion.Choice.FinishReason.STOP)) {
-                // When a tool is called, OpenAI returns a finish reason of "STOP", instead of "TOOL_CALLS"
+            ChatCompletion.Choice choice = (ChatCompletion.Choice)chatCompletion.choices().get(0);
+            responseMetadataBuilder.finishReason(InternalOpenAiOfficialHelper.finishReasonFrom(choice.finishReason()));
+            if (choice.message().toolCalls().isPresent() && choice.finishReason().equals((Object)ChatCompletion.Choice.FinishReason.STOP)) {
                 responseMetadataBuilder.finishReason(FinishReason.TOOL_EXECUTION);
             }
         }
         if (chatCompletion.usage().isPresent()) {
-            responseMetadataBuilder.tokenUsage(
-                    tokenUsageFrom(chatCompletion.usage().get()));
+            responseMetadataBuilder.tokenUsage(InternalOpenAiOfficialHelper.tokenUsageFrom((CompletionUsage)chatCompletion.usage().get()));
         }
         if (chatCompletion.serviceTier().isPresent()) {
-            responseMetadataBuilder.serviceTier(
-                    chatCompletion.serviceTier().get().toString());
+            responseMetadataBuilder.serviceTier(((ChatCompletion.ServiceTier)chatCompletion.serviceTier().get()).toString());
         }
         if (chatCompletion.systemFingerprint().isPresent()) {
-            responseMetadataBuilder.systemFingerprint(
-                    chatCompletion.systemFingerprint().get());
+            responseMetadataBuilder.systemFingerprint((String)chatCompletion.systemFingerprint().get());
         }
-
-        return ChatResponse.builder()
-                .aiMessage(aiMessageFrom(chatCompletion))
-                .metadata(responseMetadataBuilder.build())
-                .build();
+        return ChatResponse.builder().aiMessage(InternalOpenAiOfficialHelper.aiMessageFrom(chatCompletion)).metadata((ChatResponseMetadata)responseMetadataBuilder.build()).build();
     }
 
     public static Builder builder() {
@@ -131,7 +95,6 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
     }
 
     public static class Builder {
-
         private String baseUrl;
         private String apiKey;
         private Credential credential;
@@ -141,7 +104,6 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
         private boolean isMicrosoftFoundry;
         private boolean isGitHubModels;
         private OpenAIClient openAIClient;
-
         private ChatRequestParameters defaultRequestParameters;
         private String modelName;
         private Double temperature;
@@ -160,7 +122,6 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
         private Boolean store;
         private Map<String, String> metadata;
         private String serviceTier;
-
         private Duration timeout;
         private Integer maxRetries;
         private Proxy proxy;
@@ -169,16 +130,6 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
         private List<ChatModelListener> listeners;
         private Set<Capability> capabilities;
 
-        public Builder() {
-            // This is public so it can be extended
-        }
-
-        /**
-         * Sets default common {@link ChatRequestParameters} or OpenAI-specific {@link OpenAiOfficialChatRequestParameters}.
-         * <br>
-         * When a parameter is set via an individual builder method (e.g., {@link #modelName(String)}),
-         * its value takes precedence over the same parameter set via {@link ChatRequestParameters}.
-         */
         public Builder defaultRequestParameters(ChatRequestParameters parameters) {
             this.defaultRequestParameters = parameters;
             return this;
@@ -189,7 +140,7 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
             return this;
         }
 
-        public Builder modelName(com.openai.models.ChatModel modelName) {
+        public Builder modelName(ChatModel modelName) {
             this.modelName = modelName.toString();
             return this;
         }
@@ -209,9 +160,6 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #microsoftFoundryDeploymentName(String)} instead
-         */
         @Deprecated
         public Builder azureDeploymentName(String azureDeploymentName) {
             this.microsoftFoundryDeploymentName = azureDeploymentName;
@@ -238,9 +186,6 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #isMicrosoftFoundry(boolean)} instead
-         */
         @Deprecated
         public Builder isAzure(boolean isAzure) {
             this.isMicrosoftFoundry = isAzure;
@@ -377,3 +322,4 @@ public class OpenAiOfficialChatModel extends OpenAiOfficialBaseChatModel impleme
         }
     }
 }
+

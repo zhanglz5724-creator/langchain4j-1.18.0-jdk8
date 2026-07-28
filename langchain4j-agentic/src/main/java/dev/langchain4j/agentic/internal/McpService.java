@@ -1,43 +1,33 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.internal;
 
+import dev.langchain4j.agentic.internal.AgentExecutor;
+import dev.langchain4j.agentic.internal.InternalAgent;
+import dev.langchain4j.agentic.internal.McpClientBuilder;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
 public interface McpService {
+    public <T> McpClientBuilder<T> mcpBuilder(Object var1, Class<T> var2);
 
-    <T> McpClientBuilder<T> mcpBuilder(Object mcpClient, Class<T> agentServiceClass);
+    public Optional<AgentExecutor> methodToAgentExecutor(InternalAgent var1, Method var2);
 
-    Optional<AgentExecutor> methodToAgentExecutor(InternalAgent mcpClient, Method method);
-
-    static McpService get() {
+    public static McpService get() {
         return Provider.mcpService;
     }
 
-    class Provider {
-
-        static McpService mcpService = loadMcpService();
-
-        private Provider() { }
-
-        private static McpService loadMcpService() {
-            ServiceLoader<McpService> loader =
-                    ServiceLoader.load(McpService.class);
-
-            for (McpService service : loader) {
-                return service;
-            }
-            return new DummyMcpService();
+    public static class DummyMcpService
+    implements McpService {
+        private DummyMcpService() {
         }
-    }
-
-    class DummyMcpService implements McpService {
-
-        private DummyMcpService() { }
 
         @Override
         public <T> McpClientBuilder<T> mcpBuilder(Object mcpClient, Class<T> agentServiceClass) {
-            throw noMcpException();
+            throw DummyMcpService.noMcpException();
         }
 
         @Override
@@ -46,8 +36,25 @@ public interface McpService {
         }
 
         private static UnsupportedOperationException noMcpException() {
-            return new UnsupportedOperationException(
-                    "No MCP service implementation found. Please add 'langchain4j-agentic-mcp' to your dependencies.");
+            return new UnsupportedOperationException("No MCP service implementation found. Please add 'langchain4j-agentic-mcp' to your dependencies.");
+        }
+    }
+
+    public static class Provider {
+        static McpService mcpService = Provider.loadMcpService();
+
+        private Provider() {
+        }
+
+        private static McpService loadMcpService() {
+            ServiceLoader<McpService> loader = ServiceLoader.load(McpService.class);
+            Iterator<McpService> iterator = loader.iterator();
+            if (iterator.hasNext()) {
+                McpService service = iterator.next();
+                return service;
+            }
+            return new DummyMcpService();
         }
     }
 }
+

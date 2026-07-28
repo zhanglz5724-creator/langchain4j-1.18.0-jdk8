@@ -1,25 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.agent.tool.ReturnBehavior
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.service.tool;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.ToolSpecification;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.service.tool.ToolExecutor;
+import dev.langchain4j.service.tool.ToolProvider;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Collections;
-
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.service.tool.search.ToolSearchStrategy;
-
-import static dev.langchain4j.internal.Utils.copy;
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
 
 @Internal
 public class ToolServiceContext {
-
     private final List<ToolSpecification> effectiveTools;
     private final List<ToolSpecification> availableTools;
     private final Map<String, ToolExecutor> toolExecutors;
@@ -27,176 +32,107 @@ public class ToolServiceContext {
     private final List<ToolProvider> dynamicToolProviders;
 
     public ToolServiceContext(Builder builder) {
-        this.effectiveTools = copy(builder.effectiveTools);
-        this.availableTools = copy(builder.availableTools);
-        this.toolExecutors = copy(builder.toolExecutors);
-        this.returnBehaviors = copy(builder.returnBehaviors);
-        this.dynamicToolProviders = copy(builder.dynamicToolProviders);
+        this.effectiveTools = Utils.copy((List)builder.effectiveTools);
+        this.availableTools = Utils.copy((List)builder.availableTools);
+        this.toolExecutors = Utils.copy((Map)builder.toolExecutors);
+        this.returnBehaviors = Utils.copy((Map)builder.returnBehaviors);
+        this.dynamicToolProviders = Utils.copy((List)builder.dynamicToolProviders);
     }
 
-    /**
-     * @deprecated use {@link #ToolServiceContext(Builder)} instead
-     */
-    @Deprecated(since = "1.12.0")
+    @Deprecated
     public ToolServiceContext(List<ToolSpecification> toolSpecifications, Map<String, ToolExecutor> toolExecutors) {
-        this.effectiveTools = copy(toolSpecifications);
-        this.availableTools = copy(toolSpecifications);
-        this.toolExecutors = copy(toolExecutors);
+        this.effectiveTools = Utils.copy(toolSpecifications);
+        this.availableTools = Utils.copy(toolSpecifications);
+        this.toolExecutors = Utils.copy(toolExecutors);
         this.returnBehaviors = Collections.emptyMap();
         this.dynamicToolProviders = Collections.emptyList();
     }
 
-    /**
-     * Returns <b>effective</b> tool specifications that should be included in the next {@link ChatRequest}.
-     *
-     * @see #availableTools()
-     */
     public List<ToolSpecification> effectiveTools() {
-        return effectiveTools;
+        return this.effectiveTools;
     }
 
-    /**
-     * Returns <b>effective</b> tool specifications that should be included in the next {@link ChatRequest}.
-     *
-     * @see #availableTools()
-     * @deprecated use {@link #effectiveTools()} instead
-     */
-    @Deprecated(since = "1.12.0")
+    @Deprecated
     public List<ToolSpecification> toolSpecifications() {
-        return effectiveTools;
+        return this.effectiveTools;
     }
 
-    /**
-     * Returns <b>all available</b> tool specifications configured for AI service.
-     * These tool specifications can be discovered/found by the LLM (see {@link ToolSearchStrategy})
-     * and included in the next {@link ChatRequest}.
-     *
-     * @see #effectiveTools()
-     * @since 1.12.0
-     */
     public List<ToolSpecification> availableTools() {
-        return availableTools;
+        return this.availableTools;
     }
 
     public Map<String, ToolExecutor> toolExecutors() {
-        return toolExecutors;
+        return this.toolExecutors;
     }
 
-    /**
-     * @since 1.14.0
-     */
     public Map<String, ReturnBehavior> returnBehaviors() {
-        return returnBehaviors;
+        return this.returnBehaviors;
     }
 
-    /**
-     * Returns the effective {@link ReturnBehavior} for the given tool. If the tool is unknown
-     * or has no explicitly configured behavior, {@link ReturnBehavior#TO_LLM} is returned.
-     *
-     * @since 1.14.0
-     */
     public ReturnBehavior returnBehavior(String toolName) {
-        return returnBehaviors.getOrDefault(toolName, ReturnBehavior.TO_LLM);
+        return this.returnBehaviors.getOrDefault(toolName, ReturnBehavior.TO_LLM);
     }
 
-    /**
-     * @deprecated use {@link #returnBehavior(String)} instead
-     */
-    @Deprecated(since = "1.14.0")
+    @Deprecated
     public Set<String> immediateReturnTools() {
-        return returnBehaviors.entrySet().stream()
-                .filter(entry -> entry.getValue() == ReturnBehavior.IMMEDIATE)
-                .map(Map.Entry::getKey)
-                .collect(toSet());
+        return this.returnBehaviors.entrySet().stream().filter(entry -> entry.getValue() == ReturnBehavior.IMMEDIATE).map(Map.Entry::getKey).collect(Collectors.toSet());
     }
 
-    /**
-     * Returns dynamic tool providers that are re-evaluated before each LLM call.
-     *
-     * @since 1.13.0
-     */
     public List<ToolProvider> dynamicToolProviders() {
-        return dynamicToolProviders;
+        return this.dynamicToolProviders;
     }
 
     public Builder toBuilder() {
-        return builder()
-                .effectiveTools(effectiveTools)
-                .availableTools(availableTools)
-                .toolExecutors(toolExecutors)
-                .returnBehaviors(returnBehaviors)
-                .dynamicToolProviders(dynamicToolProviders);
+        return ToolServiceContext.builder().effectiveTools(this.effectiveTools).availableTools(this.availableTools).toolExecutors(this.toolExecutors).returnBehaviors(this.returnBehaviors).dynamicToolProviders(this.dynamicToolProviders);
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        ToolServiceContext that = (ToolServiceContext) o;
-        return Objects.equals(effectiveTools, that.effectiveTools)
-                && Objects.equals(availableTools, that.availableTools)
-                && Objects.equals(toolExecutors, that.toolExecutors)
-                && Objects.equals(returnBehaviors, that.returnBehaviors)
-                && Objects.equals(dynamicToolProviders, that.dynamicToolProviders);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        ToolServiceContext that = (ToolServiceContext)o;
+        return Objects.equals(this.effectiveTools, that.effectiveTools) && Objects.equals(this.availableTools, that.availableTools) && Objects.equals(this.toolExecutors, that.toolExecutors) && Objects.equals(this.returnBehaviors, that.returnBehaviors) && Objects.equals(this.dynamicToolProviders, that.dynamicToolProviders);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(effectiveTools, availableTools, toolExecutors, returnBehaviors, dynamicToolProviders);
+        return Objects.hash(this.effectiveTools, this.availableTools, this.toolExecutors, this.returnBehaviors, this.dynamicToolProviders);
     }
 
-    @Override
     public String toString() {
-        return "ToolServiceContext{" +
-                "effectiveTools=" + effectiveTools +
-                ", availableTools=" + availableTools +
-                ", toolExecutors=" + toolExecutors +
-                ", returnBehaviorByName=" + returnBehaviors +
-                ", dynamicToolProviders=" + dynamicToolProviders +
-                '}';
+        return "ToolServiceContext{effectiveTools=" + this.effectiveTools + ", availableTools=" + this.availableTools + ", toolExecutors=" + this.toolExecutors + ", returnBehaviorByName=" + this.returnBehaviors + ", dynamicToolProviders=" + this.dynamicToolProviders + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
+    public static class Empty
+    extends ToolServiceContext {
+        public static final Empty INSTANCE = new Empty();
 
+        private Empty() {
+            super(Collections.emptyList(), Collections.emptyMap());
+        }
+    }
+
+    public static class Builder {
         private List<ToolSpecification> effectiveTools;
         private List<ToolSpecification> availableTools;
         private Map<String, ToolExecutor> toolExecutors;
-        private Map<String, ReturnBehavior> returnBehaviors = new HashMap<>();
+        private Map<String, ReturnBehavior> returnBehaviors = new HashMap<String, ReturnBehavior>();
         private List<ToolProvider> dynamicToolProviders;
 
-        /**
-         * Sets <b>effective</b> tool specifications that should be included in the next {@link ChatRequest}.
-         *
-         * @see #availableTools()
-         */
         public Builder effectiveTools(List<ToolSpecification> effectiveTools) {
             this.effectiveTools = effectiveTools;
             return this;
         }
 
-        /**
-         * Sets <b>effective</b> tool specifications that should be included in the next {@link ChatRequest}.
-         *
-         * @see #availableTools()
-         * @deprecated use {@link #effectiveTools(List)} instead
-         */
-        @Deprecated(since = "1.12.0")
+        @Deprecated
         public Builder toolSpecifications(List<ToolSpecification> toolSpecifications) {
             this.effectiveTools = toolSpecifications;
             return this;
         }
 
-        /**
-         * Sets <b>all available</b> tool specifications configured for AI service.
-         * These tool specifications can be discovered/found by the LLM (see {@link ToolSearchStrategy})
-         * and included in the next {@link ChatRequest}.
-         *
-         * @see #effectiveTools(List)
-         * @since 1.12.0
-         */
         public Builder availableTools(List<ToolSpecification> availableTools) {
             this.availableTools = availableTools;
             return this;
@@ -207,20 +143,14 @@ public class ToolServiceContext {
             return this;
         }
 
-        /**
-         * @deprecated use {@link #returnBehaviors(Map)} instead
-         */
-        @Deprecated(since = "1.14.0")
+        @Deprecated
         public Builder immediateReturnTools(Set<String> immediateReturnTools) {
             if (immediateReturnTools != null) {
-                immediateReturnTools.forEach(name -> this.returnBehaviors.put(name, ReturnBehavior.IMMEDIATE));
+                immediateReturnTools.forEach(name -> this.returnBehaviors.put((String)name, ReturnBehavior.IMMEDIATE));
             }
             return this;
         }
 
-        /**
-         * @since 1.14.0
-         */
         public Builder returnBehaviors(Map<String, ReturnBehavior> returnBehaviorByName) {
             if (returnBehaviorByName != null) {
                 this.returnBehaviors.putAll(returnBehaviorByName);
@@ -228,9 +158,6 @@ public class ToolServiceContext {
             return this;
         }
 
-        /**
-         * @since 1.13.0
-         */
         public Builder dynamicToolProviders(List<ToolProvider> dynamicToolProviders) {
             this.dynamicToolProviders = dynamicToolProviders;
             return this;
@@ -240,13 +167,5 @@ public class ToolServiceContext {
             return new ToolServiceContext(this);
         }
     }
-
-    public static class Empty extends ToolServiceContext {
-
-        public static final Empty INSTANCE = new Empty();
-
-        private Empty() {
-            super(Collections.emptyList(), Collections.emptyMap());
-        }
-    }
 }
+

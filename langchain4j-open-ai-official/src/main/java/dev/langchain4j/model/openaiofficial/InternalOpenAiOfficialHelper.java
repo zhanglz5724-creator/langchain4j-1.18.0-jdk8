@@ -1,12 +1,83 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.core.JsonValue
+ *  com.openai.models.FunctionDefinition
+ *  com.openai.models.FunctionDefinition$Builder
+ *  com.openai.models.FunctionParameters
+ *  com.openai.models.FunctionParameters$Builder
+ *  com.openai.models.ReasoningEffort
+ *  com.openai.models.ResponseFormatJsonObject
+ *  com.openai.models.chat.completions.ChatCompletion
+ *  com.openai.models.chat.completions.ChatCompletion$Choice
+ *  com.openai.models.chat.completions.ChatCompletion$Choice$FinishReason
+ *  com.openai.models.chat.completions.ChatCompletionAssistantMessageParam
+ *  com.openai.models.chat.completions.ChatCompletionChunk$Choice$FinishReason
+ *  com.openai.models.chat.completions.ChatCompletionContentPart
+ *  com.openai.models.chat.completions.ChatCompletionContentPart$File
+ *  com.openai.models.chat.completions.ChatCompletionContentPart$File$FileObject
+ *  com.openai.models.chat.completions.ChatCompletionContentPartImage
+ *  com.openai.models.chat.completions.ChatCompletionContentPartImage$ImageUrl
+ *  com.openai.models.chat.completions.ChatCompletionContentPartImage$ImageUrl$Builder
+ *  com.openai.models.chat.completions.ChatCompletionContentPartImage$ImageUrl$Detail
+ *  com.openai.models.chat.completions.ChatCompletionContentPartInputAudio
+ *  com.openai.models.chat.completions.ChatCompletionContentPartInputAudio$InputAudio
+ *  com.openai.models.chat.completions.ChatCompletionContentPartInputAudio$InputAudio$Format
+ *  com.openai.models.chat.completions.ChatCompletionContentPartText
+ *  com.openai.models.chat.completions.ChatCompletionCreateParams
+ *  com.openai.models.chat.completions.ChatCompletionCreateParams$Builder
+ *  com.openai.models.chat.completions.ChatCompletionCreateParams$LogitBias
+ *  com.openai.models.chat.completions.ChatCompletionCreateParams$Metadata
+ *  com.openai.models.chat.completions.ChatCompletionCreateParams$ServiceTier
+ *  com.openai.models.chat.completions.ChatCompletionCreateParams$Stop
+ *  com.openai.models.chat.completions.ChatCompletionFunctionTool
+ *  com.openai.models.chat.completions.ChatCompletionMessage
+ *  com.openai.models.chat.completions.ChatCompletionMessageFunctionToolCall
+ *  com.openai.models.chat.completions.ChatCompletionMessageFunctionToolCall$Function
+ *  com.openai.models.chat.completions.ChatCompletionMessageParam
+ *  com.openai.models.chat.completions.ChatCompletionMessageToolCall
+ *  com.openai.models.chat.completions.ChatCompletionSystemMessageParam
+ *  com.openai.models.chat.completions.ChatCompletionTool
+ *  com.openai.models.chat.completions.ChatCompletionToolChoiceOption
+ *  com.openai.models.chat.completions.ChatCompletionToolChoiceOption$Auto
+ *  com.openai.models.chat.completions.ChatCompletionToolMessageParam
+ *  com.openai.models.chat.completions.ChatCompletionUserMessageParam
+ *  com.openai.models.chat.completions.ChatCompletionUserMessageParam$Builder
+ *  com.openai.models.completions.CompletionUsage
+ *  com.openai.models.completions.CompletionUsage$CompletionTokensDetails
+ *  com.openai.models.completions.CompletionUsage$PromptTokensDetails
+ *  com.openai.models.embeddings.CreateEmbeddingResponse$Usage
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.AudioContent
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.data.message.ImageContent$DetailLevel
+ *  dev.langchain4j.data.message.PdfFileContent
+ *  dev.langchain4j.data.message.SystemMessage
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.message.ToolExecutionResultMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.Exceptions
+ *  dev.langchain4j.internal.JsonSchemaElementUtils
+ *  dev.langchain4j.internal.ToolSpecificationUtils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ResponseFormatType
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.request.json.JsonObjectSchema
+ *  dev.langchain4j.model.chat.request.json.JsonRawSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchemaElement
+ *  dev.langchain4j.model.output.FinishReason
+ */
 package dev.langchain4j.model.openaiofficial;
-
-import static dev.langchain4j.internal.Exceptions.illegalArgument;
-import static dev.langchain4j.internal.JsonSchemaElementUtils.toMap;
-import static dev.langchain4j.internal.ToolSpecificationUtils.isEffectivelyStrict;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.chat.request.ResponseFormat.JSON;
-import static dev.langchain4j.model.chat.request.ResponseFormatType.TEXT;
-import static java.util.stream.Collectors.toList;
 
 import com.openai.core.JsonValue;
 import com.openai.models.FunctionDefinition;
@@ -46,378 +117,297 @@ import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.Exceptions;
+import dev.langchain4j.internal.JsonSchemaElementUtils;
+import dev.langchain4j.internal.ToolSpecificationUtils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
+import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialChatRequestParameters;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialTokenUsage;
 import dev.langchain4j.model.output.FinishReason;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 class InternalOpenAiOfficialHelper {
+    InternalOpenAiOfficialHelper() {
+    }
 
     static List<ChatCompletionMessageParam> toOpenAiMessages(List<ChatMessage> messages) {
-        return messages.stream()
-                .map(InternalOpenAiOfficialHelper::toOpenAiMessage)
-                .collect(toList());
+        return messages.stream().map(InternalOpenAiOfficialHelper::toOpenAiMessage).collect(Collectors.toList());
     }
 
     static ChatCompletionMessageParam toOpenAiMessage(ChatMessage message) {
-        if (message instanceof SystemMessage systemMessage) {
-            return ChatCompletionMessageParam.ofSystem(ChatCompletionSystemMessageParam.builder()
-                    .content(systemMessage.text())
-                    .build());
+        if (message instanceof SystemMessage) {
+            SystemMessage systemMessage = (SystemMessage)message;
+            return ChatCompletionMessageParam.ofSystem((ChatCompletionSystemMessageParam)ChatCompletionSystemMessageParam.builder().content(systemMessage.text()).build());
         }
-
-        if (message instanceof UserMessage userMessage) {
-            final ChatCompletionUserMessageParam.Builder builder = ChatCompletionUserMessageParam.builder();
+        if (message instanceof UserMessage) {
+            UserMessage userMessage = (UserMessage)message;
+            ChatCompletionUserMessageParam.Builder builder = ChatCompletionUserMessageParam.builder();
             if (userMessage.hasSingleText()) {
                 builder.content(userMessage.singleText());
             } else {
-                builder.contentOfArrayOfContentParts(toOpenAiContent(userMessage.contents()));
+                builder.contentOfArrayOfContentParts(InternalOpenAiOfficialHelper.toOpenAiContent(userMessage.contents()));
             }
             if (userMessage.name() != null) {
                 builder.name(userMessage.name());
             }
-            return ChatCompletionMessageParam.ofUser(builder.build());
+            return ChatCompletionMessageParam.ofUser((ChatCompletionUserMessageParam)builder.build());
         }
-
-        if (message instanceof AiMessage aiMessage) {
-
+        if (message instanceof AiMessage) {
+            AiMessage aiMessage = (AiMessage)message;
             if (!aiMessage.hasToolExecutionRequests()) {
-                return ChatCompletionMessageParam.ofAssistant(ChatCompletionAssistantMessageParam.builder()
-                        .content(aiMessage.text())
-                        .build());
+                return ChatCompletionMessageParam.ofAssistant((ChatCompletionAssistantMessageParam)ChatCompletionAssistantMessageParam.builder().content(aiMessage.text()).build());
             }
-
-            List<ChatCompletionMessageToolCall> toolCalls = aiMessage.toolExecutionRequests().stream()
-                    .map(it -> ChatCompletionMessageToolCall.ofFunction(ChatCompletionMessageFunctionToolCall.builder()
-                            .id(it.id())
-                            .function(ChatCompletionMessageFunctionToolCall.Function.builder()
-                                    .name(it.name())
-                                    .arguments(it.arguments())
-                                    .build())
-                            .build()))
-                    .collect(toList());
-
-            return ChatCompletionMessageParam.ofAssistant(ChatCompletionAssistantMessageParam.builder()
-                    .content(aiMessage.text() != null ? aiMessage.text() : "")
-                    .toolCalls(toolCalls)
-                    .build());
+            List toolCalls = aiMessage.toolExecutionRequests().stream().map(it -> ChatCompletionMessageToolCall.ofFunction((ChatCompletionMessageFunctionToolCall)ChatCompletionMessageFunctionToolCall.builder().id(it.id()).function(ChatCompletionMessageFunctionToolCall.Function.builder().name(it.name()).arguments(it.arguments()).build()).build())).collect(Collectors.toList());
+            return ChatCompletionMessageParam.ofAssistant((ChatCompletionAssistantMessageParam)ChatCompletionAssistantMessageParam.builder().content(aiMessage.text() != null ? aiMessage.text() : "").toolCalls(toolCalls).build());
         }
-
-        if (message instanceof ToolExecutionResultMessage toolExecutionResultMessage) {
+        if (message instanceof ToolExecutionResultMessage) {
+            ToolExecutionResultMessage toolExecutionResultMessage = (ToolExecutionResultMessage)message;
             if (!toolExecutionResultMessage.hasSingleText()) {
-                throw new UnsupportedFeatureException(
-                        "OpenAI Chat Completions API does not support non-text content in tool results. "
-                                + "Only text content is supported.");
+                throw new UnsupportedFeatureException("OpenAI Chat Completions API does not support non-text content in tool results. Only text content is supported.");
             }
-            return ChatCompletionMessageParam.ofTool(ChatCompletionToolMessageParam.builder()
-                    .toolCallId(toolExecutionResultMessage.id())
-                    .content(toolExecutionResultMessage.text())
-                    .build());
+            return ChatCompletionMessageParam.ofTool((ChatCompletionToolMessageParam)ChatCompletionToolMessageParam.builder().toolCallId(toolExecutionResultMessage.id()).content(toolExecutionResultMessage.text()).build());
         }
-
-        throw illegalArgument("Unknown message type: " + message.type());
+        throw Exceptions.illegalArgument((String)("Unknown message type: " + message.type()), (Object[])new Object[0]);
     }
 
     private static List<ChatCompletionContentPart> toOpenAiContent(List<Content> contents) {
-        List<ChatCompletionContentPart> parts = new ArrayList<>();
+        ArrayList<ChatCompletionContentPart> parts = new ArrayList<ChatCompletionContentPart>();
         for (Content content : contents) {
-            if (content instanceof TextContent textContent) {
-                parts.add(ChatCompletionContentPart.ofText(ChatCompletionContentPartText.builder()
-                        .text(textContent.text())
-                        .build()));
-            } else if (content instanceof ImageContent imageContent) {
-                ChatCompletionContentPartImage.ImageUrl.Builder imageUrlBuilder =
-                        ChatCompletionContentPartImage.ImageUrl.builder();
+            if (content instanceof TextContent) {
+                TextContent textContent = (TextContent)content;
+                parts.add(ChatCompletionContentPart.ofText((ChatCompletionContentPartText)ChatCompletionContentPartText.builder().text(textContent.text()).build()));
+                continue;
+            }
+            if (content instanceof ImageContent) {
+                ImageContent imageContent = (ImageContent)content;
+                ChatCompletionContentPartImage.ImageUrl.Builder imageUrlBuilder = ChatCompletionContentPartImage.ImageUrl.builder();
                 if (imageContent.image().url() != null) {
                     imageUrlBuilder.url(imageContent.image().url().toString());
-                    imageUrlBuilder.detail(toImageDetail(imageContent.detailLevel()));
-                    parts.add(ChatCompletionContentPart.ofImageUrl(ChatCompletionContentPartImage.builder()
-                            .imageUrl(imageUrlBuilder.build())
-                            .build()));
-                } else if (imageContent.image().base64Data() != null) {
-                    // The URL field can contain either a URL of the image or the base64 encoded image, as documented in
-                    // https://github.com/openai/openai-java/blob/e5b8e55762ecde475fa2de081b770d28537c9cd3/openai-java-core/src/main/kotlin/com/openai/models/ChatCompletionContentPartImage.kt#L130
-                    imageUrlBuilder.url("data:" + imageContent.image().mimeType() + ";base64,"
-                            + imageContent.image().base64Data());
-                    imageUrlBuilder.detail(toImageDetail(imageContent.detailLevel()));
-                    parts.add(ChatCompletionContentPart.ofImageUrl(ChatCompletionContentPartImage.builder()
-                            .imageUrl(imageUrlBuilder.build())
-                            .build()));
-                } else {
-                    throw new UnsupportedFeatureException("Image URL is not present.");
+                    imageUrlBuilder.detail(InternalOpenAiOfficialHelper.toImageDetail(imageContent.detailLevel()));
+                    parts.add(ChatCompletionContentPart.ofImageUrl((ChatCompletionContentPartImage)ChatCompletionContentPartImage.builder().imageUrl(imageUrlBuilder.build()).build()));
+                    continue;
                 }
-            } else if (content instanceof AudioContent audioContent) {
-                parts.add(ChatCompletionContentPart.ofInputAudio(ChatCompletionContentPartInputAudio.builder()
-                        .inputAudio(ChatCompletionContentPartInputAudio.builder()
-                                .inputAudio(ChatCompletionContentPartInputAudio.InputAudio.builder()
-                                        .data(ensureNotBlank(
-                                                audioContent.audio().base64Data(), "audio.base64Data"))
-                                        .format(ChatCompletionContentPartInputAudio.InputAudio.Format.of(ensureNotBlank(
-                                                        audioContent.audio().mimeType(), "audio.mimeType")
-                                                .split("/")[1]))
-                                        .build())
-                                .build()
-                                .inputAudio())
-                        .build()));
-            } else if (content instanceof PdfFileContent pdfFileContent) {
-                if (pdfFileContent.pdfFile().url() != null) {
-                    throw new UnsupportedFeatureException(
-                            "OpenAI Official Chat Completions API does not support URL-based PDF inputs. "
-                                    + "Provide PDF content as base64 data instead.");
+                if (imageContent.image().base64Data() != null) {
+                    imageUrlBuilder.url("data:" + imageContent.image().mimeType() + ";base64," + imageContent.image().base64Data());
+                    imageUrlBuilder.detail(InternalOpenAiOfficialHelper.toImageDetail(imageContent.detailLevel()));
+                    parts.add(ChatCompletionContentPart.ofImageUrl((ChatCompletionContentPartImage)ChatCompletionContentPartImage.builder().imageUrl(imageUrlBuilder.build()).build()));
+                    continue;
                 }
-
-                String fileData = String.format(
-                        "data:%s;base64,%s",
-                        pdfFileContent.pdfFile().mimeType(),
-                        pdfFileContent.pdfFile().base64Data());
-
-                parts.add(ChatCompletionContentPart.ofFile(ChatCompletionContentPart.File.builder()
-                        .file(ChatCompletionContentPart.File.FileObject.builder()
-                                .fileData(fileData)
-                                .filename("document.pdf")
-                                .build())
-                        .build()));
-            } else {
-                throw illegalArgument("Unknown content type: " + content);
+                throw new UnsupportedFeatureException("Image URL is not present.");
             }
+            if (content instanceof AudioContent) {
+                AudioContent audioContent = (AudioContent)content;
+                parts.add(ChatCompletionContentPart.ofInputAudio((ChatCompletionContentPartInputAudio)ChatCompletionContentPartInputAudio.builder().inputAudio(ChatCompletionContentPartInputAudio.builder().inputAudio(ChatCompletionContentPartInputAudio.InputAudio.builder().data(ValidationUtils.ensureNotBlank((String)audioContent.audio().base64Data(), (String)"audio.base64Data")).format(ChatCompletionContentPartInputAudio.InputAudio.Format.of((String)ValidationUtils.ensureNotBlank((String)audioContent.audio().mimeType(), (String)"audio.mimeType").split("/")[1])).build()).build().inputAudio()).build()));
+                continue;
+            }
+            if (content instanceof PdfFileContent) {
+                PdfFileContent pdfFileContent = (PdfFileContent)content;
+                if (pdfFileContent.pdfFile().url() != null) {
+                    throw new UnsupportedFeatureException("OpenAI Official Chat Completions API does not support URL-based PDF inputs. Provide PDF content as base64 data instead.");
+                }
+                String fileData = String.format("data:%s;base64,%s", pdfFileContent.pdfFile().mimeType(), pdfFileContent.pdfFile().base64Data());
+                parts.add(ChatCompletionContentPart.ofFile((ChatCompletionContentPart.File)ChatCompletionContentPart.File.builder().file(ChatCompletionContentPart.File.FileObject.builder().fileData(fileData).filename("document.pdf").build()).build()));
+                continue;
+            }
+            throw Exceptions.illegalArgument((String)("Unknown content type: " + content), (Object[])new Object[0]);
         }
         return parts;
     }
 
     private static ChatCompletionContentPartImage.ImageUrl.Detail toImageDetail(ImageContent.DetailLevel detailLevel) {
-        return switch (detailLevel) {
-            case LOW -> ChatCompletionContentPartImage.ImageUrl.Detail.LOW;
-            case HIGH -> ChatCompletionContentPartImage.ImageUrl.Detail.HIGH;
-            case AUTO -> ChatCompletionContentPartImage.ImageUrl.Detail.AUTO;
-            case MEDIUM, ULTRA_HIGH ->
-                throw new UnsupportedFeatureException("DetailLevel " + detailLevel
-                        + " is not supported by OpenAI Chat Completions API. Supported values: LOW, HIGH, AUTO");
-        };
+        switch (detailLevel) {
+            case LOW: {
+                return ChatCompletionContentPartImage.ImageUrl.Detail.LOW;
+            }
+            case HIGH: {
+                return ChatCompletionContentPartImage.ImageUrl.Detail.HIGH;
+            }
+            case AUTO: {
+                return ChatCompletionContentPartImage.ImageUrl.Detail.AUTO;
+            }
+            case MEDIUM: 
+            case ULTRA_HIGH: {
+                throw new UnsupportedFeatureException("DetailLevel " + detailLevel + " is not supported by OpenAI Chat Completions API. Supported values: LOW, HIGH, AUTO");
+            }
+        }
+        throw new UnsupportedFeatureException("DetailLevel " + detailLevel + " is not supported by OpenAI Chat Completions API. Supported values: LOW, HIGH, AUTO");
     }
 
     static List<ChatCompletionTool> toTools(Collection<ToolSpecification> toolSpecifications, boolean strict) {
-        return toolSpecifications.stream()
-                .map((ToolSpecification toolSpecification) -> toTool(toolSpecification, strict))
-                .collect(toList());
+        return toolSpecifications.stream().map(toolSpecification -> InternalOpenAiOfficialHelper.toTool(toolSpecification, strict)).collect(Collectors.toList());
     }
 
     private static ChatCompletionTool toTool(ToolSpecification toolSpecification, boolean strict) {
-        boolean effectiveStrict = isEffectivelyStrict(toolSpecification, strict);
-
-        FunctionDefinition.Builder functionDefinitionBuilder = FunctionDefinition.builder()
-                .name(toolSpecification.name())
-                .description(toolSpecification.description() != null ? toolSpecification.description() : "")
-                .parameters(toOpenAiParameters(toolSpecification, effectiveStrict));
-
+        boolean effectiveStrict = ToolSpecificationUtils.isEffectivelyStrict((ToolSpecification)toolSpecification, (boolean)strict);
+        FunctionDefinition.Builder functionDefinitionBuilder = FunctionDefinition.builder().name(toolSpecification.name()).description(toolSpecification.description() != null ? toolSpecification.description() : "").parameters(InternalOpenAiOfficialHelper.toOpenAiParameters(toolSpecification, effectiveStrict));
         if (effectiveStrict) {
             functionDefinitionBuilder.strict(true);
         }
-
-        return ChatCompletionTool.ofFunction(ChatCompletionFunctionTool.builder()
-                .function(functionDefinitionBuilder.build())
-                .build());
+        return ChatCompletionTool.ofFunction((ChatCompletionFunctionTool)ChatCompletionFunctionTool.builder().function(functionDefinitionBuilder.build()).build());
     }
 
     private static FunctionParameters toOpenAiParameters(ToolSpecification toolSpecification, boolean strict) {
-
         FunctionParameters.Builder parametersBuilder = FunctionParameters.builder();
-
         JsonObjectSchema parameters = toolSpecification.parameters();
-        parametersBuilder.putAdditionalProperty("type", JsonValue.from("object"));
-
+        parametersBuilder.putAdditionalProperty("type", JsonValue.from((Object)"object"));
         if (parameters != null) {
-            parametersBuilder.putAdditionalProperty(
-                    "properties", JsonValue.from(toMap(parameters.properties(), strict)));
-
+            parametersBuilder.putAdditionalProperty("properties", JsonValue.from((Object)JsonSchemaElementUtils.toMap((Map)parameters.properties(), (boolean)strict)));
             if (strict) {
-                // when strict, all fields must be required:
-                // https://platform.openai.com/docs/guides/structured-outputs/all-fields-must-be-required
-                parametersBuilder.putAdditionalProperty(
-                        "required",
-                        JsonValue.from(new ArrayList<>(parameters.properties().keySet())));
-                // when strict, additionalProperties must be false:
-                // https://platform.openai.com/docs/guides/structured-outputs/additionalproperties-false-must-always-be-set-in-objects
-                parametersBuilder.putAdditionalProperty("additionalProperties", JsonValue.from(false));
+                parametersBuilder.putAdditionalProperty("required", JsonValue.from(new ArrayList(parameters.properties().keySet())));
+                parametersBuilder.putAdditionalProperty("additionalProperties", JsonValue.from((Object)false));
             } else {
-                parametersBuilder.putAdditionalProperty("required", JsonValue.from(parameters.required()));
+                parametersBuilder.putAdditionalProperty("required", JsonValue.from((Object)parameters.required()));
             }
             if (!parameters.definitions().isEmpty()) {
-                parametersBuilder.putAdditionalProperty(
-                        "$defs", JsonValue.from(toMap(parameters.definitions(), strict)));
-            }
-            return parametersBuilder.build();
-        } else {
-            parametersBuilder.putAdditionalProperty("properties", JsonValue.from(toMap(new HashMap<>(), strict)));
-            if (strict) {
-                parametersBuilder.putAdditionalProperty("additionalProperties", JsonValue.from(false));
+                parametersBuilder.putAdditionalProperty("$defs", JsonValue.from((Object)JsonSchemaElementUtils.toMap((Map)parameters.definitions(), (boolean)strict)));
             }
             return parametersBuilder.build();
         }
+        parametersBuilder.putAdditionalProperty("properties", JsonValue.from((Object)JsonSchemaElementUtils.toMap(new HashMap(), (boolean)strict)));
+        if (strict) {
+            parametersBuilder.putAdditionalProperty("additionalProperties", JsonValue.from((Object)false));
+        }
+        return parametersBuilder.build();
     }
 
     static AiMessage aiMessageFrom(ChatCompletion chatCompletion) {
-        ChatCompletionMessage assistantMessage = chatCompletion.choices().get(0).message();
-        Optional<String> text = assistantMessage.content();
-
-        Optional<List<ChatCompletionMessageToolCall>> toolCalls = assistantMessage.toolCalls();
+        ChatCompletionMessage assistantMessage = ((ChatCompletion.Choice)chatCompletion.choices().get(0)).message();
+        Optional text = assistantMessage.content();
+        Optional toolCalls = assistantMessage.toolCalls();
         if (toolCalls.isPresent()) {
-            List<ToolExecutionRequest> toolExecutionRequests = toolCalls.get().stream()
-                    .map(InternalOpenAiOfficialHelper::toToolExecutionRequest)
-                    .filter(java.util.Objects::nonNull)
-                    .collect(toList());
-
-            if (text.isEmpty()) {
+            List toolExecutionRequests = ((List)toolCalls.get()).stream().map(InternalOpenAiOfficialHelper::toToolExecutionRequest).filter(Objects::nonNull).collect(Collectors.toList());
+            if (!text.isPresent()) {
                 return AiMessage.from(toolExecutionRequests);
-            } else if (toolExecutionRequests.isEmpty()) {
-                return AiMessage.from(text.get());
-            } else {
-                return AiMessage.from(text.get(), toolExecutionRequests);
             }
+            if (toolExecutionRequests.isEmpty()) {
+                return AiMessage.from((String)((String)text.get()));
+            }
+            return AiMessage.from((String)((String)text.get()), toolExecutionRequests);
         }
-
-        return AiMessage.from(text.orElse(""));
+        return AiMessage.from((String)text.orElse(""));
     }
 
     private static ToolExecutionRequest toToolExecutionRequest(ChatCompletionMessageToolCall toolCall) {
-        if (!toolCall.isFunction() || toolCall.function().isEmpty()) {
+        if (!toolCall.isFunction() || !toolCall.function().isPresent()) {
             return null;
         }
-        ChatCompletionMessageFunctionToolCall functionToolCall =
-                toolCall.function().get();
-        return ToolExecutionRequest.builder()
-                .id(functionToolCall.id())
-                .name(functionToolCall.function().name())
-                .arguments(functionToolCall.function().arguments())
-                .build();
+        ChatCompletionMessageFunctionToolCall functionToolCall = (ChatCompletionMessageFunctionToolCall)toolCall.function().get();
+        return ToolExecutionRequest.builder().id(functionToolCall.id()).name(functionToolCall.function().name()).arguments(functionToolCall.function().arguments()).build();
     }
 
     static OpenAiOfficialTokenUsage tokenUsageFrom(CreateEmbeddingResponse.Usage openAiUsage) {
-        return OpenAiOfficialTokenUsage.builder()
-                .inputTokenCount(openAiUsage.promptTokens())
-                .totalTokenCount(openAiUsage.totalTokens())
-                .build();
+        return OpenAiOfficialTokenUsage.builder().inputTokenCount(openAiUsage.promptTokens()).totalTokenCount(openAiUsage.totalTokens()).build();
     }
 
     static OpenAiOfficialTokenUsage tokenUsageFrom(CompletionUsage openAiUsage) {
-
-        Optional<CompletionUsage.PromptTokensDetails> promptTokensDetails = openAiUsage.promptTokensDetails();
+        Optional promptTokensDetails = openAiUsage.promptTokensDetails();
         OpenAiOfficialTokenUsage.InputTokensDetails inputTokensDetails = null;
-        if (promptTokensDetails.isPresent()
-                && promptTokensDetails.get().cachedTokens().isPresent()) {
-            inputTokensDetails = OpenAiOfficialTokenUsage.InputTokensDetails.builder()
-                    .cachedTokens(promptTokensDetails.get().cachedTokens().get())
-                    .build();
+        if (promptTokensDetails.isPresent() && ((CompletionUsage.PromptTokensDetails)promptTokensDetails.get()).cachedTokens().isPresent()) {
+            inputTokensDetails = OpenAiOfficialTokenUsage.InputTokensDetails.builder().cachedTokens((Long)((CompletionUsage.PromptTokensDetails)promptTokensDetails.get()).cachedTokens().get()).build();
         }
-
-        Optional<CompletionUsage.CompletionTokensDetails> completionTokensDetails =
-                openAiUsage.completionTokensDetails();
+        Optional completionTokensDetails = openAiUsage.completionTokensDetails();
         OpenAiOfficialTokenUsage.OutputTokensDetails outputTokensDetails = null;
-        if (completionTokensDetails.isPresent()
-                && completionTokensDetails.get().reasoningTokens().isPresent()) {
-            outputTokensDetails = OpenAiOfficialTokenUsage.OutputTokensDetails.builder()
-                    .reasoningTokens(
-                            completionTokensDetails.get().reasoningTokens().get())
-                    .build();
+        if (completionTokensDetails.isPresent() && ((CompletionUsage.CompletionTokensDetails)completionTokensDetails.get()).reasoningTokens().isPresent()) {
+            outputTokensDetails = OpenAiOfficialTokenUsage.OutputTokensDetails.builder().reasoningTokens((Long)((CompletionUsage.CompletionTokensDetails)completionTokensDetails.get()).reasoningTokens().get()).build();
         }
-
-        return OpenAiOfficialTokenUsage.builder()
-                .inputTokenCount(openAiUsage.promptTokens())
-                .inputTokensDetails(inputTokensDetails)
-                .outputTokenCount(openAiUsage.completionTokens())
-                .outputTokensDetails(outputTokensDetails)
-                .totalTokenCount(openAiUsage.totalTokens())
-                .build();
+        return OpenAiOfficialTokenUsage.builder().inputTokenCount(openAiUsage.promptTokens()).inputTokensDetails(inputTokensDetails).outputTokenCount(openAiUsage.completionTokens()).outputTokensDetails(outputTokensDetails).totalTokenCount(openAiUsage.totalTokens()).build();
     }
 
     static FinishReason finishReasonFrom(ChatCompletion.Choice.FinishReason openAiFinishReason) {
         if (openAiFinishReason == null) {
             return null;
         }
-        if (openAiFinishReason.equals(ChatCompletion.Choice.FinishReason.STOP)) {
+        if (openAiFinishReason.equals((Object)ChatCompletion.Choice.FinishReason.STOP)) {
             return FinishReason.STOP;
-        } else if (openAiFinishReason.equals(ChatCompletion.Choice.FinishReason.LENGTH)) {
-            return FinishReason.LENGTH;
-        } else if (openAiFinishReason.equals(ChatCompletion.Choice.FinishReason.TOOL_CALLS)) {
-            return FinishReason.TOOL_EXECUTION;
-        } else if (openAiFinishReason.equals(ChatCompletion.Choice.FinishReason.FUNCTION_CALL)) {
-            return FinishReason.TOOL_EXECUTION;
-        } else if (openAiFinishReason.equals(ChatCompletion.Choice.FinishReason.CONTENT_FILTER)) {
-            return FinishReason.CONTENT_FILTER;
-        } else {
-            return null;
         }
+        if (openAiFinishReason.equals((Object)ChatCompletion.Choice.FinishReason.LENGTH)) {
+            return FinishReason.LENGTH;
+        }
+        if (openAiFinishReason.equals((Object)ChatCompletion.Choice.FinishReason.TOOL_CALLS)) {
+            return FinishReason.TOOL_EXECUTION;
+        }
+        if (openAiFinishReason.equals((Object)ChatCompletion.Choice.FinishReason.FUNCTION_CALL)) {
+            return FinishReason.TOOL_EXECUTION;
+        }
+        if (openAiFinishReason.equals((Object)ChatCompletion.Choice.FinishReason.CONTENT_FILTER)) {
+            return FinishReason.CONTENT_FILTER;
+        }
+        return null;
     }
 
     static FinishReason finishReasonFrom(ChatCompletionChunk.Choice.FinishReason openAiFinishReason) {
         if (openAiFinishReason == null) {
             return null;
         }
-        if (openAiFinishReason.equals(ChatCompletionChunk.Choice.FinishReason.STOP)) {
+        if (openAiFinishReason.equals((Object)ChatCompletionChunk.Choice.FinishReason.STOP)) {
             return FinishReason.STOP;
-        } else if (openAiFinishReason.equals(ChatCompletionChunk.Choice.FinishReason.LENGTH)) {
-            return FinishReason.LENGTH;
-        } else if (openAiFinishReason.equals(ChatCompletionChunk.Choice.FinishReason.TOOL_CALLS)) {
-            return FinishReason.TOOL_EXECUTION;
-        } else if (openAiFinishReason.equals(ChatCompletionChunk.Choice.FinishReason.FUNCTION_CALL)) {
-            return FinishReason.TOOL_EXECUTION;
-        } else if (openAiFinishReason.equals(ChatCompletionChunk.Choice.FinishReason.CONTENT_FILTER)) {
-            return FinishReason.CONTENT_FILTER;
-        } else {
-            return null;
         }
+        if (openAiFinishReason.equals((Object)ChatCompletionChunk.Choice.FinishReason.LENGTH)) {
+            return FinishReason.LENGTH;
+        }
+        if (openAiFinishReason.equals((Object)ChatCompletionChunk.Choice.FinishReason.TOOL_CALLS)) {
+            return FinishReason.TOOL_EXECUTION;
+        }
+        if (openAiFinishReason.equals((Object)ChatCompletionChunk.Choice.FinishReason.FUNCTION_CALL)) {
+            return FinishReason.TOOL_EXECUTION;
+        }
+        if (openAiFinishReason.equals((Object)ChatCompletionChunk.Choice.FinishReason.CONTENT_FILTER)) {
+            return FinishReason.CONTENT_FILTER;
+        }
+        return null;
     }
 
     static ResponseFormatJsonObject toOpenAiResponseFormat(ResponseFormat responseFormat, Boolean strict) {
-        if (responseFormat == null || responseFormat.type() == TEXT) {
+        if (responseFormat == null || responseFormat.type() == ResponseFormatType.TEXT) {
             return null;
         }
-
         JsonSchema jsonSchema = responseFormat.jsonSchema();
         if (jsonSchema == null) {
-            return ResponseFormatJsonObject.builder()
-                    .type(JsonValue.from("json_object"))
-                    .build();
-        } else {
-            if (!(jsonSchema.rootElement() instanceof JsonObjectSchema
-                    || jsonSchema.rootElement() instanceof JsonRawSchema)) {
-                throw new IllegalArgumentException(
-                        "For OpenAI, the root element of the JSON Schema must be either a JsonObjectSchema or a JsonRawSchema, but it was: "
-                                + jsonSchema.rootElement().getClass());
-            }
-            Map<String, JsonValue> properties = new HashMap<>();
-            properties.put("name", JsonValue.from(jsonSchema.name()));
-            properties.put("strict", strict ? JsonValue.from(true) : JsonValue.from(false));
-            properties.put("schema", JsonValue.from(toMap(jsonSchema.rootElement(), strict)));
-
-            return ResponseFormatJsonObject.builder()
-                    .type(JsonValue.from("json_schema"))
-                    .putAllAdditionalProperties(Collections.singletonMap("json_schema", JsonValue.from(properties)))
-                    .build();
+            return ResponseFormatJsonObject.builder().type(JsonValue.from((Object)"json_object")).build();
         }
+        if (!(jsonSchema.rootElement() instanceof JsonObjectSchema) && !(jsonSchema.rootElement() instanceof JsonRawSchema)) {
+            throw new IllegalArgumentException("For OpenAI, the root element of the JSON Schema must be either a JsonObjectSchema or a JsonRawSchema, but it was: " + jsonSchema.rootElement().getClass());
+        }
+        HashMap<String, JsonValue> properties = new HashMap<String, JsonValue>();
+        properties.put("name", JsonValue.from((Object)jsonSchema.name()));
+        properties.put("strict", strict != false ? JsonValue.from((Object)true) : JsonValue.from((Object)false));
+        properties.put("schema", JsonValue.from((Object)JsonSchemaElementUtils.toMap((JsonSchemaElement)jsonSchema.rootElement(), (boolean)strict)));
+        return ResponseFormatJsonObject.builder().type(JsonValue.from((Object)"json_schema")).putAllAdditionalProperties(Collections.singletonMap("json_schema", JsonValue.from(properties))).build();
     }
 
     static ChatCompletionToolChoiceOption toOpenAiToolChoice(ToolChoice toolChoice) {
         if (toolChoice == null) {
             return null;
         }
-
-        return switch (toolChoice) {
-            case AUTO -> ChatCompletionToolChoiceOption.ofAuto(ChatCompletionToolChoiceOption.Auto.AUTO);
-            case REQUIRED -> ChatCompletionToolChoiceOption.ofAuto(ChatCompletionToolChoiceOption.Auto.REQUIRED);
-            case NONE -> ChatCompletionToolChoiceOption.ofAuto(ChatCompletionToolChoiceOption.Auto.NONE);
-        };
+        switch (toolChoice) {
+            case AUTO: {
+                return ChatCompletionToolChoiceOption.ofAuto((ChatCompletionToolChoiceOption.Auto)ChatCompletionToolChoiceOption.Auto.AUTO);
+            }
+            case REQUIRED: {
+                return ChatCompletionToolChoiceOption.ofAuto((ChatCompletionToolChoiceOption.Auto)ChatCompletionToolChoiceOption.Auto.REQUIRED);
+            }
+            case NONE: {
+                return ChatCompletionToolChoiceOption.ofAuto((ChatCompletionToolChoiceOption.Auto)ChatCompletionToolChoiceOption.Auto.NONE);
+            }
+        }
+        return null;
     }
 
     static void validate(ChatRequestParameters parameters) {
@@ -428,101 +418,69 @@ class InternalOpenAiOfficialHelper {
 
     static ResponseFormat fromOpenAiResponseFormat(String responseFormat) {
         if ("json_object".equals(responseFormat)) {
-            return JSON;
-        } else {
-            return null;
+            return ResponseFormat.JSON;
         }
+        return null;
     }
 
-    static ChatCompletionCreateParams.Builder toOpenAiChatCompletionCreateParams(
-            ChatRequest chatRequest,
-            OpenAiOfficialChatRequestParameters parameters,
-            Boolean strictTools,
-            Boolean strictJsonSchema) {
-
-        // OpenAI-specific parameters
-        ChatCompletionCreateParams.Builder builder =
-                ChatCompletionCreateParams.builder().model(parameters.modelName());
-
+    static ChatCompletionCreateParams.Builder toOpenAiChatCompletionCreateParams(ChatRequest chatRequest, OpenAiOfficialChatRequestParameters parameters, Boolean strictTools, Boolean strictJsonSchema) {
+        ChatCompletionCreateParams.Builder builder = ChatCompletionCreateParams.builder().model(parameters.modelName());
         if (parameters.maxOutputTokens() != null && parameters.maxCompletionTokens() == null) {
-            builder.maxTokens(parameters.maxOutputTokens());
+            builder.maxTokens((long)parameters.maxOutputTokens().intValue());
         }
         if (parameters.maxCompletionTokens() != null) {
-            builder.maxCompletionTokens(parameters.maxCompletionTokens());
+            builder.maxCompletionTokens((long)parameters.maxCompletionTokens().intValue());
         }
-
         if (!parameters.logitBias().isEmpty()) {
-            builder.logitBias(ChatCompletionCreateParams.LogitBias.builder()
-                    .putAllAdditionalProperties(parameters.logitBias().entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonValue.from(entry.getValue()))))
-                    .build());
+            builder.logitBias(ChatCompletionCreateParams.LogitBias.builder().putAllAdditionalProperties(parameters.logitBias().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonValue.from(entry.getValue())))).build());
         }
-
-        if ((parameters.parallelToolCalls() != null)) {
-            builder.parallelToolCalls(parameters.parallelToolCalls());
+        if (parameters.parallelToolCalls() != null) {
+            builder.parallelToolCalls(parameters.parallelToolCalls().booleanValue());
         }
-
         if (parameters.seed() != null) {
-            builder.seed(parameters.seed());
+            builder.seed((long)parameters.seed().intValue());
         }
-
         if (parameters.user() != null) {
             builder.user(parameters.user());
         }
-
         if (parameters.store() != null) {
             builder.store(parameters.store());
         }
-
         if (!parameters.metadata().isEmpty()) {
-            builder.metadata(ChatCompletionCreateParams.Metadata.builder()
-                    .putAllAdditionalProperties(parameters.metadata().entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonValue.from(entry.getValue()))))
-                    .build());
+            builder.metadata(ChatCompletionCreateParams.Metadata.builder().putAllAdditionalProperties(parameters.metadata().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonValue.from(entry.getValue())))).build());
         }
-
         if (parameters.serviceTier() != null) {
-            builder.serviceTier(ChatCompletionCreateParams.ServiceTier.of(parameters.serviceTier()));
+            builder.serviceTier(ChatCompletionCreateParams.ServiceTier.of((String)parameters.serviceTier()));
         }
-
         if (parameters.reasoningEffort() != null) {
-            builder.reasoningEffort(ReasoningEffort.of(parameters.reasoningEffort()));
+            builder.reasoningEffort(ReasoningEffort.of((String)parameters.reasoningEffort()));
         }
-
-        // Request parameters
-        builder.messages(toOpenAiMessages(chatRequest.messages()));
-
+        builder.messages(InternalOpenAiOfficialHelper.toOpenAiMessages(chatRequest.messages()));
         if (parameters.temperature() != null) {
             builder.temperature(parameters.temperature());
         }
-
         if (parameters.topP() != null) {
             builder.topP(parameters.topP());
         }
-
         if (parameters.frequencyPenalty() != null) {
             builder.frequencyPenalty(parameters.frequencyPenalty());
         }
-
         if (parameters.presencePenalty() != null) {
             builder.presencePenalty(parameters.presencePenalty());
         }
-
         if (!parameters.stopSequences().isEmpty()) {
-            builder.stop(ChatCompletionCreateParams.Stop.ofStrings(parameters.stopSequences()));
+            builder.stop(ChatCompletionCreateParams.Stop.ofStrings((List)parameters.stopSequences()));
         }
-
         if (!parameters.toolSpecifications().isEmpty()) {
-            builder.tools(toTools(parameters.toolSpecifications(), strictTools));
+            builder.tools(InternalOpenAiOfficialHelper.toTools(parameters.toolSpecifications(), strictTools));
         }
-
         if (parameters.toolChoice() != null) {
-            builder.toolChoice(toOpenAiToolChoice(parameters.toolChoice()));
+            builder.toolChoice(InternalOpenAiOfficialHelper.toOpenAiToolChoice(parameters.toolChoice()));
         }
-
         if (parameters.responseFormat() != null) {
-            builder.responseFormat(toOpenAiResponseFormat(parameters.responseFormat(), strictJsonSchema));
+            builder.responseFormat(InternalOpenAiOfficialHelper.toOpenAiResponseFormat(parameters.responseFormat(), strictJsonSchema));
         }
         return builder;
     }
 }
+

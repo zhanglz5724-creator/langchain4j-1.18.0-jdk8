@@ -1,176 +1,144 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.internal.Exceptions
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.service;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.data.image.Image;
 import dev.langchain4j.data.message.ImageContent;
-
+import dev.langchain4j.internal.Exceptions;
+import dev.langchain4j.internal.ValidationUtils;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.langchain4j.internal.Exceptions.illegalArgument;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static java.util.stream.Collectors.toList;
-
 @Internal
 public class TypeUtils {
-
-    private TypeUtils() { }
+    private TypeUtils() {
+    }
 
     public static Class<?> getRawClass(Type type) {
         if (type == null) {
             throw new NullPointerException("Type should not be null.");
         }
-
-        if (type instanceof Class<?>) {
-            return (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) type).getRawType();
-        } else {
-            throw new IllegalArgumentException("Unable to extract raw class.");
+        if (type instanceof Class) {
+            return (Class)type;
         }
+        if (type instanceof ParameterizedType) {
+            return (Class)((ParameterizedType)type).getRawType();
+        }
+        throw new IllegalArgumentException("Unable to extract raw class.");
     }
 
     public static boolean typeHasRawClass(Type type, Class<?> rawClass) {
         if (type == null || rawClass == null) {
             return false;
         }
-
-        return rawClass.equals(getRawClass(type));
+        return rawClass.equals(TypeUtils.getRawClass(type));
     }
 
     public static Class<?> resolveFirstGenericParameterClass(Type type) {
-        Type[] typeArguments = getTypeArguments(type);
-
+        Type[] typeArguments = TypeUtils.getTypeArguments(type);
         if (typeArguments.length == 0) {
             return null;
         }
-
         Type firstTypeArgument = typeArguments[0];
-        if (firstTypeArgument instanceof Class<?>) {
-            return (Class<?>) firstTypeArgument;
-        } else if (firstTypeArgument instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) firstTypeArgument).getRawType();
+        if (firstTypeArgument instanceof Class) {
+            return (Class)firstTypeArgument;
         }
-
+        if (firstTypeArgument instanceof ParameterizedType) {
+            return (Class)((ParameterizedType)firstTypeArgument).getRawType();
+        }
         return null;
     }
 
     public static Type resolveFirstGenericParameterType(Type type) {
-        Type[] typeArguments = getTypeArguments(type);
+        Type[] typeArguments = TypeUtils.getTypeArguments(type);
         return typeArguments.length > 0 ? typeArguments[0] : null;
     }
 
     private static Type[] getTypeArguments(Type type) {
-        ensureNotNull(type, "type");
-
-        if (!(type instanceof ParameterizedType parameterizedType)) {
+        ValidationUtils.ensureNotNull((Object)type, (String)"type");
+        if (!(type instanceof ParameterizedType)) {
             return new Type[0];
         }
-
-        Type[] typeArguments = parameterizedType.getActualTypeArguments();
-        ensureNotEmpty(typeArguments, "%s", "Parameterized type has no type arguments.");
+        ParameterizedType parameterizedType = (ParameterizedType)type;
+        Object[] typeArguments = parameterizedType.getActualTypeArguments();
+        ValidationUtils.ensureNotEmpty((Object[])typeArguments, (String)"%s", (Object[])new Object[]{"Parameterized type has no type arguments."});
         return typeArguments;
     }
 
-    /**
-     * <p>Ensures that no wildcard and/or parametrized types are being used as service method return type.</p>
-     * <p>For example - such (service) method return types will pass:</p>
-     * <ul>
-     * <li>String</li>
-     * <li>MyCustomPojo</li>
-     * <li>List&lt;MyCustomPojo&gt;</li>
-     * <li>Set&lt;MyCustomPojo&gt;</li>
-     * <li>Result&lt;String&gt;</li>
-     * <li>Result&lt;MyCustomPojo&gt;</li>
-     * <li>Result&lt;List&lt;MyCustomPojo&gt;&gt;</li>
-     * </ul>
-     * ... and there are few examples that will fail:
-     * <ul>
-     * <li>List&lt;?&gt;</li>
-     * <li>Result&lt;?&gt;</li>
-     * <li>Result&lt;List&lt;?&gt;&gt;</li>
-     * <li>List&lt;T&gt;</li>
-     * <li>Result&lt;T&gt;</li>
-     * <li>Result&lt;List&lt;T&gt;&gt;</li>
-     * </ul>*
-     *
-     * @param methodName the method name
-     * @param type       the return type
-     */
     public static void validateReturnTypesAreProperlyParametrized(String methodName, Type type) {
-        TypeUtils.validateReturnTypesAreProperlyParametrized(methodName, type, new ArrayList<>());
+        TypeUtils.validateReturnTypesAreProperlyParametrized(methodName, type, new ArrayList<Type>());
     }
 
     private static void validateReturnTypesAreProperlyParametrized(String methodName, Type type, List<Type> typeChain) {
-        if (type instanceof ParameterizedType parameterizedType) {
-            // Recursively check all parametrized types
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType)type;
             for (Type actualTypeArgument : parameterizedType.getActualTypeArguments()) {
                 typeChain.add(parameterizedType);
-                validateReturnTypesAreProperlyParametrized(methodName, actualTypeArgument, typeChain);
+                TypeUtils.validateReturnTypesAreProperlyParametrized(methodName, actualTypeArgument, typeChain);
             }
-        } else if (type instanceof WildcardType) {
-            // Wildcard usage: Result<?> ask(String question)
-            typeChain.add(type);
-            throw genericNotProperlySpecifiedException(methodName, typeChain);
-        } else if (type instanceof TypeVariable) {
-            // Type variable: Result<T> ask(String question)
-            typeChain.add(type);
-            throw genericNotProperlySpecifiedException(methodName, typeChain);
-        } else if (type instanceof Class<?> clazz && clazz.getTypeParameters().length > 0) {
-            //  Raw type:  Result ask(String question)
-            typeChain.add(type);
-            throw genericNotProperlySpecifiedException(methodName, typeChain);
+        } else {
+            Class clazz;
+            if (type instanceof WildcardType) {
+                typeChain.add(type);
+                throw TypeUtils.genericNotProperlySpecifiedException(methodName, typeChain);
+            }
+            if (type instanceof TypeVariable) {
+                typeChain.add(type);
+                throw TypeUtils.genericNotProperlySpecifiedException(methodName, typeChain);
+            }
+            if (type instanceof Class && (clazz = (Class)type).getTypeParameters().length > 0) {
+                typeChain.add(type);
+                throw TypeUtils.genericNotProperlySpecifiedException(methodName, typeChain);
+            }
         }
     }
 
-
     private static IllegalArgumentException genericNotProperlySpecifiedException(String methodName, List<Type> typeChain) {
-
-        String actualDeclaration = getActualDeclaration(typeChain);
-        String exampleStringDeclaration = getExemplarDeclaration(typeChain, "String");
-        String examplePojoDeclaration = getExemplarDeclaration(typeChain, "MyCustomPojo");
-
-        return illegalArgument("The return type '%s' of the method '%s' must be parameterized with a concrete type, " +
-                "for example: %s or %s", actualDeclaration, methodName, exampleStringDeclaration, examplePojoDeclaration);
+        String actualDeclaration = TypeUtils.getActualDeclaration(typeChain);
+        String exampleStringDeclaration = TypeUtils.getExemplarDeclaration(typeChain, "String");
+        String examplePojoDeclaration = TypeUtils.getExemplarDeclaration(typeChain, "MyCustomPojo");
+        return Exceptions.illegalArgument((String)"The return type '%s' of the method '%s' must be parameterized with a concrete type, for example: %s or %s", (Object[])new Object[]{actualDeclaration, methodName, exampleStringDeclaration, examplePojoDeclaration});
     }
 
     private static String getActualDeclaration(List<Type> typeChain) {
         StringBuilder actualDeclaration = new StringBuilder(typeChain.stream().map(type -> {
             if (type instanceof WildcardType) {
                 return "?";
-            } else if (type instanceof TypeVariable) {
-                return type.getTypeName();
-            } else {
-                return TypeUtils.getRawClass(type).getSimpleName();
             }
+            if (type instanceof TypeVariable) {
+                return type.getTypeName();
+            }
+            return TypeUtils.getRawClass(type).getSimpleName();
         }).collect(Collectors.joining("<")));
-        actualDeclaration.append(repeat(">", Math.max(0, typeChain.size() - 1)));
+        actualDeclaration.append(String.join((CharSequence)"", Collections.nCopies(Math.max(0, typeChain.size() - 1), ">")));
         return actualDeclaration.toString();
     }
 
     private static String getExemplarDeclaration(List<Type> typeChain, String forType) {
-        List<Type> rawTypesOnly = typeChain.stream().filter(type -> !(type instanceof WildcardType || type instanceof TypeVariable)).collect(toList());
+        List rawTypesOnly = typeChain.stream().filter(type -> !(type instanceof WildcardType) && !(type instanceof TypeVariable)).collect(Collectors.toList());
         StringBuilder declarationExample = new StringBuilder(rawTypesOnly.stream().map(type -> TypeUtils.getRawClass(type).getSimpleName()).collect(Collectors.joining("<")));
         declarationExample.append("<").append(forType);
-        declarationExample.append(repeat(">", rawTypesOnly.size()));
+        declarationExample.append(String.join((CharSequence)"", Collections.nCopies(rawTypesOnly.size(), ">")));
         return declarationExample.toString();
     }
 
     public static boolean isImageType(Class<?> rawReturnType) {
         return Image.class.isAssignableFrom(rawReturnType) || ImageContent.class.isAssignableFrom(rawReturnType);
     }
-
-    private static String repeat(String s, int n) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            sb.append(s);
-        }
-        return sb.toString();
-    }
 }
+

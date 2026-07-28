@@ -1,13 +1,37 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  dev.langchain4j.store.embedding.filter.comparison.ContainsString
+ *  dev.langchain4j.store.embedding.filter.comparison.IsEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsIn
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotIn
+ *  dev.langchain4j.store.embedding.filter.logical.And
+ *  dev.langchain4j.store.embedding.filter.logical.Not
+ *  dev.langchain4j.store.embedding.filter.logical.Or
+ */
 package dev.langchain4j.store.embedding.pgvector;
 
-import static java.lang.String.format;
-import static java.util.AbstractMap.SimpleEntry;
-
 import dev.langchain4j.store.embedding.filter.Filter;
-import dev.langchain4j.store.embedding.filter.comparison.*;
+import dev.langchain4j.store.embedding.filter.comparison.ContainsString;
+import dev.langchain4j.store.embedding.filter.comparison.IsEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan;
+import dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsIn;
+import dev.langchain4j.store.embedding.filter.comparison.IsLessThan;
+import dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo;
+import dev.langchain4j.store.embedding.filter.comparison.IsNotIn;
 import dev.langchain4j.store.embedding.filter.logical.And;
 import dev.langchain4j.store.embedding.filter.logical.Not;
 import dev.langchain4j.store.embedding.filter.logical.Or;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -15,146 +39,130 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 abstract class PgVectorFilterMapper {
+    static final Map<Class<?>, String> SQL_TYPE_MAP = Stream.of(new AbstractMap.SimpleEntry<Class<Integer>, String>(Integer.class, "int"), new AbstractMap.SimpleEntry<Class<Long>, String>(Long.class, "bigint"), new AbstractMap.SimpleEntry<Class<Float>, String>(Float.class, "float"), new AbstractMap.SimpleEntry<Class<Double>, String>(Double.class, "float8"), new AbstractMap.SimpleEntry<Class<String>, String>(String.class, "text"), new AbstractMap.SimpleEntry<Class<UUID>, String>(UUID.class, "uuid"), new AbstractMap.SimpleEntry<Class<Boolean>, String>(Boolean.class, "boolean"), new AbstractMap.SimpleEntry<Class<Object>, String>(Object.class, "text")).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    static final Map<Class<?>, String> SQL_TYPE_MAP = Stream.of(
-                    new SimpleEntry<>(Integer.class, "int"),
-                    new SimpleEntry<>(Long.class, "bigint"),
-                    new SimpleEntry<>(Float.class, "float"),
-                    new SimpleEntry<>(Double.class, "float8"),
-                    new SimpleEntry<>(String.class, "text"),
-                    new SimpleEntry<>(UUID.class, "uuid"),
-                    new SimpleEntry<>(Boolean.class, "boolean"),
-                    // Default
-                    new SimpleEntry<>(Object.class, "text"))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    PgVectorFilterMapper() {
+    }
 
     public String map(Filter filter) {
-        if (filter instanceof ContainsString containsString) {
-            return mapContains(containsString);
-        } else if (filter instanceof IsEqualTo isEqualTo) {
-            return mapEqual(isEqualTo);
-        } else if (filter instanceof IsNotEqualTo isNotEqualTo) {
-            return mapNotEqual(isNotEqualTo);
-        } else if (filter instanceof IsGreaterThan isGreaterThan) {
-            return mapGreaterThan(isGreaterThan);
-        } else if (filter instanceof IsGreaterThanOrEqualTo isGreaterThanOrEqualTo) {
-            return mapGreaterThanOrEqual(isGreaterThanOrEqualTo);
-        } else if (filter instanceof IsLessThan isLessThan) {
-            return mapLessThan(isLessThan);
-        } else if (filter instanceof IsLessThanOrEqualTo isLessThanOrEqualTo) {
-            return mapLessThanOrEqual(isLessThanOrEqualTo);
-        } else if (filter instanceof IsIn isIn) {
-            return mapIn(isIn);
-        } else if (filter instanceof IsNotIn isNotIn) {
-            return mapNotIn(isNotIn);
-        } else if (filter instanceof And and) {
-            return mapAnd(and);
-        } else if (filter instanceof Not not) {
-            return mapNot(not);
-        } else if (filter instanceof Or or) {
-            return mapOr(or);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Unsupported filter type: " + filter.getClass().getName());
+        if (filter instanceof ContainsString) {
+            return this.mapContains((ContainsString)filter);
         }
+        if (filter instanceof IsEqualTo) {
+            return this.mapEqual((IsEqualTo)filter);
+        }
+        if (filter instanceof IsNotEqualTo) {
+            return this.mapNotEqual((IsNotEqualTo)filter);
+        }
+        if (filter instanceof IsGreaterThan) {
+            return this.mapGreaterThan((IsGreaterThan)filter);
+        }
+        if (filter instanceof IsGreaterThanOrEqualTo) {
+            return this.mapGreaterThanOrEqual((IsGreaterThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsLessThan) {
+            return this.mapLessThan((IsLessThan)filter);
+        }
+        if (filter instanceof IsLessThanOrEqualTo) {
+            return this.mapLessThanOrEqual((IsLessThanOrEqualTo)filter);
+        }
+        if (filter instanceof IsIn) {
+            return this.mapIn((IsIn)filter);
+        }
+        if (filter instanceof IsNotIn) {
+            return this.mapNotIn((IsNotIn)filter);
+        }
+        if (filter instanceof And) {
+            return this.mapAnd((And)filter);
+        }
+        if (filter instanceof Not) {
+            return this.mapNot((Not)filter);
+        }
+        if (filter instanceof Or) {
+            return this.mapOr((Or)filter);
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private String mapContains(ContainsString containsString) {
-        String key =
-                formatKey(containsString.key(), containsString.comparisonValue().getClass());
-        return format(
-                "%s is not null and position(%s in %s) > 0", key, formatValue(containsString.comparisonValue()), key);
+        String key = this.formatKey(containsString.key(), containsString.comparisonValue().getClass());
+        return String.format("%s is not null and position(%s in %s) > 0", key, this.formatValue(containsString.comparisonValue()), key);
     }
 
     private String mapEqual(IsEqualTo isEqualTo) {
-        String key = formatKey(isEqualTo.key(), isEqualTo.comparisonValue().getClass());
-        return format("%s is not null and %s = %s", key, key, formatValue(isEqualTo.comparisonValue()));
+        String key = this.formatKey(isEqualTo.key(), isEqualTo.comparisonValue().getClass());
+        return String.format("%s is not null and %s = %s", key, key, this.formatValue(isEqualTo.comparisonValue()));
     }
 
     private String mapNotEqual(IsNotEqualTo isNotEqualTo) {
-        String key =
-                formatKey(isNotEqualTo.key(), isNotEqualTo.comparisonValue().getClass());
-        return format("(%s is null or %s != %s)", key, key, formatValue(isNotEqualTo.comparisonValue()));
+        String key = this.formatKey(isNotEqualTo.key(), isNotEqualTo.comparisonValue().getClass());
+        return String.format("(%s is null or %s != %s)", key, key, this.formatValue(isNotEqualTo.comparisonValue()));
     }
 
     private String mapGreaterThan(IsGreaterThan isGreaterThan) {
-        return format(
-                "%s > %s",
-                formatKey(isGreaterThan.key(), isGreaterThan.comparisonValue().getClass()),
-                formatValue(isGreaterThan.comparisonValue()));
+        return String.format("%s > %s", this.formatKey(isGreaterThan.key(), isGreaterThan.comparisonValue().getClass()), this.formatValue(isGreaterThan.comparisonValue()));
     }
 
     private String mapGreaterThanOrEqual(IsGreaterThanOrEqualTo isGreaterThanOrEqualTo) {
-        return format(
-                "%s >= %s",
-                formatKey(
-                        isGreaterThanOrEqualTo.key(),
-                        isGreaterThanOrEqualTo.comparisonValue().getClass()),
-                formatValue(isGreaterThanOrEqualTo.comparisonValue()));
+        return String.format("%s >= %s", this.formatKey(isGreaterThanOrEqualTo.key(), isGreaterThanOrEqualTo.comparisonValue().getClass()), this.formatValue(isGreaterThanOrEqualTo.comparisonValue()));
     }
 
     private String mapLessThan(IsLessThan isLessThan) {
-        return format(
-                "%s < %s",
-                formatKey(isLessThan.key(), isLessThan.comparisonValue().getClass()),
-                formatValue(isLessThan.comparisonValue()));
+        return String.format("%s < %s", this.formatKey(isLessThan.key(), isLessThan.comparisonValue().getClass()), this.formatValue(isLessThan.comparisonValue()));
     }
 
     private String mapLessThanOrEqual(IsLessThanOrEqualTo isLessThanOrEqualTo) {
-        return format(
-                "%s <= %s",
-                formatKey(
-                        isLessThanOrEqualTo.key(),
-                        isLessThanOrEqualTo.comparisonValue().getClass()),
-                formatValue(isLessThanOrEqualTo.comparisonValue()));
+        return String.format("%s <= %s", this.formatKey(isLessThanOrEqualTo.key(), isLessThanOrEqualTo.comparisonValue().getClass()), this.formatValue(isLessThanOrEqualTo.comparisonValue()));
     }
 
     private String mapIn(IsIn isIn) {
-        return format("%s in %s", formatKeyAsString(isIn.key()), formatValuesAsString(isIn.comparisonValues()));
+        return String.format("%s in %s", this.formatKeyAsString(isIn.key()), this.formatValuesAsString(isIn.comparisonValues()));
     }
 
     private String mapNotIn(IsNotIn isNotIn) {
-        String key = formatKeyAsString(isNotIn.key());
-        return format("(%s is null or %s not in %s)", key, key, formatValuesAsString(isNotIn.comparisonValues()));
+        String key = this.formatKeyAsString(isNotIn.key());
+        return String.format("(%s is null or %s not in %s)", key, key, this.formatValuesAsString(isNotIn.comparisonValues()));
     }
 
     private String mapAnd(And and) {
-        return format("%s and %s", map(and.left()), map(and.right()));
+        return String.format("%s and %s", this.map(and.left()), this.map(and.right()));
     }
 
     private String mapNot(Not not) {
-        return format("not(%s)", map(not.expression()));
+        return String.format("not(%s)", this.map(not.expression()));
     }
 
     private String mapOr(Or or) {
-        return format("(%s or %s)", map(or.left()), map(or.right()));
+        return String.format("(%s or %s)", this.map(or.left()), this.map(or.right()));
     }
 
-    abstract String formatKey(String key, Class<?> valueType);
+    abstract String formatKey(String var1, Class<?> var2);
 
-    abstract String formatKeyAsString(String key);
+    abstract String formatKeyAsString(String var1);
 
     String formatValue(Object value) {
-        if (value instanceof String stringValue) {
-            final String escapedValue = stringValue.replace("'", "''");
+        if (value instanceof String) {
+            String escapedValue = (String)value;
+            String escapedValue_replace = escapedValue.replace("'", "''");
             return "'" + escapedValue + "'";
-        } else if (value instanceof UUID) {
-            return "'" + value + "'";
-        } else {
-            return value.toString();
         }
+        if (value instanceof UUID) {
+            return "'" + value + "'";
+        }
+        return value.toString();
     }
 
     String formatCollectionValue(Object value) {
-        if (value instanceof String stringValue) {
-            final String escapedValue = stringValue.replace("'", "''");
+        if (value instanceof String) {
+            String escapedValue = (String)value;
+            String escapedValue_replace = escapedValue.replace("'", "''");
             return '\'' + escapedValue + '\'';
-        } else {
-            return '\'' + value.toString() + '\'';
         }
+        return '\'' + value.toString() + '\'';
     }
 
     String formatValuesAsString(Collection<?> values) {
         return "(" + values.stream().map(this::formatCollectionValue).collect(Collectors.joining(",")) + ")";
     }
 }
+

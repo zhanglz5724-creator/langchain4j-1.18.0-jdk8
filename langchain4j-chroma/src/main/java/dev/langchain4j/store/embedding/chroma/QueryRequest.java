@@ -1,16 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.store.embedding.chroma;
 
 import dev.langchain4j.Internal;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Internal
 class QueryRequest {
-
     private final Map<String, Object> where;
     private final List<List<Float>> queryEmbeddings;
     private final int nResults;
@@ -24,27 +27,26 @@ class QueryRequest {
     }
 
     public Map<String, Object> getWhere() {
-        return where;
+        return this.where;
     }
 
     public List<List<Float>> getQueryEmbeddings() {
-        return queryEmbeddings;
+        return this.queryEmbeddings;
     }
 
     public int getnResults() {
-        return nResults;
+        return this.nResults;
     }
 
     public List<String> getInclude() {
-        return include;
+        return this.include;
     }
 
     public static class Builder {
-
         private Map<String, Object> where;
         private List<List<Float>> queryEmbeddings;
         private int nResults;
-        private List<String> include = asList("metadatas", "documents", "distances", "embeddings");
+        private List<String> include = Arrays.asList("metadatas", "documents", "distances", "embeddings");
 
         public Builder where(Map<String, Object> where) {
             this.where = where;
@@ -52,7 +54,7 @@ class QueryRequest {
         }
 
         public Builder queryEmbeddings(List<Float> queryEmbeddings) {
-            this.queryEmbeddings = singletonList(queryEmbeddings);
+            this.queryEmbeddings = Collections.singletonList(queryEmbeddings);
             return this;
         }
 
@@ -71,3 +73,4 @@ class QueryRequest {
         }
     }
 }
+

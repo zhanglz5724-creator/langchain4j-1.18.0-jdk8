@@ -1,21 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ */
 package dev.langchain4j.model.vertexai.gemini;
 
 import dev.langchain4j.model.chat.response.StreamingHandle;
 
-/**
- * @since 1.8.0
- */
-class VertexAiGeminiStreamingHandle implements StreamingHandle {
-
+class VertexAiGeminiStreamingHandle
+implements StreamingHandle {
     private volatile boolean isCancelled;
 
-    @Override
-    public void cancel() {
-        isCancelled = true;
+    VertexAiGeminiStreamingHandle() {
     }
 
-    @Override
+    public void cancel() {
+        this.isCancelled = true;
+    }
+
     public boolean isCancelled() {
-        return isCancelled;
+        return this.isCancelled;
     }
 }
+

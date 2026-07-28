@@ -1,8 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.observability;
 
-import java.util.Map;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.scope.AgenticScope;
+import java.util.Map;
+import java.util.Objects;
+
 public class AgentInvocationError {
     private final AgenticScope agenticScope;
     private final AgentInstance agent;
@@ -16,46 +21,56 @@ public class AgentInvocationError {
         this.error = error;
     }
 
-    public AgenticScope getAgenticScope() {
-        return agenticScope;
+    public AgenticScope agenticScope() {
+        return this.agenticScope;
     }
 
-    public AgentInstance getAgent() {
-        return agent;
+    public AgentInstance agent() {
+        return this.agent;
     }
 
-    public Map<String, Object> getInputs() {
-        return inputs;
+    public Map<String, Object> inputs() {
+        return this.inputs;
     }
 
-    public Throwable getError() {
-        return error;
+    public Throwable error() {
+        return this.error;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AgentInvocationError that = (AgentInvocationError) o;
-        return java.util.Objects.equals(this.agenticScope, that.agenticScope) && java.util.Objects.equals(this.agent, that.agent) && java.util.Objects.equals(this.inputs, that.inputs) && java.util.Objects.equals(this.error, that.error);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AgentInvocationError)) {
+            return false;
+        }
+        AgentInvocationError other = (AgentInvocationError)o;
+        if (!Objects.equals(this.agenticScope, other.agenticScope)) {
+            return false;
+        }
+        if (!Objects.equals(this.agent, other.agent)) {
+            return false;
+        }
+        if (!Objects.equals(this.inputs, other.inputs)) {
+            return false;
+        }
+        return Objects.equals(this.error, other.error);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(agenticScope, agent, inputs, error);
+        return Objects.hash(this.agenticScope, this.agent, this.inputs, this.error);
     }
 
-    @Override
     public String toString() {
-        return "AgentInvocationError{"agenticScope=" + agenticScope + , "agent=" + agent + , "inputs=" + inputs + , "error=" + error + "}"";
+        return "AgentInvocationError{agenticScope=" + this.agenticScope + ", agent=" + this.agent + ", inputs=" + this.inputs + ", error=" + this.error + "}";
     }
-
 
     public String agentName() {
-        return agent.name();
+        return this.agent.name();
     }
 
     public String agentId() {
-        return agent.agentId();
+        return this.agent.agentId();
     }
 }
+

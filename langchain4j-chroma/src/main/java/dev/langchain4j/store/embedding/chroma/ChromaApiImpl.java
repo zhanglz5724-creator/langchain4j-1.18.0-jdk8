@@ -1,14 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.store.embedding.chroma;
 
 import dev.langchain4j.Internal;
+import dev.langchain4j.store.embedding.chroma.AddEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.ChromaHttpClient;
+import dev.langchain4j.store.embedding.chroma.Collection;
+import dev.langchain4j.store.embedding.chroma.CreateCollectionRequest;
+import dev.langchain4j.store.embedding.chroma.DeleteEmbeddingsRequest;
+import dev.langchain4j.store.embedding.chroma.QueryRequest;
+import dev.langchain4j.store.embedding.chroma.QueryResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Internal
 class ChromaApiImpl {
-
     private final ChromaHttpClient httpClient;
 
     public ChromaApiImpl(ChromaHttpClient httpClient) {
@@ -16,41 +27,39 @@ class ChromaApiImpl {
     }
 
     public Collection collection(String collectionName) throws IOException {
-        Map<String, String> pathParams = new HashMap<>();
+        HashMap<String, String> pathParams = new HashMap<String, String>();
         pathParams.put("collection_name", collectionName);
-        return httpClient.get("api/v1/collections/{collection_name}", Collection.class, pathParams);
+        return this.httpClient.get("api/v1/collections/{collection_name}", Collection.class, pathParams);
     }
 
     public Collection createCollection(CreateCollectionRequest createCollectionRequest) throws IOException {
-        return httpClient.post("api/v1/collections", createCollectionRequest, Collection.class);
+        return this.httpClient.post("api/v1/collections", createCollectionRequest, Collection.class);
     }
 
     public boolean addEmbeddings(String collectionId, AddEmbeddingsRequest embedding) throws IOException {
-        Map<String, String> pathParams = new HashMap<>();
+        HashMap<String, String> pathParams = new HashMap<String, String>();
         pathParams.put("collection_id", collectionId);
-        Boolean result =
-                httpClient.post("api/v1/collections/{collection_id}/add", embedding, Boolean.class, pathParams);
+        Boolean result = this.httpClient.post("api/v1/collections/{collection_id}/add", embedding, Boolean.class, pathParams);
         return Boolean.TRUE.equals(result);
     }
 
     public QueryResponse queryCollection(String collectionId, QueryRequest queryRequest) throws IOException {
-        Map<String, String> pathParams = new HashMap<>();
+        HashMap<String, String> pathParams = new HashMap<String, String>();
         pathParams.put("collection_id", collectionId);
-        return httpClient.post(
-                "api/v1/collections/{collection_id}/query", queryRequest, QueryResponse.class, pathParams);
+        return this.httpClient.post("api/v1/collections/{collection_id}/query", queryRequest, QueryResponse.class, pathParams);
     }
 
-    @SuppressWarnings("unchecked")
     public List<String> deleteEmbeddings(String collectionId, DeleteEmbeddingsRequest embedding) throws IOException {
-        Map<String, String> pathParams = new HashMap<>();
+        HashMap<String, String> pathParams = new HashMap<String, String>();
         pathParams.put("collection_id", collectionId);
-        return httpClient.post("api/v1/collections/{collection_id}/delete", embedding, List.class, pathParams);
+        return this.httpClient.post("api/v1/collections/{collection_id}/delete", embedding, List.class, pathParams);
     }
 
     public Collection deleteCollection(String collectionName) throws IOException {
-        Map<String, String> pathParams = new HashMap<>();
+        HashMap<String, String> pathParams = new HashMap<String, String>();
         pathParams.put("collection_name", collectionName);
-        httpClient.delete("api/v1/collections/{collection_name}", pathParams);
-        return null; // DELETE operations typically don't return a body
+        this.httpClient.delete("api/v1/collections/{collection_name}", pathParams);
+        return null;
     }
 }
+

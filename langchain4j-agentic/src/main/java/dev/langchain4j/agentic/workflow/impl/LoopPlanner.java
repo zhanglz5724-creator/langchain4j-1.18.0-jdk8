@@ -1,29 +1,29 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.workflow.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.Collections;
-import java.util.HashMap;
 import dev.langchain4j.agentic.planner.Action;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.planner.AgenticSystemTopology;
 import dev.langchain4j.agentic.planner.InitPlanningContext;
-import dev.langchain4j.agentic.planner.PlanningContext;
 import dev.langchain4j.agentic.planner.Planner;
+import dev.langchain4j.agentic.planner.PlanningContext;
 import dev.langchain4j.agentic.scope.AgenticScope;
 import dev.langchain4j.agentic.workflow.LoopAgentInstance;
+import dev.langchain4j.agentic.workflow.impl.DefaultLoopAgentInstance;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiPredicate;
 
-public class LoopPlanner implements Planner {
-
+public class LoopPlanner
+implements Planner {
     private final int maxIterations;
     private int iterationsCounter = 1;
-
     private final boolean testExitAtLoopEnd;
-
     private final BiPredicate<AgenticScope, Integer> exitCondition;
     private final String exitConditionDescription;
-
     private List<AgentInstance> agents;
     private int agentCursor = 0;
 
@@ -41,21 +41,21 @@ public class LoopPlanner implements Planner {
 
     @Override
     public Action firstAction(PlanningContext planningContext) {
-        return call(agents.get(agentCursor));
+        return this.call(this.agents.get(this.agentCursor));
     }
 
     @Override
     public Action nextAction(PlanningContext planningContext) {
-        agentCursor = (agentCursor+1) % agents.size();
-        if (agentCursor == 0) {
-            if (iterationsCounter >= maxIterations || exitCondition.test(planningContext.agenticScope(), iterationsCounter)) {
-                return done();
+        this.agentCursor = (this.agentCursor + 1) % this.agents.size();
+        if (this.agentCursor == 0) {
+            if (this.iterationsCounter >= this.maxIterations || this.exitCondition.test(planningContext.agenticScope(), this.iterationsCounter)) {
+                return this.done();
             }
-            iterationsCounter++;
-        } else if (!testExitAtLoopEnd && exitCondition.test(planningContext.agenticScope(), iterationsCounter)) {
-            return done();
+            ++this.iterationsCounter;
+        } else if (!this.testExitAtLoopEnd && this.exitCondition.test(planningContext.agenticScope(), this.iterationsCounter)) {
+            return this.done();
         }
-        return call(agents.get(agentCursor));
+        return this.call(this.agents.get(this.agentCursor));
     }
 
     @Override
@@ -68,41 +68,41 @@ public class LoopPlanner implements Planner {
         if (agentInstanceClass != LoopAgentInstance.class) {
             throw new ClassCastException("Cannot cast to " + agentInstanceClass.getName() + ": incompatible type");
         }
-        return (T) new DefaultLoopAgentInstance(agentInstance, this);
+        return (T)new DefaultLoopAgentInstance(agentInstance, this);
     }
 
     public int maxIterations() {
-        return maxIterations;
+        return this.maxIterations;
     }
 
     public boolean testExitAtLoopEnd() {
-        return testExitAtLoopEnd;
+        return this.testExitAtLoopEnd;
     }
 
     public String exitCondition() {
-        return exitConditionDescription;
+        return this.exitConditionDescription;
     }
 
     @Override
     public Map<String, Object> executionState() {
-        // Save the current cursor and iteration counter.
-        // LoopPlanner's firstAction() does NOT advance state (it just calls agents.get(agentCursor)),
-        // so the saved values can be restored directly.
-        return Collections.unmodifiableMap(new HashMap<>() {{
-    put("cursor", agentCursor);
-    put("iteration", iterationsCounter);
-}});
+        HashMap<String, Object> m = new HashMap<String, Object>();
+        m.put("cursor", this.agentCursor);
+        m.put("iteration", this.iterationsCounter);
+        return m;
     }
 
     @Override
     public void restoreExecutionState(Map<String, Object> state) {
+        Object savedIteration;
         Object savedCursor = state.get("cursor");
-        if (savedCursor instanceof Number n) {
+        if (savedCursor instanceof Number) {
+            Number n = (Number)savedCursor;
             this.agentCursor = n.intValue();
         }
-        Object savedIteration = state.get("iteration");
-        if (savedIteration instanceof Number n) {
+        if ((savedIteration = state.get("iteration")) instanceof Number) {
+            Number n = (Number)savedIteration;
             this.iterationsCounter = n.intValue();
         }
     }
 }
+

@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.completion;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,18 +22,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.model.openai.internal.completion.CompletionChoice;
 import dev.langchain4j.model.openai.internal.shared.Usage;
-
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Collections.unmodifiableList;
-
-@JsonDeserialize(builder = CompletionResponse.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class CompletionResponse {
-
     @JsonProperty
     private final String id;
     @JsonProperty
@@ -40,82 +52,66 @@ public final class CompletionResponse {
     }
 
     public String id() {
-        return id;
+        return this.id;
     }
 
     public Integer created() {
-        return created;
+        return this.created;
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public List<CompletionChoice> choices() {
-        return choices;
+        return this.choices;
     }
 
     public Usage usage() {
-        return usage;
+        return this.usage;
     }
 
-    /**
-     * Convenience method to get the text from the first choice.
-     */
     public String text() {
-        return choices().get(0).text();
+        return this.choices().get(0).text();
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof CompletionResponse
-                && equalTo((CompletionResponse) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof CompletionResponse && this.equalTo((CompletionResponse)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(CompletionResponse another) {
-        return Objects.equals(id, another.id)
-                && Objects.equals(created, another.created)
-                && Objects.equals(model, another.model)
-                && Objects.equals(choices, another.choices)
-                && Objects.equals(usage, another.usage);
+        return Objects.equals(this.id, another.id) && Objects.equals(this.created, another.created) && Objects.equals(this.model, another.model) && Objects.equals(this.choices, another.choices) && Objects.equals(this.usage, another.usage);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(id);
-        h += (h << 5) + Objects.hashCode(created);
-        h += (h << 5) + Objects.hashCode(model);
-        h += (h << 5) + Objects.hashCode(choices);
-        h += (h << 5) + Objects.hashCode(usage);
+        h += (h << 5) + Objects.hashCode(this.id);
+        h += (h << 5) + Objects.hashCode(this.created);
+        h += (h << 5) + Objects.hashCode(this.model);
+        h += (h << 5) + Objects.hashCode(this.choices);
+        h += (h << 5) + Objects.hashCode(this.usage);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "CompletionResponse{"
-                + "id=" + id
-                + ", created=" + created
-                + ", model=" + model
-                + ", choices=" + choices
-                + ", usage=" + usage
-                + "}";
+        return "CompletionResponse{id=" + this.id + ", created=" + this.created + ", model=" + this.model + ", choices=" + this.choices + ", usage=" + this.usage + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String id;
         private Integer created;
         private String model;
@@ -139,7 +135,7 @@ public final class CompletionResponse {
 
         public Builder choices(List<CompletionChoice> choices) {
             if (choices != null) {
-                this.choices = unmodifiableList(choices);
+                this.choices = Collections.unmodifiableList(choices);
             }
             return this;
         }
@@ -154,3 +150,4 @@ public final class CompletionResponse {
         }
     }
 }
+

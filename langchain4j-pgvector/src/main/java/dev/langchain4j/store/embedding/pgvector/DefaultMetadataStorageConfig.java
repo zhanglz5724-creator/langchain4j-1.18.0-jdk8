@@ -1,23 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.pgvector;
 
+import dev.langchain4j.store.embedding.pgvector.MetadataStorageConfig;
+import dev.langchain4j.store.embedding.pgvector.MetadataStorageMode;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Metadata configuration implementation
- */
-public class DefaultMetadataStorageConfig implements MetadataStorageConfig {
+public class DefaultMetadataStorageConfig
+implements MetadataStorageConfig {
     private MetadataStorageMode storageMode;
     private List<String> columnDefinitions;
     private List<String> indexes;
     private String indexType;
 
-    /**
-     * Just for warnings ?
-     */
-    @SuppressWarnings("unused")
     public DefaultMetadataStorageConfig() {
-        // Just for javadoc warning ?
     }
 
     public DefaultMetadataStorageConfig(MetadataStorageMode storageMode, List<String> columnDefinitions, List<String> indexes, String indexType) {
@@ -27,34 +25,30 @@ public class DefaultMetadataStorageConfig implements MetadataStorageConfig {
         this.indexType = indexType;
     }
 
-    /**
-     * Default configuration
-     *
-     * @return Default configuration
-     */
     public static MetadataStorageConfig defaultConfig() {
-        return DefaultMetadataStorageConfig.builder()
-                .storageMode(MetadataStorageMode.COMBINED_JSON)
-                .columnDefinitions(Collections.singletonList("metadata JSON NULL"))
-                .build();
+        return DefaultMetadataStorageConfig.builder().storageMode(MetadataStorageMode.COMBINED_JSON).columnDefinitions(Collections.singletonList("metadata JSON NULL")).build();
     }
 
     public static DefaultMetadataStorageConfigBuilder builder() {
         return new DefaultMetadataStorageConfigBuilder();
     }
 
+    @Override
     public MetadataStorageMode storageMode() {
         return this.storageMode;
     }
 
+    @Override
     public List<String> columnDefinitions() {
         return this.columnDefinitions;
     }
 
+    @Override
     public List<String> indexes() {
         return this.indexes;
     }
 
+    @Override
     public String indexType() {
         return this.indexType;
     }
@@ -93,7 +87,8 @@ public class DefaultMetadataStorageConfig implements MetadataStorageConfig {
         }
 
         public String toString() {
-            return "DefaultMetadataStorageConfig.DefaultMetadataStorageConfigBuilder(storageMode=" + this.storageMode + ", columnDefinitions=" + this.columnDefinitions + ", indexes=" + this.indexes + ", indexType=" + this.indexType + ")";
+            return "DefaultMetadataStorageConfig.DefaultMetadataStorageConfigBuilder(storageMode=" + (Object)((Object)this.storageMode) + ", columnDefinitions=" + this.columnDefinitions + ", indexes=" + this.indexes + ", indexType=" + this.indexType + ")";
         }
     }
 }
+

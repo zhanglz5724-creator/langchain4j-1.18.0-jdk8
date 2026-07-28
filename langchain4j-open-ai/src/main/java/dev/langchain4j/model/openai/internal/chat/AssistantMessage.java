@@ -1,3 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAnyGetter
+ *  com.fasterxml.jackson.annotation.JsonIgnore
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.annotation.JsonSetter
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -11,23 +28,24 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
+import dev.langchain4j.model.openai.internal.chat.FunctionCall;
+import dev.langchain4j.model.openai.internal.chat.Message;
+import dev.langchain4j.model.openai.internal.chat.Role;
+import dev.langchain4j.model.openai.internal.chat.ToolCall;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static dev.langchain4j.model.openai.internal.chat.Role.ASSISTANT;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
-
-@JsonDeserialize(builder = AssistantMessage.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public final class AssistantMessage implements Message {
-
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+public final class AssistantMessage
+implements Message {
     @JsonProperty
-    private final Role role = ASSISTANT;
+    private final Role role = Role.ASSISTANT;
     @JsonProperty
     private final String content;
     @JsonProperty
@@ -54,106 +72,86 @@ public final class AssistantMessage implements Message {
         this.customParameters = builder.customParameters;
     }
 
+    @Override
     public Role role() {
-        return role;
+        return this.role;
     }
 
     public String content() {
-        return content;
+        return this.content;
     }
 
     public String reasoningContent() {
-        return reasoningContent;
+        return this.reasoningContent;
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
     public List<ToolCall> toolCalls() {
-        return toolCalls;
+        return this.toolCalls;
     }
 
     public String refusal() {
-        return refusal;
+        return this.refusal;
     }
 
     @Deprecated
     public FunctionCall functionCall() {
-        return functionCall;
+        return this.functionCall;
     }
 
     @JsonAnyGetter
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(value=JsonInclude.Include.NON_EMPTY)
     public Map<String, Object> customParameters() {
-        return customParameters;
+        return this.customParameters;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof AssistantMessage
-                && equalTo((AssistantMessage) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof AssistantMessage && this.equalTo((AssistantMessage)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(AssistantMessage another) {
-        return Objects.equals(role, another.role)
-                && Objects.equals(content, another.content)
-                && Objects.equals(reasoningContent, another.reasoningContent)
-                && Objects.equals(name, another.name)
-                && Objects.equals(toolCalls, another.toolCalls)
-                && Objects.equals(refusal, another.refusal)
-                && Objects.equals(functionCall, another.functionCall)
-                && Objects.equals(customParameters, another.customParameters);
+        return Objects.equals((Object)this.role, (Object)another.role) && Objects.equals(this.content, another.content) && Objects.equals(this.reasoningContent, another.reasoningContent) && Objects.equals(this.name, another.name) && Objects.equals(this.toolCalls, another.toolCalls) && Objects.equals(this.refusal, another.refusal) && Objects.equals(this.functionCall, another.functionCall) && Objects.equals(this.customParameters, another.customParameters);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(role);
-        h += (h << 5) + Objects.hashCode(content);
-        h += (h << 5) + Objects.hashCode(reasoningContent);
-        h += (h << 5) + Objects.hashCode(name);
-        h += (h << 5) + Objects.hashCode(toolCalls);
-        h += (h << 5) + Objects.hashCode(refusal);
-        h += (h << 5) + Objects.hashCode(functionCall);
-        h += (h << 5) + Objects.hashCode(customParameters);
+        h += (h << 5) + Objects.hashCode((Object)this.role);
+        h += (h << 5) + Objects.hashCode(this.content);
+        h += (h << 5) + Objects.hashCode(this.reasoningContent);
+        h += (h << 5) + Objects.hashCode(this.name);
+        h += (h << 5) + Objects.hashCode(this.toolCalls);
+        h += (h << 5) + Objects.hashCode(this.refusal);
+        h += (h << 5) + Objects.hashCode(this.functionCall);
+        h += (h << 5) + Objects.hashCode(this.customParameters);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "AssistantMessage{"
-                + "role=" + role
-                + ", content=" + content
-                + ", reasoningContent=" + reasoningContent
-                + ", name=" + name
-                + ", toolCalls=" + toolCalls
-                + ", refusal=" + refusal
-                + ", functionCall=" + functionCall
-                + ", customParameters=" + customParameters
-                + "}";
+        return "AssistantMessage{role=" + (Object)((Object)this.role) + ", content=" + this.content + ", reasoningContent=" + this.reasoningContent + ", name=" + this.name + ", toolCalls=" + this.toolCalls + ", refusal=" + this.refusal + ", functionCall=" + this.functionCall + ", customParameters=" + this.customParameters + "}";
     }
 
     public static AssistantMessage from(String content) {
-        return AssistantMessage.builder()
-                .content(content)
-                .build();
+        return AssistantMessage.builder().content(content).build();
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private String content;
         private String reasoningContent;
         private String name;
@@ -181,14 +179,14 @@ public final class AssistantMessage implements Message {
         @JsonSetter
         public Builder toolCalls(List<ToolCall> toolCalls) {
             if (toolCalls != null) {
-                this.toolCalls = unmodifiableList(toolCalls);
+                this.toolCalls = Collections.unmodifiableList(toolCalls);
             }
             return this;
         }
 
         @JsonIgnore
-        public Builder toolCalls(ToolCall... toolCalls) {
-            return toolCalls(asList(toolCalls));
+        public Builder toolCalls(ToolCall ... toolCalls) {
+            return this.toolCalls(Arrays.asList(toolCalls));
         }
 
         public Builder refusal(String refusal) {
@@ -209,7 +207,7 @@ public final class AssistantMessage implements Message {
 
         public Builder customParameter(String key, Object value) {
             if (this.customParameters == null) {
-                this.customParameters = new LinkedHashMap<>();
+                this.customParameters = new LinkedHashMap<String, Object>();
             }
             this.customParameters.put(key, value);
             return this;
@@ -220,3 +218,4 @@ public final class AssistantMessage implements Message {
         }
     }
 }
+

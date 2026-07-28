@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.image;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,42 +24,28 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
 import java.util.Objects;
 
-/**
- * Represents the request to the OpenAI image generation API.
- * Find description of parameters <a href="https://developers.openai.com/api/reference/resources/images/methods/generate">here</a>.
- */
-@JsonDeserialize(builder = GenerateImagesRequest.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class GenerateImagesRequest {
-
     @JsonProperty
     private final String model;
-
     @JsonProperty
     private final String prompt;
-
     @JsonProperty
     private final int n;
-
     @JsonProperty
     private final String size;
-
     @JsonProperty
     private final String quality;
-
     @JsonProperty
     private final String user;
-
     @JsonProperty
     private final String background;
-
     @JsonProperty
     private final String outputFormat;
-
     @JsonProperty
     private final Integer outputCompression;
-
     @JsonProperty
     private final String moderation;
 
@@ -62,58 +62,35 @@ public class GenerateImagesRequest {
         this.moderation = builder.moderation;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 2381;
-        h += (h << 5) + Objects.hashCode(model);
-        h += (h << 5) + Objects.hashCode(prompt);
-        h += (h << 5) + n;
-        h += (h << 5) + Objects.hashCode(size);
-        h += (h << 5) + Objects.hashCode(quality);
-        h += (h << 5) + Objects.hashCode(user);
-        h += (h << 5) + Objects.hashCode(background);
-        h += (h << 5) + Objects.hashCode(outputFormat);
-        h += (h << 5) + Objects.hashCode(outputCompression);
-        h += (h << 5) + Objects.hashCode(moderation);
+        h += (h << 5) + Objects.hashCode(this.model);
+        h += (h << 5) + Objects.hashCode(this.prompt);
+        h += (h << 5) + this.n;
+        h += (h << 5) + Objects.hashCode(this.size);
+        h += (h << 5) + Objects.hashCode(this.quality);
+        h += (h << 5) + Objects.hashCode(this.user);
+        h += (h << 5) + Objects.hashCode(this.background);
+        h += (h << 5) + Objects.hashCode(this.outputFormat);
+        h += (h << 5) + Objects.hashCode(this.outputCompression);
+        h += (h << 5) + Objects.hashCode(this.moderation);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return ("GenerateImagesRequest{" + "model="
-                + model
-                + ", prompt="
-                + prompt
-                + ", n="
-                + n
-                + ", size="
-                + size
-                + ", quality="
-                + quality
-                + ", user="
-                + user
-                + ", background="
-                + background
-                + ", outputFormat="
-                + outputFormat
-                + ", outputCompression="
-                + outputCompression
-                + ", moderation="
-                + moderation
-                + '}');
+        return "GenerateImagesRequest{model=" + this.model + ", prompt=" + this.prompt + ", n=" + this.n + ", size=" + this.size + ", quality=" + this.quality + ", user=" + this.user + ", background=" + this.background + ", outputFormat=" + this.outputFormat + ", outputCompression=" + this.outputCompression + ", moderation=" + this.moderation + '}';
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Builder {
-
         private String model;
         private String prompt;
         private int n = 1;
@@ -180,3 +157,4 @@ public class GenerateImagesRequest {
         }
     }
 }
+

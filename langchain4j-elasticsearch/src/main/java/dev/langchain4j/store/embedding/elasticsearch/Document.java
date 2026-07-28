@@ -1,16 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ */
 package dev.langchain4j.store.embedding.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Document {
-
     private float[] vector;
     private String text;
     private Map<String, Object> metadata;
 
-    Document() {}
+    Document() {
+    }
 
     Document(float[] vector, String text, Map<String, Object> metadata) {
         this.vector = vector;
@@ -19,7 +25,7 @@ public class Document {
     }
 
     public float[] getVector() {
-        return vector;
+        return this.vector;
     }
 
     public void setVector(float[] vector) {
@@ -27,7 +33,7 @@ public class Document {
     }
 
     public String getText() {
-        return text;
+        return this.text;
     }
 
     public void setText(String text) {
@@ -35,7 +41,7 @@ public class Document {
     }
 
     public Map<String, Object> getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public void setMetadata(Map<String, Object> metadata) {
@@ -47,7 +53,6 @@ public class Document {
     }
 
     public static class Builder {
-
         private float[] vector;
         private String text;
         private Map<String, Object> metadata;
@@ -68,7 +73,8 @@ public class Document {
         }
 
         public Document build() {
-            return new Document(vector, text, metadata);
+            return new Document(this.vector, this.text, this.metadata);
         }
     }
 }
+

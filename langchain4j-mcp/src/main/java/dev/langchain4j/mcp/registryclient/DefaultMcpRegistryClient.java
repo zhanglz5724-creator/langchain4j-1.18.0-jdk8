@@ -1,18 +1,40 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility
+ *  com.fasterxml.jackson.annotation.PropertyAccessor
+ *  com.fasterxml.jackson.core.JsonParser
+ *  com.fasterxml.jackson.core.JsonProcessingException
+ *  com.fasterxml.jackson.databind.DeserializationContext
+ *  com.fasterxml.jackson.databind.DeserializationFeature
+ *  com.fasterxml.jackson.databind.JsonDeserializer
+ *  com.fasterxml.jackson.databind.JsonNode
+ *  com.fasterxml.jackson.databind.Module
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  com.fasterxml.jackson.databind.SerializationFeature
+ *  com.fasterxml.jackson.databind.module.SimpleModule
+ *  dev.langchain4j.http.client.HttpClient
+ *  dev.langchain4j.http.client.HttpClientBuilderLoader
+ *  dev.langchain4j.http.client.HttpMethod
+ *  dev.langchain4j.http.client.HttpRequest
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ *  dev.langchain4j.http.client.log.LoggingHttpClient
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.mcp.registryclient;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.PropertyAccessor.FIELD;
-import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
-import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpClientBuilderLoader;
@@ -21,144 +43,95 @@ import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.log.LoggingHttpClient;
 import dev.langchain4j.internal.Utils;
+import dev.langchain4j.mcp.registryclient.McpRegistryClient;
+import dev.langchain4j.mcp.registryclient.McpRegistryClientException;
 import dev.langchain4j.mcp.registryclient.model.McpGetServerResponse;
 import dev.langchain4j.mcp.registryclient.model.McpRegistryHealth;
 import dev.langchain4j.mcp.registryclient.model.McpRegistryPong;
 import dev.langchain4j.mcp.registryclient.model.McpServerList;
 import dev.langchain4j.mcp.registryclient.model.McpServerListRequest;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class DefaultMcpRegistryClient implements McpRegistryClient {
-
+public class DefaultMcpRegistryClient
+implements McpRegistryClient {
     private static final String OFFICIAL_REGISTRY_URL = "https://registry.modelcontextprotocol.io";
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
-            .parseCaseInsensitive()
-            .append(ISO_LOCAL_DATE_TIME)
-            .parseLenient()
-            .appendLiteral('Z') // we are using UTC time and the official registry requires the 'Z' to be present
-            .toFormatter();
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive().append(DateTimeFormatter.ISO_LOCAL_DATE_TIME).parseLenient().appendLiteral('Z').toFormatter();
+    private static final SimpleModule JACKSON_MODULE = new SimpleModule("mcp-registry-client-module").addDeserializer(LocalDateTime.class, (JsonDeserializer)new JsonDeserializer<LocalDateTime>(){
 
-    private static final SimpleModule JACKSON_MODULE = new SimpleModule("mcp-registry-client-module")
-            .addDeserializer(LocalDateTime.class, new JsonDeserializer<>() {
-                @Override
-                public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-                    JsonNode node = p.getCodec().readTree(p);
-                    return LocalDateTime.parse(node.asText(), ISO_DATE_TIME);
-                }
-            });
-    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .setVisibility(FIELD, ANY)
-            .registerModule(JACKSON_MODULE)
-            // the servers might add new properties over time, let's not allow that to break the client
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .enable(INDENT_OUTPUT);
-
+        public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            JsonNode node = (JsonNode)p.getCodec().readTree(p);
+            return LocalDateTime.parse(node.asText(), DateTimeFormatter.ISO_DATE_TIME);
+        }
+    });
+    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY).registerModule((Module)JACKSON_MODULE).disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).enable(SerializationFeature.INDENT_OUTPUT);
     private final String baseUrl;
     private final HttpClient httpClient;
     private final Supplier<Map<String, String>> headers;
-
-    // this is used to validate path parameters to prevent URL injection attacks
     private static final Pattern ALLOWED_URL_CHARACTERS = Pattern.compile("[a-zA-Z0-9\\-_./]+");
 
-    private DefaultMcpRegistryClient(
-            String baseUrl,
-            HttpClient httpClient,
-            Supplier<Map<String, String>> headers,
-            boolean logRequests,
-            boolean logResponses) {
-        this.baseUrl = Utils.getOrDefault(baseUrl, OFFICIAL_REGISTRY_URL);
-        this.headers = Utils.getOrDefault(headers, () -> HashMap::new);
-        HttpClient httpClientToUse =
-                Utils.getOrDefault(httpClient, () -> HttpClientBuilderLoader.loadHttpClientBuilder()
-                        .build());
-        if (logRequests || logResponses) {
-            this.httpClient = new LoggingHttpClient(httpClientToUse, logRequests, logResponses);
-        } else {
-            this.httpClient = httpClientToUse;
-        }
+    private DefaultMcpRegistryClient(String baseUrl, HttpClient httpClient, Supplier<Map<String, String>> headers, boolean logRequests, boolean logResponses) {
+        this.baseUrl = (String)Utils.getOrDefault((Object)baseUrl, (Object)OFFICIAL_REGISTRY_URL);
+        this.headers = (Supplier)Utils.getOrDefault(headers, () -> HashMap::new);
+        HttpClient httpClientToUse = (HttpClient)Utils.getOrDefault((Object)httpClient, () -> HttpClientBuilderLoader.loadHttpClientBuilder().build());
+        this.httpClient = logRequests || logResponses ? new LoggingHttpClient(httpClientToUse, Boolean.valueOf(logRequests), Boolean.valueOf(logResponses)) : httpClientToUse;
     }
 
     @Override
     public McpServerList listServers(McpServerListRequest request) {
         Objects.requireNonNull(request, "request must not be null");
-        String params = processServerListRequestPathParams(request);
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, !params.isEmpty() ? "/v0/servers?" + params : "/v0/servers")
-                .addHeaders(currentHeaders())
-                .build();
-        return sendAndProcessResponse(httpRequest, McpServerList.class);
+        String params = this.processServerListRequestPathParams(request);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, !params.isEmpty() ? "/v0/servers?" + params : "/v0/servers").addHeaders(this.currentHeaders()).build();
+        return this.sendAndProcessResponse(httpRequest, McpServerList.class);
     }
 
     @Override
     public McpGetServerResponse getServerDetails(String serverName) {
         Objects.requireNonNull(serverName, "serverName cannot be null");
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "/v0/servers/" + URLEncoder.encode(serverName, StandardCharsets.UTF_8))
-                .addHeaders(currentHeaders())
-                .build();
-        return sendAndProcessResponse(httpRequest, McpGetServerResponse.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "/v0/servers/" + this.encode(serverName)).addHeaders(this.currentHeaders()).build();
+        return this.sendAndProcessResponse(httpRequest, McpGetServerResponse.class);
     }
 
     @Override
     public McpGetServerResponse getSpecificServerVersion(String serverName, String version) {
         Objects.requireNonNull(serverName, "serverName cannot be null");
         Objects.requireNonNull(version, "version cannot be null");
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "/v0.1/servers/" + encode(serverName) + "/versions/" + encode(version))
-                .addHeaders(currentHeaders())
-                .build();
-        return sendAndProcessResponse(httpRequest, McpGetServerResponse.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "/v0.1/servers/" + this.encode(serverName) + "/versions/" + this.encode(version)).addHeaders(this.currentHeaders()).build();
+        return this.sendAndProcessResponse(httpRequest, McpGetServerResponse.class);
     }
 
     @Override
     public McpServerList getAllVersionsOfServer(String serverName) {
         Objects.requireNonNull(serverName, "serverName cannot be null");
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "/v0.1/servers/" + encode(serverName) + "/versions")
-                .addHeaders(currentHeaders())
-                .build();
-        return sendAndProcessResponse(httpRequest, McpServerList.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "/v0.1/servers/" + this.encode(serverName) + "/versions").addHeaders(this.currentHeaders()).build();
+        return this.sendAndProcessResponse(httpRequest, McpServerList.class);
     }
 
     @Override
     public McpRegistryHealth healthCheck() {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "/v0/health")
-                .addHeaders(currentHeaders())
-                .build();
-        return sendAndProcessResponse(httpRequest, McpRegistryHealth.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "/v0/health").addHeaders(this.currentHeaders()).build();
+        return this.sendAndProcessResponse(httpRequest, McpRegistryHealth.class);
     }
 
     @Override
     public McpRegistryPong ping() {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "/v0/ping")
-                .addHeaders(currentHeaders())
-                .build();
-        return sendAndProcessResponse(httpRequest, McpRegistryPong.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "/v0/ping").addHeaders(this.currentHeaders()).build();
+        return this.sendAndProcessResponse(httpRequest, McpRegistryPong.class);
     }
 
     private Map<String, String> currentHeaders() {
-        Map<String, String> map = headers.get();
+        Map<String, String> map = this.headers.get();
         map.put("Content-Type", "application/json");
         map.put("Accept", "application/json, application/problem+json");
         return map;
@@ -171,11 +144,16 @@ public class DefaultMcpRegistryClient implements McpRegistryClient {
         if (!ALLOWED_URL_CHARACTERS.matcher(parameter).matches()) {
             throw new IllegalArgumentException("Parameter contains unsafe characters");
         }
-        return URLEncoder.encode(parameter, StandardCharsets.UTF_8);
+        try {
+            return URLEncoder.encode(parameter, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String processServerListRequestPathParams(McpServerListRequest request) {
-        List<String> params = new ArrayList<>();
+        ArrayList<String> params = new ArrayList<String>();
         if (request.getCursor() != null) {
             params.add("cursor=" + request.getCursor());
         }
@@ -195,10 +173,11 @@ public class DefaultMcpRegistryClient implements McpRegistryClient {
     }
 
     private <T> T sendAndProcessResponse(HttpRequest httpRequest, Class<T> returnType) {
-        SuccessfulHttpResponse response = httpClient.execute(httpRequest);
+        SuccessfulHttpResponse response = this.httpClient.execute(httpRequest);
         try {
-            return OBJECT_MAPPER.readValue(response.body(), returnType);
-        } catch (JsonProcessingException e) {
+            return (T)OBJECT_MAPPER.readValue(response.body(), returnType);
+        }
+        catch (JsonProcessingException e) {
             throw new McpRegistryClientException(e);
         }
     }
@@ -245,7 +224,8 @@ public class DefaultMcpRegistryClient implements McpRegistryClient {
         }
 
         public DefaultMcpRegistryClient build() {
-            return new DefaultMcpRegistryClient(baseUrl, httpClient, headers, logRequests, logResponses);
+            return new DefaultMcpRegistryClient(this.baseUrl, this.httpClient, this.headers, this.logRequests, this.logResponses);
         }
     }
 }
+

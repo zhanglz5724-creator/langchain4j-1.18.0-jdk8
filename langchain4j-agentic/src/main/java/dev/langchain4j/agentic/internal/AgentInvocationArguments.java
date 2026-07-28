@@ -1,6 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.internal;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
+
 public class AgentInvocationArguments {
     private final Map<String, Object> namedArgs;
     private final Object[] positionalArgs;
@@ -10,30 +16,34 @@ public class AgentInvocationArguments {
         this.positionalArgs = positionalArgs;
     }
 
-    public Map<String, Object> getNamedArgs() {
-        return namedArgs;
+    public Map<String, Object> namedArgs() {
+        return this.namedArgs;
     }
 
-    public Object[] getPositionalArgs() {
-        return positionalArgs;
+    public Object[] positionalArgs() {
+        return this.positionalArgs;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AgentInvocationArguments that = (AgentInvocationArguments) o;
-        return java.util.Objects.equals(this.namedArgs, that.namedArgs) && java.util.Objects.equals(this.positionalArgs, that.positionalArgs);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AgentInvocationArguments)) {
+            return false;
+        }
+        AgentInvocationArguments other = (AgentInvocationArguments)o;
+        if (!Objects.equals(this.namedArgs, other.namedArgs)) {
+            return false;
+        }
+        return Objects.equals(this.positionalArgs, other.positionalArgs);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(namedArgs, positionalArgs);
+        return Objects.hash(this.namedArgs, this.positionalArgs);
     }
 
-    @Override
     public String toString() {
-        return "AgentInvocationArguments{"namedArgs=" + namedArgs + , "positionalArgs=" + positionalArgs + "}"";
+        return "AgentInvocationArguments{namedArgs=" + this.namedArgs + ", positionalArgs=" + Arrays.toString(this.positionalArgs) + "}";
     }
-
 }
+

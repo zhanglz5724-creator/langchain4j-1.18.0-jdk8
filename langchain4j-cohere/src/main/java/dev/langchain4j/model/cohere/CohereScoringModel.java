@@ -1,102 +1,72 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  dev.langchain4j.model.scoring.ScoringModel
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.cohere;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.time.Duration.ofSeconds;
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
 
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.cohere.CohereClient;
+import dev.langchain4j.model.cohere.RerankRequest;
+import dev.langchain4j.model.cohere.RerankResponse;
+import dev.langchain4j.model.cohere.Result;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.model.scoring.ScoringModel;
 import java.net.Proxy;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
-/**
- * An implementation of a {@link ScoringModel} that uses
- * <a href="https://docs.cohere.com/docs/rerank-guide">Cohere Rerank API</a>.
- */
-public class CohereScoringModel implements ScoringModel {
-
+public class CohereScoringModel
+implements ScoringModel {
     private static final String DEFAULT_BASE_URL = "https://api.cohere.ai/v1/";
-
     private final CohereClient client;
     private final String modelName;
     private final Integer maxRetries;
 
-    @Deprecated(forRemoval = true, since = "1.4.0")
-    public CohereScoringModel(
-            String baseUrl,
-            String apiKey,
-            String modelName,
-            Duration timeout,
-            Integer maxRetries,
-            Proxy proxy,
-            Boolean logRequests,
-            Boolean logResponses) {
-        this.client = CohereClient.builder()
-                .baseUrl(getOrDefault(baseUrl, DEFAULT_BASE_URL))
-                .apiKey(ensureNotBlank(apiKey, "apiKey"))
-                .timeout(getOrDefault(timeout, ofSeconds(60)))
-                .proxy(proxy)
-                .logRequests(getOrDefault(logRequests, false))
-                .logResponses(getOrDefault(logResponses, false))
-                .build();
+    @Deprecated
+    public CohereScoringModel(String baseUrl, String apiKey, String modelName, Duration timeout, Integer maxRetries, Proxy proxy, Boolean logRequests, Boolean logResponses) {
+        this.client = CohereClient.builder().baseUrl((String)Utils.getOrDefault((Object)baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(ValidationUtils.ensureNotBlank((String)apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)timeout, (Object)Duration.ofSeconds(60L))).proxy(proxy).logRequests((Boolean)Utils.getOrDefault((Object)logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)logResponses, (Object)false)).build();
         this.modelName = modelName;
-        this.maxRetries = getOrDefault(maxRetries, 2);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)maxRetries, (Object)2);
     }
 
     public CohereScoringModel(CohereScoringModelBuilder builder) {
-        this.client = CohereClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.baseUrl, DEFAULT_BASE_URL))
-                .apiKey(ensureNotBlank(builder.apiKey, "apiKey"))
-                .timeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .proxy(builder.proxy)
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .build();
+        this.client = CohereClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(ValidationUtils.ensureNotBlank((String)builder.apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).proxy(builder.proxy).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false)).logger(builder.logger).build();
         this.modelName = builder.modelName;
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
-    /**
-     * @deprecated Please use {@code builder()} instead, and explicitly set the model name and,
-     * if necessary, other parameters.
-     */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public static CohereScoringModel withApiKey(String apiKey) {
-        return builder().apiKey(apiKey).build();
+        return CohereScoringModel.builder().apiKey(apiKey).build();
     }
 
     public static CohereScoringModelBuilder builder() {
         return new CohereScoringModelBuilder();
     }
 
-    @Override
     public Response<List<Double>> scoreAll(List<TextSegment> segments, String query) {
-
-        RerankRequest request = RerankRequest.builder()
-                .model(modelName)
-                .query(query)
-                .documents(segments.stream().map(TextSegment::text).collect(toList()))
-                .build();
-
-        RerankResponse response = withRetryMappingExceptions(() -> client.rerank(request), maxRetries);
-
-        List<Double> scores = response.getResults().stream()
-                .sorted(comparingInt(Result::getIndex))
-                .map(Result::getRelevanceScore)
-                .collect(toList());
-
-        return Response.from(
-                scores, new TokenUsage(response.getMeta().getBilledUnits().getSearchUnits()));
+        RerankRequest request = RerankRequest.builder().model(this.modelName).query(query).documents(segments.stream().map(TextSegment::text).collect(Collectors.toList())).build();
+        RerankResponse response = (RerankResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.rerank(request), (int)this.maxRetries);
+        List scores = response.getResults().stream().sorted(Comparator.comparingInt(Result::getIndex)).map(Result::getRelevanceScore).collect(Collectors.toList());
+        return Response.from(scores, (TokenUsage)new TokenUsage(response.getMeta().getBilledUnits().getSearchUnits()));
     }
 
     public static class CohereScoringModelBuilder {
@@ -111,15 +81,9 @@ public class CohereScoringModel implements ScoringModel {
         private Boolean logResponses;
         private Logger logger;
 
-        CohereScoringModelBuilder() {}
+        CohereScoringModelBuilder() {
+        }
 
-        /**
-         * Sets a custom HTTP client builder, allowing fine-grained control over the HTTP client
-         * configuration such as timeouts and proxy settings.
-         *
-         * @param httpClientBuilder the HTTP client builder
-         * @return {@code this}
-         */
         public CohereScoringModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -150,14 +114,6 @@ public class CohereScoringModel implements ScoringModel {
             return this;
         }
 
-        /**
-         * @param proxy the proxy (no longer applied)
-         * @return {@code this}
-         * @deprecated Proxy configuration via {@code proxy(...)} is no longer supported since the migration to the
-         * langchain4j HttpClient abstraction. Passing a non-null proxy will cause an
-         * {@link UnsupportedOperationException} when the model is built. To configure a proxy, supply a custom
-         * {@link HttpClientBuilder} via {@link #httpClientBuilder(HttpClientBuilder)} instead.
-         */
         @Deprecated
         public CohereScoringModelBuilder proxy(Proxy proxy) {
             this.proxy = proxy;
@@ -174,10 +130,6 @@ public class CohereScoringModel implements ScoringModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public CohereScoringModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
@@ -188,10 +140,8 @@ public class CohereScoringModel implements ScoringModel {
         }
 
         public String toString() {
-            return "CohereScoringModel.CohereScoringModelBuilder(baseUrl=" + this.baseUrl + ", apiKey="
-                    + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", timeout="
-                    + this.timeout + ", maxRetries=" + this.maxRetries + ", proxy=" + this.proxy + ", logRequests="
-                    + this.logRequests + ", logResponses=" + this.logResponses + ")";
+            return "CohereScoringModel.CohereScoringModelBuilder(baseUrl=" + this.baseUrl + ", apiKey=" + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", timeout=" + this.timeout + ", maxRetries=" + this.maxRetries + ", proxy=" + this.proxy + ", logRequests=" + this.logRequests + ", logResponses=" + this.logResponses + ")";
         }
     }
 }
+

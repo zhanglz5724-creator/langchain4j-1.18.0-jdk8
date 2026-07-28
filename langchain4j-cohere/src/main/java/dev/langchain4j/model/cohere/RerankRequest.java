@@ -1,9 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.cohere;
 
 import java.util.List;
 
 class RerankRequest {
-
     private String model;
     private String query;
     private List<String> documents;
@@ -62,3 +64,4 @@ class RerankRequest {
         }
     }
 }
+

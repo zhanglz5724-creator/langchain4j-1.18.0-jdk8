@@ -1,10 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.azure.cosmos.mongo.vcore;
 
 import java.util.List;
 import java.util.Map;
 
 public class AzureCosmosDbMongoVCoreMatchedDocument {
-
     private String id;
     private List<Float> embedding;
     private String text;
@@ -62,46 +64,59 @@ public class AzureCosmosDbMongoVCoreMatchedDocument {
         this.score = score;
     }
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof AzureCosmosDbMongoVCoreMatchedDocument)) return false;
-        final AzureCosmosDbMongoVCoreMatchedDocument other = (AzureCosmosDbMongoVCoreMatchedDocument) o;
-        if (!other.canEqual((Object) this)) return false;
-        final Object this$id = this.getId();
-        final Object other$id = other.getId();
-        if (this$id == null ? other$id != null : !this$id.equals(other$id)) return false;
-        final Object this$embedding = this.getEmbedding();
-        final Object other$embedding = other.getEmbedding();
-        if (this$embedding == null ? other$embedding != null : !this$embedding.equals(other$embedding)) return false;
-        final Object this$text = this.getText();
-        final Object other$text = other.getText();
-        if (this$text == null ? other$text != null : !this$text.equals(other$text)) return false;
-        final Object this$metadata = this.getMetadata();
-        final Object other$metadata = other.getMetadata();
-        if (this$metadata == null ? other$metadata != null : !this$metadata.equals(other$metadata)) return false;
-        final Object this$score = this.getScore();
-        final Object other$score = other.getScore();
-        if (this$score == null ? other$score != null : !this$score.equals(other$score)) return false;
-        return true;
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof AzureCosmosDbMongoVCoreMatchedDocument)) {
+            return false;
+        }
+        AzureCosmosDbMongoVCoreMatchedDocument other = (AzureCosmosDbMongoVCoreMatchedDocument)o;
+        if (!other.canEqual(this)) {
+            return false;
+        }
+        String this$id = this.getId();
+        String other$id = other.getId();
+        if (this$id == null ? other$id != null : !this$id.equals(other$id)) {
+            return false;
+        }
+        List<Float> this$embedding = this.getEmbedding();
+        List<Float> other$embedding = other.getEmbedding();
+        if (this$embedding == null ? other$embedding != null : !((Object)this$embedding).equals(other$embedding)) {
+            return false;
+        }
+        String this$text = this.getText();
+        String other$text = other.getText();
+        if (this$text == null ? other$text != null : !this$text.equals(other$text)) {
+            return false;
+        }
+        Map<String, String> this$metadata = this.getMetadata();
+        Map<String, String> other$metadata = other.getMetadata();
+        if (this$metadata == null ? other$metadata != null : !((Object)this$metadata).equals(other$metadata)) {
+            return false;
+        }
+        Double this$score = this.getScore();
+        Double other$score = other.getScore();
+        return !(this$score == null ? other$score != null : !((Object)this$score).equals(other$score));
     }
 
-    protected boolean canEqual(final Object other) {
+    protected boolean canEqual(Object other) {
         return other instanceof AzureCosmosDbMongoVCoreMatchedDocument;
     }
 
     public int hashCode() {
-        final int PRIME = 59;
+        int PRIME = 59;
         int result = 1;
-        final Object $id = this.getId();
-        result = result * PRIME + ($id == null ? 43 : $id.hashCode());
-        final Object $embedding = this.getEmbedding();
-        result = result * PRIME + ($embedding == null ? 43 : $embedding.hashCode());
-        final Object $text = this.getText();
-        result = result * PRIME + ($text == null ? 43 : $text.hashCode());
-        final Object $metadata = this.getMetadata();
-        result = result * PRIME + ($metadata == null ? 43 : $metadata.hashCode());
-        final Object $score = this.getScore();
-        result = result * PRIME + ($score == null ? 43 : $score.hashCode());
+        String $id = this.getId();
+        result = result * 59 + ($id == null ? 43 : $id.hashCode());
+        List<Float> $embedding = this.getEmbedding();
+        result = result * 59 + ($embedding == null ? 43 : ((Object)$embedding).hashCode());
+        String $text = this.getText();
+        result = result * 59 + ($text == null ? 43 : $text.hashCode());
+        Map<String, String> $metadata = this.getMetadata();
+        result = result * 59 + ($metadata == null ? 43 : ((Object)$metadata).hashCode());
+        Double $score = this.getScore();
+        result = result * 59 + ($score == null ? 43 : ((Object)$score).hashCode());
         return result;
     }
 
@@ -109,3 +124,4 @@ public class AzureCosmosDbMongoVCoreMatchedDocument {
         return "AzureCosmosDbMongoVCoreMatchedDocument(id=" + this.getId() + ", embedding=" + this.getEmbedding() + ", text=" + this.getText() + ", metadata=" + this.getMetadata() + ", score=" + this.getScore() + ")";
     }
 }
+

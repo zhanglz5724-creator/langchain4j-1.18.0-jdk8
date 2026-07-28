@@ -1,3 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,25 +22,23 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.model.openai.internal.chat.AssistantMessage;
+import dev.langchain4j.model.openai.internal.chat.Delta;
+import dev.langchain4j.model.openai.internal.chat.LogProbs;
 import java.util.Objects;
 
-@JsonDeserialize(builder = ChatCompletionChoice.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class ChatCompletionChoice {
-
     @JsonProperty
     private final Integer index;
-
     @JsonProperty
     private final AssistantMessage message;
-
     @JsonProperty
     private final Delta delta;
-
     @JsonProperty
     private final String finishReason;
-
     @JsonProperty
     private final LogProbs logprobs;
 
@@ -39,74 +51,62 @@ public final class ChatCompletionChoice {
     }
 
     public Integer index() {
-        return index;
+        return this.index;
     }
 
     public AssistantMessage message() {
-        return message;
+        return this.message;
     }
 
     public Delta delta() {
-        return delta;
+        return this.delta;
     }
 
     public String finishReason() {
-        return finishReason;
+        return this.finishReason;
     }
 
     public LogProbs logprobs() {
-        return logprobs;
+        return this.logprobs;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof ChatCompletionChoice && equalTo((ChatCompletionChoice) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof ChatCompletionChoice && this.equalTo((ChatCompletionChoice)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(ChatCompletionChoice another) {
-        return Objects.equals(index, another.index)
-                && Objects.equals(message, another.message)
-                && Objects.equals(delta, another.delta)
-                && Objects.equals(finishReason, another.finishReason)
-                && Objects.equals(logprobs, another.logprobs);
+        return Objects.equals(this.index, another.index) && Objects.equals(this.message, another.message) && Objects.equals(this.delta, another.delta) && Objects.equals(this.finishReason, another.finishReason) && Objects.equals(this.logprobs, another.logprobs);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(index);
-        h += (h << 5) + Objects.hashCode(message);
-        h += (h << 5) + Objects.hashCode(delta);
-        h += (h << 5) + Objects.hashCode(finishReason);
-        h += (h << 5) + Objects.hashCode(logprobs);
+        h += (h << 5) + Objects.hashCode(this.index);
+        h += (h << 5) + Objects.hashCode(this.message);
+        h += (h << 5) + Objects.hashCode(this.delta);
+        h += (h << 5) + Objects.hashCode(this.finishReason);
+        h += (h << 5) + Objects.hashCode(this.logprobs);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "ChatCompletionChoice{"
-                + "index=" + index
-                + ", message=" + message
-                + ", delta=" + delta
-                + ", finishReason=" + finishReason
-                + ", logprobs=" + logprobs
-                + "}";
+        return "ChatCompletionChoice{index=" + this.index + ", message=" + this.message + ", delta=" + this.delta + ", finishReason=" + this.finishReason + ", logprobs=" + this.logprobs + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private Integer index;
         private AssistantMessage message;
         private Delta delta;
@@ -143,3 +143,4 @@ public final class ChatCompletionChoice {
         }
     }
 }
+

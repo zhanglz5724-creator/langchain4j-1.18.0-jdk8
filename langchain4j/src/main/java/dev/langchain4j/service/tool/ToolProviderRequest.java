@@ -1,63 +1,60 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.invocation.InvocationContext
+ *  dev.langchain4j.invocation.InvocationParameters
+ */
 package dev.langchain4j.service.tool;
 
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.invocation.InvocationContext;
 import dev.langchain4j.invocation.InvocationParameters;
-
-import java.util.List;
 import java.util.Collections;
-
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
+import java.util.List;
 
 public class ToolProviderRequest {
-
     private final InvocationContext invocationContext;
     private final UserMessage userMessage;
     private final List<ChatMessage> messages;
 
-    /**
-     * @since 1.6.0
-     */
     public ToolProviderRequest(Builder builder) {
-        this.invocationContext = ensureNotNull(builder.invocationContext, "invocationContext");
-        this.userMessage = ensureNotNull(builder.userMessage, "userMessage");
-        this.messages = copy(builder.messages);
+        this.invocationContext = (InvocationContext)ValidationUtils.ensureNotNull((Object)builder.invocationContext, (String)"invocationContext");
+        this.userMessage = (UserMessage)ValidationUtils.ensureNotNull((Object)builder.userMessage, (String)"userMessage");
+        this.messages = Utils.copy((List)builder.messages);
     }
 
     public ToolProviderRequest(Object chatMemoryId, UserMessage userMessage) {
-        this.invocationContext = InvocationContext.builder()
-                .chatMemoryId(chatMemoryId)
-                .build();
-        this.userMessage = ensureNotNull(userMessage, "userMessage");
+        this.invocationContext = InvocationContext.builder().chatMemoryId(chatMemoryId).build();
+        this.userMessage = (UserMessage)ValidationUtils.ensureNotNull((Object)userMessage, (String)"userMessage");
         this.messages = Collections.emptyList();
     }
 
-    /**
-     * @since 1.6.0
-     */
     public InvocationContext invocationContext() {
-        return invocationContext;
+        return this.invocationContext;
     }
 
-    /**
-     * @since 1.6.0
-     */
     public InvocationParameters invocationParameters() {
-        return invocationContext.invocationParameters();
+        return this.invocationContext.invocationParameters();
     }
 
     public UserMessage userMessage() {
-        return userMessage;
+        return this.userMessage;
     }
 
     public Object chatMemoryId() {
-        return invocationContext.chatMemoryId();
+        return this.invocationContext.chatMemoryId();
     }
 
     public List<ChatMessage> messages() {
-        return messages;
+        return this.messages;
     }
 
     public static Builder builder() {
@@ -65,7 +62,6 @@ public class ToolProviderRequest {
     }
 
     public static class Builder {
-
         private InvocationContext invocationContext;
         private UserMessage userMessage;
         private List<ChatMessage> messages;
@@ -90,3 +86,4 @@ public class ToolProviderRequest {
         }
     }
 }
+

@@ -1,36 +1,56 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.googleai;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.model.googleai.GeminiModelInfo;
 import java.util.List;
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonIgnoreProperties(ignoreUnknown = true) class GeminiModelsListResponse {
-    private final Object @JsonProperty("models";
+import java.util.Objects;
 
-    public GeminiModelsListResponse(Object @JsonProperty("models") {
-        this.@JsonProperty("models" = @JsonProperty("models";
+@JsonIgnoreProperties(ignoreUnknown=true)
+final class GeminiModelsListResponse {
+    private final List<GeminiModelInfo> models;
+    private final String nextPageToken;
+
+    @JsonCreator
+    GeminiModelsListResponse(@JsonProperty(value="models") List<GeminiModelInfo> models, @JsonProperty(value="nextPageToken") String nextPageToken) {
+        this.models = models;
+        this.nextPageToken = nextPageToken;
     }
 
-    public Object get@JsonProperty("models"() {
-        return @JsonProperty("models";
+    List<GeminiModelInfo> models() {
+        return this.models;
     }
 
-    @Override
+    String nextPageToken() {
+        return this.nextPageToken;
+    }
+
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GeminiModelsListResponse that = (GeminiModelsListResponse) o;
-        return java.util.Objects.equals(this.@JsonProperty("models", that.@JsonProperty("models");
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GeminiModelsListResponse)) {
+            return false;
+        }
+        GeminiModelsListResponse that = (GeminiModelsListResponse)o;
+        return Objects.equals(this.models, that.models) && Objects.equals(this.nextPageToken, that.nextPageToken);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(@JsonProperty("models");
+        return Objects.hash(this.models, this.nextPageToken);
     }
 
-    @Override
     public String toString() {
-        return "GeminiModelsListResponse{"@JsonProperty("models"=" + @JsonProperty("models" + "}"";
+        return "GeminiModelsListResponse[models=" + this.models + ", nextPageToken=" + this.nextPageToken + "]";
     }
-
 }
+

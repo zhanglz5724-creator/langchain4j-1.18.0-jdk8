@@ -1,20 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.vertexai.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import dev.langchain4j.model.vertexai.anthropic.internal.Constants;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicMessage;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicSystemMessage;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicTool;
+import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicToolChoice;
 import java.util.List;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicRequest {
-
     public String anthropicVersion;
     public List<AnthropicMessage> messages;
     public List<AnthropicSystemMessage> system;
@@ -27,19 +37,10 @@ public class AnthropicRequest {
     public List<AnthropicTool> tools;
     public AnthropicToolChoice toolChoice;
 
-    public AnthropicRequest() {}
+    public AnthropicRequest() {
+    }
 
-    public AnthropicRequest(
-            List<AnthropicMessage> messages,
-            List<AnthropicSystemMessage> system,
-            Integer maxTokens,
-            List<String> stopSequences,
-            Boolean stream,
-            Double temperature,
-            Double topP,
-            Integer topK,
-            List<AnthropicTool> tools,
-            AnthropicToolChoice toolChoice) {
+    public AnthropicRequest(List<AnthropicMessage> messages, List<AnthropicSystemMessage> system, Integer maxTokens, List<String> stopSequences, Boolean stream, Double temperature, Double topP, Integer topK, List<AnthropicTool> tools, AnthropicToolChoice toolChoice) {
         this.messages = messages;
         this.system = system;
         this.maxTokens = maxTokens;
@@ -50,58 +51,47 @@ public class AnthropicRequest {
         this.topK = topK;
         this.tools = tools;
         this.toolChoice = toolChoice;
-        this.anthropicVersion = Constants.ANTHROPIC_VERSION;
+        this.anthropicVersion = "vertex-2023-10-16";
     }
 
     public String getAnthropicVersion() {
-        return anthropicVersion;
+        return this.anthropicVersion;
     }
 
     public List<AnthropicMessage> getMessages() {
-        return messages;
+        return this.messages;
     }
 
     public Integer getMaxTokens() {
-        return maxTokens;
+        return this.maxTokens;
     }
 
     public Boolean getStream() {
-        return stream;
+        return this.stream;
     }
 
     public Double getTemperature() {
-        return temperature;
+        return this.temperature;
     }
 
     public Double getTopP() {
-        return topP;
+        return this.topP;
     }
 
     public Integer getTopK() {
-        return topK;
+        return this.topK;
     }
 
     public List<AnthropicTool> getTools() {
-        return tools;
+        return this.tools;
     }
 
     public AnthropicToolChoice getToolChoice() {
-        return toolChoice;
+        return this.toolChoice;
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "AnthropicRequest [", "]")
-                .add("anthropicVersion=" + this.getAnthropicVersion())
-                .add("messages="
-                        + (this.getMessages() == null ? 0 : this.getMessages().size()))
-                .add("maxTokens=" + this.getMaxTokens())
-                .add("stream=" + this.getStream())
-                .add("temperature=" + this.getTemperature())
-                .add("topP=" + this.getTopP())
-                .add("topK=" + this.getTopK())
-                .add("tools=" + this.getTools())
-                .add("toolsChoice=" + this.getToolChoice())
-                .toString();
+        return new StringJoiner(", ", "AnthropicRequest [", "]").add("anthropicVersion=" + this.getAnthropicVersion()).add("messages=" + (this.getMessages() == null ? 0 : this.getMessages().size())).add("maxTokens=" + this.getMaxTokens()).add("stream=" + this.getStream()).add("temperature=" + this.getTemperature()).add("topP=" + this.getTopP()).add("topK=" + this.getTopK()).add("tools=" + this.getTools()).add("toolsChoice=" + this.getToolChoice()).toString();
     }
 }
+

@@ -1,31 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.core.JsonProcessingException
+ *  com.fasterxml.jackson.databind.JsonNode
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  dev.langchain4j.internal.DefaultExecutorProvider
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.mcp.client.transport.stdio;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.internal.DefaultExecutorProvider;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.mcp.client.McpCallContext;
 import dev.langchain4j.mcp.client.transport.McpOperationHandler;
 import dev.langchain4j.mcp.client.transport.McpTransport;
+import dev.langchain4j.mcp.client.transport.stdio.ProcessStderrHandler;
 import dev.langchain4j.mcp.protocol.McpClientMessage;
 import dev.langchain4j.mcp.protocol.McpInitializationNotification;
 import dev.langchain4j.mcp.protocol.McpInitializeRequest;
 import dev.langchain4j.mcp.transport.stdio.JsonRpcIoHandler;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StdioMcpTransport implements McpTransport {
-
+public class StdioMcpTransport
+implements McpTransport {
     private final List<String> command;
     private final Map<String, String> environment;
     private Process process;
@@ -44,115 +57,116 @@ public class StdioMcpTransport implements McpTransport {
         this.environment = builder.environment;
         this.logEvents = builder.logEvents;
         this.logger = builder.logger;
-        this.executorService =
-                getOrDefault(builder.executorService, DefaultExecutorProvider::getDefaultExecutorService);
-        // FIXME: are there actually any cases where we should shut down the executor service?
-        // the DefaultExecutorProvider always returns a single shared instance, so we can't shut it down
+        this.executorService = (ExecutorService)Utils.getOrDefault((Object)builder.executorService, DefaultExecutorProvider::getDefaultExecutorService);
         this.shouldShutdownExecutorService = false;
     }
 
     @Override
     public void start(McpOperationHandler messageHandler) {
         this.messageHandler = messageHandler;
-        log.debug("Starting process: {}", command);
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.environment().putAll(environment);
+        log.debug("Starting process: {}", this.command);
+        ProcessBuilder processBuilder = new ProcessBuilder(this.command);
+        processBuilder.environment().putAll(this.environment);
         try {
-            process = processBuilder.start();
-            log.debug("PID of the started process: {}", process.pid());
-            process.onExit().thenRun(() -> {
-                if (messageHandler != null) {
-                    messageHandler.cancelAllPendingOperations("Process has exited");
-                }
-                log.debug("Subprocess has exited with code: {}", process.exitValue());
-            });
-        } catch (Exception e) {
+            this.process = processBuilder.start();
+            log.debug("PID of the started process: N/A (Java 8)");
+            log.debug("Process started successfully");
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
-        jsonRpcIoHandler = new JsonRpcIoHandler(
-                process.getInputStream(), process.getOutputStream(), messageHandler::handle, logEvents, logger);
-        stderrHandler = new ProcessStderrHandler(process);
-        executorService.submit(jsonRpcIoHandler);
-        executorService.submit(stderrHandler);
+        this.jsonRpcIoHandler = new JsonRpcIoHandler(this.process.getInputStream(), this.process.getOutputStream(), messageHandler::handle, this.logEvents, this.logger);
+        this.stderrHandler = new ProcessStderrHandler(this.process);
+        this.executorService.submit(this.jsonRpcIoHandler);
+        this.executorService.submit(this.stderrHandler);
     }
 
     @Override
     public CompletableFuture<JsonNode> initialize(McpInitializeRequest operation) {
         try {
-            String requestString = OBJECT_MAPPER.writeValueAsString(operation);
-            String initializationNotification = OBJECT_MAPPER.writeValueAsString(new McpInitializationNotification());
-            return execute(requestString, operation.getId())
-                    .thenCompose(originalResponse -> execute(initializationNotification, null)
-                            .thenCompose(nullNode -> CompletableFuture.completedFuture(originalResponse)));
-        } catch (JsonProcessingException e) {
-            return CompletableFuture.failedFuture(e);
+            String requestString = OBJECT_MAPPER.writeValueAsString((Object)operation);
+            String initializationNotification = OBJECT_MAPPER.writeValueAsString((Object)new McpInitializationNotification());
+            return this.execute(requestString, operation.getId()).thenCompose(originalResponse -> this.execute(initializationNotification, null).thenCompose(nullNode -> CompletableFuture.completedFuture(originalResponse)));
+        }
+        catch (JsonProcessingException e) {
+            CompletableFuture<JsonNode> future = new CompletableFuture<JsonNode>();
+            future.completeExceptionally(e);
+            return future;
         }
     }
 
     @Override
     public CompletableFuture<JsonNode> executeOperationWithResponse(McpClientMessage operation) {
-        return executeOperationWithResponse(new McpCallContext(null, operation));
+        return this.executeOperationWithResponse(new McpCallContext(null, operation));
     }
 
     @Override
     public CompletableFuture<JsonNode> executeOperationWithResponse(McpCallContext context) {
         try {
-            String requestString = OBJECT_MAPPER.writeValueAsString(context.message());
-            return execute(requestString, context.message().getId());
-        } catch (JsonProcessingException e) {
-            return CompletableFuture.failedFuture(e);
+            String requestString = OBJECT_MAPPER.writeValueAsString((Object)context.message());
+            return this.execute(requestString, context.message().getId());
+        }
+        catch (JsonProcessingException e) {
+            CompletableFuture<JsonNode> future = new CompletableFuture<JsonNode>();
+            future.completeExceptionally(e);
+            return future;
         }
     }
 
     @Override
     public void executeOperationWithoutResponse(McpClientMessage operation) {
-        executeOperationWithoutResponse(new McpCallContext(null, operation));
+        this.executeOperationWithoutResponse(new McpCallContext(null, operation));
     }
 
     @Override
     public void executeOperationWithoutResponse(McpCallContext context) {
         try {
-            String requestString = OBJECT_MAPPER.writeValueAsString(context.message());
-            execute(requestString, null);
-        } catch (JsonProcessingException e) {
+            String requestString = OBJECT_MAPPER.writeValueAsString((Object)context.message());
+            this.execute(requestString, null);
+        }
+        catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public void checkHealth() {
-        if (!process.isAlive()) {
+        if (!this.process.isAlive()) {
             throw new IllegalStateException("Process is not alive");
         }
     }
 
     @Override
     public void onFailure(Runnable actionOnFailure) {
-        // ignore, for stdio transport, we currently don't do reconnection attempts
     }
 
     @Override
     public void close() throws IOException {
         try {
-            stderrHandler.close();
-        } catch (Exception ignored) {
+            this.stderrHandler.close();
+        }
+        catch (Exception exception) {
+            // empty catch block
         }
         try {
-            jsonRpcIoHandler.close();
-        } catch (Exception ignored) {
+            this.jsonRpcIoHandler.close();
         }
-        if (executorService != null && shouldShutdownExecutorService) {
-            executorService.shutdown();
+        catch (Exception exception) {
+            // empty catch block
+        }
+        if (this.executorService != null && this.shouldShutdownExecutorService) {
+            this.executorService.shutdown();
             try {
-                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                    executorService.shutdownNow();
+                if (!this.executorService.awaitTermination(5L, TimeUnit.SECONDS)) {
+                    this.executorService.shutdownNow();
                 }
-            } catch (InterruptedException e) {
-                executorService.shutdownNow();
+            }
+            catch (InterruptedException e) {
+                this.executorService.shutdownNow();
                 Thread.currentThread().interrupt();
             }
         }
-        process.destroy();
+        this.process.destroy();
     }
 
     public static Builder builder() {
@@ -160,28 +174,27 @@ public class StdioMcpTransport implements McpTransport {
     }
 
     private CompletableFuture<JsonNode> execute(String request, Long id) {
-        CompletableFuture<JsonNode> future = new CompletableFuture<>();
+        CompletableFuture<JsonNode> future = new CompletableFuture<JsonNode>();
         if (id != null) {
-            messageHandler.startOperation(id, future);
+            this.messageHandler.startOperation(id, future);
         }
         try {
-            jsonRpcIoHandler.submit(request);
-            // For messages with null ID, we don't wait for a corresponding response
+            this.jsonRpcIoHandler.submit(request);
             if (id == null) {
                 future.complete(null);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             future.completeExceptionally(e);
         }
         return future;
     }
 
     public Process getProcess() {
-        return process;
+        return this.process;
     }
 
     public static class Builder {
-
         private List<String> command;
         private Map<String, String> environment;
         private boolean logEvents;
@@ -203,36 +216,23 @@ public class StdioMcpTransport implements McpTransport {
             return this;
         }
 
-        /**
-         * Sets the {@link ExecutorService} to use for background I/O operations.
-         * If not provided, will use {@link DefaultExecutorProvider#getDefaultExecutorService()}.
-         * <p>
-         * Frameworks like Quarkus should provide their managed executor here.
-         * If an executor is provided, it will not be shut down when the transport is closed.
-         *
-         * @param executorService the executor service to use
-         * @return {@code this}
-         */
         public Builder executorService(ExecutorService executorService) {
             this.executorService = executorService;
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for traffic logging.
-         * @return {@code this}.
-         */
         public Builder logger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
         public StdioMcpTransport build() {
-            ensureNotEmpty(command, "command");
-            if (environment == null) {
-                environment = Collections.emptyMap();
+            ValidationUtils.ensureNotEmpty(this.command, (String)"command");
+            if (this.environment == null) {
+                this.environment = Collections.emptyMap();
             }
             return new StdioMcpTransport(this);
         }
     }
 }
+

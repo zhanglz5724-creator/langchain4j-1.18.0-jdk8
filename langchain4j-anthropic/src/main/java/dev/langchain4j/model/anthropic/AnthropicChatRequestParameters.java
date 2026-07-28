@@ -1,20 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters$Builder
+ */
 package dev.langchain4j.model.anthropic;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import java.util.Objects;
 
-/**
- * Anthropic-specific {@link ChatRequestParameters} that can be set per request (i.e., per {@code ChatRequest}),
- * overriding the values configured on the {@link AnthropicChatModel} / {@link AnthropicStreamingChatModel} builder.
- */
-public class AnthropicChatRequestParameters extends DefaultChatRequestParameters {
-
-    public static final AnthropicChatRequestParameters EMPTY =
-            AnthropicChatRequestParameters.builder().build();
-
+public class AnthropicChatRequestParameters
+extends DefaultChatRequestParameters {
+    public static final AnthropicChatRequestParameters EMPTY = AnthropicChatRequestParameters.builder().build();
     private final Boolean cacheSystemMessages;
     private final Boolean cacheTools;
     private final String thinkingType;
@@ -29,7 +32,7 @@ public class AnthropicChatRequestParameters extends DefaultChatRequestParameters
     private final String previousMessageId;
 
     private AnthropicChatRequestParameters(Builder builder) {
-        super(builder);
+        super((DefaultChatRequestParameters.Builder)builder);
         this.cacheSystemMessages = builder.cacheSystemMessages;
         this.cacheTools = builder.cacheTools;
         this.thinkingType = builder.thinkingType;
@@ -45,164 +48,93 @@ public class AnthropicChatRequestParameters extends DefaultChatRequestParameters
     }
 
     public Boolean cacheSystemMessages() {
-        return cacheSystemMessages;
+        return this.cacheSystemMessages;
     }
 
     public Boolean cacheTools() {
-        return cacheTools;
+        return this.cacheTools;
     }
 
     public String thinkingType() {
-        return thinkingType;
+        return this.thinkingType;
     }
 
     public Integer thinkingBudgetTokens() {
-        return thinkingBudgetTokens;
+        return this.thinkingBudgetTokens;
     }
 
     public Boolean sendThinking() {
-        return sendThinking;
+        return this.sendThinking;
     }
 
     public Boolean midConversationSystemMessages() {
-        return midConversationSystemMessages;
+        return this.midConversationSystemMessages;
     }
 
     public Boolean returnThinking() {
-        return returnThinking;
+        return this.returnThinking;
     }
 
     public String toolChoiceName() {
-        return toolChoiceName;
+        return this.toolChoiceName;
     }
 
     public Boolean disableParallelToolUse() {
-        return disableParallelToolUse;
+        return this.disableParallelToolUse;
     }
 
     public String userId() {
-        return userId;
+        return this.userId;
     }
 
-    /**
-     * Whether to request a (beta) cache-diagnostics comparison for this request.
-     *
-     * @see AnthropicCacheDiagnostics
-     */
     public Boolean returnCacheDiagnostics() {
-        return returnCacheDiagnostics;
+        return this.returnCacheDiagnostics;
     }
 
-    /**
-     * The {@code id} of the previous response to compare against when {@link #returnCacheDiagnostics()}
-     * is enabled. Pass {@code null} on the first turn of a conversation to opt in without a prior
-     * message to compare, and the {@code id} of the previous {@link AnthropicChatResponseMetadata} on
-     * every subsequent turn.
-     * <p>
-     * This is a per-request value: it changes on every turn and there is intentionally no model-level
-     * setter for it. It can therefore be varied per request on its own, while
-     * {@link #returnCacheDiagnostics()} is enabled once on the model builder — the per-request
-     * {@code previousMessageId} is not paired with, or gated on, {@code returnCacheDiagnostics}.
-     *
-     * @see AnthropicCacheDiagnostics
-     */
     public String previousMessageId() {
-        return previousMessageId;
+        return this.previousMessageId;
     }
 
-    @Override
     public AnthropicChatRequestParameters overrideWith(ChatRequestParameters that) {
-        return AnthropicChatRequestParameters.builder()
-                .overrideWith(this)
-                .overrideWith(that)
-                .build();
+        return AnthropicChatRequestParameters.builder().overrideWith((ChatRequestParameters)this).overrideWith(that).build();
     }
 
-    @Override
     public AnthropicChatRequestParameters defaultedBy(ChatRequestParameters that) {
-        return AnthropicChatRequestParameters.builder()
-                .overrideWith(that)
-                .overrideWith(this)
-                .build();
+        return AnthropicChatRequestParameters.builder().overrideWith(that).overrideWith((ChatRequestParameters)this).build();
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        AnthropicChatRequestParameters that = (AnthropicChatRequestParameters) o;
-        return Objects.equals(cacheSystemMessages, that.cacheSystemMessages)
-                && Objects.equals(cacheTools, that.cacheTools)
-                && Objects.equals(thinkingType, that.thinkingType)
-                && Objects.equals(thinkingBudgetTokens, that.thinkingBudgetTokens)
-                && Objects.equals(sendThinking, that.sendThinking)
-                && Objects.equals(midConversationSystemMessages, that.midConversationSystemMessages)
-                && Objects.equals(returnThinking, that.returnThinking)
-                && Objects.equals(toolChoiceName, that.toolChoiceName)
-                && Objects.equals(disableParallelToolUse, that.disableParallelToolUse)
-                && Objects.equals(userId, that.userId)
-                && Objects.equals(returnCacheDiagnostics, that.returnCacheDiagnostics)
-                && Objects.equals(previousMessageId, that.previousMessageId);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AnthropicChatRequestParameters that = (AnthropicChatRequestParameters)((Object)o);
+        return Objects.equals(this.cacheSystemMessages, that.cacheSystemMessages) && Objects.equals(this.cacheTools, that.cacheTools) && Objects.equals(this.thinkingType, that.thinkingType) && Objects.equals(this.thinkingBudgetTokens, that.thinkingBudgetTokens) && Objects.equals(this.sendThinking, that.sendThinking) && Objects.equals(this.midConversationSystemMessages, that.midConversationSystemMessages) && Objects.equals(this.returnThinking, that.returnThinking) && Objects.equals(this.toolChoiceName, that.toolChoiceName) && Objects.equals(this.disableParallelToolUse, that.disableParallelToolUse) && Objects.equals(this.userId, that.userId) && Objects.equals(this.returnCacheDiagnostics, that.returnCacheDiagnostics) && Objects.equals(this.previousMessageId, that.previousMessageId);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(
-                super.hashCode(),
-                cacheSystemMessages,
-                cacheTools,
-                thinkingType,
-                thinkingBudgetTokens,
-                sendThinking,
-                midConversationSystemMessages,
-                returnThinking,
-                toolChoiceName,
-                disableParallelToolUse,
-                userId,
-                returnCacheDiagnostics,
-                previousMessageId);
+        return Objects.hash(super.hashCode(), this.cacheSystemMessages, this.cacheTools, this.thinkingType, this.thinkingBudgetTokens, this.sendThinking, this.midConversationSystemMessages, this.returnThinking, this.toolChoiceName, this.disableParallelToolUse, this.userId, this.returnCacheDiagnostics, this.previousMessageId);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicChatRequestParameters{"
-                + "modelName=" + modelName()
-                + ", temperature=" + temperature()
-                + ", topP=" + topP()
-                + ", topK=" + topK()
-                + ", frequencyPenalty=" + frequencyPenalty()
-                + ", presencePenalty=" + presencePenalty()
-                + ", maxOutputTokens=" + maxOutputTokens()
-                + ", stopSequences=" + stopSequences()
-                + ", toolSpecifications=" + toolSpecifications()
-                + ", toolChoice=" + toolChoice()
-                + ", responseFormat=" + responseFormat()
-                + ", cacheSystemMessages=" + cacheSystemMessages
-                + ", cacheTools=" + cacheTools
-                + ", thinkingType=" + thinkingType
-                + ", thinkingBudgetTokens=" + thinkingBudgetTokens
-                + ", sendThinking=" + sendThinking
-                + ", midConversationSystemMessages=" + midConversationSystemMessages
-                + ", returnThinking=" + returnThinking
-                + ", toolChoiceName=" + toolChoiceName
-                + ", disableParallelToolUse=" + disableParallelToolUse
-                + ", userId=" + userId
-                + ", returnCacheDiagnostics=" + returnCacheDiagnostics
-                + ", previousMessageId=" + previousMessageId
-                + '}';
+        return "AnthropicChatRequestParameters{modelName=" + this.modelName() + ", temperature=" + this.temperature() + ", topP=" + this.topP() + ", topK=" + this.topK() + ", frequencyPenalty=" + this.frequencyPenalty() + ", presencePenalty=" + this.presencePenalty() + ", maxOutputTokens=" + this.maxOutputTokens() + ", stopSequences=" + this.stopSequences() + ", toolSpecifications=" + this.toolSpecifications() + ", toolChoice=" + this.toolChoice() + ", responseFormat=" + this.responseFormat() + ", cacheSystemMessages=" + this.cacheSystemMessages + ", cacheTools=" + this.cacheTools + ", thinkingType=" + this.thinkingType + ", thinkingBudgetTokens=" + this.thinkingBudgetTokens + ", sendThinking=" + this.sendThinking + ", midConversationSystemMessages=" + this.midConversationSystemMessages + ", returnThinking=" + this.returnThinking + ", toolChoiceName=" + this.toolChoiceName + ", disableParallelToolUse=" + this.disableParallelToolUse + ", userId=" + this.userId + ", returnCacheDiagnostics=" + this.returnCacheDiagnostics + ", previousMessageId=" + this.previousMessageId + '}';
     }
 
     public Builder toBuilder() {
-        return builder().overrideWith(this);
+        return AnthropicChatRequestParameters.builder().overrideWith((ChatRequestParameters)this);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends DefaultChatRequestParameters.Builder<Builder> {
-
+    public static class Builder
+    extends DefaultChatRequestParameters.Builder<Builder> {
         private Boolean cacheSystemMessages;
         private Boolean cacheTools;
         private String thinkingType;
@@ -216,31 +148,28 @@ public class AnthropicChatRequestParameters extends DefaultChatRequestParameters
         private Boolean returnCacheDiagnostics;
         private String previousMessageId;
 
-        @Override
         public Builder overrideWith(ChatRequestParameters parameters) {
             super.overrideWith(parameters);
-            if (parameters instanceof AnthropicChatRequestParameters anthropicParameters) {
-                cacheSystemMessages(getOrDefault(anthropicParameters.cacheSystemMessages(), cacheSystemMessages));
-                cacheTools(getOrDefault(anthropicParameters.cacheTools(), cacheTools));
-                thinkingType(getOrDefault(anthropicParameters.thinkingType(), thinkingType));
-                thinkingBudgetTokens(getOrDefault(anthropicParameters.thinkingBudgetTokens(), thinkingBudgetTokens));
-                sendThinking(getOrDefault(anthropicParameters.sendThinking(), sendThinking));
-                midConversationSystemMessages(getOrDefault(
-                        anthropicParameters.midConversationSystemMessages(), midConversationSystemMessages));
-                returnThinking(getOrDefault(anthropicParameters.returnThinking(), returnThinking));
-                toolChoiceName(getOrDefault(anthropicParameters.toolChoiceName(), toolChoiceName));
-                disableParallelToolUse(
-                        getOrDefault(anthropicParameters.disableParallelToolUse(), disableParallelToolUse));
-                userId(getOrDefault(anthropicParameters.userId(), userId));
-                returnCacheDiagnostics(
-                        getOrDefault(anthropicParameters.returnCacheDiagnostics(), returnCacheDiagnostics));
-                previousMessageId(getOrDefault(anthropicParameters.previousMessageId(), previousMessageId));
+            if (parameters instanceof AnthropicChatRequestParameters) {
+                AnthropicChatRequestParameters anthropicParameters = (AnthropicChatRequestParameters)parameters;
+                this.cacheSystemMessages((Boolean)Utils.getOrDefault((Object)anthropicParameters.cacheSystemMessages(), (Object)this.cacheSystemMessages));
+                this.cacheTools((Boolean)Utils.getOrDefault((Object)anthropicParameters.cacheTools(), (Object)this.cacheTools));
+                this.thinkingType((String)Utils.getOrDefault((Object)anthropicParameters.thinkingType(), (Object)this.thinkingType));
+                this.thinkingBudgetTokens((Integer)Utils.getOrDefault((Object)anthropicParameters.thinkingBudgetTokens(), (Object)this.thinkingBudgetTokens));
+                this.sendThinking((Boolean)Utils.getOrDefault((Object)anthropicParameters.sendThinking(), (Object)this.sendThinking));
+                this.midConversationSystemMessages((Boolean)Utils.getOrDefault((Object)anthropicParameters.midConversationSystemMessages(), (Object)this.midConversationSystemMessages));
+                this.returnThinking((Boolean)Utils.getOrDefault((Object)anthropicParameters.returnThinking(), (Object)this.returnThinking));
+                this.toolChoiceName((String)Utils.getOrDefault((Object)anthropicParameters.toolChoiceName(), (Object)this.toolChoiceName));
+                this.disableParallelToolUse((Boolean)Utils.getOrDefault((Object)anthropicParameters.disableParallelToolUse(), (Object)this.disableParallelToolUse));
+                this.userId((String)Utils.getOrDefault((Object)anthropicParameters.userId(), (Object)this.userId));
+                this.returnCacheDiagnostics((Boolean)Utils.getOrDefault((Object)anthropicParameters.returnCacheDiagnostics(), (Object)this.returnCacheDiagnostics));
+                this.previousMessageId((String)Utils.getOrDefault((Object)anthropicParameters.previousMessageId(), (Object)this.previousMessageId));
             }
             return this;
         }
 
         public Builder modelName(AnthropicChatModelName modelName) {
-            return super.modelName(modelName == null ? null : modelName.toString());
+            return (Builder)super.modelName(modelName == null ? null : modelName.toString());
         }
 
         public Builder cacheSystemMessages(Boolean cacheSystemMessages) {
@@ -293,37 +222,19 @@ public class AnthropicChatRequestParameters extends DefaultChatRequestParameters
             return this;
         }
 
-        /**
-         * Enables Anthropic's (beta) cache diagnostics for this request, requesting a comparison
-         * against the request identified by {@link #previousMessageId(String)}.
-         * Requires the {@code cache-diagnosis-2026-04-07} beta header to be set on the model
-         * (see {@code beta(String)} on {@link AnthropicChatModel.AnthropicChatModelBuilder} /
-         * {@link AnthropicStreamingChatModel.AnthropicStreamingChatModelBuilder}).
-         *
-         * @see AnthropicCacheDiagnostics
-         */
         public Builder returnCacheDiagnostics(Boolean returnCacheDiagnostics) {
             this.returnCacheDiagnostics = returnCacheDiagnostics;
             return this;
         }
 
-        /**
-         * The {@code id} of the previous response to compare against; see
-         * {@link AnthropicChatRequestParameters#previousMessageId()} for the full contract. Pass
-         * {@code null} (the default) on the first turn of a conversation to opt in without a prior
-         * message to compare, and the {@code id} of the previous {@link AnthropicChatResponseMetadata}
-         * on every subsequent turn.
-         *
-         * @see AnthropicCacheDiagnostics
-         */
         public Builder previousMessageId(String previousMessageId) {
             this.previousMessageId = previousMessageId;
             return this;
         }
 
-        @Override
         public AnthropicChatRequestParameters build() {
             return new AnthropicChatRequestParameters(this);
         }
     }
 }
+

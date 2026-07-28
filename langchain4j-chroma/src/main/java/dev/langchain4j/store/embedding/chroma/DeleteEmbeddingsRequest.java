@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.store.embedding.chroma;
 
 import dev.langchain4j.Internal;
@@ -6,7 +12,6 @@ import java.util.Map;
 
 @Internal
 class DeleteEmbeddingsRequest {
-
     private final List<String> ids;
     private final Map<String, Object> where;
 
@@ -20,15 +25,14 @@ class DeleteEmbeddingsRequest {
     }
 
     public List<String> getIds() {
-        return ids;
+        return this.ids;
     }
 
     public Map<String, Object> getWhere() {
-        return where;
+        return this.where;
     }
 
     public static class Builder {
-
         private List<String> ids;
         private Map<String, Object> where;
 
@@ -47,3 +51,4 @@ class DeleteEmbeddingsRequest {
         }
     }
 }
+

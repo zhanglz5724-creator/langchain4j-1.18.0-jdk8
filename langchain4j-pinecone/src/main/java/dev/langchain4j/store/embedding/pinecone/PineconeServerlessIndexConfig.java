@@ -1,45 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  io.pinecone.clients.Pinecone
+ *  org.openapitools.db_control.client.model.DeletionProtection
+ */
 package dev.langchain4j.store.embedding.pinecone;
 
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.store.embedding.pinecone.PineconeIndexConfig;
 import io.pinecone.clients.Pinecone;
 import org.openapitools.db_control.client.model.DeletionProtection;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static org.openapitools.db_control.client.model.DeletionProtection.ENABLED;
-
-public class PineconeServerlessIndexConfig implements PineconeIndexConfig {
-
+public class PineconeServerlessIndexConfig
+implements PineconeIndexConfig {
     private final Integer dimension;
     private final String cloud;
     private final String region;
     private final DeletionProtection deletionProtection;
 
-    PineconeServerlessIndexConfig(Integer dimension,
-                                  String cloud,
-                                  String region,
-                                  DeletionProtection deletionProtection) {
-        this.dimension = ensureNotNull(dimension, "dimension");
-        this.cloud = ensureNotBlank(cloud, "cloud");
-        this.region = ensureNotBlank(region, "region");
-        this.deletionProtection = getOrDefault(deletionProtection, ENABLED);
+    PineconeServerlessIndexConfig(Integer dimension, String cloud, String region, DeletionProtection deletionProtection) {
+        this.dimension = (Integer)ValidationUtils.ensureNotNull((Object)dimension, (String)"dimension");
+        this.cloud = ValidationUtils.ensureNotBlank((String)cloud, (String)"cloud");
+        this.region = ValidationUtils.ensureNotBlank((String)region, (String)"region");
+        this.deletionProtection = (DeletionProtection)Utils.getOrDefault((Object)deletionProtection, (Object)DeletionProtection.ENABLED);
     }
 
-    /**
-     * @deprecated please use {@link #PineconeServerlessIndexConfig(Integer, String, String, DeletionProtection)} instead
-     */
-    @Deprecated(since = "1.0.0-beta1", forRemoval = true)
-    PineconeServerlessIndexConfig(Integer dimension,
-                                  String cloud,
-                                  String region) {
+    @Deprecated
+    PineconeServerlessIndexConfig(Integer dimension, String cloud, String region) {
         this(dimension, cloud, region, null);
     }
 
     @Override
     public void createIndex(Pinecone pinecone, String index) {
-        ensureNotNull(pinecone, "pinecone");
-        ensureNotNull(index, "index");
-        pinecone.createServerlessIndex(index, "cosine", dimension, cloud, region, deletionProtection);
+        ValidationUtils.ensureNotNull((Object)pinecone, (String)"pinecone");
+        ValidationUtils.ensureNotNull((Object)index, (String)"index");
+        pinecone.createServerlessIndex(index, "cosine", this.dimension.intValue(), this.cloud, this.region, this.deletionProtection);
     }
 
     public static Builder builder() {
@@ -47,7 +46,6 @@ public class PineconeServerlessIndexConfig implements PineconeIndexConfig {
     }
 
     public static class Builder {
-
         private Integer dimension;
         private String cloud;
         private String region;
@@ -74,7 +72,8 @@ public class PineconeServerlessIndexConfig implements PineconeIndexConfig {
         }
 
         public PineconeServerlessIndexConfig build() {
-            return new PineconeServerlessIndexConfig(dimension, cloud, region, deletionProtection);
+            return new PineconeServerlessIndexConfig(this.dimension, this.cloud, this.region, this.deletionProtection);
         }
     }
 }
+

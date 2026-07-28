@@ -1,50 +1,58 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.core.JsonProcessingException
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  com.fasterxml.jackson.databind.SerializationFeature
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.embedding.filter.Filter
+ */
 package dev.langchain4j.store.embedding.pgvector;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.embedding.filter.Filter;
+import dev.langchain4j.store.embedding.pgvector.JSONFilterMapper;
+import dev.langchain4j.store.embedding.pgvector.MetadataColumDefinition;
+import dev.langchain4j.store.embedding.pgvector.MetadataHandler;
+import dev.langchain4j.store.embedding.pgvector.MetadataStorageConfig;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import java.sql.*;
-import java.util.*;
-
-import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
-import static dev.langchain4j.internal.Utils.toStringValueMap;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-
-/**
- * Handle metadata as JSON column.
- */
-class JSONMetadataHandler implements MetadataHandler {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .enable(INDENT_OUTPUT);
-
+class JSONMetadataHandler
+implements MetadataHandler {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     final MetadataColumDefinition columnDefinition;
     final String columnName;
     final JSONFilterMapper filterMapper;
     final List<String> indexes;
 
-    /**
-     * MetadataHandler constructor
-     * @param config {@link MetadataStorageConfig} configuration
-     */
     public JSONMetadataHandler(MetadataStorageConfig config) {
-        List<String> definition = ensureNotEmpty(config.columnDefinitions(), "Metadata definition");
-        if (definition.size()>1) {
-            throw new IllegalArgumentException("Metadata definition should be an unique column definition, " +
-                    "example: metadata JSON NULL");
+        List definition = (List)ValidationUtils.ensureNotEmpty(config.columnDefinitions(), (String)"Metadata definition");
+        if (definition.size() > 1) {
+            throw new IllegalArgumentException("Metadata definition should be an unique column definition, example: metadata JSON NULL");
         }
-        this.columnDefinition = MetadataColumDefinition.from(definition.get(0));
+        this.columnDefinition = MetadataColumDefinition.from((String)definition.get(0));
         this.columnName = this.columnDefinition.getName();
-        this.filterMapper = new JSONFilterMapper(columnName);
-        this.indexes = getOrDefault(config.indexes(), Collections.emptyList());
+        this.filterMapper = new JSONFilterMapper(this.columnName);
+        this.indexes = Utils.getOrDefault(config.indexes(), Collections.emptyList());
     }
 
     @Override
     public String columnDefinitionsString() {
-        return columnDefinition.getFullDefinition();
+        return this.columnDefinition.getFullDefinition();
     }
 
     @Override
@@ -61,16 +69,16 @@ class JSONMetadataHandler implements MetadataHandler {
 
     @Override
     public String whereClause(Filter filter) {
-        return filterMapper.map(filter);
+        return this.filterMapper.map(filter);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Metadata fromResultSet(ResultSet resultSet) {
         try {
-            String metadataJson = getOrDefault(resultSet.getString(columnsNames().get(0)),"{}");
-            return new Metadata(OBJECT_MAPPER.readValue(metadataJson, Map.class));
-        } catch (SQLException | JsonProcessingException e) {
+            String metadataJson = (String)Utils.getOrDefault((Object)resultSet.getString(this.columnsNames().get(0)), (Object)"{}");
+            return new Metadata((Map)OBJECT_MAPPER.readValue(metadataJson, Map.class));
+        }
+        catch (JsonProcessingException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -83,10 +91,11 @@ class JSONMetadataHandler implements MetadataHandler {
     @Override
     public void setMetadata(PreparedStatement upsertStmt, Integer parameterInitialIndex, Metadata metadata) {
         try {
-            upsertStmt.setObject(parameterInitialIndex,
-                    OBJECT_MAPPER.writeValueAsString(toStringValueMap(metadata.toMap())), Types.OTHER);
-        } catch (SQLException | JsonProcessingException e) {
+            upsertStmt.setObject((int)parameterInitialIndex, (Object)OBJECT_MAPPER.writeValueAsString((Object)Utils.toStringValueMap((Map)metadata.toMap())), 1111);
+        }
+        catch (JsonProcessingException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
 }
+

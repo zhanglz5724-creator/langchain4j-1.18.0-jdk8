@@ -1,37 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.document.DocumentSource
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.data.document.source;
-
-import static dev.langchain4j.data.document.Document.ABSOLUTE_DIRECTORY_PATH;
-import static dev.langchain4j.data.document.Document.FILE_NAME;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
 
 import dev.langchain4j.data.document.DocumentSource;
 import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.internal.ValidationUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class FileSystemSource implements DocumentSource {
-
+public class FileSystemSource
+implements DocumentSource {
     private final Path path;
 
     public FileSystemSource(Path path) {
-        this.path = ensureNotNull(path, "path");
+        this.path = (Path)ValidationUtils.ensureNotNull((Object)path, (String)"path");
     }
 
-    @Override
     public InputStream inputStream() throws IOException {
-        return Files.newInputStream(path);
+        return Files.newInputStream(this.path, new OpenOption[0]);
     }
 
-    @Override
     public Metadata metadata() {
-        return new Metadata()
-                .put(FILE_NAME, path.getFileName().toString())
-                .put(ABSOLUTE_DIRECTORY_PATH, path.toAbsolutePath().getParent().toString());
+        return new Metadata().put("file_name", this.path.getFileName().toString()).put("absolute_directory_path", this.path.toAbsolutePath().getParent().toString());
     }
 
     public static FileSystemSource from(Path filePath) {
@@ -39,7 +41,7 @@ public class FileSystemSource implements DocumentSource {
     }
 
     public static FileSystemSource from(String filePath) {
-        return new FileSystemSource(Paths.get(filePath));
+        return new FileSystemSource(Paths.get(filePath, new String[0]));
     }
 
     public static FileSystemSource from(URI fileUri) {
@@ -50,8 +52,8 @@ public class FileSystemSource implements DocumentSource {
         return new FileSystemSource(file.toPath());
     }
 
-    @Override
     public String toString() {
-        return "FileSystemSource { path = " + path + " }";
+        return "FileSystemSource { path = " + this.path + " }";
     }
 }
+

@@ -1,133 +1,72 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.store.embedding.oracle;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.store.embedding.oracle.CreateOption;
+import dev.langchain4j.store.embedding.oracle.EmbeddingTable;
+import dev.langchain4j.store.embedding.oracle.Index;
 
-/**
- * <p>
- *   Abstract class that contains common methods for IndexBuilders. Two index
- *   builder implementation exist: {@link IVFIndexBuilder} and {@link
- *   JSONIndexBuilder}. {@link IVFIndexBuilder} can be used to configure an
- *   index on the embedding column of the embedding table and {@link
- *   JSONIndexBuilder} allow you to index keys of the metadata column of the
- *   embedding table.
- * </p>
- * @param <T> The index builder's type.
- */
 abstract class IndexBuilder<T extends IndexBuilder> {
     static final int INDEX_NAME_MAX_LENGTH = 128;
-
-    /**
-     * The name of the index, or null if no name was set.
-     */
     protected String indexName;
-
-    /**
-     * CreateOption for the index. By default, the index will not be created.
-     */
     CreateOption createOption = CreateOption.CREATE_NONE;
 
-    /**
-     * Configures the option to create (or not create) an index. The default is
-     * {@link CreateOption#CREATE_IF_NOT_EXISTS}, which means that an index will
-     * be created if an index with the same name does not already exist.
-     *
-     * @param createOption The create option.
-     *
-     * @return This builder.
-     *
-     * @throws IllegalArgumentException If createOption is null.
-     */
-    public T createOption(CreateOption createOption) {
-        ensureNotNull(createOption, "createOption");
-        this.createOption = createOption;
-        return (T) this;
+    IndexBuilder() {
     }
 
-    /**
-     * Sets the index name.
-     * @param indexName The name of the index.
-     * @return This builder.
-     */
+    public T createOption(CreateOption createOption) {
+        ValidationUtils.ensureNotNull((Object)((Object)createOption), (String)"createOption");
+        this.createOption = createOption;
+        return (T)this;
+    }
+
     public T name(String indexName) {
         this.indexName = indexName;
-        return (T) this;
+        return (T)this;
     }
 
-    /**
-     * Creates an index name given the table name and a suffix.
-     * @param tableName The table name.
-     * @param suffix The index suffix.
-     * @return The index name.
-     */
     String buildIndexName(String tableName, String suffix) {
+        boolean isQuoted;
         String unquotedTableName = tableName;
-        boolean isQuoted = unquotedTableName.startsWith("\"") && unquotedTableName.endsWith("\"");
-        // If the table name is a quoted identifier, then the index name must also be quoted.
+        boolean bl = isQuoted = unquotedTableName.startsWith("\"") && unquotedTableName.endsWith("\"");
         if (isQuoted) {
-            unquotedTableName = unquoteTableName(unquotedTableName);
+            unquotedTableName = this.unquoteTableName(unquotedTableName);
         }
-        indexName = truncateIndexName(unquotedTableName + suffix, isQuoted);
+        this.indexName = this.truncateIndexName(unquotedTableName + suffix, isQuoted);
         if (isQuoted) {
-            indexName = "\"" + indexName + "\"";
+            this.indexName = "\"" + this.indexName + "\"";
         }
-        return indexName;
+        return this.indexName;
     }
 
-    /**
-     * Truncates the index name if it os longer that the maximum length allowed
-     * by the database.
-     * @param indexName The index name.
-     * @param isQuoted True if the index name is quoted.
-     * @return The index name truncated to the max length allowed by the database.
-     */
     private String truncateIndexName(String indexName, boolean isQuoted) {
+        int maxLength;
         String truncatedIndexName = indexName;
-        int maxLength = isQuoted ? INDEX_NAME_MAX_LENGTH - 2 : INDEX_NAME_MAX_LENGTH;
+        int n = maxLength = isQuoted ? 126 : 128;
         if (truncatedIndexName.length() > maxLength) {
             truncatedIndexName = truncatedIndexName.substring(0, maxLength);
         }
         return truncatedIndexName;
     }
 
-    /**
-     * Unquote the table name.
-     * @param tableName The table name.
-     * @return The unquoted table name.
-     */
     private String unquoteTableName(String tableName) {
         String unquotedTableName = tableName;
         return unquotedTableName.substring(1, unquotedTableName.length() - 1);
     }
 
-    /**
-     * Builds the index object configured by this builder.
-     * @return The index object.
-     */
     public abstract Index build();
 
-    /**
-     * Returns the <em>CREATE INDEX</em> SQL statement of the configured index given
-     * the embedding table.
-     * @param embeddingTable The embedding table.
-     * @return The <em>CREATE INDEX</em> SQL statement.
-     */
-    abstract String getCreateIndexStatement(EmbeddingTable embeddingTable);
+    abstract String getCreateIndexStatement(EmbeddingTable var1);
 
-    /**
-     * Returns the <em>DROP INDEX</em> SQL statement of the configured index given
-     * the embedding table.
-     * @param embeddingTable The embedding table.
-     * @return The <em>DROP INDEX</em> SQL statement.
-     */
     String getDropIndexStatement(EmbeddingTable embeddingTable) {
-
-        return "DROP INDEX IF EXISTS " + getIndexName(embeddingTable);
+        return "DROP INDEX IF EXISTS " + this.getIndexName(embeddingTable);
     }
 
-    /**
-     * Returns the name of the index, if a name has not been set, the name is generated.
-     * @param embeddingTable The embedding table.
-     * @return The index name.
-     */
-    abstract String getIndexName(EmbeddingTable embeddingTable);
+    abstract String getIndexName(EmbeddingTable var1);
 }
+

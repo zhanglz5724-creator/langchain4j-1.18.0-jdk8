@@ -1,18 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonSerialize
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import dev.langchain4j.model.ollama.FormatSerializer;
+import dev.langchain4j.model.ollama.Options;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class CompletionRequest {
-
     private String model;
     private String system;
     private String prompt;
@@ -20,24 +30,14 @@ class CompletionRequest {
     private Integer width;
     private Integer height;
     private Integer steps;
-
-    @JsonSerialize(using = FormatSerializer.class)
+    @JsonSerialize(using=FormatSerializer.class)
     private String format;
-
     private Boolean stream;
 
-    CompletionRequest() {}
+    CompletionRequest() {
+    }
 
-    CompletionRequest(
-            String model,
-            String system,
-            String prompt,
-            Options options,
-            Integer width,
-            Integer height,
-            Integer steps,
-            String format,
-            Boolean stream) {
+    CompletionRequest(String model, String system, String prompt, Options options, Integer width, Integer height, Integer steps, String format, Boolean stream) {
         this.model = model;
         this.system = system;
         this.prompt = prompt;
@@ -54,7 +54,7 @@ class CompletionRequest {
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -62,7 +62,7 @@ class CompletionRequest {
     }
 
     public String getSystem() {
-        return system;
+        return this.system;
     }
 
     public void setSystem(String system) {
@@ -70,7 +70,7 @@ class CompletionRequest {
     }
 
     public String getPrompt() {
-        return prompt;
+        return this.prompt;
     }
 
     public void setPrompt(String prompt) {
@@ -78,7 +78,7 @@ class CompletionRequest {
     }
 
     public Options getOptions() {
-        return options;
+        return this.options;
     }
 
     public void setOptions(Options options) {
@@ -86,7 +86,7 @@ class CompletionRequest {
     }
 
     public Integer getWidth() {
-        return width;
+        return this.width;
     }
 
     public void setWidth(Integer width) {
@@ -94,7 +94,7 @@ class CompletionRequest {
     }
 
     public Integer getHeight() {
-        return height;
+        return this.height;
     }
 
     public void setHeight(Integer height) {
@@ -102,7 +102,7 @@ class CompletionRequest {
     }
 
     public Integer getSteps() {
-        return steps;
+        return this.steps;
     }
 
     public void setSteps(Integer steps) {
@@ -110,7 +110,7 @@ class CompletionRequest {
     }
 
     public String getFormat() {
-        return format;
+        return this.format;
     }
 
     public void setFormat(String format) {
@@ -118,7 +118,7 @@ class CompletionRequest {
     }
 
     public Boolean getStream() {
-        return stream;
+        return this.stream;
     }
 
     public void setStream(Boolean stream) {
@@ -126,7 +126,6 @@ class CompletionRequest {
     }
 
     static class Builder {
-
         private String model;
         private String system;
         private String prompt;
@@ -136,6 +135,9 @@ class CompletionRequest {
         private Integer steps;
         private String format;
         private Boolean stream;
+
+        Builder() {
+        }
 
         Builder model(String model) {
             this.model = model;
@@ -183,7 +185,8 @@ class CompletionRequest {
         }
 
         CompletionRequest build() {
-            return new CompletionRequest(model, system, prompt, options, width, height, steps, format, stream);
+            return new CompletionRequest(this.model, this.system, this.prompt, this.options, this.width, this.height, this.steps, this.format, this.stream);
         }
     }
 }
+

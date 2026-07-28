@@ -1,22 +1,95 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.core.JsonProcessingException
+ *  com.fasterxml.jackson.databind.ObjectMapper
+ *  dev.langchain4j.data.document.Metadata
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.embedding.EmbeddingModel
+ *  dev.langchain4j.store.embedding.EmbeddingMatch
+ *  dev.langchain4j.store.embedding.EmbeddingSearchRequest
+ *  dev.langchain4j.store.embedding.EmbeddingSearchResult
+ *  dev.langchain4j.store.embedding.EmbeddingStore
+ *  dev.langchain4j.store.embedding.filter.Filter
+ *  dev.langchain4j.store.embedding.filter.comparison.ContainsString
+ *  dev.langchain4j.store.embedding.filter.comparison.IsEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsGreaterThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsIn
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThan
+ *  dev.langchain4j.store.embedding.filter.comparison.IsLessThanOrEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotEqualTo
+ *  dev.langchain4j.store.embedding.filter.comparison.IsNotIn
+ *  dev.langchain4j.store.embedding.filter.logical.And
+ *  dev.langchain4j.store.embedding.filter.logical.Not
+ *  dev.langchain4j.store.embedding.filter.logical.Or
+ *  jakarta.persistence.criteria.CriteriaBuilder
+ *  jakarta.persistence.criteria.CriteriaDelete
+ *  jakarta.persistence.criteria.CriteriaQuery
+ *  jakarta.persistence.criteria.Expression
+ *  jakarta.persistence.criteria.Order
+ *  jakarta.persistence.criteria.Predicate
+ *  jakarta.persistence.criteria.Selection
+ *  jakarta.persistence.metamodel.EntityType
+ *  jakarta.persistence.metamodel.ManagedType
+ *  jakarta.persistence.metamodel.SingularAttribute
+ *  jakarta.persistence.metamodel.Type
+ *  org.hibernate.SessionFactory
+ *  org.hibernate.StatelessSession
+ *  org.hibernate.boot.ResourceStreamLocator
+ *  org.hibernate.boot.registry.BootstrapServiceRegistryBuilder
+ *  org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl
+ *  org.hibernate.boot.registry.classloading.spi.ClassLoaderService
+ *  org.hibernate.boot.spi.AdditionalMappingContributions
+ *  org.hibernate.boot.spi.AdditionalMappingContributor
+ *  org.hibernate.boot.spi.InFlightMetadataCollector
+ *  org.hibernate.boot.spi.MetadataBuildingContext
+ *  org.hibernate.cfg.Configuration
+ *  org.hibernate.engine.jdbc.spi.JdbcServices
+ *  org.hibernate.engine.spi.SessionFactoryImplementor
+ *  org.hibernate.engine.spi.SharedSessionContractImplementor
+ *  org.hibernate.generator.BeforeExecutionGenerator
+ *  org.hibernate.generator.EventType
+ *  org.hibernate.generator.Generator
+ *  org.hibernate.internal.util.ReaderInputStream
+ *  org.hibernate.mapping.Column
+ *  org.hibernate.metamodel.mapping.AttributeMapping
+ *  org.hibernate.metamodel.mapping.ModelPart
+ *  org.hibernate.metamodel.spi.EntityInstantiator
+ *  org.hibernate.persister.entity.EntityPersister
+ *  org.hibernate.query.MutationQuery
+ *  org.hibernate.query.SelectionQuery
+ *  org.hibernate.query.criteria.HibernateCriteriaBuilder
+ *  org.hibernate.query.criteria.JpaConflictClause
+ *  org.hibernate.query.criteria.JpaConflictUpdateAction
+ *  org.hibernate.query.criteria.JpaCriteriaDelete
+ *  org.hibernate.query.criteria.JpaCriteriaInsertValues
+ *  org.hibernate.query.criteria.JpaCriteriaQuery
+ *  org.hibernate.query.criteria.JpaJsonValueExpression
+ *  org.hibernate.query.criteria.JpaParameterExpression
+ *  org.hibernate.query.criteria.JpaPath
+ *  org.hibernate.query.criteria.JpaPredicate
+ *  org.hibernate.query.criteria.JpaRoot
+ *  org.hibernate.query.restriction.Restriction
+ *  org.hibernate.relational.SchemaManager
+ *  org.hibernate.tool.schema.Action
+ *  org.hibernate.tool.schema.SourceType
+ *  org.hibernate.type.descriptor.java.JavaType
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.store.embedding.hibernate;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.Utils.randomUUID;
-import static dev.langchain4j.internal.Utils.toStringValueMap;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.internal.ValidationUtils.ensureTrue;
-import static java.util.Collections.singletonList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.document.Metadata;
-import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
@@ -35,15 +108,27 @@ import dev.langchain4j.store.embedding.filter.comparison.IsNotIn;
 import dev.langchain4j.store.embedding.filter.logical.And;
 import dev.langchain4j.store.embedding.filter.logical.Not;
 import dev.langchain4j.store.embedding.filter.logical.Or;
+import dev.langchain4j.store.embedding.hibernate.DatabaseKind;
+import dev.langchain4j.store.embedding.hibernate.DistanceFunction;
+import dev.langchain4j.store.embedding.hibernate.EmbeddedText;
+import dev.langchain4j.store.embedding.hibernate.Embedding;
+import dev.langchain4j.store.embedding.hibernate.EmbeddingEntity;
+import dev.langchain4j.store.embedding.hibernate.EmbeddingVector;
+import dev.langchain4j.store.embedding.hibernate.MetadataAttribute;
+import dev.langchain4j.store.embedding.hibernate.UnmappedMetadata;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.ManagedType;
 import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.persistence.metamodel.Type;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
@@ -67,13 +152,12 @@ import org.hibernate.StatelessSession;
 import org.hibernate.boot.ResourceStreamLocator;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl;
+import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.AdditionalMappingContributor;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.JdbcSettings;
-import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -81,7 +165,9 @@ import org.hibernate.generator.BeforeExecutionGenerator;
 import org.hibernate.generator.EventType;
 import org.hibernate.generator.Generator;
 import org.hibernate.internal.util.ReaderInputStream;
+import org.hibernate.mapping.Column;
 import org.hibernate.metamodel.mapping.AttributeMapping;
+import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.spi.EntityInstantiator;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.query.MutationQuery;
@@ -92,7 +178,7 @@ import org.hibernate.query.criteria.JpaConflictUpdateAction;
 import org.hibernate.query.criteria.JpaCriteriaDelete;
 import org.hibernate.query.criteria.JpaCriteriaInsertValues;
 import org.hibernate.query.criteria.JpaCriteriaQuery;
-import org.hibernate.query.criteria.JpaExpression;
+import org.hibernate.query.criteria.JpaJsonValueExpression;
 import org.hibernate.query.criteria.JpaParameterExpression;
 import org.hibernate.query.criteria.JpaPath;
 import org.hibernate.query.criteria.JpaPredicate;
@@ -105,25 +191,11 @@ import org.hibernate.type.descriptor.java.JavaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Hibernate ORM EmbeddingStore Implementation
- */
-// Needed for inherited bean injection validation
-public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
+public class HibernateEmbeddingStore<E>
+implements EmbeddingStore<TextSegment> {
     private static final Logger log = LoggerFactory.getLogger(HibernateEmbeddingStore.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final boolean IS_HIBERNATE_ORM_7_1;
-
-    static {
-        boolean isHibernateOrm71 = false;
-        try {
-            SchemaManager.class.getMethod("truncateTable", String.class);
-        } catch (NoSuchMethodException e) {
-            isHibernateOrm71 = true;
-        }
-        IS_HIBERNATE_ORM_7_1 = isHibernateOrm71;
-    }
-
     protected final boolean isDynamic;
     protected final SessionFactory sessionFactory;
     protected final DatabaseKind databaseKind;
@@ -139,157 +211,93 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
     protected final Type<Map<?, ?>> unmappedMetadataAttributeMapType;
     protected final Map<String, AttributeMapping> metadataAttributeMappings;
     protected final DistanceFunction distanceFunction;
-
     private final JpaCriteriaDelete<?> deleteByIds;
     private final JpaCriteriaInsertValues<?> insertValues;
 
-    /**
-     * Constructor for HibernateEmbeddingStore Class
-     *
-     * @param isDynamic                     Whether the session factory was created dynamically
-     * @param sessionFactory                The Hibernate session factory to use
-     * @param databaseKind                  The database kind
-     * @param entityClass                   The Hibernate entity class to use
-     * @param embeddingAttributeName        The name of the entity attribute containing the embedding vector
-     * @param embeddedTextAttributeName     The name of the entity attribute containing the text from which the embedding vector is derived, or null
-     * @param unmappedMetadataAttributeName The name of the entity attribute to store generic metadata in
-     * @param metadataAttributePaths        The name of the explicit metadata entity attributes
-     * @param distanceFunction              The distance function to use for vector search
-     */
-    protected HibernateEmbeddingStore(
-            boolean isDynamic,
-            SessionFactory sessionFactory,
-            DatabaseKind databaseKind,
-            Class<E> entityClass,
-            String embeddingAttributeName,
-            String embeddedTextAttributeName,
-            String unmappedMetadataAttributeName,
-            String[] metadataAttributePaths,
-            DistanceFunction distanceFunction) {
+    protected HibernateEmbeddingStore(boolean isDynamic, SessionFactory sessionFactory, DatabaseKind databaseKind, Class<E> entityClass, String embeddingAttributeName, String embeddedTextAttributeName, String unmappedMetadataAttributeName, String[] metadataAttributePaths, DistanceFunction distanceFunction) {
         this.isDynamic = isDynamic;
-        this.sessionFactory = ensureNotNull(sessionFactory, "sessionFactory");
-        this.databaseKind = ensureNotNull(databaseKind, "databaseKind");
-        this.entityClass = ensureNotNull(entityClass, "entityClass");
-        this.distanceFunction = ensureNotNull(distanceFunction, "distanceFunction");
-        this.entityPersister = sessionFactory
-                .unwrap(SessionFactoryImplementor.class)
-                .getRuntimeMetamodels()
-                .getMappingMetamodel()
-                .getEntityDescriptor(entityClass);
-        //noinspection unchecked
-        this.idType = (JavaType<Object>) entityPersister.getIdentifierMapping().getJavaType();
-        this.allowUuidGeneration =
-                entityPersister.getIdentifierMapping().getJavaType().getJavaTypeClass() == String.class
-                        || entityPersister.getIdentifierMapping().getJavaType().getJavaTypeClass() == UUID.class;
-        this.idGenerator = entityPersister.getGenerator();
-        this.idAttributeMapping = (AttributeMapping) entityPersister.getIdentifierMapping();
-        this.embeddingAttributeMapping =
-                entityPersister.findAttributeMapping(ensureNotEmpty(embeddingAttributeName, "embeddingAttributeName"));
-        this.embeddedTextAttributeMapping = embeddedTextAttributeName == null
-                ? null
-                : entityPersister.findAttributeMapping(embeddedTextAttributeName);
-        this.unmappedMetadataAttributeMapping = entityPersister.findAttributeMapping(
-                ensureNotEmpty(unmappedMetadataAttributeName, "unmappedMetadataAttributeName"));
-        if (embeddingAttributeMapping == null) {
-            throw new IllegalArgumentException(
-                    "Couldn't find embedding with attribute name: " + embeddingAttributeName);
+        this.sessionFactory = (SessionFactory)ValidationUtils.ensureNotNull((Object)sessionFactory, (String)"sessionFactory");
+        this.databaseKind = (DatabaseKind)ValidationUtils.ensureNotNull((Object)databaseKind, (String)"databaseKind");
+        this.entityClass = (Class)ValidationUtils.ensureNotNull(entityClass, (String)"entityClass");
+        this.distanceFunction = (DistanceFunction)((Object)ValidationUtils.ensureNotNull((Object)((Object)distanceFunction), (String)"distanceFunction"));
+        this.entityPersister = ((SessionFactoryImplementor)sessionFactory.unwrap(SessionFactoryImplementor.class)).getRuntimeMetamodels().getMappingMetamodel().getEntityDescriptor(entityClass);
+        this.idType = this.entityPersister.getIdentifierMapping().getJavaType();
+        this.allowUuidGeneration = this.entityPersister.getIdentifierMapping().getJavaType().getJavaTypeClass() == String.class || this.entityPersister.getIdentifierMapping().getJavaType().getJavaTypeClass() == UUID.class;
+        this.idGenerator = this.entityPersister.getGenerator();
+        this.idAttributeMapping = (AttributeMapping)this.entityPersister.getIdentifierMapping();
+        this.embeddingAttributeMapping = this.entityPersister.findAttributeMapping(ValidationUtils.ensureNotEmpty((String)embeddingAttributeName, (String)"embeddingAttributeName"));
+        this.embeddedTextAttributeMapping = embeddedTextAttributeName == null ? null : this.entityPersister.findAttributeMapping(embeddedTextAttributeName);
+        this.unmappedMetadataAttributeMapping = this.entityPersister.findAttributeMapping(ValidationUtils.ensureNotEmpty((String)unmappedMetadataAttributeName, (String)"unmappedMetadataAttributeName"));
+        if (this.embeddingAttributeMapping == null) {
+            throw new IllegalArgumentException("Couldn't find embedding with attribute name: " + embeddingAttributeName);
         }
-        if (embeddedTextAttributeMapping == null && embeddedTextAttributeName != null) {
-            throw new IllegalArgumentException(
-                    "Couldn't find embedded text with attribute name: " + embeddedTextAttributeName);
+        if (this.embeddedTextAttributeMapping == null && embeddedTextAttributeName != null) {
+            throw new IllegalArgumentException("Couldn't find embedded text with attribute name: " + embeddedTextAttributeName);
         }
-        if (unmappedMetadataAttributeMapping == null) {
-            throw new IllegalArgumentException(
-                    "Couldn't find unmapped metadata with attribute name: " + unmappedMetadataAttributeName);
+        if (this.unmappedMetadataAttributeMapping == null) {
+            throw new IllegalArgumentException("Couldn't find unmapped metadata with attribute name: " + unmappedMetadataAttributeName);
         }
-        final Type<?> unmappedMetadataAttributeType = sessionFactory
-                .getMetamodel()
-                .entity(entityClass)
-                .getSingularAttribute(unmappedMetadataAttributeName)
-                .getType();
+        Type unmappedMetadataAttributeType = sessionFactory.getMetamodel().entity(entityClass).getSingularAttribute(unmappedMetadataAttributeName).getType();
         if (unmappedMetadataAttributeType.getJavaType() == String.class) {
             this.unmappedMetadataAttributeMapType = null;
         } else {
             if (unmappedMetadataAttributeType.getJavaType() != Map.class) {
-                throw new IllegalArgumentException("Unmapped metadata attribute '" + unmappedMetadataAttributeName
-                        + "' must be of type Map or String, but found: "
-                        + unmappedMetadataAttributeType.getJavaType().getTypeName());
+                throw new IllegalArgumentException("Unmapped metadata attribute '" + unmappedMetadataAttributeName + "' must be of type Map or String, but found: " + unmappedMetadataAttributeType.getJavaType().getTypeName());
             }
-            //noinspection unchecked
-            this.unmappedMetadataAttributeMapType = (Type<Map<?, ?>>) unmappedMetadataAttributeType;
+            this.unmappedMetadataAttributeMapType = unmappedMetadataAttributeType;
         }
         if (metadataAttributePaths == null || metadataAttributePaths.length == 0) {
             this.metadataAttributeMappings = Collections.emptyMap();
         } else {
-            final Map<String, AttributeMapping> metadataAttributeMappings =
-                    new LinkedHashMap<>(metadataAttributePaths.length);
+            LinkedHashMap<String, AttributeMapping> metadataAttributeMappings = new LinkedHashMap<String, AttributeMapping>(metadataAttributePaths.length);
             for (String metadataAttributePath : metadataAttributePaths) {
-                if (!(entityPersister.findByPath(metadataAttributePath) instanceof AttributeMapping attributeMapping)) {
-                    throw new IllegalArgumentException(
-                            "Couldn't find metadata attribute with path: " + metadataAttributePath);
+                ModelPart modelPart = this.entityPersister.findByPath(metadataAttributePath);
+                if (!(modelPart instanceof AttributeMapping)) {
+                    throw new IllegalArgumentException("Couldn't find metadata attribute with path: " + metadataAttributePath);
                 }
+                AttributeMapping attributeMapping = (AttributeMapping)modelPart;
                 metadataAttributeMappings.put(metadataAttributePath, attributeMapping);
             }
             this.metadataAttributeMappings = metadataAttributeMappings;
         }
-
-        final HibernateCriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
-        final JpaCriteriaDelete<?> delete = criteriaBuilder.createCriteriaDelete(entityClass);
-        @SuppressWarnings("unchecked")
-        final JpaParameterExpression<List<?>> idListParameter =
-                (JpaParameterExpression<List<?>>) (JpaParameterExpression<?>)
-                        criteriaBuilder.listParameter(idType.getJavaTypeClass(), idAttributeMapping.getAttributeName());
-        final JpaRoot<?> root = delete.getTarget();
-        delete.where(criteriaBuilder
-                .in(root.get(idAttributeMapping.getAttributeName()))
-                .value(idListParameter));
+        HibernateCriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
+        JpaCriteriaDelete delete = criteriaBuilder.createCriteriaDelete(entityClass);
+        JpaParameterExpression idListParameter = criteriaBuilder.listParameter(this.idType.getJavaTypeClass(), this.idAttributeMapping.getAttributeName());
+        JpaRoot root = delete.getTarget();
+        delete.where((Expression)criteriaBuilder.in((Expression)root.get(this.idAttributeMapping.getAttributeName())).value((Expression)idListParameter));
         this.deleteByIds = delete;
-
-        final JpaCriteriaInsertValues<?> criteriaInsertValues = criteriaBuilder.createCriteriaInsertValues(entityClass);
-        final JpaRoot<?> target = criteriaInsertValues.getTarget();
-        final JpaParameterExpression<Object> idParameter =
-                criteriaBuilder.parameter(idType.getJavaTypeClass(), idAttributeMapping.getAttributeName());
-        final JpaParameterExpression<float[]> embeddingParameter =
-                criteriaBuilder.parameter(float[].class, embeddingAttributeName);
-        final JpaParameterExpression<?> unmappedMetadataParameter = unmappedMetadataAttributeMapType != null
-                ? criteriaBuilder.parameter(Map.class, unmappedMetadataAttributeName)
-                : criteriaBuilder.parameter(String.class, unmappedMetadataAttributeName);
-        final List<Path<?>> paths = new ArrayList<>();
-        final List<Expression<?>> values = new ArrayList<>();
-        final JpaConflictClause<?> onConflict =
-                criteriaInsertValues.onConflict().conflictOnConstraintAttributes(idAttributeMapping.getAttributeName());
-        final JpaRoot<?> excludedRoot = onConflict.getExcludedRoot();
-        final JpaConflictUpdateAction<?> updateAction = onConflict.onConflictDoUpdate();
-
-        paths.add(target.get(idAttributeMapping.getAttributeName()));
+        JpaCriteriaInsertValues criteriaInsertValues = criteriaBuilder.createCriteriaInsertValues(entityClass);
+        JpaRoot target = criteriaInsertValues.getTarget();
+        JpaParameterExpression idParameter = criteriaBuilder.parameter(this.idType.getJavaTypeClass(), this.idAttributeMapping.getAttributeName());
+        JpaParameterExpression embeddingParameter = criteriaBuilder.parameter(float[].class, embeddingAttributeName);
+        JpaParameterExpression unmappedMetadataParameter = this.unmappedMetadataAttributeMapType != null ? criteriaBuilder.parameter(Map.class, unmappedMetadataAttributeName) : criteriaBuilder.parameter(String.class, unmappedMetadataAttributeName);
+        ArrayList<Object> paths = new ArrayList<Object>();
+        ArrayList<JpaParameterExpression> values = new ArrayList<JpaParameterExpression>();
+        JpaConflictClause onConflict = criteriaInsertValues.onConflict().conflictOnConstraintAttributes(new String[]{this.idAttributeMapping.getAttributeName()});
+        JpaRoot excludedRoot = onConflict.getExcludedRoot();
+        JpaConflictUpdateAction updateAction = onConflict.onConflictDoUpdate();
+        paths.add(target.get(this.idAttributeMapping.getAttributeName()));
         values.add(idParameter);
-
         paths.add(target.get(embeddingAttributeName));
         values.add(embeddingParameter);
-        updateAction.set(embeddingAttributeName, excludedRoot.get(embeddingAttributeName));
-
+        updateAction.set(embeddingAttributeName, (Object)excludedRoot.get(embeddingAttributeName));
         if (embeddedTextAttributeName != null) {
-            final JpaParameterExpression<String> embeddedTextParameter =
-                    criteriaBuilder.parameter(String.class, embeddedTextAttributeName);
+            JpaParameterExpression embeddedTextParameter = criteriaBuilder.parameter(String.class, embeddedTextAttributeName);
             paths.add(target.get(embeddedTextAttributeName));
             values.add(embeddedTextParameter);
-            updateAction.set(embeddedTextAttributeName, excludedRoot.get(embeddedTextAttributeName));
+            updateAction.set(embeddedTextAttributeName, (Object)excludedRoot.get(embeddedTextAttributeName));
         }
-
         paths.add(target.get(unmappedMetadataAttributeName));
         values.add(unmappedMetadataParameter);
-        updateAction.set(unmappedMetadataAttributeName, excludedRoot.get(unmappedMetadataAttributeName));
-
-        for (String attributePath : metadataAttributeMappings.keySet()) {
-            JpaPath<Object> path = get(target, attributePath);
+        updateAction.set(unmappedMetadataAttributeName, (Object)excludedRoot.get(unmappedMetadataAttributeName));
+        for (String attributePath : this.metadataAttributeMappings.keySet()) {
+            JpaPath path = this.get(target, attributePath);
             paths.add(path);
             values.add(criteriaBuilder.parameter(path.getJavaType(), attributePath));
-            updateAction.set(path, (Object) get(excludedRoot, attributePath));
+            updateAction.set(path, this.get(excludedRoot, attributePath));
         }
-
         criteriaInsertValues.setInsertionTargetPaths(paths);
         criteriaInsertValues.values(Collections.singletonList(criteriaBuilder.values(values)));
-
         this.insertValues = criteriaInsertValues;
     }
 
@@ -313,1030 +321,725 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
         this.insertValues = null;
     }
 
-    /**
-     * A builder for creating a Hibernate based {@link EmbeddingStore} for
-     * an existing {@link SessionFactory} and entity classes.
-     *
-     * @return The builder
-     */
     public static <E> Builder<E> builder(Class<E> entityClass) {
-        return new Builder<>(entityClass);
+        return new Builder<E>(entityClass);
     }
 
-    /**
-     * A builder for creating a Hibernate based {@link EmbeddingStore} when
-     * no {@link SessionFactory} or entity classes exist.
-     *
-     * @return The builder
-     */
     public static DynamicBuilder dynamicBuilder() {
         return new DynamicBuilder();
     }
 
-    /**
-     * A builder for creating a Hibernate based {@link EmbeddingStore} when
-     * no {@link SessionFactory} or entity classes exist and a datasource shall be used.
-     *
-     * @return The builder
-     */
     public static DynamicDatasourceBuilder dynamicDatasourceBuilder() {
         return new DynamicDatasourceBuilder();
     }
 
     public void close() {
-        if (isDynamic) {
+        if (this.isDynamic) {
             this.sessionFactory.close();
         }
     }
 
-    /**
-     * Adds a given embedding to the store.
-     *
-     * @param embedding The embedding to be added to the store.
-     * @return The auto-generated ID associated with the added embedding.
-     */
-    @Override
-    public String add(Embedding embedding) {
-        final List<String> ids = addAll(Collections.singletonList(embedding), null);
+    public String add(dev.langchain4j.data.embedding.Embedding embedding) {
+        List<String> ids = this.addAll(Collections.singletonList(embedding), null);
         return ids.get(0);
     }
 
-    /**
-     * Adds a given embedding to the store.
-     *
-     * @param id        The unique identifier for the embedding to be added.
-     * @param embedding The embedding to be added to the store.
-     */
-    @Override
-    public void add(String id, Embedding embedding) {
-        addInternal(id, embedding, null);
+    public void add(String id, dev.langchain4j.data.embedding.Embedding embedding) {
+        this.addInternal(id, embedding, null);
     }
 
-    /**
-     * Adds a given embedding and the corresponding content that has been embedded to the store.
-     *
-     * @param embedding   The embedding to be added to the store.
-     * @param textSegment Original content that was embedded.
-     * @return The auto-generated ID associated with the added embedding.
-     */
-    @Override
-    public String add(Embedding embedding, TextSegment textSegment) {
-        final List<String> ids = addAll(
-                Collections.singletonList(embedding),
-                textSegment == null ? null : Collections.singletonList(textSegment));
+    public String add(dev.langchain4j.data.embedding.Embedding embedding, TextSegment textSegment) {
+        List<String> ids = this.addAll(Collections.singletonList(embedding), textSegment == null ? null : Collections.singletonList(textSegment));
         return ids.get(0);
     }
 
-    /**
-     * Adds multiple embeddings to the store.
-     *
-     * @param embeddings A list of embeddings to be added to the store.
-     * @return A list of auto-generated IDs associated with the added embeddings.
-     */
-    @Override
-    public List<String> addAll(List<Embedding> embeddings) {
-        return addAll(embeddings, null);
+    public List<String> addAll(List<dev.langchain4j.data.embedding.Embedding> embeddings) {
+        return this.addAll(embeddings, null);
     }
 
-    @Override
     public void removeAll(Collection<String> ids) {
-        ensureNotEmpty(ids, "ids");
-        sessionFactory.inTransaction(session -> {
-            session.createMutationQuery(deleteByIds)
-                    .setParameter(
-                            idAttributeMapping.getAttributeName(),
-                            ids.stream().map(idType::fromString).collect(Collectors.toList()))
-                    .executeUpdate();
-        });
+        ValidationUtils.ensureNotEmpty(ids, (String)"ids");
+        this.sessionFactory.inTransaction(session -> session.createMutationQuery(this.deleteByIds).setParameter(this.idAttributeMapping.getAttributeName(), ids.stream().map(arg_0 -> this.idType.fromString(arg_0)).collect(Collectors.toList())).executeUpdate());
     }
 
-    @Override
     public void removeAll(Filter filter) {
-        ensureNotNull(filter, "filter");
-        final HibernateCriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
-        final JpaCriteriaDelete<?> delete = criteriaBuilder.createCriteriaDelete(entityClass);
-        delete.where(createPredicateFromFilter(delete.getTarget(), filter, criteriaBuilder));
-        sessionFactory.inTransaction(session -> {
-            session.createMutationQuery(delete).executeUpdate();
-        });
+        ValidationUtils.ensureNotNull((Object)filter, (String)"filter");
+        HibernateCriteriaBuilder criteriaBuilder = this.sessionFactory.getCriteriaBuilder();
+        JpaCriteriaDelete delete = criteriaBuilder.createCriteriaDelete(this.entityClass);
+        delete.where((Expression)this.createPredicateFromFilter(delete.getTarget(), filter, criteriaBuilder));
+        this.sessionFactory.inTransaction(session -> session.createMutationQuery((CriteriaDelete)delete).executeUpdate());
     }
 
-    @Override
     public void removeAll() {
-        if (isDynamic) {
-            sessionFactory.getSchemaManager().truncate();
-        } else if (isIsHibernateOrm71()) {
-            sessionFactory.inStatelessTransaction(session -> {
-                session.createMutationQuery("delete from " + entityPersister.getEntityName())
-                        .executeUpdate();
-            });
+        if (this.isDynamic) {
+            this.sessionFactory.getSchemaManager().truncate();
+        } else if (HibernateEmbeddingStore.isIsHibernateOrm71()) {
+            this.sessionFactory.inStatelessTransaction(session -> session.createMutationQuery("delete from " + this.entityPersister.getEntityName()).executeUpdate());
         } else {
             try {
-                sessionFactory
-                        .getSchemaManager()
-                        .truncateTable(entityPersister.getIdentifierTableMapping().getTableName());
+                this.sessionFactory.getSchemaManager().truncateTable(this.entityPersister.getIdentifierTableMapping().getTableName());
             }
             catch (UnsupportedOperationException ex) {
-                // Workaround HHH-20500 since we can't reliably detect the Hibernate ORM version
-                sessionFactory.inStatelessTransaction(session -> {
-                    session.createMutationQuery("delete from " + entityPersister.getEntityName())
-                            .executeUpdate();
-                });
+                this.sessionFactory.inStatelessTransaction(session -> session.createMutationQuery("delete from " + this.entityPersister.getEntityName()).executeUpdate());
             }
         }
     }
 
-    // Allows replacing this logic for native image generation
     private static boolean isIsHibernateOrm71() {
         return IS_HIBERNATE_ORM_7_1;
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) entities based on {@link Embedding}s.
-     * <br>
-     * The passed restriction is used to filter by metadata.
-     *
-     * @param embedding The embedding for the query
-     * @param restriction Filter for metadata
-     * @return The list of all found entities.
-     */
-    public List<E> query(Embedding embedding, Restriction<E> restriction) {
-        return query(embedding, null, restriction, null);
+    public List<E> query(dev.langchain4j.data.embedding.Embedding embedding, Restriction<E> restriction) {
+        return this.query(embedding, null, restriction, null);
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) entities based on {@link Embedding}s.
-     * <br>
-     * The passed restriction is used to filter by metadata.
-     *
-     * @param embedding The embedding for the query
-     * @param minScore The minimum distance score
-     * @param restriction Filter for metadata
-     * @return The list of all found entities.
-     */
-    public List<E> query(Embedding embedding, double minScore, Restriction<E> restriction) {
-        return query(embedding, minScore, restriction, null);
+    public List<E> query(dev.langchain4j.data.embedding.Embedding embedding, double minScore, Restriction<E> restriction) {
+        return this.query(embedding, (Double)minScore, restriction, null);
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) entities based on {@link Embedding}s.
-     * <br>
-     * The passed restriction is used to filter by metadata.
-     *
-     * @param embedding The embedding for the query
-     * @param minScore The minimum distance score
-     * @param restriction Filter for metadata
-     * @param maxResults The maximum number of results
-     * @return The list of all found entities.
-     */
-    public List<E> query(Embedding embedding, double minScore, Restriction<E> restriction, int maxResults) {
-        return query(embedding, (Double) minScore, restriction, (Integer) maxResults);
+    public List<E> query(dev.langchain4j.data.embedding.Embedding embedding, double minScore, Restriction<E> restriction, int maxResults) {
+        return this.query(embedding, (Double)minScore, restriction, (Integer)maxResults);
     }
 
-    private List<E> query(Embedding embedding, Double minScore, Restriction<E> restriction, Integer maxResults) {
-        ensureNotNull(restriction, "restriction");
-
-        final JpaCriteriaQuery<E> query = createBaseQuery(entityClass, minScore != null, restriction::toPredicate);
-
-        return sessionFactory.fromStatelessSession(session -> {
-            final SelectionQuery<E> selectionQuery = session.createSelectionQuery(query);
-            selectionQuery.setParameter(embeddingAttributeMapping.getAttributeName(), embedding.vector());
+    private List<E> query(dev.langchain4j.data.embedding.Embedding embedding, Double minScore, Restriction<E> restriction, Integer maxResults) {
+        ValidationUtils.ensureNotNull(restriction, (String)"restriction");
+        JpaCriteriaQuery<E> query = this.createBaseQuery(this.entityClass, minScore != null, (arg_0, arg_1) -> restriction.toPredicate(arg_0, arg_1));
+        return (List)this.sessionFactory.fromStatelessSession(session -> {
+            SelectionQuery selectionQuery = session.createSelectionQuery((CriteriaQuery)query);
+            selectionQuery.setParameter(this.embeddingAttributeMapping.getAttributeName(), (Object)embedding.vector());
             if (minScore != null) {
-                selectionQuery.setParameter("minScore", minScore);
+                selectionQuery.setParameter("minScore", (Object)minScore);
             }
             if (maxResults != null) {
-                selectionQuery.setMaxResults(maxResults);
+                selectionQuery.setMaxResults(maxResults.intValue());
             }
             return selectionQuery.getResultList();
         });
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) {@link Embedding}s.
-     * <br>
-     * The passed restriction is used to filter by metadata.
-     *
-     * @param embedding The embedding for the search
-     * @param restriction Filter for metadata
-     * @return An {@link EmbeddingSearchResult} containing all found {@link Embedding}s.
-     */
-    public EmbeddingSearchResult<TextSegment> search(Embedding embedding, Restriction<E> restriction) {
-        return search(embedding, null, restriction, null);
+    public EmbeddingSearchResult<TextSegment> search(dev.langchain4j.data.embedding.Embedding embedding, Restriction<E> restriction) {
+        return this.search(embedding, null, restriction, null);
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) {@link Embedding}s.
-     * <br>
-     * The passed restriction is used to filter by metadata.
-     *
-     * @param embedding The embedding for the search
-     * @param minScore The minimum distance score
-     * @param restriction Filter for metadata
-     * @return An {@link EmbeddingSearchResult} containing all found {@link Embedding}s.
-     */
-    public EmbeddingSearchResult<TextSegment> search(Embedding embedding, double minScore, Restriction<E> restriction) {
-        return search(embedding, minScore, restriction, null);
+    public EmbeddingSearchResult<TextSegment> search(dev.langchain4j.data.embedding.Embedding embedding, double minScore, Restriction<E> restriction) {
+        return this.search(embedding, (Double)minScore, restriction, null);
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) {@link Embedding}s.
-     * <br>
-     * The passed restriction is used to filter by metadata.
-     *
-     * @param embedding The embedding for the search
-     * @param minScore The minimum distance score
-     * @param restriction Filter for metadata
-     * @param maxResults The maximum number of results
-     * @return An {@link EmbeddingSearchResult} containing all found {@link Embedding}s.
-     */
-    public EmbeddingSearchResult<TextSegment> search(
-            Embedding embedding, double minScore, Restriction<E> restriction, int maxResults) {
-        return search(embedding, (Double) minScore, restriction, (Integer) maxResults);
+    public EmbeddingSearchResult<TextSegment> search(dev.langchain4j.data.embedding.Embedding embedding, double minScore, Restriction<E> restriction, int maxResults) {
+        return this.search(embedding, (Double)minScore, restriction, (Integer)maxResults);
     }
 
-    private EmbeddingSearchResult<TextSegment> search(
-            Embedding embedding, Double minScore, Restriction<E> restriction, Integer maxResults) {
-        ensureNotNull(restriction, "restriction");
-
-        final JpaCriteriaQuery<Object[]> query =
-                createBaseQuery(Object[].class, minScore != null, restriction::toPredicate);
-        applyEmbeddingSearchResultSelections(query);
-
-        return sessionFactory.fromStatelessSession(session -> {
-            final SelectionQuery<Object[]> selectionQuery = session.createSelectionQuery(query);
-            selectionQuery.setParameter(embeddingAttributeMapping.getAttributeName(), embedding.vector());
+    private EmbeddingSearchResult<TextSegment> search(dev.langchain4j.data.embedding.Embedding embedding, Double minScore, Restriction<E> restriction, Integer maxResults) {
+        ValidationUtils.ensureNotNull(restriction, (String)"restriction");
+        JpaCriteriaQuery<Object[]> query = this.createBaseQuery(Object[].class, minScore != null, (arg_0, arg_1) -> restriction.toPredicate(arg_0, arg_1));
+        this.applyEmbeddingSearchResultSelections(query);
+        return (EmbeddingSearchResult)this.sessionFactory.fromStatelessSession(session -> {
+            SelectionQuery selectionQuery = session.createSelectionQuery((CriteriaQuery)query);
+            selectionQuery.setParameter(this.embeddingAttributeMapping.getAttributeName(), (Object)embedding.vector());
             if (minScore != null) {
-                selectionQuery.setParameter("minScore", minScore);
+                selectionQuery.setParameter("minScore", (Object)minScore);
             }
             if (maxResults != null) {
-                selectionQuery.setMaxResults(maxResults);
+                selectionQuery.setMaxResults(maxResults.intValue());
             }
-
-            return transformToSearchResult(selectionQuery.getResultList());
+            return this.transformToSearchResult(selectionQuery.getResultList());
         });
     }
 
-    /**
-     * Searches for the most similar (closest in the embedding space) {@link Embedding}s.
-     * <br>
-     * All search criteria are defined inside the {@link EmbeddingSearchRequest}.
-     * <br>
-     * {@link EmbeddingSearchRequest#filter()} is used to filter by meta data.
-     *
-     * @param request A request to search in an {@link EmbeddingStore}. Contains all search criteria.
-     * @return An {@link EmbeddingSearchResult} containing all found {@link Embedding}s.
-     */
-    @Override
     public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
-        Embedding referenceEmbedding = request.queryEmbedding();
+        dev.langchain4j.data.embedding.Embedding referenceEmbedding = request.queryEmbedding();
         int maxResults = request.maxResults();
         double minScore = request.minScore();
         Filter filter = request.filter();
-
-        final JpaCriteriaQuery<Object[]> query = createBaseQuery(
-                Object[].class,
-                true,
-                (root, cb) -> filter == null ? null : createPredicateFromFilter(root, filter, cb));
-        applyEmbeddingSearchResultSelections(query);
-
-        return sessionFactory.fromStatelessSession(session -> {
-            final SelectionQuery<Object[]> selectionQuery = session.createSelectionQuery(query);
-            selectionQuery.setParameter(embeddingAttributeMapping.getAttributeName(), referenceEmbedding.vector());
-            selectionQuery.setParameter("minScore", minScore);
+        JpaCriteriaQuery<Object[]> query = this.createBaseQuery(Object[].class, true, (root, cb) -> filter == null ? null : this.createPredicateFromFilter((JpaRoot)root, filter, (HibernateCriteriaBuilder)cb));
+        this.applyEmbeddingSearchResultSelections(query);
+        return (EmbeddingSearchResult)this.sessionFactory.fromStatelessSession(session -> {
+            SelectionQuery selectionQuery = session.createSelectionQuery((CriteriaQuery)query);
+            selectionQuery.setParameter(this.embeddingAttributeMapping.getAttributeName(), (Object)referenceEmbedding.vector());
+            selectionQuery.setParameter("minScore", (Object)minScore);
             selectionQuery.setMaxResults(maxResults);
-
-            return transformToSearchResult(selectionQuery.getResultList());
+            return this.transformToSearchResult(selectionQuery.getResultList());
         });
     }
 
     private EmbeddingSearchResult<TextSegment> transformToSearchResult(List<Object[]> tuples) {
-        final List<EmbeddingMatch<TextSegment>> result = new ArrayList<>(tuples.size());
+        ArrayList<EmbeddingMatch> result = new ArrayList<EmbeddingMatch>(tuples.size());
         for (Object[] tuple : tuples) {
-            final Double score = (Double) tuple[0];
-            final Object embeddingId = tuple[1];
-            final Embedding embedding = new Embedding((float[]) tuple[2]);
-            final String text = embeddedTextAttributeMapping == null ? null : (String) tuple[4];
+            Double score = (Double)tuple[0];
+            Object embeddingId = tuple[1];
+            dev.langchain4j.data.embedding.Embedding embedding = new dev.langchain4j.data.embedding.Embedding((float[])tuple[2]);
+            String text = this.embeddedTextAttributeMapping == null ? null : (String)tuple[4];
             TextSegment segment = null;
-            if (isNotNullOrBlank(text)) {
-                final Object textMetadata = tuple[3];
-                final Metadata metadata;
-                if (textMetadata instanceof String metadataJson) {
+            if (Utils.isNotNullOrBlank((String)text)) {
+                Metadata metadata;
+                Object textMetadata = tuple[3];
+                if (textMetadata instanceof String) {
+                    String metadataJson = (String)textMetadata;
                     try {
-                        //noinspection unchecked
-                        metadata = new Metadata(OBJECT_MAPPER.readValue(getOrDefault(metadataJson, "{}"), Map.class));
-                    } catch (JsonProcessingException e) {
+                        metadata = new Metadata((Map)OBJECT_MAPPER.readValue((String)Utils.getOrDefault((Object)metadataJson, (Object)"{}"), Map.class));
+                    }
+                    catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
-                } else if (textMetadata instanceof Map<?, ?> metadataMap) {
-                    //noinspection unchecked
-                    metadata = new Metadata((Map<String, ?>) metadataMap);
+                } else if (textMetadata instanceof Map) {
+                    Map metadataMap = (Map)textMetadata;
+                    metadata = new Metadata(metadataMap);
                 } else if (textMetadata == null) {
                     metadata = new Metadata();
                 } else {
-                    throw new IllegalArgumentException(
-                            "Text metadata must be of type String or Map but got: " + textMetadata.getClass());
+                    throw new IllegalArgumentException("Text metadata must be of type String or Map but got: " + textMetadata.getClass());
                 }
-
                 int i = 0;
-                for (Map.Entry<String, AttributeMapping> metadataAttribute : metadataAttributeMappings.entrySet()) {
-                    final String metadataAttributePath = metadataAttribute.getKey();
-                    final JavaType<?> metadataAttributeJavaType =
-                            metadataAttribute.getValue().getJavaType();
-                    final Object metadataValue = tuple[5 + i];
+                for (Map.Entry<String, AttributeMapping> metadataAttribute : this.metadataAttributeMappings.entrySet()) {
+                    String metadataAttributePath = metadataAttribute.getKey();
+                    JavaType metadataAttributeJavaType = metadataAttribute.getValue().getJavaType();
+                    Object metadataValue = tuple[5 + i];
                     if (metadataValue != null) {
-                        if (metadataValue instanceof String string) {
+                        if (metadataValue instanceof String) {
+                            String string = (String)metadataValue;
                             metadata.put(metadataAttributePath, string);
-                        } else if (metadataValue instanceof UUID uuid) {
+                        } else if (metadataValue instanceof UUID) {
+                            UUID uuid = (UUID)metadataValue;
                             metadata.put(metadataAttributePath, uuid);
-                        } else if (metadataValue instanceof Integer integerValue) {
-                            metadata.put(metadataAttributePath, integerValue);
-                        } else if (metadataValue instanceof Long longValue) {
-                            metadata.put(metadataAttributePath, longValue);
-                        } else if (metadataValue instanceof Float floatValue) {
-                            metadata.put(metadataAttributePath, floatValue);
-                        } else if (metadataValue instanceof Double doubleValue) {
-                            metadata.put(metadataAttributePath, doubleValue);
+                        } else if (metadataValue instanceof Integer) {
+                            Integer integerValue = (Integer)metadataValue;
+                            metadata.put(metadataAttributePath, integerValue.intValue());
+                        } else if (metadataValue instanceof Long) {
+                            Long longValue = (Long)metadataValue;
+                            metadata.put(metadataAttributePath, longValue.longValue());
+                        } else if (metadataValue instanceof Float) {
+                            Float floatValue = (Float)metadataValue;
+                            metadata.put(metadataAttributePath, floatValue.floatValue());
+                        } else if (metadataValue instanceof Double) {
+                            Double doubleValue = (Double)metadataValue;
+                            metadata.put(metadataAttributePath, doubleValue.doubleValue());
                         } else {
-                            //noinspection unchecked
-                            metadata.put(
-                                    metadataAttributePath,
-                                    ((JavaType<Object>) metadataAttributeJavaType).toString(metadataValue));
+                            metadata.put(metadataAttributePath, metadataAttributeJavaType.toString(metadataValue));
                         }
                     }
-                    i++;
+                    ++i;
                 }
-
-                segment = TextSegment.from(text, metadata);
+                segment = TextSegment.from((String)text, (Metadata)metadata);
             }
-            result.add(new EmbeddingMatch<>(score, idType.toString(embeddingId), embedding, segment));
+            result.add(new EmbeddingMatch(score, this.idType.toString(embeddingId), embedding, segment));
         }
-        return new EmbeddingSearchResult<>(result);
+        return new EmbeddingSearchResult(result);
     }
 
-    private <T> JpaCriteriaQuery<T> createBaseQuery(
-            Class<T> resultClass,
-            boolean minScoreFilter,
-            BiFunction<JpaRoot<E>, HibernateCriteriaBuilder, Predicate> additionalPredicateBuilder) {
-        final HibernateCriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
-        final JpaCriteriaQuery<T> query = criteriaBuilder.createQuery(resultClass);
-        final JpaRoot<E> root = query.from(entityClass);
-        final JpaPath<float[]> embeddingPath = root.get(embeddingAttributeMapping.getAttributeName());
-        // Workaround because the VectorArgumentValidator can't deal with float[] expressions
-        @SuppressWarnings("unchecked")
-        final JpaParameterExpression<float[]> embeddingParameter =
-                (JpaParameterExpression<float[]>) (JpaParameterExpression<?>) criteriaBuilder.parameter(
-                        HibernateEmbeddingStore.class, embeddingAttributeMapping.getAttributeName());
-        final Expression<Double> distance =
-                distance(distanceFunction, embeddingPath, embeddingParameter, criteriaBuilder);
-
-        final Predicate predicate = minScoreFilter
-                ? distanceFilter(
-                        distanceFunction,
-                        distance,
-                        criteriaBuilder.parameter(Double.class, "minScore"),
-                        criteriaBuilder)
-                : null;
-        final Predicate additonalPredicate =
-                additionalPredicateBuilder == null ? null : additionalPredicateBuilder.apply(root, criteriaBuilder);
-        query.where(
-                additonalPredicate == null
-                        ? predicate
-                        : (predicate == null
-                                ? additonalPredicate
-                                : criteriaBuilder.and(predicate, additonalPredicate)));
-        query.orderBy(criteriaBuilder.asc(distance));
+    private <T> JpaCriteriaQuery<T> createBaseQuery(Class<T> resultClass, boolean minScoreFilter, BiFunction<JpaRoot<E>, HibernateCriteriaBuilder, Predicate> additionalPredicateBuilder) {
+        Predicate additonalPredicate;
+        HibernateCriteriaBuilder criteriaBuilder = this.sessionFactory.getCriteriaBuilder();
+        JpaCriteriaQuery query = criteriaBuilder.createQuery(resultClass);
+        JpaRoot root = query.from(this.entityClass);
+        JpaPath embeddingPath = root.get(this.embeddingAttributeMapping.getAttributeName());
+        JpaParameterExpression embeddingParameter = criteriaBuilder.parameter(HibernateEmbeddingStore.class, this.embeddingAttributeMapping.getAttributeName());
+        Expression<Double> distance = this.distance(this.distanceFunction, (Expression<float[]>)embeddingPath, (Expression<float[]>)embeddingParameter, (CriteriaBuilder)criteriaBuilder);
+        Predicate predicate = minScoreFilter ? this.distanceFilter(this.distanceFunction, distance, (Expression<Double>)criteriaBuilder.parameter(Double.class, "minScore"), (CriteriaBuilder)criteriaBuilder) : null;
+        Predicate predicate2 = additonalPredicate = additionalPredicateBuilder == null ? null : additionalPredicateBuilder.apply(root, criteriaBuilder);
+        query.where((Expression)(additonalPredicate == null ? predicate : (predicate == null ? additonalPredicate : criteriaBuilder.and((Expression)predicate, (Expression)additonalPredicate))));
+        query.orderBy(new Order[]{criteriaBuilder.asc(distance)});
         return query;
     }
 
     private void applyEmbeddingSearchResultSelections(JpaCriteriaQuery<Object[]> query) {
-        final HibernateCriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
-        final JpaRoot<?> root = (JpaRoot<?>) query.getRoots().iterator().next();
-        @SuppressWarnings("unchecked")
-        final Expression<Double> distance =
-                (Expression<Double>) query.getOrderList().get(0).getExpression();
-        final int metadataOffset = embeddedTextAttributeMapping == null ? 4 : 5;
-        final Selection<?>[] selections = new Selection<?>[metadataOffset + metadataAttributeMappings.size()];
-        selections[0] = score(distanceFunction, distance, criteriaBuilder);
-        selections[1] = root.get(idAttributeMapping.getAttributeName());
-        selections[2] = root.get(embeddingAttributeMapping.getAttributeName());
-        selections[3] = root.get(unmappedMetadataAttributeMapping.getAttributeName());
-        if (embeddedTextAttributeMapping != null) {
-            selections[4] = root.get(embeddedTextAttributeMapping.getAttributeName());
+        HibernateCriteriaBuilder criteriaBuilder = this.sessionFactory.getCriteriaBuilder();
+        JpaRoot root = (JpaRoot)query.getRoots().iterator().next();
+        Expression distance = ((Order)query.getOrderList().get(0)).getExpression();
+        int metadataOffset = this.embeddedTextAttributeMapping == null ? 4 : 5;
+        Selection[] selections = new Selection[metadataOffset + this.metadataAttributeMappings.size()];
+        selections[0] = this.score(this.distanceFunction, (Expression<Double>)distance, (CriteriaBuilder)criteriaBuilder);
+        selections[1] = root.get(this.idAttributeMapping.getAttributeName());
+        selections[2] = root.get(this.embeddingAttributeMapping.getAttributeName());
+        selections[3] = root.get(this.unmappedMetadataAttributeMapping.getAttributeName());
+        if (this.embeddedTextAttributeMapping != null) {
+            selections[4] = root.get(this.embeddedTextAttributeMapping.getAttributeName());
         }
         int index = metadataOffset;
-        for (String attributePath : metadataAttributeMappings.keySet()) {
-            selections[index++] = get(root, attributePath);
+        for (String attributePath : this.metadataAttributeMappings.keySet()) {
+            selections[index++] = this.get(root, attributePath);
         }
-        query.select(criteriaBuilder.array(selections));
+        query.select((Selection)criteriaBuilder.array(selections));
     }
 
-    private Expression<Double> distance(
-            DistanceFunction distanceFunction,
-            Expression<float[]> lhs,
-            Expression<float[]> rhs,
-            CriteriaBuilder criteriaBuilder) {
-        final String functionName =
-                switch (distanceFunction) {
-                    case COSINE -> "cosine_distance";
-                    case EUCLIDEAN -> "euclidean_distance";
-                    case EUCLIDEAN_SQUARED -> "euclidean_square_distance";
-                    case MANHATTAN -> "taxicab_distance";
-                    case INNER_PRODUCT -> "inner_product";
-                    case NEGATIVE_INNER_PRODUCT -> "negative_inner_product";
-                    case HAMMING -> "hamming_distance";
-                    case JACCARD -> "jaccard_distance";
-                };
-        return criteriaBuilder.function(functionName, Double.class, lhs, rhs);
+    private Expression<Double> distance(DistanceFunction distanceFunction, Expression<float[]> lhs, Expression<float[]> rhs, CriteriaBuilder criteriaBuilder) {
+        String functionName = switch (distanceFunction) {
+            default -> throw new IncompatibleClassChangeError();
+            case DistanceFunction.COSINE -> "cosine_distance";
+            case DistanceFunction.EUCLIDEAN -> "euclidean_distance";
+            case DistanceFunction.EUCLIDEAN_SQUARED -> "euclidean_square_distance";
+            case DistanceFunction.MANHATTAN -> "taxicab_distance";
+            case DistanceFunction.INNER_PRODUCT -> "inner_product";
+            case DistanceFunction.NEGATIVE_INNER_PRODUCT -> "negative_inner_product";
+            case DistanceFunction.HAMMING -> "hamming_distance";
+            case DistanceFunction.JACCARD -> "jaccard_distance";
+        };
+        return criteriaBuilder.function(functionName, Double.class, new Expression[]{lhs, rhs});
     }
 
-    protected Expression<Double> score(
-            DistanceFunction distanceFunction, Expression<Double> distance, CriteriaBuilder criteriaBuilder) {
-        return criteriaBuilder
-                .quot(criteriaBuilder.diff(criteriaBuilder.literal(2D), distance), criteriaBuilder.literal(2D))
-                .as(Double.class);
+    protected Expression<Double> score(DistanceFunction distanceFunction, Expression<Double> distance, CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.quot(criteriaBuilder.diff(criteriaBuilder.literal((Object)2.0), distance), criteriaBuilder.literal((Object)2.0)).as(Double.class);
     }
 
-    protected Predicate distanceFilter(
-            DistanceFunction distanceFunction,
-            Expression<Double> distance,
-            Expression<Double> minScore,
-            CriteriaBuilder criteriaBuilder) {
-        return criteriaBuilder.le(
-                distance,
-                criteriaBuilder.function(
-                        "round",
-                        Double.class,
-                        criteriaBuilder.diff(
-                                criteriaBuilder.literal(2D),
-                                criteriaBuilder.prod(criteriaBuilder.literal(2D), minScore)),
-                        criteriaBuilder.literal(8)));
+    protected Predicate distanceFilter(DistanceFunction distanceFunction, Expression<Double> distance, Expression<Double> minScore, CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.le(distance, criteriaBuilder.function("round", Double.class, new Expression[]{criteriaBuilder.diff(criteriaBuilder.literal((Object)2.0), criteriaBuilder.prod(criteriaBuilder.literal((Object)2.0), minScore)), criteriaBuilder.literal((Object)8)}));
     }
 
-    private <X> Predicate createPredicateFromFilter(
-            JpaRoot<X> root, Filter filter, final HibernateCriteriaBuilder criteriaBuilder) {
-        if (filter instanceof ContainsString containsString) {
-            return mapContains(root, criteriaBuilder, containsString);
-        } else if (filter instanceof IsEqualTo isEqualTo) {
-            return mapEqual(root, criteriaBuilder, isEqualTo);
-        } else if (filter instanceof IsNotEqualTo isNotEqualTo) {
-            return mapNotEqual(root, criteriaBuilder, isNotEqualTo);
-        } else if (filter instanceof IsGreaterThan isGreaterThan) {
-            return mapGreaterThan(root, criteriaBuilder, isGreaterThan);
-        } else if (filter instanceof IsGreaterThanOrEqualTo isGreaterThanOrEqualTo) {
-            return mapGreaterThanOrEqual(root, criteriaBuilder, isGreaterThanOrEqualTo);
-        } else if (filter instanceof IsLessThan isLessThan) {
-            return mapLessThan(root, criteriaBuilder, isLessThan);
-        } else if (filter instanceof IsLessThanOrEqualTo isLessThanOrEqualTo) {
-            return mapLessThanOrEqual(root, criteriaBuilder, isLessThanOrEqualTo);
-        } else if (filter instanceof IsIn isIn) {
-            return mapIn(root, criteriaBuilder, isIn);
-        } else if (filter instanceof IsNotIn isNotIn) {
-            return mapNotIn(root, criteriaBuilder, isNotIn);
-        } else if (filter instanceof And and) {
-            return mapAnd(root, criteriaBuilder, and);
-        } else if (filter instanceof Not not) {
-            return mapNot(root, criteriaBuilder, not);
-        } else if (filter instanceof Or or) {
-            return mapOr(root, criteriaBuilder, or);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Unsupported filter type: " + filter.getClass().getName());
+    private <X> Predicate createPredicateFromFilter(JpaRoot<X> root, Filter filter, HibernateCriteriaBuilder criteriaBuilder) {
+        if (filter instanceof ContainsString) {
+            ContainsString containsString = (ContainsString)filter;
+            return this.mapContains(root, criteriaBuilder, containsString);
         }
+        if (filter instanceof IsEqualTo) {
+            IsEqualTo isEqualTo = (IsEqualTo)filter;
+            return this.mapEqual(root, criteriaBuilder, isEqualTo);
+        }
+        if (filter instanceof IsNotEqualTo) {
+            IsNotEqualTo isNotEqualTo = (IsNotEqualTo)filter;
+            return this.mapNotEqual(root, criteriaBuilder, isNotEqualTo);
+        }
+        if (filter instanceof IsGreaterThan) {
+            IsGreaterThan isGreaterThan = (IsGreaterThan)filter;
+            return this.mapGreaterThan(root, criteriaBuilder, isGreaterThan);
+        }
+        if (filter instanceof IsGreaterThanOrEqualTo) {
+            IsGreaterThanOrEqualTo isGreaterThanOrEqualTo = (IsGreaterThanOrEqualTo)filter;
+            return this.mapGreaterThanOrEqual(root, criteriaBuilder, isGreaterThanOrEqualTo);
+        }
+        if (filter instanceof IsLessThan) {
+            IsLessThan isLessThan = (IsLessThan)filter;
+            return this.mapLessThan(root, criteriaBuilder, isLessThan);
+        }
+        if (filter instanceof IsLessThanOrEqualTo) {
+            IsLessThanOrEqualTo isLessThanOrEqualTo = (IsLessThanOrEqualTo)filter;
+            return this.mapLessThanOrEqual(root, criteriaBuilder, isLessThanOrEqualTo);
+        }
+        if (filter instanceof IsIn) {
+            IsIn isIn = (IsIn)filter;
+            return this.mapIn(root, criteriaBuilder, isIn);
+        }
+        if (filter instanceof IsNotIn) {
+            IsNotIn isNotIn = (IsNotIn)filter;
+            return this.mapNotIn(root, criteriaBuilder, isNotIn);
+        }
+        if (filter instanceof And) {
+            And and = (And)filter;
+            return this.mapAnd(root, criteriaBuilder, and);
+        }
+        if (filter instanceof Not) {
+            Not not = (Not)filter;
+            return this.mapNot(root, criteriaBuilder, not);
+        }
+        if (filter instanceof Or) {
+            Or or = (Or)filter;
+            return this.mapOr(root, criteriaBuilder, or);
+        }
+        throw new UnsupportedOperationException("Unsupported filter type: " + filter.getClass().getName());
     }
 
     private <X> JpaPath<X> get(JpaRoot<?> root, String path) {
-        if (path.indexOf('.') == -1) {
+        if (path.indexOf(46) == -1) {
             return root.get(path);
-        } else {
-            JpaPath<?> p = root;
-            StringTokenizer tokenizer = new StringTokenizer(path, ".");
-            while (tokenizer.hasMoreTokens()) {
-                p = p.get(tokenizer.nextToken());
-            }
-            //noinspection unchecked
-            return (JpaPath<X>) p;
         }
+        JpaPath p = root;
+        StringTokenizer tokenizer = new StringTokenizer(path, ".");
+        while (tokenizer.hasMoreTokens()) {
+            p = p.get(tokenizer.nextToken());
+        }
+        return p;
     }
 
     private Object toDomainValue(JavaType<?> attributeJavaType, Object value) {
+        Object object;
         if (attributeJavaType.getJavaTypeClass() == String.class) {
             return value.toString();
-        } else {
-            return value instanceof String s ? attributeJavaType.fromString(s) : value;
         }
+        if (value instanceof String) {
+            String s = (String)value;
+            object = attributeJavaType.fromString((CharSequence)s);
+        } else {
+            object = value;
+        }
+        return object;
     }
 
-    private JpaPredicate mapContains(
-            JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, ContainsString containsString) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(containsString.key());
-        final JpaExpression<String> expression = attributeMapping != null
-                ? get(root, containsString.key())
-                : criteriaBuilder.jsonValue(
-                        root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                        criteriaBuilder.literal("$." + containsString.key()));
-        return criteriaBuilder.and(
-                expression.isNotNull(),
-                criteriaBuilder.like(
-                        expression,
-                        "%"
-                                + containsString
-                                        .comparisonValue()
-                                        .replace("\\", "\\\\")
-                                        .replace("%", "\\%")
-                                        .replace("_", "\\_")
-                                + "%",
-                        '\\'));
+    private JpaPredicate mapContains(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, ContainsString containsString) {
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(containsString.key());
+        JpaJsonValueExpression expression = attributeMapping != null ? this.get(root, containsString.key()) : criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + containsString.key())));
+        return criteriaBuilder.and((Expression)expression.isNotNull(), (Expression)criteriaBuilder.like((Expression)expression, "%" + containsString.comparisonValue().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%", '\\'));
     }
 
     private JpaPredicate mapEqual(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, IsEqualTo isEqualTo) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isEqualTo.key());
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isEqualTo.key());
         if (attributeMapping != null) {
-            final JpaExpression<?> valueExpression = get(root, isEqualTo.key());
-            final Object comparisonValue = isEqualTo.comparisonValue();
-            final Object domainValue = toDomainValue(attributeMapping.getJavaType(), comparisonValue);
-            return criteriaBuilder.and(
-                    valueExpression.isNotNull(), criteriaBuilder.equal(valueExpression, domainValue));
-        } else {
-            final JpaExpression<?> valueExpression = criteriaBuilder.jsonValue(
-                    root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                    criteriaBuilder.literal("$." + isEqualTo.key()),
-                    isEqualTo.comparisonValue().getClass());
-            return criteriaBuilder.and(
-                    valueExpression.isNotNull(), criteriaBuilder.equal(valueExpression, isEqualTo.comparisonValue()));
+            JpaPath valueExpression = this.get(root, isEqualTo.key());
+            Object comparisonValue = isEqualTo.comparisonValue();
+            Object domainValue = this.toDomainValue(attributeMapping.getJavaType(), comparisonValue);
+            return criteriaBuilder.and((Expression)valueExpression.isNotNull(), (Expression)criteriaBuilder.equal(valueExpression, domainValue));
         }
+        JpaJsonValueExpression valueExpression = criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isEqualTo.key())), isEqualTo.comparisonValue().getClass());
+        return criteriaBuilder.and((Expression)valueExpression.isNotNull(), (Expression)criteriaBuilder.equal((Expression)valueExpression, isEqualTo.comparisonValue()));
     }
 
-    private JpaPredicate mapNotEqual(
-            JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, IsNotEqualTo isNotEqualTo) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isNotEqualTo.key());
+    private JpaPredicate mapNotEqual(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, IsNotEqualTo isNotEqualTo) {
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isNotEqualTo.key());
         if (attributeMapping != null) {
-            final JpaExpression<?> valueExpression = get(root, isNotEqualTo.key());
-            final Object comparisonValue = isNotEqualTo.comparisonValue();
-            final Object domainValue = toDomainValue(attributeMapping.getJavaType(), comparisonValue);
-            return criteriaBuilder.or(valueExpression.isNull(), criteriaBuilder.notEqual(valueExpression, domainValue));
-        } else {
-            final JpaExpression<?> valueExpression = criteriaBuilder.jsonValue(
-                    root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                    criteriaBuilder.literal("$." + isNotEqualTo.key()),
-                    isNotEqualTo.comparisonValue().getClass());
-            return criteriaBuilder.or(
-                    valueExpression.isNull(),
-                    criteriaBuilder.notEqual(valueExpression, isNotEqualTo.comparisonValue()));
+            JpaPath valueExpression = this.get(root, isNotEqualTo.key());
+            Object comparisonValue = isNotEqualTo.comparisonValue();
+            Object domainValue = this.toDomainValue(attributeMapping.getJavaType(), comparisonValue);
+            return criteriaBuilder.or((Expression)valueExpression.isNull(), (Expression)criteriaBuilder.notEqual(valueExpression, domainValue));
         }
+        JpaJsonValueExpression valueExpression = criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isNotEqualTo.key())), isNotEqualTo.comparisonValue().getClass());
+        return criteriaBuilder.or((Expression)valueExpression.isNull(), (Expression)criteriaBuilder.notEqual((Expression)valueExpression, isNotEqualTo.comparisonValue()));
     }
 
     private JpaPredicate mapIn(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, IsIn isIn) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isIn.key());
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isIn.key());
         if (attributeMapping != null) {
-            final Collection<Object> domainValue = isIn.comparisonValues().stream()
-                    .map(value -> toDomainValue(attributeMapping.getJavaType(), value))
-                    .collect(Collectors.toList());
-            return criteriaBuilder.in(get(root, isIn.key()), domainValue);
-        } else {
-            return criteriaBuilder.in(
-                    criteriaBuilder.jsonValue(
-                            root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                            criteriaBuilder.literal("$." + isIn.key())),
-                    isIn.comparisonValues().stream().map(Object::toString).collect(Collectors.toList()));
+            Collection domainValue = isIn.comparisonValues().stream().map(value -> this.toDomainValue(attributeMapping.getJavaType(), value)).collect(Collectors.toList());
+            return criteriaBuilder.in(this.get(root, isIn.key()), domainValue);
         }
+        return criteriaBuilder.in((Expression)criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isIn.key()))), (Collection)isIn.comparisonValues().stream().map(Object::toString).collect(Collectors.toList()));
     }
 
     private JpaPredicate mapNotIn(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, IsNotIn isNotIn) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isNotIn.key());
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isNotIn.key());
         if (attributeMapping != null) {
-            final JpaExpression<?> valueExpression = get(root, isNotIn.key());
-            final Collection<Object> domainValue = isNotIn.comparisonValues().stream()
-                    .map(value -> toDomainValue(attributeMapping.getJavaType(), value))
-                    .collect(Collectors.toList());
-            return criteriaBuilder.or(
-                    valueExpression.isNull(),
-                    criteriaBuilder.in(valueExpression, domainValue).not());
-        } else {
-            final JpaExpression<String> valueExpression = criteriaBuilder.jsonValue(
-                    root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                    criteriaBuilder.literal("$." + isNotIn.key()));
-            return criteriaBuilder.or(
-                    valueExpression.isNull(),
-                    criteriaBuilder
-                            .in(
-                                    valueExpression,
-                                    isNotIn.comparisonValues().stream()
-                                            .map(Object::toString)
-                                            .collect(Collectors.toList()))
-                            .not());
+            JpaPath valueExpression = this.get(root, isNotIn.key());
+            Collection domainValue = isNotIn.comparisonValues().stream().map(value -> this.toDomainValue(attributeMapping.getJavaType(), value)).collect(Collectors.toList());
+            return criteriaBuilder.or((Expression)valueExpression.isNull(), (Expression)criteriaBuilder.in(valueExpression, domainValue).not());
         }
+        JpaJsonValueExpression valueExpression = criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isNotIn.key())));
+        return criteriaBuilder.or((Expression)valueExpression.isNull(), (Expression)criteriaBuilder.in((Expression)valueExpression, (Collection)isNotIn.comparisonValues().stream().map(Object::toString).collect(Collectors.toList())).not());
     }
 
     private JpaPredicate mapNot(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, Not not) {
-        return criteriaBuilder.not(createPredicateFromFilter(root, not.expression(), criteriaBuilder));
+        return criteriaBuilder.not((Expression)this.createPredicateFromFilter(root, not.expression(), criteriaBuilder));
     }
 
     private JpaPredicate mapAnd(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, And and) {
-        return criteriaBuilder.and(
-                createPredicateFromFilter(root, and.left(), criteriaBuilder),
-                createPredicateFromFilter(root, and.right(), criteriaBuilder));
+        return criteriaBuilder.and((Expression)this.createPredicateFromFilter(root, and.left(), criteriaBuilder), (Expression)this.createPredicateFromFilter(root, and.right(), criteriaBuilder));
     }
 
     private JpaPredicate mapOr(JpaRoot<?> root, HibernateCriteriaBuilder criteriaBuilder, Or or) {
-        return criteriaBuilder.or(
-                createPredicateFromFilter(root, or.left(), criteriaBuilder),
-                createPredicateFromFilter(root, or.right(), criteriaBuilder));
+        return criteriaBuilder.or((Expression)this.createPredicateFromFilter(root, or.left(), criteriaBuilder), (Expression)this.createPredicateFromFilter(root, or.right(), criteriaBuilder));
     }
 
-    private <X, Y extends Comparable<? super Y>> JpaPredicate mapGreaterThan(
-            JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsGreaterThan isGreaterThan) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isGreaterThan.key());
+    private <X, Y extends Comparable<? super Y>> JpaPredicate mapGreaterThan(JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsGreaterThan isGreaterThan) {
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isGreaterThan.key());
         if (attributeMapping != null) {
-            final Object comparisonValue = isGreaterThan.comparisonValue();
-            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class
-                    && !(comparisonValue instanceof String)) {
-                //noinspection unchecked
-                return criteriaBuilder.greaterThan(
-                        get(root, isGreaterThan.key()).cast((Class<Y>) comparisonValue.getClass()),
-                        (Y) comparisonValue);
-            } else {
-                final Object domainValue = toDomainValue(attributeMapping.getJavaType(), comparisonValue);
-                //noinspection unchecked
-                return criteriaBuilder.greaterThan(get(root, isGreaterThan.key()), (Y) domainValue);
+            Comparable comparisonValue = isGreaterThan.comparisonValue();
+            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class && !(comparisonValue instanceof String)) {
+                return criteriaBuilder.greaterThan((Expression)this.get(root, isGreaterThan.key()).cast(comparisonValue.getClass()), comparisonValue);
             }
-        } else {
-            //noinspection unchecked
-            return criteriaBuilder.greaterThan(
-                    criteriaBuilder.jsonValue(
-                            root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                            criteriaBuilder.literal("$." + isGreaterThan.key()),
-                            (Class<Y>) isGreaterThan.comparisonValue().getClass()),
-                    (Y) isGreaterThan.comparisonValue());
+            Object domainValue = this.toDomainValue(attributeMapping.getJavaType(), comparisonValue);
+            return criteriaBuilder.greaterThan(this.get(root, isGreaterThan.key()), (Comparable)domainValue);
         }
+        return criteriaBuilder.greaterThan((Expression)criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isGreaterThan.key())), isGreaterThan.comparisonValue().getClass()), isGreaterThan.comparisonValue());
     }
 
-    private <X, Y extends Comparable<? super Y>> JpaPredicate mapGreaterThanOrEqual(
-            JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsGreaterThanOrEqualTo isGreaterThanOrEqualTo) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isGreaterThanOrEqualTo.key());
+    private <X, Y extends Comparable<? super Y>> JpaPredicate mapGreaterThanOrEqual(JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsGreaterThanOrEqualTo isGreaterThanOrEqualTo) {
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isGreaterThanOrEqualTo.key());
         if (attributeMapping != null) {
-            final Object comparisonValue = isGreaterThanOrEqualTo.comparisonValue();
-            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class
-                    && !(comparisonValue instanceof String)) {
-                //noinspection unchecked
-                return criteriaBuilder.greaterThanOrEqualTo(
-                        get(root, isGreaterThanOrEqualTo.key()).cast((Class<Y>) comparisonValue.getClass()),
-                        (Y) comparisonValue);
-            } else {
-                final Object domainValue = toDomainValue(attributeMapping.getJavaType(), comparisonValue);
-                //noinspection unchecked
-                return criteriaBuilder.greaterThanOrEqualTo(get(root, isGreaterThanOrEqualTo.key()), (Y) domainValue);
+            Comparable comparisonValue = isGreaterThanOrEqualTo.comparisonValue();
+            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class && !(comparisonValue instanceof String)) {
+                return criteriaBuilder.greaterThanOrEqualTo((Expression)this.get(root, isGreaterThanOrEqualTo.key()).cast(comparisonValue.getClass()), comparisonValue);
             }
-        } else {
-            //noinspection unchecked
-            return criteriaBuilder.greaterThanOrEqualTo(
-                    criteriaBuilder.jsonValue(
-                            root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                            criteriaBuilder.literal("$." + isGreaterThanOrEqualTo.key()),
-                            (Class<Y>) isGreaterThanOrEqualTo.comparisonValue().getClass()),
-                    (Y) isGreaterThanOrEqualTo.comparisonValue());
+            Object domainValue = this.toDomainValue(attributeMapping.getJavaType(), comparisonValue);
+            return criteriaBuilder.greaterThanOrEqualTo(this.get(root, isGreaterThanOrEqualTo.key()), (Comparable)domainValue);
         }
+        return criteriaBuilder.greaterThanOrEqualTo((Expression)criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isGreaterThanOrEqualTo.key())), isGreaterThanOrEqualTo.comparisonValue().getClass()), isGreaterThanOrEqualTo.comparisonValue());
     }
 
-    private <X, Y extends Comparable<? super Y>> JpaPredicate mapLessThan(
-            JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsLessThan isLessThan) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isLessThan.key());
+    private <X, Y extends Comparable<? super Y>> JpaPredicate mapLessThan(JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsLessThan isLessThan) {
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isLessThan.key());
         if (attributeMapping != null) {
-            final Object comparisonValue = isLessThan.comparisonValue();
-            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class
-                    && !(comparisonValue instanceof String)) {
-                //noinspection unchecked
-                return criteriaBuilder.lessThan(
-                        get(root, isLessThan.key()).cast((Class<Y>) comparisonValue.getClass()), (Y) comparisonValue);
-            } else {
-                final Object domainValue = toDomainValue(attributeMapping.getJavaType(), comparisonValue);
-                //noinspection unchecked
-                return criteriaBuilder.lessThan(get(root, isLessThan.key()), (Y) domainValue);
+            Comparable comparisonValue = isLessThan.comparisonValue();
+            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class && !(comparisonValue instanceof String)) {
+                return criteriaBuilder.lessThan((Expression)this.get(root, isLessThan.key()).cast(comparisonValue.getClass()), comparisonValue);
             }
-        } else {
-            //noinspection unchecked
-            return criteriaBuilder.lessThan(
-                    criteriaBuilder.jsonValue(
-                            root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                            criteriaBuilder.literal("$." + isLessThan.key()),
-                            (Class<Y>) isLessThan.comparisonValue().getClass()),
-                    (Y) isLessThan.comparisonValue());
+            Object domainValue = this.toDomainValue(attributeMapping.getJavaType(), comparisonValue);
+            return criteriaBuilder.lessThan(this.get(root, isLessThan.key()), (Comparable)domainValue);
         }
+        return criteriaBuilder.lessThan((Expression)criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isLessThan.key())), isLessThan.comparisonValue().getClass()), isLessThan.comparisonValue());
     }
 
-    private <X, Y extends Comparable<? super Y>> JpaPredicate mapLessThanOrEqual(
-            JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsLessThanOrEqualTo isLessThanOrEqualTo) {
-        final AttributeMapping attributeMapping = metadataAttributeMappings.get(isLessThanOrEqualTo.key());
+    private <X, Y extends Comparable<? super Y>> JpaPredicate mapLessThanOrEqual(JpaRoot<X> root, HibernateCriteriaBuilder criteriaBuilder, IsLessThanOrEqualTo isLessThanOrEqualTo) {
+        AttributeMapping attributeMapping = this.metadataAttributeMappings.get(isLessThanOrEqualTo.key());
         if (attributeMapping != null) {
-            final Object comparisonValue = isLessThanOrEqualTo.comparisonValue();
-            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class
-                    && !(comparisonValue instanceof String)) {
-                //noinspection unchecked
-                return criteriaBuilder.lessThanOrEqualTo(
-                        get(root, isLessThanOrEqualTo.key()).cast((Class<Y>) comparisonValue.getClass()),
-                        (Y) comparisonValue);
-            } else {
-                final Object domainValue = toDomainValue(attributeMapping.getJavaType(), comparisonValue);
-                //noinspection unchecked
-                return criteriaBuilder.lessThanOrEqualTo(get(root, isLessThanOrEqualTo.key()), (Y) domainValue);
+            Comparable comparisonValue = isLessThanOrEqualTo.comparisonValue();
+            if (attributeMapping.getJavaType().getJavaTypeClass() == String.class && !(comparisonValue instanceof String)) {
+                return criteriaBuilder.lessThanOrEqualTo((Expression)this.get(root, isLessThanOrEqualTo.key()).cast(comparisonValue.getClass()), comparisonValue);
             }
-        } else {
-            //noinspection unchecked
-            return criteriaBuilder.lessThanOrEqualTo(
-                    criteriaBuilder.jsonValue(
-                            root.get(unmappedMetadataAttributeMapping.getAttributeName()),
-                            criteriaBuilder.literal("$." + isLessThanOrEqualTo.key()),
-                            (Class<Y>) isLessThanOrEqualTo.comparisonValue().getClass()),
-                    (Y) isLessThanOrEqualTo.comparisonValue());
+            Object domainValue = this.toDomainValue(attributeMapping.getJavaType(), comparisonValue);
+            return criteriaBuilder.lessThanOrEqualTo(this.get(root, isLessThanOrEqualTo.key()), (Comparable)domainValue);
         }
+        return criteriaBuilder.lessThanOrEqualTo((Expression)criteriaBuilder.jsonValue((Expression)root.get(this.unmappedMetadataAttributeMapping.getAttributeName()), (Expression)criteriaBuilder.literal((Object)("$." + isLessThanOrEqualTo.key())), isLessThanOrEqualTo.comparisonValue().getClass()), isLessThanOrEqualTo.comparisonValue());
     }
 
-    private void addInternal(String id, Embedding embedding, TextSegment embedded) {
-        addAll(singletonList(id), singletonList(embedding), embedded == null ? null : singletonList(embedded));
+    private void addInternal(String id, dev.langchain4j.data.embedding.Embedding embedding, TextSegment embedded) {
+        this.addAll(Collections.singletonList(id), Collections.singletonList(embedding), embedded == null ? null : Collections.singletonList(embedded));
     }
 
     public void addAllEntities(List<?> entities) {
-        if (isNullOrEmpty(entities)) {
+        if (Utils.isNullOrEmpty(entities)) {
             log.info("Empty entities - no ops");
             return;
         }
-        sessionFactory.inStatelessTransaction(session -> session.insertMultiple(entities));
+        this.sessionFactory.inStatelessTransaction(session -> session.insertMultiple(entities));
     }
 
     public void applyEmbeddings(List<? extends E> entities, EmbeddingModel embeddingModel) {
-        final List<TextSegment> textSegments = createTextSegments(entities);
-        final List<Embedding> embeddings = embeddingModel.embedAll(textSegments).content();
-        for (int i = 0; i < entities.size(); i++) {
-            embeddingAttributeMapping.setValue(
-                    entities.get(i), embeddings.get(i).vector());
+        List<TextSegment> textSegments = this.createTextSegments(entities);
+        List embeddings = (List)embeddingModel.embedAll(textSegments).content();
+        for (int i = 0; i < entities.size(); ++i) {
+            this.embeddingAttributeMapping.setValue(entities.get(i), (Object)((dev.langchain4j.data.embedding.Embedding)embeddings.get(i)).vector());
         }
     }
 
     public List<TextSegment> createTextSegments(List<? extends E> entities) {
-        if (embeddedTextAttributeMapping == null) {
-            throw new IllegalStateException("Embedding entity [" + entityClass.getName()
-                    + "] has no text attribute mapping, so can't create text segments");
+        if (this.embeddedTextAttributeMapping == null) {
+            throw new IllegalStateException("Embedding entity [" + this.entityClass.getName() + "] has no text attribute mapping, so can't create text segments");
         }
-        final List<TextSegment> textSegments = new ArrayList<>(entities.size());
+        ArrayList<TextSegment> textSegments = new ArrayList<TextSegment>(entities.size());
         for (E entity : entities) {
-            final String text = (String) embeddedTextAttributeMapping.getValue(entity);
+            String text = (String)this.embeddedTextAttributeMapping.getValue(entity);
             if (text == null) {
                 textSegments.add(null);
-            } else {
-                @SuppressWarnings("unchecked")
-                final Metadata metadata =
-                        new Metadata((Map<String, ?>) unmappedMetadataAttributeMapping.getValue(entity));
-                for (Map.Entry<String, AttributeMapping> metadataAttribute : metadataAttributeMappings.entrySet()) {
-                    final String metadataAttributePath = metadataAttribute.getKey();
-                    final JavaType<?> metadataAttributeJavaType =
-                            metadataAttribute.getValue().getJavaType();
-                    final Object metadataValue = metadataAttribute.getValue().getValue(entity);
-                    if (metadataValue != null) {
-                        if (metadataValue instanceof String string) {
-                            metadata.put(metadataAttributePath, string);
-                        } else if (metadataValue instanceof UUID uuid) {
-                            metadata.put(metadataAttributePath, uuid);
-                        } else if (metadataValue instanceof Integer integerValue) {
-                            metadata.put(metadataAttributePath, integerValue);
-                        } else if (metadataValue instanceof Long longValue) {
-                            metadata.put(metadataAttributePath, longValue);
-                        } else if (metadataValue instanceof Float floatValue) {
-                            metadata.put(metadataAttributePath, floatValue);
-                        } else if (metadataValue instanceof Double doubleValue) {
-                            metadata.put(metadataAttributePath, doubleValue);
-                        } else {
-                            //noinspection unchecked
-                            metadata.put(
-                                    metadataAttributePath,
-                                    ((JavaType<Object>) metadataAttributeJavaType).toString(metadataValue));
-                        }
-                    }
-                }
-                textSegments.add(TextSegment.from(text, metadata));
+                continue;
             }
+            Metadata metadata = new Metadata((Map)this.unmappedMetadataAttributeMapping.getValue(entity));
+            for (Map.Entry<String, AttributeMapping> metadataAttribute : this.metadataAttributeMappings.entrySet()) {
+                String metadataAttributePath = metadataAttribute.getKey();
+                JavaType metadataAttributeJavaType = metadataAttribute.getValue().getJavaType();
+                Object metadataValue = metadataAttribute.getValue().getValue(entity);
+                if (metadataValue == null) continue;
+                if (metadataValue instanceof String) {
+                    String string = (String)metadataValue;
+                    metadata.put(metadataAttributePath, string);
+                    continue;
+                }
+                if (metadataValue instanceof UUID) {
+                    UUID uuid = (UUID)metadataValue;
+                    metadata.put(metadataAttributePath, uuid);
+                    continue;
+                }
+                if (metadataValue instanceof Integer) {
+                    Integer integerValue = (Integer)metadataValue;
+                    metadata.put(metadataAttributePath, integerValue.intValue());
+                    continue;
+                }
+                if (metadataValue instanceof Long) {
+                    Long longValue = (Long)metadataValue;
+                    metadata.put(metadataAttributePath, longValue.longValue());
+                    continue;
+                }
+                if (metadataValue instanceof Float) {
+                    Float floatValue = (Float)metadataValue;
+                    metadata.put(metadataAttributePath, floatValue.floatValue());
+                    continue;
+                }
+                if (metadataValue instanceof Double) {
+                    Double doubleValue = (Double)metadataValue;
+                    metadata.put(metadataAttributePath, doubleValue.doubleValue());
+                    continue;
+                }
+                metadata.put(metadataAttributePath, metadataAttributeJavaType.toString(metadataValue));
+            }
+            textSegments.add(TextSegment.from((String)text, (Metadata)metadata));
         }
         return textSegments;
     }
 
-    @Override
-    public List<String> generateIds(final int n) {
-        final List<Object> ids = sessionFactory.fromStatelessTransaction(
-                session -> generateIds(n, (SharedSessionContractImplementor) session));
-        final ArrayList<String> idStrings = new ArrayList<>(ids.size());
+    public List<String> generateIds(int n) {
+        List ids = (List)this.sessionFactory.fromStatelessTransaction(session -> this.generateIds(n, (SharedSessionContractImplementor)session));
+        ArrayList<String> idStrings = new ArrayList<String>(ids.size());
         for (Object id : ids) {
-            idStrings.add(idType.toString(id));
+            idStrings.add(this.idType.toString(id));
         }
         return idStrings;
     }
 
-    private ArrayList<Object> generateIds(final int n, SharedSessionContractImplementor session) {
-        if (!idGenerator.allowAssignedIdentifiers()) {
-            throw new IllegalStateException(
-                    "Entity does not allow generating identifiers and assigning them separately");
+    private ArrayList<Object> generateIds(int n, SharedSessionContractImplementor session) {
+        ArrayList<Object> ids;
+        if (!this.idGenerator.allowAssignedIdentifiers()) {
+            throw new IllegalStateException("Entity does not allow generating identifiers and assigning them separately");
         }
-        if (idGenerator instanceof BeforeExecutionGenerator beforeExecutionGenerator) {
-            final ArrayList<Object> ids = new ArrayList<>(n);
-            for (int i = 0; i < n; i++) {
+        Generator generator = this.idGenerator;
+        if (generator instanceof BeforeExecutionGenerator) {
+            BeforeExecutionGenerator beforeExecutionGenerator = (BeforeExecutionGenerator)generator;
+            ids = new ArrayList<Object>(n);
+            for (int i = 0; i < n; ++i) {
                 ids.add(beforeExecutionGenerator.generate(session, null, null, EventType.INSERT));
             }
             return ids;
-        } else if (allowUuidGeneration) {
-            // Assigned identifier. Let's support generating UUID automatically as a convenience
-            final ArrayList<Object> ids = new ArrayList<>(n);
-            if (String.class.isAssignableFrom(idType.getJavaTypeClass())) {
-                for (int i = 0; i < n; i++) {
-                    ids.add(randomUUID());
+        }
+        if (this.allowUuidGeneration) {
+            ids = new ArrayList(n);
+            if (String.class.isAssignableFrom(this.idType.getJavaTypeClass())) {
+                for (int i = 0; i < n; ++i) {
+                    ids.add(Utils.randomUUID());
                 }
             } else {
-                for (int i = 0; i < n; i++) {
+                for (int i = 0; i < n; ++i) {
                     ids.add(UUID.randomUUID());
                 }
             }
             return ids;
-        } else {
-            throw new IllegalStateException("Can't generate identifiers for identifier type "
-                    + idType.getJavaTypeClass().getName() + " without a generator");
         }
+        throw new IllegalStateException("Can't generate identifiers for identifier type " + this.idType.getJavaTypeClass().getName() + " without a generator");
     }
 
-    @Override
-    public List<String> addAll(final List<Embedding> embeddings, final List<TextSegment> embedded) {
-        // todo: make this configurable or always work with entities directly?
-        if (!idGenerator.allowAssignedIdentifiers() || idGenerator.generatedOnExecution()) {
-            if (isNullOrEmpty(embeddings)) {
+    public List<String> addAll(List<dev.langchain4j.data.embedding.Embedding> embeddings, List<TextSegment> embedded) {
+        if (!this.idGenerator.allowAssignedIdentifiers() || this.idGenerator.generatedOnExecution()) {
+            if (Utils.isNullOrEmpty(embeddings)) {
                 log.info("Empty embeddings - no ops");
                 return Collections.emptyList();
             }
-            ensureTrue(
-                    embedded == null || embeddings.size() == embedded.size(),
-                    "embeddings size is not equal to embedded size");
-            final ArrayList<Object> entities = createEntities(embeddings, embedded);
-
-            sessionFactory.inStatelessTransaction(session -> {
-                if (!idGenerator.generatesSometimes() && allowUuidGeneration) {
-                    final SharedSessionContractImplementor sharedSessionContractImplementor =
-                            (SharedSessionContractImplementor) session;
-                    final boolean convertToString = String.class.isAssignableFrom(idType.getJavaTypeClass());
+            ValidationUtils.ensureTrue((embedded == null || embeddings.size() == embedded.size() ? 1 : 0) != 0, (String)"embeddings size is not equal to embedded size");
+            ArrayList<Object> entities = this.createEntities(embeddings, embedded);
+            this.sessionFactory.inStatelessTransaction(session -> {
+                if (!this.idGenerator.generatesSometimes() && this.allowUuidGeneration) {
+                    SharedSessionContractImplementor sharedSessionContractImplementor = (SharedSessionContractImplementor)session;
+                    boolean convertToString = String.class.isAssignableFrom(this.idType.getJavaTypeClass());
                     for (Object entity : entities) {
-                        final UUID uuid = UUID.randomUUID();
-                        final Object id = convertToString ? uuid.toString() : uuid;
-                        entityPersister.setIdentifier(entity, id, sharedSessionContractImplementor);
+                        UUID uuid = UUID.randomUUID();
+                        Object id = convertToString ? uuid.toString() : uuid;
+                        this.entityPersister.setIdentifier(entity, id, sharedSessionContractImplementor);
                     }
                 }
-                session.insertMultiple(entities);
+                session.insertMultiple((List)entities);
             });
-            final ArrayList<String> idStrings = new ArrayList<>(embeddings.size());
+            ArrayList<String> idStrings = new ArrayList<String>(embeddings.size());
             for (Object entity : entities) {
-                idStrings.add(idType.toString(entityPersister.getIdentifier(entity)));
+                idStrings.add(this.idType.toString(this.entityPersister.getIdentifier(entity)));
             }
             return idStrings;
-        } else {
-            return sessionFactory.fromStatelessTransaction(session -> {
-                final ArrayList<Object> ids =
-                        generateIds(embeddings.size(), (SharedSessionContractImplementor) session);
-                addAll(ids, embeddings, embedded, session);
-                final ArrayList<String> idStrings = new ArrayList<>(ids.size());
-                for (Object id : ids) {
-                    idStrings.add(idType.toString(id));
-                }
-                return idStrings;
-            });
         }
-    }
-
-    @Override
-    public void addAll(List<String> idStrings, List<Embedding> embeddings, List<TextSegment> embedded) {
-        final ArrayList<Object> ids = new ArrayList<>(idStrings.size());
-        for (String id : idStrings) {
-            ids.add(idType.fromString(id));
-        }
-        sessionFactory.inStatelessTransaction(session -> {
-            addAll(ids, embeddings, embedded, session);
+        return (List)this.sessionFactory.fromStatelessTransaction(session -> {
+            ArrayList<Object> ids = this.generateIds(embeddings.size(), (SharedSessionContractImplementor)session);
+            this.addAll((List<Object>)ids, embeddings, embedded, (StatelessSession)session);
+            ArrayList<String> idStrings = new ArrayList<String>(ids.size());
+            for (Object id : ids) {
+                idStrings.add(this.idType.toString(id));
+            }
+            return idStrings;
         });
     }
 
-    private ArrayList<Object> createEntities(final List<Embedding> embeddings, final List<TextSegment> embedded) {
-        final EntityInstantiator instantiator =
-                entityPersister.getRepresentationStrategy().getInstantiator();
-        final ArrayList<Object> entities = new ArrayList<>(embeddings.size());
-        final Object[] values = new Object[entityPersister.getNumberOfAttributeMappings()];
-        for (int i = 0; i < embeddings.size(); i++) {
-            values[embeddingAttributeMapping.getStateArrayPosition()] =
-                    embeddings.get(i).vector();
+    public void addAll(List<String> idStrings, List<dev.langchain4j.data.embedding.Embedding> embeddings, List<TextSegment> embedded) {
+        ArrayList<Object> ids = new ArrayList<Object>(idStrings.size());
+        for (String id : idStrings) {
+            ids.add(this.idType.fromString((CharSequence)id));
+        }
+        this.sessionFactory.inStatelessTransaction(session -> this.addAll((List<Object>)ids, embeddings, embedded, (StatelessSession)session));
+    }
 
+    private ArrayList<Object> createEntities(List<dev.langchain4j.data.embedding.Embedding> embeddings, List<TextSegment> embedded) {
+        EntityInstantiator instantiator = this.entityPersister.getRepresentationStrategy().getInstantiator();
+        ArrayList<Object> entities = new ArrayList<Object>(embeddings.size());
+        Object[] values = new Object[this.entityPersister.getNumberOfAttributeMappings()];
+        for (int i = 0; i < embeddings.size(); ++i) {
+            values[this.embeddingAttributeMapping.getStateArrayPosition()] = embeddings.get(i).vector();
             if (embedded != null && embedded.get(i) != null) {
-                if (embeddedTextAttributeMapping != null) {
-                    values[embeddedTextAttributeMapping.getStateArrayPosition()] =
-                            embedded.get(i).text();
+                if (this.embeddedTextAttributeMapping != null) {
+                    values[this.embeddedTextAttributeMapping.getStateArrayPosition()] = embedded.get(i).text();
                 }
-                final Map<String, String> metadataMap =
-                        toStringValueMap(embedded.get(i).metadata().toMap());
-                for (Map.Entry<String, AttributeMapping> entry : metadataAttributeMappings.entrySet()) {
-                    final String attributePath = entry.getKey();
-                    final String stringValue = metadataMap.remove(attributePath);
-                    final Object value = stringValue == null
-                            ? null
-                            : entry.getValue().getJavaType().fromString(stringValue);
-                    if (entry.getValue().getDeclaringType() != entityPersister) {
-                        if (value != null) {
-                            throw new IllegalArgumentException(
-                                    "Can't add metadata from TextSegment for attribute path: " + attributePath);
-                        }
-                    } else {
-                        values[entry.getValue().getStateArrayPosition()] = value;
+                Map metadataMap = Utils.toStringValueMap((Map)embedded.get(i).metadata().toMap());
+                for (Map.Entry<String, AttributeMapping> entry : this.metadataAttributeMappings.entrySet()) {
+                    Object value;
+                    String attributePath = entry.getKey();
+                    String stringValue = (String)metadataMap.remove(attributePath);
+                    Object object = value = stringValue == null ? null : entry.getValue().getJavaType().fromString((CharSequence)stringValue);
+                    if (entry.getValue().getDeclaringType() != this.entityPersister) {
+                        if (value == null) continue;
+                        throw new IllegalArgumentException("Can't add metadata from TextSegment for attribute path: " + attributePath);
                     }
+                    values[entry.getValue().getStateArrayPosition()] = value;
                 }
-                if (unmappedMetadataAttributeMapType != null) {
-                    values[unmappedMetadataAttributeMapping.getStateArrayPosition()] = metadataMap;
+                if (this.unmappedMetadataAttributeMapType != null) {
+                    values[this.unmappedMetadataAttributeMapping.getStateArrayPosition()] = metadataMap;
                 } else {
                     try {
-                        values[unmappedMetadataAttributeMapping.getStateArrayPosition()] =
-                                OBJECT_MAPPER.writeValueAsString(metadataMap);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
+                        values[this.unmappedMetadataAttributeMapping.getStateArrayPosition()] = OBJECT_MAPPER.writeValueAsString((Object)metadataMap);
+                    }
+                    catch (JsonProcessingException jsonProcessingException) {
+                        throw new RuntimeException(jsonProcessingException);
                     }
                 }
             } else {
-                if (embeddedTextAttributeMapping != null) {
-                    values[embeddedTextAttributeMapping.getStateArrayPosition()] = null;
+                if (this.embeddedTextAttributeMapping != null) {
+                    values[this.embeddedTextAttributeMapping.getStateArrayPosition()] = null;
                 }
-                values[unmappedMetadataAttributeMapping.getStateArrayPosition()] = null;
-                for (Map.Entry<String, AttributeMapping> entry : metadataAttributeMappings.entrySet()) {
-                    if (entry.getValue().getDeclaringType() != entityPersister) {
-                        values[entry.getValue().getStateArrayPosition()] = null;
-                    }
+                values[this.unmappedMetadataAttributeMapping.getStateArrayPosition()] = null;
+                for (Map.Entry entry : this.metadataAttributeMappings.entrySet()) {
+                    if (((AttributeMapping)entry.getValue()).getDeclaringType() == this.entityPersister) continue;
+                    values[((AttributeMapping)entry.getValue()).getStateArrayPosition()] = null;
                 }
             }
-
-            final Object entity = instantiator.instantiate();
-            entityPersister.setValues(entity, values);
+            Object entity = instantiator.instantiate();
+            this.entityPersister.setValues(entity, values);
             entities.add(entity);
         }
         return entities;
     }
 
-    private void addAll(
-            List<Object> ids, List<Embedding> embeddings, List<TextSegment> embedded, StatelessSession session) {
-        if (isNullOrEmpty(ids) || isNullOrEmpty(embeddings)) {
+    private void addAll(List<Object> ids, List<dev.langchain4j.data.embedding.Embedding> embeddings, List<TextSegment> embedded, StatelessSession session) {
+        if (Utils.isNullOrEmpty(ids) || Utils.isNullOrEmpty(embeddings)) {
             log.info("Empty embeddings - no ops");
             return;
         }
-        ensureTrue(ids.size() == embeddings.size(), "ids size is not equal to embeddings size");
-        ensureTrue(
-                embedded == null || embeddings.size() == embedded.size(),
-                "embeddings size is not equal to embedded size");
-        if (!idGenerator.allowAssignedIdentifiers()) {
+        ValidationUtils.ensureTrue((ids.size() == embeddings.size() ? 1 : 0) != 0, (String)"ids size is not equal to embeddings size");
+        ValidationUtils.ensureTrue((embedded == null || embeddings.size() == embedded.size() ? 1 : 0) != 0, (String)"embeddings size is not equal to embedded size");
+        if (!this.idGenerator.allowAssignedIdentifiers()) {
             throw new IllegalStateException("Entity does not allow assigning identifiers");
         }
-
-        // todo: use new query batching API?
-        final MutationQuery mutationQuery = session.createMutationQuery(insertValues);
+        MutationQuery mutationQuery = session.createMutationQuery(this.insertValues);
         for (int i = 0; i < ids.size(); ++i) {
-            mutationQuery.setParameter(idAttributeMapping.getAttributeName(), ids.get(i));
-            mutationQuery.setParameter(
-                    embeddingAttributeMapping.getAttributeName(),
-                    embeddings.get(i).vector());
-
+            mutationQuery.setParameter(this.idAttributeMapping.getAttributeName(), ids.get(i));
+            mutationQuery.setParameter(this.embeddingAttributeMapping.getAttributeName(), (Object)embeddings.get(i).vector());
             if (embedded != null && embedded.get(i) != null) {
-                if (embeddedTextAttributeMapping != null) {
-                    mutationQuery.setParameter(
-                            embeddedTextAttributeMapping.getAttributeName(),
-                            embedded.get(i).text());
+                if (this.embeddedTextAttributeMapping != null) {
+                    mutationQuery.setParameter(this.embeddedTextAttributeMapping.getAttributeName(), (Object)embedded.get(i).text());
                 }
-                final Map<String, String> metadataMap =
-                        toStringValueMap(embedded.get(i).metadata().toMap());
-                for (Map.Entry<String, AttributeMapping> entry : metadataAttributeMappings.entrySet()) {
-                    final String attributePath = entry.getKey();
-                    final String stringValue = metadataMap.remove(attributePath);
-                    final Object value = stringValue == null
-                            ? null
-                            : entry.getValue().getJavaType().fromString(stringValue);
+                Map metadataMap = Utils.toStringValueMap((Map)embedded.get(i).metadata().toMap());
+                for (Map.Entry<String, AttributeMapping> entry : this.metadataAttributeMappings.entrySet()) {
+                    String attributePath = entry.getKey();
+                    String stringValue = (String)metadataMap.remove(attributePath);
+                    Object value = stringValue == null ? null : entry.getValue().getJavaType().fromString((CharSequence)stringValue);
                     mutationQuery.setParameter(attributePath, value);
                 }
-                if (unmappedMetadataAttributeMapType != null) {
-                    mutationQuery.setParameter(
-                            unmappedMetadataAttributeMapping.getAttributeName(),
-                            metadataMap,
-                            unmappedMetadataAttributeMapType);
+                if (this.unmappedMetadataAttributeMapType != null) {
+                    mutationQuery.setParameter(this.unmappedMetadataAttributeMapping.getAttributeName(), (Object)metadataMap, this.unmappedMetadataAttributeMapType);
                 } else {
                     try {
-                        mutationQuery.setParameter(
-                                unmappedMetadataAttributeMapping.getAttributeName(),
-                                OBJECT_MAPPER.writeValueAsString(metadataMap));
-                    } catch (JsonProcessingException e) {
+                        mutationQuery.setParameter(this.unmappedMetadataAttributeMapping.getAttributeName(), (Object)OBJECT_MAPPER.writeValueAsString((Object)metadataMap));
+                    }
+                    catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
                 }
             } else {
-                if (embeddedTextAttributeMapping != null) {
-                    mutationQuery.setParameter(embeddedTextAttributeMapping.getAttributeName(), null);
+                if (this.embeddedTextAttributeMapping != null) {
+                    mutationQuery.setParameter(this.embeddedTextAttributeMapping.getAttributeName(), null);
                 }
-                mutationQuery.setParameter(unmappedMetadataAttributeMapping.getAttributeName(), null);
-                for (String attributePath : metadataAttributeMappings.keySet()) {
+                mutationQuery.setParameter(this.unmappedMetadataAttributeMapping.getAttributeName(), null);
+                for (String attributePath : this.metadataAttributeMappings.keySet()) {
                     mutationQuery.setParameter(attributePath, null);
                 }
             }
             mutationQuery.executeUpdate();
         }
+    }
+
+    static {
+        boolean isHibernateOrm71 = false;
+        try {
+            SchemaManager.class.getMethod("truncateTable", String.class);
+        }
+        catch (NoSuchMethodException e) {
+            isHibernateOrm71 = true;
+        }
+        IS_HIBERNATE_ORM_7_1 = isHibernateOrm71;
     }
 
     public static class Builder<E> {
@@ -1368,7 +1071,7 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
             return this;
         }
 
-        public Builder<E> metadataAttributeNames(String... metadataAttributeNames) {
+        public Builder<E> metadataAttributeNames(String ... metadataAttributeNames) {
             this.metadataAttributeNames = metadataAttributeNames;
             return this;
         }
@@ -1384,87 +1087,63 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
         }
 
         public Builder<E> distanceFunction(DistanceFunction distanceFunction) {
-            this.distanceFunction = ensureNotNull(distanceFunction, "distanceFunction");
+            this.distanceFunction = (DistanceFunction)((Object)ValidationUtils.ensureNotNull((Object)((Object)distanceFunction), (String)"distanceFunction"));
             return this;
         }
 
         public HibernateEmbeddingStore<E> build() {
-            final String embeddingAttributeName;
-            final String embeddedTextAttributeName;
-            final String unmappedMetadataAttributeName;
-            final String[] metadataAttributeNames;
+            DatabaseKind databaseKind;
+            String[] metadataAttributeNames;
+            String unmappedMetadataAttributeName;
+            String embeddedTextAttributeName;
+            String embeddingAttributeName;
             DistanceFunction localDistanceFunction = null;
-            if (this.embeddingAttributeName == null
-                    || this.embeddedTextAttributeName == null
-                    || this.unmappedMetadataAttributeName == null
-                    || this.metadataAttributeNames == null) {
-                final EntityType<?> entityType = sessionFactory.getMetamodel().entity(entityClass);
-                SingularAttribute<?, ?> embeddingAttribute = null;
-                SingularAttribute<?, ?> embeddedTextAttribute = null;
-                SingularAttribute<?, ?> unmappedMetadataAttribute = null;
-                LinkedHashSet<String> metadataAttributes = new LinkedHashSet<>();
-                for (SingularAttribute<?, ?> singularAttribute : entityType.getSingularAttributes()) {
-                    final Member member = singularAttribute.getJavaMember();
-                    if (member instanceof AnnotatedElement annotatedElement) {
-                        EmbeddingVector embeddingVector = annotatedElement.getAnnotation(EmbeddingVector.class);
-                        if (embeddingVector != null) {
-                            if (embeddingAttribute != null) {
-                                throw new IllegalArgumentException(
-                                        "Multiple @Embedding/@EmbeddingVector annotated attributes ["
-                                                + embeddingAttribute.getName() + "," + singularAttribute.getName()
-                                                + "] found on " + entityClass.getName()
-                                                + ". Please specify the explicit embedding vector attribute name instead");
-                            }
-                            embeddingAttribute = singularAttribute;
-                            localDistanceFunction = embeddingVector.distance();
+            if (this.embeddingAttributeName == null || this.embeddedTextAttributeName == null || this.unmappedMetadataAttributeName == null || this.metadataAttributeNames == null) {
+                EntityType entityType = this.sessionFactory.getMetamodel().entity(this.entityClass);
+                SingularAttribute embeddingAttribute = null;
+                SingularAttribute embeddedTextAttribute = null;
+                SingularAttribute unmappedMetadataAttribute = null;
+                LinkedHashSet<String> metadataAttributes = new LinkedHashSet<String>();
+                for (SingularAttribute singularAttribute : entityType.getSingularAttributes()) {
+                    Member member = singularAttribute.getJavaMember();
+                    if (!(member instanceof AnnotatedElement)) continue;
+                    AnnotatedElement annotatedElement = (AnnotatedElement)((Object)member);
+                    EmbeddingVector embeddingVector = annotatedElement.getAnnotation(EmbeddingVector.class);
+                    if (embeddingVector != null) {
+                        if (embeddingAttribute != null) {
+                            throw new IllegalArgumentException("Multiple @Embedding/@EmbeddingVector annotated attributes [" + embeddingAttribute.getName() + "," + singularAttribute.getName() + "] found on " + this.entityClass.getName() + ". Please specify the explicit embedding vector attribute name instead");
                         }
-                        if (annotatedElement.isAnnotationPresent(
-                                dev.langchain4j.store.embedding.hibernate.Embedding.class)) {
-                            if (embeddingAttribute != null) {
-                                throw new IllegalArgumentException(
-                                        "Multiple @Embedding/@EmbeddingVector annotated attributes ["
-                                                + embeddingAttribute.getName() + "," + singularAttribute.getName()
-                                                + "] found on " + entityClass.getName()
-                                                + ". Please specify the explicit embedding vector attribute name instead");
-                            }
-                            embeddingAttribute = singularAttribute;
-                        }
-                        if (annotatedElement.isAnnotationPresent(EmbeddedText.class)) {
-                            if (embeddedTextAttribute != null) {
-                                throw new IllegalArgumentException("Multiple @EmbeddedText annotated attributes ["
-                                        + embeddedTextAttribute.getName() + "," + singularAttribute.getName()
-                                        + "] found on " + entityClass.getName()
-                                        + ". Please specify the explicit embedded text attribute name instead");
-                            }
-                            embeddedTextAttribute = singularAttribute;
-                        }
-                        if (annotatedElement.isAnnotationPresent(UnmappedMetadata.class)) {
-                            if (unmappedMetadataAttribute != null) {
-                                throw new IllegalArgumentException("Multiple @UnmappedMetadata annotated attributes ["
-                                        + unmappedMetadataAttribute.getName() + "," + singularAttribute.getName()
-                                        + "] found on " + entityClass.getName()
-                                        + ". Please specify the explicit unmapped metadata attribute name instead");
-                            }
-                            unmappedMetadataAttribute = singularAttribute;
-                        }
-                        if (annotatedElement.isAnnotationPresent(MetadataAttribute.class)) {
-                            Set<ManagedType<?>> visitedTypes = new HashSet<>();
-                            visitedTypes.add(entityType);
-                            collectMetadataAttributes(
-                                    visitedTypes,
-                                    metadataAttributes,
-                                    singularAttribute.getName(),
-                                    singularAttribute.getType());
-                        }
+                        embeddingAttribute = singularAttribute;
+                        localDistanceFunction = embeddingVector.distance();
                     }
+                    if (annotatedElement.isAnnotationPresent(Embedding.class)) {
+                        if (embeddingAttribute != null) {
+                            throw new IllegalArgumentException("Multiple @Embedding/@EmbeddingVector annotated attributes [" + embeddingAttribute.getName() + "," + singularAttribute.getName() + "] found on " + this.entityClass.getName() + ". Please specify the explicit embedding vector attribute name instead");
+                        }
+                        embeddingAttribute = singularAttribute;
+                    }
+                    if (annotatedElement.isAnnotationPresent(EmbeddedText.class)) {
+                        if (embeddedTextAttribute != null) {
+                            throw new IllegalArgumentException("Multiple @EmbeddedText annotated attributes [" + embeddedTextAttribute.getName() + "," + singularAttribute.getName() + "] found on " + this.entityClass.getName() + ". Please specify the explicit embedded text attribute name instead");
+                        }
+                        embeddedTextAttribute = singularAttribute;
+                    }
+                    if (annotatedElement.isAnnotationPresent(UnmappedMetadata.class)) {
+                        if (unmappedMetadataAttribute != null) {
+                            throw new IllegalArgumentException("Multiple @UnmappedMetadata annotated attributes [" + unmappedMetadataAttribute.getName() + "," + singularAttribute.getName() + "] found on " + this.entityClass.getName() + ". Please specify the explicit unmapped metadata attribute name instead");
+                        }
+                        unmappedMetadataAttribute = singularAttribute;
+                    }
+                    if (!annotatedElement.isAnnotationPresent(MetadataAttribute.class)) continue;
+                    HashSet visitedTypes = new HashSet();
+                    visitedTypes.add((ManagedType<?>)entityType);
+                    this.collectMetadataAttributes(visitedTypes, metadataAttributes, singularAttribute.getName(), singularAttribute.getType());
                 }
                 if (embeddingAttribute == null) {
-                    throw new IllegalArgumentException("Embedding attribute not found on " + entityClass.getName()
-                            + ". Did you forget to annotate @Embedding on an attribute?");
+                    throw new IllegalArgumentException("Embedding attribute not found on " + this.entityClass.getName() + ". Did you forget to annotate @Embedding on an attribute?");
                 }
                 if (unmappedMetadataAttribute == null) {
-                    throw new IllegalArgumentException("Text metadata attribute not found on " + entityClass.getName()
-                            + ". Did you forget to annotate @UnmappedMetadata on an attribute?");
+                    throw new IllegalArgumentException("Text metadata attribute not found on " + this.entityClass.getName() + ". Did you forget to annotate @UnmappedMetadata on an attribute?");
                 }
                 embeddingAttributeName = embeddingAttribute.getName();
                 embeddedTextAttributeName = embeddedTextAttribute == null ? null : embeddedTextAttribute.getName();
@@ -1476,49 +1155,29 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
                 unmappedMetadataAttributeName = this.unmappedMetadataAttributeName;
                 metadataAttributeNames = this.metadataAttributeNames;
             }
-            final DatabaseKind databaseKind;
             if (this.databaseKind == null) {
-                databaseKind = DatabaseKind.determineDatabaseKind(
-                        sessionFactory.unwrap(JdbcServices.class).getDialect());
+                databaseKind = DatabaseKind.determineDatabaseKind(((JdbcServices)this.sessionFactory.unwrap(JdbcServices.class)).getDialect());
                 if (databaseKind == null) {
-                    throw new IllegalArgumentException(
-                            "Could not determine DatabaseKind based on dialect. Please configure it explicitly");
+                    throw new IllegalArgumentException("Could not determine DatabaseKind based on dialect. Please configure it explicitly");
                 }
             } else {
                 databaseKind = this.databaseKind;
             }
-            final DistanceFunction distanceFunction = this.distanceFunction != null
-                    ? this.distanceFunction
-                    : localDistanceFunction != null ? localDistanceFunction : DistanceFunction.COSINE;
-            return new HibernateEmbeddingStore<>(
-                    false,
-                    this.sessionFactory,
-                    databaseKind,
-                    this.entityClass,
-                    embeddingAttributeName,
-                    embeddedTextAttributeName,
-                    unmappedMetadataAttributeName,
-                    metadataAttributeNames,
-                    distanceFunction);
+            DistanceFunction distanceFunction = this.distanceFunction != null ? this.distanceFunction : (localDistanceFunction != null ? localDistanceFunction : DistanceFunction.COSINE);
+            return new HibernateEmbeddingStore<E>(false, this.sessionFactory, databaseKind, this.entityClass, embeddingAttributeName, embeddedTextAttributeName, unmappedMetadataAttributeName, metadataAttributeNames, distanceFunction);
         }
 
-        private void collectMetadataAttributes(
-                Set<ManagedType<?>> visitedTypes, LinkedHashSet<String> metadataAttributes, String path, Type<?> type) {
-            if (type instanceof ManagedType<?> managedType) {
+        private void collectMetadataAttributes(Set<ManagedType<?>> visitedTypes, LinkedHashSet<String> metadataAttributes, String path, Type<?> type) {
+            if (type instanceof ManagedType) {
+                ManagedType managedType = (ManagedType)type;
                 if (visitedTypes.add(managedType)) {
-                    for (SingularAttribute<?, ?> attribute : managedType.getSingularAttributes()) {
-                        if (attribute.getJavaMember() instanceof AnnotatedElement annotatedElement
-                                && annotatedElement.isAnnotationPresent(MetadataAttribute.class)) {
-                            collectMetadataAttributes(
-                                    visitedTypes,
-                                    metadataAttributes,
-                                    path + "." + attribute.getName(),
-                                    attribute.getType());
-                            visitedTypes.remove(managedType);
-                        }
+                    for (SingularAttribute attribute : managedType.getSingularAttributes()) {
+                        AnnotatedElement annotatedElement;
+                        Member member = attribute.getJavaMember();
+                        if (!(member instanceof AnnotatedElement) || !(annotatedElement = (AnnotatedElement)((Object)member)).isAnnotationPresent(MetadataAttribute.class)) continue;
+                        this.collectMetadataAttributes(visitedTypes, metadataAttributes, path + "." + attribute.getName(), attribute.getType());
+                        visitedTypes.remove(managedType);
                     }
-                } else {
-                    // todo: error when metadata annotations can lead to a cycle?
                 }
             } else {
                 metadataAttributes.add(path);
@@ -1526,14 +1185,205 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
         }
 
         public String toString() {
-            return "HibernateEmbeddingStore.HibernateEmbeddingStoreBuilder(sessionFactory=" + this.sessionFactory
-                    + ", databaseKind=" + this.databaseKind
-                    + ", entityClass=" + this.entityClass.getName()
-                    + ", embeddingAttributeName=" + this.embeddingAttributeName
-                    + ", embeddedTextAttributeName=" + this.embeddedTextAttributeName
-                    + ", unmappedMetadataAttributeName=" + this.unmappedMetadataAttributeName
-                    + ", metadataAttributeNames=" + Arrays.toString(this.metadataAttributeNames)
-                    + ")";
+            return "HibernateEmbeddingStore.HibernateEmbeddingStoreBuilder(sessionFactory=" + this.sessionFactory + ", databaseKind=" + this.databaseKind + ", entityClass=" + this.entityClass.getName() + ", embeddingAttributeName=" + this.embeddingAttributeName + ", embeddedTextAttributeName=" + this.embeddedTextAttributeName + ", unmappedMetadataAttributeName=" + this.unmappedMetadataAttributeName + ", metadataAttributeNames=" + Arrays.toString(this.metadataAttributeNames) + ")";
+        }
+    }
+
+    public static class DynamicBuilder
+    extends BaseBuilder<EmbeddingEntity> {
+        private String host;
+        private int port;
+        private String database;
+        private String jdbcUrl;
+        private String user;
+        private String password;
+
+        DynamicBuilder() {
+        }
+
+        public DynamicBuilder host(String host) {
+            this.host = host;
+            return this;
+        }
+
+        public DynamicBuilder port(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public DynamicBuilder database(String database) {
+            this.database = database;
+            return this;
+        }
+
+        public DynamicBuilder jdbcUrl(String jdbcUrl) {
+            this.jdbcUrl = jdbcUrl;
+            return this;
+        }
+
+        public DynamicBuilder user(String user) {
+            this.user = user;
+            return this;
+        }
+
+        public DynamicBuilder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public DynamicBuilder databaseKind(DatabaseKind databaseKind) {
+            super.databaseKind(databaseKind);
+            return this;
+        }
+
+        public DynamicBuilder table(String table) {
+            super.table(table);
+            return this;
+        }
+
+        public DynamicBuilder dimension(Integer dimension) {
+            super.dimension(dimension);
+            return this;
+        }
+
+        public DynamicBuilder createIndex(Boolean createIndex) {
+            super.createIndex(createIndex);
+            return this;
+        }
+
+        public DynamicBuilder indexType(String indexType) {
+            super.indexType(indexType);
+            return this;
+        }
+
+        public DynamicBuilder indexOptions(String indexOptions) {
+            super.indexOptions(indexOptions);
+            return this;
+        }
+
+        public DynamicBuilder createTable(Boolean createTable) {
+            super.createTable(createTable);
+            return this;
+        }
+
+        public DynamicBuilder dropTableFirst(Boolean dropTableFirst) {
+            super.dropTableFirst(dropTableFirst);
+            return this;
+        }
+
+        public DynamicBuilder distanceFunction(DistanceFunction distanceFunction) {
+            super.distanceFunction(distanceFunction);
+            return this;
+        }
+
+        public HibernateEmbeddingStore<EmbeddingEntity> build() {
+            DatabaseKind databaseKind;
+            Configuration cfg = this.createConfiguration();
+            if (Utils.isNullOrBlank((String)this.jdbcUrl)) {
+                databaseKind = (DatabaseKind)ValidationUtils.ensureNotNull((Object)this.databaseKind, (String)"databaseKind");
+                String jdbcUrl = databaseKind.createJdbcUrl(ValidationUtils.ensureNotBlank((String)this.host, (String)"host"), this.port, ValidationUtils.ensureNotBlank((String)this.database, (String)"database"));
+                cfg.setProperty("jakarta.persistence.jdbc.url", jdbcUrl);
+            } else {
+                String jdbcUrl = ValidationUtils.ensureNotBlank((String)this.jdbcUrl, (String)"jdbcUrl");
+                databaseKind = DatabaseKind.determineDatabaseKind(jdbcUrl);
+                if (databaseKind == null) {
+                    throw new IllegalArgumentException("Can't determine DatabaseKind for JDBC URL: " + jdbcUrl);
+                }
+                cfg.setProperty("jakarta.persistence.jdbc.url", jdbcUrl);
+            }
+            cfg.setProperty("jakarta.persistence.jdbc.user", ValidationUtils.ensureNotBlank((String)this.user, (String)"user"));
+            cfg.setProperty("jakarta.persistence.jdbc.password", ValidationUtils.ensureNotBlank((String)this.password, (String)"password"));
+            return new HibernateEmbeddingStore<EmbeddingEntity>(true, this.createSessionFactory(cfg, databaseKind), databaseKind, EmbeddingEntity.class, "embedding", "text", "metadata", null, this.distanceFunction);
+        }
+
+        public String toString() {
+            return "HibernateEmbeddingStore.DynamicBuilder(jdbcUrl=" + this.jdbcUrl + ", databaseKind=" + this.databaseKind + ", user=" + this.user + ", password=" + (this.password == null ? null : "********") + ", table=" + this.table + ", dimension=" + this.dimension + ", createIndex=" + this.createIndex + ", indexType=" + this.indexType + ", indexOptions=(" + this.indexOptions + "), createTable=" + this.createTable + ", dropTableFirst=" + this.dropTableFirst + ", distanceFunction=" + this.distanceFunction + ")";
+        }
+    }
+
+    public static class DynamicDatasourceBuilder
+    extends BaseBuilder<EmbeddingEntity> {
+        private DataSource dataSource;
+
+        DynamicDatasourceBuilder() {
+        }
+
+        public DynamicDatasourceBuilder dataSource(DataSource datasource) {
+            this.dataSource = datasource;
+            return this;
+        }
+
+        public DynamicDatasourceBuilder databaseKind(DatabaseKind databaseKind) {
+            super.databaseKind(databaseKind);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder table(String table) {
+            super.table(table);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder dimension(Integer dimension) {
+            super.dimension(dimension);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder createIndex(Boolean createIndex) {
+            super.createIndex(createIndex);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder indexType(String indexType) {
+            super.indexType(indexType);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder indexOptions(String indexOptions) {
+            super.indexOptions(indexOptions);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder createTable(Boolean createTable) {
+            super.createTable(createTable);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder dropTableFirst(Boolean dropTableFirst) {
+            super.dropTableFirst(dropTableFirst);
+            return this;
+        }
+
+        public DynamicDatasourceBuilder distanceFunction(DistanceFunction distanceFunction) {
+            super.distanceFunction(distanceFunction);
+            return this;
+        }
+
+        public HibernateEmbeddingStore<EmbeddingEntity> build() {
+            Configuration cfg = this.createConfiguration();
+            cfg.getProperties().put("jakarta.persistence.nonJtaDataSource", ValidationUtils.ensureNotNull((Object)this.dataSource, (String)"dataSource"));
+            DatabaseKind databaseKind = (DatabaseKind)ValidationUtils.ensureNotNull((Object)this.databaseKind, (String)"databaseKind");
+            return new HibernateEmbeddingStore<EmbeddingEntity>(true, this.createSessionFactory(cfg, databaseKind), databaseKind, EmbeddingEntity.class, "embedding", "text", "metadata", null, this.distanceFunction);
+        }
+
+        public String toString() {
+            return "HibernateEmbeddingStore.DynamicDatasourceBuilder(datasource=" + this.dataSource + ", databaseKind=" + this.databaseKind + ", table=" + this.table + ", dimension=" + this.dimension + ", createIndex=" + this.createIndex + ", indexType=" + this.indexType + ", indexOptions=(" + this.indexOptions + "), createTable=" + this.createTable + ", dropTableFirst=" + this.dropTableFirst + ", distanceFunction=" + this.distanceFunction + ")";
+        }
+    }
+
+    private static class DynamicEmbeddingStoreAdditionalMappingContributor
+    implements AdditionalMappingContributor {
+        private final int dimension;
+
+        public DynamicEmbeddingStoreAdditionalMappingContributor(int dimension) {
+            this.dimension = dimension;
+        }
+
+        public void contribute(AdditionalMappingContributions contributions, InFlightMetadataCollector metadata, ResourceStreamLocator resourceStreamLocator, MetadataBuildingContext buildingContext) {
+            ((Column)metadata.getEntityBinding(EmbeddingEntity.class.getName()).getProperty("embedding").getValue().getColumns().get(0)).setArrayLength(Integer.valueOf(this.dimension));
+        }
+
+        public String getContributorName() {
+            return "Langchain4j Hibernate DynamicEmbeddingStore";
         }
     }
 
@@ -1549,61 +1399,38 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
         protected DistanceFunction distanceFunction = DistanceFunction.COSINE;
 
         protected Configuration createConfiguration() {
-            final int dimension = ensureNotNull(this.dimension, "dimension");
-            final Configuration cfg = new Configuration(new BootstrapServiceRegistryBuilder()
-                    .applyClassLoaderService(new ClassLoaderServiceImpl() {
-                        @Override
-                        public <S> Collection<S> loadJavaServices(final Class<S> serviceContract) {
-                            //noinspection unchecked
-                            return serviceContract == AdditionalMappingContributor.class
-                                    ? Collections.singletonList((S) new DynamicEmbeddingStoreAdditionalMappingContributor(dimension))
-                                    // todo: Maybe return an empty list otherwise? Does it make sense to let classes
-                                    // creep in?
-                                    : super.loadJavaServices(serviceContract);
-                        }
-                    })
-                    .build());
-            final boolean drop = getOrDefault(dropTableFirst, false);
-            final boolean create = getOrDefault(createTable, false);
+            final int dimension = (Integer)ValidationUtils.ensureNotNull((Object)this.dimension, (String)"dimension");
+            Configuration cfg = new Configuration(new BootstrapServiceRegistryBuilder().applyClassLoaderService((ClassLoaderService)new ClassLoaderServiceImpl(){
+
+                public <S> Collection<S> loadJavaServices(Class<S> serviceContract) {
+                    return serviceContract == AdditionalMappingContributor.class ? List.of((Object)new DynamicEmbeddingStoreAdditionalMappingContributor(dimension)) : super.loadJavaServices(serviceContract);
+                }
+            }).build());
+            boolean drop = (Boolean)Utils.getOrDefault((Object)this.dropTableFirst, (Object)false);
+            boolean create = (Boolean)Utils.getOrDefault((Object)this.createTable, (Object)false);
             if (drop && create) {
                 cfg.setSchemaExportAction(Action.CREATE);
             } else if (drop) {
-                // Does this make sense?
                 cfg.setSchemaExportAction(Action.DROP);
             } else if (create) {
                 cfg.setSchemaExportAction(Action.CREATE_ONLY);
             } else {
                 cfg.setSchemaExportAction(Action.POPULATE);
             }
-            final String ormXmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    + "<entity-mappings xmlns=\"https://www.hibernate.org/xsd/orm/mapping\" version=\"7.0\">\n"
-                    + "	<package>dev.langchain4j.store.embedding.hibernate</package>\n"
-                    + "    <entity class=\"EmbeddingEntity\">\n"
-                    + "        <table name=\""
-                    + ensureNotBlank(table, "table") + "\"/>\n" + "    </entity>\n"
-                    + "</entity-mappings>";
-            cfg.addInputStream(new ReaderInputStream(new StringReader(ormXmlContent)));
+            String ormXmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<entity-mappings xmlns=\"https://www.hibernate.org/xsd/orm/mapping\" version=\"7.0\">\n\t<package>dev.langchain4j.store.embedding.hibernate</package>\n    <entity class=\"EmbeddingEntity\">\n        <table name=\"" + ValidationUtils.ensureNotBlank((String)this.table, (String)"table") + "\"/>\n    </entity>\n</entity-mappings>";
+            cfg.addInputStream((InputStream)new ReaderInputStream((Reader)new StringReader(ormXmlContent)));
             return cfg;
         }
 
         protected SessionFactory createSessionFactory(Configuration cfg, DatabaseKind databaseKind) {
-            // Builder for dynamic mapping use case for people who just want to use it without mapping an entity,
-            // based on orm.xml/hbm.xml, because we need to allow overriding the vector dimension programmatically
-            final String setupSql = databaseKind.getSetupSql();
+            boolean index;
+            String setupSql = databaseKind.getSetupSql();
             if (setupSql != null) {
-                cfg.setProperty(SchemaToolingSettings.JAKARTA_HBM2DDL_CREATE_SOURCE, SourceType.SCRIPT_THEN_METADATA);
-                cfg.getProperties()
-                        .put(SchemaToolingSettings.JAKARTA_HBM2DDL_CREATE_SCRIPT_SOURCE, new StringReader(setupSql));
+                cfg.setProperty("jakarta.persistence.schema-generation.create-source", (Enum)SourceType.SCRIPT_THEN_METADATA);
+                cfg.getProperties().put("jakarta.persistence.schema-generation.create-script-source", new StringReader(setupSql));
             }
-            final boolean index = getOrDefault(createIndex, false);
-            final String importSqlContent = index
-                    ? databaseKind.createIndexDDL(distanceFunction, indexType, table, "embedding", indexOptions)
-                    : null;
-            // Always set this to avoid a default file to creep in
-            cfg.getProperties()
-                    .put(
-                            SchemaToolingSettings.JAKARTA_HBM2DDL_LOAD_SCRIPT_SOURCE,
-                            new ReaderInputStream(new StringReader(importSqlContent == null ? "" : importSqlContent)));
+            String importSqlContent = (index = ((Boolean)Utils.getOrDefault((Object)this.createIndex, (Object)false)).booleanValue()) ? databaseKind.createIndexDDL(this.distanceFunction, this.indexType, this.table, "embedding", this.indexOptions) : null;
+            cfg.getProperties().put("jakarta.persistence.sql-load-script-source", new ReaderInputStream((Reader)new StringReader(importSqlContent == null ? "" : importSqlContent)));
             return cfg.buildSessionFactory();
         }
 
@@ -1648,272 +1475,9 @@ public class HibernateEmbeddingStore<E> implements EmbeddingStore<TextSegment> {
         }
 
         public BaseBuilder<E> distanceFunction(DistanceFunction distanceFunction) {
-            this.distanceFunction = ensureNotNull(distanceFunction, "distanceFunction");
+            this.distanceFunction = (DistanceFunction)((Object)ValidationUtils.ensureNotNull((Object)((Object)distanceFunction), (String)"distanceFunction"));
             return this;
-        }
-    }
-
-    public static class DynamicBuilder extends BaseBuilder<EmbeddingEntity> {
-        private String host;
-        private int port;
-        private String database;
-        private String jdbcUrl;
-        private String user;
-        private String password;
-
-        DynamicBuilder() {}
-
-        public DynamicBuilder host(String host) {
-            this.host = host;
-            return this;
-        }
-
-        public DynamicBuilder port(int port) {
-            this.port = port;
-            return this;
-        }
-
-        public DynamicBuilder database(String database) {
-            this.database = database;
-            return this;
-        }
-
-        public DynamicBuilder jdbcUrl(String jdbcUrl) {
-            this.jdbcUrl = jdbcUrl;
-            return this;
-        }
-
-        public DynamicBuilder user(String user) {
-            this.user = user;
-            return this;
-        }
-
-        public DynamicBuilder password(String password) {
-            this.password = password;
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder databaseKind(DatabaseKind databaseKind) {
-            super.databaseKind(databaseKind);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder table(String table) {
-            super.table(table);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder dimension(Integer dimension) {
-            super.dimension(dimension);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder createIndex(Boolean createIndex) {
-            super.createIndex(createIndex);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder indexType(final String indexType) {
-            super.indexType(indexType);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder indexOptions(String indexOptions) {
-            super.indexOptions(indexOptions);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder createTable(Boolean createTable) {
-            super.createTable(createTable);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder dropTableFirst(Boolean dropTableFirst) {
-            super.dropTableFirst(dropTableFirst);
-            return this;
-        }
-
-        @Override
-        public DynamicBuilder distanceFunction(DistanceFunction distanceFunction) {
-            super.distanceFunction(distanceFunction);
-            return this;
-        }
-
-        public HibernateEmbeddingStore<EmbeddingEntity> build() {
-            final Configuration cfg = createConfiguration();
-            final DatabaseKind databaseKind;
-            if (isNullOrBlank(jdbcUrl)) {
-                databaseKind = ensureNotNull(this.databaseKind, "databaseKind");
-                final String jdbcUrl = databaseKind.createJdbcUrl(
-                        ensureNotBlank(host, "host"), port, ensureNotBlank(database, "database"));
-                cfg.setProperty(JdbcSettings.JAKARTA_JDBC_URL, jdbcUrl);
-            } else {
-                final String jdbcUrl = ensureNotBlank(this.jdbcUrl, "jdbcUrl");
-                databaseKind = DatabaseKind.determineDatabaseKind(jdbcUrl);
-                if (databaseKind == null) {
-                    throw new IllegalArgumentException("Can't determine DatabaseKind for JDBC URL: " + jdbcUrl);
-                }
-                cfg.setProperty(JdbcSettings.JAKARTA_JDBC_URL, jdbcUrl);
-            }
-            cfg.setProperty(JdbcSettings.JAKARTA_JDBC_USER, ensureNotBlank(user, "user"));
-            cfg.setProperty(JdbcSettings.JAKARTA_JDBC_PASSWORD, ensureNotBlank(password, "password"));
-            return new HibernateEmbeddingStore<>(
-                    true,
-                    createSessionFactory(cfg, databaseKind),
-                    databaseKind,
-                    EmbeddingEntity.class,
-                    "embedding",
-                    "text",
-                    "metadata",
-                    null,
-                    distanceFunction);
-        }
-
-        public String toString() {
-            return "HibernateEmbeddingStore.DynamicBuilder(jdbcUrl=" + this.jdbcUrl
-                    + ", databaseKind=" + this.databaseKind
-                    + ", user=" + this.user
-                    + ", password=" + (this.password == null ? null : "********")
-                    + ", table=" + this.table
-                    + ", dimension=" + this.dimension
-                    + ", createIndex=" + this.createIndex
-                    + ", indexType=" + this.indexType
-                    + ", indexOptions=(" + this.indexOptions + ")"
-                    + ", createTable=" + this.createTable
-                    + ", dropTableFirst=" + this.dropTableFirst
-                    + ", distanceFunction=" + this.distanceFunction
-                    + ")";
-        }
-    }
-
-    public static class DynamicDatasourceBuilder extends BaseBuilder<EmbeddingEntity> {
-        private DataSource dataSource;
-
-        DynamicDatasourceBuilder() {}
-
-        public DynamicDatasourceBuilder dataSource(DataSource datasource) {
-            this.dataSource = datasource;
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder databaseKind(DatabaseKind databaseKind) {
-            super.databaseKind(databaseKind);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder table(String table) {
-            super.table(table);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder dimension(Integer dimension) {
-            super.dimension(dimension);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder createIndex(Boolean createIndex) {
-            super.createIndex(createIndex);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder indexType(String indexType) {
-            super.indexType(indexType);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder indexOptions(String indexOptions) {
-            super.indexOptions(indexOptions);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder createTable(Boolean createTable) {
-            super.createTable(createTable);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder dropTableFirst(Boolean dropTableFirst) {
-            super.dropTableFirst(dropTableFirst);
-            return this;
-        }
-
-        @Override
-        public DynamicDatasourceBuilder distanceFunction(DistanceFunction distanceFunction) {
-            super.distanceFunction(distanceFunction);
-            return this;
-        }
-
-        public HibernateEmbeddingStore<EmbeddingEntity> build() {
-            final Configuration cfg = createConfiguration();
-            cfg.getProperties().put(JdbcSettings.JAKARTA_NON_JTA_DATASOURCE, ensureNotNull(dataSource, "dataSource"));
-            final DatabaseKind databaseKind = ensureNotNull(this.databaseKind, "databaseKind");
-            return new HibernateEmbeddingStore<>(
-                    true,
-                    createSessionFactory(cfg, databaseKind),
-                    databaseKind,
-                    EmbeddingEntity.class,
-                    "embedding",
-                    "text",
-                    "metadata",
-                    null,
-                    distanceFunction);
-        }
-
-        public String toString() {
-            return "HibernateEmbeddingStore.DynamicDatasourceBuilder(datasource=" + this.dataSource
-                    + ", databaseKind=" + this.databaseKind
-                    + ", table=" + this.table
-                    + ", dimension=" + this.dimension
-                    + ", createIndex=" + this.createIndex
-                    + ", indexType=" + this.indexType
-                    + ", indexOptions=(" + this.indexOptions + ")"
-                    + ", createTable=" + this.createTable
-                    + ", dropTableFirst=" + this.dropTableFirst
-                    + ", distanceFunction=" + this.distanceFunction
-                    + ")";
-        }
-    }
-
-    private static class DynamicEmbeddingStoreAdditionalMappingContributor implements AdditionalMappingContributor {
-
-        private final int dimension;
-
-        public DynamicEmbeddingStoreAdditionalMappingContributor(final int dimension) {
-            this.dimension = dimension;
-        }
-
-        @Override
-        public void contribute(
-                final AdditionalMappingContributions contributions,
-                final InFlightMetadataCollector metadata,
-                final ResourceStreamLocator resourceStreamLocator,
-                final MetadataBuildingContext buildingContext) {
-            metadata.getEntityBinding(EmbeddingEntity.class.getName())
-                    .getProperty("embedding")
-                    .getValue()
-                    .getColumns()
-                    .get(0)
-                    .setArrayLength(dimension);
-        }
-
-        @Override
-        public String getContributorName() {
-            return "Langchain4j Hibernate DynamicEmbeddingStore";
         }
     }
 }
+

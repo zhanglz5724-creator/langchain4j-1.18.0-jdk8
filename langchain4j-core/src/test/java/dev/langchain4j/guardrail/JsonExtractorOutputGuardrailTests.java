@@ -16,7 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@Deprecated(forRemoval = true)
+@Deprecated()
 class JsonExtractorOutputGuardrailTests {
     private static final String JSON = "{\n" +
             "    \"name\": \"MyObject\",\n" +
@@ -26,7 +26,7 @@ class JsonExtractorOutputGuardrailTests {
     private static final JsonExtractorOutputGuardrail<MyObject> MY_OBJECT_JSON_OUTPUT_GUARDRAIL =
             new JsonExtractorOutputGuardrail<>(MyObject.class);
     private static final JsonExtractorOutputGuardrail<Map<String, MyObject>> MAP_OF_MY_OBJECT_JSON_OUTPUT_GUARDRAIL =
-            new JsonExtractorOutputGuardrail<>(new TypeReference<>() {});
+            new JsonExtractorOutputGuardrail<>(new TypeReference<Map<String, MyObject>>() {});
 
     @ParameterizedTest
     @MethodSource("guardrails")

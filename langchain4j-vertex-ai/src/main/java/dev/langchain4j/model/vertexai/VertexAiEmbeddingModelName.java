@@ -1,11 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.vertexai;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public enum VertexAiEmbeddingModelName {
-
-    MULTIMODALEMBEDDING("multimodalembedding", 1408), // accepts 128, 256, 512 too
+    MULTIMODALEMBEDDING("multimodalembedding", 1408),
     TEXT_EMBEDDING_004("text-embedding-004", 768),
     TEXT_EMBEDDING_PREVIEW_0815("text-embedding-preview-0815", 768),
     TEXT_MULTILINGUAL_EMBEDDING_002("text-multilingual-embedding-002", 768),
@@ -16,31 +18,30 @@ public enum VertexAiEmbeddingModelName {
 
     private final String stringValue;
     private final Integer dimension;
+    private static final Map<String, Integer> KNOWN_DIMENSION;
 
-    VertexAiEmbeddingModelName(String stringValue,
-                               Integer dimension) {
+    private VertexAiEmbeddingModelName(String stringValue, Integer dimension) {
         this.stringValue = stringValue;
         this.dimension = dimension;
     }
 
-    @Override
     public String toString() {
-        return stringValue;
+        return this.stringValue;
     }
 
     public Integer dimension() {
-        return dimension;
-    }
-
-    private static final Map<String, Integer> KNOWN_DIMENSION = new HashMap<>(VertexAiEmbeddingModelName.values().length);
-
-    static {
-        for (VertexAiEmbeddingModelName embeddingModelName : VertexAiEmbeddingModelName.values()) {
-            KNOWN_DIMENSION.put(embeddingModelName.toString(), embeddingModelName.dimension());
-        }
+        return this.dimension;
     }
 
     public static Integer knownDimension(String modelName) {
         return KNOWN_DIMENSION.get(modelName);
     }
+
+    static {
+        KNOWN_DIMENSION = new HashMap<String, Integer>(VertexAiEmbeddingModelName.values().length);
+        for (VertexAiEmbeddingModelName embeddingModelName : VertexAiEmbeddingModelName.values()) {
+            KNOWN_DIMENSION.put(embeddingModelName.toString(), embeddingModelName.dimension());
+        }
+    }
 }
+

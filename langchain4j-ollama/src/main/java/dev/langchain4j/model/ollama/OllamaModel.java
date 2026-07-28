@@ -1,23 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
+import dev.langchain4j.model.ollama.OllamaDateDeserializer;
+import dev.langchain4j.model.ollama.OllamaModelDetails;
 import java.time.OffsetDateTime;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OllamaModel {
-
     private String name;
     private String model;
-    @JsonDeserialize(using = OllamaDateDeserializer.class)
+    @JsonDeserialize(using=OllamaDateDeserializer.class)
     private OffsetDateTime modifiedAt;
     private long size;
     private String digest;
@@ -40,7 +49,7 @@ public class OllamaModel {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -48,7 +57,7 @@ public class OllamaModel {
     }
 
     public long getSize() {
-        return size;
+        return this.size;
     }
 
     public void setSize(long size) {
@@ -56,7 +65,7 @@ public class OllamaModel {
     }
 
     public String getDigest() {
-        return digest;
+        return this.digest;
     }
 
     public void setDigest(String digest) {
@@ -64,7 +73,7 @@ public class OllamaModel {
     }
 
     public OllamaModelDetails getDetails() {
-        return details;
+        return this.details;
     }
 
     public void setDetails(OllamaModelDetails details) {
@@ -72,7 +81,7 @@ public class OllamaModel {
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -80,7 +89,7 @@ public class OllamaModel {
     }
 
     public OffsetDateTime getModifiedAt() {
-        return modifiedAt;
+        return this.modifiedAt;
     }
 
     public void setModifiedAt(OffsetDateTime modifiedAt) {
@@ -88,7 +97,6 @@ public class OllamaModel {
     }
 
     public static class Builder {
-
         private String name;
         private long size;
         private String digest;
@@ -126,9 +134,9 @@ public class OllamaModel {
             return this;
         }
 
-
         public OllamaModel build() {
-            return new OllamaModel(name, size, digest, details, modifiedAt, model);
+            return new OllamaModel(this.name, this.size, this.digest, this.details, this.modifiedAt, this.model);
         }
     }
 }
+

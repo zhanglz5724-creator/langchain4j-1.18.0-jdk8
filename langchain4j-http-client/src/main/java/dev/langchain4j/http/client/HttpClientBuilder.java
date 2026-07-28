@@ -1,16 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.http.client;
 
+import dev.langchain4j.http.client.HttpClient;
 import java.time.Duration;
 
 public interface HttpClientBuilder {
+    public Duration connectTimeout();
 
-    Duration connectTimeout();
+    public HttpClientBuilder connectTimeout(Duration var1);
 
-    HttpClientBuilder connectTimeout(Duration timeout);
+    public Duration readTimeout();
 
-    Duration readTimeout();
+    public HttpClientBuilder readTimeout(Duration var1);
 
-    HttpClientBuilder readTimeout(Duration timeout);
-
-    HttpClient build();
+    public HttpClient build();
 }
+

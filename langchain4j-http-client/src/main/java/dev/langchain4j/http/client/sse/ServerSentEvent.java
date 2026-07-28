@@ -1,11 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.http.client.sse;
 
-import static dev.langchain4j.internal.Utils.quoted;
-
+import dev.langchain4j.internal.Utils;
 import java.util.Objects;
 
 public class ServerSentEvent {
-
     private final String event;
     private final String data;
 
@@ -15,28 +19,30 @@ public class ServerSentEvent {
     }
 
     public String event() {
-        return event;
+        return this.event;
     }
 
     public String data() {
-        return data;
+        return this.data;
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        ServerSentEvent that = (ServerSentEvent) obj;
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        ServerSentEvent that = (ServerSentEvent)obj;
         return Objects.equals(this.event, that.event) && Objects.equals(this.data, that.data);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(event, data);
+        return Objects.hash(this.event, this.data);
     }
 
-    @Override
     public String toString() {
-        return "ServerSentEvent {" + " event = " + quoted(event) + ", data = " + quoted(data) + " }";
+        return "ServerSentEvent { event = " + Utils.quoted((Object)this.event) + ", data = " + Utils.quoted((Object)this.data) + " }";
     }
 }
+

@@ -1,27 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.agentic.scope;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.agentic.observability.AgentListener;
+import dev.langchain4j.agentic.observability.ListenerNotifierUtil;
+import dev.langchain4j.agentic.scope.AgenticScopeKey;
+import dev.langchain4j.agentic.scope.AgenticScopePersister;
+import dev.langchain4j.agentic.scope.AgenticScopeStore;
+import dev.langchain4j.agentic.scope.DefaultAgenticScope;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import java.util.Set;
-
-import static dev.langchain4j.agentic.observability.ListenerNotifierUtil.beforeAgenticScopeDestroyed;
-import static dev.langchain4j.agentic.scope.DefaultAgenticScope.ephemeralAgenticScope;
-
-/**
- * Singleton registry for managing AgenticScope instances.
- * Provides methods to register, retrieve, and manage AgenticScope objects.
- * Supports persistence through a pluggable store.
- */
 @Internal
 public class AgenticScopeRegistry {
-
     private final String agentId;
     private final AgenticScopeStore store;
-
-    private final Map<AgenticScopeKey, DefaultAgenticScope> inMemoryAgenticScope = new ConcurrentHashMap<>();
+    private final Map<AgenticScopeKey, DefaultAgenticScope> inMemoryAgenticScope = new ConcurrentHashMap<AgenticScopeKey, DefaultAgenticScope>();
 
     public AgenticScopeRegistry(String agentId) {
         this.agentId = agentId;
@@ -29,63 +29,64 @@ public class AgenticScopeRegistry {
     }
 
     private boolean hasStore() {
-        return store != null;
+        return this.store != null;
     }
 
     public void update(DefaultAgenticScope agenticScope) {
-        if (hasStore()) {
-            store.save(new AgenticScopeKey(agentId, agenticScope.memoryId()), agenticScope);
+        if (this.hasStore()) {
+            this.store.save(new AgenticScopeKey(this.agentId, agenticScope.memoryId()), agenticScope);
         }
     }
 
     public DefaultAgenticScope get(Object memoryId) {
-        AgenticScopeKey key = new AgenticScopeKey(agentId, memoryId);
-        DefaultAgenticScope agenticScope = inMemoryAgenticScope.get(key);
-        if (agenticScope == null && hasStore()) {
-            agenticScope = store.load(key)
-                    .map(loaded -> {
-                        inMemoryAgenticScope.put(key, loaded);
-                        return loaded;
-                    }).orElse(null);
+        AgenticScopeKey key = new AgenticScopeKey(this.agentId, memoryId);
+        DefaultAgenticScope agenticScope = this.inMemoryAgenticScope.get(key);
+        if (agenticScope == null && this.hasStore()) {
+            agenticScope = this.store.load(key).map(loaded -> {
+                this.inMemoryAgenticScope.put(key, (DefaultAgenticScope)loaded);
+                return loaded;
+            }).orElse(null);
         }
         return agenticScope;
     }
 
     public DefaultAgenticScope create(Object memoryId) {
-        DefaultAgenticScope agenticScope = new DefaultAgenticScope(memoryId, hasStore() ? DefaultAgenticScope.Kind.PERSISTENT : DefaultAgenticScope.Kind.REGISTERED);
-        register(agenticScope);
+        DefaultAgenticScope agenticScope = new DefaultAgenticScope(memoryId, this.hasStore() ? DefaultAgenticScope.Kind.PERSISTENT : DefaultAgenticScope.Kind.REGISTERED);
+        this.register(agenticScope);
         return agenticScope;
     }
 
     public DefaultAgenticScope createEphemeralAgenticScope() {
-        DefaultAgenticScope agenticScope = ephemeralAgenticScope();
-        register(agenticScope);
+        DefaultAgenticScope agenticScope = DefaultAgenticScope.ephemeralAgenticScope();
+        this.register(agenticScope);
         return agenticScope;
     }
 
     private void register(DefaultAgenticScope agenticScope) {
-        inMemoryAgenticScope.put(new AgenticScopeKey(agentId, agenticScope.memoryId()), agenticScope);
-        update(agenticScope);
+        this.inMemoryAgenticScope.put(new AgenticScopeKey(this.agentId, agenticScope.memoryId()), agenticScope);
+        this.update(agenticScope);
     }
 
     public boolean evict(Object memoryId, AgentListener listener) {
-        AgenticScopeKey key = new AgenticScopeKey(agentId, memoryId);
-        DefaultAgenticScope agenticScope = inMemoryAgenticScope.remove(key);
-        boolean removed = agenticScope != null;
+        boolean removed;
+        AgenticScopeKey key = new AgenticScopeKey(this.agentId, memoryId);
+        DefaultAgenticScope agenticScope = this.inMemoryAgenticScope.remove(key);
+        boolean bl = removed = agenticScope != null;
         if (removed) {
-            beforeAgenticScopeDestroyed(listener, agenticScope);
+            ListenerNotifierUtil.beforeAgenticScopeDestroyed(listener, agenticScope);
         }
-        if (hasStore()) {
-            return store.delete(key) || removed;
+        if (this.hasStore()) {
+            return this.store.delete(key) || removed;
         }
         return removed;
     }
 
     public Set<AgenticScopeKey> getAllAgenticScopeKeysInMemory() {
-        return inMemoryAgenticScope.keySet();
+        return this.inMemoryAgenticScope.keySet();
     }
 
     public void clearInMemory() {
-        inMemoryAgenticScope.clear();
+        this.inMemoryAgenticScope.clear();
     }
 }
+

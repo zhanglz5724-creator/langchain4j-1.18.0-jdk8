@@ -1,10 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.azure.AzureOpenAIServiceVersion
+ *  com.openai.client.OpenAIClient
+ *  com.openai.credential.Credential
+ *  com.openai.models.embeddings.CreateEmbeddingResponse
+ *  com.openai.models.embeddings.EmbeddingCreateParams
+ *  com.openai.models.embeddings.EmbeddingCreateParams$Builder
+ *  com.openai.models.embeddings.EmbeddingCreateParams$Input
+ *  com.openai.models.embeddings.EmbeddingModel
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.openaiofficial;
-
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureGreaterThanZero;
-import static dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper.tokenUsageFrom;
-import static dev.langchain4j.model.openaiofficial.setup.OpenAiOfficialSetup.setupSyncClient;
-import static java.util.stream.Collectors.toList;
 
 import com.openai.azure.AzureOpenAIServiceVersion;
 import com.openai.client.OpenAIClient;
@@ -14,7 +28,12 @@ import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.embeddings.EmbeddingModel;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
+import dev.langchain4j.model.openaiofficial.InternalOpenAiOfficialHelper;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialEmbeddingModelName;
+import dev.langchain4j.model.openaiofficial.setup.OpenAiOfficialSetup;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import java.net.Proxy;
@@ -25,8 +44,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
-
+public class OpenAiOfficialEmbeddingModel
+extends DimensionAwareEmbeddingModel {
     private final OpenAIClient client;
     private final String modelName;
     private final Integer dimensions;
@@ -34,49 +53,26 @@ public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
     private final Integer maxSegmentsPerBatch;
 
     public OpenAiOfficialEmbeddingModel(Builder builder) {
-
-        if (builder.openAIClient != null) {
-            this.client = builder.openAIClient;
-        } else {
-            this.client = setupSyncClient(
-                    builder.baseUrl,
-                    builder.apiKey,
-                    builder.credential,
-                    builder.microsoftFoundryDeploymentName,
-                    builder.azureOpenAIServiceVersion,
-                    builder.organizationId,
-                    builder.isMicrosoftFoundry,
-                    builder.isGitHubModels,
-                    builder.modelName,
-                    builder.timeout,
-                    builder.maxRetries,
-                    builder.proxy,
-                    builder.customHeaders);
-        }
+        this.client = builder.openAIClient != null ? builder.openAIClient : OpenAiOfficialSetup.setupSyncClient(builder.baseUrl, builder.apiKey, builder.credential, builder.microsoftFoundryDeploymentName, builder.azureOpenAIServiceVersion, builder.organizationId, builder.isMicrosoftFoundry, builder.isGitHubModels, builder.modelName, builder.timeout, builder.maxRetries, builder.proxy, builder.customHeaders);
         this.modelName = builder.modelName;
-        this.dimensions = getOrDefault(builder.dimensions, knownDimension());
+        this.dimensions = (Integer)Utils.getOrDefault((Object)builder.dimensions, (Object)this.knownDimension());
         this.user = builder.user;
-        this.maxSegmentsPerBatch = getOrDefault(builder.maxSegmentsPerBatch, 2048);
-        ensureGreaterThanZero(this.maxSegmentsPerBatch, "maxSegmentsPerBatch");
+        this.maxSegmentsPerBatch = (Integer)Utils.getOrDefault((Object)builder.maxSegmentsPerBatch, (Object)2048);
+        ValidationUtils.ensureGreaterThanZero((Integer)this.maxSegmentsPerBatch, (String)"maxSegmentsPerBatch");
     }
 
-    @Override
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments) {
-
-        List<String> texts = textSegments.stream().map(TextSegment::text).collect(toList());
-
-        List<List<String>> textBatches = partition(texts, maxSegmentsPerBatch);
-
-        return embedBatchedTexts(textBatches);
+        List<String> texts = textSegments.stream().map(TextSegment::text).collect(Collectors.toList());
+        List<List<String>> textBatches = this.partition(texts, this.maxSegmentsPerBatch);
+        return this.embedBatchedTexts(textBatches);
     }
 
-    @Override
     public String modelName() {
         return this.modelName;
     }
 
     private List<List<String>> partition(List<String> inputList, int size) {
-        List<List<String>> result = new ArrayList<>();
+        ArrayList<List<String>> result = new ArrayList<List<String>>();
         for (int i = 0; i < inputList.size(); i += size) {
             int toIndex = Math.min(i + size, inputList.size());
             result.add(inputList.subList(i, toIndex));
@@ -85,61 +81,42 @@ public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
     }
 
     private Response<List<Embedding>> embedBatchedTexts(List<List<String>> textBatches) {
-        List<Response<List<Embedding>>> responses = new ArrayList<>();
+        ArrayList<Response<List<Embedding>>> responses = new ArrayList<Response<List<Embedding>>>();
         for (List<String> batch : textBatches) {
-            Response<List<Embedding>> response = embedTexts(batch);
-            responses.add(response);
+            Response<List<Embedding>> response2 = this.embedTexts(batch);
+            responses.add(response2);
         }
-        return Response.from(
-                responses.stream()
-                        .flatMap(response -> response.content().stream())
-                        .collect(Collectors.toList()),
-                responses.stream()
-                        .map(Response::tokenUsage)
-                        .filter(Objects::nonNull)
-                        .reduce(TokenUsage::add)
-                        .orElse(null));
+        return Response.from(responses.stream().flatMap(response -> ((List)response.content()).stream()).collect(Collectors.toList()), (TokenUsage)responses.stream().map(Response::tokenUsage).filter(Objects::nonNull).reduce(TokenUsage::add).orElse(null));
     }
 
     private Response<List<Embedding>> embedTexts(List<String> texts) {
-
         EmbeddingCreateParams.Input input = EmbeddingCreateParams.Input.ofArrayOfStrings(texts);
-
         EmbeddingCreateParams.Builder embeddingCreateParamsBuilder = EmbeddingCreateParams.builder();
         embeddingCreateParamsBuilder.input(input);
-        embeddingCreateParamsBuilder.model(modelName);
-        if (user != null) {
-            embeddingCreateParamsBuilder.user(user);
+        embeddingCreateParamsBuilder.model(this.modelName);
+        if (this.user != null) {
+            embeddingCreateParamsBuilder.user(this.user);
         }
-        if (dimensions != null) {
-            embeddingCreateParamsBuilder.dimensions(dimensions);
+        if (this.dimensions != null) {
+            embeddingCreateParamsBuilder.dimensions((long)this.dimensions.intValue());
         }
-
-        final CreateEmbeddingResponse createEmbeddingResponse =
-                client.embeddings().create(embeddingCreateParamsBuilder.build());
-
-        List<Embedding> embeddings = createEmbeddingResponse.data().stream()
-                .map(embeddingItem -> Embedding.from(embeddingItem.embedding()))
-                .collect(Collectors.toList());
-
-        return Response.from(embeddings, tokenUsageFrom(createEmbeddingResponse.usage()));
+        CreateEmbeddingResponse createEmbeddingResponse = this.client.embeddings().create(embeddingCreateParamsBuilder.build());
+        List embeddings = createEmbeddingResponse.data().stream().map(embeddingItem -> Embedding.from((List)embeddingItem.embedding())).collect(Collectors.toList());
+        return Response.from(embeddings, (TokenUsage)InternalOpenAiOfficialHelper.tokenUsageFrom(createEmbeddingResponse.usage()));
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     protected Integer knownDimension() {
-        if (dimensions != null) {
-            return dimensions;
-        } else {
-            return OpenAiOfficialEmbeddingModelName.knownDimension(modelName);
+        if (this.dimensions != null) {
+            return this.dimensions;
         }
+        return OpenAiOfficialEmbeddingModelName.knownDimension(this.modelName);
     }
 
     public static class Builder {
-
         private String baseUrl;
         private String apiKey;
         private Credential credential;
@@ -173,9 +150,6 @@ public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #microsoftFoundryDeploymentName(String)} instead
-         */
         @Deprecated
         public Builder azureDeploymentName(String azureDeploymentName) {
             this.microsoftFoundryDeploymentName = azureDeploymentName;
@@ -197,9 +171,6 @@ public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #isMicrosoftFoundry(boolean)} instead
-         */
         @Deprecated
         public Builder isAzure(boolean isAzure) {
             this.isMicrosoftFoundry = isAzure;
@@ -271,3 +242,4 @@ public class OpenAiOfficialEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
     }
 }
+

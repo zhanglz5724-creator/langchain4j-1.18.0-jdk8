@@ -1,33 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ *  reactor.core.Disposable
+ */
 package dev.langchain4j.model.azure;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.response.StreamingHandle;
 import reactor.core.Disposable;
 
-/**
- * @since 1.8.0
- */
-class AzureOpenAiStreamingHandle implements StreamingHandle {
-
+class AzureOpenAiStreamingHandle
+implements StreamingHandle {
     private final Disposable disposable;
     private volatile boolean isCancelled;
 
     AzureOpenAiStreamingHandle(Disposable disposable) {
-        this.disposable = ensureNotNull(disposable, "disposable");
+        this.disposable = (Disposable)ValidationUtils.ensureNotNull((Object)disposable, (String)"disposable");
     }
 
-    @Override
     public void cancel() {
-        isCancelled = true;
+        this.isCancelled = true;
         try {
-            disposable.dispose();
-        } catch (Exception ignored) {
+            this.disposable.dispose();
+        }
+        catch (Exception exception) {
+            // empty catch block
         }
     }
 
-    @Override
     public boolean isCancelled() {
-        return isCancelled;
+        return this.isCancelled;
     }
 }
+

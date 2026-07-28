@@ -1,44 +1,68 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.ChatRequestValidationUtils
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.openai.internal.OpenAiClient
+ *  dev.langchain4j.model.openai.internal.OpenAiUtils
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionChoice
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest$Builder
+ *  dev.langchain4j.model.openai.internal.chat.ChatCompletionResponse
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.localai;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.ChatRequestValidationUtils;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
-import dev.langchain4j.internal.ChatRequestValidationUtils;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.localai.spi.LocalAiChatModelBuilderFactory;
 import dev.langchain4j.model.openai.internal.OpenAiClient;
+import dev.langchain4j.model.openai.internal.OpenAiUtils;
+import dev.langchain4j.model.openai.internal.chat.ChatCompletionChoice;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionRequest;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionResponse;
+import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.spi.ServiceHelper;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import org.slf4j.Logger;
 
-import java.time.Duration;
-import java.util.List;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.chat.request.ToolChoice.REQUIRED;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.aiMessageFrom;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.finishReasonFrom;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.toFunctions;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.toOpenAiMessages;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-import static java.time.Duration.ofSeconds;
-import static java.util.Collections.singletonList;
-
-/**
- * See <a href="https://localai.io/features/text-generation/">LocalAI documentation</a> for more details.
- */
-public class LocalAiChatModel implements ChatModel {
-
+public class LocalAiChatModel
+implements ChatModel {
     private final OpenAiClient client;
     private final String modelName;
     private final Double temperature;
@@ -46,29 +70,13 @@ public class LocalAiChatModel implements ChatModel {
     private final Integer maxTokens;
     private final Integer maxRetries;
 
-    @Deprecated(forRemoval = true, since = "1.5.0")
-    public LocalAiChatModel(String baseUrl,
-                            String modelName,
-                            Double temperature,
-                            Double topP,
-                            Integer maxTokens,
-                            Duration timeout,
-                            Integer maxRetries,
-                            Boolean logRequests,
-                            Boolean logResponses) {
-
+    @Deprecated
+    public LocalAiChatModel(String baseUrl, String modelName, Double temperature, Double topP, Integer maxTokens, Duration timeout, Integer maxRetries, Boolean logRequests, Boolean logResponses) {
         temperature = temperature == null ? 0.7 : temperature;
-        timeout = timeout == null ? ofSeconds(60) : timeout;
+        timeout = timeout == null ? Duration.ofSeconds(60L) : timeout;
         maxRetries = maxRetries == null ? 3 : maxRetries;
-
-        this.client = OpenAiClient.builder()
-                .baseUrl(ensureNotBlank(baseUrl, "baseUrl"))
-                .connectTimeout(timeout)
-                .readTimeout(timeout)
-                .logRequests(logRequests)
-                .logResponses(logResponses)
-                .build();
-        this.modelName = ensureNotBlank(modelName, "modelName");
+        this.client = OpenAiClient.builder().baseUrl(ValidationUtils.ensureNotBlank((String)baseUrl, (String)"baseUrl")).connectTimeout(timeout).readTimeout(timeout).logRequests(logRequests).logResponses(logResponses).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
         this.temperature = temperature;
         this.topP = topP;
         this.maxTokens = maxTokens;
@@ -76,97 +84,63 @@ public class LocalAiChatModel implements ChatModel {
     }
 
     public LocalAiChatModel(LocalAiChatModelBuilder builder) {
-        this.client = OpenAiClient.builder()
-                .baseUrl(ensureNotBlank(builder.baseUrl, "baseUrl"))
-                .connectTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .readTimeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .logger(builder.logger)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.temperature = getOrDefault(builder.temperature, 0.7);
+        this.client = OpenAiClient.builder().baseUrl(ValidationUtils.ensureNotBlank((String)builder.baseUrl, (String)"baseUrl")).connectTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).readTimeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests(builder.logRequests).logResponses(builder.logResponses).logger(builder.logger).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.temperature = (Double)Utils.getOrDefault((Object)builder.temperature, (Object)0.7);
         this.topP = builder.topP;
         this.maxTokens = builder.maxTokens;
-        this.maxRetries = getOrDefault(builder.maxRetries, 3);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)3);
     }
 
-    @Override
     public ChatResponse chat(ChatRequest chatRequest) {
-        ChatRequestParameters parameters = chatRequest.parameters();
-        ChatRequestValidationUtils.validateParameters(parameters);
-        ChatRequestValidationUtils.validate(parameters.responseFormat());
-
         Response<AiMessage> response;
-        List<ToolSpecification> toolSpecifications = parameters.toolSpecifications();
-        if (isNullOrEmpty(toolSpecifications)) {
-            response = generate(chatRequest.messages());
-        } else {
-            if (parameters.toolChoice() == REQUIRED) {
-                if (toolSpecifications.size() != 1) {
-                    throw new UnsupportedFeatureException(
-                            String.format("%s.%s is currently supported only when there is a single tool",
-                                    ToolChoice.class.getSimpleName(), REQUIRED.name()));
-                }
-                response = generate(chatRequest.messages(), toolSpecifications.get(0));
-            } else {
-                response = generate(chatRequest.messages(), toolSpecifications);
+        ChatRequestParameters parameters = chatRequest.parameters();
+        ChatRequestValidationUtils.validateParameters((ChatRequestParameters)parameters);
+        ChatRequestValidationUtils.validate((ResponseFormat)parameters.responseFormat());
+        List toolSpecifications = parameters.toolSpecifications();
+        if (Utils.isNullOrEmpty((Collection)toolSpecifications)) {
+            response = this.generate(chatRequest.messages());
+        } else if (parameters.toolChoice() == ToolChoice.REQUIRED) {
+            if (toolSpecifications.size() != 1) {
+                throw new UnsupportedFeatureException(String.format("%s.%s is currently supported only when there is a single tool", ToolChoice.class.getSimpleName(), ToolChoice.REQUIRED.name()));
             }
+            response = this.generate((List<ChatMessage>)chatRequest.messages(), (ToolSpecification)toolSpecifications.get(0));
+        } else {
+            response = this.generate((List<ChatMessage>)chatRequest.messages(), toolSpecifications);
         }
-
-        return ChatResponse.builder()
-                .aiMessage(response.content())
-                .metadata(ChatResponseMetadata.builder()
-                        .tokenUsage(response.tokenUsage())
-                        .finishReason(response.finishReason())
-                        .build())
-                .build();
+        return ChatResponse.builder().aiMessage((AiMessage)response.content()).metadata(ChatResponseMetadata.builder().tokenUsage(response.tokenUsage()).finishReason(response.finishReason()).build()).build();
     }
 
     private Response<AiMessage> generate(List<ChatMessage> messages) {
-        return generate(messages, null, null);
+        return this.generate(messages, null, null);
     }
 
     private Response<AiMessage> generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications) {
-        return generate(messages, toolSpecifications, null);
+        return this.generate(messages, toolSpecifications, null);
     }
 
     private Response<AiMessage> generate(List<ChatMessage> messages, ToolSpecification toolSpecification) {
-        return generate(messages, singletonList(toolSpecification), toolSpecification);
+        return this.generate(messages, Collections.singletonList(toolSpecification), toolSpecification);
     }
 
-    private Response<AiMessage> generate(List<ChatMessage> messages,
-                                         List<ToolSpecification> toolSpecifications,
-                                         ToolSpecification toolThatMustBeExecuted
-    ) {
-        ChatCompletionRequest.Builder requestBuilder = ChatCompletionRequest.builder()
-                .model(modelName)
-                .messages(toOpenAiMessages(messages))
-                .temperature(temperature)
-                .topP(topP)
-                .maxTokens(maxTokens);
-
+    private Response<AiMessage> generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications, ToolSpecification toolThatMustBeExecuted) {
+        ChatCompletionRequest.Builder requestBuilder = ChatCompletionRequest.builder().model(this.modelName).messages(OpenAiUtils.toOpenAiMessages(messages)).temperature(this.temperature).topP(this.topP).maxTokens(this.maxTokens);
         if (toolSpecifications != null && !toolSpecifications.isEmpty()) {
-            requestBuilder.functions(toFunctions(toolSpecifications));
+            requestBuilder.functions(OpenAiUtils.toFunctions(toolSpecifications));
         }
         if (toolThatMustBeExecuted != null) {
             requestBuilder.functionCall(toolThatMustBeExecuted.name());
         }
-
         ChatCompletionRequest request = requestBuilder.build();
-
-        ChatCompletionResponse response = withRetryMappingExceptions(() -> client.chatCompletion(request).execute(), maxRetries);
-
-        return Response.from(
-                aiMessageFrom(response),
-                null,
-                finishReasonFrom(response.choices().get(0).finishReason())
-        );
+        ChatCompletionResponse response = (ChatCompletionResponse)RetryUtils.withRetryMappingExceptions(() -> (ChatCompletionResponse)this.client.chatCompletion(request).execute(), (int)this.maxRetries);
+        return Response.from((Object)OpenAiUtils.aiMessageFrom((ChatCompletionResponse)response), null, (FinishReason)OpenAiUtils.finishReasonFrom((String)((ChatCompletionChoice)response.choices().get(0)).finishReason()));
     }
 
     public static LocalAiChatModelBuilder builder() {
-        for (LocalAiChatModelBuilderFactory factory : loadFactories(LocalAiChatModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(LocalAiChatModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            LocalAiChatModelBuilderFactory factory = (LocalAiChatModelBuilderFactory)iterator.next();
+            return (LocalAiChatModelBuilder)factory.get();
         }
         return new LocalAiChatModelBuilder();
     }
@@ -182,10 +156,6 @@ public class LocalAiChatModel implements ChatModel {
         private Boolean logRequests;
         private Boolean logResponses;
         private Logger logger;
-
-        public LocalAiChatModelBuilder() {
-            // This is public so it can be extended
-        }
 
         public LocalAiChatModelBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -232,10 +202,6 @@ public class LocalAiChatModel implements ChatModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public LocalAiChatModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
@@ -250,3 +216,4 @@ public class LocalAiChatModel implements ChatModel {
         }
     }
 }
+

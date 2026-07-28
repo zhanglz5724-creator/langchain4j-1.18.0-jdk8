@@ -1,11 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.http.client.HttpClient
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.http.client.HttpClientBuilderLoader
+ *  dev.langchain4j.http.client.HttpMethod
+ *  dev.langchain4j.http.client.HttpRequest
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ *  dev.langchain4j.http.client.log.LoggingHttpClient
+ *  dev.langchain4j.http.client.sse.ServerSentEventListener
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.StreamingResponseHandler
+ *  dev.langchain4j.model.chat.response.StreamingChatResponseHandler
+ */
 package dev.langchain4j.model.mistralai.internal.client;
-
-import static dev.langchain4j.http.client.HttpMethod.POST;
-import static dev.langchain4j.internal.Utils.*;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
-import static dev.langchain4j.model.mistralai.internal.client.MistralAiJsonUtils.fromJson;
-import static dev.langchain4j.model.mistralai.internal.client.MistralAiJsonUtils.toJson;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.http.client.HttpClient;
@@ -15,9 +26,28 @@ import dev.langchain4j.http.client.HttpMethod;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.log.LoggingHttpClient;
+import dev.langchain4j.http.client.sse.ServerSentEventListener;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
-import dev.langchain4j.model.mistralai.internal.api.*;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiBatchJob;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiBatchJobRequest;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiBatchJobsResponse;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiBatchResultEntry;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiChatCompletionRequest;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiChatCompletionResponse;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiEmbeddingRequest;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiEmbeddingResponse;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiFimCompletionRequest;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiModelResponse;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiModerationRequest;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiModerationResponse;
+import dev.langchain4j.model.mistralai.internal.client.MistralAiClient;
+import dev.langchain4j.model.mistralai.internal.client.MistralAiFimServerSentEventListener;
+import dev.langchain4j.model.mistralai.internal.client.MistralAiJsonUtils;
+import dev.langchain4j.model.mistralai.internal.client.MistralAiServerSentEventListener;
+import dev.langchain4j.model.mistralai.internal.client.ParsedAndRawResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,11 +56,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 @Internal
-public class DefaultMistralAiClient extends MistralAiClient {
-
+public class DefaultMistralAiClient
+extends MistralAiClient {
     private final HttpClient httpClient;
     private final String baseUrl;
     private final String apiKey;
@@ -40,40 +69,24 @@ public class DefaultMistralAiClient extends MistralAiClient {
         return new Builder();
     }
 
-    public static class Builder extends MistralAiClient.Builder<DefaultMistralAiClient, Builder> {
-
-        public DefaultMistralAiClient build() {
-            return new DefaultMistralAiClient(this);
-        }
-    }
-
     DefaultMistralAiClient(Builder builder) {
-        HttpClientBuilder httpClientBuilder =
-                getOrDefault(builder.httpClientBuilder, HttpClientBuilderLoader::loadHttpClientBuilder);
+        HttpClientBuilder httpClientBuilder = (HttpClientBuilder)Utils.getOrDefault((Object)builder.httpClientBuilder, HttpClientBuilderLoader::loadHttpClientBuilder);
+        HttpClient httpClient = httpClientBuilder.connectTimeout((Duration)Utils.getOrDefault((Object)Utils.getOrDefault((Object)builder.timeout, (Object)httpClientBuilder.connectTimeout()), (Object)Duration.ofSeconds(15L))).readTimeout((Duration)Utils.getOrDefault((Object)Utils.getOrDefault((Object)builder.timeout, (Object)httpClientBuilder.readTimeout()), (Object)Duration.ofSeconds(60L))).build();
+        this.httpClient = builder.logRequests != null && builder.logRequests != false || builder.logResponses != null && builder.logResponses != false ? new LoggingHttpClient(httpClient, builder.logRequests, builder.logResponses, builder.logger) : httpClient;
+        this.baseUrl = ValidationUtils.ensureNotBlank((String)builder.baseUrl, (String)"baseUrl");
+        this.apiKey = ValidationUtils.ensureNotBlank((String)builder.apiKey, (String)"apiKey");
+        this.customHeadersSupplier = (Supplier)Utils.getOrDefault((Object)builder.customHeadersSupplier, (Object)new Supplier<Map<String, String>>(){
 
-        HttpClient httpClient = httpClientBuilder
-                .connectTimeout(getOrDefault(
-                        getOrDefault(builder.timeout, httpClientBuilder.connectTimeout()), Duration.ofSeconds(15)))
-                .readTimeout(getOrDefault(
-                        getOrDefault(builder.timeout, httpClientBuilder.readTimeout()), Duration.ofSeconds(60)))
-                .build();
-
-        if (builder.logRequests != null && builder.logRequests
-                || builder.logResponses != null && builder.logResponses) {
-            this.httpClient =
-                    new LoggingHttpClient(httpClient, builder.logRequests, builder.logResponses, builder.logger);
-        } else {
-            this.httpClient = httpClient;
-        }
-
-        this.baseUrl = ensureNotBlank(builder.baseUrl, "baseUrl");
-        this.apiKey = ensureNotBlank(builder.apiKey, "apiKey");
-        this.customHeadersSupplier = getOrDefault(builder.customHeadersSupplier, () -> Map::of);
+            @Override
+            public Map<String, String> get() {
+                return Collections.emptyMap();
+            }
+        });
     }
 
-    private java.util.Map<String, String> buildRequestHeaders() {
-        Map<String, String> dynamicHeaders = customHeadersSupplier.get();
-        if (isNullOrEmpty(dynamicHeaders)) {
+    private Map<String, String> buildRequestHeaders() {
+        Map<String, String> dynamicHeaders = this.customHeadersSupplier.get();
+        if (Utils.isNullOrEmpty(dynamicHeaders)) {
             return Collections.emptyMap();
         }
         return dynamicHeaders;
@@ -81,197 +94,101 @@ public class DefaultMistralAiClient extends MistralAiClient {
 
     @Override
     public MistralAiChatCompletionResponse chatCompletion(MistralAiChatCompletionRequest request) {
-        return chatCompletionWithRawResponse(request).parsedResponse();
+        return this.chatCompletionWithRawResponse(request).parsedResponse();
     }
 
     @Override
-    public ParsedAndRawResponse<MistralAiChatCompletionResponse> chatCompletionWithRawResponse(
-            MistralAiChatCompletionRequest request) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "chat/completions")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .body(toJson(request))
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
-        MistralAiChatCompletionResponse parsedResponse =
-                fromJson(rawResponse.body(), MistralAiChatCompletionResponse.class);
-        return new ParsedAndRawResponse<>(parsedResponse, rawResponse);
+    public ParsedAndRawResponse<MistralAiChatCompletionResponse> chatCompletionWithRawResponse(MistralAiChatCompletionRequest request) {
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "chat/completions").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).body(MistralAiJsonUtils.toJson(request)).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
+        MistralAiChatCompletionResponse parsedResponse = MistralAiJsonUtils.fromJson(rawResponse.body(), MistralAiChatCompletionResponse.class);
+        return new ParsedAndRawResponse<MistralAiChatCompletionResponse>(parsedResponse, rawResponse);
     }
 
     @Override
     public void streamingChatCompletion(MistralAiChatCompletionRequest request, StreamingChatResponseHandler handler) {
-        streamingChatCompletion(request, handler, false);
+        this.streamingChatCompletion(request, handler, false);
     }
 
     @Override
-    public void streamingChatCompletion(
-            MistralAiChatCompletionRequest request, StreamingChatResponseHandler handler, boolean returnThinking) {
-        ensureNotEmpty(request.getMessages(), "messages");
-
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "chat/completions")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .body(toJson(request))
-                .build();
-
-        httpClient.execute(httpRequest, new MistralAiServerSentEventListener(handler, returnThinking));
+    public void streamingChatCompletion(MistralAiChatCompletionRequest request, StreamingChatResponseHandler handler, boolean returnThinking) {
+        ValidationUtils.ensureNotEmpty(request.getMessages(), (String)"messages");
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "chat/completions").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).body(MistralAiJsonUtils.toJson(request)).build();
+        this.httpClient.execute(httpRequest, (ServerSentEventListener)new MistralAiServerSentEventListener(handler, returnThinking));
     }
 
     @Override
     public MistralAiChatCompletionResponse fimCompletion(MistralAiFimCompletionRequest request) {
-        return fimCompletionWithRawResponse(request).parsedResponse();
+        return this.fimCompletionWithRawResponse(request).parsedResponse();
     }
 
     @Override
-    public ParsedAndRawResponse<MistralAiChatCompletionResponse> fimCompletionWithRawResponse(
-            MistralAiFimCompletionRequest request) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "fim/completions")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .body(toJson(request))
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
-        MistralAiChatCompletionResponse parsedResponse =
-                fromJson(rawResponse.body(), MistralAiChatCompletionResponse.class);
-        return new ParsedAndRawResponse<>(parsedResponse, rawResponse);
+    public ParsedAndRawResponse<MistralAiChatCompletionResponse> fimCompletionWithRawResponse(MistralAiFimCompletionRequest request) {
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "fim/completions").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).body(MistralAiJsonUtils.toJson(request)).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
+        MistralAiChatCompletionResponse parsedResponse = MistralAiJsonUtils.fromJson(rawResponse.body(), MistralAiChatCompletionResponse.class);
+        return new ParsedAndRawResponse<MistralAiChatCompletionResponse>(parsedResponse, rawResponse);
     }
 
     @Override
-    public void streamingFimCompletion(
-            MistralAiFimCompletionRequest request, StreamingResponseHandler<String> handler) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "fim/completions")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .body(toJson(request))
-                .build();
-
-        MistralAiFimServerSentEventListener listener =
-                new MistralAiFimServerSentEventListener(handler, (content, toolExecutionRequests) -> content);
-        httpClient.execute(httpRequest, listener);
+    public void streamingFimCompletion(MistralAiFimCompletionRequest request, StreamingResponseHandler<String> handler) {
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "fim/completions").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).body(MistralAiJsonUtils.toJson(request)).build();
+        MistralAiFimServerSentEventListener listener = new MistralAiFimServerSentEventListener(handler, (content, toolExecutionRequests) -> content);
+        this.httpClient.execute(httpRequest, (ServerSentEventListener)listener);
     }
 
     @Override
     public MistralAiEmbeddingResponse embedding(MistralAiEmbeddingRequest request) {
-        return embeddingWithRawResponse(request).parsedResponse();
+        return this.embeddingWithRawResponse(request).parsedResponse();
     }
 
     @Override
-    public ParsedAndRawResponse<MistralAiEmbeddingResponse> embeddingWithRawResponse(
-            MistralAiEmbeddingRequest request) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "embeddings")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .body(toJson(request))
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
-        MistralAiEmbeddingResponse parsedResponse = fromJson(rawResponse.body(), MistralAiEmbeddingResponse.class);
-        return new ParsedAndRawResponse<>(parsedResponse, rawResponse);
+    public ParsedAndRawResponse<MistralAiEmbeddingResponse> embeddingWithRawResponse(MistralAiEmbeddingRequest request) {
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "embeddings").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).body(MistralAiJsonUtils.toJson(request)).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
+        MistralAiEmbeddingResponse parsedResponse = MistralAiJsonUtils.fromJson(rawResponse.body(), MistralAiEmbeddingResponse.class);
+        return new ParsedAndRawResponse<MistralAiEmbeddingResponse>(parsedResponse, rawResponse);
     }
 
     @Override
     public MistralAiModerationResponse moderation(MistralAiModerationRequest request) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "moderations")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .body(toJson(request))
-                .build();
-
-        SuccessfulHttpResponse successfulHttpResponse = httpClient.execute(httpRequest);
-        return fromJson(successfulHttpResponse.body(), MistralAiModerationResponse.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "moderations").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).body(MistralAiJsonUtils.toJson(request)).build();
+        SuccessfulHttpResponse successfulHttpResponse = this.httpClient.execute(httpRequest);
+        return MistralAiJsonUtils.fromJson(successfulHttpResponse.body(), MistralAiModerationResponse.class);
     }
 
     @Override
     public MistralAiModelResponse listModels() {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "models")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .build();
-
-        SuccessfulHttpResponse successfulHttpResponse = httpClient.execute(httpRequest);
-        return fromJson(successfulHttpResponse.body(), MistralAiModelResponse.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "models").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).build();
+        SuccessfulHttpResponse successfulHttpResponse = this.httpClient.execute(httpRequest);
+        return MistralAiJsonUtils.fromJson(successfulHttpResponse.body(), MistralAiModelResponse.class);
     }
 
     @Override
     public MistralAiBatchJob createBatchJob(MistralAiBatchJobRequest request) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "batch/jobs")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .body(toJson(request))
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
-        return fromJson(rawResponse.body(), MistralAiBatchJob.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "batch/jobs").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).body(MistralAiJsonUtils.toJson(request)).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
+        return MistralAiJsonUtils.fromJson(rawResponse.body(), MistralAiBatchJob.class);
     }
 
     @Override
     public MistralAiBatchJob retrieveBatchJob(String jobId) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "batch/jobs/" + jobId)
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
-        return fromJson(rawResponse.body(), MistralAiBatchJob.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "batch/jobs/" + jobId).addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
+        return MistralAiJsonUtils.fromJson(rawResponse.body(), MistralAiBatchJob.class);
     }
 
     @Override
     public MistralAiBatchJob cancelBatchJob(String jobId) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(POST)
-                .url(baseUrl, "batch/jobs/" + jobId + "/cancel")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
-        return fromJson(rawResponse.body(), MistralAiBatchJob.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.POST).url(this.baseUrl, "batch/jobs/" + jobId + "/cancel").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
+        return MistralAiJsonUtils.fromJson(rawResponse.body(), MistralAiBatchJob.class);
     }
 
     @Override
     public MistralAiBatchJobsResponse listBatchJobs(Integer page, Integer pageSize) {
         StringBuilder path = new StringBuilder("batch/jobs");
-        List<String> queryParams = new ArrayList<>();
+        ArrayList<String> queryParams = new ArrayList<String>();
         if (page != null) {
             queryParams.add("page=" + page);
         }
@@ -279,41 +196,30 @@ public class DefaultMistralAiClient extends MistralAiClient {
             queryParams.add("page_size=" + pageSize);
         }
         if (!queryParams.isEmpty()) {
-            path.append('?').append(String.join("&", queryParams));
+            path.append('?').append(String.join((CharSequence)"&", queryParams));
         }
-
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, path.toString())
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
-        return fromJson(rawResponse.body(), MistralAiBatchJobsResponse.class);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, path.toString()).addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("Content-Type", new String[]{"application/json"}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
+        return MistralAiJsonUtils.fromJson(rawResponse.body(), MistralAiBatchJobsResponse.class);
     }
 
     @Override
     public List<MistralAiBatchResultEntry> downloadBatchResults(String fileId) {
-        HttpRequest httpRequest = HttpRequest.builder()
-                .method(HttpMethod.GET)
-                .url(baseUrl, "files/" + fileId + "/content")
-                .addHeader("Authorization", "Bearer " + apiKey)
-                .addHeader("User-Agent", "langchain4j-mistral-ai")
-                .addHeaders(buildRequestHeaders())
-                .build();
-
-        SuccessfulHttpResponse rawResponse = httpClient.execute(httpRequest);
+        HttpRequest httpRequest = HttpRequest.builder().method(HttpMethod.GET).url(this.baseUrl, "files/" + fileId + "/content").addHeader("Authorization", new String[]{"Bearer " + this.apiKey}).addHeader("User-Agent", new String[]{"langchain4j-mistral-ai"}).addHeaders(this.buildRequestHeaders()).build();
+        SuccessfulHttpResponse rawResponse = this.httpClient.execute(httpRequest);
         String body = rawResponse.body();
         if (body == null) {
             return Collections.emptyList();
         }
-        return Arrays.stream(body.split("\\n"))
-                .map(String::trim)
-                .filter(line -> !line.isEmpty())
-                .map(line -> fromJson(line, MistralAiBatchResultEntry.class))
-                .collect(Collectors.toList());
+        return Arrays.asList(body.split("\\R")).stream().map(s -> s.trim()).filter(line -> !line.isEmpty()).map(line -> MistralAiJsonUtils.fromJson(line, MistralAiBatchResultEntry.class)).collect(Collectors.toList());
+    }
+
+    public static class Builder
+    extends MistralAiClient.Builder<DefaultMistralAiClient, Builder> {
+        @Override
+        public DefaultMistralAiClient build() {
+            return new DefaultMistralAiClient(this);
+        }
     }
 }
+

@@ -1,42 +1,49 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.planner;
 
+import dev.langchain4j.agentic.planner.AgentArgument;
+import dev.langchain4j.agentic.planner.AgenticSystemTopology;
+import dev.langchain4j.agentic.planner.Planner;
 import java.lang.reflect.Type;
 import java.util.List;
 
 public interface AgentInstance {
+    public Class<?> type();
 
-    Class<?> type();
+    public Class<? extends Planner> plannerType();
 
-    Class<? extends Planner> plannerType();
+    public String name();
 
-    String name();
+    public String agentId();
 
-    String agentId();
+    public String description();
 
-    String description();
+    public Type outputType();
 
-    Type outputType();
+    public String outputKey();
 
-    String outputKey();
+    public boolean async();
 
-    boolean async();
-
-    default boolean optional() {
+    default public boolean optional() {
         return false;
     }
 
-    List<AgentArgument> arguments();
+    public List<AgentArgument> arguments();
 
-    AgentInstance parent();
-    List<AgentInstance> subagents();
+    public AgentInstance parent();
 
-    default boolean leaf() {
-        return subagents().isEmpty();
+    public List<AgentInstance> subagents();
+
+    default public boolean leaf() {
+        return this.subagents().isEmpty();
     }
 
-    AgenticSystemTopology topology();
+    public AgenticSystemTopology topology();
 
-    default <T extends AgentInstance> T as(Class<T> agentInstanceClass) {
+    default public <T extends AgentInstance> T as(Class<T> agentInstanceClass) {
         throw new ClassCastException("Cannot cast to " + agentInstanceClass.getName() + ": incompatible type");
     }
 }
+

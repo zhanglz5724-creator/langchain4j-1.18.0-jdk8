@@ -1,23 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 
-/**
- * request options in completion/embedding API
- *
- * @see <a href="https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values">Ollama REST API Doc</a>
- */
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 class Options {
-
     private Integer mirostat;
     private Double mirostatEta;
     private Double mirostatTau;
@@ -39,7 +41,8 @@ class Options {
     private Integer mainGPU;
     private Boolean useMmap;
 
-    Options() {}
+    Options() {
+    }
 
     Options(Builder builder) {
         this.mirostat = builder.mirostat;
@@ -65,7 +68,7 @@ class Options {
     }
 
     public Integer getMirostat() {
-        return mirostat;
+        return this.mirostat;
     }
 
     public void setMirostat(Integer mirostat) {
@@ -73,7 +76,7 @@ class Options {
     }
 
     public Double getMirostatEta() {
-        return mirostatEta;
+        return this.mirostatEta;
     }
 
     public void setMirostatEta(Double mirostatEta) {
@@ -81,7 +84,7 @@ class Options {
     }
 
     public Double getMirostatTau() {
-        return mirostatTau;
+        return this.mirostatTau;
     }
 
     public void setMirostatTau(Double mirostatTau) {
@@ -89,7 +92,7 @@ class Options {
     }
 
     public Integer getRepeatLastN() {
-        return repeatLastN;
+        return this.repeatLastN;
     }
 
     public void setRepeatLastN(Integer repeatLastN) {
@@ -97,7 +100,7 @@ class Options {
     }
 
     public Double getTemperature() {
-        return temperature;
+        return this.temperature;
     }
 
     public void setTemperature(Double temperature) {
@@ -105,7 +108,7 @@ class Options {
     }
 
     public Integer getTopK() {
-        return topK;
+        return this.topK;
     }
 
     public void setTopK(Integer topK) {
@@ -113,7 +116,7 @@ class Options {
     }
 
     public Double getTopP() {
-        return topP;
+        return this.topP;
     }
 
     public void setTopP(Double topP) {
@@ -121,7 +124,7 @@ class Options {
     }
 
     public Double getRepeatPenalty() {
-        return repeatPenalty;
+        return this.repeatPenalty;
     }
 
     public void setRepeatPenalty(Double repeatPenalty) {
@@ -129,7 +132,7 @@ class Options {
     }
 
     public Integer getSeed() {
-        return seed;
+        return this.seed;
     }
 
     public void setSeed(Integer seed) {
@@ -137,7 +140,7 @@ class Options {
     }
 
     public Integer getNumPredict() {
-        return numPredict;
+        return this.numPredict;
     }
 
     public void setNumPredict(Integer numPredict) {
@@ -145,7 +148,7 @@ class Options {
     }
 
     public Integer getNumCtx() {
-        return numCtx;
+        return this.numCtx;
     }
 
     public void setNumCtx(Integer numCtx) {
@@ -153,7 +156,7 @@ class Options {
     }
 
     public Integer getNumThread() {
-        return numThread;
+        return this.numThread;
     }
 
     public void setNumThread(Integer numThread) {
@@ -161,7 +164,7 @@ class Options {
     }
 
     public List<String> getStop() {
-        return stop;
+        return this.stop;
     }
 
     public void setStop(List<String> stop) {
@@ -169,7 +172,7 @@ class Options {
     }
 
     public Double getMinP() {
-        return minP;
+        return this.minP;
     }
 
     public void setMinP(Double minP) {
@@ -177,7 +180,7 @@ class Options {
     }
 
     public Boolean getUseMmap() {
-        return useMmap;
+        return this.useMmap;
     }
 
     public void setUseMmap(Boolean useMmap) {
@@ -185,7 +188,7 @@ class Options {
     }
 
     public Integer getMainGPU() {
-        return mainGPU;
+        return this.mainGPU;
     }
 
     public void setMainGPU(Integer mainGPU) {
@@ -193,7 +196,7 @@ class Options {
     }
 
     public Integer getNumGPU() {
-        return numGPU;
+        return this.numGPU;
     }
 
     public void setNumGPU(Integer numGPU) {
@@ -201,7 +204,7 @@ class Options {
     }
 
     public Integer getNumBatch() {
-        return numBatch;
+        return this.numBatch;
     }
 
     public void setNumBatch(Integer numBatch) {
@@ -209,7 +212,7 @@ class Options {
     }
 
     public Double getTypicalP() {
-        return typicalP;
+        return this.typicalP;
     }
 
     public void setTypicalP(Double typicalP) {
@@ -217,7 +220,7 @@ class Options {
     }
 
     public Integer getNumKeep() {
-        return numKeep;
+        return this.numKeep;
     }
 
     public void setNumKeep(Integer numKeep) {
@@ -229,7 +232,6 @@ class Options {
     }
 
     static class Builder {
-
         private Integer mirostat;
         private Double mirostatEta;
         private Double mirostatTau;
@@ -250,6 +252,9 @@ class Options {
         private Integer numGPU;
         private Integer mainGPU;
         private Boolean useMmap;
+
+        Builder() {
+        }
 
         Builder mirostat(Integer mirostat) {
             this.mirostat = mirostat;
@@ -356,3 +361,4 @@ class Options {
         }
     }
 }
+

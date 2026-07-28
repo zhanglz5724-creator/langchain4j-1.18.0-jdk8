@@ -1,22 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.invocation.InvocationContext
+ */
 package dev.langchain4j.service.tool;
 
+import dev.langchain4j.Experimental;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.data.message.Content;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.invocation.InvocationContext;
+import dev.langchain4j.service.tool.ToolExecutionResult;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import dev.langchain4j.Experimental;
-import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.data.message.Content;
-import dev.langchain4j.data.message.TextContent;
-import dev.langchain4j.invocation.InvocationContext;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * Represents the execution of a tool, including the request and the result.
- */
 public class ToolExecution {
-
     private final ToolExecutionRequest request;
     private final ToolExecutionResult result;
     private final LocalDateTime startTime;
@@ -24,119 +29,70 @@ public class ToolExecution {
     private final InvocationContext invocationContext;
 
     private ToolExecution(Builder builder) {
-        this.request = ensureNotNull(builder.request, "request");
-        this.result = ensureNotNull(builder.result, "result");
+        this.request = (ToolExecutionRequest)ValidationUtils.ensureNotNull((Object)builder.request, (String)"request");
+        this.result = (ToolExecutionResult)ValidationUtils.ensureNotNull((Object)builder.result, (String)"result");
         this.startTime = builder.startTime;
         this.finishTime = builder.finishTime;
-        this.invocationContext = ensureNotNull(builder.invocationContext, "invocationContext");
+        this.invocationContext = (InvocationContext)ValidationUtils.ensureNotNull((Object)builder.invocationContext, (String)"invocationContext");
     }
 
-    /**
-     * Returns the request of the tool execution.
-     *
-     * @return the request of the tool execution.
-     */
     public ToolExecutionRequest request() {
-        return request;
+        return this.request;
     }
 
-    /**
-     * Returns the tool execution result as text.
-     *
-     * @return the result of the tool execution.
-     * @see #resultContents()
-     * @see #resultObject()
-     */
     public String result() {
-        return result.resultText();
+        return this.result.resultText();
     }
 
-    /**
-     * Returns the contents of the tool execution result.
-     * For text-only results, returns a singleton list containing a {@link TextContent}.
-     *
-     * @see #result()
-     * @see #resultObject()
-     * @since 1.13.0
-     */
     @Experimental
     public List<Content> resultContents() {
-        return result.resultContents();
+        return this.result.resultContents();
     }
 
-    /**
-     * Returns the tool execution result as object.
-     * This object is the actual value returned by the tool.
-     *
-     * @return the result of the tool execution.
-     * @see #result()
-     */
     public Object resultObject() {
-        return result.result();
+        return this.result.result();
     }
 
-    /**
-     * Indicates whether the tool execution result represents an error.
-     */
     public boolean hasFailed() {
-        return result.isError();
+        return this.result.isError();
     }
 
-    /**
-     * Returns the time when the tool execution started, or {@code null} if not recorded.
-     */
     public LocalDateTime startTime() {
-        return startTime;
+        return this.startTime;
     }
 
-    /**
-     * Returns the time when the tool execution finished, or {@code null} if not recorded.
-     */
     public LocalDateTime finishTime() {
-        return finishTime;
+        return this.finishTime;
     }
 
-    /**
-     * Returns the duration of the tool execution, or {@code null} if timing was not recorded.
-     */
     public Duration duration() {
-        if (startTime == null || finishTime == null) {
+        if (this.startTime == null || this.finishTime == null) {
             return null;
         }
-        return Duration.between(startTime, finishTime);
+        return Duration.between(this.startTime, this.finishTime);
     }
 
-    /**
-     * Returns the invocation context of the tool execution.
-     */
     public InvocationContext invocationContext() {
-        return invocationContext;
+        return this.invocationContext;
     }
 
-    @Override
-    public boolean equals(final Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        ToolExecution that = (ToolExecution) object;
-        return Objects.equals(request, that.request)
-                && Objects.equals(result, that.result)
-                && Objects.equals(startTime, that.startTime)
-                && Objects.equals(finishTime, that.finishTime);
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+        ToolExecution that = (ToolExecution)object;
+        return Objects.equals(this.request, that.request) && Objects.equals(this.result, that.result) && Objects.equals(this.startTime, that.startTime) && Objects.equals(this.finishTime, that.finishTime);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(request, result, startTime, finishTime);
+        return Objects.hash(this.request, this.result, this.startTime, this.finishTime);
     }
 
-    @Override
     public String toString() {
-        return "ToolExecution{" +
-                "request=" + request +
-                ", result=" + result +
-                ", startTime=" + startTime +
-                ", finishTime=" + finishTime +
-                '}';
+        return "ToolExecution{request=" + this.request + ", result=" + this.result + ", startTime=" + this.startTime + ", finishTime=" + this.finishTime + '}';
     }
 
     public static Builder builder() {
@@ -144,7 +100,6 @@ public class ToolExecution {
     }
 
     public static final class Builder {
-
         private ToolExecutionRequest request;
         private ToolExecutionResult result;
         private LocalDateTime startTime;
@@ -179,14 +134,9 @@ public class ToolExecution {
             return this;
         }
 
-        /**
-         * @deprecated Please use {@link #result(ToolExecutionResult)} instead
-         */
-        @Deprecated(since = "1.5.0")
+        @Deprecated
         public Builder result(String result) {
-            this.result = ToolExecutionResult.builder()
-                    .resultText(result)
-                    .build();
+            this.result = ToolExecutionResult.builder().resultText(result).build();
             return this;
         }
 
@@ -195,3 +145,4 @@ public class ToolExecution {
         }
     }
 }
+

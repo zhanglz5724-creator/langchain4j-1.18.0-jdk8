@@ -1,13 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ */
 package dev.langchain4j.model.anthropic.internal.client;
 
 import dev.langchain4j.Internal;
 
-/**
- * @since 1.2.0
- */
 @Internal
 public class AnthropicCreateMessageOptions {
-
     private final boolean returnThinking;
     private final boolean returnServerToolResults;
 
@@ -21,10 +23,11 @@ public class AnthropicCreateMessageOptions {
     }
 
     public boolean returnThinking() {
-        return returnThinking;
+        return this.returnThinking;
     }
 
     public boolean returnServerToolResults() {
-        return returnServerToolResults;
+        return this.returnServerToolResults;
     }
 }
+

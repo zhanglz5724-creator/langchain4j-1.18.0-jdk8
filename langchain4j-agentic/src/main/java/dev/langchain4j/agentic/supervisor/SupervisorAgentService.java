@@ -1,9 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.memory.chat.ChatMemoryProvider
+ *  dev.langchain4j.model.chat.ChatModel
+ */
 package dev.langchain4j.agentic.supervisor;
 
 import dev.langchain4j.agentic.agent.ErrorContext;
 import dev.langchain4j.agentic.agent.ErrorRecoveryResult;
 import dev.langchain4j.agentic.observability.AgentListener;
 import dev.langchain4j.agentic.scope.AgenticScope;
+import dev.langchain4j.agentic.supervisor.SupervisorContextStrategy;
+import dev.langchain4j.agentic.supervisor.SupervisorResponseStrategy;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatModel;
 import java.util.Collection;
@@ -11,38 +20,38 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface SupervisorAgentService<T> {
+    public T build();
 
-    T build();
+    public SupervisorAgentService<T> chatModel(ChatModel var1);
 
-    SupervisorAgentService<T> chatModel(ChatModel chatModel);
+    public SupervisorAgentService<T> chatMemoryProvider(ChatMemoryProvider var1);
 
-    SupervisorAgentService<T> chatMemoryProvider(ChatMemoryProvider chatMemoryProvider);
+    public SupervisorAgentService<T> name(String var1);
 
-    SupervisorAgentService<T> name(String name);
+    public SupervisorAgentService<T> description(String var1);
 
-    SupervisorAgentService<T> description(String description);
+    public SupervisorAgentService<T> outputKey(String var1);
 
-    SupervisorAgentService<T> outputKey(String outputKey);
+    public SupervisorAgentService<T> requestGenerator(Function<AgenticScope, String> var1);
 
-    SupervisorAgentService<T> requestGenerator(Function<AgenticScope, String> requestGenerator);
+    public SupervisorAgentService<T> contextGenerationStrategy(SupervisorContextStrategy var1);
 
-    SupervisorAgentService<T> contextGenerationStrategy(SupervisorContextStrategy contextStrategy);
+    public SupervisorAgentService<T> responseStrategy(SupervisorResponseStrategy var1);
 
-    SupervisorAgentService<T> responseStrategy(SupervisorResponseStrategy responseStrategy);
+    public SupervisorAgentService<T> supervisorContext(String var1);
 
-    SupervisorAgentService<T> supervisorContext(String supervisorContext);
+    public SupervisorAgentService<T> subAgents(Object ... var1);
 
-    SupervisorAgentService<T> subAgents(Object... agents);
+    public SupervisorAgentService<T> subAgents(Collection<?> var1);
 
-    SupervisorAgentService<T> subAgents(Collection<?> agents);
+    public SupervisorAgentService<T> maxAgentsInvocations(int var1);
 
-    SupervisorAgentService<T> maxAgentsInvocations(int maxAgentsInvocations);
+    public SupervisorAgentService<T> output(Function<AgenticScope, Object> var1);
 
-    SupervisorAgentService<T> output(Function<AgenticScope, Object> output);
+    public SupervisorAgentService<T> errorHandler(Function<ErrorContext, ErrorRecoveryResult> var1);
 
-    SupervisorAgentService<T> errorHandler(Function<ErrorContext, ErrorRecoveryResult> errorHandler);
+    public SupervisorAgentService<T> listener(AgentListener var1);
 
-    SupervisorAgentService<T> listener(AgentListener agentListener);
-
-    SupervisorAgentService<T> beforeCall(Consumer<AgenticScope> beforeCall);
+    public SupervisorAgentService<T> beforeCall(Consumer<AgenticScope> var1);
 }
+

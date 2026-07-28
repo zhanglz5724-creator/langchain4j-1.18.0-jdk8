@@ -1,36 +1,43 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.memory.ChatMemory
+ *  dev.langchain4j.memory.chat.ChatMemoryProvider
+ *  dev.langchain4j.model.chat.ChatModel
+ */
 package dev.langchain4j.agentic.supervisor;
-
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.agenticScopeFunction;
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.buildAgentFeatures;
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.invokeStatic;
-import static dev.langchain4j.agentic.declarative.DeclarativeUtil.selectMethod;
-import static dev.langchain4j.agentic.internal.AgentUtil.validateAgentClass;
 
 import dev.langchain4j.agentic.declarative.ChatMemoryProviderSupplier;
 import dev.langchain4j.agentic.declarative.ChatModelSupplier;
+import dev.langchain4j.agentic.declarative.DeclarativeUtil;
 import dev.langchain4j.agentic.declarative.Output;
 import dev.langchain4j.agentic.declarative.SupervisorRequest;
 import dev.langchain4j.agentic.internal.AbstractServiceBuilder;
+import dev.langchain4j.agentic.internal.AgentUtil;
 import dev.langchain4j.agentic.planner.AgenticService;
 import dev.langchain4j.agentic.scope.AgenticScope;
+import dev.langchain4j.agentic.supervisor.SupervisorAgent;
+import dev.langchain4j.agentic.supervisor.SupervisorAgentService;
+import dev.langchain4j.agentic.supervisor.SupervisorContextStrategy;
+import dev.langchain4j.agentic.supervisor.SupervisorPlanner;
+import dev.langchain4j.agentic.supervisor.SupervisorResponseStrategy;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatModel;
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.function.Function;
 
-public class SupervisorAgentServiceImpl<T> extends AbstractServiceBuilder<T, SupervisorAgentServiceImpl<T>>
-        implements SupervisorAgentService<T>, AgenticService<SupervisorAgentService<T>, T> {
-
+public class SupervisorAgentServiceImpl<T>
+extends AbstractServiceBuilder<T, SupervisorAgentServiceImpl<T>>
+implements SupervisorAgentService<T>,
+AgenticService<SupervisorAgentService<T>, T> {
     private ChatModel chatModel;
-
     private ChatMemoryProvider chatMemoryProvider;
-
     private int maxAgentsInvocations = 10;
-
     private SupervisorContextStrategy contextStrategy = SupervisorContextStrategy.CHAT_MEMORY;
     private SupervisorResponseStrategy responseStrategy = SupervisorResponseStrategy.LAST;
-
     private Function<AgenticScope, String> requestGenerator;
     private String supervisorContext;
 
@@ -40,32 +47,29 @@ public class SupervisorAgentServiceImpl<T> extends AbstractServiceBuilder<T, Sup
 
     public SupervisorAgentServiceImpl(Class<T> agentServiceClass, Method agenticMethod, ChatModel chatModel) {
         super(agentServiceClass, agenticMethod);
-        configureSupervisor(agentServiceClass, chatModel);
+        this.configureSupervisor(agentServiceClass, chatModel);
     }
 
+    @Override
     public T build() {
-        if (supervisorContext != null) {
-            this.beforeCall(this.beforeCall.andThen(agenticScope ->
-                    agenticScope.writeStateIfAbsent(SupervisorPlanner.SUPERVISOR_CONTEXT_KEY, supervisorContext)
-            ));
+        if (this.supervisorContext != null) {
+            this.beforeCall(this.beforeCall.andThen(agenticScope -> agenticScope.writeStateIfAbsent("supervisorContext", this.supervisorContext)));
         }
-
-        return build(() -> new SupervisorPlanner(chatModel, chatMemoryProvider, maxAgentsInvocations,
-                contextStrategy, responseStrategy, requestGenerator,
-                outputKey, output));
+        return this.build(() -> new SupervisorPlanner(this.chatModel, this.chatMemoryProvider, this.maxAgentsInvocations, this.contextStrategy, this.responseStrategy, this.requestGenerator, this.outputKey, this.output));
     }
 
     public static SupervisorAgentService<SupervisorAgent> builder() {
         try {
             Method supervisorMethod = SupervisorAgent.class.getMethod("invoke", String.class);
-            return new SupervisorAgentServiceImpl<>(SupervisorAgent.class, supervisorMethod);
-        } catch (NoSuchMethodException e) {
+            return new SupervisorAgentServiceImpl<SupervisorAgent>(SupervisorAgent.class, supervisorMethod);
+        }
+        catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static <T> SupervisorAgentService<T> builder(Class<T> agentServiceClass) {
-        return new SupervisorAgentServiceImpl<>(agentServiceClass, validateAgentClass(agentServiceClass, false));
+        return new SupervisorAgentServiceImpl<T>(agentServiceClass, AgentUtil.validateAgentClass(agentServiceClass, false));
     }
 
     @Override
@@ -116,33 +120,16 @@ public class SupervisorAgentServiceImpl<T> extends AbstractServiceBuilder<T, Sup
     }
 
     private void configureSupervisor(Class<T> agentServiceClass, ChatModel chatModel) {
-        selectMethod(
-                agentServiceClass,
-                method -> method.isAnnotationPresent(SupervisorRequest.class)
-                        && method.getReturnType() == String.class)
-                .map(m -> agenticScopeFunction(m, String.class))
-                .ifPresent(this::requestGenerator);
-
-        selectMethod(
-                agentServiceClass,
-                method -> method.isAnnotationPresent(ChatModelSupplier.class)
-                        && method.getReturnType() == ChatModel.class
-                        && method.getParameterCount() == 0)
-                .map(method -> (ChatModel) invokeStatic(method))
-                .ifPresentOrElse(this::chatModel, () -> this.chatModel(chatModel));
-
-        selectMethod(
-                agentServiceClass,
-                method -> method.isAnnotationPresent(ChatMemoryProviderSupplier.class)
-                        && method.getReturnType() == ChatMemory.class
-                        && method.getParameterCount() == 1)
-                .map(method -> (ChatMemoryProvider) memoryId -> invokeStatic(method, memoryId))
-                .ifPresent(this::chatMemoryProvider);
-
-        selectMethod(agentServiceClass, method -> method.isAnnotationPresent(Output.class))
-                .map(m -> agenticScopeFunction(m, Object.class))
-                .ifPresent(this::output);
-
-        buildAgentFeatures(agentServiceClass, this);
+        DeclarativeUtil.selectMethod(agentServiceClass, method -> method.isAnnotationPresent(SupervisorRequest.class) && method.getReturnType() == String.class).map(m -> DeclarativeUtil.agenticScopeFunction(m, String.class)).ifPresent(function -> this.requestGenerator((Function)function));
+        Optional<ChatModel> suppliedChatModel = DeclarativeUtil.selectMethod(agentServiceClass, method -> method.isAnnotationPresent(ChatModelSupplier.class) && method.getReturnType() == ChatModel.class && method.getParameterCount() == 0).map(method -> (ChatModel)DeclarativeUtil.invokeStatic(method, new Object[0]));
+        if (suppliedChatModel.isPresent()) {
+            this.chatModel(suppliedChatModel.get());
+        } else {
+            this.chatModel(chatModel);
+        }
+        DeclarativeUtil.selectMethod(agentServiceClass, method -> method.isAnnotationPresent(ChatMemoryProviderSupplier.class) && method.getReturnType() == ChatMemory.class && method.getParameterCount() == 1).map(method -> memoryId -> (ChatMemory)DeclarativeUtil.invokeStatic(method, memoryId)).ifPresent(chatMemoryProvider -> this.chatMemoryProvider((ChatMemoryProvider)chatMemoryProvider));
+        DeclarativeUtil.selectMethod(agentServiceClass, method -> method.isAnnotationPresent(Output.class)).map(m -> DeclarativeUtil.agenticScopeFunction(m, Object.class)).ifPresent(this::output);
+        DeclarativeUtil.buildAgentFeatures(agentServiceClass, this);
     }
 }
+

@@ -1,3 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.alicloud.openservices.tablestore.SyncClient
+ *  com.alicloud.openservices.tablestore.model.CapacityUnit
+ *  com.alicloud.openservices.tablestore.model.Column
+ *  com.alicloud.openservices.tablestore.model.ColumnValue
+ *  com.alicloud.openservices.tablestore.model.CreateTableRequest
+ *  com.alicloud.openservices.tablestore.model.DeleteRowRequest
+ *  com.alicloud.openservices.tablestore.model.Direction
+ *  com.alicloud.openservices.tablestore.model.GetRangeRequest
+ *  com.alicloud.openservices.tablestore.model.GetRangeResponse
+ *  com.alicloud.openservices.tablestore.model.ListTableResponse
+ *  com.alicloud.openservices.tablestore.model.PrimaryKey
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeyBuilder
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeySchema
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeyType
+ *  com.alicloud.openservices.tablestore.model.PrimaryKeyValue
+ *  com.alicloud.openservices.tablestore.model.PutRowRequest
+ *  com.alicloud.openservices.tablestore.model.RangeRowQueryCriteria
+ *  com.alicloud.openservices.tablestore.model.ReservedThroughput
+ *  com.alicloud.openservices.tablestore.model.Row
+ *  com.alicloud.openservices.tablestore.model.RowDeleteChange
+ *  com.alicloud.openservices.tablestore.model.RowPutChange
+ *  com.alicloud.openservices.tablestore.model.TableMeta
+ *  com.alicloud.openservices.tablestore.model.TableOptions
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.ChatMessageDeserializer
+ *  dev.langchain4j.data.message.ChatMessageSerializer
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.store.memory.chat.ChatMemoryStore
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.store.memory.chat.tablestore;
 
 import com.alicloud.openservices.tablestore.SyncClient;
@@ -28,23 +63,21 @@ import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.data.message.ChatMessageSerializer;
 import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class TablestoreChatMemoryStore implements ChatMemoryStore {
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
+public class TablestoreChatMemoryStore
+implements ChatMemoryStore {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final SyncClient client;
     private final String tableName;
     private final String pkName1;
     private final String pkName2;
     private final String chatMessageFieldName;
-
     private static final String DEFAULT_TABLE_NAME = "langchain4j_chat_memory_store_ots_v1";
     private static final String DEFAULT_TABLE_PK_1_NAME = "memory_id";
     private static final String DEFAULT_TABLE_PK_2_NAME = "seq_no";
@@ -63,36 +96,32 @@ public class TablestoreChatMemoryStore implements ChatMemoryStore {
     }
 
     public void init() {
-        createTableIfNotExist();
+        this.createTableIfNotExist();
     }
 
-    /**
-     * Clear all message.
-     */
     public void clear() {
-        forEachAllData(PrimaryKeyValue.INF_MIN, PrimaryKeyValue.INF_MAX, row -> {
-                    String id = row.getPrimaryKey().getPrimaryKeyColumn(pkName1).getValue().asString();
-                    long seqNo = row.getPrimaryKey().getPrimaryKeyColumn(pkName2).getValue().asLong();
-                    innerDelete(id, seqNo);
-                }
-        );
+        this.forEachAllData(PrimaryKeyValue.INF_MIN, PrimaryKeyValue.INF_MAX, row -> {
+            String id = row.getPrimaryKey().getPrimaryKeyColumn(this.pkName1).getValue().asString();
+            long seqNo = row.getPrimaryKey().getPrimaryKeyColumn(this.pkName2).getValue().asLong();
+            this.innerDelete(id, seqNo);
+        });
     }
 
-    @Override
     public List<ChatMessage> getMessages(Object memoryId) {
-        String memoryIdStr = getMemoryId(memoryId);
-        log.debug("get messages, memoryIdStr:{}", memoryIdStr);
-        List<ChatMessage> messages = new ArrayList<>();
-        forEachAllData(PrimaryKeyValue.fromString(memoryIdStr), row -> {
-            Column column = row.getLatestColumn(chatMessageFieldName);
+        String memoryIdStr = this.getMemoryId(memoryId);
+        this.log.debug("get messages, memoryIdStr:{}", (Object)memoryIdStr);
+        ArrayList<ChatMessage> messages = new ArrayList<ChatMessage>();
+        this.forEachAllData(PrimaryKeyValue.fromString((String)memoryIdStr), row -> {
+            Column column = row.getLatestColumn(this.chatMessageFieldName);
             if (column != null) {
                 String jsonString = column.getValue().asString();
                 try {
-                    ChatMessage chatMessage = ChatMessageDeserializer.messageFromJson(jsonString);
+                    ChatMessage chatMessage = ChatMessageDeserializer.messageFromJson((String)jsonString);
                     messages.add(chatMessage);
-                } catch (Exception e) {
-                    String id = row.getPrimaryKey().getPrimaryKeyColumn(pkName1).getValue().asString();
-                    long seqNo = row.getPrimaryKey().getPrimaryKeyColumn(pkName2).getValue().asLong();
+                }
+                catch (Exception e) {
+                    String id = row.getPrimaryKey().getPrimaryKeyColumn(this.pkName1).getValue().asString();
+                    long seqNo = row.getPrimaryKey().getPrimaryKeyColumn(this.pkName2).getValue().asLong();
                     throw new RuntimeException(String.format("unable to parse message body, memoryId:%s, seqNo:%s", id, seqNo), e);
                 }
             }
@@ -100,18 +129,19 @@ public class TablestoreChatMemoryStore implements ChatMemoryStore {
         return messages;
     }
 
-    @Override
     public void updateMessages(Object memoryId, List<ChatMessage> messages) {
-        String memoryIdStr = getMemoryId(memoryId);
-        log.debug("update messages, memoryIdStr:{}", memoryIdStr);
-        ValidationUtils.ensureNotEmpty(messages, "messages");
-        deleteMessages(memoryId);
-        List<Exception> exceptions = new ArrayList<>();
-        for (int i = 0; i < messages.size(); i++) {
+        String memoryIdStr = this.getMemoryId(memoryId);
+        this.log.debug("update messages, memoryIdStr:{}", (Object)memoryIdStr);
+        ValidationUtils.ensureNotEmpty(messages, (String)"messages");
+        this.deleteMessages(memoryId);
+        ArrayList<Exception> exceptions = new ArrayList<Exception>();
+        for (int i = 0; i < messages.size(); ++i) {
             ChatMessage message = messages.get(i);
             try {
-                innerAdd(memoryIdStr, i, ChatMessageSerializer.messageToJson(message));
-            } catch (Exception e) {
+                this.innerAdd(memoryIdStr, i, ChatMessageSerializer.messageToJson((ChatMessage)message));
+                continue;
+            }
+            catch (Exception e) {
                 exceptions.add(e);
             }
         }
@@ -124,55 +154,57 @@ public class TablestoreChatMemoryStore implements ChatMemoryStore {
         }
     }
 
-    @Override
     public void deleteMessages(Object memoryId) {
-        String memoryIdStr = getMemoryId(memoryId);
-        log.debug("delete messages, memoryIdStr:{}", memoryIdStr);
-        forEachAllData(PrimaryKeyValue.fromString(memoryIdStr), row -> {
-            String id = row.getPrimaryKey().getPrimaryKeyColumn(pkName1).getValue().asString();
-            long seqNo = row.getPrimaryKey().getPrimaryKeyColumn(pkName2).getValue().asLong();
-            innerDelete(id, seqNo);
+        String memoryIdStr = this.getMemoryId(memoryId);
+        this.log.debug("delete messages, memoryIdStr:{}", (Object)memoryIdStr);
+        this.forEachAllData(PrimaryKeyValue.fromString((String)memoryIdStr), row -> {
+            String id = row.getPrimaryKey().getPrimaryKeyColumn(this.pkName1).getValue().asString();
+            long seqNo = row.getPrimaryKey().getPrimaryKeyColumn(this.pkName2).getValue().asLong();
+            this.innerDelete(id, seqNo);
         });
     }
 
     private void innerDelete(String memoryId, long seqNo) {
-        ValidationUtils.ensureNotNull(memoryId, "memoryId");
-        ValidationUtils.ensureNotNull(seqNo, "seqNo");
+        ValidationUtils.ensureNotNull((Object)memoryId, (String)"memoryId");
+        ValidationUtils.ensureNotNull((Object)seqNo, (String)"seqNo");
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
-        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName1, PrimaryKeyValue.fromString(memoryId));
-        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName2, PrimaryKeyValue.fromLong(seqNo));
+        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName1, PrimaryKeyValue.fromString((String)memoryId));
+        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName2, PrimaryKeyValue.fromLong((long)seqNo));
         PrimaryKey primaryKey = primaryKeyBuilder.build();
         RowDeleteChange rowDeleteChange = new RowDeleteChange(this.tableName, primaryKey);
         try {
-            client.deleteRow(new DeleteRowRequest(rowDeleteChange));
-            log.debug("delete memoryId:{}, seqNo:{}", memoryId, seqNo);
-        } catch (Exception e) {
+            this.client.deleteRow(new DeleteRowRequest(rowDeleteChange));
+            this.log.debug("delete memoryId:{}, seqNo:{}", (Object)memoryId, (Object)seqNo);
+        }
+        catch (Exception e) {
             throw new RuntimeException(String.format("delete embedding data failed, memoryId:%s, seqNo:%s", memoryId, seqNo), e);
         }
     }
 
     private void innerAdd(String memoryId, int seqNo, String chatMessage) {
-        ValidationUtils.ensureNotNull(memoryId, "memoryId");
-        ValidationUtils.ensureNotNull(seqNo, "seqNo");
-        ValidationUtils.ensureNotNull(chatMessage, "chatMessage");
+        ValidationUtils.ensureNotNull((Object)memoryId, (String)"memoryId");
+        ValidationUtils.ensureNotNull((Object)seqNo, (String)"seqNo");
+        ValidationUtils.ensureNotNull((Object)chatMessage, (String)"chatMessage");
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
-        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName1, PrimaryKeyValue.fromString(memoryId));
-        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName2, PrimaryKeyValue.fromLong(seqNo));
+        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName1, PrimaryKeyValue.fromString((String)memoryId));
+        primaryKeyBuilder.addPrimaryKeyColumn(this.pkName2, PrimaryKeyValue.fromLong((long)seqNo));
         PrimaryKey primaryKey = primaryKeyBuilder.build();
         RowPutChange rowPutChange = new RowPutChange(this.tableName, primaryKey);
-        rowPutChange.addColumn(new Column(chatMessageFieldName, ColumnValue.fromString(chatMessage)));
+        rowPutChange.addColumn(new Column(this.chatMessageFieldName, ColumnValue.fromString((String)chatMessage)));
         try {
-            client.putRow(new PutRowRequest(rowPutChange));
-            if (log.isDebugEnabled()) {
-                log.debug("add memoryId:{}, seqNo:{}, chatMessage:{}", memoryId, seqNo, chatMessage);
+            this.client.putRow(new PutRowRequest(rowPutChange));
+            if (this.log.isDebugEnabled()) {
+                this.log.debug("add memoryId:{}, seqNo:{}, chatMessage:{}", new Object[]{memoryId, seqNo, chatMessage});
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(String.format("add embedding data failed, memoryId:%s, seqNo:%s, chatMessage:%s", memoryId, seqNo, chatMessage), e);
         }
     }
 
     private String getMemoryId(Object memoryId) {
-        boolean isNullOrEmpty = memoryId == null || memoryId.toString().trim().isEmpty();
+        boolean isNullOrEmpty;
+        boolean bl = isNullOrEmpty = memoryId == null || memoryId.toString().trim().isEmpty();
         if (isNullOrEmpty) {
             throw new IllegalArgumentException("memoryId cannot be null or empty");
         }
@@ -180,28 +212,27 @@ public class TablestoreChatMemoryStore implements ChatMemoryStore {
     }
 
     private void createTableIfNotExist() {
-        if (tableExists()) {
-            log.info("table:{} already exists", tableName);
+        if (this.tableExists()) {
+            this.log.info("table:{} already exists", (Object)this.tableName);
             return;
         }
         TableMeta tableMeta = new TableMeta(this.tableName);
-        tableMeta.addPrimaryKeyColumn(new PrimaryKeySchema(pkName1, PrimaryKeyType.STRING));
-        tableMeta.addPrimaryKeyColumn(new PrimaryKeySchema(pkName2, PrimaryKeyType.INTEGER));
+        tableMeta.addPrimaryKeyColumn(new PrimaryKeySchema(this.pkName1, PrimaryKeyType.STRING));
+        tableMeta.addPrimaryKeyColumn(new PrimaryKeySchema(this.pkName2, PrimaryKeyType.INTEGER));
         TableOptions tableOptions = new TableOptions(-1, 1);
         CreateTableRequest request = new CreateTableRequest(tableMeta, tableOptions);
         request.setReservedThroughput(new ReservedThroughput(new CapacityUnit(0, 0)));
-        client.createTable(request);
-        log.info("create table:{}", tableName);
+        this.client.createTable(request);
+        this.log.info("create table:{}", (Object)this.tableName);
     }
 
-
     private boolean tableExists() {
-        ListTableResponse listTableResponse = client.listTable();
-        return listTableResponse.getTableNames().contains(tableName);
+        ListTableResponse listTableResponse = this.client.listTable();
+        return listTableResponse.getTableNames().contains(this.tableName);
     }
 
     private void forEachAllData(PrimaryKeyValue memoryId, Consumer<Row> rowConsumer) {
-        forEachAllData(memoryId, memoryId, rowConsumer);
+        this.forEachAllData(memoryId, memoryId, rowConsumer);
     }
 
     private void forEachAllData(PrimaryKeyValue memoryIdStart, PrimaryKeyValue memoryIdEnd, Consumer<Row> rowConsumer) {
@@ -216,20 +247,17 @@ public class TablestoreChatMemoryStore implements ChatMemoryStore {
         rangeRowQueryCriteria.setExclusiveEndPrimaryKey(end.build());
         rangeRowQueryCriteria.setMaxVersions(1);
         rangeRowQueryCriteria.setLimit(5000);
-        rangeRowQueryCriteria.addColumnsToGet(Collections.singletonList(chatMessageFieldName));
+        rangeRowQueryCriteria.addColumnsToGet(Collections.singletonList(this.chatMessageFieldName));
         rangeRowQueryCriteria.setDirection(Direction.FORWARD);
         GetRangeRequest getRangeRequest = new GetRangeRequest(rangeRowQueryCriteria);
-        GetRangeResponse getRangeResponse;
         while (true) {
-            getRangeResponse = client.getRange(getRangeRequest);
+            GetRangeResponse getRangeResponse = this.client.getRange(getRangeRequest);
             for (Row row : getRangeResponse.getRows()) {
                 rowConsumer.accept(row);
             }
-            if (getRangeResponse.getNextStartPrimaryKey() != null) {
-                rangeRowQueryCriteria.setInclusiveStartPrimaryKey(getRangeResponse.getNextStartPrimaryKey());
-            } else {
-                break;
-            }
+            if (getRangeResponse.getNextStartPrimaryKey() == null) break;
+            rangeRowQueryCriteria.setInclusiveStartPrimaryKey(getRangeResponse.getNextStartPrimaryKey());
         }
     }
 }
+

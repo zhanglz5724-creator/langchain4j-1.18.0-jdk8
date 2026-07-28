@@ -1,21 +1,33 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.ollama;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.ollama.OllamaDateDeserializer;
+import dev.langchain4j.model.ollama.OllamaModelDetails;
+import dev.langchain4j.model.ollama.OllamaModelMessage;
+import dev.langchain4j.model.ollama.OllamaModelTensor;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OllamaModelCard {
-
     private String license;
     private String modelfile;
     private String parameters;
@@ -26,13 +38,12 @@ public class OllamaModelCard {
     private Map<String, Object> modelInfo;
     private Map<String, Object> projectorInfo;
     private List<OllamaModelTensor> tensors;
-
-    @JsonDeserialize(using = OllamaDateDeserializer.class)
+    @JsonDeserialize(using=OllamaDateDeserializer.class)
     private OffsetDateTime modifiedAt;
-
     private List<String> capabilities;
 
-    OllamaModelCard() {}
+    OllamaModelCard() {
+    }
 
     public OllamaModelCard(String modelfile, String parameters, String template, OllamaModelDetails details) {
         this.modelfile = modelfile;
@@ -46,7 +57,7 @@ public class OllamaModelCard {
     }
 
     public String getLicense() {
-        return license;
+        return this.license;
     }
 
     public void setLicense(String license) {
@@ -54,7 +65,7 @@ public class OllamaModelCard {
     }
 
     public String getModelfile() {
-        return modelfile;
+        return this.modelfile;
     }
 
     public void setModelfile(String modelfile) {
@@ -62,7 +73,7 @@ public class OllamaModelCard {
     }
 
     public String getParameters() {
-        return parameters;
+        return this.parameters;
     }
 
     public void setParameters(String parameters) {
@@ -70,7 +81,7 @@ public class OllamaModelCard {
     }
 
     public String getTemplate() {
-        return template;
+        return this.template;
     }
 
     public void setTemplate(String template) {
@@ -78,7 +89,7 @@ public class OllamaModelCard {
     }
 
     public String getSystem() {
-        return system;
+        return this.system;
     }
 
     public void setSystem(String system) {
@@ -86,7 +97,7 @@ public class OllamaModelCard {
     }
 
     public OllamaModelDetails getDetails() {
-        return details;
+        return this.details;
     }
 
     public void setDetails(OllamaModelDetails details) {
@@ -94,7 +105,7 @@ public class OllamaModelCard {
     }
 
     public List<OllamaModelMessage> getMessages() {
-        return messages;
+        return this.messages;
     }
 
     public void setMessages(List<OllamaModelMessage> messages) {
@@ -102,7 +113,7 @@ public class OllamaModelCard {
     }
 
     public Map<String, Object> getModelInfo() {
-        return modelInfo;
+        return this.modelInfo;
     }
 
     public void setModelInfo(Map<String, Object> modelInfo) {
@@ -110,7 +121,7 @@ public class OllamaModelCard {
     }
 
     public Map<String, Object> getProjectorInfo() {
-        return projectorInfo;
+        return this.projectorInfo;
     }
 
     public void setProjectorInfo(Map<String, Object> projectorInfo) {
@@ -118,7 +129,7 @@ public class OllamaModelCard {
     }
 
     public List<OllamaModelTensor> getTensors() {
-        return tensors;
+        return this.tensors;
     }
 
     public void setTensors(List<OllamaModelTensor> tensors) {
@@ -126,7 +137,7 @@ public class OllamaModelCard {
     }
 
     public OffsetDateTime getModifiedAt() {
-        return modifiedAt;
+        return this.modifiedAt;
     }
 
     public void setModifiedAt(OffsetDateTime modifiedAt) {
@@ -134,7 +145,7 @@ public class OllamaModelCard {
     }
 
     public List<String> getCapabilities() {
-        return capabilities;
+        return this.capabilities;
     }
 
     public void setCapabilities(List<String> capabilities) {
@@ -142,7 +153,6 @@ public class OllamaModelCard {
     }
 
     public static class Builder {
-
         private String license;
         private String modelfile;
         private String parameters;
@@ -217,16 +227,17 @@ public class OllamaModelCard {
         }
 
         public OllamaModelCard build() {
-            OllamaModelCard modelCard = new OllamaModelCard(modelfile, parameters, template, details);
-            modelCard.setLicense(license);
-            modelCard.setSystem(system);
-            modelCard.setMessages(messages);
-            modelCard.setModelInfo(modelInfo);
-            modelCard.setProjectorInfo(projectorInfo);
-            modelCard.setTensors(tensors);
-            modelCard.setCapabilities(capabilities);
-            modelCard.setModifiedAt(modifiedAt);
+            OllamaModelCard modelCard = new OllamaModelCard(this.modelfile, this.parameters, this.template, this.details);
+            modelCard.setLicense(this.license);
+            modelCard.setSystem(this.system);
+            modelCard.setMessages(this.messages);
+            modelCard.setModelInfo(this.modelInfo);
+            modelCard.setProjectorInfo(this.projectorInfo);
+            modelCard.setTensors(this.tensors);
+            modelCard.setCapabilities(this.capabilities);
+            modelCard.setModifiedAt(this.modifiedAt);
             return modelCard;
         }
     }
 }
+

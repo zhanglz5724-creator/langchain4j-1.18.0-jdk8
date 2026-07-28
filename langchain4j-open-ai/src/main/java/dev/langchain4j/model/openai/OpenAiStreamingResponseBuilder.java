@@ -1,18 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.http.client.SuccessfulHttpResponse
+ *  dev.langchain4j.http.client.sse.ServerSentEvent
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.output.FinishReason
+ *  dev.langchain4j.model.output.TokenUsage
+ */
 package dev.langchain4j.model.openai;
-
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.finishReasonFrom;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.logProbsFrom;
-import static dev.langchain4j.model.openai.internal.OpenAiUtils.tokenUsageFrom;
-import static java.util.stream.Collectors.toList;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEvent;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
+import dev.langchain4j.model.openai.OpenAiChatResponseMetadata;
+import dev.langchain4j.model.openai.internal.OpenAiUtils;
 import dev.langchain4j.model.openai.internal.ParsedAndRawResponse;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionChoice;
 import dev.langchain4j.model.openai.internal.chat.ChatCompletionResponse;
@@ -35,36 +47,26 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
-/**
- * This class needs to be thread safe because it is called when a streaming result comes back
- * and there is no guarantee that this thread will be the same as the one that initiated the request,
- * in fact it almost certainly won't be.
- */
 @Internal
 public class OpenAiStreamingResponseBuilder {
-
     private final StringBuffer contentBuilder = new StringBuffer();
     private final StringBuffer reasoningContentBuilder;
-
-    private final StringBuffer toolNameBuilder = new StringBuffer(); // legacy
-    private final StringBuffer toolArgumentsBuilder = new StringBuffer(); // legacy
-
-    private final Map<Integer, ToolExecutionRequestBuilder> indexToToolExecutionRequestBuilder =
-            new ConcurrentHashMap<>();
+    private final StringBuffer toolNameBuilder = new StringBuffer();
+    private final StringBuffer toolArgumentsBuilder = new StringBuffer();
+    private final Map<Integer, ToolExecutionRequestBuilder> indexToToolExecutionRequestBuilder = new ConcurrentHashMap<Integer, ToolExecutionRequestBuilder>();
     private final AtomicInteger fallbackToolCallIndex = new AtomicInteger(0);
-
-    private final AtomicReference<String> id = new AtomicReference<>();
-    private final AtomicReference<Long> created = new AtomicReference<>();
-    private final AtomicReference<String> model = new AtomicReference<>();
-    private final AtomicReference<String> serviceTier = new AtomicReference<>();
-    private final AtomicReference<String> systemFingerprint = new AtomicReference<>();
-    private final AtomicReference<TokenUsage> tokenUsage = new AtomicReference<>();
-    private final AtomicReference<FinishReason> finishReason = new AtomicReference<>();
-    private final AtomicReference<SuccessfulHttpResponse> rawHttpResponse = new AtomicReference<>();
-    private final Queue<ServerSentEvent> rawServerSentEvents = new ConcurrentLinkedQueue<>();
-    private final List<LogProb> logProbs = new CopyOnWriteArrayList<>();
-
+    private final AtomicReference<String> id = new AtomicReference();
+    private final AtomicReference<Long> created = new AtomicReference();
+    private final AtomicReference<String> model = new AtomicReference();
+    private final AtomicReference<String> serviceTier = new AtomicReference();
+    private final AtomicReference<String> systemFingerprint = new AtomicReference();
+    private final AtomicReference<TokenUsage> tokenUsage = new AtomicReference();
+    private final AtomicReference<FinishReason> finishReason = new AtomicReference();
+    private final AtomicReference<SuccessfulHttpResponse> rawHttpResponse = new AtomicReference();
+    private final Queue<ServerSentEvent> rawServerSentEvents = new ConcurrentLinkedQueue<ServerSentEvent>();
+    private final List<LogProb> logProbs = new CopyOnWriteArrayList<LogProb>();
     private final boolean returnThinking;
     private final boolean accumulateToolCallId;
 
@@ -79,257 +81,184 @@ public class OpenAiStreamingResponseBuilder {
     public OpenAiStreamingResponseBuilder(boolean returnThinking, boolean accumulateToolCallId) {
         this.returnThinking = returnThinking;
         this.accumulateToolCallId = accumulateToolCallId;
-        if (returnThinking) {
-            this.reasoningContentBuilder = new StringBuffer();
-        } else {
-            this.reasoningContentBuilder = null;
-        }
+        this.reasoningContentBuilder = returnThinking ? new StringBuffer() : null;
     }
 
     public void append(ParsedAndRawResponse<ChatCompletionResponse> parsedAndRawResponse) {
         if (parsedAndRawResponse != null) {
             if (parsedAndRawResponse.rawHttpResponse() != null) {
-                rawHttpResponse.set(parsedAndRawResponse.rawHttpResponse());
+                this.rawHttpResponse.set(parsedAndRawResponse.rawHttpResponse());
             }
             if (parsedAndRawResponse.rawServerSentEvent() != null) {
-                rawServerSentEvents.add(parsedAndRawResponse.rawServerSentEvent());
+                this.rawServerSentEvents.add(parsedAndRawResponse.rawServerSentEvent());
             }
-
-            append(parsedAndRawResponse.parsedResponse());
+            this.append(parsedAndRawResponse.parsedResponse());
         }
     }
 
     public void append(ChatCompletionResponse partialResponse) {
+        Delta delta;
+        LogProbs logProbs;
+        List<ChatCompletionChoice> choices;
+        Usage usage;
         if (partialResponse == null) {
             return;
         }
-
-        if (!isNullOrBlank(partialResponse.id())) {
+        if (!Utils.isNullOrBlank((String)partialResponse.id())) {
             this.id.set(partialResponse.id());
         }
         if (partialResponse.created() != null) {
             this.created.set(partialResponse.created());
         }
-        if (!isNullOrBlank(partialResponse.model())) {
+        if (!Utils.isNullOrBlank((String)partialResponse.model())) {
             this.model.set(partialResponse.model());
         }
-        if (!isNullOrBlank(partialResponse.serviceTier())) {
+        if (!Utils.isNullOrBlank((String)partialResponse.serviceTier())) {
             this.serviceTier.set(partialResponse.serviceTier());
         }
-        if (!isNullOrBlank(partialResponse.systemFingerprint())) {
+        if (!Utils.isNullOrBlank((String)partialResponse.systemFingerprint())) {
             this.systemFingerprint.set(partialResponse.systemFingerprint());
         }
-
-        Usage usage = partialResponse.usage();
-        if (usage != null) {
-            this.tokenUsage.set(tokenUsageFrom(usage));
+        if ((usage = partialResponse.usage()) != null) {
+            this.tokenUsage.set(OpenAiUtils.tokenUsageFrom(usage));
         }
-
-        List<ChatCompletionChoice> choices = partialResponse.choices();
-        if (isNullOrEmpty(choices)) {
+        if (Utils.isNullOrEmpty(choices = partialResponse.choices())) {
             return;
         }
-
         ChatCompletionChoice chatCompletionChoice = choices.get(0);
         if (chatCompletionChoice == null) {
             return;
         }
-
         String finishReason = chatCompletionChoice.finishReason();
         if (finishReason != null) {
-            this.finishReason.set(finishReasonFrom(finishReason));
+            this.finishReason.set(OpenAiUtils.finishReasonFrom(finishReason));
         }
-
-        LogProbs logProbs = chatCompletionChoice.logprobs();
-        if (logProbs != null && logProbs.content() != null) {
+        if ((logProbs = chatCompletionChoice.logprobs()) != null && logProbs.content() != null) {
             this.logProbs.addAll(logProbs.content());
         }
-
-        Delta delta = chatCompletionChoice.delta();
-        if (delta == null) {
+        if ((delta = chatCompletionChoice.delta()) == null) {
             return;
         }
-
         String content = delta.content();
-        if (!isNullOrEmpty(content)) {
+        if (!Utils.isNullOrEmpty((String)content)) {
             this.contentBuilder.append(content);
         }
-
         String reasoningContent = delta.reasoningContent();
-        if (returnThinking && !isNullOrEmpty(reasoningContent)) {
+        if (this.returnThinking && !Utils.isNullOrEmpty((String)reasoningContent)) {
             this.reasoningContentBuilder.append(reasoningContent);
         }
-
         if (delta.functionCall() != null) {
             FunctionCall functionCall = delta.functionCall();
-
             if (functionCall.name() != null) {
                 this.toolNameBuilder.append(functionCall.name());
             }
-
             if (functionCall.arguments() != null) {
                 this.toolArgumentsBuilder.append(functionCall.arguments());
             }
         }
-
         if (delta.toolCalls() != null) {
             for (ToolCall toolCall : delta.toolCalls()) {
-                if (isSentinel(toolCall)) {
-                    continue;
+                FunctionCall functionCall;
+                if (OpenAiStreamingResponseBuilder.isSentinel(toolCall)) continue;
+                int toolCallIndex = toolCall.index() != null ? toolCall.index().intValue() : this.fallbackToolCallIndex.get();
+                ToolExecutionRequestBuilder builder = this.indexToToolExecutionRequestBuilder.computeIfAbsent(toolCallIndex, idx -> new ToolExecutionRequestBuilder());
+                if (toolCall.index() == null && toolCall.id() != null && builder.idBuilder.length() > 0 && !builder.idBuilder.toString().equals(toolCall.id())) {
+                    toolCallIndex = this.fallbackToolCallIndex.incrementAndGet();
+                    builder = this.indexToToolExecutionRequestBuilder.computeIfAbsent(toolCallIndex, idx -> new ToolExecutionRequestBuilder());
                 }
-
-                int toolCallIndex = toolCall.index() != null ? toolCall.index() : fallbackToolCallIndex.get();
-
-                ToolExecutionRequestBuilder builder = this.indexToToolExecutionRequestBuilder.computeIfAbsent(
-                        toolCallIndex, idx -> new ToolExecutionRequestBuilder());
-
-                // When index is null and a different tool call id appears, increment the fallback index
-                if (toolCall.index() == null
-                        && toolCall.id() != null
-                        && !builder.idBuilder.isEmpty()
-                        && !builder.idBuilder.toString().equals(toolCall.id())) {
-                    toolCallIndex = fallbackToolCallIndex.incrementAndGet();
-                    builder = this.indexToToolExecutionRequestBuilder.computeIfAbsent(
-                            toolCallIndex, idx -> new ToolExecutionRequestBuilder());
-                }
-
                 if (toolCall.id() != null) {
-                    if (accumulateToolCallId) {
+                    if (this.accumulateToolCallId) {
                         builder.idBuilder.append(toolCall.id());
                     } else {
                         builder.idBuilder.setLength(0);
                         builder.idBuilder.append(toolCall.id());
                     }
                 }
-
-                FunctionCall functionCall = toolCall.function();
-                if (functionCall != null) {
-                    if (functionCall.name() != null) {
-                        builder.nameBuilder.append(functionCall.name());
-                    }
-                    if (functionCall.arguments() != null) {
-                        builder.argumentsBuilder.append(functionCall.arguments());
-                    }
+                if ((functionCall = toolCall.function()) == null) continue;
+                if (functionCall.name() != null) {
+                    builder.nameBuilder.append(functionCall.name());
                 }
+                if (functionCall.arguments() == null) continue;
+                builder.argumentsBuilder.append(functionCall.arguments());
             }
         }
     }
 
     public void append(CompletionResponse partialResponse) {
+        String token;
+        List<CompletionChoice> choices;
         if (partialResponse == null) {
             return;
         }
-
         Usage usage = partialResponse.usage();
         if (usage != null) {
-            this.tokenUsage.set(tokenUsageFrom(usage));
+            this.tokenUsage.set(OpenAiUtils.tokenUsageFrom(usage));
         }
-
-        List<CompletionChoice> choices = partialResponse.choices();
-        if (isNullOrEmpty(choices)) {
+        if (Utils.isNullOrEmpty(choices = partialResponse.choices())) {
             return;
         }
-
         CompletionChoice completionChoice = choices.get(0);
         if (completionChoice == null) {
             return;
         }
-
         String finishReason = completionChoice.finishReason();
         if (finishReason != null) {
-            this.finishReason.set(finishReasonFrom(finishReason));
+            this.finishReason.set(OpenAiUtils.finishReasonFrom(finishReason));
         }
-
-        String token = completionChoice.text();
-        if (token != null) {
+        if ((token = completionChoice.text()) != null) {
             this.contentBuilder.append(token);
         }
     }
 
     public ChatResponse build() {
-        return ChatResponse.builder()
-                .aiMessage(buildAiMessage())
-                .metadata(buildMetadata())
-                .build();
+        return ChatResponse.builder().aiMessage(this.buildAiMessage()).metadata((ChatResponseMetadata)this.buildMetadata()).build();
     }
 
     private AiMessage buildAiMessage() {
-        String text = contentBuilder.toString();
-
+        String text = this.contentBuilder.toString();
         String thinking = null;
-        if (returnThinking) {
-            thinking = reasoningContentBuilder.toString();
+        if (this.returnThinking) {
+            thinking = this.reasoningContentBuilder.toString();
         }
-
-        return AiMessage.builder()
-                .text(isNullOrEmpty(text) ? null : text)
-                .thinking(isNullOrEmpty(thinking) ? null : thinking)
-                .toolExecutionRequests(buildToolExecutionRequests())
-                .build();
+        return AiMessage.builder().text(Utils.isNullOrEmpty((String)text) ? null : text).thinking(Utils.isNullOrEmpty((String)thinking) ? null : thinking).toolExecutionRequests(this.buildToolExecutionRequests()).build();
     }
 
     private List<ToolExecutionRequest> buildToolExecutionRequests() {
-        List<ToolExecutionRequest> toolExecutionRequests = new ArrayList<>();
-
-        // legacy
-        String toolName = toolNameBuilder.toString();
+        ArrayList<ToolExecutionRequest> toolExecutionRequests = new ArrayList<ToolExecutionRequest>();
+        String toolName = this.toolNameBuilder.toString();
         if (!toolName.isEmpty()) {
-            ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                    .name(toolName)
-                    .arguments(toolArgumentsBuilder.toString())
-                    .build();
+            ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder().name(toolName).arguments(this.toolArgumentsBuilder.toString()).build();
             toolExecutionRequests.add(toolExecutionRequest);
         }
-
-        if (!indexToToolExecutionRequestBuilder.isEmpty()) {
-            List<ToolExecutionRequest> toolRequests = indexToToolExecutionRequestBuilder.values().stream()
-                    .map(it -> ToolExecutionRequest.builder()
-                            .id(it.idBuilder.toString())
-                            .name(it.nameBuilder.toString())
-                            .arguments(it.argumentsBuilder.toString())
-                            .build())
-                    .collect(toList());
+        if (!this.indexToToolExecutionRequestBuilder.isEmpty()) {
+            List toolRequests = this.indexToToolExecutionRequestBuilder.values().stream().map(it -> ToolExecutionRequest.builder().id(((ToolExecutionRequestBuilder)it).idBuilder.toString()).name(((ToolExecutionRequestBuilder)it).nameBuilder.toString()).arguments(((ToolExecutionRequestBuilder)it).argumentsBuilder.toString()).build()).collect(Collectors.toList());
             toolExecutionRequests.addAll(toolRequests);
         }
-
         return toolExecutionRequests;
     }
 
     private OpenAiChatResponseMetadata buildMetadata() {
-        return OpenAiChatResponseMetadata.builder()
-                .id(id.get())
-                .modelName(model.get())
-                .tokenUsage(tokenUsage.get())
-                .finishReason(finishReason.get())
-                .created(created.get())
-                .serviceTier(serviceTier.get())
-                .systemFingerprint(systemFingerprint.get())
-                .rawHttpResponse(rawHttpResponse.get())
-                .rawServerSentEvents(new ArrayList<>(rawServerSentEvents))
-                .logProbs(
-                        logProbs.isEmpty()
-                                ? null
-                                : logProbsFrom(LogProbs.builder()
-                                        .content(new ArrayList<>(logProbs))
-                                        .build()))
-                .build();
+        return ((OpenAiChatResponseMetadata.Builder)((OpenAiChatResponseMetadata.Builder)((OpenAiChatResponseMetadata.Builder)((OpenAiChatResponseMetadata.Builder)OpenAiChatResponseMetadata.builder().id(this.id.get())).modelName(this.model.get())).tokenUsage(this.tokenUsage.get())).finishReason(this.finishReason.get())).created(this.created.get()).serviceTier(this.serviceTier.get()).systemFingerprint(this.systemFingerprint.get()).rawHttpResponse(this.rawHttpResponse.get()).rawServerSentEvents(new ArrayList<ServerSentEvent>(this.rawServerSentEvents)).logProbs(this.logProbs.isEmpty() ? null : OpenAiUtils.logProbsFrom(LogProbs.builder().content(new ArrayList<LogProb>(this.logProbs)).build())).build();
     }
 
     private static boolean isSentinel(ToolCall toolCall) {
-        boolean hasId = !isNullOrBlank(toolCall.id());
+        boolean hasId = !Utils.isNullOrBlank((String)toolCall.id());
         FunctionCall functionCall = toolCall.function();
         if (functionCall == null) {
             return !hasId;
         }
-        boolean hasName = !isNullOrBlank(functionCall.name());
+        boolean hasName = !Utils.isNullOrBlank((String)functionCall.name());
         boolean hasArguments = functionCall.arguments() != null;
         return !hasId && !hasName && !hasArguments;
     }
 
     private static class ToolExecutionRequestBuilder {
-
         private final StringBuffer idBuilder = new StringBuffer();
         private final StringBuffer nameBuilder = new StringBuffer();
         private final StringBuffer argumentsBuilder = new StringBuffer();
+
+        private ToolExecutionRequestBuilder() {
+        }
     }
 }
+

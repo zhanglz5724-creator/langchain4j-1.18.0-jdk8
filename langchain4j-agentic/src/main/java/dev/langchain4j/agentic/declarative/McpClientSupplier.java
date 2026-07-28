@@ -1,15 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.declarative;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Marks a static method that returns the McpClient instance for declarative MCP client agents.
- */
-@Retention(RUNTIME)
-@Target({METHOD})
+@Retention(value=RetentionPolicy.RUNTIME)
+@Target(value={ElementType.METHOD})
 public @interface McpClientSupplier {
 }
+

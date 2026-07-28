@@ -1,15 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  dev.langchain4j.Internal
+ *  org.jspecify.annotations.Nullable
+ */
 package dev.langchain4j.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.langchain4j.Internal;
+import dev.langchain4j.mcp.protocol.McpImplementation;
+import dev.langchain4j.mcp.protocol.McpJsonRpcMessage;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Corresponds to the {@code InitializeResult} type from the MCP schema.
- */
 @Internal
-public class McpInitializeResult extends McpJsonRpcMessage {
-
+public class McpInitializeResult
+extends McpJsonRpcMessage {
     private final Result result;
 
     public McpInitializeResult(Long id, Result result) {
@@ -18,12 +26,36 @@ public class McpInitializeResult extends McpJsonRpcMessage {
     }
 
     public Result getResult() {
-        return result;
+        return this.result;
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class Result {
+    public static class Capabilities {
+        private final Tools tools;
 
+        public Capabilities(Tools tools) {
+            this.tools = tools;
+        }
+
+        public Tools getTools() {
+            return this.tools;
+        }
+
+        @JsonInclude(value=JsonInclude.Include.NON_NULL)
+        public static class Tools {
+            private final Boolean listChanged;
+
+            public Tools(Boolean listChanged) {
+                this.listChanged = listChanged;
+            }
+
+            public Boolean getListChanged() {
+                return this.listChanged;
+            }
+        }
+    }
+
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    public static class Result {
         private final String protocolVersion;
         private final Capabilities capabilities;
         private final McpImplementation serverInfo;
@@ -33,11 +65,7 @@ public class McpInitializeResult extends McpJsonRpcMessage {
             this(protocolVersion, capabilities, serverInfo, null);
         }
 
-        public Result(
-                String protocolVersion,
-                Capabilities capabilities,
-                McpImplementation serverInfo,
-                @Nullable String instructions) {
+        public Result(String protocolVersion, Capabilities capabilities, McpImplementation serverInfo, @Nullable String instructions) {
             this.protocolVersion = protocolVersion;
             this.capabilities = capabilities;
             this.serverInfo = serverInfo;
@@ -45,46 +73,20 @@ public class McpInitializeResult extends McpJsonRpcMessage {
         }
 
         public String getProtocolVersion() {
-            return protocolVersion;
+            return this.protocolVersion;
         }
 
         public Capabilities getCapabilities() {
-            return capabilities;
+            return this.capabilities;
         }
 
         public McpImplementation getServerInfo() {
-            return serverInfo;
+            return this.serverInfo;
         }
 
         public @Nullable String getInstructions() {
-            return instructions;
-        }
-    }
-
-    public static class Capabilities {
-
-        private final Tools tools;
-
-        public Capabilities(Tools tools) {
-            this.tools = tools;
-        }
-
-        public Tools getTools() {
-            return tools;
-        }
-
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        public static class Tools {
-
-            private final Boolean listChanged;
-
-            public Tools(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
-
-            public Boolean getListChanged() {
-                return listChanged;
-            }
+            return this.instructions;
         }
     }
 }
+

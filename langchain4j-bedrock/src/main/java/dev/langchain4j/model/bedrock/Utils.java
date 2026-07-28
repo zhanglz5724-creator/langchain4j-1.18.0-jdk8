@@ -1,160 +1,112 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.ValidationUtils
+ *  software.amazon.awssdk.services.bedrockruntime.model.ImageFormat
+ */
 package dev.langchain4j.model.bedrock;
-
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static java.util.Objects.isNull;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.data.image.Image;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.ValidationUtils;
 import java.net.URI;
-import java.util.Map;
-import java.util.Set;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import software.amazon.awssdk.services.bedrockruntime.model.ImageFormat;
 
-/**
- * Utility methods.
- */
 @Internal
 class Utils {
-    /**
-     * Extracts the extension from a file path, URI, or URL.
-     * @param uri The path to analyze.
-     * @return The file extension (without the dot) or an empty string if there is no extension.
-     */
+    private static final Map<String, ImageFormat> MIME_TYPE_MAPPING;
+    private static final Map<String, ImageFormat> EXTENSION_MAPPING;
+    private static final Set<ImageFormat> SUPPORTED_FORMATS;
+
+    Utils() {
+    }
+
     public static String extractExtension(URI uri) {
-        final String path = uri.getPath();
-        if (isNull(path) || path.isEmpty()) {
+        int lastDot;
+        String path = uri.getPath();
+        if (Objects.isNull(path) || path.isEmpty()) {
             return "";
         }
-
         String cleanPath = path.split("\\?")[0];
-        cleanPath = cleanPath.split("#")[0];
-
-        String fileName = cleanPath;
-
-        int lastSlash = Math.max(cleanPath.lastIndexOf('/'), cleanPath.lastIndexOf('\\'));
+        String fileName = cleanPath = cleanPath.split("#")[0];
+        int lastSlash = Math.max(cleanPath.lastIndexOf(47), cleanPath.lastIndexOf(92));
         if (lastSlash >= 0) {
             fileName = cleanPath.substring(lastSlash + 1);
         }
-
-        int lastDot = fileName.lastIndexOf('.');
-        if (lastDot > 0) { // > 0 ignore filenames with a . at beginning
+        if ((lastDot = fileName.lastIndexOf(46)) > 0) {
             return fileName.substring(lastDot + 1);
         }
-
         return "";
     }
 
-    private static final Map<String, ImageFormat> MIME_TYPE_MAPPING = Collections.unmodifiableMap(new HashMap<>() {{
-    put("image/png", ImageFormat.PNG);
-    put("image/jpeg", ImageFormat.JPEG);
-    put("image/jpg", ImageFormat.JPEG);
-    put("image/gif", ImageFormat.GIF);
-    put("image/webp", ImageFormat.WEBP);
-}});
-
-    private static final Map<String, ImageFormat> EXTENSION_MAPPING = Collections.unmodifiableMap(new HashMap<>() {{
-    put("png", ImageFormat.PNG);
-    put("jpg", ImageFormat.JPEG);
-    put("jpeg", ImageFormat.JPEG);
-    put("gif", ImageFormat.GIF);
-    put("webp", ImageFormat.WEBP);
-}});
-
-    private static final Set<ImageFormat> SUPPORTED_FORMATS =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ImageFormat.PNG, ImageFormat.JPEG, ImageFormat.GIF, ImageFormat.WEBP)));
-
-    /**
-     * Extracts the image format from an Image object using either mime type or URI.
-     * Prioritizes mime type over file extension.
-     *
-     * https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
-     * imgFormat valid values are : png | jpeg | gif | webp
-     *
-     * @param image The Image object containing mime type and URI
-     * @return The normalized ImageFormat
-     * @throws dev.langchain4j.exception.UnsupportedFeatureException if the format is not supported
-     * @throws IllegalArgumentException if the image is null
-     */
     public static String extractAndValidateFormat(Image image) {
-        ensureNotNull(image, "image");
-
-        // First try to extract from mime type
-        if (image.mimeType() != null && !image.mimeType().trim().isEmpty()) {
-            ImageFormat format = MIME_TYPE_MAPPING.get(image.mimeType().toLowerCase());
-            if (format != null) {
-                return format.toString();
-            }
+        String extension;
+        ImageFormat format;
+        ImageFormat format2;
+        ValidationUtils.ensureNotNull((Object)image, (String)"image");
+        if (image.mimeType() != null && !image.mimeType().trim().isEmpty() && (format2 = MIME_TYPE_MAPPING.get(image.mimeType().toLowerCase())) != null) {
+            return format2.toString();
         }
-
-        // If mime type fails, try to extract from URI
-        if (image.url() != null) {
-            String extension = Utils.extractExtension(image.url()).toLowerCase();
-            ImageFormat format = EXTENSION_MAPPING.get(extension);
-            if (format != null) {
-                return format.toString();
-            }
+        if (image.url() != null && (format = EXTENSION_MAPPING.get(extension = Utils.extractExtension(image.url()).toLowerCase())) != null) {
+            return format.toString();
         }
-
-        throw new UnsupportedFeatureException(String.format(
-                "Unsupported image format, should be one of png | jpeg | gif | webp. Mime type: %s, URI: %s",
-                image.mimeType(), image.url()));
+        throw new UnsupportedFeatureException(String.format("Unsupported image format, should be one of png | jpeg | gif | webp. Mime type: %s, URI: %s", image.mimeType(), image.url()));
     }
 
-    /**
-     * Extracts and sanitizes a filename from a URI.
-     * Allowed characters are:
-     * - Alphanumeric characters
-     * - Single whitespace (multiple spaces are reduced to one)
-     * - Hyphens
-     * - Parentheses
-     * - Square brackets
-     *
-     * @param uri The URI to process
-     * @return The cleaned filename or empty string if no filename is found
-     */
     public static String extractCleanFileName(URI uri) {
+        String fileName;
         if (uri == null) {
             return "";
         }
-
-        // Get the path and extract the filename
         String path = uri.getPath();
-        if (isNull(path) || path.isEmpty()) {
+        if (Objects.isNull(path) || path.isEmpty()) {
             return "";
         }
-
-        // Remove query parameters and fragments
         String cleanPath = path.split("\\?")[0];
-        cleanPath = cleanPath.split("#")[0];
-
-        // Extract filename from path
-        int lastSlash = Math.max(cleanPath.lastIndexOf('/'), cleanPath.lastIndexOf('\\'));
-        String fileName = (lastSlash >= 0) ? cleanPath.substring(lastSlash + 1) : cleanPath;
-
-        // If filename is empty or just dots, return empty string
+        int lastSlash = Math.max((cleanPath = cleanPath.split("#")[0]).lastIndexOf(47), cleanPath.lastIndexOf(92));
+        String string = fileName = lastSlash >= 0 ? cleanPath.substring(lastSlash + 1) : cleanPath;
         if (fileName.isEmpty() || fileName.matches("^[.]+$")) {
             return "";
         }
-
-        // Remove the extension (everything after the last dot, if not at start)
-        int lastDot = fileName.lastIndexOf('.');
-        if (lastDot > 0) { // > 0 to keep files starting with a dot
+        int lastDot = fileName.lastIndexOf(46);
+        if (lastDot > 0) {
             fileName = fileName.substring(0, lastDot);
         }
+        return fileName.replaceAll("[^a-zA-Z0-9\\s\\-()\\[\\]]", "-").replaceAll("\\s+", "-").trim();
+    }
 
-        // Clean the filename according to rules
-        return fileName
-                // Replace any character that's not allowed with a space
-                .replaceAll("[^a-zA-Z0-9\\s\\-()\\[\\]]", "-")
-                // Replace multiple spaces with a single space
-                .replaceAll("\\s+", "-")
-                // Trim spaces at start and end
-                .trim();
+    static {
+        HashMap<String, ImageFormat> map = new HashMap<String, ImageFormat>();
+        map.put("image/png", ImageFormat.PNG);
+        map.put("image/jpeg", ImageFormat.JPEG);
+        map.put("image/jpg", ImageFormat.JPEG);
+        map.put("image/gif", ImageFormat.GIF);
+        map.put("image/webp", ImageFormat.WEBP);
+        MIME_TYPE_MAPPING = Collections.unmodifiableMap(map);
+        map = new HashMap();
+        map.put("png", ImageFormat.PNG);
+        map.put("jpg", ImageFormat.JPEG);
+        map.put("jpeg", ImageFormat.JPEG);
+        map.put("gif", ImageFormat.GIF);
+        map.put("webp", ImageFormat.WEBP);
+        EXTENSION_MAPPING = Collections.unmodifiableMap(map);
+        HashSet<ImageFormat> set = new HashSet<ImageFormat>();
+        set.add(ImageFormat.PNG);
+        set.add(ImageFormat.JPEG);
+        set.add(ImageFormat.GIF);
+        set.add(ImageFormat.WEBP);
+        SUPPORTED_FORMATS = Collections.unmodifiableSet(set);
     }
 }
+

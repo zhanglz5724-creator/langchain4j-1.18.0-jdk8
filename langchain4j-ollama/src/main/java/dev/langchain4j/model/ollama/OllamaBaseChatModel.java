@@ -1,21 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.ChatRequestValidationUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.ollama;
 
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static java.util.Arrays.asList;
-
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.internal.ChatRequestValidationUtils;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
-import dev.langchain4j.model.chat.response.PartialThinking;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.chat.request.ToolChoice;
+import dev.langchain4j.model.ollama.InternalOllamaHelper;
+import dev.langchain4j.model.ollama.OllamaChatRequestParameters;
+import dev.langchain4j.model.ollama.OllamaClient;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,81 +37,39 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 
 abstract class OllamaBaseChatModel {
-
     protected OllamaClient client;
     protected OllamaChatRequestParameters defaultRequestParameters;
     protected boolean returnThinking;
     protected List<ChatModelListener> listeners;
     protected Set<Capability> supportedCapabilities;
 
-    void init(Builder<? extends OllamaBaseChatModel, ? extends Builder<?, ?>> builder) {
-        this.client = OllamaClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(builder.baseUrl)
-                .timeout(builder.timeout)
-                .customHeaders(builder.customHeadersSupplier)
-                .logRequests(builder.logRequests)
-                .logResponses(builder.logResponses)
-                .logger(builder.logger)
-                .build();
+    OllamaBaseChatModel() {
+    }
 
+    void init(Builder<? extends OllamaBaseChatModel, ? extends Builder<?, ?>> builder) {
         ChatRequestParameters commonParameters;
+        this.client = OllamaClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl(builder.baseUrl).timeout(builder.timeout).customHeaders(builder.customHeadersSupplier).logRequests(builder.logRequests).logResponses(builder.logResponses).logger(builder.logger).build();
         if (builder.defaultRequestParameters != null) {
-            validate(builder.defaultRequestParameters);
+            this.validate(builder.defaultRequestParameters);
             commonParameters = builder.defaultRequestParameters;
         } else {
             commonParameters = DefaultChatRequestParameters.EMPTY;
         }
-
-        OllamaChatRequestParameters ollamaParameters =
-                builder.defaultRequestParameters instanceof OllamaChatRequestParameters ollamaChatRequestParameters
-                        ? ollamaChatRequestParameters
-                        : OllamaChatRequestParameters.EMPTY;
-
-        this.defaultRequestParameters = OllamaChatRequestParameters.builder()
-                // common parameters
-                .modelName(getOrDefault(builder.modelName, commonParameters.modelName()))
-                .temperature(getOrDefault(builder.temperature, commonParameters.temperature()))
-                .topP(getOrDefault(builder.topP, commonParameters.topP()))
-                .topK(getOrDefault(builder.topK, commonParameters.topK()))
-                .maxOutputTokens(getOrDefault(builder.numPredict, commonParameters.maxOutputTokens()))
-                .stopSequences(getOrDefault(builder.stop, commonParameters.stopSequences()))
-                .toolSpecifications(commonParameters.toolSpecifications())
-                .responseFormat(getOrDefault(builder.responseFormat, commonParameters.responseFormat()))
-                // Ollama-specific parameters
-                .mirostat(getOrDefault(builder.mirostat, ollamaParameters.mirostat()))
-                .mirostatEta(getOrDefault(builder.mirostatEta, ollamaParameters.mirostatEta()))
-                .mirostatTau(getOrDefault(builder.mirostatTau, ollamaParameters.mirostatTau()))
-                .numCtx(getOrDefault(builder.numCtx, ollamaParameters.numCtx()))
-                .repeatLastN(getOrDefault(builder.repeatLastN, ollamaParameters.repeatLastN()))
-                .repeatPenalty(getOrDefault(builder.repeatPenalty, ollamaParameters.repeatPenalty()))
-                .seed(getOrDefault(builder.seed, ollamaParameters.seed()))
-                .minP(getOrDefault(builder.minP, ollamaParameters.minP()))
-                .keepAlive(ollamaParameters.keepAlive())
-                .think(getOrDefault(builder.think, ollamaParameters.think()))
-                .numThread(ollamaParameters.numThread())
-                .numKeep(ollamaParameters.numKeep())
-                .typicalP(ollamaParameters.typicalP())
-                .numBatch(ollamaParameters.numBatch())
-                .numGPU(ollamaParameters.numGPU())
-                .mainGPU(ollamaParameters.mainGPU())
-                .useMmap(ollamaParameters.useMmap())
-                .build();
-        this.returnThinking = getOrDefault(builder.returnThinking, false);
-        this.listeners = copy(builder.listeners);
-        this.supportedCapabilities = copy(builder.supportedCapabilities);
+        OllamaChatRequestParameters ollamaParameters = builder.defaultRequestParameters instanceof OllamaChatRequestParameters ? (OllamaChatRequestParameters)builder.defaultRequestParameters : OllamaChatRequestParameters.EMPTY;
+        this.defaultRequestParameters = ((OllamaChatRequestParameters.Builder)((OllamaChatRequestParameters.Builder)((OllamaChatRequestParameters.Builder)((OllamaChatRequestParameters.Builder)((OllamaChatRequestParameters.Builder)((OllamaChatRequestParameters.Builder)((OllamaChatRequestParameters.Builder)((OllamaChatRequestParameters.Builder)OllamaChatRequestParameters.builder().modelName((String)Utils.getOrDefault((Object)builder.modelName, (Object)commonParameters.modelName()))).temperature((Double)Utils.getOrDefault((Object)builder.temperature, (Object)commonParameters.temperature()))).topP((Double)Utils.getOrDefault((Object)builder.topP, (Object)commonParameters.topP()))).topK((Integer)Utils.getOrDefault((Object)builder.topK, (Object)commonParameters.topK()))).maxOutputTokens((Integer)Utils.getOrDefault((Object)builder.numPredict, (Object)commonParameters.maxOutputTokens()))).stopSequences(Utils.getOrDefault(builder.stop, (List)commonParameters.stopSequences()))).toolSpecifications(commonParameters.toolSpecifications())).responseFormat((ResponseFormat)Utils.getOrDefault((Object)builder.responseFormat, (Object)commonParameters.responseFormat()))).mirostat((Integer)Utils.getOrDefault((Object)builder.mirostat, (Object)ollamaParameters.mirostat())).mirostatEta((Double)Utils.getOrDefault((Object)builder.mirostatEta, (Object)ollamaParameters.mirostatEta())).mirostatTau((Double)Utils.getOrDefault((Object)builder.mirostatTau, (Object)ollamaParameters.mirostatTau())).numCtx((Integer)Utils.getOrDefault((Object)builder.numCtx, (Object)ollamaParameters.numCtx())).repeatLastN((Integer)Utils.getOrDefault((Object)builder.repeatLastN, (Object)ollamaParameters.repeatLastN())).repeatPenalty((Double)Utils.getOrDefault((Object)builder.repeatPenalty, (Object)ollamaParameters.repeatPenalty())).seed((Integer)Utils.getOrDefault((Object)builder.seed, (Object)ollamaParameters.seed())).minP((Double)Utils.getOrDefault((Object)builder.minP, (Object)ollamaParameters.minP())).keepAlive(ollamaParameters.keepAlive()).think((Boolean)Utils.getOrDefault((Object)builder.think, (Object)ollamaParameters.think())).numThread(ollamaParameters.numThread()).numKeep(ollamaParameters.numKeep()).typicalP(ollamaParameters.typicalP()).numBatch(ollamaParameters.numBatch()).numGPU(ollamaParameters.numGPU()).mainGPU(ollamaParameters.mainGPU()).useMmap(ollamaParameters.useMmap()).build();
+        this.returnThinking = (Boolean)Utils.getOrDefault((Object)builder.returnThinking, (Object)false);
+        this.listeners = Utils.copy(builder.listeners);
+        this.supportedCapabilities = Utils.copy(builder.supportedCapabilities);
     }
 
     protected void validate(ChatRequestParameters chatRequestParameters) {
         InternalOllamaHelper.validate(chatRequestParameters);
-        ChatRequestValidationUtils.validate(chatRequestParameters.toolChoice());
+        ChatRequestValidationUtils.validate((ToolChoice)chatRequestParameters.toolChoice());
     }
 
-    protected abstract static class Builder<C extends OllamaBaseChatModel, B extends Builder<C, B>> {
-
+    protected static abstract class Builder<C extends OllamaBaseChatModel, B extends Builder<C, B>> {
         protected HttpClientBuilder httpClientBuilder;
         protected String baseUrl;
-
         protected ChatRequestParameters defaultRequestParameters;
         protected String modelName;
         protected Double temperature;
@@ -125,194 +96,158 @@ abstract class OllamaBaseChatModel {
         protected List<ChatModelListener> listeners;
         protected Set<Capability> supportedCapabilities;
 
-        protected B self() {
-            return (B) this;
+        protected Builder() {
         }
 
-        /**
-         * Sets the {@link HttpClientBuilder} that will be used to create the {@link HttpClient}
-         * that will be used to communicate with Ollama.
-         * <p>
-         * NOTE: {@link #timeout(Duration)} overrides timeouts set on the {@link HttpClientBuilder}.
-         */
+        protected B self() {
+            return (B)this;
+        }
+
         public B httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
-            return self();
+            return this.self();
         }
 
         public B baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
-            return self();
+            return this.self();
         }
 
         public B defaultRequestParameters(ChatRequestParameters defaultRequestParameters) {
             this.defaultRequestParameters = defaultRequestParameters;
-            return self();
+            return this.self();
         }
 
         public B modelName(String modelName) {
             this.modelName = modelName;
-            return self();
+            return this.self();
         }
 
         public B temperature(Double temperature) {
             this.temperature = temperature;
-            return self();
+            return this.self();
         }
 
         public B topK(Integer topK) {
             this.topK = topK;
-            return self();
+            return this.self();
         }
 
         public B topP(Double topP) {
             this.topP = topP;
-            return self();
+            return this.self();
         }
 
         public B mirostat(Integer mirostat) {
             this.mirostat = mirostat;
-            return self();
+            return this.self();
         }
 
         public B mirostatEta(Double mirostatEta) {
             this.mirostatEta = mirostatEta;
-            return self();
+            return this.self();
         }
 
         public B mirostatTau(Double mirostatTau) {
             this.mirostatTau = mirostatTau;
-            return self();
+            return this.self();
         }
 
         public B repeatLastN(Integer repeatLastN) {
             this.repeatLastN = repeatLastN;
-            return self();
+            return this.self();
         }
 
         public B repeatPenalty(Double repeatPenalty) {
             this.repeatPenalty = repeatPenalty;
-            return self();
+            return this.self();
         }
 
         public B seed(Integer seed) {
             this.seed = seed;
-            return self();
+            return this.self();
         }
 
         public B numPredict(Integer numPredict) {
             this.numPredict = numPredict;
-            return self();
+            return this.self();
         }
 
         public B numCtx(Integer numCtx) {
             this.numCtx = numCtx;
-            return self();
+            return this.self();
         }
 
         public B stop(List<String> stop) {
             this.stop = stop;
-            return self();
+            return this.self();
         }
 
         public B minP(Double minP) {
             this.minP = minP;
-            return self();
+            return this.self();
         }
 
         public B responseFormat(ResponseFormat responseFormat) {
             this.responseFormat = responseFormat;
-            return self();
+            return this.self();
         }
 
-        /**
-         * Controls <a href="https://ollama.com/blog/thinking">thinking</a>.
-         * <pre>
-         * <code>true</code>: the LLM thinks and returns thoughts in a separate <code>thinking</code> field
-         * <code>false</code>: the LLM does not think
-         * <code>null</code> (not set): reasoning LLMs (e.g., DeepSeek R1) will prepend thoughts, delimited by </code>&lt;think&gt;</code> and </code>&lt;/think&gt;</code>, to the actual response
-         * </pre>
-         *
-         * @see #returnThinking(Boolean)
-         */
         public B think(Boolean think) {
             this.think = think;
-            return self();
+            return this.self();
         }
 
-        /**
-         * Controls whether to return thinking/reasoning text (if available) inside {@link AiMessage#thinking()}
-         * and whether to invoke the {@link StreamingChatResponseHandler#onPartialThinking(PartialThinking)} callback.
-         * Please note that this does not enable thinking/reasoning for the LLM;
-         * it only controls whether to parse the {@code thinking} field from the API response
-         * and return it inside the {@link AiMessage}.
-         * <p>
-         * Disabled by default.
-         * If enabled, the thinking text will be stored within the {@link AiMessage} and may be persisted.
-         *
-         * @see #think(Boolean)
-         */
         public B returnThinking(Boolean returnThinking) {
             this.returnThinking = returnThinking;
-            return self();
+            return this.self();
         }
 
         public B timeout(Duration timeout) {
             this.timeout = timeout;
-            return self();
+            return this.self();
         }
 
-        /**
-         * Sets custom HTTP headers.
-         */
         public B customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
-            return self();
+            return this.self();
         }
 
-        /**
-         * Sets a supplier for custom HTTP headers.
-         * The supplier is called before each request, allowing dynamic header values.
-         * For example, this is useful for OAuth2 tokens that expire and need refreshing.
-         */
         public B customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
-            return self();
+            return this.self();
         }
 
         public B logRequests(Boolean logRequests) {
             this.logRequests = logRequests;
-            return self();
+            return this.self();
         }
 
         public B logResponses(Boolean logResponses) {
             this.logResponses = logResponses;
-            return self();
+            return this.self();
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public B logger(Logger logger) {
             this.logger = logger;
-            return self();
+            return this.self();
         }
 
         public B listeners(List<ChatModelListener> listeners) {
             this.listeners = listeners;
-            return self();
+            return this.self();
         }
 
         public B supportedCapabilities(Set<Capability> supportedCapabilities) {
             this.supportedCapabilities = supportedCapabilities;
-            return self();
+            return this.self();
         }
 
-        public B supportedCapabilities(Capability... supportedCapabilities) {
-            return supportedCapabilities(new HashSet<>(asList(supportedCapabilities)));
+        public B supportedCapabilities(Capability ... supportedCapabilities) {
+            return this.supportedCapabilities(new HashSet<Capability>(Arrays.asList(supportedCapabilities)));
         }
 
         public abstract C build();
     }
 }
+

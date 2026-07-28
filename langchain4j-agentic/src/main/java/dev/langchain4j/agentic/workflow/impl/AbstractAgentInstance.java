@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.workflow.impl;
 
 import dev.langchain4j.agentic.planner.AgentArgument;
@@ -7,80 +10,82 @@ import dev.langchain4j.agentic.planner.Planner;
 import java.lang.reflect.Type;
 import java.util.List;
 
-abstract class AbstractAgentInstance implements AgentInstance {
+abstract class AbstractAgentInstance
+implements AgentInstance {
     private final AgentInstance delegate;
 
-    AbstractAgentInstance(final AgentInstance delegate) {
+    AbstractAgentInstance(AgentInstance delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public Class<?> type() {
-        return delegate.type();
+        return this.delegate.type();
     }
 
     @Override
     public Class<? extends Planner> plannerType() {
-        return delegate.plannerType();
+        return this.delegate.plannerType();
     }
 
     @Override
     public String name() {
-        return delegate.name();
+        return this.delegate.name();
     }
 
     @Override
     public String agentId() {
-        return delegate.agentId();
+        return this.delegate.agentId();
     }
 
     @Override
     public String description() {
-        return delegate.description();
+        return this.delegate.description();
     }
 
     @Override
     public Type outputType() {
-        return delegate.outputType();
+        return this.delegate.outputType();
     }
 
     @Override
     public String outputKey() {
-        return delegate.outputKey();
+        return this.delegate.outputKey();
     }
 
     @Override
     public boolean async() {
-        return delegate.async();
+        return this.delegate.async();
     }
 
     @Override
     public List<AgentArgument> arguments() {
-        return delegate.arguments();
+        return this.delegate.arguments();
     }
 
     @Override
     public AgentInstance parent() {
-        return delegate.parent();
+        return this.delegate.parent();
     }
 
     @Override
     public List<AgentInstance> subagents() {
-        return delegate.subagents();
+        return this.delegate.subagents();
     }
 
     @Override
     public boolean leaf() {
-        return delegate.leaf();
+        return this.delegate.leaf();
     }
 
     @Override
     public AgenticSystemTopology topology() {
-        return delegate.topology();
+        return this.delegate.topology();
     }
 
     @Override
-    public <T extends AgentInstance> T as(final Class<T> agentInstanceClass) {
-        return delegate.as(agentInstanceClass);
+    public <T extends AgentInstance> T as(Class<T> agentInstanceClass) {
+        return this.delegate.as(agentInstanceClass);
     }
 }
+

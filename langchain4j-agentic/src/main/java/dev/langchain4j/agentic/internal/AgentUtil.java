@@ -1,10 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.internal.Json
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.invocation.InvocationParameters
+ *  dev.langchain4j.service.MemoryId
+ *  dev.langchain4j.service.TokenStream
+ *  dev.langchain4j.service.TypeUtils
+ */
 package dev.langchain4j.agentic.internal;
-
-import static dev.langchain4j.agentic.AgenticServices.createBuiltInAgentExecutor;
-import static dev.langchain4j.internal.Utils.allMethods;
-import static dev.langchain4j.internal.Utils.getAnnotatedMethod;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.service.TypeUtils.isImageType;
 
 import dev.langchain4j.agentic.Agent;
 import dev.langchain4j.agentic.AgenticServices;
@@ -13,6 +20,15 @@ import dev.langchain4j.agentic.agent.MissingArgumentException;
 import dev.langchain4j.agentic.declarative.K;
 import dev.langchain4j.agentic.declarative.LoopCounter;
 import dev.langchain4j.agentic.declarative.TypedKey;
+import dev.langchain4j.agentic.internal.A2AService;
+import dev.langchain4j.agentic.internal.AgentExecutor;
+import dev.langchain4j.agentic.internal.AgentInvocationArguments;
+import dev.langchain4j.agentic.internal.AgentInvoker;
+import dev.langchain4j.agentic.internal.AgentSpecsProvider;
+import dev.langchain4j.agentic.internal.AgenticScopeOwner;
+import dev.langchain4j.agentic.internal.InternalAgent;
+import dev.langchain4j.agentic.internal.McpService;
+import dev.langchain4j.agentic.internal.NonAiAgentInstance;
 import dev.langchain4j.agentic.planner.AgentArgument;
 import dev.langchain4j.agentic.planner.AgentInstance;
 import dev.langchain4j.agentic.planner.AgenticSystemConfigurationException;
@@ -22,10 +38,13 @@ import dev.langchain4j.agentic.scope.ResultWithAgenticScope;
 import dev.langchain4j.data.image.Image;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.internal.Json;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.invocation.InvocationParameters;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.TypeUtils;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,59 +54,59 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
-import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AgentUtil {
-
     public static final String MEMORY_ID_ARG_NAME = "@MemoryId";
     public static final String AGENTIC_SCOPE_ARG_NAME = "@AgenticScope";
     public static final String LOOP_COUNTER_ARG_NAME = "@LoopCounter";
     public static final String INVOCATION_PARAMETERS_ARG_NAME = "@InvocationParameters";
+    private static final Map<Class<? extends TypedKey<?>>, TypedKey<?>> STATE_INSTANCES = new ConcurrentHashMap();
 
-    private static final Map<Class<? extends TypedKey<?>>, TypedKey<?>> STATE_INSTANCES = new ConcurrentHashMap<>();
-
-    private AgentUtil() {}
+    private AgentUtil() {
+    }
 
     private static <T> TypedKey<T> stateInstance(Class<? extends TypedKey<? extends T>> key) {
-        return (TypedKey<T>) STATE_INSTANCES.computeIfAbsent(key, k -> {
+        return STATE_INSTANCES.computeIfAbsent(key, k -> {
             try {
-                return key.getDeclaredConstructor().newInstance();
-            } catch (NoSuchMethodException e) {
-                throw new AgenticSystemConfigurationException(
-                        "TypedKey '" + key.getName() + "' doesn't have a no-args constructor", e);
-            } catch (IllegalAccessException e) {
+                return (TypedKey)key.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
+            }
+            catch (NoSuchMethodException e) {
+                throw new AgenticSystemConfigurationException("TypedKey '" + key.getName() + "' doesn't have a no-args constructor", e);
+            }
+            catch (IllegalAccessException e) {
                 throw new AgenticSystemConfigurationException("TypedKey '" + key.getName() + "' is not accessible", e);
-            } catch (InstantiationException | InvocationTargetException e) {
+            }
+            catch (InstantiationException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
     public static String outputKey(String outputKey, Class<? extends TypedKey<?>> typedOutputKey) {
-        if (isNullOrBlank(outputKey)) {
-            return typedOutputKey != Agent.NoTypedKey.class ? keyName(typedOutputKey) : null;
+        if (Utils.isNullOrBlank((String)outputKey)) {
+            return typedOutputKey != Agent.NoTypedKey.class ? AgentUtil.keyName(typedOutputKey) : null;
         }
         if (typedOutputKey != Agent.NoTypedKey.class) {
-            throw new AgenticSystemConfigurationException(
-                    "Both outputKey and typedOutputKey are set. Please set only one of them.");
+            throw new AgenticSystemConfigurationException("Both outputKey and typedOutputKey are set. Please set only one of them.");
         }
         return outputKey;
     }
 
     public static <T> T keyDefaultValue(Class<? extends TypedKey<T>> key) {
-        return stateInstance(key).defaultValue();
+        return AgentUtil.stateInstance(key).defaultValue();
     }
 
     public static String keyName(Class<? extends TypedKey<?>> key) {
-        return stateInstance(key).name();
+        return AgentUtil.stateInstance(key).name();
     }
 
     public static List<AgentExecutor> agentsToExecutors(Collection<?> agents) {
@@ -95,50 +114,35 @@ public class AgentUtil {
     }
 
     public static AgentExecutor agentToExecutor(Object agent) {
-        if (agent instanceof AgentExecutor executor) {
+        if (agent instanceof AgentExecutor) {
+            AgentExecutor executor = (AgentExecutor)agent;
             return executor;
         }
-        if (agent instanceof Class c) {
-            AgentExecutor builtInAgent = createBuiltInAgentExecutor(c);
+        if (agent instanceof Class) {
+            Class c = (Class)agent;
+            AgentExecutor builtInAgent = AgenticServices.createBuiltInAgentExecutor(c);
             if (builtInAgent != null) {
                 return builtInAgent;
             }
             agent = AgenticServices.agentBuilder(c).build();
         }
-        return agent instanceof InternalAgent internalAgent
-                ? agentToExecutor(internalAgent)
-                : nonAiAgentToExecutor(agent, validateAgentClass(agent.getClass()));
+        return agent instanceof InternalAgent ? AgentUtil.agentToExecutor((InternalAgent)agent) : AgentUtil.nonAiAgentToExecutor(agent, AgentUtil.validateAgentClass(agent.getClass()));
     }
 
     public static AgentExecutor nonAiAgentToExecutor(Object agent, Method agenticMethod) {
         Agent annotation = agenticMethod.getAnnotation(Agent.class);
-        String name = isNullOrBlank(annotation.name()) ? agenticMethod.getName() : annotation.name();
-        String description = isNullOrBlank(annotation.description()) ? annotation.value() : annotation.description();
+        String name = Utils.isNullOrBlank((String)annotation.name()) ? agenticMethod.getName() : annotation.name();
+        String description = Utils.isNullOrBlank((String)annotation.description()) ? annotation.value() : annotation.description();
         String outputKey = AgentUtil.outputKey(annotation.outputKey(), annotation.typedOutputKey());
-        return new AgentExecutor(
-                nonAiAgentInvoker(agent, agenticMethod, name, description, outputKey, annotation.async()), agent);
+        return new AgentExecutor(AgentUtil.nonAiAgentInvoker(agent, agenticMethod, name, description, outputKey, annotation.async()), agent);
     }
 
-    private static AgentInvoker nonAiAgentInvoker(
-            Object agent, Method agenticMethod, String name, String description, String outputKey, boolean async) {
-        return agent instanceof AgentSpecsProvider spec
-                ? AgentInvoker.fromSpec(spec, agenticMethod, name)
-                : nonAiAgentInvoker(agenticMethod, name, description, outputKey, async);
+    private static AgentInvoker nonAiAgentInvoker(Object agent, Method agenticMethod, String name, String description, String outputKey, boolean async) {
+        return agent instanceof AgentSpecsProvider ? AgentInvoker.fromSpec((AgentSpecsProvider)agent, agenticMethod, name) : AgentUtil.nonAiAgentInvoker(agenticMethod, name, description, outputKey, async);
     }
 
-    public static AgentInvoker nonAiAgentInvoker(
-            Method agenticMethod, String name, String description, String outputKey, boolean async) {
-        return AgentInvoker.fromMethod(
-                new NonAiAgentInstance(
-                        agenticMethod.getDeclaringClass(),
-                        name,
-                        description,
-                        agenticMethod.getGenericReturnType(),
-                        outputKey,
-                        async,
-                        argumentsFromMethod(agenticMethod),
-                        null),
-                agenticMethod);
+    public static AgentInvoker nonAiAgentInvoker(Method agenticMethod, String name, String description, String outputKey, boolean async) {
+        return AgentInvoker.fromMethod(new NonAiAgentInstance(agenticMethod.getDeclaringClass(), name, description, agenticMethod.getGenericReturnType(), outputKey, async, AgentUtil.argumentsFromMethod(agenticMethod), null), agenticMethod);
     }
 
     public static AgentExecutor agentToExecutor(InternalAgent agent) {
@@ -151,57 +155,48 @@ public class AgentUtil {
             if (executor.isPresent()) {
                 return executor.get();
             }
-            executor = methodToAgentExecutor(agent, method);
-            if (executor.isPresent()) {
-                return executor.get();
-            }
+            executor = AgentUtil.methodToAgentExecutor(agent, method);
+            if (!executor.isPresent()) continue;
+            return executor.get();
         }
         throw new IllegalArgumentException("Agent executor not found");
     }
 
     public static Optional<Method> getAnnotatedMethodOnClass(Class<?> clazz, Class<? extends Annotation> annotation) {
-        return Arrays.stream(clazz.getMethods())
-                .filter(m -> m.isAnnotationPresent(annotation))
-                .findFirst();
+        return Arrays.stream(clazz.getMethods()).filter(m -> m.isAnnotationPresent(annotation)).findFirst();
     }
 
     private static Optional<AgentExecutor> methodToAgentExecutor(InternalAgent agent, Method method) {
-        return getAnnotatedMethod(method, Agent.class)
-                .map(agentMethod -> new AgentExecutor(AgentInvoker.fromMethod(agent, agentMethod), agent));
+        return Utils.getAnnotatedMethod((Method)method, Agent.class).map(agentMethod -> new AgentExecutor(AgentInvoker.fromMethod(agent, agentMethod), agent));
     }
 
     public static List<AgentArgument> argumentsFromMethod(Method method) {
-        return argumentsFromMethod(method, Collections.emptyMap());
+        return AgentUtil.argumentsFromMethod(method, Collections.emptyMap());
     }
 
     public static List<AgentArgument> argumentsFromMethod(Method method, Set<String> optionalArgs) {
-        return argumentsFromMethod(method, Collections.emptyMap(), optionalArgs);
+        return AgentUtil.argumentsFromMethod(method, Collections.emptyMap(), optionalArgs);
     }
 
     public static List<AgentArgument> argumentsFromMethod(Method method, Map<String, Object> defaultValues) {
-        return argumentsFromMethod(method, defaultValues, Collections.emptySet());
+        return AgentUtil.argumentsFromMethod(method, defaultValues, Collections.emptySet());
     }
 
-    public static List<AgentArgument> argumentsFromMethod(
-            Method method, Map<String, Object> defaultValues, Set<String> optionalArgs) {
+    public static List<AgentArgument> argumentsFromMethod(Method method, Map<String, Object> defaultValues, Set<String> optionalArgs) {
         if (method.getDeclaringClass() == UntypedAgent.class) {
             return Collections.emptyList();
         }
-        return Stream.of(method.getParameters())
-                .map(p -> argumentFromParameter(p, defaultValues, optionalArgs))
-                .collect(Collectors.toList());
+        return Stream.of(method.getParameters()).map(p -> AgentUtil.argumentFromParameter(p, defaultValues, optionalArgs)).collect(Collectors.toList());
     }
 
     public static AgentArgument argumentFromParameter(Parameter parameter) {
-        return argumentFromParameter(parameter, Collections.emptyMap(), Collections.emptySet());
+        return AgentUtil.argumentFromParameter(parameter, Collections.emptyMap(), Collections.emptySet());
     }
 
-    private static AgentArgument argumentFromParameter(
-            Parameter parameter, Map<String, Object> defaultValues, Set<String> optionalArgs) {
-        String argName = parameterName(parameter);
-        Object defaultValue = defaultValues.getOrDefault(argName, parameterDefaultValue(parameter));
-        return new AgentArgument(
-                parameter.getParameterizedType(), argName, defaultValue, optionalArgs.contains(argName));
+    private static AgentArgument argumentFromParameter(Parameter parameter, Map<String, Object> defaultValues, Set<String> optionalArgs) {
+        String argName = AgentUtil.parameterName(parameter);
+        Object defaultValue = defaultValues.getOrDefault(argName, AgentUtil.parameterDefaultValue(parameter));
+        return new AgentArgument(parameter.getParameterizedType(), argName, defaultValue, optionalArgs.contains(argName));
     }
 
     private static String parameterName(Parameter p) {
@@ -222,25 +217,20 @@ public class AgentUtil {
 
     private static Object parameterDefaultValue(Parameter p) {
         K k = p.getAnnotation(K.class);
-        return k != null ? stateInstance(k.value()).defaultValue() : null;
+        return k != null ? AgentUtil.stateInstance(k.value()).defaultValue() : null;
     }
 
-    public static AgentInvocationArguments agentInvocationArguments(AgenticScope agenticScope, Method method)
-            throws MissingArgumentException {
-        return agentInvocationArguments(agenticScope, argumentsFromMethod(method), Collections.emptyMap());
+    public static AgentInvocationArguments agentInvocationArguments(AgenticScope agenticScope, Method method) throws MissingArgumentException {
+        return AgentUtil.agentInvocationArguments(agenticScope, AgentUtil.argumentsFromMethod(method), Collections.emptyMap());
     }
 
-    public static AgentInvocationArguments agentInvocationArguments(
-            AgenticScope agenticScope, List<AgentArgument> agentArguments) throws MissingArgumentException {
-        return agentInvocationArguments(agenticScope, agentArguments, Collections.emptyMap());
+    public static AgentInvocationArguments agentInvocationArguments(AgenticScope agenticScope, List<AgentArgument> agentArguments) throws MissingArgumentException {
+        return AgentUtil.agentInvocationArguments(agenticScope, agentArguments, Collections.emptyMap());
     }
 
-    public static AgentInvocationArguments agentInvocationArguments(
-            AgenticScope agenticScope, List<AgentArgument> agentArguments, Map<String, Object> additionalArgs)
-            throws MissingArgumentException {
-        Map<String, Object> namedArgs = new HashMap<>();
+    public static AgentInvocationArguments agentInvocationArguments(AgenticScope agenticScope, List<AgentArgument> agentArguments, Map<String, Object> additionalArgs) throws MissingArgumentException {
+        HashMap<String, Object> namedArgs = new HashMap<String, Object>();
         Object[] positionalArgs = new Object[agentArguments.size()];
-
         int i = 0;
         for (AgentArgument arg : agentArguments) {
             String argName = arg.name();
@@ -261,8 +251,7 @@ public class AgentUtil {
                 positionalArgs[i++] = additionalArgs.get(argName);
                 continue;
             }
-
-            Object argValue = argumentFromAgenticScope(agenticScope, arg);
+            Object argValue = AgentUtil.argumentFromAgenticScope(agenticScope, arg);
             positionalArgs[i++] = argValue;
             namedArgs.put(argName, argValue);
         }
@@ -271,16 +260,13 @@ public class AgentUtil {
 
     private static Object argumentFromAgenticScope(AgenticScope agenticScope, AgentArgument arg) {
         Object argValue = agenticScope.readState(arg.name());
-        if (argValue == null) {
-            argValue = arg.defaultValue();
-            if (argValue == null) {
-                if (arg.isOptional()) {
-                    return null;
-                }
-                throw new MissingArgumentException(arg.name());
+        if (argValue == null && (argValue = arg.defaultValue()) == null) {
+            if (arg.isOptional()) {
+                return null;
             }
+            throw new MissingArgumentException(arg.name());
         }
-        Object parsedArgument = adaptValueToType(argValue, arg.rawType());
+        Object parsedArgument = AgentUtil.adaptValueToType(argValue, arg.rawType());
         if (argValue != parsedArgument) {
             agenticScope.writeState(arg.name(), parsedArgument);
         }
@@ -291,70 +277,108 @@ public class AgentUtil {
         if (type.isInstance(value)) {
             return value;
         }
-        if (value instanceof String s) {
-            return switch (type.getName()) {
-                case "java.lang.String", "java.lang.Object" -> s;
-                case "int", "java.lang.Integer" -> Integer.parseInt(s);
-                case "long", "java.lang.Long" -> Long.parseLong(s);
-                case "double", "java.lang.Double" -> Double.parseDouble(s);
-                case "float", "java.lang.Float" -> Float.parseFloat(s);
-                case "boolean", "java.lang.Boolean" -> Boolean.parseBoolean(s);
-                default -> {
-                    try {
-                        yield Json.fromJson(s, type);
-                    } catch (Exception e) {
-                        throw new IllegalArgumentException(
-                                "Cannot deserialize value '" + s + "' to type " + type.getName(), e);
-                    }
+        if (value instanceof String) {
+            String s = (String)value;
+            switch (type.getName()) {
+                case "java.lang.String": 
+                case "java.lang.Object": {
+                    return s;
                 }
-            };
+                case "int": 
+                case "java.lang.Integer": {
+                    return Integer.parseInt(s);
+                }
+                case "long": 
+                case "java.lang.Long": {
+                    return Long.parseLong(s);
+                }
+                case "double": 
+                case "java.lang.Double": {
+                    return Double.parseDouble(s);
+                }
+                case "float": 
+                case "java.lang.Float": {
+                    return Float.valueOf(Float.parseFloat(s));
+                }
+                case "boolean": 
+                case "java.lang.Boolean": {
+                    return Boolean.parseBoolean(s);
+                }
+            }
+            try {
+                return Json.fromJson((String)s, type);
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException("Cannot deserialize value '" + s + "' to type " + type.getName(), e);
+            }
         }
-        if (value instanceof Number n) {
-            return switch (type.getName()) {
-                case "java.lang.String" -> "" + n;
-                case "int", "java.lang.Integer" -> n.intValue();
-                case "long", "java.lang.Long" -> n.longValue();
-                case "double", "java.lang.Double" -> n.doubleValue();
-                case "float", "java.lang.Float" -> n.floatValue();
-                case "short", "java.lang.Short" -> n.shortValue();
-                case "byte", "java.lang.Byte" -> n.byteValue();
-                default -> value;
-            };
+        if (value instanceof Number) {
+            Number n = (Number)value;
+            switch (type.getName()) {
+                case "java.lang.String": {
+                    return "" + n;
+                }
+                case "int": 
+                case "java.lang.Integer": {
+                    return n.intValue();
+                }
+                case "long": 
+                case "java.lang.Long": {
+                    return n.longValue();
+                }
+                case "double": 
+                case "java.lang.Double": {
+                    return n.doubleValue();
+                }
+                case "float": 
+                case "java.lang.Float": {
+                    return Float.valueOf(n.floatValue());
+                }
+                case "short": 
+                case "java.lang.Short": {
+                    return n.shortValue();
+                }
+                case "byte": 
+                case "java.lang.Byte": {
+                    return n.byteValue();
+                }
+            }
+            return value;
         }
         if (value instanceof Map && !Map.class.isAssignableFrom(type)) {
-            return Json.fromJson(Json.toJson(value), type);
+            return Json.fromJson((String)Json.toJson((Object)value), type);
         }
-        if (value instanceof Image image && type == ImageContent.class) {
-            return ImageContent.from(image);
+        if (value instanceof Image) {
+            Image image = (Image)value;
+            if (type == ImageContent.class) {
+                return ImageContent.from((Image)image);
+            }
         }
-        if (value instanceof ImageContent imageContent && type == Image.class) {
-            return imageContent.image();
+        if (value instanceof ImageContent) {
+            ImageContent imageContent = (ImageContent)value;
+            if (type == Image.class) {
+                return imageContent.image();
+            }
         }
         return value;
     }
 
     public static Method validateAgentClass(Class<?> agentServiceClass) {
-        return validateAgentClass(agentServiceClass, true);
+        return AgentUtil.validateAgentClass(agentServiceClass, true);
     }
 
     public static Method validateAgentClass(Class<?> agentServiceClass, boolean failOnMissingAnnotation) {
-        return validateAgentClass(agentServiceClass, failOnMissingAnnotation, null);
+        return AgentUtil.validateAgentClass(agentServiceClass, failOnMissingAnnotation, null);
     }
 
-    public static Method validateAgentClass(
-            Class<?> agentServiceClass,
-            boolean failOnMissingAnnotation,
-            Class<? extends Annotation> patternAnnotation) {
-        Method agentMethod = null;
-        for (Method method : allMethods(agentServiceClass)) {
-            if (method.isAnnotationPresent(Agent.class)
-                    || (patternAnnotation != null && method.isAnnotationPresent(patternAnnotation))) {
-                if (agentMethod != null) {
-                    throw new IllegalArgumentException(
-                            "Multiple agent methods found in class: " + agentServiceClass.getName());
-                }
-                agentMethod = method;
+    public static Method validateAgentClass(Class<?> agentServiceClass, boolean failOnMissingAnnotation, Class<? extends Annotation> patternAnnotation) {
+        AccessibleObject agentMethod = null;
+        for (Method method : Utils.allMethods(agentServiceClass)) {
+            if (!method.isAnnotationPresent(Agent.class) && (patternAnnotation == null || !method.isAnnotationPresent(patternAnnotation))) continue;
+            if (agentMethod != null) {
+                throw new IllegalArgumentException("Multiple agent methods found in class: " + agentServiceClass.getName());
             }
+            agentMethod = method;
         }
         if (agentMethod != null) {
             agentMethod.setAccessible(true);
@@ -365,65 +389,59 @@ public class AgentUtil {
     }
 
     public static <T> T buildAgent(Class<T> agentServiceClass, InvocationHandler invocationHandler) {
-        return (T) Proxy.newProxyInstance(
-                agentServiceClass.getClassLoader(),
-                new Class<?>[] {
-                    agentServiceClass, InternalAgent.class, AgenticScopeOwner.class, AgenticScopeAccess.class
-                },
-                invocationHandler);
+        return (T)Proxy.newProxyInstance(agentServiceClass.getClassLoader(), new Class[]{agentServiceClass, InternalAgent.class, AgenticScopeOwner.class, AgenticScopeAccess.class}, invocationHandler);
     }
 
     public static Map<String, Class<?>> agenticSystemDataTypes(AgentInstance rootAgent) {
-        Map<String, Class<?>> dataTypes = new HashMap<>();
-        collectAgenticSystemDataTypes(rootAgent, dataTypes);
+        HashMap dataTypes = new HashMap();
+        AgentUtil.collectAgenticSystemDataTypes(rootAgent, dataTypes);
         return dataTypes;
     }
 
     private static void collectAgenticSystemDataTypes(AgentInstance rootAgent, Map<String, Class<?>> dataTypes) {
         for (AgentArgument arg : rootAgent.arguments()) {
-            recordType(dataTypes, arg.name(), arg.type());
+            AgentUtil.recordType(dataTypes, arg.name(), arg.type());
         }
         if (rootAgent.outputKey() != null) {
-            recordType(dataTypes, rootAgent.outputKey(), rootAgent.outputType());
+            AgentUtil.recordType(dataTypes, rootAgent.outputKey(), rootAgent.outputType());
         }
         for (AgentInstance subagent : rootAgent.subagents()) {
-            collectAgenticSystemDataTypes(subagent, dataTypes);
+            AgentUtil.collectAgenticSystemDataTypes(subagent, dataTypes);
         }
     }
 
     private static void recordType(Map<String, Class<?>> dataTypes, String name, Type type) {
-        Class<?> keyClass = rawType(type);
+        Class<Object> keyClass = AgentUtil.rawType(type);
         if (TokenStream.class.isAssignableFrom(keyClass)) {
             keyClass = String.class;
         }
         if (!dataTypes.containsKey(name)) {
             dataTypes.put(name, keyClass);
         } else {
-            Class<?> existingType = dataTypes.get(name);
-            if (existingType.isAssignableFrom(keyClass)) {
-                // do nothing, keep the existing type
-            } else if (keyClass.isAssignableFrom(existingType)) {
-                dataTypes.put(name, keyClass);
-            } else if (isImageType(keyClass) && isImageType(existingType)) {
-                // do nothing
-            } else {
-                throw new AgenticSystemConfigurationException("Conflicting types for key '" + name + "': "
-                        + existingType.getName() + " and " + keyClass.getName());
+            Class<Object> existingType = dataTypes.get(name);
+            if (!existingType.isAssignableFrom(keyClass)) {
+                if (keyClass.isAssignableFrom(existingType)) {
+                    dataTypes.put(name, keyClass);
+                } else if (!TypeUtils.isImageType(keyClass) || !TypeUtils.isImageType(existingType)) {
+                    throw new AgenticSystemConfigurationException("Conflicting types for key '" + name + "': " + existingType.getName() + " and " + keyClass.getName());
+                }
             }
         }
     }
 
     public static Class<?> rawType(Type type) {
-        if (type instanceof Class<?> clazz) {
-            return clazz;
+        if (type instanceof Class) {
+            return (Class)type;
         }
-        if (type instanceof ParameterizedType parameterizedType) {
-            Class<?> clazz = (Class<?>) parameterizedType.getRawType();
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType)type;
+            Class clazz = (Class)parameterizedType.getRawType();
             if (clazz == ResultWithAgenticScope.class) {
-                return rawType(parameterizedType.getActualTypeArguments()[0]);
+                return AgentUtil.rawType(parameterizedType.getActualTypeArguments()[0]);
             }
             return clazz;
         }
         throw new IllegalArgumentException("Unsupported type: " + type);
     }
 }
+

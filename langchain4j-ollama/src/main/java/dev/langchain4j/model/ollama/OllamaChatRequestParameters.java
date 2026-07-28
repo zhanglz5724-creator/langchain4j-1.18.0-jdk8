@@ -1,17 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters$Builder
+ */
 package dev.langchain4j.model.ollama;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.quoted;
-
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import java.util.Objects;
 
-public class OllamaChatRequestParameters extends DefaultChatRequestParameters {
-
-    public static final OllamaChatRequestParameters EMPTY =
-            OllamaChatRequestParameters.builder().build();
-
+public class OllamaChatRequestParameters
+extends DefaultChatRequestParameters {
+    public static final OllamaChatRequestParameters EMPTY = OllamaChatRequestParameters.builder().build();
     private final Integer mirostat;
     private final Double mirostatEta;
     private final Double mirostatTau;
@@ -31,7 +36,7 @@ public class OllamaChatRequestParameters extends DefaultChatRequestParameters {
     private final Boolean useMmap;
 
     private OllamaChatRequestParameters(Builder builder) {
-        super(builder);
+        super((DefaultChatRequestParameters.Builder)builder);
         this.mirostat = builder.mirostat;
         this.mirostatEta = builder.mirostatEta;
         this.mirostatTau = builder.mirostatTau;
@@ -52,176 +57,106 @@ public class OllamaChatRequestParameters extends DefaultChatRequestParameters {
     }
 
     public Integer mirostat() {
-        return mirostat;
+        return this.mirostat;
     }
 
     public Double mirostatEta() {
-        return mirostatEta;
+        return this.mirostatEta;
     }
 
     public Double mirostatTau() {
-        return mirostatTau;
+        return this.mirostatTau;
     }
 
     public Integer numCtx() {
-        return numCtx;
+        return this.numCtx;
     }
 
     public Integer numThread() {
-        return numThread;
+        return this.numThread;
     }
 
     public Boolean useMmap() {
-        return useMmap;
+        return this.useMmap;
     }
 
     public Integer mainGPU() {
-        return mainGPU;
+        return this.mainGPU;
     }
 
     public Integer numGPU() {
-        return numGPU;
+        return this.numGPU;
     }
 
     public Integer numBatch() {
-        return numBatch;
+        return this.numBatch;
     }
 
     public Double typicalP() {
-        return typicalP;
+        return this.typicalP;
     }
 
     public Integer numKeep() {
-        return numKeep;
+        return this.numKeep;
     }
 
     public Integer repeatLastN() {
-        return repeatLastN;
+        return this.repeatLastN;
     }
 
     public Double repeatPenalty() {
-        return repeatPenalty;
+        return this.repeatPenalty;
     }
 
     public Integer seed() {
-        return seed;
+        return this.seed;
     }
 
     public Double minP() {
-        return minP;
+        return this.minP;
     }
 
     public Integer keepAlive() {
-        return keepAlive;
+        return this.keepAlive;
     }
 
     public Boolean think() {
-        return think;
+        return this.think;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        OllamaChatRequestParameters that = (OllamaChatRequestParameters) o;
-        return Objects.equals(mirostat, that.mirostat)
-                && Objects.equals(mirostatEta, that.mirostatEta)
-                && Objects.equals(mirostatTau, that.mirostatTau)
-                && Objects.equals(numCtx, that.numCtx)
-                && Objects.equals(numThread, that.numThread)
-                && Objects.equals(numKeep, that.numKeep)
-                && Objects.equals(typicalP, that.typicalP)
-                && Objects.equals(numBatch, that.numBatch)
-                && Objects.equals(numGPU, that.numGPU)
-                && Objects.equals(mainGPU, that.mainGPU)
-                && Objects.equals(useMmap, that.useMmap)
-                && Objects.equals(repeatLastN, that.repeatLastN)
-                && Objects.equals(repeatPenalty, that.repeatPenalty)
-                && Objects.equals(seed, that.seed)
-                && Objects.equals(minP, that.minP)
-                && Objects.equals(keepAlive, that.keepAlive)
-                && Objects.equals(think, that.think);
+    public boolean equals(Object o) {
+        if (o == null || ((Object)((Object)this)).getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        OllamaChatRequestParameters that = (OllamaChatRequestParameters)((Object)o);
+        return Objects.equals(this.mirostat, that.mirostat) && Objects.equals(this.mirostatEta, that.mirostatEta) && Objects.equals(this.mirostatTau, that.mirostatTau) && Objects.equals(this.numCtx, that.numCtx) && Objects.equals(this.numThread, that.numThread) && Objects.equals(this.numKeep, that.numKeep) && Objects.equals(this.typicalP, that.typicalP) && Objects.equals(this.numBatch, that.numBatch) && Objects.equals(this.numGPU, that.numGPU) && Objects.equals(this.mainGPU, that.mainGPU) && Objects.equals(this.useMmap, that.useMmap) && Objects.equals(this.repeatLastN, that.repeatLastN) && Objects.equals(this.repeatPenalty, that.repeatPenalty) && Objects.equals(this.seed, that.seed) && Objects.equals(this.minP, that.minP) && Objects.equals(this.keepAlive, that.keepAlive) && Objects.equals(this.think, that.think);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(
-                super.hashCode(),
-                mirostat,
-                mirostatEta,
-                mirostatTau,
-                numCtx,
-                numThread,
-                numKeep,
-                typicalP,
-                numBatch,
-                numGPU,
-                mainGPU,
-                useMmap,
-                repeatLastN,
-                repeatPenalty,
-                seed,
-                minP,
-                keepAlive,
-                think);
+        return Objects.hash(super.hashCode(), this.mirostat, this.mirostatEta, this.mirostatTau, this.numCtx, this.numThread, this.numKeep, this.typicalP, this.numBatch, this.numGPU, this.mainGPU, this.useMmap, this.repeatLastN, this.repeatPenalty, this.seed, this.minP, this.keepAlive, this.think);
     }
 
-    @Override
     public String toString() {
-        return "OllamaChatRequestParameters{"
-                + "modelName=" + quoted(modelName())
-                + ", temperature=" + temperature()
-                + ", topP=" + topP()
-                + ", topK=" + topK()
-                + ", frequencyPenalty=" + frequencyPenalty()
-                + ", presencePenalty=" + presencePenalty()
-                + ", maxOutputTokens=" + maxOutputTokens()
-                + ", stopSequences=" + stopSequences()
-                + ", toolSpecifications=" + toolSpecifications()
-                + ", toolChoice=" + toolChoice()
-                + ", responseFormat=" + responseFormat()
-                + ", mirostat=" + mirostat
-                + ", mirostatEta=" + mirostatEta
-                + ", mirostatTau=" + mirostatTau
-                + ", numCtx=" + numCtx
-                + ", numThread=" + numThread
-                + ", numKeep=" + numKeep
-                + ", typicalP=" + typicalP
-                + ", numBatch=" + numBatch
-                + ", numGPU=" + numGPU
-                + ", mainGPU=" + mainGPU
-                + ", useMmap=" + useMmap
-                + ", repeatLastN=" + repeatLastN
-                + ", repeatPenalty=" + repeatPenalty
-                + ", seed=" + seed
-                + ", minP=" + minP
-                + ", keepAlive=" + keepAlive
-                + ", think=" + think
-                + '}';
+        return "OllamaChatRequestParameters{modelName=" + Utils.quoted((Object)this.modelName()) + ", temperature=" + this.temperature() + ", topP=" + this.topP() + ", topK=" + this.topK() + ", frequencyPenalty=" + this.frequencyPenalty() + ", presencePenalty=" + this.presencePenalty() + ", maxOutputTokens=" + this.maxOutputTokens() + ", stopSequences=" + this.stopSequences() + ", toolSpecifications=" + this.toolSpecifications() + ", toolChoice=" + this.toolChoice() + ", responseFormat=" + this.responseFormat() + ", mirostat=" + this.mirostat + ", mirostatEta=" + this.mirostatEta + ", mirostatTau=" + this.mirostatTau + ", numCtx=" + this.numCtx + ", numThread=" + this.numThread + ", numKeep=" + this.numKeep + ", typicalP=" + this.typicalP + ", numBatch=" + this.numBatch + ", numGPU=" + this.numGPU + ", mainGPU=" + this.mainGPU + ", useMmap=" + this.useMmap + ", repeatLastN=" + this.repeatLastN + ", repeatPenalty=" + this.repeatPenalty + ", seed=" + this.seed + ", minP=" + this.minP + ", keepAlive=" + this.keepAlive + ", think=" + this.think + '}';
     }
 
-    @Override
     public OllamaChatRequestParameters overrideWith(ChatRequestParameters that) {
-        return OllamaChatRequestParameters.builder()
-                .overrideWith(this)
-                .overrideWith(that)
-                .build();
+        return OllamaChatRequestParameters.builder().overrideWith((ChatRequestParameters)this).overrideWith(that).build();
     }
 
-    @Override
     public OllamaChatRequestParameters defaultedBy(ChatRequestParameters that) {
-        return OllamaChatRequestParameters.builder()
-                .overrideWith(that)
-                .overrideWith(this)
-                .build();
+        return OllamaChatRequestParameters.builder().overrideWith(that).overrideWith((ChatRequestParameters)this).build();
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends DefaultChatRequestParameters.Builder<Builder> {
-
+    public static class Builder
+    extends DefaultChatRequestParameters.Builder<Builder> {
         private Integer mirostat;
         private Double mirostatEta;
         private Double mirostatTau;
@@ -240,62 +175,41 @@ public class OllamaChatRequestParameters extends DefaultChatRequestParameters {
         private Integer mainGPU;
         private Boolean useMmap;
 
-        @Override
         public Builder overrideWith(ChatRequestParameters parameters) {
             super.overrideWith(parameters);
-            if (parameters instanceof OllamaChatRequestParameters ollamaChatRequestParameters) {
-                mirostat(getOrDefault(ollamaChatRequestParameters.mirostat, mirostat));
-                mirostatEta(getOrDefault(ollamaChatRequestParameters.mirostatEta, mirostatEta));
-                mirostatTau(getOrDefault(ollamaChatRequestParameters.mirostatTau, mirostatTau));
-                numCtx(getOrDefault(ollamaChatRequestParameters.numCtx, numCtx));
-                numThread(getOrDefault(ollamaChatRequestParameters.numThread, numThread));
-                numKeep(getOrDefault(ollamaChatRequestParameters.numKeep, numKeep));
-                typicalP(getOrDefault(ollamaChatRequestParameters.typicalP, typicalP));
-                numBatch(getOrDefault(ollamaChatRequestParameters.numBatch, numBatch));
-                numGPU(getOrDefault(ollamaChatRequestParameters.numGPU, numGPU));
-                mainGPU(getOrDefault(ollamaChatRequestParameters.mainGPU, mainGPU));
-                useMmap(getOrDefault(ollamaChatRequestParameters.useMmap, useMmap));
-                repeatLastN(getOrDefault(ollamaChatRequestParameters.repeatLastN, repeatLastN));
-                repeatPenalty(getOrDefault(ollamaChatRequestParameters.repeatPenalty, repeatPenalty));
-                seed(getOrDefault(ollamaChatRequestParameters.seed, seed));
-                minP(getOrDefault(ollamaChatRequestParameters.minP, minP));
-                keepAlive(getOrDefault(ollamaChatRequestParameters.keepAlive, keepAlive));
-                think(getOrDefault(ollamaChatRequestParameters.think, think));
+            if (parameters instanceof OllamaChatRequestParameters) {
+                OllamaChatRequestParameters ollamaChatRequestParameters = (OllamaChatRequestParameters)parameters;
+                this.mirostat((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.mirostat, (Object)this.mirostat));
+                this.mirostatEta((Double)Utils.getOrDefault((Object)ollamaChatRequestParameters.mirostatEta, (Object)this.mirostatEta));
+                this.mirostatTau((Double)Utils.getOrDefault((Object)ollamaChatRequestParameters.mirostatTau, (Object)this.mirostatTau));
+                this.numCtx((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.numCtx, (Object)this.numCtx));
+                this.numThread((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.numThread, (Object)this.numThread));
+                this.numKeep((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.numKeep, (Object)this.numKeep));
+                this.typicalP((Double)Utils.getOrDefault((Object)ollamaChatRequestParameters.typicalP, (Object)this.typicalP));
+                this.numBatch((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.numBatch, (Object)this.numBatch));
+                this.numGPU((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.numGPU, (Object)this.numGPU));
+                this.mainGPU((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.mainGPU, (Object)this.mainGPU));
+                this.useMmap((Boolean)Utils.getOrDefault((Object)ollamaChatRequestParameters.useMmap, (Object)this.useMmap));
+                this.repeatLastN((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.repeatLastN, (Object)this.repeatLastN));
+                this.repeatPenalty((Double)Utils.getOrDefault((Object)ollamaChatRequestParameters.repeatPenalty, (Object)this.repeatPenalty));
+                this.seed((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.seed, (Object)this.seed));
+                this.minP((Double)Utils.getOrDefault((Object)ollamaChatRequestParameters.minP, (Object)this.minP));
+                this.keepAlive((Integer)Utils.getOrDefault((Object)ollamaChatRequestParameters.keepAlive, (Object)this.keepAlive));
+                this.think((Boolean)Utils.getOrDefault((Object)ollamaChatRequestParameters.think, (Object)this.think));
             }
             return this;
         }
 
-        /**
-         * Enable Mirostat sampling for controlling perplexity.
-         * <p>Default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0</p>
-         *
-         * @return builder
-         */
         public Builder mirostat(Integer mirostat) {
             this.mirostat = mirostat;
             return this;
         }
 
-        /**
-         * Influences how quickly the algorithm responds to feedback from the generated text.
-         * <p>A lower learning rate will result in slower adjustments,
-         * while a higher learning rate will make the algorithm more responsive.</p>
-         * <p>Default: 0.1</p>
-         *
-         * @return builder
-         */
         public Builder mirostatEta(Double mirostatEta) {
             this.mirostatEta = mirostatEta;
             return this;
         }
 
-        /**
-         * Controls the balance between coherence and diversity of the output.
-         * <p>A lower value will result in more focused and coherent text.</p>
-         * <p>Default: 5.0</p>
-         *
-         * @return builder
-         */
         public Builder mirostatTau(Double mirostatTau) {
             this.mirostatTau = mirostatTau;
             return this;
@@ -306,13 +220,6 @@ public class OllamaChatRequestParameters extends DefaultChatRequestParameters {
             return this;
         }
 
-        /**
-         * Sets the number of threads to use during computation.
-         * <p>Useful for CPU-only machines to control CPU utilization.</p>
-         * <p>Default: detected automatically</p>
-         *
-         * @return builder
-         */
         public Builder numThread(Integer numThread) {
             this.numThread = numThread;
             return this;
@@ -363,50 +270,24 @@ public class OllamaChatRequestParameters extends DefaultChatRequestParameters {
             return this;
         }
 
-        /**
-         * Alternative to the {@code topP}, and aims to ensure a balance of quality and variety.
-         * The parameter p represents the minimum probability for a token to be considered,
-         * relative to the probability of the most likely token.
-         * <p>For example, with p=0.05 and the most likely token having a probability of 0.9,
-         * logits with a value less than 0.045 are filtered out.</p>
-         * <p>Default: 0.0</p>
-         *
-         * @return builder
-         */
         public Builder minP(Double minP) {
             this.minP = minP;
             return this;
         }
 
-        /**
-         * Controls how long the model will stay loaded into memory following the request
-         * <p>Default: 5m</p>
-         *
-         * @return builder
-         */
         public Builder keepAlive(Integer keepAlive) {
             this.keepAlive = keepAlive;
             return this;
         }
 
-        /**
-         * Controls <a href="https://ollama.com/blog/thinking">thinking</a>.
-         * <pre>
-         * <code>true</code>: the LLM thinks and returns thoughts in a separate <code>thinking</code> field
-         * <code>false</code>: the LLM does not think
-         * <code>null</code> (not set): reasoning LLMs (e.g., DeepSeek R1) will prepend thoughts, delimited by <code>&lt;think&gt;</code> and <code>&lt;/think&gt;</code>, to the actual response
-         * </pre>
-         *
-         * @see OllamaChatModel.Builder#returnThinking(Boolean)
-         */
         public Builder think(Boolean think) {
             this.think = think;
             return this;
         }
 
-        @Override
         public OllamaChatRequestParameters build() {
             return new OllamaChatRequestParameters(this);
         }
     }
 }
+

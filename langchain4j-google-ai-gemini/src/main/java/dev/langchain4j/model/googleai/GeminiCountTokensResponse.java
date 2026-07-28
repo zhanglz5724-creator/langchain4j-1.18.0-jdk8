@@ -1,35 +1,48 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonCreator
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.googleai;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonIgnoreProperties(ignoreUnknown = true) class GeminiCountTokensResponse {
-    private final Object @JsonProperty("totalTokens";
+import java.util.Objects;
 
-    public GeminiCountTokensResponse(Object @JsonProperty("totalTokens") {
-        this.@JsonProperty("totalTokens" = @JsonProperty("totalTokens";
+@JsonIgnoreProperties(ignoreUnknown=true)
+final class GeminiCountTokensResponse {
+    private final Integer totalTokens;
+
+    @JsonCreator
+    GeminiCountTokensResponse(@JsonProperty(value="totalTokens") Integer totalTokens) {
+        this.totalTokens = totalTokens;
     }
 
-    public Object get@JsonProperty("totalTokens"() {
-        return @JsonProperty("totalTokens";
+    Integer totalTokens() {
+        return this.totalTokens;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GeminiCountTokensResponse that = (GeminiCountTokensResponse) o;
-        return java.util.Objects.equals(this.@JsonProperty("totalTokens", that.@JsonProperty("totalTokens");
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GeminiCountTokensResponse)) {
+            return false;
+        }
+        GeminiCountTokensResponse that = (GeminiCountTokensResponse)o;
+        return Objects.equals(this.totalTokens, that.totalTokens);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(@JsonProperty("totalTokens");
+        return Objects.hash(this.totalTokens);
     }
 
-    @Override
     public String toString() {
-        return "GeminiCountTokensResponse{"@JsonProperty("totalTokens"=" + @JsonProperty("totalTokens" + "}"";
+        return "GeminiCountTokensResponse[totalTokens=" + this.totalTokens + "]";
     }
-
 }
+

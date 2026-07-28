@@ -1,54 +1,59 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.http.client.sse;
 
-import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+import dev.langchain4j.http.client.sse.DefaultServerSentEventParsingHandle;
+import dev.langchain4j.http.client.sse.ServerSentEvent;
+import dev.langchain4j.http.client.sse.ServerSentEventContext;
+import dev.langchain4j.http.client.sse.ServerSentEventListener;
+import dev.langchain4j.http.client.sse.ServerSentEventListenerUtils;
+import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
-public class DefaultServerSentEventParser implements ServerSentEventParser {
-
+public class DefaultServerSentEventParser
+implements ServerSentEventParser {
     @Override
     public void parse(InputStream httpResponseBody, ServerSentEventListener listener) {
-        ServerSentEventParsingHandle parsingHandle = new DefaultServerSentEventParsingHandle(httpResponseBody);
+        DefaultServerSentEventParsingHandle parsingHandle = new DefaultServerSentEventParsingHandle(httpResponseBody);
         ServerSentEventContext context = new ServerSentEventContext(parsingHandle);
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponseBody, UTF_8))) {
-
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponseBody, StandardCharsets.UTF_8));){
+            ServerSentEvent sse;
+            String line;
             String event = null;
             StringBuilder data = new StringBuilder();
-
-            String line;
             while (!parsingHandle.isCancelled() && (line = reader.readLine()) != null) {
                 if (line.isEmpty()) {
-                    if (!data.isEmpty()) {
-                        ServerSentEvent sse = new ServerSentEvent(event, data.toString());
-                        ignoringExceptions(() -> listener.onEvent(sse, context));
-                        event = null;
-                        data.setLength(0);
-                    }
+                    if (data.length() == 0) continue;
+                    sse = new ServerSentEvent(event, data.toString());
+                    ServerSentEventListenerUtils.ignoringExceptions(() -> listener.onEvent(sse, context));
+                    event = null;
+                    data.setLength(0);
                     continue;
                 }
-
                 if (line.startsWith("event:")) {
                     event = line.substring("event:".length()).trim();
-                } else if (line.startsWith("data:")) {
-                    String content = line.substring("data:".length());
-                    if (!data.isEmpty()) {
-                        data.append("\n");
-                    }
-                    data.append(content.trim());
+                    continue;
                 }
+                if (!line.startsWith("data:")) continue;
+                String content = line.substring("data:".length());
+                if (data.length() != 0) {
+                    data.append("\n");
+                }
+                data.append(content.trim());
             }
-
-            if (!parsingHandle.isCancelled() && !data.isEmpty()) {
-                ServerSentEvent sse = new ServerSentEvent(event, data.toString());
-                ignoringExceptions(() -> listener.onEvent(sse, context));
+            if (!parsingHandle.isCancelled() && data.length() != 0) {
+                sse = new ServerSentEvent(event, data.toString());
+                ServerSentEventListenerUtils.ignoringExceptions(() -> listener.onEvent(sse, context));
             }
-        } catch (IOException e) {
-            ignoringExceptions(() -> listener.onError(e));
+        }
+        catch (IOException e) {
+            ServerSentEventListenerUtils.ignoringExceptions(() -> listener.onError(e));
         }
     }
 }
+

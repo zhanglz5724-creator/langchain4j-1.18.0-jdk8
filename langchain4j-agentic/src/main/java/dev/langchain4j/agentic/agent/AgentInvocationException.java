@@ -1,11 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.exception.LangChain4jException
+ */
 package dev.langchain4j.agentic.agent;
 
 import dev.langchain4j.exception.LangChain4jException;
 
-public class AgentInvocationException extends LangChain4jException {
-
+public class AgentInvocationException
+extends LangChain4jException {
     public AgentInvocationException(Exception cause) {
-        super(cause);
+        super((Throwable)cause);
     }
 
     public AgentInvocationException(String message) {
@@ -13,6 +19,7 @@ public class AgentInvocationException extends LangChain4jException {
     }
 
     public AgentInvocationException(String message, Exception cause) {
-        super(message, cause);
+        super(message, (Throwable)cause);
     }
 }
+

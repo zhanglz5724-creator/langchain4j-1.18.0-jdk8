@@ -1,5 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.completion;
-
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -9,20 +22,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
-
-@JsonDeserialize(builder = Logprobs.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Logprobs {
-
     @JsonProperty
     private final List<String> tokens;
     @JsonProperty
@@ -40,68 +49,57 @@ public final class Logprobs {
     }
 
     public List<String> tokens() {
-        return tokens;
+        return this.tokens;
     }
 
     public List<Double> tokenLogprobs() {
-        return tokenLogprobs;
+        return this.tokenLogprobs;
     }
 
     public List<Map<String, Double>> topLogprobs() {
-        return topLogprobs;
+        return this.topLogprobs;
     }
 
     public List<Integer> textOffset() {
-        return textOffset;
+        return this.textOffset;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof Logprobs
-                && equalTo((Logprobs) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof Logprobs && this.equalTo((Logprobs)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(Logprobs another) {
-        return Objects.equals(tokens, another.tokens)
-                && Objects.equals(tokenLogprobs, another.tokenLogprobs)
-                && Objects.equals(topLogprobs, another.topLogprobs)
-                && Objects.equals(textOffset, another.textOffset);
+        return Objects.equals(this.tokens, another.tokens) && Objects.equals(this.tokenLogprobs, another.tokenLogprobs) && Objects.equals(this.topLogprobs, another.topLogprobs) && Objects.equals(this.textOffset, another.textOffset);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(tokens);
-        h += (h << 5) + Objects.hashCode(tokenLogprobs);
-        h += (h << 5) + Objects.hashCode(topLogprobs);
-        h += (h << 5) + Objects.hashCode(textOffset);
+        h += (h << 5) + Objects.hashCode(this.tokens);
+        h += (h << 5) + Objects.hashCode(this.tokenLogprobs);
+        h += (h << 5) + Objects.hashCode(this.topLogprobs);
+        h += (h << 5) + Objects.hashCode(this.textOffset);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "Logprobs{"
-                + "tokens=" + tokens
-                + ", tokenLogprobs=" + tokenLogprobs
-                + ", topLogprobs=" + topLogprobs
-                + ", textOffset=" + textOffset
-                + "}";
+        return "Logprobs{tokens=" + this.tokens + ", tokenLogprobs=" + this.tokenLogprobs + ", topLogprobs=" + this.topLogprobs + ", textOffset=" + this.textOffset + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private List<String> tokens;
         private List<Double> tokenLogprobs;
         private List<Map<String, Double>> topLogprobs;
@@ -109,33 +107,32 @@ public final class Logprobs {
 
         public Builder tokens(List<String> tokens) {
             if (tokens != null) {
-                this.tokens = unmodifiableList(tokens);
+                this.tokens = Collections.unmodifiableList(tokens);
             }
             return this;
         }
 
         public Builder tokenLogprobs(List<Double> tokenLogprobs) {
             if (tokenLogprobs != null) {
-                this.tokenLogprobs = unmodifiableList(tokenLogprobs);
+                this.tokenLogprobs = Collections.unmodifiableList(tokenLogprobs);
             }
             return this;
         }
 
         public Builder topLogprobs(List<Map<String, Double>> topLogprobs) {
             if (topLogprobs != null) {
-                List<Map<String, Double>> topLogprobsCopy = new ArrayList<>();
+                ArrayList<Map<String, Double>> topLogprobsCopy = new ArrayList<Map<String, Double>>();
                 for (Map<String, Double> map : topLogprobs) {
-                    topLogprobsCopy.add(unmodifiableMap(map));
+                    topLogprobsCopy.add(Collections.unmodifiableMap(map));
                 }
-                this.topLogprobs = unmodifiableList(topLogprobsCopy);
+                this.topLogprobs = Collections.unmodifiableList(topLogprobsCopy);
             }
-
             return this;
         }
 
         public Builder textOffset(List<Integer> textOffset) {
             if (textOffset != null) {
-                this.textOffset = unmodifiableList(textOffset);
+                this.textOffset = Collections.unmodifiableList(textOffset);
             }
             return this;
         }
@@ -145,3 +142,4 @@ public final class Logprobs {
         }
     }
 }
+

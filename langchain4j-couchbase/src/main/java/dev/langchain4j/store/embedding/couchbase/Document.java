@@ -1,9 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.couchbase;
 
+import java.util.Arrays;
 import java.util.Map;
 
 class Document {
-
     private String id;
     private float[] vector;
     private String text;
@@ -55,43 +58,54 @@ class Document {
         this.metadata = metadata;
     }
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Document)) return false;
-        final Document other = (Document) o;
-        if (!other.canEqual((Object) this)) return false;
-        final Object this$id = this.getId();
-        final Object other$id = other.getId();
-        if (this$id == null ? other$id != null : !this$id.equals(other$id)) return false;
-        if (!java.util.Arrays.equals(this.getVector(), other.getVector())) return false;
-        final Object this$text = this.getText();
-        final Object other$text = other.getText();
-        if (this$text == null ? other$text != null : !this$text.equals(other$text)) return false;
-        final Object this$metadata = this.getMetadata();
-        final Object other$metadata = other.getMetadata();
-        if (this$metadata == null ? other$metadata != null : !this$metadata.equals(other$metadata)) return false;
-        return true;
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Document)) {
+            return false;
+        }
+        Document other = (Document)o;
+        if (!other.canEqual(this)) {
+            return false;
+        }
+        String this$id = this.getId();
+        String other$id = other.getId();
+        if (this$id == null ? other$id != null : !this$id.equals(other$id)) {
+            return false;
+        }
+        if (!Arrays.equals(this.getVector(), other.getVector())) {
+            return false;
+        }
+        String this$text = this.getText();
+        String other$text = other.getText();
+        if (this$text == null ? other$text != null : !this$text.equals(other$text)) {
+            return false;
+        }
+        Map<String, Object> this$metadata = this.getMetadata();
+        Map<String, Object> other$metadata = other.getMetadata();
+        return !(this$metadata == null ? other$metadata != null : !((Object)this$metadata).equals(other$metadata));
     }
 
-    protected boolean canEqual(final Object other) {
+    protected boolean canEqual(Object other) {
         return other instanceof Document;
     }
 
     public int hashCode() {
-        final int PRIME = 59;
+        int PRIME = 59;
         int result = 1;
-        final Object $id = this.getId();
-        result = result * PRIME + ($id == null ? 43 : $id.hashCode());
-        result = result * PRIME + java.util.Arrays.hashCode(this.getVector());
-        final Object $text = this.getText();
-        result = result * PRIME + ($text == null ? 43 : $text.hashCode());
-        final Object $metadata = this.getMetadata();
-        result = result * PRIME + ($metadata == null ? 43 : $metadata.hashCode());
+        String $id = this.getId();
+        result = result * 59 + ($id == null ? 43 : $id.hashCode());
+        result = result * 59 + Arrays.hashCode(this.getVector());
+        String $text = this.getText();
+        result = result * 59 + ($text == null ? 43 : $text.hashCode());
+        Map<String, Object> $metadata = this.getMetadata();
+        result = result * 59 + ($metadata == null ? 43 : ((Object)$metadata).hashCode());
         return result;
     }
 
     public String toString() {
-        return "Document(id=" + this.getId() + ", vector=" + java.util.Arrays.toString(this.getVector()) + ", text=" + this.getText() + ", metadata=" + this.getMetadata() + ")";
+        return "Document(id=" + this.getId() + ", vector=" + Arrays.toString(this.getVector()) + ", text=" + this.getText() + ", metadata=" + this.getMetadata() + ")";
     }
 
     public static class DocumentBuilder {
@@ -128,7 +142,8 @@ class Document {
         }
 
         public String toString() {
-            return "Document.DocumentBuilder(id=" + this.id + ", vector=" + java.util.Arrays.toString(this.vector) + ", text=" + this.text + ", metadata=" + this.metadata + ")";
+            return "Document.DocumentBuilder(id=" + this.id + ", vector=" + Arrays.toString(this.vector) + ", text=" + this.text + ", metadata=" + this.metadata + ")";
         }
     }
 }
+

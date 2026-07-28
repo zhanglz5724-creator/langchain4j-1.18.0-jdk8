@@ -1,6 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.openai.internal;
 
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.model.openai.internal.DefaultOpenAiClient;
+import dev.langchain4j.model.openai.internal.SyncOrAsync;
+import dev.langchain4j.model.openai.internal.SyncOrAsyncOrStreaming;
 import dev.langchain4j.model.openai.internal.audio.texttospeech.OpenAiTextToSpeechRequest;
 import dev.langchain4j.model.openai.internal.audio.texttospeech.OpenAiTextToSpeechResponse;
 import dev.langchain4j.model.openai.internal.audio.transcription.OpenAiAudioTranscriptionRequest;
@@ -20,21 +30,21 @@ import dev.langchain4j.model.openai.internal.moderation.ModerationResponse;
 import dev.langchain4j.model.openai.internal.spi.OpenAiClientBuilderFactory;
 import dev.langchain4j.model.openai.internal.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 
 public abstract class OpenAiClient {
+    public abstract SyncOrAsyncOrStreaming<CompletionResponse> completion(CompletionRequest var1);
 
-    public abstract SyncOrAsyncOrStreaming<CompletionResponse> completion(CompletionRequest request);
+    public abstract SyncOrAsyncOrStreaming<ChatCompletionResponse> chatCompletion(ChatCompletionRequest var1);
 
-    public abstract SyncOrAsyncOrStreaming<ChatCompletionResponse> chatCompletion(ChatCompletionRequest request);
+    public abstract SyncOrAsync<EmbeddingResponse> embedding(EmbeddingRequest var1);
 
-    public abstract SyncOrAsync<EmbeddingResponse> embedding(EmbeddingRequest request);
+    public abstract SyncOrAsync<ModerationResponse> moderation(ModerationRequest var1);
 
-    public abstract SyncOrAsync<ModerationResponse> moderation(ModerationRequest request);
-
-    public abstract SyncOrAsync<GenerateImagesResponse> imagesGeneration(GenerateImagesRequest request);
+    public abstract SyncOrAsync<GenerateImagesResponse> imagesGeneration(GenerateImagesRequest var1);
 
     public SyncOrAsync<GenerateImagesResponse> imagesEdit(EditImageRequest request) {
         throw new UnsupportedOperationException("Image editing is not supported by this client implementation");
@@ -52,18 +62,16 @@ public abstract class OpenAiClient {
         throw new UnsupportedOperationException("Model listing is not supported by this client implementation");
     }
 
-    @SuppressWarnings("rawtypes")
     public static Builder builder() {
-        for (OpenAiClientBuilderFactory factory : ServiceHelper.loadFactories(OpenAiClientBuilderFactory.class)) {
-            return factory.get();
+        Iterator<OpenAiClientBuilderFactory> iterator = ServiceHelper.loadFactories(OpenAiClientBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            OpenAiClientBuilderFactory factory = iterator.next();
+            return (Builder)factory.get();
         }
-        // fallback to the default
         return DefaultOpenAiClient.builder();
     }
 
-    @SuppressWarnings("unchecked")
-    public abstract static class Builder<T extends OpenAiClient, B extends Builder<T, B>> {
-
+    public static abstract class Builder<T extends OpenAiClient, B extends Builder<T, B>> {
         public HttpClientBuilder httpClientBuilder;
         public String baseUrl;
         public String organizationId;
@@ -82,61 +90,42 @@ public abstract class OpenAiClient {
 
         public B httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * @param baseUrl Base URL of OpenAI API. For example: "https://api.openai.com/v1/"
-         * @return builder
-         */
         public B baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * @param organizationId The OpenAI Organization ID.
-         *                       More info <a href="https://platform.openai.com/docs/api-reference/organizations-and-projects-optional">here</a>.
-         * @return builder
-         */
         public B organizationId(String organizationId) {
             this.organizationId = organizationId;
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * @param projectId The OpenAI Project ID.
-         *                  More info <a href="https://platform.openai.com/docs/api-reference/organizations-and-projects-optional">here</a>.
-         * @return builder
-         */
         public B projectId(String projectId) {
             this.projectId = projectId;
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * @param apiKey OpenAI API key.
-         *               Will be injected in HTTP headers like this: "Authorization: Bearer ${apiKey}"
-         * @return builder
-         */
         public B apiKey(String apiKey) {
             this.apiKey = apiKey;
-            return (B) this;
+            return (B)this;
         }
 
         public B connectTimeout(Duration connectTimeout) {
             this.connectTimeout = connectTimeout;
-            return (B) this;
+            return (B)this;
         }
 
         public B readTimeout(Duration readTimeout) {
             this.readTimeout = readTimeout;
-            return (B) this;
+            return (B)this;
         }
 
         public B userAgent(String userAgent) {
             this.userAgent = userAgent;
-            return (B) this;
+            return (B)this;
         }
 
         public B logRequests(Boolean logRequests) {
@@ -144,12 +133,12 @@ public abstract class OpenAiClient {
                 logRequests = false;
             }
             this.logRequests = logRequests;
-            return (B) this;
+            return (B)this;
         }
 
         public B logger(Logger logger) {
             this.logger = logger;
-            return (B) this;
+            return (B)this;
         }
 
         public B logResponses(Boolean logResponses) {
@@ -157,42 +146,23 @@ public abstract class OpenAiClient {
                 logResponses = false;
             }
             this.logResponses = logResponses;
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * Custom headers to be added to each HTTP request.
-         *
-         * @param customHeaders a map of headers
-         * @return builder
-         */
         public B customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * A supplier for custom headers to be added to each HTTP request.
-         * The supplier is called before each request, allowing dynamic header values.
-         * For example, this is useful for OAuth2 tokens that expire and need refreshing.
-         *
-         * @param customHeadersSupplier a supplier that provides a map of headers
-         * @return builder
-         */
         public B customHeaders(Supplier<Map<String, String>> customHeadersSupplier) {
             this.customHeadersSupplier = customHeadersSupplier;
-            return (B) this;
+            return (B)this;
         }
 
-        /**
-         * Custom query parameters to be added to each HTTP request URL.
-         *
-         * @param customQueryParams a map of query parameters
-         * @return builder
-         */
         public B customQueryParams(Map<String, String> customQueryParams) {
             this.customQueryParams = customQueryParams;
-            return (B) this;
+            return (B)this;
         }
     }
 }
+

@@ -107,7 +107,7 @@ public class ChatModelMock implements ChatModel {
     /**
      * @deprecated use {@link #requests()} instead
      */
-    @Deprecated(since = "1.12.0")
+    @Deprecated()
     public List<List<ChatMessage>> getRequests() {
         return requests.stream().map(ChatRequest::messages).collect(Collectors.toList());
     }

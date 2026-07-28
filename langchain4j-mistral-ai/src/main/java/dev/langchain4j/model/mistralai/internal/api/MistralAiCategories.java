@@ -1,6 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,12 +21,11 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiCategories.MistralCategoriesBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralCategoriesBuilder.class)
 public class MistralAiCategories {
-
     private final Boolean sexual;
     private final Boolean hateAndDiscrimination;
     private final Boolean violenceAndThreats;
@@ -38,38 +47,37 @@ public class MistralAiCategories {
     }
 
     public Boolean getSexual() {
-        return sexual;
+        return this.sexual;
     }
 
     public Boolean getHateAndDiscrimination() {
-        return hateAndDiscrimination;
+        return this.hateAndDiscrimination;
     }
 
     public Boolean getViolenceAndThreats() {
-        return violenceAndThreats;
+        return this.violenceAndThreats;
     }
 
     public Boolean getDangerousAndCriminalContent() {
-        return dangerousAndCriminalContent;
+        return this.dangerousAndCriminalContent;
     }
 
     public Boolean getSelfHarm() {
-        return selfHarm;
+        return this.selfHarm;
     }
 
     public Boolean getHealth() {
-        return health;
+        return this.health;
     }
 
     public Boolean getLaw() {
-        return law;
+        return this.law;
     }
 
     public Boolean getPii() {
-        return pii;
+        return this.pii;
     }
 
-    @Override
     public int hashCode() {
         int hash = 5;
         hash = 67 * hash + Objects.hashCode(this.sexual);
@@ -83,7 +91,6 @@ public class MistralAiCategories {
         return hash;
     }
 
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -91,43 +98,25 @@ public class MistralAiCategories {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.getClass() != obj.getClass()) {
             return false;
         }
-        final MistralAiCategories other = (MistralAiCategories) obj;
-        return Objects.equals(this.sexual, other.sexual)
-                && Objects.equals(this.hateAndDiscrimination, other.hateAndDiscrimination)
-                && Objects.equals(this.violenceAndThreats, other.violenceAndThreats)
-                && Objects.equals(this.dangerousAndCriminalContent, other.dangerousAndCriminalContent)
-                && Objects.equals(this.selfHarm, other.selfHarm)
-                && Objects.equals(this.health, other.health)
-                && Objects.equals(this.law, other.law)
-                && Objects.equals(this.pii, other.pii);
+        MistralAiCategories other = (MistralAiCategories)obj;
+        return Objects.equals(this.sexual, other.sexual) && Objects.equals(this.hateAndDiscrimination, other.hateAndDiscrimination) && Objects.equals(this.violenceAndThreats, other.violenceAndThreats) && Objects.equals(this.dangerousAndCriminalContent, other.dangerousAndCriminalContent) && Objects.equals(this.selfHarm, other.selfHarm) && Objects.equals(this.health, other.health) && Objects.equals(this.law, other.law) && Objects.equals(this.pii, other.pii);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiCategories [", "]")
-                .add("sexual=" + this.getSexual())
-                .add("hateAndDiscrimination=" + this.getHateAndDiscrimination())
-                .add("violenceAndThreats=" + this.getViolenceAndThreats())
-                .add("dangerousAndCriminalContent=" + this.getDangerousAndCriminalContent())
-                .add("selfHarm=" + this.getSelfHarm())
-                .add("health=" + this.getHealth())
-                .add("law=" + this.getLaw())
-                .add("pii=" + this.getPii())
-                .toString();
+        return new StringJoiner(", ", "MistralAiCategories [", "]").add("sexual=" + this.getSexual()).add("hateAndDiscrimination=" + this.getHateAndDiscrimination()).add("violenceAndThreats=" + this.getViolenceAndThreats()).add("dangerousAndCriminalContent=" + this.getDangerousAndCriminalContent()).add("selfHarm=" + this.getSelfHarm()).add("health=" + this.getHealth()).add("law=" + this.getLaw()).add("pii=" + this.getPii()).toString();
     }
 
     public static MistralCategoriesBuilder builder() {
         return new MistralCategoriesBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralCategoriesBuilder {
-
         private Boolean sexual;
         private Boolean hateAndDiscrimination;
         private Boolean violenceAndThreats;
@@ -137,7 +126,8 @@ public class MistralAiCategories {
         private Boolean law;
         private Boolean pii;
 
-        private MistralCategoriesBuilder() {}
+        private MistralCategoriesBuilder() {
+        }
 
         public MistralCategoriesBuilder sexual(Boolean sexual) {
             this.sexual = sexual;
@@ -145,7 +135,7 @@ public class MistralAiCategories {
         }
 
         public Boolean getHateAndDiscrimination() {
-            return hateAndDiscrimination;
+            return this.hateAndDiscrimination;
         }
 
         public MistralCategoriesBuilder hateAndDiscrimination(Boolean hateAndDiscrimination) {
@@ -188,3 +178,4 @@ public class MistralAiCategories {
         }
     }
 }
+

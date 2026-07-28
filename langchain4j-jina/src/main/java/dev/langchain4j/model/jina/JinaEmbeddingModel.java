@@ -1,3 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.embedding.Embedding
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ContentType
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel
+ *  dev.langchain4j.model.embedding.listener.EmbeddingModelListener
+ *  dev.langchain4j.model.embedding.request.EmbeddingInput
+ *  dev.langchain4j.model.embedding.request.EmbeddingRequest
+ *  dev.langchain4j.model.embedding.response.EmbeddingResponse
+ *  dev.langchain4j.model.embedding.response.EmbeddingResponseMetadata
+ *  dev.langchain4j.model.output.TokenUsage
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.jina;
 
 import dev.langchain4j.data.embedding.Embedding;
@@ -5,12 +29,13 @@ import dev.langchain4j.data.image.Image;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ContentType;
 import dev.langchain4j.data.message.ImageContent;
-import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.exception.UnsupportedFeatureException;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.embedding.DimensionAwareEmbeddingModel;
-import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.embedding.request.EmbeddingInput;
 import dev.langchain4j.model.embedding.request.EmbeddingRequest;
@@ -19,85 +44,47 @@ import dev.langchain4j.model.embedding.response.EmbeddingResponseMetadata;
 import dev.langchain4j.model.jina.internal.api.JinaEmbeddingRequest;
 import dev.langchain4j.model.jina.internal.api.JinaEmbeddingResponse;
 import dev.langchain4j.model.jina.internal.api.JinaMultimodalEmbeddingRequest;
-import dev.langchain4j.model.jina.internal.api.JinaMultimodalEmbeddingRequest.JinaMultimodalInput;
 import dev.langchain4j.model.jina.internal.client.JinaClient;
-import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
-import org.slf4j.Logger;
-
 import java.time.Duration;
-import java.util.List;
-import java.util.Set;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
 
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.time.Duration.ofSeconds;
-import static java.util.stream.Collectors.toList;
-
-/**
- * An implementation of an {@link EmbeddingModel} that uses
- * <a href="https://jina.ai/embeddings">Jina Embeddings API</a>.
- */
-public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
-
+public class JinaEmbeddingModel
+extends DimensionAwareEmbeddingModel {
     private static final String DEFAULT_BASE_URL = "https://api.jina.ai/";
-
     private final JinaClient client;
     private final String modelName;
     private final Integer maxRetries;
     private final Boolean lateChunking;
     private final List<EmbeddingModelListener> listeners;
 
-    @Deprecated(forRemoval = true, since = "1.4.0")
-    public JinaEmbeddingModel(
-            String baseUrl,
-            String apiKey,
-            String modelName,
-            Duration timeout,
-            Integer maxRetries,
-            Boolean lateChunking,
-            Boolean logRequests,
-            Boolean logResponses) {
-        this.client = JinaClient.builder()
-                .baseUrl(getOrDefault(baseUrl, DEFAULT_BASE_URL))
-                .apiKey(apiKey)
-                .timeout(getOrDefault(timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(logRequests, false))
-                .logResponses(getOrDefault(logResponses, false))
-                .build();
-        this.modelName = ensureNotBlank(modelName, "modelName");
-        this.maxRetries = getOrDefault(maxRetries, 2);
-        this.lateChunking = getOrDefault(lateChunking, false);
+    @Deprecated
+    public JinaEmbeddingModel(String baseUrl, String apiKey, String modelName, Duration timeout, Integer maxRetries, Boolean lateChunking, Boolean logRequests, Boolean logResponses) {
+        this.client = JinaClient.builder().baseUrl((String)Utils.getOrDefault((Object)baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(apiKey).timeout((Duration)Utils.getOrDefault((Object)timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)logResponses, (Object)false)).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)maxRetries, (Object)2);
+        this.lateChunking = (Boolean)Utils.getOrDefault((Object)lateChunking, (Object)false);
         this.listeners = Collections.emptyList();
     }
 
     public JinaEmbeddingModel(JinaEmbeddingModelBuilder builder) {
-        this.client = JinaClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.baseUrl, DEFAULT_BASE_URL))
-                .apiKey(builder.apiKey)
-                .timeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
-        this.lateChunking = getOrDefault(builder.lateChunking, false);
-        this.listeners = copy(builder.listeners);
+        this.client = JinaClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(builder.apiKey).timeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false)).logger(builder.logger).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
+        this.lateChunking = (Boolean)Utils.getOrDefault((Object)builder.lateChunking, (Object)false);
+        this.listeners = Utils.copy((List)builder.listeners);
     }
 
-    @Override
     public List<EmbeddingModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
         return ModelProvider.JINA;
     }
@@ -106,93 +93,74 @@ public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
         return new JinaEmbeddingModelBuilder();
     }
 
-    @Override
     public String modelName() {
         return this.modelName;
     }
 
-    @Override
     public Set<ContentType> supportedContentTypes() {
-        return isMultimodalModel(modelName)
-                ? Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE)))
-                : Collections.singleton(ContentType.TEXT);
+        return JinaEmbeddingModel.isMultimodalModel(this.modelName) ? new HashSet<ContentType>(Arrays.asList(ContentType.TEXT, ContentType.IMAGE)) : Collections.singleton(ContentType.TEXT);
     }
 
-    @Override
     public EmbeddingResponse doEmbed(EmbeddingRequest request) {
-
-        List<Embedding> embeddings;
         JinaEmbeddingResponse response;
-
-        if (isMultimodalModel(modelName)) {
-            JinaMultimodalEmbeddingRequest wireRequest = buildMultimodalRequest(request);
-            response = withRetryMappingExceptions(() -> client.embedMultimodal(wireRequest), maxRetries);
+        Object wireRequest;
+        if (JinaEmbeddingModel.isMultimodalModel(this.modelName)) {
+            wireRequest = this.buildMultimodalRequest(request);
+            response = (JinaEmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.lambda$doEmbed$0((JinaMultimodalEmbeddingRequest)wireRequest), (int)this.maxRetries);
         } else {
-            JinaEmbeddingRequest wireRequest = JinaEmbeddingRequest.builder()
-                    .model(modelName)
-                    .lateChunking(lateChunking)
-                    .input(request.inputs().stream().map(EmbeddingInput::text).collect(toList()))
-                    .build();
-            response = withRetryMappingExceptions(() -> client.embed(wireRequest), maxRetries);
+            wireRequest = JinaEmbeddingRequest.builder().model(this.modelName).lateChunking(this.lateChunking).input(request.inputs().stream().map(EmbeddingInput::text).collect(Collectors.toList())).build();
+            response = (JinaEmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.lambda$doEmbed$1((JinaEmbeddingRequest)wireRequest), (int)this.maxRetries);
         }
-
-        embeddings = response.data == null
-                ? Collections.emptyList()
-                : response.data.stream()
-                        .map(jinaEmbedding -> Embedding.from(jinaEmbedding.embedding))
-                        .collect(toList());
-
-        TokenUsage tokenUsage = response.usage == null
-                ? null
-                : new TokenUsage(response.usage.promptTokens, 0, response.usage.totalTokens);
-
-        return EmbeddingResponse.builder()
-                .embeddings(embeddings)
-                .metadata(EmbeddingResponseMetadata.builder()
-                        .modelName(getOrDefault(response.model, modelName))
-                        .tokenUsage(tokenUsage)
-                        .build())
-                .build();
+        List embeddings = response.data == null ? Collections.emptyList() : response.data.stream().map(jinaEmbedding -> Embedding.from((float[])jinaEmbedding.embedding)).collect(Collectors.toList());
+        TokenUsage tokenUsage = response.usage == null ? null : new TokenUsage(response.usage.promptTokens, Integer.valueOf(0), response.usage.totalTokens);
+        return EmbeddingResponse.builder().embeddings(embeddings).metadata(EmbeddingResponseMetadata.builder().modelName((String)Utils.getOrDefault((Object)response.model, (Object)this.modelName)).tokenUsage(tokenUsage).build()).build();
     }
 
     JinaMultimodalEmbeddingRequest buildMultimodalRequest(EmbeddingRequest request) {
-        return new JinaMultimodalEmbeddingRequest(
-                modelName, request.inputs().stream().map(this::toMultimodalInput).collect(toList()));
+        return new JinaMultimodalEmbeddingRequest(this.modelName, request.inputs().stream().map(this::toMultimodalInput).collect(Collectors.toList()));
     }
 
-    private JinaMultimodalInput toMultimodalInput(EmbeddingInput input) {
+    private JinaMultimodalEmbeddingRequest.JinaMultimodalInput toMultimodalInput(EmbeddingInput input) {
         String imageValue = null;
         boolean hasText = false;
         for (Content content : input.contents()) {
-            if (content instanceof ImageContent imageContent) {
+            if (content instanceof ImageContent) {
+                ImageContent imageContent = (ImageContent)content;
                 if (imageValue != null) {
                     throw new UnsupportedFeatureException("Jina embeds one image per input");
                 }
                 Image image = imageContent.image();
                 if (image.url() != null) {
                     imageValue = image.url().toString();
-                } else if (image.base64Data() != null) {
-                    imageValue = "data:" + getOrDefault(image.mimeType(), "image/png") + ";base64," + image.base64Data();
-                } else {
-                    throw new UnsupportedFeatureException("ImageContent must have either a URL or base64 data");
+                    continue;
                 }
-            } else {
-                hasText = true;
+                if (image.base64Data() != null) {
+                    imageValue = "data:" + (String)Utils.getOrDefault((Object)image.mimeType(), (Object)"image/png") + ";base64," + image.base64Data();
+                    continue;
+                }
+                throw new UnsupportedFeatureException("ImageContent must have either a URL or base64 data");
             }
+            hasText = true;
         }
         if (imageValue != null) {
             if (hasText) {
-                // Jina embeds a single text OR a single image per input, not both fused.
-                throw new UnsupportedFeatureException(
-                        "Jina embeds a single text or image per input; interleaved text+image is not supported");
+                throw new UnsupportedFeatureException("Jina embeds a single text or image per input; interleaved text+image is not supported");
             }
-            return JinaMultimodalInput.image(imageValue);
+            return JinaMultimodalEmbeddingRequest.JinaMultimodalInput.image(imageValue);
         }
-        return JinaMultimodalInput.text(input.text());
+        return JinaMultimodalEmbeddingRequest.JinaMultimodalInput.text(input.text());
     }
 
     private static boolean isMultimodalModel(String modelName) {
         return modelName != null && (modelName.contains("clip") || modelName.contains("embeddings-v4"));
+    }
+
+    private /* synthetic */ JinaEmbeddingResponse lambda$doEmbed$1(JinaEmbeddingRequest wireRequest) throws Exception {
+        return this.client.embed(wireRequest);
+    }
+
+    private /* synthetic */ JinaEmbeddingResponse lambda$doEmbed$0(JinaMultimodalEmbeddingRequest wireRequest) throws Exception {
+        return this.client.embedMultimodal(wireRequest);
     }
 
     public static class JinaEmbeddingModelBuilder {
@@ -256,22 +224,11 @@ public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public JinaEmbeddingModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
-        /**
-         * Sets a custom HTTP client builder, allowing fine-grained control over the HTTP client
-         * configuration such as timeouts and proxy settings.
-         *
-         * @param httpClientBuilder the HTTP client builder
-         * @return {@code this}
-         */
         public JinaEmbeddingModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -286,3 +243,4 @@ public class JinaEmbeddingModel extends DimensionAwareEmbeddingModel {
         }
     }
 }
+

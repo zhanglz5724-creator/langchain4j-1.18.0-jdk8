@@ -1,9 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.voyageai;
 
 import java.util.List;
 
 class RerankRequest {
-
     private String query;
     private List<String> documents;
     private String model;
@@ -24,27 +26,27 @@ class RerankRequest {
     }
 
     public String getQuery() {
-        return query;
+        return this.query;
     }
 
     public List<String> getDocuments() {
-        return documents;
+        return this.documents;
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public Integer getTopK() {
-        return topK;
+        return this.topK;
     }
 
     public Boolean getReturnDocuments() {
-        return returnDocuments;
+        return this.returnDocuments;
     }
 
     public Boolean getTruncation() {
-        return truncation;
+        return this.truncation;
     }
 
     static Builder builder() {
@@ -52,13 +54,15 @@ class RerankRequest {
     }
 
     static class Builder {
-
         private String query;
         private List<String> documents;
         private String model;
         private Integer topK;
         private Boolean returnDocuments;
         private Boolean truncation;
+
+        Builder() {
+        }
 
         Builder query(String query) {
             this.query = query;
@@ -91,7 +95,8 @@ class RerankRequest {
         }
 
         RerankRequest build() {
-            return new RerankRequest(query, documents, model, topK, returnDocuments, truncation);
+            return new RerankRequest(this.query, this.documents, this.model, this.topK, this.returnDocuments, this.truncation);
         }
     }
 }
+

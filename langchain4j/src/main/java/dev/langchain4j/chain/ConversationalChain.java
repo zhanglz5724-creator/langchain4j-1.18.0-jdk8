@@ -1,28 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.memory.ChatMemory
+ *  dev.langchain4j.model.chat.ChatModel
+ */
 package dev.langchain4j.chain;
 
+import dev.langchain4j.chain.Chain;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.service.AiServices;
 
-import static dev.langchain4j.data.message.UserMessage.userMessage;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * A chain for conversing with a specified {@link ChatModel} while maintaining a memory of the conversation.
- * Includes a default {@link ChatMemory} (a message window with maximum 10 messages), which can be overridden.
- * <br>
- * Chains are not going to be developed further, it is recommended to use {@link AiServices} instead.
- */
-public class ConversationalChain implements Chain<String, String> {
-
+public class ConversationalChain
+implements Chain<String, String> {
     private final ChatModel chatModel;
     private final ChatMemory chatMemory;
 
     private ConversationalChain(ChatModel chatModel, ChatMemory chatMemory) {
-        this.chatModel = ensureNotNull(chatModel, "chatModel");
+        this.chatModel = (ChatModel)ValidationUtils.ensureNotNull((Object)chatModel, (String)"chatModel");
         this.chatMemory = chatMemory == null ? MessageWindowChatMemory.withMaxMessages(10) : chatMemory;
     }
 
@@ -32,13 +36,9 @@ public class ConversationalChain implements Chain<String, String> {
 
     @Override
     public String execute(String userMessage) {
-
-        chatMemory.add(userMessage(ensureNotBlank(userMessage, "userMessage")));
-
-        AiMessage aiMessage = chatModel.chat(chatMemory.messages()).aiMessage();
-
-        chatMemory.add(aiMessage);
-
+        this.chatMemory.add((ChatMessage)UserMessage.userMessage((String)ValidationUtils.ensureNotBlank((String)userMessage, (String)"userMessage")));
+        AiMessage aiMessage = this.chatModel.chat(this.chatMemory.messages()).aiMessage();
+        this.chatMemory.add((ChatMessage)aiMessage);
         return aiMessage.text();
     }
 
@@ -64,3 +64,4 @@ public class ConversationalChain implements Chain<String, String> {
         }
     }
 }
+

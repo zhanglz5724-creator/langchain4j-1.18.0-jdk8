@@ -1,99 +1,79 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.cloud.discoveryengine.v1beta.RankRequest
+ *  com.google.cloud.discoveryengine.v1beta.RankRequest$Builder
+ *  com.google.cloud.discoveryengine.v1beta.RankResponse
+ *  com.google.cloud.discoveryengine.v1beta.RankServiceClient
+ *  com.google.cloud.discoveryengine.v1beta.RankServiceSettings
+ *  com.google.cloud.discoveryengine.v1beta.RankingConfigName
+ *  com.google.cloud.discoveryengine.v1beta.RankingRecord
+ *  com.google.cloud.discoveryengine.v1beta.RankingRecord$Builder
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.scoring.ScoringModel
+ */
 package dev.langchain4j.model.vertexai;
 
-import com.google.cloud.discoveryengine.v1beta.*;
+import com.google.cloud.discoveryengine.v1beta.RankRequest;
+import com.google.cloud.discoveryengine.v1beta.RankResponse;
+import com.google.cloud.discoveryengine.v1beta.RankServiceClient;
+import com.google.cloud.discoveryengine.v1beta.RankServiceSettings;
+import com.google.cloud.discoveryengine.v1beta.RankingConfigName;
+import com.google.cloud.discoveryengine.v1beta.RankingRecord;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.scoring.ScoringModel;
-
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.util.Comparator.comparing;
-
-/**
- * Implementation of a <code>ScoringModel</code> for the Google Cloud Vertex AI
- * <a href="https://cloud.google.com/generative-ai-app-builder/docs/ranking">Ranking API</a>.
- */
-public class VertexAiScoringModel implements ScoringModel {
-
+public class VertexAiScoringModel
+implements ScoringModel {
     private final String model;
     private final String projectId;
     private final String projectNumber;
     private final String location;
     private final String titleMetadataKey;
 
-    /**
-     * Constructor for the Vertex AI Ranker Scoring Model.
-     *
-     * @param projectId  The Google Cloud Project ID.
-     * @param projectNumber The Google Cloud Project Number.
-     * @param location   The Google Cloud Region.
-     * @param model      The model to use
-     * @param titleMetadataKey The name of the key to use as a title.
-     */
     public VertexAiScoringModel(String projectId, String projectNumber, String location, String model, String titleMetadataKey) {
-        this.projectId = ensureNotBlank(projectId, "projectId");
-        this.projectNumber = ensureNotBlank(projectNumber, "projectNumber");
-        this.location = ensureNotBlank(location, "location");
-        this.model = ensureNotBlank(model, "model");
+        this.projectId = ValidationUtils.ensureNotBlank((String)projectId, (String)"projectId");
+        this.projectNumber = ValidationUtils.ensureNotBlank((String)projectNumber, (String)"projectNumber");
+        this.location = ValidationUtils.ensureNotBlank((String)location, (String)"location");
+        this.model = ValidationUtils.ensureNotBlank((String)model, (String)"model");
         this.titleMetadataKey = titleMetadataKey != null ? titleMetadataKey : "title";
     }
 
-    /**
-     * Scores all provided {@link TextSegment}s against a given query.
-     *
-     * @param segments The list of {@link TextSegment}s to score.
-     * @param query    The query against which to score the segments.
-     * @return the list of scores. The order of scores corresponds to the order of {@link TextSegment}s.
+    /*
+     * Enabled aggressive block sorting
+     * Enabled unnecessary exception pruning
+     * Enabled aggressive exception aggregation
      */
-    @Override
     public Response<List<Double>> scoreAll(List<TextSegment> segments, String query) {
         AtomicInteger counter = new AtomicInteger();
-
-        try (RankServiceClient rankServiceClient = RankServiceClient.create(
-            RankServiceSettings.newBuilder().build())) {
-
+        try (RankServiceClient rankServiceClient = RankServiceClient.create((RankServiceSettings)RankServiceSettings.newBuilder().build());){
             RankRequest.Builder rankingRequestBuilder = RankRequest.newBuilder();
-
-            if (model != null && !model.isEmpty()) {
-                rankingRequestBuilder.setModel(model);
+            if (this.model != null && !this.model.isEmpty()) {
+                rankingRequestBuilder.setModel(this.model);
             }
-
-            rankingRequestBuilder
-                .setRankingConfig(RankingConfigName.newBuilder()
-                    .setProject(projectId)
-                    .setLocation(location)
-                    .setRankingConfig(
-                        String.format("projects/%s/locations/%s/rankingConfigs/default_ranking_config.", projectNumber, location))
-                    .build().getRankingConfig())
-                .setQuery(query)
-                .setIgnoreRecordDetailsInResponse(true)
-                .addAllRecords(segments.stream()
-                    .map(segment -> {
-                        RankingRecord.Builder rankingBuilder = RankingRecord.newBuilder()
-                            .setContent(segment.text());
-                        // Ranker API takes into account titles in its score calculations
-                        if (segment.metadata().getString(titleMetadataKey) != null) {
-                            rankingBuilder.setTitle(segment.metadata().getString(titleMetadataKey));
-                        }
-                        // custom ID used to reorder the (sorted) results back into original segment order
-                        rankingBuilder.setId(String.valueOf(counter.getAndIncrement()));
-                        return rankingBuilder.build();
-                    })
-                    .collect(Collectors.toList()));
-
+            rankingRequestBuilder.setRankingConfig(RankingConfigName.newBuilder().setProject(this.projectId).setLocation(this.location).setRankingConfig(String.format("projects/%s/locations/%s/rankingConfigs/default_ranking_config.", this.projectNumber, this.location)).build().getRankingConfig()).setQuery(query).setIgnoreRecordDetailsInResponse(true).addAllRecords((Iterable)segments.stream().map(segment -> {
+                RankingRecord.Builder rankingBuilder = RankingRecord.newBuilder().setContent(segment.text());
+                if (segment.metadata().getString(this.titleMetadataKey) != null) {
+                    rankingBuilder.setTitle(segment.metadata().getString(this.titleMetadataKey));
+                }
+                rankingBuilder.setId(String.valueOf(counter.getAndIncrement()));
+                return rankingBuilder.build();
+            }).collect(Collectors.toList()));
             RankResponse rankResponse = rankServiceClient.rank(rankingRequestBuilder.build());
-
-            return Response.from(rankResponse.getRecordsList().stream()
-                // the API returns results sorted by relevance score, so reorder them back to original order
-                .sorted(comparing(rr -> Double.valueOf(rr.getId())))
-                .map(RankingRecord::getScore)
-                .map(Double::valueOf)
-                .collect(Collectors.toList()));
-        } catch (IOException e) {
+            Response response = Response.from(rankResponse.getRecordsList().stream().sorted(Comparator.comparing(rr -> Double.valueOf(rr.getId()))).map(RankingRecord::getScore).map(Double::valueOf).collect(Collectors.toList()));
+            return response;
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -110,7 +90,7 @@ public class VertexAiScoringModel implements ScoringModel {
         private String titleMetadataKey;
 
         public Builder model(String model) {
-            this.model = ensureNotBlank(model, "model");
+            this.model = ValidationUtils.ensureNotBlank((String)model, (String)"model");
             return this;
         }
 
@@ -130,12 +110,13 @@ public class VertexAiScoringModel implements ScoringModel {
         }
 
         public Builder titleMetadataKey(String titleMetadataKey) {
-            this.titleMetadataKey = ensureNotBlank(titleMetadataKey, "titleMetadataKey");
+            this.titleMetadataKey = ValidationUtils.ensureNotBlank((String)titleMetadataKey, (String)"titleMetadataKey");
             return this;
         }
 
         public VertexAiScoringModel build() {
-            return new VertexAiScoringModel(projectId, projectNumber, location, model, titleMetadataKey);
+            return new VertexAiScoringModel(this.projectId, this.projectNumber, this.location, this.model, this.titleMetadataKey);
         }
     }
 }
+

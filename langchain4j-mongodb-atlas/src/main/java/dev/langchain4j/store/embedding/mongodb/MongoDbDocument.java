@@ -1,12 +1,16 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.bson.codecs.pojo.annotations.BsonId
+ */
 package dev.langchain4j.store.embedding.mongodb;
-
-import org.bson.codecs.pojo.annotations.BsonId;
 
 import java.util.List;
 import java.util.Map;
+import org.bson.codecs.pojo.annotations.BsonId;
 
 public class MongoDbDocument {
-
     @BsonId
     private String id;
     private List<Float> embedding;
@@ -24,7 +28,7 @@ public class MongoDbDocument {
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -32,7 +36,7 @@ public class MongoDbDocument {
     }
 
     public List<Float> getEmbedding() {
-        return embedding;
+        return this.embedding;
     }
 
     public void setEmbedding(List<Float> embedding) {
@@ -40,7 +44,7 @@ public class MongoDbDocument {
     }
 
     public String getText() {
-        return text;
+        return this.text;
     }
 
     public void setText(String text) {
@@ -48,7 +52,7 @@ public class MongoDbDocument {
     }
 
     public Map<String, Object> getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public void setMetadata(Map<String, Object> metadata) {
@@ -60,7 +64,6 @@ public class MongoDbDocument {
     }
 
     public static class Builder {
-
         private String id;
         private List<Float> embedding;
         private String text;
@@ -87,8 +90,8 @@ public class MongoDbDocument {
         }
 
         public MongoDbDocument build() {
-            return new MongoDbDocument(id, embedding, text, metadata);
+            return new MongoDbDocument(this.id, this.embedding, this.text, this.metadata);
         }
-
     }
 }
+

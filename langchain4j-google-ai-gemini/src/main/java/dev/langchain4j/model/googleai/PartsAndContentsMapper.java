@@ -1,14 +1,27 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.AudioContent
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.data.message.ImageContent$DetailLevel
+ *  dev.langchain4j.data.message.PdfFileContent
+ *  dev.langchain4j.data.message.SystemMessage
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.message.ToolExecutionResultMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.data.message.VideoContent
+ *  dev.langchain4j.data.pdf.PdfFile
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.CustomMimeTypesFileTypeDetector
+ *  dev.langchain4j.internal.Utils
+ */
 package dev.langchain4j.model.googleai;
-
-import static dev.langchain4j.data.message.AiMessage.GENERATED_IMAGES_KEY;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.Utils.isNotNullOrEmpty;
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
-import static dev.langchain4j.internal.Utils.isNullOrEmpty;
-import static dev.langchain4j.internal.Utils.readBytes;
-import static dev.langchain4j.model.googleai.FunctionMapper.toToolExecutionRequests;
-import static dev.langchain4j.model.googleai.Json.fromJson;
-import static java.util.stream.Collectors.joining;
 
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.image.Image;
@@ -26,16 +39,17 @@ import dev.langchain4j.data.message.VideoContent;
 import dev.langchain4j.data.pdf.PdfFile;
 import dev.langchain4j.exception.UnsupportedFeatureException;
 import dev.langchain4j.internal.CustomMimeTypesFileTypeDetector;
-import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiBlob;
-import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiCodeExecutionResult;
-import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiCodeExecutionResult.GeminiOutcome;
-import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiExecutableCode;
-import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiFileData;
-import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiFunctionCall;
-import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiFunctionResponse;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.googleai.FunctionMapper;
+import dev.langchain4j.model.googleai.GeminiContent;
+import dev.langchain4j.model.googleai.GeminiMediaResolution;
+import dev.langchain4j.model.googleai.GeminiMediaResolutionLevel;
+import dev.langchain4j.model.googleai.GeminiRole;
+import dev.langchain4j.model.googleai.Json;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,392 +57,262 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 final class PartsAndContentsMapper {
-
-    private PartsAndContentsMapper() {}
-
-    static final String THINKING_SIGNATURE_KEY =
-            "thinking_signature"; // do not change, will break backward compatibility!
-
+    static final String THINKING_SIGNATURE_KEY = "thinking_signature";
     private static final CustomMimeTypesFileTypeDetector mimeTypeDetector = new CustomMimeTypesFileTypeDetector();
-
-    // Pattern to parse data URIs: data:[<mediatype>][;base64],<data>
     private static final Pattern DATA_URI_PATTERN = Pattern.compile("^data:([^;,]+)(?:;[^,]*)?,(.*)$");
 
+    private PartsAndContentsMapper() {
+    }
+
     static GeminiContent.GeminiPart fromContentToGPart(Content content) {
-        return fromContentToGPart(content, false);
+        return PartsAndContentsMapper.fromContentToGPart(content, false);
     }
 
     static GeminiContent.GeminiPart fromContentToGPart(Content content, boolean mediaResolutionPerPartEnabled) {
-        if (content instanceof TextContent textContent) {
+        if (content instanceof TextContent) {
+            TextContent textContent = (TextContent)content;
             return GeminiContent.GeminiPart.builder().text(textContent.text()).build();
-        } else if (content instanceof ImageContent imageContent) {
+        }
+        if (content instanceof ImageContent) {
+            GeminiMediaResolution mediaResolution;
+            ImageContent imageContent = (ImageContent)content;
             Image image = imageContent.image();
-            GeminiMediaResolution mediaResolution =
-                    mediaResolutionPerPartEnabled ? toGeminiMediaResolution(imageContent.detailLevel()) : null;
-
-            if (!isNullOrBlank(image.base64Data())) {
-                return GeminiContent.GeminiPart.builder()
-                        .inlineData(new GeminiBlob(image.mimeType(), image.base64Data()))
-                        .mediaResolution(mediaResolution)
-                        .build();
-            } else if (image.url() != null) {
-                URI url = image.url();
-                // Handle data URIs (e.g., "data:image/png;base64,iVBORw0KG...")
-                if (url.getScheme() != null && url.getScheme().equals("data")) {
-                    return GeminiContent.GeminiPart.builder()
-                            .inlineData(parseDataUri(url))
-                            .mediaResolution(mediaResolution)
-                            .build();
-                } else if (url.getScheme() != null && url.getScheme().startsWith("http")) {
-                    byte[] imageBytes = readBytes(url.toString());
-                    String base64Data = Base64.getEncoder().encodeToString(imageBytes);
-                    return GeminiContent.GeminiPart.builder()
-                            .inlineData(new GeminiBlob(
-                                    getOrDefault(image.mimeType(), mimeTypeDetector.probeContentType(url)), base64Data))
-                            .mediaResolution(mediaResolution)
-                            .build();
-                } else {
-                    return GeminiContent.GeminiPart.builder()
-                            .fileData(new GeminiFileData(
-                                    getOrDefault(image.mimeType(), mimeTypeDetector.probeContentType(url)),
-                                    url.toString()))
-                            .mediaResolution(mediaResolution)
-                            .build();
-                }
-            } else {
-                throw new IllegalArgumentException("Image should contain either base64 data or url");
+            GeminiMediaResolution geminiMediaResolution = mediaResolution = mediaResolutionPerPartEnabled ? PartsAndContentsMapper.toGeminiMediaResolution(imageContent.detailLevel()) : null;
+            if (!Utils.isNullOrBlank((String)image.base64Data())) {
+                return GeminiContent.GeminiPart.builder().inlineData(new GeminiContent.GeminiPart.GeminiBlob(image.mimeType(), image.base64Data())).mediaResolution(mediaResolution).build();
             }
-        } else if (content instanceof AudioContent audioContent) {
+            if (image.url() != null) {
+                URI url = image.url();
+                if (url.getScheme() != null && url.getScheme().equals("data")) {
+                    return GeminiContent.GeminiPart.builder().inlineData(PartsAndContentsMapper.parseDataUri(url)).mediaResolution(mediaResolution).build();
+                }
+                if (url.getScheme() != null && url.getScheme().startsWith("http")) {
+                    byte[] imageBytes = Utils.readBytes((String)url.toString());
+                    String base64Data = Base64.getEncoder().encodeToString(imageBytes);
+                    return GeminiContent.GeminiPart.builder().inlineData(new GeminiContent.GeminiPart.GeminiBlob((String)Utils.getOrDefault((Object)image.mimeType(), (Object)mimeTypeDetector.probeContentType(url)), base64Data)).mediaResolution(mediaResolution).build();
+                }
+                return GeminiContent.GeminiPart.builder().fileData(new GeminiContent.GeminiPart.GeminiFileData((String)Utils.getOrDefault((Object)image.mimeType(), (Object)mimeTypeDetector.probeContentType(url)), url.toString())).mediaResolution(mediaResolution).build();
+            }
+            throw new IllegalArgumentException("Image should contain either base64 data or url");
+        }
+        if (content instanceof AudioContent) {
+            AudioContent audioContent = (AudioContent)content;
             URI uri = audioContent.audio().url();
             if (uri != null) {
-                // Handle data URIs for audio
                 if (uri.getScheme() != null && uri.getScheme().equals("data")) {
-                    return GeminiContent.GeminiPart.builder()
-                            .inlineData(parseDataUri(uri))
-                            .build();
+                    return GeminiContent.GeminiPart.builder().inlineData(PartsAndContentsMapper.parseDataUri(uri)).build();
                 }
-                return GeminiContent.GeminiPart.builder()
-                        .fileData(new GeminiFileData(mimeTypeDetector.probeContentType(uri), uri.toString()))
-                        .build();
-            } else {
-                return GeminiContent.GeminiPart.builder()
-                        .inlineData(new GeminiBlob(
-                                audioContent.audio().mimeType(),
-                                audioContent.audio().base64Data()))
-                        .build();
+                return GeminiContent.GeminiPart.builder().fileData(new GeminiContent.GeminiPart.GeminiFileData(mimeTypeDetector.probeContentType(uri), uri.toString())).build();
             }
-        } else if (content instanceof VideoContent videoContent) {
+            return GeminiContent.GeminiPart.builder().inlineData(new GeminiContent.GeminiPart.GeminiBlob(audioContent.audio().mimeType(), audioContent.audio().base64Data())).build();
+        }
+        if (content instanceof VideoContent) {
+            VideoContent videoContent = (VideoContent)content;
             URI uri = videoContent.video().url();
             if (uri != null) {
-                // Handle data URIs for video
                 if (uri.getScheme() != null && uri.getScheme().equals("data")) {
-                    return GeminiContent.GeminiPart.builder()
-                            .inlineData(parseDataUri(uri))
-                            .build();
+                    return GeminiContent.GeminiPart.builder().inlineData(PartsAndContentsMapper.parseDataUri(uri)).build();
                 }
-                return GeminiContent.GeminiPart.builder()
-                        .fileData(new GeminiFileData(mimeTypeDetector.probeContentType(uri), uri.toString()))
-                        .build();
-            } else {
-                return GeminiContent.GeminiPart.builder()
-                        .inlineData(new GeminiBlob(
-                                videoContent.video().mimeType(),
-                                videoContent.video().base64Data()))
-                        .build();
+                return GeminiContent.GeminiPart.builder().fileData(new GeminiContent.GeminiPart.GeminiFileData(mimeTypeDetector.probeContentType(uri), uri.toString())).build();
             }
-        } else if (content instanceof PdfFileContent pdfFileContent) {
+            return GeminiContent.GeminiPart.builder().inlineData(new GeminiContent.GeminiPart.GeminiBlob(videoContent.video().mimeType(), videoContent.video().base64Data())).build();
+        }
+        if (content instanceof PdfFileContent) {
+            PdfFileContent pdfFileContent = (PdfFileContent)content;
             PdfFile pdfFile = pdfFileContent.pdfFile();
-
             URI uri = pdfFile.url();
             if (uri != null) {
-                // Handle data URIs for PDF
                 if (uri.getScheme() != null && uri.getScheme().equals("data")) {
-                    return GeminiContent.GeminiPart.builder()
-                            .inlineData(parseDataUri(uri))
-                            .build();
+                    return GeminiContent.GeminiPart.builder().inlineData(PartsAndContentsMapper.parseDataUri(uri)).build();
                 }
-                return GeminiContent.GeminiPart.builder()
-                        .fileData(new GeminiFileData(mimeTypeDetector.probeContentType(uri), uri.toString()))
-                        .build();
-            } else {
-                return GeminiContent.GeminiPart.builder()
-                        .inlineData(new GeminiBlob(pdfFile.mimeType(), pdfFile.base64Data()))
-                        .build();
+                return GeminiContent.GeminiPart.builder().fileData(new GeminiContent.GeminiPart.GeminiFileData(mimeTypeDetector.probeContentType(uri), uri.toString())).build();
             }
-        } else {
-            throw new UnsupportedFeatureException("Unsupported content type: " + content.type());
+            return GeminiContent.GeminiPart.builder().inlineData(new GeminiContent.GeminiPart.GeminiBlob(pdfFile.mimeType(), pdfFile.base64Data())).build();
         }
+        throw new UnsupportedFeatureException("Unsupported content type: " + content.type());
     }
 
-    /**
-     * Maps DetailLevel from ImageContent to GeminiMediaResolution.
-     *
-     * @param detailLevel the detail level from ImageContent
-     * @return the corresponding GeminiMediaResolution, or null if detailLevel is null
-     */
     private static GeminiMediaResolution toGeminiMediaResolution(ImageContent.DetailLevel detailLevel) {
         if (detailLevel == null) {
             return null;
         }
-        return switch (detailLevel) {
-            case LOW -> GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_LOW);
-            case MEDIUM -> GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_MEDIUM);
-            case HIGH -> GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_HIGH);
-            case ULTRA_HIGH -> GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_ULTRA_HIGH);
-            case AUTO -> GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_UNSPECIFIED);
-        };
+        switch (detailLevel) {
+            case LOW: {
+                return GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_LOW);
+            }
+            case MEDIUM: {
+                return GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_MEDIUM);
+            }
+            case HIGH: {
+                return GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_HIGH);
+            }
+            case ULTRA_HIGH: {
+                return GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_ULTRA_HIGH);
+            }
+            case AUTO: {
+                return GeminiMediaResolution.of(GeminiMediaResolutionLevel.MEDIA_RESOLUTION_UNSPECIFIED);
+            }
+        }
+        throw new IllegalArgumentException("Unknown detail level: " + detailLevel);
     }
 
-    static AiMessage fromGPartsToAiMessage(
-            List<GeminiContent.GeminiPart> parts, boolean includeCodeExecutionOutput, Boolean returnThinking) {
-
-        List<GeminiContent.GeminiPart> safeParts = Objects.requireNonNullElse(parts, Collections.emptyList());
+    static AiMessage fromGPartsToAiMessage(List<GeminiContent.GeminiPart> parts, boolean includeCodeExecutionOutput, Boolean returnThinking) {
+        List<GeminiContent.GeminiPart> safeParts = parts != null ? parts : Collections.emptyList();
         StringBuilder fullText = new StringBuilder();
-        List<String> thoughts = new ArrayList<>();
-        List<String> thoughtSignatures = new ArrayList<>();
-        List<GeminiFunctionCall> functionCalls = new ArrayList<>();
-        List<Image> generatedImages = new ArrayList<>();
-
+        ArrayList<String> thoughts = new ArrayList<String>();
+        ArrayList<String> thoughtSignatures = new ArrayList<String>();
+        ArrayList<GeminiContent.GeminiPart.GeminiFunctionCall> functionCalls = new ArrayList<GeminiContent.GeminiPart.GeminiFunctionCall>();
+        ArrayList<Image> generatedImages = new ArrayList<Image>();
         for (GeminiContent.GeminiPart part : safeParts) {
-            GeminiExecutableCode executableCode = part.executableCode();
+            GeminiContent.GeminiPart.GeminiBlob inlineData;
+            String text;
+            GeminiContent.GeminiPart.GeminiCodeExecutionResult codeExecutionResult;
+            GeminiContent.GeminiPart.GeminiExecutableCode executableCode = part.executableCode();
             if (executableCode != null && includeCodeExecutionOutput) {
-                fullText.append("Code executed:\n")
-                        .append("```python\n")
-                        .append(executableCode.code())
-                        .append("\n```\n");
+                fullText.append("Code executed:\n").append("```python\n").append(executableCode.code()).append("\n```\n");
             }
-
-            GeminiCodeExecutionResult codeExecutionResult = part.codeExecutionResult();
-            if (codeExecutionResult != null && includeCodeExecutionOutput) {
-                GeminiOutcome outcome = codeExecutionResult.outcome();
-
-                if (outcome != GeminiOutcome.OUTCOME_OK) {
-                    fullText.append("Code execution failed: **")
-                            .append(outcome.name())
-                            .append("**\n")
-                            .append(part.text() != null ? part.text() : "");
+            if ((codeExecutionResult = part.codeExecutionResult()) != null && includeCodeExecutionOutput) {
+                GeminiContent.GeminiPart.GeminiCodeExecutionResult.GeminiOutcome outcome = codeExecutionResult.outcome();
+                if (outcome != GeminiContent.GeminiPart.GeminiCodeExecutionResult.GeminiOutcome.OUTCOME_OK) {
+                    fullText.append("Code execution failed: **").append(outcome.name()).append("**\n").append(part.text() != null ? part.text() : "");
                 } else {
-                    fullText.append("Output:\n")
-                            .append("```\n")
-                            .append(codeExecutionResult.output())
-                            .append("```\n");
+                    fullText.append("Output:\n").append("```\n").append(codeExecutionResult.output()).append("```\n");
                 }
             }
-
-            String text = part.text();
-            if (isNotNullOrEmpty(text)) {
+            if (Utils.isNotNullOrEmpty((String)(text = part.text()))) {
                 if (Boolean.TRUE.equals(part.isThought())) {
                     if (Boolean.TRUE.equals(returnThinking)) {
                         thoughts.add(text);
-                    } else if (returnThinking == null) { // for backward compatibility
-                        if (!fullText.isEmpty()) {
+                    } else if (returnThinking == null) {
+                        if (fullText.length() > 0) {
                             fullText.append("\n\n");
                         }
                         fullText.append(text);
                     }
                 } else {
-                    if (!fullText.isEmpty()) {
+                    if (fullText.length() > 0) {
                         fullText.append("\n\n");
                     }
                     fullText.append(text);
                 }
             }
-
             String thoughtSignature = part.thoughtSignature();
-            if (Boolean.TRUE.equals(returnThinking) && isNotNullOrEmpty(thoughtSignature)) {
+            if (Boolean.TRUE.equals(returnThinking) && Utils.isNotNullOrEmpty((String)thoughtSignature)) {
                 thoughtSignatures.add(thoughtSignature);
             }
-
             if (part.functionCall() != null) {
                 functionCalls.add(part.functionCall());
             }
-
-            GeminiBlob inlineData = part.inlineData();
-            if (inlineData != null
-                    && inlineData.mimeType() != null
-                    && inlineData.mimeType().startsWith("image/")
-                    && inlineData.data() != null) {
-                Image generatedImage = Image.builder()
-                        .base64Data(inlineData.data())
-                        .mimeType(inlineData.mimeType())
-                        .build();
-                generatedImages.add(generatedImage);
-            }
+            if ((inlineData = part.inlineData()) == null || inlineData.mimeType() == null || !inlineData.mimeType().startsWith("image/") || inlineData.data() == null) continue;
+            Image generatedImage = Image.builder().base64Data(inlineData.data()).mimeType(inlineData.mimeType()).build();
+            generatedImages.add(generatedImage);
         }
-
         String text = fullText.toString();
-        String thinking = thoughts.stream().collect(joining("\n\n"));
-        String thinkingSignature = thoughtSignatures.stream().collect(joining("\n\n"));
-
-        Map<String, Object> attributes = new java.util.HashMap<>();
-        if (isNotNullOrEmpty(thinkingSignature)) {
+        String thinking = thoughts.stream().collect(Collectors.joining("\n\n"));
+        String thinkingSignature = thoughtSignatures.stream().collect(Collectors.joining("\n\n"));
+        HashMap<String, Object> attributes = new HashMap<String, Object>();
+        if (Utils.isNotNullOrEmpty((String)thinkingSignature)) {
             attributes.put(THINKING_SIGNATURE_KEY, thinkingSignature);
         }
         if (!generatedImages.isEmpty()) {
-            attributes.put(GENERATED_IMAGES_KEY, generatedImages);
+            attributes.put("generated_images", generatedImages);
         }
-
-        return AiMessage.builder()
-                .text(isNullOrEmpty(text) ? null : text)
-                .thinking(isNullOrEmpty(thinking) ? null : thinking)
-                .toolExecutionRequests(toToolExecutionRequests(functionCalls))
-                .attributes(attributes.isEmpty() ? Collections.emptyMap() : attributes)
-                .build();
+        return AiMessage.builder().text(Utils.isNullOrEmpty((String)text) ? null : text).thinking(Utils.isNullOrEmpty((String)thinking) ? null : thinking).toolExecutionRequests(FunctionMapper.toToolExecutionRequests(functionCalls)).attributes(attributes.isEmpty() ? Collections.emptyMap() : attributes).build();
     }
 
-    static List<GeminiContent> fromMessageToGContent(
-            List<ChatMessage> messages, GeminiContent systemInstruction, boolean sendThinking) {
-        return fromMessageToGContent(messages, systemInstruction, sendThinking, false);
+    static List<GeminiContent> fromMessageToGContent(List<ChatMessage> messages, GeminiContent systemInstruction, boolean sendThinking) {
+        return PartsAndContentsMapper.fromMessageToGContent(messages, systemInstruction, sendThinking, false);
     }
 
-    static List<GeminiContent> fromMessageToGContent(
-            List<ChatMessage> messages,
-            GeminiContent systemInstruction,
-            boolean sendThinking,
-            boolean mediaResolutionPerPartEnabled) {
-        return messages.stream()
-                .map(msg -> {
-                    switch (msg.type()) {
-                        case SYSTEM:
-                            SystemMessage systemMessage = (SystemMessage) msg;
-
-                            if (systemInstruction != null) {
-                                systemInstruction.addPart(GeminiContent.GeminiPart.builder()
-                                        .text(systemMessage.text())
-                                        .build());
-                                return null;
-                            }
-
-                            if (isNotNullOrEmpty(systemMessage.text())) {
-                                return new GeminiContent(
-                                        Collections.singletonList(GeminiContent.GeminiPart.builder()
-                                                .text(systemMessage.text())
-                                                .build()),
-                                        GeminiRole.MODEL.toString());
-                            }
-
-                            return null;
-                        case AI:
-                            AiMessage aiMessage = (AiMessage) msg;
-
-                            List<GeminiContent.GeminiPart> parts = new ArrayList<>();
-
-                            if (sendThinking && isNotNullOrEmpty(aiMessage.thinking())) {
-                                parts.add(GeminiContent.GeminiPart.builder()
-                                        .text(aiMessage.thinking())
-                                        .thought(true)
-                                        .build());
-                            }
-
-                            if (isNotNullOrEmpty(aiMessage.text())) {
-                                parts.add(GeminiContent.GeminiPart.builder()
-                                        .text(aiMessage.text())
-                                        .build());
-                            }
-
-                            if (aiMessage.hasToolExecutionRequests()) {
-                                String thoughtSignature = null;
-                                if (sendThinking) {
-                                    thoughtSignature = aiMessage.attribute(THINKING_SIGNATURE_KEY, String.class);
-                                }
-                                parts.addAll(toGeminiParts(aiMessage.toolExecutionRequests(), thoughtSignature));
-                            }
-
-                            return new GeminiContent(parts, GeminiRole.MODEL.toString());
-
-                        case USER:
-                            UserMessage userMessage = (UserMessage) msg;
-
-                            return new GeminiContent(
-                                    userMessage.contents().stream()
-                                            .map(content -> fromContentToGPart(content, mediaResolutionPerPartEnabled))
-                                            .collect(Collectors.toList()),
-                                    GeminiRole.USER.toString());
-                        case TOOL_EXECUTION_RESULT:
-                            ToolExecutionResultMessage toolResultMessage = (ToolExecutionResultMessage) msg;
-
-                            if (!toolResultMessage.hasSingleText()) {
-                                List<GeminiContent.GeminiPart> toolParts = new ArrayList<>();
-                                Map<String, String> responseMap = new HashMap<>();
-                                for (dev.langchain4j.data.message.Content content : toolResultMessage.contents()) {
-                                    if (content instanceof TextContent textContent) {
-                                        responseMap.put("response", textContent.text());
-                                    } else if (content instanceof ImageContent imageContent) {
-                                        toolParts.add(fromContentToGPart(imageContent, mediaResolutionPerPartEnabled));
-                                    } else {
-                                        throw new UnsupportedFeatureException(
-                                                "Google AI Gemini does not support content type '" + content.type()
-                                                        + "' in tool results.");
-                                    }
-                                }
-                                if (responseMap.isEmpty()) {
-                                    responseMap.put("response", "");
-                                }
-                                toolParts.add(
-                                        0,
-                                        GeminiContent.GeminiPart.builder()
-                                                .functionResponse(new GeminiFunctionResponse(
-                                                        toolResultMessage.id(),
-                                                        toolResultMessage.toolName(),
-                                                        responseMap))
-                                                .build());
-                                return new GeminiContent(toolParts, GeminiRole.USER.toString());
-                            }
-
-                            return new GeminiContent(
-                                    Collections.singletonList(GeminiContent.GeminiPart.builder()
-                                            .functionResponse(new GeminiFunctionResponse(
-                                                    toolResultMessage.id(),
-                                                    toolResultMessage.toolName(),
-                                                    Collections.singletonMap("response", toolResultMessage.text())))
-                                            .build()),
-                                    GeminiRole.USER.toString());
-                        default:
-                            return null;
+    static List<GeminiContent> fromMessageToGContent(List<ChatMessage> messages, GeminiContent systemInstruction, boolean sendThinking, boolean mediaResolutionPerPartEnabled) {
+        return messages.stream().map(msg -> {
+            switch (msg.type()) {
+                case SYSTEM: {
+                    SystemMessage systemMessage = (SystemMessage)msg;
+                    if (systemInstruction != null) {
+                        systemInstruction.addPart(GeminiContent.GeminiPart.builder().text(systemMessage.text()).build());
+                        return null;
                     }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                    if (Utils.isNotNullOrEmpty((String)systemMessage.text())) {
+                        return new GeminiContent(Collections.singletonList(GeminiContent.GeminiPart.builder().text(systemMessage.text()).build()), GeminiRole.MODEL.toString());
+                    }
+                    return null;
+                }
+                case AI: {
+                    AiMessage aiMessage = (AiMessage)msg;
+                    ArrayList<GeminiContent.GeminiPart> parts = new ArrayList<GeminiContent.GeminiPart>();
+                    if (sendThinking && Utils.isNotNullOrEmpty((String)aiMessage.thinking())) {
+                        parts.add(GeminiContent.GeminiPart.builder().text(aiMessage.thinking()).thought(true).build());
+                    }
+                    if (Utils.isNotNullOrEmpty((String)aiMessage.text())) {
+                        parts.add(GeminiContent.GeminiPart.builder().text(aiMessage.text()).build());
+                    }
+                    if (aiMessage.hasToolExecutionRequests()) {
+                        String thoughtSignature = null;
+                        if (sendThinking) {
+                            thoughtSignature = (String)aiMessage.attribute(THINKING_SIGNATURE_KEY, String.class);
+                        }
+                        parts.addAll(PartsAndContentsMapper.toGeminiParts(aiMessage.toolExecutionRequests(), thoughtSignature));
+                    }
+                    return new GeminiContent(parts, GeminiRole.MODEL.toString());
+                }
+                case USER: {
+                    UserMessage userMessage = (UserMessage)msg;
+                    return new GeminiContent(userMessage.contents().stream().map(content -> PartsAndContentsMapper.fromContentToGPart(content, mediaResolutionPerPartEnabled)).collect(Collectors.toList()), GeminiRole.USER.toString());
+                }
+                case TOOL_EXECUTION_RESULT: {
+                    ToolExecutionResultMessage toolResultMessage = (ToolExecutionResultMessage)msg;
+                    if (!toolResultMessage.hasSingleText()) {
+                        ArrayList<GeminiContent.GeminiPart> toolParts = new ArrayList<GeminiContent.GeminiPart>();
+                        HashMap<String, String> responseMap = new HashMap<String, String>();
+                        for (Content content2 : toolResultMessage.contents()) {
+                            if (content2 instanceof TextContent) {
+                                TextContent textContent = (TextContent)content2;
+                                responseMap.put("response", textContent.text());
+                                continue;
+                            }
+                            if (content2 instanceof ImageContent) {
+                                ImageContent imageContent = (ImageContent)content2;
+                                toolParts.add(PartsAndContentsMapper.fromContentToGPart((Content)imageContent, mediaResolutionPerPartEnabled));
+                                continue;
+                            }
+                            throw new UnsupportedFeatureException("Google AI Gemini does not support content type '" + content2.type() + "' in tool results.");
+                        }
+                        if (responseMap.isEmpty()) {
+                            responseMap.put("response", "");
+                        }
+                        toolParts.add(0, GeminiContent.GeminiPart.builder().functionResponse(new GeminiContent.GeminiPart.GeminiFunctionResponse(toolResultMessage.id(), toolResultMessage.toolName(), responseMap)).build());
+                        return new GeminiContent(toolParts, GeminiRole.USER.toString());
+                    }
+                    return new GeminiContent(Collections.singletonList(GeminiContent.GeminiPart.builder().functionResponse(new GeminiContent.GeminiPart.GeminiFunctionResponse(toolResultMessage.id(), toolResultMessage.toolName(), Collections.singletonMap("response", toolResultMessage.text()))).build()), GeminiRole.USER.toString());
+                }
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    /**
-     * Parses a data URI and returns a GeminiBlob with the extracted MIME type and base64 data.
-     *
-     * @param uri the data URI to parse (e.g., "data:image/png;base64,iVBORw0KG...")
-     * @return a GeminiBlob containing the MIME type and base64 data
-     * @throws IllegalArgumentException if the URI is not a valid data URI
-     */
-    private static GeminiBlob parseDataUri(URI uri) {
+    private static GeminiContent.GeminiPart.GeminiBlob parseDataUri(URI uri) {
         String urlString = uri.toString();
         Matcher matcher = DATA_URI_PATTERN.matcher(urlString);
-
         if (matcher.matches()) {
             String mimeType = matcher.group(1);
             String base64Data = matcher.group(2);
-            return new GeminiBlob(mimeType, base64Data);
+            return new GeminiContent.GeminiPart.GeminiBlob(mimeType, base64Data);
         }
-
         throw new IllegalArgumentException("Invalid data URI format: " + urlString);
     }
 
-    private static List<GeminiContent.GeminiPart> toGeminiParts(
-            List<ToolExecutionRequest> toolExecutionRequests, String thoughtSignature) {
-        List<GeminiContent.GeminiPart> geminiParts = new ArrayList<>();
-        for (int i = 0; i < toolExecutionRequests.size(); i++) {
+    private static List<GeminiContent.GeminiPart> toGeminiParts(List<ToolExecutionRequest> toolExecutionRequests, String thoughtSignature) {
+        ArrayList<GeminiContent.GeminiPart> geminiParts = new ArrayList<GeminiContent.GeminiPart>();
+        for (int i = 0; i < toolExecutionRequests.size(); ++i) {
             ToolExecutionRequest toolExecutionRequest = toolExecutionRequests.get(i);
-            boolean shouldAddThoughtSignature = i == 0 && isNotNullOrEmpty(thoughtSignature);
-            GeminiContent.GeminiPart geminiPart = GeminiContent.GeminiPart.builder()
-                    .functionCall(new GeminiFunctionCall(
-                            toolExecutionRequest.id(),
-                            toolExecutionRequest.name(),
-                            fromJson(toolExecutionRequest.arguments(), Map.class)))
-                    .thoughtSignature(shouldAddThoughtSignature ? thoughtSignature : null)
-                    .build();
+            boolean shouldAddThoughtSignature = i == 0 && Utils.isNotNullOrEmpty((String)thoughtSignature);
+            GeminiContent.GeminiPart geminiPart = GeminiContent.GeminiPart.builder().functionCall(new GeminiContent.GeminiPart.GeminiFunctionCall(toolExecutionRequest.id(), toolExecutionRequest.name(), Json.fromJson(toolExecutionRequest.arguments(), Map.class))).thoughtSignature(shouldAddThoughtSignature ? thoughtSignature : null).build();
             geminiParts.add(geminiPart);
         }
         return geminiParts;
     }
 }
+

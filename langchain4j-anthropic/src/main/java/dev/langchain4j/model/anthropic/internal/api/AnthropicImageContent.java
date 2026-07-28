@@ -1,18 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicImageContentSource;
+import dev.langchain4j.model.anthropic.internal.api.AnthropicMessageContent;
 import java.util.Objects;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-public class AnthropicImageContent extends AnthropicMessageContent {
-
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class AnthropicImageContent
+extends AnthropicMessageContent {
     public AnthropicImageContentSource source;
 
     public AnthropicImageContent(AnthropicImageContentSource source) {
@@ -35,22 +45,23 @@ public class AnthropicImageContent extends AnthropicMessageContent {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        AnthropicImageContent that = (AnthropicImageContent) o;
-        return Objects.equals(source, that.source);
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AnthropicImageContent that = (AnthropicImageContent)o;
+        return Objects.equals(this.source, that.source);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), source);
+        return Objects.hash(super.hashCode(), this.source);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicImageContent{" + "source="
-                + source + ", type='"
-                + type + '\'' + ", cacheControl="
-                + cacheControl + '}';
+        return "AnthropicImageContent{source=" + this.source + ", type='" + this.type + '\'' + ", cacheControl=" + this.cacheControl + '}';
     }
 }
+

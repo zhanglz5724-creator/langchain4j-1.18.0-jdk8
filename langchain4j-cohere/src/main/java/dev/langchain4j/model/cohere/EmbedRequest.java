@@ -1,9 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.cohere;
 
 import java.util.List;
 
 class EmbedRequest {
-
     private List<String> texts;
     private String model;
     private String inputType;
@@ -62,3 +64,4 @@ class EmbedRequest {
         }
     }
 }
+

@@ -1,21 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.agentic.scope;
 
+import dev.langchain4j.agentic.scope.AgenticScope;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 
-/**
- * Holds the result of an agent invocation along with its associated {@link AgenticScope}.
- * This is useful for returning results from agents while also providing access to the cognitive
- * scope through which that result has been generated.
- * <p>
- * When the invocation is suspended ({@link #suspended()} returns {@code true}), the caller
- * can provide the human response and resume in a single call via
- * {@link #completePendingResponse(Object)}.
- *
- * @param <T> The type of the result.
- */
 public final class ResultWithAgenticScope<T> {
-
     private final AgenticScope agenticScope;
     private final T result;
     private final boolean suspended;
@@ -29,8 +22,7 @@ public final class ResultWithAgenticScope<T> {
         this(agenticScope, result, suspended, null);
     }
 
-    public ResultWithAgenticScope(AgenticScope agenticScope, T result, boolean suspended,
-                                  Supplier<ResultWithAgenticScope<T>> resumeCallback) {
+    public ResultWithAgenticScope(AgenticScope agenticScope, T result, boolean suspended, Supplier<ResultWithAgenticScope<T>> resumeCallback) {
         this.agenticScope = agenticScope;
         this.result = result;
         this.suspended = suspended;
@@ -38,79 +30,57 @@ public final class ResultWithAgenticScope<T> {
     }
 
     public AgenticScope agenticScope() {
-        return agenticScope;
+        return this.agenticScope;
     }
 
     public T result() {
-        return result;
+        return this.result;
     }
 
     public boolean suspended() {
-        return suspended;
+        return this.suspended;
     }
 
-    /**
-     * Completes the single pending response and re-invokes the agentic system to resume execution.
-     * The returned result may itself be suspended if the workflow has further human-in-the-loop steps.
-     *
-     * @param value the human response value
-     * @return the result of the resumed invocation
-     * @throws IllegalStateException if this result is not suspended, if there is not exactly one
-     *         pending response, or if no resume callback is available (e.g. after a crash/restart)
-     */
     public ResultWithAgenticScope<T> completePendingResponse(Object value) {
-        return completePendingResponse(singlePendingResponseId(), value);
+        return this.completePendingResponse(this.singlePendingResponseId(), value);
     }
 
-    /**
-     * Completes the pending response with the given ID and re-invokes the agentic system to resume execution.
-     * The returned result may itself be suspended if the workflow has further human-in-the-loop steps.
-     *
-     * @param responseId the identifier of the pending response to complete
-     * @param value the human response value
-     * @return the result of the resumed invocation
-     * @throws IllegalStateException if this result is not suspended or if no resume callback
-     *         is available (e.g. after a crash/restart)
-     */
     public ResultWithAgenticScope<T> completePendingResponse(String responseId, Object value) {
-        if (!suspended) {
+        if (!this.suspended) {
             throw new IllegalStateException("Cannot complete a pending response on a non-suspended result");
         }
-        if (resumeCallback == null) {
-            throw new IllegalStateException(
-                    "No resume callback available. After a crash/restart, use AgenticScope.completePendingResponse() and re-invoke the agent method directly.");
+        if (this.resumeCallback == null) {
+            throw new IllegalStateException("No resume callback available. After a crash/restart, use AgenticScope.completePendingResponse() and re-invoke the agent method directly.");
         }
-        agenticScope.completePendingResponse(responseId, value);
-        return resumeCallback.get();
+        this.agenticScope.completePendingResponse(responseId, value);
+        return this.resumeCallback.get();
     }
 
     private String singlePendingResponseId() {
-        Set<String> ids = agenticScope.pendingResponseIds();
+        Set<String> ids = this.agenticScope.pendingResponseIds();
         if (ids.size() != 1) {
-            throw new IllegalStateException(
-                    "Expected exactly 1 pending response, but found " + ids.size() + ": " + ids);
+            throw new IllegalStateException("Expected exactly 1 pending response, but found " + ids.size() + ": " + ids);
         }
         return ids.iterator().next();
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ResultWithAgenticScope<?> that)) return false;
-        return suspended == that.suspended
-                && Objects.equals(agenticScope, that.agenticScope)
-                && Objects.equals(result, that.result);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResultWithAgenticScope)) {
+            return false;
+        }
+        ResultWithAgenticScope that = (ResultWithAgenticScope)o;
+        return this.suspended == that.suspended && Objects.equals(this.agenticScope, that.agenticScope) && Objects.equals(this.result, that.result);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(agenticScope, result, suspended);
+        return Objects.hash(this.agenticScope, this.result, this.suspended);
     }
 
-    @Override
     public String toString() {
-        return "ResultWithAgenticScope[agenticScope=" + agenticScope
-                + ", result=" + result
-                + ", suspended=" + suspended + "]";
+        return "ResultWithAgenticScope[agenticScope=" + this.agenticScope + ", result=" + this.result + ", suspended=" + this.suspended + "]";
     }
 }
+

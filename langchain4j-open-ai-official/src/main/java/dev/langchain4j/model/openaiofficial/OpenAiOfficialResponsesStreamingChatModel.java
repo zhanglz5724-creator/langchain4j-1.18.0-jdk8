@@ -1,22 +1,132 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.openai.azure.AzureOpenAIServiceVersion
+ *  com.openai.client.OpenAIClient
+ *  com.openai.core.JsonField
+ *  com.openai.core.JsonMissing
+ *  com.openai.core.JsonValue
+ *  com.openai.core.http.StreamResponse
+ *  com.openai.credential.Credential
+ *  com.openai.models.ChatModel
+ *  com.openai.models.Reasoning
+ *  com.openai.models.Reasoning$Builder
+ *  com.openai.models.Reasoning$Summary
+ *  com.openai.models.ReasoningEffort
+ *  com.openai.models.ResponseFormatJsonObject
+ *  com.openai.models.ResponsesModel
+ *  com.openai.models.responses.EasyInputMessage
+ *  com.openai.models.responses.EasyInputMessage$Content
+ *  com.openai.models.responses.EasyInputMessage$Role
+ *  com.openai.models.responses.FunctionTool
+ *  com.openai.models.responses.FunctionTool$Parameters
+ *  com.openai.models.responses.FunctionTool$Parameters$Builder
+ *  com.openai.models.responses.Response
+ *  com.openai.models.responses.ResponseCompletedEvent
+ *  com.openai.models.responses.ResponseCreateParams
+ *  com.openai.models.responses.ResponseCreateParams$Builder
+ *  com.openai.models.responses.ResponseCreateParams$ServiceTier
+ *  com.openai.models.responses.ResponseCreateParams$StreamOptions
+ *  com.openai.models.responses.ResponseCreateParams$Truncation
+ *  com.openai.models.responses.ResponseCreatedEvent
+ *  com.openai.models.responses.ResponseError
+ *  com.openai.models.responses.ResponseErrorEvent
+ *  com.openai.models.responses.ResponseFailedEvent
+ *  com.openai.models.responses.ResponseFormatTextConfig
+ *  com.openai.models.responses.ResponseFormatTextJsonSchemaConfig
+ *  com.openai.models.responses.ResponseFormatTextJsonSchemaConfig$Schema
+ *  com.openai.models.responses.ResponseFormatTextJsonSchemaConfig$Schema$Builder
+ *  com.openai.models.responses.ResponseFunctionCallArgumentsDeltaEvent
+ *  com.openai.models.responses.ResponseFunctionCallArgumentsDoneEvent
+ *  com.openai.models.responses.ResponseFunctionCallOutputItem
+ *  com.openai.models.responses.ResponseFunctionToolCall
+ *  com.openai.models.responses.ResponseIncludable
+ *  com.openai.models.responses.ResponseIncompleteEvent
+ *  com.openai.models.responses.ResponseInputContent
+ *  com.openai.models.responses.ResponseInputFile
+ *  com.openai.models.responses.ResponseInputFile$Builder
+ *  com.openai.models.responses.ResponseInputImage
+ *  com.openai.models.responses.ResponseInputImage$Detail
+ *  com.openai.models.responses.ResponseInputImageContent
+ *  com.openai.models.responses.ResponseInputImageContent$Detail
+ *  com.openai.models.responses.ResponseInputItem
+ *  com.openai.models.responses.ResponseInputItem$FunctionCallOutput
+ *  com.openai.models.responses.ResponseInputItem$FunctionCallOutput$Builder
+ *  com.openai.models.responses.ResponseInputItem$FunctionCallOutput$Output
+ *  com.openai.models.responses.ResponseInputText
+ *  com.openai.models.responses.ResponseInputTextContent
+ *  com.openai.models.responses.ResponseOutputItem
+ *  com.openai.models.responses.ResponseOutputItemAddedEvent
+ *  com.openai.models.responses.ResponseOutputItemDoneEvent
+ *  com.openai.models.responses.ResponseReasoningItem
+ *  com.openai.models.responses.ResponseReasoningItem$Summary
+ *  com.openai.models.responses.ResponseReasoningSummaryTextDeltaEvent
+ *  com.openai.models.responses.ResponseReasoningTextDeltaEvent
+ *  com.openai.models.responses.ResponseStreamEvent
+ *  com.openai.models.responses.ResponseTextConfig
+ *  com.openai.models.responses.ResponseTextConfig$Builder
+ *  com.openai.models.responses.ResponseTextConfig$Verbosity
+ *  com.openai.models.responses.ResponseTextDeltaEvent
+ *  com.openai.models.responses.Tool
+ *  com.openai.models.responses.ToolChoiceOptions
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest
+ *  dev.langchain4j.agent.tool.ToolExecutionRequest$Builder
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.data.image.Image
+ *  dev.langchain4j.data.message.AiMessage
+ *  dev.langchain4j.data.message.AiMessage$Builder
+ *  dev.langchain4j.data.message.ChatMessage
+ *  dev.langchain4j.data.message.Content
+ *  dev.langchain4j.data.message.ImageContent
+ *  dev.langchain4j.data.message.ImageContent$DetailLevel
+ *  dev.langchain4j.data.message.PdfFileContent
+ *  dev.langchain4j.data.message.SystemMessage
+ *  dev.langchain4j.data.message.TextContent
+ *  dev.langchain4j.data.message.ToolExecutionResultMessage
+ *  dev.langchain4j.data.message.UserMessage
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.DefaultExecutorProvider
+ *  dev.langchain4j.internal.ExceptionMapper
+ *  dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils
+ *  dev.langchain4j.internal.JsonSchemaElementUtils
+ *  dev.langchain4j.internal.MappingTrackingStreamingChatResponseHandler
+ *  dev.langchain4j.internal.ToolSpecificationUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.StreamingChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.request.ResponseFormatType
+ *  dev.langchain4j.model.chat.request.ToolChoice
+ *  dev.langchain4j.model.chat.request.json.JsonObjectSchema
+ *  dev.langchain4j.model.chat.request.json.JsonRawSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchemaElement
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.model.chat.response.CompleteToolCall
+ *  dev.langchain4j.model.chat.response.PartialToolCall
+ *  dev.langchain4j.model.chat.response.StreamingChatResponseHandler
+ *  dev.langchain4j.model.chat.response.StreamingHandle
+ *  dev.langchain4j.model.output.FinishReason
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.model.openaiofficial;
-
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onPartialResponse;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onPartialThinking;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onPartialToolCall;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.onUnmappedRawEvent;
-import static dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils.withLoggingExceptions;
-import static dev.langchain4j.internal.JsonSchemaElementUtils.toMap;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-import static dev.langchain4j.model.openaiofficial.setup.OpenAiOfficialSetup.setupSyncClient;
-import static java.util.Arrays.asList;
 
 import com.openai.azure.AzureOpenAIServiceVersion;
 import com.openai.client.OpenAIClient;
 import com.openai.core.JsonField;
 import com.openai.core.JsonMissing;
 import com.openai.core.JsonValue;
+import com.openai.core.http.StreamResponse;
 import com.openai.credential.Credential;
 import com.openai.models.ChatModel;
 import com.openai.models.Reasoning;
@@ -25,6 +135,7 @@ import com.openai.models.ResponseFormatJsonObject;
 import com.openai.models.ResponsesModel;
 import com.openai.models.responses.EasyInputMessage;
 import com.openai.models.responses.FunctionTool;
+import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCompletedEvent;
 import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.ResponseCreatedEvent;
@@ -73,8 +184,12 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
 import dev.langchain4j.internal.DefaultExecutorProvider;
 import dev.langchain4j.internal.ExceptionMapper;
+import dev.langchain4j.internal.InternalStreamingChatResponseHandlerUtils;
+import dev.langchain4j.internal.JsonSchemaElementUtils;
 import dev.langchain4j.internal.MappingTrackingStreamingChatResponseHandler;
 import dev.langchain4j.internal.ToolSpecificationUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -88,19 +203,27 @@ import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.chat.response.CompleteToolCall;
 import dev.langchain4j.model.chat.response.PartialToolCall;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.chat.response.StreamingHandle;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialResponsesChatRequestParameters;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialResponsesChatResponseMetadata;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialTokenUsage;
+import dev.langchain4j.model.openaiofficial.setup.OpenAiOfficialSetup;
 import dev.langchain4j.model.output.FinishReason;
 import java.net.Proxy;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
@@ -110,239 +233,153 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * StreamingChatModel implementation using the official OpenAI Java client for the Responses API.
- */
 @Experimental
-public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatModel {
-
+public class OpenAiOfficialResponsesStreamingChatModel
+implements StreamingChatModel {
     private static final Logger logger = LoggerFactory.getLogger(OpenAiOfficialResponsesStreamingChatModel.class);
     private static final String PROMPT_CACHE_RETENTION_FIELD = "prompt_cache_retention";
-    // do not change, will break backward compatibility!
     static final String ENCRYPTED_REASONING_KEY = "encrypted_reasoning";
-
     private final OpenAIClient client;
     private final ExecutorService executorService;
     private final OpenAiOfficialResponsesChatRequestParameters defaultRequestParameters;
     private final List<ChatModelListener> listeners;
 
     private OpenAiOfficialResponsesStreamingChatModel(Builder builder) {
-        this.client = builder.client != null
-                ? builder.client
-                : setupSyncClient(
-                        builder.baseUrl,
-                        builder.apiKey,
-                        builder.credential,
-                        builder.microsoftFoundryDeploymentName,
-                        builder.azureOpenAIServiceVersion,
-                        builder.organizationId,
-                        builder.isMicrosoftFoundry,
-                        builder.isGitHubModels,
-                        builder.modelName,
-                        builder.timeout,
-                        builder.maxRetries,
-                        builder.proxy,
-                        builder.customHeaders);
-        this.executorService =
-                getOrDefault(builder.executorService, DefaultExecutorProvider::getDefaultExecutorService);
-
         ChatRequestParameters commonParameters;
+        this.client = builder.client != null ? builder.client : OpenAiOfficialSetup.setupSyncClient(builder.baseUrl, builder.apiKey, builder.credential, builder.microsoftFoundryDeploymentName, builder.azureOpenAIServiceVersion, builder.organizationId, builder.isMicrosoftFoundry, builder.isGitHubModels, builder.modelName, builder.timeout, builder.maxRetries, builder.proxy, builder.customHeaders);
+        this.executorService = (ExecutorService)Utils.getOrDefault((Object)builder.executorService, DefaultExecutorProvider::getDefaultExecutorService);
         if (builder.defaultRequestParameters != null) {
-            validate(builder.defaultRequestParameters);
+            OpenAiOfficialResponsesStreamingChatModel.validate(builder.defaultRequestParameters);
             commonParameters = builder.defaultRequestParameters;
         } else {
             commonParameters = DefaultChatRequestParameters.EMPTY;
         }
-
-        OpenAiOfficialResponsesChatRequestParameters responsesParameters =
-                commonParameters instanceof OpenAiOfficialResponsesChatRequestParameters p
-                        ? p
-                        : OpenAiOfficialResponsesChatRequestParameters.EMPTY;
-
-        this.defaultRequestParameters = OpenAiOfficialResponsesChatRequestParameters.builder()
-                .modelName(ensureNotNull(getOrDefault(builder.modelName, commonParameters.modelName()), "modelName"))
-                .temperature(getOrDefault(builder.temperature, commonParameters.temperature()))
-                .topP(getOrDefault(builder.topP, commonParameters.topP()))
-                .maxOutputTokens(getOrDefault(builder.maxOutputTokens, commonParameters.maxOutputTokens()))
-                .toolSpecifications(getOrDefault(builder.toolSpecifications, commonParameters.toolSpecifications()))
-                .toolChoice(getOrDefault(builder.toolChoice, commonParameters.toolChoice()))
-                .responseFormat(getOrDefault(builder.responseFormat, commonParameters.responseFormat()))
-                .previousResponseId(getOrDefault(builder.previousResponseId, responsesParameters.previousResponseId()))
-                .maxToolCalls(getOrDefault(builder.maxToolCalls, responsesParameters.maxToolCalls()))
-                .parallelToolCalls(getOrDefault(builder.parallelToolCalls, responsesParameters.parallelToolCalls()))
-                .topLogprobs(getOrDefault(builder.topLogprobs, responsesParameters.topLogprobs()))
-                .truncation(getOrDefault(builder.truncation, responsesParameters.truncation()))
-                .include(getOrDefault(builder.include, responsesParameters.include()))
-                .serviceTier(getOrDefault(builder.serviceTier, responsesParameters.serviceTier()))
-                .safetyIdentifier(getOrDefault(builder.safetyIdentifier, responsesParameters.safetyIdentifier()))
-                .promptCacheKey(getOrDefault(builder.promptCacheKey, responsesParameters.promptCacheKey()))
-                .promptCacheRetention(
-                        getOrDefault(builder.promptCacheRetention, responsesParameters.promptCacheRetention()))
-                .reasoningEffort(getOrDefault(builder.reasoningEffort, responsesParameters.reasoningEffort()))
-                .reasoningSummary(getOrDefault(builder.reasoningSummary, responsesParameters.reasoningSummary()))
-                .textVerbosity(getOrDefault(builder.textVerbosity, responsesParameters.textVerbosity()))
-                .streamIncludeObfuscation(
-                        getOrDefault(builder.streamIncludeObfuscation, responsesParameters.streamIncludeObfuscation()))
-                .store(getOrDefault(builder.store, getOrDefault(responsesParameters.store(), false)))
-                .strictTools(getOrDefault(builder.strictTools, responsesParameters.strictTools()))
-                .strictJsonSchema(getOrDefault(builder.strictJsonSchema, responsesParameters.strictJsonSchema()))
-                .serverTools(getOrDefault(builder.serverTools, responsesParameters.serverTools()))
-                .build();
-
-        this.listeners = copy(builder.listeners);
+        OpenAiOfficialResponsesChatRequestParameters responsesParameters = commonParameters instanceof OpenAiOfficialResponsesChatRequestParameters ? (OpenAiOfficialResponsesChatRequestParameters)commonParameters : OpenAiOfficialResponsesChatRequestParameters.EMPTY;
+        this.defaultRequestParameters = ((OpenAiOfficialResponsesChatRequestParameters.Builder)((OpenAiOfficialResponsesChatRequestParameters.Builder)((OpenAiOfficialResponsesChatRequestParameters.Builder)((OpenAiOfficialResponsesChatRequestParameters.Builder)((OpenAiOfficialResponsesChatRequestParameters.Builder)((OpenAiOfficialResponsesChatRequestParameters.Builder)((OpenAiOfficialResponsesChatRequestParameters.Builder)OpenAiOfficialResponsesChatRequestParameters.builder().modelName((String)ValidationUtils.ensureNotNull((Object)Utils.getOrDefault((Object)builder.modelName, (Object)commonParameters.modelName()), (String)"modelName"))).temperature((Double)Utils.getOrDefault((Object)builder.temperature, (Object)commonParameters.temperature()))).topP((Double)Utils.getOrDefault((Object)builder.topP, (Object)commonParameters.topP()))).maxOutputTokens((Integer)Utils.getOrDefault((Object)builder.maxOutputTokens, (Object)commonParameters.maxOutputTokens()))).toolSpecifications(Utils.getOrDefault((List)builder.toolSpecifications, (List)commonParameters.toolSpecifications()))).toolChoice((ToolChoice)Utils.getOrDefault((Object)builder.toolChoice, (Object)commonParameters.toolChoice()))).responseFormat((ResponseFormat)Utils.getOrDefault((Object)builder.responseFormat, (Object)commonParameters.responseFormat()))).previousResponseId((String)Utils.getOrDefault((Object)builder.previousResponseId, (Object)responsesParameters.previousResponseId())).maxToolCalls((Integer)Utils.getOrDefault((Object)builder.maxToolCalls, (Object)responsesParameters.maxToolCalls())).parallelToolCalls((Boolean)Utils.getOrDefault((Object)builder.parallelToolCalls, (Object)responsesParameters.parallelToolCalls())).topLogprobs((Integer)Utils.getOrDefault((Object)builder.topLogprobs, (Object)responsesParameters.topLogprobs())).truncation((String)Utils.getOrDefault((Object)builder.truncation, (Object)responsesParameters.truncation())).include(Utils.getOrDefault((List)builder.include, responsesParameters.include())).serviceTier((String)Utils.getOrDefault((Object)builder.serviceTier, (Object)responsesParameters.serviceTier())).safetyIdentifier((String)Utils.getOrDefault((Object)builder.safetyIdentifier, (Object)responsesParameters.safetyIdentifier())).promptCacheKey((String)Utils.getOrDefault((Object)builder.promptCacheKey, (Object)responsesParameters.promptCacheKey())).promptCacheRetention((String)Utils.getOrDefault((Object)builder.promptCacheRetention, (Object)responsesParameters.promptCacheRetention())).reasoningEffort((ReasoningEffort)Utils.getOrDefault((Object)builder.reasoningEffort, (Object)responsesParameters.reasoningEffort())).reasoningSummary((Reasoning.Summary)Utils.getOrDefault((Object)builder.reasoningSummary, (Object)responsesParameters.reasoningSummary())).textVerbosity((String)Utils.getOrDefault((Object)builder.textVerbosity, (Object)responsesParameters.textVerbosity())).streamIncludeObfuscation((Boolean)Utils.getOrDefault((Object)builder.streamIncludeObfuscation, (Object)responsesParameters.streamIncludeObfuscation())).store((Boolean)Utils.getOrDefault((Object)builder.store, (Object)Utils.getOrDefault((Object)responsesParameters.store(), (Object)false))).strictTools((Boolean)Utils.getOrDefault((Object)builder.strictTools, (Object)responsesParameters.strictTools())).strictJsonSchema((Boolean)Utils.getOrDefault((Object)builder.strictJsonSchema, (Object)responsesParameters.strictJsonSchema())).serverTools(Utils.getOrDefault((List)builder.serverTools, responsesParameters.serverTools())).build();
+        this.listeners = Utils.copy((List)builder.listeners);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
-        validate(chatRequest.parameters());
-        OpenAiOfficialResponsesChatRequestParameters parameters =
-                (OpenAiOfficialResponsesChatRequestParameters) chatRequest.parameters();
-
-        AtomicReference<String> responseIdRef = new AtomicReference<>();
-        Future<?> streamingFuture = null;
-
-        try {
-            ResponseCreateParams params = buildRequestParams(chatRequest, parameters);
-            ResponseStream<ResponseStreamEvent> streamResponse = client.responses().createStreaming(params);
-
-            ResponsesStreamingHandle streamingHandle = new ResponsesStreamingHandle(() -> {
-                try {
-                    streamResponse.close();
-                } catch (Exception e) {
-                    // Ignore close errors
-                }
-            });
-
-            ResponsesEventHandler eventHandler =
-                    new ResponsesEventHandler(handler, responseIdRef, parameters.modelName(), streamingHandle);
-
-            // The forEach call blocks, so it is submitted to the executor service to run asynchronously.
-            // We keep this on our executor (instead of OpenAIClientAsync callbacks) to ensure that user
-            // handlers execute on a single, controlled thread rather than SDK/OkHttp threads.
-            streamingFuture = executorService.submit(() -> {
-                try (streamResponse) {
-                    streamResponse.stream().forEach(eventHandler::handleEvent);
-                } catch (CancellationException e) {
-                    withLoggingExceptions(() -> handler.onError(e));
-                } catch (Exception e) {
-                    RuntimeException mappedException = ExceptionMapper.DEFAULT.mapException(e);
-                    withLoggingExceptions(() -> handler.onError(mappedException));
-                } finally {
-                    streamingHandle.markCompleted();
-                }
-            });
-            streamingHandle.setStreamingFuture(streamingFuture);
-        } catch (Exception e) {
-            RuntimeException mappedException = ExceptionMapper.DEFAULT.mapException(e);
-            withLoggingExceptions(() -> handler.onError(mappedException));
-            if (streamingFuture != null) {
+        block2: {
+            OpenAiOfficialResponsesStreamingChatModel.validate(chatRequest.parameters());
+            OpenAiOfficialResponsesChatRequestParameters parameters = (OpenAiOfficialResponsesChatRequestParameters)chatRequest.parameters();
+            AtomicReference<String> responseIdRef = new AtomicReference<String>();
+            Future<?> streamingFuture = null;
+            try {
+                ResponseCreateParams params = OpenAiOfficialResponsesStreamingChatModel.buildRequestParams(chatRequest, parameters);
+                StreamResponse streamResponse = this.client.responses().createStreaming(params);
+                ResponsesStreamingHandle streamingHandle = new ResponsesStreamingHandle(() -> {
+                    try {
+                        streamResponse.close();
+                    }
+                    catch (Exception exception) {
+                        // empty catch block
+                    }
+                });
+                ResponsesEventHandler eventHandler = new ResponsesEventHandler(handler, responseIdRef, parameters.modelName(), streamingHandle);
+                streamingFuture = this.executorService.submit(() -> {
+                    try (StreamResponse sr = streamResponse;){
+                        sr.stream().forEach(eventHandler::handleEvent);
+                    }
+                    catch (CancellationException e) {
+                        InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> handler.onError((Throwable)e));
+                    }
+                    catch (Exception e) {
+                        RuntimeException mappedException = ExceptionMapper.DEFAULT.mapException((Throwable)e);
+                        InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> handler.onError((Throwable)mappedException));
+                    }
+                    finally {
+                        streamingHandle.markCompleted();
+                    }
+                });
+                streamingHandle.setStreamingFuture(streamingFuture);
+            }
+            catch (Exception e) {
+                RuntimeException mappedException = ExceptionMapper.DEFAULT.mapException((Throwable)e);
+                InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> handler.onError((Throwable)mappedException));
+                if (streamingFuture == null) break block2;
                 streamingFuture.cancel(true);
             }
         }
     }
 
-    @Override
     public ChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
         return ModelProvider.OPEN_AI;
     }
 
-    @Override
     public Set<Capability> supportedCapabilities() {
         return Collections.singleton(Capability.RESPONSE_FORMAT_JSON_SCHEMA);
     }
 
-    static String extractReasoningSummary(com.openai.models.responses.Response response) {
+    static String extractReasoningSummary(Response response) {
         StringBuilder summaryBuilder = new StringBuilder();
         for (ResponseOutputItem item : response.output()) {
-            if (item.isReasoning()) {
-                for (ResponseReasoningItem.Summary summary : item.asReasoning().summary()) {
-                    summaryBuilder.append(summary.text());
-                }
+            if (!item.isReasoning()) continue;
+            for (ResponseReasoningItem.Summary summary : item.asReasoning().summary()) {
+                summaryBuilder.append(summary.text());
             }
         }
-        return summaryBuilder.isEmpty() ? null : summaryBuilder.toString();
+        return summaryBuilder.length() == 0 ? null : summaryBuilder.toString();
     }
 
-    static String extractEncryptedReasoning(com.openai.models.responses.Response response) {
+    static String extractEncryptedReasoning(Response response) {
         for (ResponseOutputItem item : response.output()) {
-            if (item.isReasoning()) {
-                JsonField<String> encrypted = item.asReasoning().encryptedContent();
-                if (encrypted.isPresent() && !encrypted.get().isEmpty()) {
-                    return encrypted.get();
-                }
-            }
+            Optional encrypted;
+            if (!item.isReasoning() || !(encrypted = item.asReasoning().encryptedContent()).isPresent() || ((String)encrypted.get()).isEmpty()) continue;
+            return (String)encrypted.get();
         }
         return null;
     }
 
-    static List<ToolExecutionRequest> extractToolExecutionRequests(com.openai.models.responses.Response response) {
-        List<ToolExecutionRequest> requests = new ArrayList<>();
+    static List<ToolExecutionRequest> extractToolExecutionRequests(Response response) {
+        ArrayList<ToolExecutionRequest> requests = new ArrayList<ToolExecutionRequest>();
         for (ResponseOutputItem item : response.output()) {
-            if (item.isFunctionCall()) {
-                ResponseFunctionToolCall fn = item.asFunctionCall();
-                requests.add(ToolExecutionRequest.builder()
-                        .id(fn.callId())
-                        .name(fn.name())
-                        .arguments(fn.arguments())
-                        .build());
-            }
+            if (!item.isFunctionCall()) continue;
+            ResponseFunctionToolCall fn = item.asFunctionCall();
+            requests.add(ToolExecutionRequest.builder().id(fn.callId()).name(fn.name()).arguments(fn.arguments()).build());
         }
         return requests;
     }
 
-    static String extractText(com.openai.models.responses.Response response) {
+    static String extractText(Response response) {
         StringBuilder textBuilder = new StringBuilder();
         for (ResponseOutputItem item : response.output()) {
-            if (item.isMessage()) {
-                item.asMessage().content().forEach(content -> {
-                    if (content.isOutputText()) {
-                        textBuilder.append(content.asOutputText().text());
-                    }
-                });
-            }
+            if (!item.isMessage()) continue;
+            item.asMessage().content().forEach(content -> {
+                if (content.isOutputText()) {
+                    textBuilder.append(content.asOutputText().text());
+                }
+            });
         }
-        return textBuilder.isEmpty() ? null : textBuilder.toString();
+        return textBuilder.length() == 0 ? null : textBuilder.toString();
     }
 
-    static AiMessage buildAiMessage(
-            String text, String thinking, List<ToolExecutionRequest> toolExecutionRequests, String encryptedReasoning) {
-        AiMessage.Builder builder =
-                AiMessage.builder().text(text).thinking(thinking).toolExecutionRequests(toolExecutionRequests);
+    static AiMessage buildAiMessage(String text, String thinking, List<ToolExecutionRequest> toolExecutionRequests, String encryptedReasoning) {
+        AiMessage.Builder builder = AiMessage.builder().text(text).thinking(thinking).toolExecutionRequests(toolExecutionRequests);
         if (encryptedReasoning != null) {
             builder.attributes(Collections.singletonMap(ENCRYPTED_REASONING_KEY, encryptedReasoning));
         }
         return builder.build();
     }
 
-    static OpenAiOfficialResponsesChatResponseMetadata buildResponseMetadata(
-            String responseId,
-            String modelName,
-            com.openai.models.responses.Response response,
-            String finishReason,
-            OpenAiOfficialTokenUsage tokenUsage) {
-        OpenAiOfficialResponsesChatResponseMetadata.Builder builder = OpenAiOfficialResponsesChatResponseMetadata.builder()
-                .id(responseId)
-                .modelName(modelName)
-                .createdAt((long) response.createdAt())
-                .rawResponse(response);
+    static OpenAiOfficialResponsesChatResponseMetadata buildResponseMetadata(String responseId, String modelName, Response response, String finishReason, OpenAiOfficialTokenUsage tokenUsage) {
+        OpenAiOfficialResponsesChatResponseMetadata.Builder builder = ((OpenAiOfficialResponsesChatResponseMetadata.Builder)((OpenAiOfficialResponsesChatResponseMetadata.Builder)OpenAiOfficialResponsesChatResponseMetadata.builder().id(responseId)).modelName(modelName)).createdAt((long)response.createdAt()).rawResponse(response);
         response.completedAt().ifPresent(ts -> builder.completedAt(ts.longValue()));
         response.serviceTier().ifPresent(tier -> builder.serviceTier(tier.asString()));
         if (finishReason != null) {
-            builder.finishReason(FinishReason.valueOf(finishReason));
+            builder.finishReason(FinishReason.valueOf((String)finishReason));
         }
         if (tokenUsage != null) {
             builder.tokenUsage(tokenUsage);
@@ -354,42 +391,31 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         if (status == null) {
             return null;
         }
-        return switch (status) {
-            case "completed" -> hasToolCalls ? "TOOL_EXECUTION" : "STOP";
-            case "incomplete" -> "LENGTH";
-            case "failed" -> "OTHER";
-            default -> "OTHER";
-        };
+        switch (status) {
+            case "completed": {
+                return hasToolCalls ? "TOOL_EXECUTION" : "STOP";
+            }
+            case "incomplete": {
+                return "LENGTH";
+            }
+            case "failed": {
+                return "OTHER";
+            }
+        }
+        return "OTHER";
     }
 
-    static OpenAiOfficialTokenUsage extractTokenUsage(com.openai.models.responses.Response response) {
-        return response.usage()
-                .map(usage -> OpenAiOfficialTokenUsage.builder()
-                        .inputTokenCount(usage.inputTokens())
-                        .outputTokenCount(usage.outputTokens())
-                        .totalTokenCount(usage.totalTokens())
-                        .inputTokensDetails(OpenAiOfficialTokenUsage.InputTokensDetails.builder()
-                                .cachedTokens(usage.inputTokensDetails().cachedTokens())
-                                .build())
-                        .outputTokensDetails(OpenAiOfficialTokenUsage.OutputTokensDetails.builder()
-                                .reasoningTokens(usage.outputTokensDetails().reasoningTokens())
-                                .build())
-                        .build())
-                .orElse(null);
+    static OpenAiOfficialTokenUsage extractTokenUsage(Response response) {
+        return response.usage().map(usage -> OpenAiOfficialTokenUsage.builder().inputTokenCount(usage.inputTokens()).outputTokenCount(usage.outputTokens()).totalTokenCount(usage.totalTokens()).inputTokensDetails(OpenAiOfficialTokenUsage.InputTokensDetails.builder().cachedTokens(usage.inputTokensDetails().cachedTokens()).build()).outputTokensDetails(OpenAiOfficialTokenUsage.OutputTokensDetails.builder().reasoningTokens(usage.outputTokensDetails().reasoningTokens()).build()).build()).orElse(null);
     }
 
-    static ResponseCreateParams buildRequestParams(
-            ChatRequest chatRequest, OpenAiOfficialResponsesChatRequestParameters parameters) {
-        ResponseCreateParams.Builder paramsBuilder = ResponseCreateParams.builder()
-                .model(ResponsesModel.ofChat(ChatModel.of(parameters.modelName())))
-                .store(parameters.store());
-
+    static ResponseCreateParams buildRequestParams(ChatRequest chatRequest, OpenAiOfficialResponsesChatRequestParameters parameters) {
+        ResponseCreateParams.Builder paramsBuilder = ResponseCreateParams.builder().model(ResponsesModel.ofChat((ChatModel)ChatModel.of((String)parameters.modelName()))).store(parameters.store());
         ArrayList<ResponseInputItem> inputItems = new ArrayList<ResponseInputItem>();
-        for (ChatMessage msg : chatRequest.messages()) {
-            inputItems.addAll(toResponseInputItems(msg));
+        for (Object msg : chatRequest.messages()) {
+            inputItems.addAll(OpenAiOfficialResponsesStreamingChatModel.toResponseInputItems((ChatMessage)msg));
         }
         paramsBuilder.inputOfResponse(inputItems);
-
         if (parameters.temperature() != null) {
             paramsBuilder.temperature(parameters.temperature());
         }
@@ -400,7 +426,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             paramsBuilder.maxOutputTokens(parameters.maxOutputTokens().longValue());
         }
         if (parameters.maxToolCalls() != null) {
-            paramsBuilder.maxToolCalls(parameters.maxToolCalls());
+            paramsBuilder.maxToolCalls((long)parameters.maxToolCalls().intValue());
         }
         if (parameters.parallelToolCalls() != null) {
             paramsBuilder.parallelToolCalls(parameters.parallelToolCalls());
@@ -409,20 +435,20 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             paramsBuilder.previousResponseId(parameters.previousResponseId());
         }
         if (parameters.topLogprobs() != null) {
-            paramsBuilder.topLogprobs(parameters.topLogprobs());
+            paramsBuilder.topLogprobs((long)parameters.topLogprobs().intValue());
         }
         if (parameters.truncation() != null) {
-            paramsBuilder.truncation(ResponseCreateParams.Truncation.of(parameters.truncation()));
+            paramsBuilder.truncation(ResponseCreateParams.Truncation.of((String)parameters.truncation()));
         }
         if (parameters.include() != null && !parameters.include().isEmpty()) {
             ArrayList<ResponseIncludable> includables = new ArrayList<ResponseIncludable>();
-            for (ResponseIncludable item : parameters.include()) {
-                includables.add(ResponseIncludable.of(item));
+            for (String string : parameters.include()) {
+                includables.add(ResponseIncludable.of((String)string));
             }
             paramsBuilder.include(includables);
         }
         if (parameters.serviceTier() != null) {
-            paramsBuilder.serviceTier(ResponseCreateParams.ServiceTier.of(parameters.serviceTier()));
+            paramsBuilder.serviceTier(ResponseCreateParams.ServiceTier.of((String)parameters.serviceTier()));
         }
         if (parameters.safetyIdentifier() != null) {
             paramsBuilder.safetyIdentifier(parameters.safetyIdentifier());
@@ -431,8 +457,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             paramsBuilder.promptCacheKey(parameters.promptCacheKey());
         }
         if (parameters.promptCacheRetention() != null) {
-            paramsBuilder.putAdditionalBodyProperty(
-                    PROMPT_CACHE_RETENTION_FIELD, JsonValue.from(parameters.promptCacheRetention()));
+            paramsBuilder.putAdditionalBodyProperty(PROMPT_CACHE_RETENTION_FIELD, JsonValue.from((Object)parameters.promptCacheRetention()));
         }
         if (parameters.reasoningEffort() != null || parameters.reasoningSummary() != null) {
             Reasoning.Builder reasoningBuilder = Reasoning.builder();
@@ -445,30 +470,23 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             paramsBuilder.reasoning(reasoningBuilder.build());
         }
         if (parameters.streamIncludeObfuscation() != null) {
-            paramsBuilder.streamOptions(ResponseCreateParams.StreamOptions.builder()
-                    .includeObfuscation(parameters.streamIncludeObfuscation())
-                    .build());
+            paramsBuilder.streamOptions(ResponseCreateParams.StreamOptions.builder().includeObfuscation(parameters.streamIncludeObfuscation().booleanValue()).build());
         }
-
         boolean strictTools = Boolean.TRUE.equals(parameters.strictTools());
-        List<Tool> tools = toResponsesTools(parameters.toolSpecifications(), strictTools, parameters.serverTools());
+        List<Tool> tools = OpenAiOfficialResponsesStreamingChatModel.toResponsesTools(parameters.toolSpecifications(), strictTools, parameters.serverTools());
         if (!tools.isEmpty()) {
             for (Tool tool : tools) {
                 paramsBuilder.addTool(tool);
             }
-
             if (parameters.toolChoice() != null) {
-                paramsBuilder.toolChoice(toResponsesToolChoice(parameters.toolChoice()));
+                paramsBuilder.toolChoice(OpenAiOfficialResponsesStreamingChatModel.toResponsesToolChoice(parameters.toolChoice()));
             }
         }
-
-        boolean strictJsonSchema = Boolean.TRUE.equals(parameters.strictJsonSchema());
-        ResponseTextConfig textConfig =
-                toResponseTextConfig(parameters.responseFormat(), strictJsonSchema, parameters.textVerbosity());
+        boolean bl = Boolean.TRUE.equals(parameters.strictJsonSchema());
+        ResponseTextConfig textConfig = OpenAiOfficialResponsesStreamingChatModel.toResponseTextConfig(parameters.responseFormat(), bl, parameters.textVerbosity());
         if (textConfig != null) {
             paramsBuilder.text(textConfig);
         }
-
         return paramsBuilder.build();
     }
 
@@ -477,12 +495,10 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             throw new UnsupportedFeatureException("'topK' parameter is not supported by OpenAI Responses API");
         }
         if (parameters.frequencyPenalty() != null) {
-            throw new UnsupportedFeatureException(
-                    "'frequencyPenalty' parameter is not supported by OpenAI Responses API");
+            throw new UnsupportedFeatureException("'frequencyPenalty' parameter is not supported by OpenAI Responses API");
         }
         if (parameters.presencePenalty() != null) {
-            throw new UnsupportedFeatureException(
-                    "'presencePenalty' parameter is not supported by OpenAI Responses API");
+            throw new UnsupportedFeatureException("'presencePenalty' parameter is not supported by OpenAI Responses API");
         }
         if (parameters.stopSequences() != null && !parameters.stopSequences().isEmpty()) {
             throw new UnsupportedFeatureException("'stopSequences' parameter is not supported by OpenAI Responses API");
@@ -490,195 +506,167 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
     }
 
     private static List<ResponseInputItem> toResponseInputItems(ChatMessage msg) {
-        if (msg instanceof SystemMessage systemMessage) {
-            return Collections.singletonList(createTextMessage(EasyInputMessage.Role.SYSTEM, systemMessage.text()));
-        } else if (msg instanceof UserMessage userMessage) {
-            return Collections.singletonList(createUserMessage(userMessage));
-        } else if (msg instanceof AiMessage aiMessage) {
+        if (msg instanceof SystemMessage) {
+            SystemMessage systemMessage = (SystemMessage)msg;
+            return Collections.singletonList(OpenAiOfficialResponsesStreamingChatModel.createTextMessage(EasyInputMessage.Role.SYSTEM, systemMessage.text()));
+        }
+        if (msg instanceof UserMessage) {
+            UserMessage userMessage = (UserMessage)msg;
+            return Collections.singletonList(OpenAiOfficialResponsesStreamingChatModel.createUserMessage(userMessage));
+        }
+        if (msg instanceof AiMessage) {
+            String text;
+            AiMessage aiMessage = (AiMessage)msg;
             ArrayList<ResponseInputItem> items = new ArrayList<ResponseInputItem>();
-
-            // Add reasoning item (with encrypted_content and summary) if present
-            String encryptedReasoning = aiMessage.attribute(ENCRYPTED_REASONING_KEY, String.class);
+            String encryptedReasoning = (String)aiMessage.attribute(ENCRYPTED_REASONING_KEY, String.class);
             if (encryptedReasoning != null && !encryptedReasoning.isEmpty()) {
-                items.add(toReasoningInputItem(encryptedReasoning, aiMessage.thinking()));
+                items.add(OpenAiOfficialResponsesStreamingChatModel.toReasoningInputItem(encryptedReasoning, aiMessage.thinking()));
             }
-
-            // Add text message if present
-            String text = aiMessage.text();
-            if (text != null && !text.isEmpty()) {
-                items.add(createTextMessage(EasyInputMessage.Role.ASSISTANT, text));
+            if ((text = aiMessage.text()) != null && !text.isEmpty()) {
+                items.add(OpenAiOfficialResponsesStreamingChatModel.createTextMessage(EasyInputMessage.Role.ASSISTANT, text));
             }
-
-            // Add function calls if present
             if (aiMessage.hasToolExecutionRequests()) {
-                aiMessage.toolExecutionRequests().stream()
-                        .map(toolRequest -> ResponseInputItem.ofFunctionCall(ResponseFunctionToolCall.builder()
-                                .callId(toolRequest.id())
-                                .name(toolRequest.name())
-                                .arguments(toolRequest.arguments())
-                                .build()))
-                        .forEach(items::add);
+                aiMessage.toolExecutionRequests().stream().map(toolRequest -> ResponseInputItem.ofFunctionCall((ResponseFunctionToolCall)ResponseFunctionToolCall.builder().callId(toolRequest.id()).name(toolRequest.name()).arguments(toolRequest.arguments()).build())).forEach(items::add);
             }
-
-            // If no text and no tool calls, return empty assistant message
             if (items.isEmpty()) {
-                items.add(createTextMessage(EasyInputMessage.Role.ASSISTANT, ""));
+                items.add(OpenAiOfficialResponsesStreamingChatModel.createTextMessage(EasyInputMessage.Role.ASSISTANT, ""));
             }
-
             return items;
-        } else if (msg instanceof ToolExecutionResultMessage toolResultMessage) {
+        }
+        if (msg instanceof ToolExecutionResultMessage) {
+            ToolExecutionResultMessage toolResultMessage = (ToolExecutionResultMessage)msg;
             ResponseInputItem.FunctionCallOutput.Builder outputBuilder = ResponseInputItem.FunctionCallOutput.builder().callId(toolResultMessage.id());
-
             if (toolResultMessage.hasSingleText()) {
                 outputBuilder.output(toolResultMessage.text());
             } else {
                 ArrayList<ResponseFunctionCallOutputItem> outputItems = new ArrayList<ResponseFunctionCallOutputItem>();
                 for (Content content : toolResultMessage.contents()) {
-                    if (content instanceof TextContent textContent) {
-                        outputItems.add(ResponseFunctionCallOutputItem.ofInputText(ResponseInputTextContent.builder()
-                                .text(textContent.text())
-                                .build()));
-                    } else if (content instanceof ImageContent imageContent) {
-                        outputItems.add(ResponseFunctionCallOutputItem.ofInputImage(ResponseInputImageContent.builder()
-                                .imageUrl(buildImageUrl(imageContent.image()))
-                                .detail(toResponsesImageDetail(imageContent.detailLevel()))
-                                .build()));
-                    } else {
-                        throw new UnsupportedFeatureException("Unsupported content type in tool result: "
-                                + content.getClass().getName()
-                                + ". Only TextContent and ImageContent are supported.");
+                    if (content instanceof TextContent) {
+                        TextContent textContent = (TextContent)content;
+                        outputItems.add(ResponseFunctionCallOutputItem.ofInputText((ResponseInputTextContent)ResponseInputTextContent.builder().text(textContent.text()).build()));
+                        continue;
                     }
+                    if (content instanceof ImageContent) {
+                        ImageContent imageContent = (ImageContent)content;
+                        outputItems.add(ResponseFunctionCallOutputItem.ofInputImage((ResponseInputImageContent)ResponseInputImageContent.builder().imageUrl(OpenAiOfficialResponsesStreamingChatModel.buildImageUrl(imageContent.image())).detail(OpenAiOfficialResponsesStreamingChatModel.toResponsesImageDetail(imageContent.detailLevel())).build()));
+                        continue;
+                    }
+                    throw new UnsupportedFeatureException("Unsupported content type in tool result: " + content.getClass().getName() + ". Only TextContent and ImageContent are supported.");
                 }
-                outputBuilder.output(
-                        ResponseInputItem.FunctionCallOutput.Output.ofResponseFunctionCallOutputItemList(outputItems));
+                outputBuilder.output(ResponseInputItem.FunctionCallOutput.Output.ofResponseFunctionCallOutputItemList(outputItems));
             }
-
-            return Collections.singletonList(ResponseInputItem.ofFunctionCallOutput(outputBuilder.build()));
-        } else {
-            return Collections.singletonList(createTextMessage(EasyInputMessage.Role.USER, msg.toString()));
+            return Collections.singletonList(ResponseInputItem.ofFunctionCallOutput((ResponseInputItem.FunctionCallOutput)outputBuilder.build()));
         }
+        return Collections.singletonList(OpenAiOfficialResponsesStreamingChatModel.createTextMessage(EasyInputMessage.Role.USER, msg.toString()));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private static ResponseInputItem toReasoningInputItem(String encryptedContent, String thinking) {
-        List<ResponseReasoningItem.Summary> summaries = new ArrayList<>();
+        ArrayList<ResponseReasoningItem.Summary> summaries = new ArrayList<ResponseReasoningItem.Summary>();
         if (thinking != null && !thinking.isEmpty()) {
             summaries.add(ResponseReasoningItem.Summary.builder().text(thinking).build());
         }
-        ResponseReasoningItem reasoningItem = ResponseReasoningItem.builder()
-                .id((JsonField) JsonMissing.of())
-                .summary(summaries)
-                .encryptedContent(encryptedContent)
-                .build();
-        return ResponseInputItem.ofReasoning(reasoningItem);
+        ResponseReasoningItem reasoningItem = ResponseReasoningItem.builder().id((JsonField)JsonMissing.of()).summary(summaries).encryptedContent(encryptedContent).build();
+        return ResponseInputItem.ofReasoning((ResponseReasoningItem)reasoningItem);
     }
 
     private static ResponseInputItem createTextMessage(EasyInputMessage.Role role, String text) {
-        return ResponseInputItem.ofEasyInputMessage(EasyInputMessage.builder()
-                .role(role)
-                .content(EasyInputMessage.Content.ofTextInput(text))
-                .build());
+        return ResponseInputItem.ofEasyInputMessage((EasyInputMessage)EasyInputMessage.builder().role(role).content(EasyInputMessage.Content.ofTextInput((String)text)).build());
     }
 
     private static ResponseInputItem createUserMessage(UserMessage userMessage) {
-        List<Content> contents = userMessage.contents();
+        List contents = userMessage.contents();
         ArrayList<ResponseInputContent> contentList = new ArrayList<ResponseInputContent>();
-
         for (Content content : contents) {
-            if (content instanceof TextContent textContent) {
-                contentList.add(ResponseInputContent.ofInputText(
-                        ResponseInputText.builder().text(textContent.text()).build()));
-            } else if (content instanceof ImageContent imageContent) {
-                Image image = imageContent.image();
-                String imageUrl = buildImageUrl(image);
-                contentList.add(ResponseInputContent.ofInputImage(ResponseInputImage.builder()
-                        .imageUrl(imageUrl)
-                        .detail(toResponsesUserImageDetail(imageContent.detailLevel()))
-                        .build()));
-            } else if (content instanceof PdfFileContent pdfFileContent) {
-                ResponseInputFile.Builder pdfInput = ResponseInputFile.builder();
-                if (pdfFileContent.pdfFile().url() != null) {
-                    pdfInput.fileUrl(pdfFileContent.pdfFile().url().toString());
-                } else if (pdfFileContent.pdfFile().base64Data() != null) {
-                    pdfInput.filename("document.pdf");
-                    pdfInput.fileData("data:" + pdfFileContent.pdfFile().mimeType() + ";base64,"
-                            + pdfFileContent.pdfFile().base64Data());
-                } else {
-                    throw new IllegalArgumentException("PDF must have either url or base64Data");
-                }
-                contentList.add(ResponseInputContent.ofInputFile(pdfInput.build()));
+            if (content instanceof TextContent) {
+                TextContent textContent = (TextContent)content;
+                contentList.add(ResponseInputContent.ofInputText((ResponseInputText)ResponseInputText.builder().text(textContent.text()).build()));
+                continue;
             }
+            if (content instanceof ImageContent) {
+                ImageContent imageContent = (ImageContent)content;
+                Image image = imageContent.image();
+                String imageUrl = OpenAiOfficialResponsesStreamingChatModel.buildImageUrl(image);
+                contentList.add(ResponseInputContent.ofInputImage((ResponseInputImage)ResponseInputImage.builder().imageUrl(imageUrl).detail(OpenAiOfficialResponsesStreamingChatModel.toResponsesUserImageDetail(imageContent.detailLevel())).build()));
+                continue;
+            }
+            if (!(content instanceof PdfFileContent)) continue;
+            PdfFileContent pdfFileContent = (PdfFileContent)content;
+            ResponseInputFile.Builder pdfInput = ResponseInputFile.builder();
+            if (pdfFileContent.pdfFile().url() != null) {
+                pdfInput.fileUrl(pdfFileContent.pdfFile().url().toString());
+            } else if (pdfFileContent.pdfFile().base64Data() != null) {
+                pdfInput.filename("document.pdf");
+                pdfInput.fileData("data:" + pdfFileContent.pdfFile().mimeType() + ";base64," + pdfFileContent.pdfFile().base64Data());
+            } else {
+                throw new IllegalArgumentException("PDF must have either url or base64Data");
+            }
+            contentList.add(ResponseInputContent.ofInputFile((ResponseInputFile)pdfInput.build()));
         }
-
-        return ResponseInputItem.ofEasyInputMessage(EasyInputMessage.builder()
-                .role(EasyInputMessage.Role.USER)
-                .content(EasyInputMessage.Content.ofResponseInputMessageContentList(contentList))
-                .build());
+        return ResponseInputItem.ofEasyInputMessage((EasyInputMessage)EasyInputMessage.builder().role(EasyInputMessage.Role.USER).content(EasyInputMessage.Content.ofResponseInputMessageContentList(contentList)).build());
     }
 
     private static String buildImageUrl(Image image) {
         if (image.url() != null) {
             return image.url().toString();
-        } else if (image.base64Data() != null) {
+        }
+        if (image.base64Data() != null) {
             String mimeType = image.mimeType() != null ? image.mimeType() : "image/jpeg";
             return "data:" + mimeType + ";base64," + image.base64Data();
-        } else {
-            throw new IllegalArgumentException("Image must have either url or base64Data");
         }
+        throw new IllegalArgumentException("Image must have either url or base64Data");
     }
 
     private static ResponseInputImage.Detail toResponsesUserImageDetail(ImageContent.DetailLevel detailLevel) {
-        return switch (detailLevel) {
-            case LOW -> ResponseInputImage.Detail.LOW;
-            case HIGH -> ResponseInputImage.Detail.HIGH;
-            case AUTO -> ResponseInputImage.Detail.AUTO;
-            default ->
-                throw new UnsupportedFeatureException("DetailLevel " + detailLevel
-                        + " is not supported by OpenAI Responses API. Supported values: LOW, HIGH, AUTO");
-        };
+        switch (detailLevel) {
+            case LOW: {
+                return ResponseInputImage.Detail.LOW;
+            }
+            case HIGH: {
+                return ResponseInputImage.Detail.HIGH;
+            }
+            case AUTO: {
+                return ResponseInputImage.Detail.AUTO;
+            }
+        }
+        throw new UnsupportedFeatureException("DetailLevel " + detailLevel + " is not supported by OpenAI Responses API. Supported values: LOW, HIGH, AUTO");
     }
 
     private static ResponseInputImageContent.Detail toResponsesImageDetail(ImageContent.DetailLevel detailLevel) {
-        return switch (detailLevel) {
-            case LOW -> ResponseInputImageContent.Detail.LOW;
-            case HIGH -> ResponseInputImageContent.Detail.HIGH;
-            case AUTO -> ResponseInputImageContent.Detail.AUTO;
-            default ->
-                throw new UnsupportedFeatureException("DetailLevel " + detailLevel
-                        + " is not supported by OpenAI Responses API. Supported values: LOW, HIGH, AUTO");
-        };
+        switch (detailLevel) {
+            case LOW: {
+                return ResponseInputImageContent.Detail.LOW;
+            }
+            case HIGH: {
+                return ResponseInputImageContent.Detail.HIGH;
+            }
+            case AUTO: {
+                return ResponseInputImageContent.Detail.AUTO;
+            }
+        }
+        throw new UnsupportedFeatureException("DetailLevel " + detailLevel + " is not supported by OpenAI Responses API. Supported values: LOW, HIGH, AUTO");
     }
 
     private static FunctionTool toResponsesTool(ToolSpecification toolSpec, boolean strict) {
-        boolean effectiveStrict = ToolSpecificationUtils.isEffectivelyStrict(toolSpec, strict);
+        boolean effectiveStrict = ToolSpecificationUtils.isEffectivelyStrict((ToolSpecification)toolSpec, (boolean)strict);
         try {
             FunctionTool.Parameters.Builder parametersBuilder = FunctionTool.Parameters.builder();
             if (toolSpec.parameters() != null) {
-                toMap(toolSpec.parameters(), effectiveStrict)
-                        .forEach((key, value) -> parametersBuilder.putAdditionalProperty(key, JsonValue.from(value)));
+                JsonSchemaElementUtils.toMap((JsonSchemaElement)toolSpec.parameters(), (boolean)effectiveStrict).forEach((key, value) -> parametersBuilder.putAdditionalProperty(key, JsonValue.from((Object)value)));
             } else if (effectiveStrict) {
-                parametersBuilder
-                        .putAdditionalProperty("type", JsonValue.from("object"))
-                        .putAdditionalProperty("properties", JsonValue.from(Collections.emptyMap()))
-                        .putAdditionalProperty("additionalProperties", JsonValue.from(false));
+                parametersBuilder.putAdditionalProperty("type", JsonValue.from((Object)"object")).putAdditionalProperty("properties", JsonValue.from(Collections.emptyMap())).putAdditionalProperty("additionalProperties", JsonValue.from((Object)false));
             }
-            return FunctionTool.builder()
-                    .name(toolSpec.name())
-                    .description(toolSpec.description())
-                    .parameters(parametersBuilder.build())
-                    .strict(effectiveStrict)
-                    .build();
-        } catch (Exception e) {
+            return FunctionTool.builder().name(toolSpec.name()).description(toolSpec.description()).parameters(parametersBuilder.build()).strict(effectiveStrict).build();
+        }
+        catch (Exception e) {
             throw new RuntimeException("Failed to convert tool specification for tool: " + toolSpec.name(), e);
         }
     }
 
-    private static List<Tool> toResponsesTools(
-            List<ToolSpecification> toolSpecifications, boolean strict, List<Tool> serverTools) {
-        List<Tool> tools = new ArrayList<>();
+    private static List<Tool> toResponsesTools(List<ToolSpecification> toolSpecifications, boolean strict, List<Tool> serverTools) {
+        ArrayList<Tool> tools = new ArrayList<Tool>();
         if (toolSpecifications != null) {
             for (ToolSpecification toolSpecification : toolSpecifications) {
-                tools.add(Tool.ofFunction(toResponsesTool(toolSpecification, strict)));
+                tools.add(Tool.ofFunction((FunctionTool)OpenAiOfficialResponsesStreamingChatModel.toResponsesTool(toolSpecification, strict)));
             }
         }
         if (serverTools != null) {
@@ -691,61 +679,288 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         if (toolChoice == null) {
             return null;
         }
-        return switch (toolChoice) {
-            case AUTO -> ToolChoiceOptions.AUTO;
-            case REQUIRED -> ToolChoiceOptions.REQUIRED;
-            case NONE -> ToolChoiceOptions.NONE;
-        };
+        switch (toolChoice) {
+            case AUTO: {
+                return ToolChoiceOptions.AUTO;
+            }
+            case REQUIRED: {
+                return ToolChoiceOptions.REQUIRED;
+            }
+            case NONE: {
+                return ToolChoiceOptions.NONE;
+            }
+        }
+        return null;
     }
 
-    private static ResponseTextConfig toResponseTextConfig(
-            ResponseFormat responseFormat, Boolean strict, String textVerbosity) {
+    private static ResponseTextConfig toResponseTextConfig(ResponseFormat responseFormat, Boolean strict, String textVerbosity) {
         ResponseTextConfig.Builder builder = null;
-
         if (responseFormat != null && responseFormat.type() != ResponseFormatType.TEXT) {
             builder = ResponseTextConfig.builder();
             JsonSchema jsonSchema = responseFormat.jsonSchema();
             if (jsonSchema == null) {
-                builder.format(ResponseFormatTextConfig.ofJsonObject(
-                        ResponseFormatJsonObject.builder().build()));
+                builder.format(ResponseFormatTextConfig.ofJsonObject((ResponseFormatJsonObject)ResponseFormatJsonObject.builder().build()));
             } else {
-                if (!(jsonSchema.rootElement() instanceof JsonObjectSchema
-                        || jsonSchema.rootElement() instanceof JsonRawSchema)) {
-                    throw new IllegalArgumentException(
-                            "For OpenAI, the root element of the JSON Schema must be either a JsonObjectSchema or a JsonRawSchema, but it was: "
-                                    + jsonSchema.rootElement().getClass());
+                if (!(jsonSchema.rootElement() instanceof JsonObjectSchema) && !(jsonSchema.rootElement() instanceof JsonRawSchema)) {
+                    throw new IllegalArgumentException("For OpenAI, the root element of the JSON Schema must be either a JsonObjectSchema or a JsonRawSchema, but it was: " + jsonSchema.rootElement().getClass());
                 }
-
-                Map<String, Object> schemaMap = toMap(jsonSchema.rootElement(), strict);
-                ResponseFormatTextJsonSchemaConfig.Schema.Builder schemaBuilder =
-                        ResponseFormatTextJsonSchemaConfig.Schema.builder();
-
-                for (Map.Entry<String, Object> entry : schemaMap.entrySet()) {
-                    schemaBuilder.putAdditionalProperty(entry.getKey(), JsonValue.from(entry.getValue()));
+                Map schemaMap = JsonSchemaElementUtils.toMap((JsonSchemaElement)jsonSchema.rootElement(), (boolean)strict);
+                ResponseFormatTextJsonSchemaConfig.Schema.Builder schemaBuilder = ResponseFormatTextJsonSchemaConfig.Schema.builder();
+                for (Map.Entry entry : schemaMap.entrySet()) {
+                    schemaBuilder.putAdditionalProperty((String)entry.getKey(), JsonValue.from(entry.getValue()));
                 }
-
-                ResponseFormatTextJsonSchemaConfig schemaConfig = ResponseFormatTextJsonSchemaConfig.builder()
-                        .name(jsonSchema.name())
-                        .schema(schemaBuilder.build())
-                        .strict(strict)
-                        .build();
-
-                builder.format(ResponseFormatTextConfig.ofJsonSchema(schemaConfig));
+                ResponseFormatTextJsonSchemaConfig schemaConfig = ResponseFormatTextJsonSchemaConfig.builder().name(jsonSchema.name()).schema(schemaBuilder.build()).strict(strict).build();
+                builder.format(ResponseFormatTextConfig.ofJsonSchema((ResponseFormatTextJsonSchemaConfig)schemaConfig));
             }
         }
-
         if (textVerbosity != null && !textVerbosity.isEmpty()) {
             if (builder == null) {
                 builder = ResponseTextConfig.builder();
             }
-            builder.verbosity(com.openai.models.responses.ResponseTextConfig.Verbosity.Companion.of(textVerbosity));
+            builder.verbosity(ResponseTextConfig.Verbosity.Companion.of(textVerbosity));
         }
-
         return builder != null ? builder.build() : null;
     }
 
-    public static class Builder {
+    private static class ResponsesStreamingHandle
+    implements StreamingHandle {
+        private final Runnable cancelCallback;
+        private final AtomicBoolean cancelled = new AtomicBoolean(false);
+        private volatile Future<?> streamingFuture;
+        private volatile boolean completed;
 
+        ResponsesStreamingHandle(Runnable cancelCallback) {
+            this.cancelCallback = cancelCallback;
+        }
+
+        void setStreamingFuture(Future<?> streamingFuture) {
+            this.streamingFuture = streamingFuture;
+            if (this.cancelled.get() && streamingFuture != null) {
+                streamingFuture.cancel(true);
+            }
+        }
+
+        void markCompleted() {
+            this.completed = true;
+        }
+
+        public void cancel() {
+            if (this.cancelled.compareAndSet(false, true)) {
+                if (!this.completed && this.cancelCallback != null) {
+                    try {
+                        this.cancelCallback.run();
+                    }
+                    catch (Exception exception) {
+                        // empty catch block
+                    }
+                }
+                if (this.streamingFuture != null) {
+                    this.streamingFuture.cancel(true);
+                }
+            }
+        }
+
+        public boolean isCancelled() {
+            return this.cancelled.get();
+        }
+    }
+
+    static class ResponsesEventHandler {
+        private final MappingTrackingStreamingChatResponseHandler handler;
+        private final AtomicReference<String> responseIdRef;
+        private final String modelName;
+        private final StreamingHandle streamingHandle;
+        private final Map<String, ToolExecutionRequest.Builder> toolCallBuilders = new HashMap<String, ToolExecutionRequest.Builder>();
+        private final Map<String, Integer> toolCallIndices = new HashMap<String, Integer>();
+        private final List<ToolExecutionRequest> completedToolCalls = new ArrayList<ToolExecutionRequest>();
+        private final StringBuilder textBuilder = new StringBuilder();
+        private OpenAiOfficialTokenUsage tokenUsage;
+        private String responseId;
+        private String finishReason;
+        private int nextToolCallIndex = 0;
+
+        ResponsesEventHandler(StreamingChatResponseHandler handler, AtomicReference<String> responseIdRef, String modelName, StreamingHandle streamingHandle) {
+            this.handler = new MappingTrackingStreamingChatResponseHandler(handler);
+            this.responseIdRef = responseIdRef;
+            this.modelName = modelName;
+            this.streamingHandle = streamingHandle;
+        }
+
+        void handleEvent(ResponseStreamEvent event) {
+            if (this.streamingHandle != null && this.streamingHandle.isCancelled()) {
+                throw new CancellationException("Request cancelled by user");
+            }
+            try {
+                this.handler.resetMappingTracking();
+                if (event.isCreated()) {
+                    this.handleCreated(event.asCreated());
+                } else if (event.isOutputTextDelta()) {
+                    this.handleOutputTextDelta(event.asOutputTextDelta());
+                } else if (event.isOutputItemAdded()) {
+                    this.handleOutputItemAdded(event.asOutputItemAdded());
+                } else if (event.isReasoningTextDelta()) {
+                    this.handleReasoningTextDelta(event.asReasoningTextDelta());
+                } else if (event.isReasoningSummaryTextDelta()) {
+                    this.handleReasoningSummaryTextDelta(event.asReasoningSummaryTextDelta());
+                } else if (event.isFunctionCallArgumentsDelta()) {
+                    this.handleFunctionCallArgumentsDelta(event.asFunctionCallArgumentsDelta());
+                } else if (event.isFunctionCallArgumentsDone()) {
+                    this.handleFunctionCallArgumentsDone(event.asFunctionCallArgumentsDone());
+                } else if (event.isOutputItemDone()) {
+                    this.handleOutputItemDone(event.asOutputItemDone());
+                } else if (event.isCompleted()) {
+                    this.handleCompleted(event.asCompleted());
+                } else if (event.isError()) {
+                    this.handleError(event.asError());
+                } else if (event.isFailed()) {
+                    this.handleFailed(event.asFailed());
+                } else if (event.isIncomplete()) {
+                    this.handleIncomplete(event.asIncomplete());
+                }
+                if (!this.handler.wasMapped()) {
+                    InternalStreamingChatResponseHandlerUtils.onUnmappedRawEvent((StreamingChatResponseHandler)this.handler, (Object)event);
+                }
+            }
+            catch (RuntimeException e) {
+                throw e;
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void handleCreated(ResponseCreatedEvent event) {
+            this.responseId = event.response().id();
+            this.responseIdRef.set(this.responseId);
+        }
+
+        private void handleOutputTextDelta(ResponseTextDeltaEvent event) {
+            String delta = event.delta();
+            if (!delta.isEmpty()) {
+                this.textBuilder.append(delta);
+                InternalStreamingChatResponseHandlerUtils.onPartialResponse((StreamingChatResponseHandler)this.handler, (String)delta, (StreamingHandle)this.streamingHandle);
+            }
+        }
+
+        private void handleOutputItemAdded(ResponseOutputItemAddedEvent event) {
+            ResponseOutputItem item = event.item();
+            if (item.isFunctionCall()) {
+                ResponseFunctionToolCall functionCall = item.asFunctionCall();
+                String itemId = functionCall.id().orElse(null);
+                if (itemId != null) {
+                    this.toolCallBuilders.put(itemId, ToolExecutionRequest.builder().id(functionCall.callId()).name(functionCall.name()).arguments(""));
+                    this.toolCallIndices.put(itemId, this.nextToolCallIndex++);
+                } else {
+                    logger.warn("Function call missing item ID: {}", (Object)functionCall.callId());
+                }
+            }
+        }
+
+        private void handleFunctionCallArgumentsDelta(ResponseFunctionCallArgumentsDeltaEvent event) {
+            String itemId = event.itemId();
+            ToolExecutionRequest.Builder builder = this.toolCallBuilders.get(itemId);
+            Integer index = this.toolCallIndices.get(itemId);
+            if (builder == null || index == null) {
+                return;
+            }
+            String delta = event.delta();
+            if (delta.isEmpty()) {
+                return;
+            }
+            String currentArgs = builder.build().arguments();
+            builder.arguments(currentArgs + delta);
+            PartialToolCall partialToolCall = PartialToolCall.builder().index(index.intValue()).id(builder.build().id()).name(builder.build().name()).partialArguments(delta).build();
+            InternalStreamingChatResponseHandlerUtils.onPartialToolCall((StreamingChatResponseHandler)this.handler, (PartialToolCall)partialToolCall, (StreamingHandle)this.streamingHandle);
+        }
+
+        private void handleReasoningTextDelta(ResponseReasoningTextDeltaEvent event) {
+            String delta = event.delta();
+            if (!delta.isEmpty()) {
+                InternalStreamingChatResponseHandlerUtils.onPartialThinking((StreamingChatResponseHandler)this.handler, (String)delta, (StreamingHandle)this.streamingHandle);
+            }
+        }
+
+        private void handleReasoningSummaryTextDelta(ResponseReasoningSummaryTextDeltaEvent event) {
+            String delta = event.delta();
+            if (!delta.isEmpty()) {
+                InternalStreamingChatResponseHandlerUtils.onPartialThinking((StreamingChatResponseHandler)this.handler, (String)delta, (StreamingHandle)this.streamingHandle);
+            }
+        }
+
+        private void handleFunctionCallArgumentsDone(ResponseFunctionCallArgumentsDoneEvent event) {
+            String itemId = event.itemId();
+            ToolExecutionRequest.Builder builder = this.toolCallBuilders.remove(itemId);
+            Integer index = this.toolCallIndices.remove(itemId);
+            if (builder != null && index != null) {
+                builder.arguments(event.arguments());
+                ToolExecutionRequest toolExecutionRequest = builder.build();
+                this.completedToolCalls.add(toolExecutionRequest);
+                if (!this.streamingHandle.isCancelled()) {
+                    try {
+                        this.handler.onCompleteToolCall(new CompleteToolCall(index.intValue(), toolExecutionRequest));
+                    }
+                    catch (Exception e) {
+                        InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> this.handler.onError((Throwable)e));
+                    }
+                }
+            } else {
+                logger.warn("No builder for itemId in argumentsDone: {}", (Object)itemId);
+            }
+        }
+
+        private void handleOutputItemDone(ResponseOutputItemDoneEvent event) {
+        }
+
+        private void handleCompleted(ResponseCompletedEvent event) {
+            Response response = event.response();
+            response.status().ifPresent(status -> {
+                this.finishReason = OpenAiOfficialResponsesStreamingChatModel.mapStatusToFinishReason(status.asString(), !this.completedToolCalls.isEmpty());
+            });
+            this.extractTokenUsageAndComplete(response);
+        }
+
+        private void handleError(ResponseErrorEvent event) {
+            String message = event.message();
+            InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> this.handler.onError((Throwable)new RuntimeException("Response error: " + message)));
+        }
+
+        private void handleFailed(ResponseFailedEvent event) {
+            Response response = event.response();
+            String message = response.error().map(this::extractErrorMessage).orElse("Response failed");
+            InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> this.handler.onError((Throwable)new RuntimeException("Response failed: " + message)));
+        }
+
+        private String extractErrorMessage(ResponseError error) {
+            String message = error.message();
+            if (message.trim().isEmpty()) {
+                return error.toString();
+            }
+            return message;
+        }
+
+        private void handleIncomplete(ResponseIncompleteEvent event) {
+            this.finishReason = "LENGTH";
+            this.extractTokenUsageAndComplete(event.response());
+        }
+
+        private void extractTokenUsageAndComplete(Response response) {
+            String text = this.textBuilder.length() > 0 ? this.textBuilder.toString() : null;
+            AiMessage aiMessage = OpenAiOfficialResponsesStreamingChatModel.buildAiMessage(text, OpenAiOfficialResponsesStreamingChatModel.extractReasoningSummary(response), this.completedToolCalls, OpenAiOfficialResponsesStreamingChatModel.extractEncryptedReasoning(response));
+            this.tokenUsage = OpenAiOfficialResponsesStreamingChatModel.extractTokenUsage(response);
+            OpenAiOfficialResponsesChatResponseMetadata metadata = OpenAiOfficialResponsesStreamingChatModel.buildResponseMetadata(this.responseId, this.modelName, response, this.finishReason, this.tokenUsage);
+            ChatResponse chatResponse = ChatResponse.builder().aiMessage(aiMessage).metadata((ChatResponseMetadata)metadata).build();
+            if (!this.streamingHandle.isCancelled()) {
+                try {
+                    this.handler.onCompleteResponse(chatResponse);
+                }
+                catch (Exception e) {
+                    InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> this.handler.onError((Throwable)e));
+                }
+            }
+        }
+    }
+
+    public static class Builder {
         private String baseUrl;
         private String apiKey;
         private Credential credential;
@@ -758,7 +973,6 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
         private Duration timeout;
         private Integer maxRetries;
         private Proxy proxy;
-
         private OpenAIClient client;
         private String modelName;
         private Double temperature;
@@ -804,9 +1018,6 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #microsoftFoundryDeploymentName(String)} instead
-         */
         @Deprecated
         public Builder azureDeploymentName(String azureDeploymentName) {
             this.microsoftFoundryDeploymentName = azureDeploymentName;
@@ -828,9 +1039,6 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #isMicrosoftFoundry(boolean)} instead
-         */
         @Deprecated
         public Builder isAzure(boolean isAzure) {
             this.isMicrosoftFoundry = isAzure;
@@ -922,10 +1130,6 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        /**
-         * When Enterprise Open AI subscription is used, service tier = "priority" puts requests into a
-         * faster pool.
-         */
         public Builder serviceTier(String serviceTier) {
             this.serviceTier = serviceTier;
             return this;
@@ -951,12 +1155,9 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        /**
-         * @deprecated use {@link #reasoningEffort(ReasoningEffort)} instead
-         */
-        @Deprecated(since = "1.14.0")
+        @Deprecated
         public Builder reasoningEffort(String reasoningEffort) {
-            return reasoningEffort(reasoningEffort != null ? ReasoningEffort.of(reasoningEffort) : null);
+            return this.reasoningEffort(reasoningEffort != null ? ReasoningEffort.of((String)reasoningEffort) : null);
         }
 
         public Builder reasoningSummary(Reasoning.Summary reasoningSummary) {
@@ -984,8 +1185,8 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        public Builder listeners(ChatModelListener... listeners) {
-            return this.listeners(asList(listeners));
+        public Builder listeners(ChatModelListener ... listeners) {
+            return this.listeners(Arrays.asList(listeners));
         }
 
         public Builder executorService(ExecutorService executorService) {
@@ -993,10 +1194,7 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        /**
-         * @deprecated use {@link #strictTools(Boolean)} and {@link #strictJsonSchema(Boolean)} instead
-         */
-        @Deprecated(since = "1.13.0")
+        @Deprecated
         public Builder strict(Boolean strict) {
             this.strictTools = strict;
             this.strictJsonSchema = strict;
@@ -1018,8 +1216,8 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        public Builder toolSpecifications(ToolSpecification... toolSpecifications) {
-            return toolSpecifications(asList(toolSpecifications));
+        public Builder toolSpecifications(ToolSpecification ... toolSpecifications) {
+            return this.toolSpecifications(Arrays.asList(toolSpecifications));
         }
 
         public Builder toolChoice(ToolChoice toolChoice) {
@@ -1042,288 +1240,13 @@ public class OpenAiOfficialResponsesStreamingChatModel implements StreamingChatM
             return this;
         }
 
-        public Builder serverTools(Tool... serverTools) {
-            return serverTools(asList(serverTools));
+        public Builder serverTools(Tool ... serverTools) {
+            return this.serverTools(Arrays.asList(serverTools));
         }
 
         public OpenAiOfficialResponsesStreamingChatModel build() {
             return new OpenAiOfficialResponsesStreamingChatModel(this);
         }
     }
-
-    /**
-     * Event handler for Responses API streaming.
-     */
-    // visible for testing
-    static class ResponsesEventHandler {
-
-        private final MappingTrackingStreamingChatResponseHandler handler;
-        private final AtomicReference<String> responseIdRef;
-        private final String modelName;
-        private final StreamingHandle streamingHandle;
-        private final Map<String, ToolExecutionRequest.Builder> toolCallBuilders = new HashMap<>();
-        private final Map<String, Integer> toolCallIndices = new HashMap<>();
-        private final List<ToolExecutionRequest> completedToolCalls = new ArrayList<>();
-        private final StringBuilder textBuilder = new StringBuilder();
-        private OpenAiOfficialTokenUsage tokenUsage;
-        private String responseId;
-        private String finishReason;
-        private int nextToolCallIndex = 0;
-
-        ResponsesEventHandler(
-                StreamingChatResponseHandler handler,
-                AtomicReference<String> responseIdRef,
-                String modelName,
-                StreamingHandle streamingHandle) {
-            this.handler = new MappingTrackingStreamingChatResponseHandler(handler);
-            this.responseIdRef = responseIdRef;
-            this.modelName = modelName;
-            this.streamingHandle = streamingHandle;
-        }
-
-        void handleEvent(ResponseStreamEvent event) {
-            if (streamingHandle != null && streamingHandle.isCancelled()) {
-                throw new CancellationException("Request cancelled by user");
-            }
-
-            try {
-                handler.resetMappingTracking();
-
-                if (event.isCreated()) {
-                    handleCreated(event.asCreated());
-                } else if (event.isOutputTextDelta()) {
-                    handleOutputTextDelta(event.asOutputTextDelta());
-                } else if (event.isOutputItemAdded()) {
-                    handleOutputItemAdded(event.asOutputItemAdded());
-                } else if (event.isReasoningTextDelta()) {
-                    handleReasoningTextDelta(event.asReasoningTextDelta());
-                } else if (event.isReasoningSummaryTextDelta()) {
-                    handleReasoningSummaryTextDelta(event.asReasoningSummaryTextDelta());
-                } else if (event.isFunctionCallArgumentsDelta()) {
-                    handleFunctionCallArgumentsDelta(event.asFunctionCallArgumentsDelta());
-                } else if (event.isFunctionCallArgumentsDone()) {
-                    handleFunctionCallArgumentsDone(event.asFunctionCallArgumentsDone());
-                } else if (event.isOutputItemDone()) {
-                    handleOutputItemDone(event.asOutputItemDone());
-                } else if (event.isCompleted()) {
-                    handleCompleted(event.asCompleted());
-                } else if (event.isError()) {
-                    handleError(event.asError());
-                } else if (event.isFailed()) {
-                    handleFailed(event.asFailed());
-                } else if (event.isIncomplete()) {
-                    handleIncomplete(event.asIncomplete());
-                }
-
-                if (!handler.wasMapped()) {
-                    onUnmappedRawEvent(handler, event);
-                }
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private void handleCreated(ResponseCreatedEvent event) {
-            this.responseId = event.response().id();
-            responseIdRef.set(responseId);
-        }
-
-        private void handleOutputTextDelta(ResponseTextDeltaEvent event) {
-            JsonValue delta = event.delta();
-            if (!delta.isEmpty()) {
-                textBuilder.append(delta);
-                onPartialResponse(handler, delta, streamingHandle);
-            }
-        }
-
-        private void handleOutputItemAdded(ResponseOutputItemAddedEvent event) {
-            ResponseOutputItem item = event.item();
-            if (item.isFunctionCall()) {
-                ResponseFunctionToolCall functionCall = item.asFunctionCall();
-                String itemId = functionCall.id().orElse(null);
-                if (itemId != null) {
-                    toolCallBuilders.put(
-                            itemId,
-                            ToolExecutionRequest.builder()
-                                    .id(functionCall.callId())
-                                    .name(functionCall.name())
-                                    .arguments(""));
-                    toolCallIndices.put(itemId, nextToolCallIndex++);
-                } else {
-                    logger.warn("Function call missing item ID: {}", functionCall.callId());
-                }
-            }
-        }
-
-        private void handleFunctionCallArgumentsDelta(ResponseFunctionCallArgumentsDeltaEvent event) {
-            String itemId = event.itemId();
-            ToolExecutionRequest.Builder builder = toolCallBuilders.get(itemId);
-            Integer index = toolCallIndices.get(itemId);
-            if (builder == null || index == null) {
-                return;
-            }
-
-            String delta = event.delta();
-            if (delta.isEmpty()) {
-                return;
-            }
-
-            String currentArgs = builder.build().arguments();
-            builder.arguments(currentArgs + delta);
-
-            PartialToolCall partialToolCall = PartialToolCall.builder()
-                    .index(index)
-                    .id(builder.build().id())
-                    .name(builder.build().name())
-                    .partialArguments(delta)
-                    .build();
-            onPartialToolCall(handler, partialToolCall, streamingHandle);
-        }
-
-        private void handleReasoningTextDelta(ResponseReasoningTextDeltaEvent event) {
-            String delta = event.delta();
-            if (!delta.isEmpty()) {
-                onPartialThinking(handler, delta, streamingHandle);
-            }
-        }
-
-        private void handleReasoningSummaryTextDelta(ResponseReasoningSummaryTextDeltaEvent event) {
-            String delta = event.delta();
-            if (!delta.isEmpty()) {
-                onPartialThinking(handler, delta, streamingHandle);
-            }
-        }
-
-        private void handleFunctionCallArgumentsDone(ResponseFunctionCallArgumentsDoneEvent event) {
-            String itemId = event.itemId();
-            ToolExecutionRequest.Builder builder = toolCallBuilders.remove(itemId);
-            Integer index = toolCallIndices.remove(itemId);
-            if (builder != null && index != null) {
-                builder.arguments(event.arguments());
-                ToolExecutionRequest toolExecutionRequest = builder.build();
-                completedToolCalls.add(toolExecutionRequest);
-
-                if (!streamingHandle.isCancelled()) {
-                    try {
-                        handler.onCompleteToolCall(new CompleteToolCall(index, toolExecutionRequest));
-                    } catch (Exception e) {
-                        withLoggingExceptions(() -> handler.onError(e));
-                    }
-                }
-            } else {
-                logger.warn("No builder for itemId in argumentsDone: {}", itemId);
-            }
-        }
-
-        private void handleOutputItemDone(ResponseOutputItemDoneEvent event) {
-            // No-op
-        }
-
-        private void handleCompleted(ResponseCompletedEvent event) {
-            com.openai.models.responses.Response response = event.response();
-
-            // Extract status and map to finish reason
-            response.status().ifPresent(status -> {
-                this.finishReason = mapStatusToFinishReason(status.asString(), !completedToolCalls.isEmpty());
-            });
-
-            // Extract token usage and complete
-            extractTokenUsageAndComplete(response);
-        }
-
-        private void handleError(ResponseErrorEvent event) {
-            String message = event.message();
-            withLoggingExceptions(() -> handler.onError(new RuntimeException("Response error: " + message)));
-        }
-
-        private void handleFailed(ResponseFailedEvent event) {
-            com.openai.models.responses.Response response = event.response();
-            String message = response.error().map(this::extractErrorMessage).orElse("Response failed");
-            withLoggingExceptions(() -> handler.onError(new RuntimeException("Response failed: " + message)));
-        }
-
-        private String extractErrorMessage(ResponseError error) {
-            String message = error.message();
-            if (message.trim().isEmpty()) {
-                return error.toString();
-            }
-            return message;
-        }
-
-        private void handleIncomplete(ResponseIncompleteEvent event) {
-            // Incomplete is not an error - it just means the response was cut off due to token limits
-            // Treat it as a normal completion with finish reason LENGTH
-            finishReason = "LENGTH";
-
-            // Complete the response normally
-            extractTokenUsageAndComplete(event.response());
-        }
-
-        private void extractTokenUsageAndComplete(com.openai.models.responses.Response response) {
-            String text = !textBuilder.isEmpty() ? textBuilder.toString() : null;
-            AiMessage aiMessage = buildAiMessage(
-                    text, extractReasoningSummary(response), completedToolCalls, extractEncryptedReasoning(response));
-
-            tokenUsage = extractTokenUsage(response);
-            OpenAiOfficialResponsesChatResponseMetadata metadata = buildResponseMetadata(responseId, modelName, response, finishReason, tokenUsage);
-
-            ChatResponse.Builder chatResponse = ChatResponse.builder()
-                    .aiMessage(aiMessage)
-                    .metadata(metadata)
-                    .build();
-
-            if (!streamingHandle.isCancelled()) {
-                try {
-                    handler.onCompleteResponse(chatResponse);
-                } catch (Exception e) {
-                    withLoggingExceptions(() -> handler.onError(e));
-                }
-            }
-        }
-    }
-
-    private static class ResponsesStreamingHandle implements StreamingHandle {
-
-        private final Runnable cancelCallback;
-        private final AtomicBoolean cancelled = new AtomicBoolean(false);
-        private volatile Future<?> streamingFuture;
-        private volatile boolean completed;
-
-        ResponsesStreamingHandle(Runnable cancelCallback) {
-            this.cancelCallback = cancelCallback;
-        }
-
-        void setStreamingFuture(Future<?> streamingFuture) {
-            this.streamingFuture = streamingFuture;
-            if (cancelled.get() && streamingFuture != null) {
-                streamingFuture.cancel(true);
-            }
-        }
-
-        void markCompleted() {
-            this.completed = true;
-        }
-
-        @Override
-        public void cancel() {
-            if (cancelled.compareAndSet(false, true)) {
-                if (!completed && cancelCallback != null) {
-                    try {
-                        cancelCallback.run();
-                    } catch (Exception ignored) {
-                    }
-                }
-                if (streamingFuture != null) {
-                    streamingFuture.cancel(true);
-                }
-            }
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return cancelled.get();
-        }
-    }
 }
+

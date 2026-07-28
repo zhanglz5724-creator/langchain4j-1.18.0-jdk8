@@ -1,63 +1,48 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonAlias
+ */
 package dev.langchain4j.mcp.registryclient.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import java.time.LocalDateTime;
 
 public class McpOfficialMeta {
-
-    @JsonAlias("id")
+    @JsonAlias(value={"id"})
     private String serverId;
-
-    @JsonAlias("is_latest")
+    @JsonAlias(value={"is_latest"})
     private boolean isLatest;
-
-    @JsonAlias("published_at")
+    @JsonAlias(value={"published_at"})
     private LocalDateTime publishedAt;
-
-    @JsonAlias("updated_at")
+    @JsonAlias(value={"updated_at"})
     private LocalDateTime updatedAt;
-
     private String status;
 
-    /**
-     * @deprecated This field was removed in the 2025-09-29 version of the schema.
-     */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public String getServerId() {
-        return serverId;
+        return this.serverId;
     }
 
     public boolean isLatest() {
-        return isLatest;
+        return this.isLatest;
     }
 
-    /**
-     * The date and time when the server was published.
-     * It is evaluated in the UTC.
-     */
     public LocalDateTime getPublishedAt() {
-        return publishedAt;
+        return this.publishedAt;
     }
 
-    /**
-     * The date and time when the server was last updated.
-     * It is evaluated in the UTC.
-     */
     public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+        return this.updatedAt;
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
-    @Override
     public String toString() {
-        return "McpOfficialMeta{" + "serverId='"
-                + serverId + '\'' + ", isLatest="
-                + isLatest + ", publishedAt="
-                + publishedAt + ", updatedAt="
-                + updatedAt + ", status='"
-                + status + '\'' + '}';
+        return "McpOfficialMeta{serverId='" + this.serverId + '\'' + ", isLatest=" + this.isLatest + ", publishedAt=" + this.publishedAt + ", updatedAt=" + this.updatedAt + ", status='" + this.status + '\'' + '}';
     }
 }
+

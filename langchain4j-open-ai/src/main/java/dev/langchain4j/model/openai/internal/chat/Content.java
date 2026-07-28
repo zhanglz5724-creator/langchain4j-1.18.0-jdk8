@@ -1,3 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.databind.JsonNode
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.internal.JacocoIgnoreCoverageGenerated
+ */
 package dev.langchain4j.model.openai.internal.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,30 +24,29 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.internal.JacocoIgnoreCoverageGenerated;
+import dev.langchain4j.model.openai.internal.chat.ContentType;
+import dev.langchain4j.model.openai.internal.chat.ImageDetail;
+import dev.langchain4j.model.openai.internal.chat.ImageUrl;
+import dev.langchain4j.model.openai.internal.chat.InputAudio;
+import dev.langchain4j.model.openai.internal.chat.PdfFile;
+import dev.langchain4j.model.openai.internal.chat.VideoUrl;
 import java.util.Locale;
 import java.util.Objects;
 
-@JsonDeserialize(builder = Content.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=Builder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public final class Content {
-
     @JsonProperty
     private final ContentType type;
-
     @JsonProperty
     private final String text;
-
     private final ImageUrl imageUrl;
-
     private final String inputImageUrl;
-
     @JsonProperty
     private final VideoUrl videoUrl;
-
     @JsonProperty
     private final InputAudio inputAudio;
-
     @JsonProperty
     private final PdfFile file;
 
@@ -47,92 +61,77 @@ public final class Content {
     }
 
     public ContentType type() {
-        return type;
+        return this.type;
     }
 
     public String text() {
-        return text;
+        return this.text;
     }
 
     public ImageUrl imageUrl() {
-        return imageUrl;
+        return this.imageUrl;
     }
 
     public String inputImageUrl() {
-        return inputImageUrl;
+        return this.inputImageUrl;
     }
 
     public VideoUrl videoUrl() {
-        return videoUrl;
+        return this.videoUrl;
     }
 
     public InputAudio inputAudio() {
-        return inputAudio;
+        return this.inputAudio;
     }
 
     public PdfFile file() {
-        return file;
+        return this.file;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public boolean equals(Object another) {
-        if (this == another) return true;
-        return another instanceof Content && equalTo((Content) another);
+        if (this == another) {
+            return true;
+        }
+        return another instanceof Content && this.equalTo((Content)another);
     }
 
     @JacocoIgnoreCoverageGenerated
     private boolean equalTo(Content another) {
-        return Objects.equals(type, another.type)
-                && Objects.equals(text, another.text)
-                && Objects.equals(imageUrl, another.imageUrl)
-                && Objects.equals(inputImageUrl, another.inputImageUrl)
-                && Objects.equals(videoUrl, another.videoUrl)
-                && Objects.equals(inputAudio, another.inputAudio)
-                && Objects.equals(file, another.file);
+        return Objects.equals((Object)this.type, (Object)another.type) && Objects.equals(this.text, another.text) && Objects.equals(this.imageUrl, another.imageUrl) && Objects.equals(this.inputImageUrl, another.inputImageUrl) && Objects.equals(this.videoUrl, another.videoUrl) && Objects.equals(this.inputAudio, another.inputAudio) && Objects.equals(this.file, another.file);
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public int hashCode() {
         int h = 5381;
-        h += (h << 5) + Objects.hashCode(type);
-        h += (h << 5) + Objects.hashCode(text);
-        h += (h << 5) + Objects.hashCode(imageUrl);
-        h += (h << 5) + Objects.hashCode(inputImageUrl);
-        h += (h << 5) + Objects.hashCode(videoUrl);
-        h += (h << 5) + Objects.hashCode(inputAudio);
-        h += (h << 5) + Objects.hashCode(file);
+        h += (h << 5) + Objects.hashCode((Object)this.type);
+        h += (h << 5) + Objects.hashCode(this.text);
+        h += (h << 5) + Objects.hashCode(this.imageUrl);
+        h += (h << 5) + Objects.hashCode(this.inputImageUrl);
+        h += (h << 5) + Objects.hashCode(this.videoUrl);
+        h += (h << 5) + Objects.hashCode(this.inputAudio);
+        h += (h << 5) + Objects.hashCode(this.file);
         return h;
     }
 
-    @Override
     @JacocoIgnoreCoverageGenerated
     public String toString() {
-        return "Content{" + "type="
-                + type + ", text="
-                + text + ", imageUrl="
-                + imageUrl + ", inputImageUrl="
-                + inputImageUrl + ", videoUrl="
-                + videoUrl + ", inputAudio="
-                + inputAudio + ", file="
-                + file + "}";
+        return "Content{type=" + (Object)((Object)this.type) + ", text=" + this.text + ", imageUrl=" + this.imageUrl + ", inputImageUrl=" + this.inputImageUrl + ", videoUrl=" + this.videoUrl + ", inputAudio=" + this.inputAudio + ", file=" + this.file + "}";
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @JsonProperty("image_url")
+    @JsonProperty(value="image_url")
     private Object imageUrlForSerialization() {
-        return imageUrl != null ? imageUrl : inputImageUrl;
+        return this.imageUrl != null ? this.imageUrl : this.inputImageUrl;
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static final class Builder {
-
         private ContentType type;
         private String text;
         private ImageUrl imageUrl;
@@ -157,20 +156,15 @@ public final class Content {
             return this;
         }
 
-        @JsonProperty("image_url")
+        @JsonProperty(value="image_url")
         Builder imageUrl(JsonNode imageUrl) {
             if (imageUrl == null || imageUrl.isNull()) {
                 return this;
             }
-
             if (imageUrl.isTextual()) {
-                return inputImageUrl(imageUrl.asText());
+                return this.inputImageUrl(imageUrl.asText());
             }
-
-            return imageUrl(ImageUrl.builder()
-                    .url(textValue(imageUrl.get("url")))
-                    .detail(imageDetail(imageUrl.get("detail")))
-                    .build());
+            return this.imageUrl(ImageUrl.builder().url(Builder.textValue(imageUrl.get("url"))).detail(Builder.imageDetail(imageUrl.get("detail"))).build());
         }
 
         public Builder inputImageUrl(String inputImageUrl) {
@@ -206,8 +200,8 @@ public final class Content {
             if (node == null || node.isNull()) {
                 return null;
             }
-
             return ImageDetail.valueOf(node.asText().toUpperCase(Locale.ROOT));
         }
     }
 }
+

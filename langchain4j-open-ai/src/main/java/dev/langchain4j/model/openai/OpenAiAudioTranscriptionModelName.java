@@ -1,13 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ */
 package dev.langchain4j.model.openai;
 
 import dev.langchain4j.Experimental;
 
-/**
- * @since 1.10.0
- */
 @Experimental
 public enum OpenAiAudioTranscriptionModelName {
-
     WHISPER_1("whisper-1"),
     GPT_4_O_TRANSCRIBE("gpt-4o-transcribe"),
     GPT_4_O_MINI_TRANSCRIBE("gpt-4o-mini-transcribe"),
@@ -15,12 +17,12 @@ public enum OpenAiAudioTranscriptionModelName {
 
     private final String stringValue;
 
-    OpenAiAudioTranscriptionModelName(String stringValue) {
+    private OpenAiAudioTranscriptionModelName(String stringValue) {
         this.stringValue = stringValue;
     }
 
-    @Override
     public String toString() {
-        return stringValue;
+        return this.stringValue;
     }
 }
+

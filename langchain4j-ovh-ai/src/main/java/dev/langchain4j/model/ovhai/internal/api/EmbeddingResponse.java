@@ -1,11 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.ovhai.internal.api;
 
 import java.util.List;
 
-/**
- * @deprecated use {@code EmbeddingResponse} from {@code langchain4j-open-ai} module instead
- */
-@Deprecated(forRemoval = true, since = "1.14.0")
+@Deprecated
 public class EmbeddingResponse {
     private List<float[]> embeddings;
 
@@ -28,27 +28,31 @@ public class EmbeddingResponse {
         this.embeddings = embeddings;
     }
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof EmbeddingResponse)) return false;
-        final EmbeddingResponse other = (EmbeddingResponse) o;
-        if (!other.canEqual((Object) this)) return false;
-        final Object this$embeddings = this.getEmbeddings();
-        final Object other$embeddings = other.getEmbeddings();
-        if (this$embeddings == null ? other$embeddings != null : !this$embeddings.equals(other$embeddings))
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof EmbeddingResponse)) {
             return false;
-        return true;
+        }
+        EmbeddingResponse other = (EmbeddingResponse)o;
+        if (!other.canEqual(this)) {
+            return false;
+        }
+        List<float[]> this$embeddings = this.getEmbeddings();
+        List<float[]> other$embeddings = other.getEmbeddings();
+        return !(this$embeddings == null ? other$embeddings != null : !((Object)this$embeddings).equals(other$embeddings));
     }
 
-    protected boolean canEqual(final Object other) {
+    protected boolean canEqual(Object other) {
         return other instanceof EmbeddingResponse;
     }
 
     public int hashCode() {
-        final int PRIME = 59;
+        int PRIME = 59;
         int result = 1;
-        final Object $embeddings = this.getEmbeddings();
-        result = result * PRIME + ($embeddings == null ? 43 : $embeddings.hashCode());
+        List<float[]> $embeddings = this.getEmbeddings();
+        result = result * 59 + ($embeddings == null ? 43 : ((Object)$embeddings).hashCode());
         return result;
     }
 
@@ -76,3 +80,4 @@ public class EmbeddingResponse {
         }
     }
 }
+

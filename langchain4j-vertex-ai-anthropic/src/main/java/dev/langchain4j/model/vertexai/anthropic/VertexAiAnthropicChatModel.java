@@ -1,19 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.auth.oauth2.GoogleCredentials
+ *  dev.langchain4j.exception.UnsupportedFeatureException
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ */
 package dev.langchain4j.model.vertexai.anthropic;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.model.ModelProvider.GOOGLE_VERTEX_AI_ANTHROPIC;
-
 import com.google.auth.oauth2.GoogleCredentials;
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.exception.UnsupportedFeatureException;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.vertexai.anthropic.VertexAiAnthropicExceptionMapper;
 import dev.langchain4j.model.vertexai.anthropic.internal.ValidationUtils;
 import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicRequest;
 import dev.langchain4j.model.vertexai.anthropic.internal.api.AnthropicResponse;
@@ -22,43 +35,15 @@ import dev.langchain4j.model.vertexai.anthropic.internal.mapper.AnthropicRequest
 import dev.langchain4j.model.vertexai.anthropic.internal.mapper.AnthropicResponseMapper;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Represents a Google Vertex AI Anthropic language model with a chat completion interface.
- * Supports Claude models through Vertex AI's Model Garden.
- * <br>
- * Please follow these steps before using this model:
- * <br>
- * 1. <a href="https://github.com/googleapis/google-cloud-java?tab=readme-ov-file#local-developmenttesting">Authentication</a>
- * <br>
- * When developing locally, you can use one of:
- * <br>
- * a) <a href="https://github.com/googleapis/google-cloud-java?tab=readme-ov-file#local-developmenttesting">Google Cloud SDK</a>
- * <br>
- * b) <a href="https://github.com/googleapis/google-cloud-java?tab=readme-ov-file#using-a-service-account-recommended">Service account</a>
- * When using service account, ensure that <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable points to your JSON service account key.
- * <br>
- * 2. <a href="https://cloud.google.com/vertex-ai/docs/model-garden/explore-models">Enable Vertex AI Model Garden</a>
- * <br>
- * 3. Request access to Claude models in Vertex AI Model Garden
- * <br>
- * 4. Model names must include version suffixes. Try one of these formats:
- * <br>
- * - "claude-3-5-sonnet-v2@20241022" (Claude 3.5 Sonnet v2)
- * - "claude-3-5-haiku@20241022" (Claude 3.5 Haiku)
- * - "claude-3-5-sonnet@20240620" (Claude 3.5 Sonnet)
- * - "claude-3-opus@20240229" (Claude 3 Opus)
- * <br>
- * Note: Model availability depends on your Google Cloud project's access to Anthropic models in Vertex AI Model Garden.
- */
-public class VertexAiAnthropicChatModel implements ChatModel, Closeable {
-
+public class VertexAiAnthropicChatModel
+implements ChatModel,
+Closeable {
     private static final Logger logger = LoggerFactory.getLogger(VertexAiAnthropicChatModel.class);
-
     private final VertexAiAnthropicClient client;
     private final String modelName;
     private final Integer maxTokens;
@@ -73,93 +58,60 @@ public class VertexAiAnthropicChatModel implements ChatModel, Closeable {
     private final String location;
 
     public VertexAiAnthropicChatModel(VertexAiAnthropicChatModelBuilder builder) {
-        this.client = new VertexAiAnthropicClient(
-                ensureNotBlank(builder.project, "project"),
-                ensureNotBlank(builder.location, "location"),
-                ensureNotBlank(builder.modelName, "modelName"),
-                builder.credentials);
+        this.client = new VertexAiAnthropicClient(dev.langchain4j.internal.ValidationUtils.ensureNotBlank((String)builder.project, (String)"project"), dev.langchain4j.internal.ValidationUtils.ensureNotBlank((String)builder.location, (String)"location"), dev.langchain4j.internal.ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName"), builder.credentials);
         this.modelName = builder.modelName;
         this.maxTokens = ValidationUtils.validateMaxTokens(builder.maxTokens);
         this.temperature = ValidationUtils.validateTemperature(builder.temperature);
         this.topP = ValidationUtils.validateTopP(builder.topP);
         this.topK = ValidationUtils.validateTopK(builder.topK);
         this.stopSequences = builder.stopSequences;
-        this.logRequests = getOrDefault(builder.logRequests, false);
-        this.logResponses = getOrDefault(builder.logResponses, false);
-        this.enablePromptCaching = getOrDefault(builder.enablePromptCaching, false);
-        this.listeners = builder.listeners != null ? Collections.unmodifiableList(new ArrayList<>(builder.listeners) : Collections.emptyList();
-        this.location = ensureNotBlank(builder.location, "location");
+        this.logRequests = (Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false);
+        this.logResponses = (Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false);
+        this.enablePromptCaching = (Boolean)Utils.getOrDefault((Object)builder.enablePromptCaching, (Object)false);
+        this.listeners = builder.listeners != null ? new ArrayList(builder.listeners) : new ArrayList();
+        this.location = dev.langchain4j.internal.ValidationUtils.ensureNotBlank((String)builder.location, (String)"location");
     }
 
-    @Override
     public ChatResponse doChat(ChatRequest chatRequest) {
         ChatRequestParameters parameters = chatRequest.parameters();
-
-        List<ChatMessage> messages = chatRequest.messages();
-        List<ToolSpecification> toolSpecifications = parameters.toolSpecifications();
-
-        // Validate that JSON response format with schema is not used (not yet supported)
+        List messages = chatRequest.messages();
+        List toolSpecifications = parameters.toolSpecifications();
         if (parameters.responseFormat() != null && parameters.responseFormat().jsonSchema() != null) {
             throw new UnsupportedFeatureException("JSON response format is not supported yet");
         }
-
         try {
-            String requestModelName = getOrDefault(parameters.modelName(), modelName);
-
-            if (logRequests) {
-                logger.debug("Base URL: {}-aiplatform.googleapis.com:443", location);
-                logger.debug(
-                        "Using model name: {} (from parameters: {}, default: {})",
-                        requestModelName,
-                        parameters.modelName(),
-                        modelName);
+            String requestModelName = (String)Utils.getOrDefault((Object)parameters.modelName(), (Object)this.modelName);
+            if (this.logRequests.booleanValue()) {
+                logger.debug("Base URL: {}-aiplatform.googleapis.com:443", (Object)this.location);
+                logger.debug("Using model name: {} (from parameters: {}, default: {})", new Object[]{requestModelName, parameters.modelName(), this.modelName});
             }
-
-            AnthropicRequest anthropicRequest = AnthropicRequestMapper.toRequest(
-                    requestModelName,
-                    messages,
-                    toolSpecifications,
-                    parameters.toolChoice(),
-                    parameters.maxOutputTokens() != null ? parameters.maxOutputTokens() : maxTokens,
-                    temperature,
-                    topP,
-                    topK,
-                    parameters.stopSequences() != null
-                                    && !parameters.stopSequences().isEmpty()
-                            ? parameters.stopSequences()
-                            : stopSequences,
-                    enablePromptCaching);
-
-            if (logRequests) {
-                logger.debug("Anthropic request: {}", anthropicRequest);
+            AnthropicRequest anthropicRequest = AnthropicRequestMapper.toRequest(requestModelName, messages, toolSpecifications, parameters.toolChoice(), parameters.maxOutputTokens() != null ? parameters.maxOutputTokens() : this.maxTokens, this.temperature, this.topP, this.topK, parameters.stopSequences() != null && !parameters.stopSequences().isEmpty() ? parameters.stopSequences() : this.stopSequences, this.enablePromptCaching);
+            if (this.logRequests.booleanValue()) {
+                logger.debug("Anthropic request: {}", (Object)anthropicRequest);
             }
-
-            AnthropicResponse anthropicResponse = client.generateContent(anthropicRequest, requestModelName);
-
-            if (logResponses) {
-                logger.debug("Anthropic response: {}", anthropicResponse);
+            AnthropicResponse anthropicResponse = this.client.generateContent(anthropicRequest, requestModelName);
+            if (this.logResponses.booleanValue()) {
+                logger.debug("Anthropic response: {}", (Object)anthropicResponse);
             }
-
             return AnthropicResponseMapper.toChatResponse(anthropicResponse);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw VertexAiAnthropicExceptionMapper.INSTANCE.mapException(e);
         }
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return GOOGLE_VERTEX_AI_ANTHROPIC;
+        return ModelProvider.GOOGLE_VERTEX_AI_ANTHROPIC;
     }
 
     @Override
     public void close() throws IOException {
-        if (client != null) {
-            client.close();
+        if (this.client != null) {
+            this.client.close();
         }
     }
 
@@ -193,15 +145,6 @@ public class VertexAiAnthropicChatModel implements ChatModel, Closeable {
             return this;
         }
 
-        /**
-         * Sets default common {@link ChatRequestParameters}.
-         * <br>
-         * When a parameter is set via both an individual builder method (e.g., {@link #modelName(String)})
-         * and {@link ChatRequestParameters}, the individual builder method takes precedence.
-         *
-         * @param parameters default common {@link ChatRequestParameters}
-         * @return this builder
-         */
         public VertexAiAnthropicChatModelBuilder defaultRequestParameters(ChatRequestParameters parameters) {
             this.defaultRequestParameters = parameters;
             return this;
@@ -252,26 +195,11 @@ public class VertexAiAnthropicChatModel implements ChatModel, Closeable {
             return this;
         }
 
-        /**
-         * Enables prompt caching for Claude models. When enabled, the model will automatically
-         * cache prompts to reduce latency and costs for repeated similar requests.
-         * Only supported by Claude models that support prompt caching.
-         *
-         * @param enablePromptCaching whether to enable prompt caching
-         * @return this builder
-         */
         public VertexAiAnthropicChatModelBuilder enablePromptCaching(Boolean enablePromptCaching) {
             this.enablePromptCaching = enablePromptCaching;
             return this;
         }
 
-        /**
-         * Sets the Google credentials to use for authentication.
-         * If not provided, the client will use Application Default Credentials.
-         *
-         * @param credentials the Google credentials to use
-         * @return this builder
-         */
         public VertexAiAnthropicChatModelBuilder credentials(GoogleCredentials credentials) {
             this.credentials = credentials;
             return this;
@@ -282,3 +210,4 @@ public class VertexAiAnthropicChatModel implements ChatModel, Closeable {
         }
     }
 }
+

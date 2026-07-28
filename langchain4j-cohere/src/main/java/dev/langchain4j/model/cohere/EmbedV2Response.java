@@ -1,37 +1,45 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package dev.langchain4j.model.cohere;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.langchain4j.model.cohere.Meta;
 import java.util.List;
 
-/**
- * Wire response for Cohere's v2 embed endpoint. Embeddings are nested under {@code embeddings.float}.
- */
 class EmbedV2Response {
-
     private String id;
     private Embeddings embeddings;
     private Meta meta;
 
+    EmbedV2Response() {
+    }
+
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public Embeddings getEmbeddings() {
-        return embeddings;
+        return this.embeddings;
     }
 
     public Meta getMeta() {
-        return meta;
+        return this.meta;
     }
 
     static class Embeddings {
-
-        // "float" is a Java keyword, so the field is named differently and mapped explicitly.
-        @JsonProperty("float")
+        @JsonProperty(value="float")
         private List<List<Float>> floatEmbeddings;
 
+        Embeddings() {
+        }
+
         public List<List<Float>> getFloatEmbeddings() {
-            return floatEmbeddings;
+            return this.floatEmbeddings;
         }
     }
 }
+

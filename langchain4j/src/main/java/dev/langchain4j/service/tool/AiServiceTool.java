@@ -1,90 +1,71 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.agent.tool.ReturnBehavior
+ *  dev.langchain4j.agent.tool.ToolSpecification
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.service.tool;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.ToolSpecification;
-
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.service.tool.ToolExecutor;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
-
-/**
- * Represents a tool managed by an AI Service, combining:
- * <ul>
- *     <li>{@link ToolSpecification} — what is sent to the LLM</li>
- *     <li>{@link ToolExecutor} — what is called when the LLM invokes the tool</li>
- *     <li>Metadata that controls how the AI Service handles this tool (e.g., {@link ReturnBehavior})</li>
- * </ul>
- *
- * @since 1.13.0
- */
 public class AiServiceTool {
-
     private final ToolSpecification toolSpecification;
     private final ToolExecutor toolExecutor;
     private final ReturnBehavior returnBehavior;
 
     private AiServiceTool(Builder builder) {
-        this.toolSpecification = ensureNotNull(builder.toolSpecification, "toolSpecification");
-        this.toolExecutor = ensureNotNull(builder.toolExecutor, "toolExecutor");
-        this.returnBehavior = getOrDefault(builder.returnBehavior, ReturnBehavior.TO_LLM);
+        this.toolSpecification = (ToolSpecification)ValidationUtils.ensureNotNull((Object)builder.toolSpecification, (String)"toolSpecification");
+        this.toolExecutor = (ToolExecutor)ValidationUtils.ensureNotNull((Object)builder.toolExecutor, (String)"toolExecutor");
+        this.returnBehavior = (ReturnBehavior)Utils.getOrDefault((Object)builder.returnBehavior, (Object)ReturnBehavior.TO_LLM);
     }
 
     public String name() {
-        return toolSpecification.name();
+        return this.toolSpecification.name();
     }
 
     public ToolSpecification toolSpecification() {
-        return toolSpecification;
+        return this.toolSpecification;
     }
 
     public ToolExecutor toolExecutor() {
-        return toolExecutor;
+        return this.toolExecutor;
     }
 
-    /**
-     * @since 1.14.0
-     */
     public ReturnBehavior returnBehavior() {
-        return returnBehavior;
+        return this.returnBehavior;
     }
 
-    /**
-     * @deprecated use {@link #returnBehavior()} instead
-     */
-    @Deprecated(since = "1.14.0")
+    @Deprecated
     public boolean immediateReturn() {
-        return returnBehavior == ReturnBehavior.IMMEDIATE;
+        return this.returnBehavior == ReturnBehavior.IMMEDIATE;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        AiServiceTool that = (AiServiceTool) o;
-        return Objects.equals(toolSpecification, that.toolSpecification)
-                && Objects.equals(toolExecutor, that.toolExecutor)
-                && returnBehavior == that.returnBehavior;
+    public boolean equals(Object o) {
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        AiServiceTool that = (AiServiceTool)o;
+        return Objects.equals(this.toolSpecification, that.toolSpecification) && Objects.equals(this.toolExecutor, that.toolExecutor) && this.returnBehavior == that.returnBehavior;
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(toolSpecification, toolExecutor, returnBehavior);
+        return Objects.hash(this.toolSpecification, this.toolExecutor, this.returnBehavior);
     }
 
-    @Override
     public String toString() {
-        return "AiServiceTool{" +
-                "toolSpecification=" + toolSpecification +
-                ", toolExecutor=" + toolExecutor +
-                ", returnBehavior=" + returnBehavior +
-                '}';
+        return "AiServiceTool{toolSpecification=" + this.toolSpecification + ", toolExecutor=" + this.toolExecutor + ", returnBehavior=" + this.returnBehavior + '}';
     }
 
     public Builder toBuilder() {
-        return builder()
-                .toolSpecification(toolSpecification)
-                .toolExecutor(toolExecutor)
-                .returnBehavior(returnBehavior);
+        return AiServiceTool.builder().toolSpecification(this.toolSpecification).toolExecutor(this.toolExecutor).returnBehavior(this.returnBehavior);
     }
 
     public static Builder builder() {
@@ -92,7 +73,6 @@ public class AiServiceTool {
     }
 
     public static class Builder {
-
         private ToolSpecification toolSpecification;
         private ToolExecutor toolExecutor;
         private ReturnBehavior returnBehavior;
@@ -107,18 +87,12 @@ public class AiServiceTool {
             return this;
         }
 
-        /**
-         * @since 1.14.0
-         */
         public Builder returnBehavior(ReturnBehavior returnBehavior) {
             this.returnBehavior = returnBehavior;
             return this;
         }
 
-        /**
-         * @deprecated use {@link #returnBehavior(ReturnBehavior)} instead
-         */
-        @Deprecated(since = "1.14.0")
+        @Deprecated
         public Builder immediateReturn(boolean immediateReturn) {
             if (immediateReturn) {
                 this.returnBehavior = ReturnBehavior.IMMEDIATE;
@@ -131,3 +105,4 @@ public class AiServiceTool {
         }
     }
 }
+

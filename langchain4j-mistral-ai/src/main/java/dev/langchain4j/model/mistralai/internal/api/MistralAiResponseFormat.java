@@ -1,21 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ *  com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ */
 package dev.langchain4j.model.mistralai.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiJsonSchema;
+import dev.langchain4j.model.mistralai.internal.api.MistralAiResponseFormatType;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonInclude(NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
-@JsonDeserialize(builder = MistralAiResponseFormat.MistralAiResponseFormatBuilder.class)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonDeserialize(builder=MistralAiResponseFormatBuilder.class)
 public class MistralAiResponseFormat {
     private Object type;
     private MistralAiJsonSchema jsonSchema;
@@ -33,24 +46,20 @@ public class MistralAiResponseFormat {
         return this.jsonSchema;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        MistralAiResponseFormat that = (MistralAiResponseFormat) o;
-        return Objects.equals(type, that.type) && Objects.equals(jsonSchema, that.jsonSchema);
+    public boolean equals(Object o) {
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        MistralAiResponseFormat that = (MistralAiResponseFormat)o;
+        return Objects.equals(this.type, that.type) && Objects.equals(this.jsonSchema, that.jsonSchema);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(type, jsonSchema);
+        return Objects.hash(this.type, this.jsonSchema);
     }
 
-    @Override
     public String toString() {
-        return new StringJoiner(", ", "MistralAiResponseFormat [", "]")
-                .add("type=" + this.getType())
-                .add("jsonSchema=" + this.jsonSchema)
-                .toString();
+        return new StringJoiner(", ", "MistralAiResponseFormat [", "]").add("type=" + this.getType()).add("jsonSchema=" + this.jsonSchema).toString();
     }
 
     public static MistralAiResponseFormat fromType(MistralAiResponseFormatType type) {
@@ -58,41 +67,33 @@ public class MistralAiResponseFormat {
     }
 
     public static MistralAiResponseFormat fromSchema(JsonSchema schema) {
-        return fromSchema(schema, false);
+        return MistralAiResponseFormat.fromSchema(schema, false);
     }
 
     public static MistralAiResponseFormat fromSchema(JsonSchema schema, boolean strict) {
         MistralAiJsonSchema mistralAiJsonSchema = MistralAiJsonSchema.fromJsonSchema(schema, strict);
-        return MistralAiResponseFormat.builder()
-                .type("json_schema")
-                .jsonSchema(mistralAiJsonSchema)
-                .build();
+        return MistralAiResponseFormat.builder().type("json_schema").jsonSchema(mistralAiJsonSchema).build();
     }
 
     public static MistralAiResponseFormatBuilder builder() {
         return new MistralAiResponseFormatBuilder();
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonPOJOBuilder(withPrefix="")
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    @JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MistralAiResponseFormatBuilder {
         private Object type;
         private MistralAiJsonSchema jsonSchema;
 
-        private MistralAiResponseFormatBuilder() {}
+        private MistralAiResponseFormatBuilder() {
+        }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiResponseFormatBuilder type(Object type) {
             this.type = type;
             return this;
         }
 
-        /**
-         * @return {@code this}.
-         */
         public MistralAiResponseFormatBuilder jsonSchema(MistralAiJsonSchema jsonSchema) {
             this.jsonSchema = jsonSchema;
             return this;
@@ -103,3 +104,4 @@ public class MistralAiResponseFormat {
         }
     }
 }
+

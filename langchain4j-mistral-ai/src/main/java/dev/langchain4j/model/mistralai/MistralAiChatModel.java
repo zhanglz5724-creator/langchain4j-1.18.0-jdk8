@@ -1,16 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.model.ModelProvider
+ *  dev.langchain4j.model.chat.Capability
+ *  dev.langchain4j.model.chat.ChatModel
+ *  dev.langchain4j.model.chat.listener.ChatModelListener
+ *  dev.langchain4j.model.chat.request.ChatRequest
+ *  dev.langchain4j.model.chat.request.ChatRequestParameters
+ *  dev.langchain4j.model.chat.request.DefaultChatRequestParameters
+ *  dev.langchain4j.model.chat.request.ResponseFormat
+ *  dev.langchain4j.model.chat.response.ChatResponse
+ *  dev.langchain4j.model.chat.response.ChatResponseMetadata
+ *  dev.langchain4j.spi.ServiceHelper
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.mistralai;
 
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.copy;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.model.ModelProvider.MISTRAL_AI;
-import static dev.langchain4j.model.mistralai.InternalMistralAIHelper.createMistralAiRequest;
-import static dev.langchain4j.model.mistralai.InternalMistralAIHelper.validate;
-import static dev.langchain4j.model.mistralai.internal.mapper.MistralAiMapper.*;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-
-import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
@@ -20,13 +32,21 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.DefaultChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
+import dev.langchain4j.model.mistralai.InternalMistralAIHelper;
+import dev.langchain4j.model.mistralai.MistralAiChatModelName;
+import dev.langchain4j.model.mistralai.MistralAiChatResponseMetadata;
 import dev.langchain4j.model.mistralai.internal.api.MistralAiChatCompletionRequest;
 import dev.langchain4j.model.mistralai.internal.api.MistralAiChatCompletionResponse;
 import dev.langchain4j.model.mistralai.internal.client.MistralAiClient;
 import dev.langchain4j.model.mistralai.internal.client.ParsedAndRawResponse;
+import dev.langchain4j.model.mistralai.internal.mapper.MistralAiMapper;
 import dev.langchain4j.model.mistralai.spi.MistralAiChatModelBuilderFactory;
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,14 +54,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
-/**
- * Represents a Mistral AI Chat Model with a chat completion interface, such as open-mistral-7b and open-mixtral-8x7b
- * This model allows generating chat completion of a sync way based on a list of chat messages.
- * You can find description of parameters
- * <a href="https://docs.mistral.ai/api/#operation/createChatCompletion">here</a>.
- */
-public class MistralAiChatModel implements ChatModel {
-
+public class MistralAiChatModel
+implements ChatModel {
     private final MistralAiClient client;
     private final Boolean safePrompt;
     private final Integer randomSeed;
@@ -54,105 +68,63 @@ public class MistralAiChatModel implements ChatModel {
     private final ChatRequestParameters defaultRequestParameters;
 
     public MistralAiChatModel(MistralAiChatModelBuilder builder) {
-        this.client = MistralAiClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.baseUrl, "https://api.mistral.ai/v1"))
-                .apiKey(builder.apiKey)
-                .timeout(builder.timeout)
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .customHeaders(builder.customHeadersSupplier)
-                .build();
-
+        this.client = ((MistralAiClient.Builder)((MistralAiClient.Builder)((MistralAiClient.Builder)((MistralAiClient.Builder)((MistralAiClient.Builder)((MistralAiClient.Builder)((MistralAiClient.Builder)((MistralAiClient.Builder)MistralAiClient.builder().httpClientBuilder(builder.httpClientBuilder)).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)"https://api.mistral.ai/v1"))).apiKey(builder.apiKey)).timeout(builder.timeout)).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false))).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false))).logger(builder.logger)).customHeaders(builder.customHeadersSupplier)).build();
         this.safePrompt = builder.safePrompt;
         this.randomSeed = builder.randomSeed;
-        this.returnThinking = getOrDefault(builder.returnThinking, false);
-        this.sendThinking = getOrDefault(builder.sendThinking, false);
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
-        this.listeners = copy(builder.listeners);
-        this.supportedCapabilities = copy(builder.supportedCapabilities);
-        this.strictJsonSchema = getOrDefault(builder.strictJsonSchema, false);
-        this.defaultRequestParameters = initDefaultRequestParameters(builder);
+        this.returnThinking = (Boolean)Utils.getOrDefault((Object)builder.returnThinking, (Object)false);
+        this.sendThinking = (Boolean)Utils.getOrDefault((Object)builder.sendThinking, (Object)false);
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
+        this.listeners = Utils.copy((List)builder.listeners);
+        this.supportedCapabilities = Utils.copy((Set)builder.supportedCapabilities);
+        this.strictJsonSchema = (Boolean)Utils.getOrDefault((Object)builder.strictJsonSchema, (Object)false);
+        this.defaultRequestParameters = this.initDefaultRequestParameters(builder);
     }
 
     private ChatRequestParameters initDefaultRequestParameters(MistralAiChatModelBuilder builder) {
         ChatRequestParameters commonParameters;
         if (builder.defaultRequestParameters != null) {
-            validate(builder.defaultRequestParameters);
+            InternalMistralAIHelper.validate(builder.defaultRequestParameters);
             commonParameters = builder.defaultRequestParameters;
         } else {
             commonParameters = DefaultChatRequestParameters.EMPTY;
         }
-
-        return DefaultChatRequestParameters.builder()
-                .modelName(getOrDefault(builder.modelName, commonParameters.modelName()))
-                .temperature(getOrDefault(builder.temperature, commonParameters.temperature()))
-                .topP(getOrDefault(builder.topP, commonParameters.topP()))
-                .frequencyPenalty(getOrDefault(builder.frequencyPenalty, commonParameters.frequencyPenalty()))
-                .presencePenalty(getOrDefault(builder.presencePenalty, commonParameters.presencePenalty()))
-                .maxOutputTokens(getOrDefault(builder.maxTokens, commonParameters.maxOutputTokens()))
-                .stopSequences(getOrDefault(builder.stopSequences, commonParameters.stopSequences()))
-                .toolSpecifications(commonParameters.toolSpecifications())
-                .toolChoice(commonParameters.toolChoice())
-                .responseFormat(getOrDefault(builder.responseFormat, commonParameters.responseFormat()))
-                .build();
+        return DefaultChatRequestParameters.builder().modelName((String)Utils.getOrDefault((Object)builder.modelName, (Object)commonParameters.modelName())).temperature((Double)Utils.getOrDefault((Object)builder.temperature, (Object)commonParameters.temperature())).topP((Double)Utils.getOrDefault((Object)builder.topP, (Object)commonParameters.topP())).frequencyPenalty((Double)Utils.getOrDefault((Object)builder.frequencyPenalty, (Object)commonParameters.frequencyPenalty())).presencePenalty((Double)Utils.getOrDefault((Object)builder.presencePenalty, (Object)commonParameters.presencePenalty())).maxOutputTokens((Integer)Utils.getOrDefault((Object)builder.maxTokens, (Object)commonParameters.maxOutputTokens())).stopSequences(Utils.getOrDefault((List)builder.stopSequences, (List)commonParameters.stopSequences())).toolSpecifications(commonParameters.toolSpecifications()).toolChoice(commonParameters.toolChoice()).responseFormat((ResponseFormat)Utils.getOrDefault((Object)builder.responseFormat, (Object)commonParameters.responseFormat())).build();
     }
 
-    @Override
     public ChatResponse doChat(ChatRequest chatRequest) {
-        validate(chatRequest.parameters());
-
-        MistralAiChatCompletionRequest request =
-                createMistralAiRequest(chatRequest, safePrompt, randomSeed, false, sendThinking, strictJsonSchema);
-
-        ParsedAndRawResponse<MistralAiChatCompletionResponse> response =
-                withRetryMappingExceptions(() -> client.chatCompletionWithRawResponse(request), maxRetries);
-
-        MistralAiChatCompletionResponse mistralAiResponse = response.parsedResponse();
-
-        return ChatResponse.builder()
-                .aiMessage(aiMessageFrom(mistralAiResponse, returnThinking))
-                .metadata(MistralAiChatResponseMetadata.builder()
-                        .id(mistralAiResponse.getId())
-                        .modelName(mistralAiResponse.getModel())
-                        .tokenUsage(tokenUsageFrom(mistralAiResponse.getUsage()))
-                        .finishReason(finishReasonFrom(
-                                mistralAiResponse.getChoices().get(0).getFinishReason()))
-                        .rawHttpResponse(response.rawResponse())
-                        .build())
-                .build();
+        InternalMistralAIHelper.validate(chatRequest.parameters());
+        MistralAiChatCompletionRequest request = InternalMistralAIHelper.createMistralAiRequest(chatRequest, this.safePrompt, this.randomSeed, false, this.sendThinking, this.strictJsonSchema);
+        ParsedAndRawResponse response = (ParsedAndRawResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.chatCompletionWithRawResponse(request), (int)this.maxRetries);
+        MistralAiChatCompletionResponse mistralAiResponse = (MistralAiChatCompletionResponse)response.parsedResponse();
+        return ChatResponse.builder().aiMessage(MistralAiMapper.aiMessageFrom(mistralAiResponse, this.returnThinking)).metadata((ChatResponseMetadata)((MistralAiChatResponseMetadata.Builder)((MistralAiChatResponseMetadata.Builder)((MistralAiChatResponseMetadata.Builder)((MistralAiChatResponseMetadata.Builder)MistralAiChatResponseMetadata.builder().id(mistralAiResponse.getId())).modelName(mistralAiResponse.getModel())).tokenUsage(MistralAiMapper.tokenUsageFrom(mistralAiResponse.getUsage()))).finishReason(MistralAiMapper.finishReasonFrom(mistralAiResponse.getChoices().get(0).getFinishReason()))).rawHttpResponse(response.rawResponse()).build()).build();
     }
 
-    @Override
     public ChatRequestParameters defaultRequestParameters() {
-        return defaultRequestParameters;
+        return this.defaultRequestParameters;
     }
 
-    @Override
     public List<ChatModelListener> listeners() {
-        return listeners;
+        return this.listeners;
     }
 
-    @Override
     public ModelProvider provider() {
-        return MISTRAL_AI;
+        return ModelProvider.MISTRAL_AI;
     }
 
-    @Override
     public Set<Capability> supportedCapabilities() {
-        return supportedCapabilities;
+        return this.supportedCapabilities;
     }
 
     public static MistralAiChatModelBuilder builder() {
-        for (MistralAiChatModelBuilderFactory factory : loadFactories(MistralAiChatModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(MistralAiChatModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            MistralAiChatModelBuilderFactory factory = (MistralAiChatModelBuilderFactory)iterator.next();
+            return (MistralAiChatModelBuilder)factory.get();
         }
         return new MistralAiChatModelBuilder();
     }
 
     public static class MistralAiChatModelBuilder {
-
         private HttpClientBuilder httpClientBuilder;
         private String baseUrl;
         private String apiKey;
@@ -179,14 +151,12 @@ public class MistralAiChatModel implements ChatModel {
         private ChatRequestParameters defaultRequestParameters;
         private Supplier<Map<String, String>> customHeadersSupplier;
 
-        public MistralAiChatModelBuilder() {}
-
         public MistralAiChatModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
         }
 
-        public MistralAiChatModelBuilder customHeaders(java.util.Map<String, String> customHeaders) {
+        public MistralAiChatModelBuilder customHeaders(Map<String, String> customHeaders) {
             this.customHeadersSupplier = () -> customHeaders;
             return this;
         }
@@ -211,152 +181,83 @@ public class MistralAiChatModel implements ChatModel {
             return this;
         }
 
-        /**
-         * @param baseUrl the base URL of the Mistral AI API. It uses the default value if not specified
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
             return this;
         }
 
-        /**
-         * @param apiKey the API key for authentication
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder apiKey(String apiKey) {
             this.apiKey = apiKey;
             return this;
         }
 
-        /**
-         * @param temperature the temperature parameter for generating chat responses
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder temperature(Double temperature) {
             this.temperature = temperature;
             return this;
         }
 
-        /**
-         * @param topP the top-p parameter for generating chat responses
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder topP(Double topP) {
             this.topP = topP;
             return this;
         }
 
-        /**
-         * @param maxTokens the maximum number of new tokens to generate in a chat response
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder maxTokens(Integer maxTokens) {
             this.maxTokens = maxTokens;
             return this;
         }
 
-        /**
-         * @param safePrompt a flag indicating whether to use a safe prompt for generating chat responses
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder safePrompt(Boolean safePrompt) {
             this.safePrompt = safePrompt;
             return this;
         }
 
-        /**
-         * @param randomSeed the random seed for generating chat responses
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder randomSeed(Integer randomSeed) {
             this.randomSeed = randomSeed;
             return this;
         }
 
-        /**
-         * Controls whether to return thinking/reasoning text (if available) inside {@link AiMessage#thinking()}.
-         * Please note that this does not enable thinking/reasoning for the LLM;
-         * it only controls whether to parse the {@code thinking} content from the API response
-         * and return it inside the {@link AiMessage}.
-         * <p>
-         * Disabled by default.
-         * If enabled, the thinking text will be stored within the {@link AiMessage} and may be persisted.
-         *
-         * @see #sendThinking(Boolean)
-         */
         public MistralAiChatModelBuilder returnThinking(Boolean returnThinking) {
             this.returnThinking = returnThinking;
             return this;
         }
 
-        /**
-         * Controls whether to send thinking/reasoning text to the LLM in follow-up requests.
-         * <p>
-         * Disabled by default.
-         * If enabled, the contents of {@link AiMessage#thinking()} will be sent in the API request.
-         *
-         * @see #returnThinking(Boolean)
-         */
         public MistralAiChatModelBuilder sendThinking(Boolean sendThinking) {
             this.sendThinking = sendThinking;
             return this;
         }
 
-        /**
-         * @param timeout the timeout duration for API requests
-         * <p>
-         * The default value is 60 seconds
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder timeout(Duration timeout) {
             this.timeout = timeout;
             return this;
         }
 
-        /**
-         * @param logRequests a flag indicating whether to log API requests
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder logRequests(Boolean logRequests) {
             this.logRequests = logRequests;
             return this;
         }
 
-        /**
-         * @param logResponses a flag indicating whether to log API responses
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder logResponses(Boolean logResponses) {
             this.logResponses = logResponses;
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
-        /**
-         * @param maxRetries
-         * @return {@code this}.
-         */
         public MistralAiChatModelBuilder maxRetries(Integer maxRetries) {
             this.maxRetries = maxRetries;
             return this;
         }
 
-        public MistralAiChatModelBuilder supportedCapabilities(Capability... supportedCapabilities) {
+        public MistralAiChatModelBuilder supportedCapabilities(Capability ... supportedCapabilities) {
             this.supportedCapabilities = Arrays.stream(supportedCapabilities).collect(Collectors.toSet());
             return this;
         }
 
         public MistralAiChatModelBuilder supportedCapabilities(Set<Capability> supportedCapabilities) {
-            this.supportedCapabilities = Collections.unmodifiableSet(new HashSet<>(supportedCapabilities);
+            this.supportedCapabilities = new HashSet<Capability>(supportedCapabilities);
             return this;
         }
 
@@ -395,3 +296,4 @@ public class MistralAiChatModel implements ChatModel {
         }
     }
 }
+

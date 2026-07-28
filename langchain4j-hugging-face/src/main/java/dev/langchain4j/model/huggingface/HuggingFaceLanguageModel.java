@@ -1,9 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.language.LanguageModel
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.spi.ServiceHelper
+ */
 package dev.langchain4j.model.huggingface;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static dev.langchain4j.spi.ServiceHelper.loadFactories;
-
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.model.huggingface.FactoryCreator;
 import dev.langchain4j.model.huggingface.client.HuggingFaceClient;
 import dev.langchain4j.model.huggingface.client.Options;
 import dev.langchain4j.model.huggingface.client.Parameters;
@@ -13,67 +22,30 @@ import dev.langchain4j.model.huggingface.spi.HuggingFaceClientFactory;
 import dev.langchain4j.model.huggingface.spi.HuggingFaceLanguageModelBuilderFactory;
 import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.spi.ServiceHelper;
 import java.time.Duration;
+import java.util.Iterator;
 
-/**
- * @deprecated Please use {@code OpenAiChatModel} from the {@code langchain4j-open-ai} module instead:
- * <pre>
- * ChatModel model = OpenAiChatModel.builder()
- *     .apiKey(System.getenv("HF_API_KEY"))
- *     .baseUrl("https://router.huggingface.co/v1")
- *     .modelName("HuggingFaceTB/SmolLM3-3B:hf-inference")
- *     .build();
- * </pre>
- */
-@Deprecated(forRemoval = true, since = "1.7.0-beta13")
-public class HuggingFaceLanguageModel implements LanguageModel {
-
+@Deprecated
+public class HuggingFaceLanguageModel
+implements LanguageModel {
     private final HuggingFaceClient client;
     private final Double temperature;
     private final Integer maxNewTokens;
     private final Boolean returnFullText;
     private final Boolean waitForModel;
 
-    public HuggingFaceLanguageModel(
-            String accessToken,
-            String modelId,
-            Duration timeout,
-            Double temperature,
-            Integer maxNewTokens,
-            Boolean returnFullText,
-            Boolean waitForModel) {
-        this(HuggingFaceLanguageModel.builder()
-                .accessToken(accessToken)
-                .modelId(modelId)
-                .timeout(timeout)
-                .temperature(temperature)
-                .maxNewTokens(maxNewTokens)
-                .returnFullText(returnFullText)
-                .waitForModel(waitForModel));
+    public HuggingFaceLanguageModel(String accessToken, String modelId, Duration timeout, Double temperature, Integer maxNewTokens, Boolean returnFullText, Boolean waitForModel) {
+        this(HuggingFaceLanguageModel.builder().accessToken(accessToken).modelId(modelId).timeout(timeout).temperature(temperature).maxNewTokens(maxNewTokens).returnFullText(returnFullText).waitForModel(waitForModel));
     }
 
-    public HuggingFaceLanguageModel(
-            String baseUrl,
-            String accessToken,
-            String modelId,
-            Duration timeout,
-            Double temperature,
-            Integer maxNewTokens,
-            Boolean returnFullText,
-            Boolean waitForModel) {
-        this(HuggingFaceLanguageModel.builder()
-                .baseUrl(baseUrl)
-                .accessToken(accessToken)
-                .modelId(modelId)
-                .timeout(timeout)
-                .temperature(temperature)
-                .maxNewTokens(maxNewTokens)
-                .returnFullText(returnFullText)
-                .waitForModel(waitForModel));
+    public HuggingFaceLanguageModel(String baseUrl, String accessToken, String modelId, Duration timeout, Double temperature, Integer maxNewTokens, Boolean returnFullText, Boolean waitForModel) {
+        this(HuggingFaceLanguageModel.builder().baseUrl(baseUrl).accessToken(accessToken).modelId(modelId).timeout(timeout).temperature(temperature).maxNewTokens(maxNewTokens).returnFullText(returnFullText).waitForModel(waitForModel));
     }
 
-    public HuggingFaceLanguageModel(Builder builder) {
-        this.client = FactoryCreator.FACTORY.create(new HuggingFaceClientFactory.Input() {
+    public HuggingFaceLanguageModel(final Builder builder) {
+        this.client = FactoryCreator.FACTORY.create(new HuggingFaceClientFactory.Input(){
+
             @Override
             public String baseUrl() {
                 return builder.baseUrl;
@@ -105,50 +77,36 @@ public class HuggingFaceLanguageModel implements LanguageModel {
         this.waitForModel = builder.waitForModel;
     }
 
-    @Override
     public Response<String> generate(String prompt) {
-
-        TextGenerationRequest request = TextGenerationRequest.builder()
-                .inputs(prompt)
-                .parameters(Parameters.builder()
-                        .temperature(temperature)
-                        .maxNewTokens(maxNewTokens)
-                        .returnFullText(returnFullText)
-                        .build())
-                .options(Options.builder().waitForModel(waitForModel).build())
-                .build();
-
-        TextGenerationResponse response = client.generate(request);
-
-        return Response.from(response.getGeneratedText());
+        TextGenerationRequest request = TextGenerationRequest.builder().inputs(prompt).parameters(Parameters.builder().temperature(this.temperature).maxNewTokens(this.maxNewTokens).returnFullText(this.returnFullText).build()).options(Options.builder().waitForModel(this.waitForModel).build()).build();
+        TextGenerationResponse response = this.client.generate(request);
+        return Response.from((Object)response.getGeneratedText());
     }
 
     public static Builder builder() {
-        for (HuggingFaceLanguageModelBuilderFactory factory :
-                loadFactories(HuggingFaceLanguageModelBuilderFactory.class)) {
-            return factory.get();
+        Iterator iterator = ServiceHelper.loadFactories(HuggingFaceLanguageModelBuilderFactory.class).iterator();
+        if (iterator.hasNext()) {
+            HuggingFaceLanguageModelBuilderFactory factory = (HuggingFaceLanguageModelBuilderFactory)iterator.next();
+            return (Builder)factory.get();
         }
         return new Builder();
     }
 
-    public static final class Builder {
+    public static HuggingFaceLanguageModel withAccessToken(String accessToken) {
+        return HuggingFaceLanguageModel.builder().accessToken(accessToken).build();
+    }
 
+    public static final class Builder {
         private HttpClientBuilder httpClientBuilder;
         private String baseUrl;
         private String accessToken;
         private String modelId;
-        private Duration timeout = Duration.ofSeconds(15);
+        private Duration timeout = Duration.ofSeconds(15L);
         private Double temperature;
         private Integer maxNewTokens;
         private Boolean returnFullText = false;
         private Boolean waitForModel = true;
 
-        /**
-         * Sets the HTTP client builder that will be used to create the HTTP client to communicate with HuggingFace.
-         *
-         * @param httpClientBuilder the HTTP client builder to use
-         * @return {@code this}
-         */
         public Builder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -203,12 +161,9 @@ public class HuggingFaceLanguageModel implements LanguageModel {
         }
 
         public HuggingFaceLanguageModel build() {
-            ensureNotBlank(accessToken, "%s", "HuggingFace access token must be defined. It can be generated here: https://huggingface.co/settings/tokens");
+            ValidationUtils.ensureNotBlank((String)this.accessToken, (String)"%s", (Object[])new Object[]{"HuggingFace access token must be defined. It can be generated here: https://huggingface.co/settings/tokens"});
             return new HuggingFaceLanguageModel(this);
         }
     }
-
-    public static HuggingFaceLanguageModel withAccessToken(String accessToken) {
-        return builder().accessToken(accessToken).build();
-    }
 }
+

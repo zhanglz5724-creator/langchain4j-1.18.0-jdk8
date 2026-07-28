@@ -1,56 +1,59 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy
+ *  com.fasterxml.jackson.databind.annotation.JsonNaming
+ */
 package dev.langchain4j.model.anthropic.internal.api;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Objects;
 
-/**
- * Request parameters enabling Anthropic's (beta) cache diagnostics feature.
- * <p>
- * {@code previousMessageId} must be serialized even when {@code null}, since sending
- * {@code "diagnostics": {"previous_message_id": null}} is how a caller opts in on the first
- * turn of a conversation. Requires the {@code cache-diagnosis-2026-04-07} beta header.
- */
-@JsonInclude(ALWAYS)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonInclude(value=JsonInclude.Include.ALWAYS)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonNaming(value=PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AnthropicDiagnosticsParameters {
-
     public String previousMessageId;
 
-    public AnthropicDiagnosticsParameters() {}
+    public AnthropicDiagnosticsParameters() {
+    }
 
     public AnthropicDiagnosticsParameters(String previousMessageId) {
         this.previousMessageId = previousMessageId;
     }
 
     public String getPreviousMessageId() {
-        return previousMessageId;
+        return this.previousMessageId;
     }
 
     public void setPreviousMessageId(String previousMessageId) {
         this.previousMessageId = previousMessageId;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AnthropicDiagnosticsParameters)) return false;
-        AnthropicDiagnosticsParameters that = (AnthropicDiagnosticsParameters) o;
-        return Objects.equals(previousMessageId, that.previousMessageId);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AnthropicDiagnosticsParameters)) {
+            return false;
+        }
+        AnthropicDiagnosticsParameters that = (AnthropicDiagnosticsParameters)o;
+        return Objects.equals(this.previousMessageId, that.previousMessageId);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(previousMessageId);
+        return Objects.hash(this.previousMessageId);
     }
 
-    @Override
     public String toString() {
-        return "AnthropicDiagnosticsParameters{" + "previousMessageId='" + previousMessageId + '\'' + '}';
+        return "AnthropicDiagnosticsParameters{previousMessageId='" + this.previousMessageId + '\'' + '}';
     }
 }
+

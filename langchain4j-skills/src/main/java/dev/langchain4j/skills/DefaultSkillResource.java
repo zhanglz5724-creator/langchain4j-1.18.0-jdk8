@@ -1,51 +1,55 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Experimental
+ *  dev.langchain4j.internal.ValidationUtils
+ */
 package dev.langchain4j.skills;
 
 import dev.langchain4j.Experimental;
-
+import dev.langchain4j.internal.ValidationUtils;
+import dev.langchain4j.skills.SkillResource;
 import java.util.Objects;
 
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-
 @Experimental
-public class DefaultSkillResource implements SkillResource {
-
+public class DefaultSkillResource
+implements SkillResource {
     private final String relativePath;
     private final String content;
 
     public DefaultSkillResource(Builder builder) {
-        this.relativePath = ensureNotBlank(builder.relativePath, "relativePath");
-        this.content = ensureNotBlank(builder.content, "content");
+        this.relativePath = ValidationUtils.ensureNotBlank((String)builder.relativePath, (String)"relativePath");
+        this.content = ValidationUtils.ensureNotBlank((String)builder.content, (String)"content");
     }
 
     @Override
     public String relativePath() {
-        return relativePath;
+        return this.relativePath;
     }
 
     @Override
     public String content() {
-        return content;
+        return this.content;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DefaultSkillResource that)) return false;
-        return Objects.equals(relativePath, that.relativePath)
-                && Objects.equals(content, that.content);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DefaultSkillResource)) {
+            return false;
+        }
+        DefaultSkillResource that = (DefaultSkillResource)o;
+        return Objects.equals(this.relativePath, that.relativePath) && Objects.equals(this.content, that.content);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(relativePath, content);
+        return Objects.hash(this.relativePath, this.content);
     }
 
-    @Override
     public String toString() {
-        return "DefaultSkillResource {"
-                + " relativePath = " + relativePath
-                + ", content = " + content
-                + " }";
+        return "DefaultSkillResource { relativePath = " + this.relativePath + ", content = " + this.content + " }";
     }
 
     public static Builder builder() {
@@ -53,7 +57,6 @@ public class DefaultSkillResource implements SkillResource {
     }
 
     public static class Builder {
-
         private String relativePath;
         private String content;
 
@@ -72,3 +75,4 @@ public class DefaultSkillResource implements SkillResource {
         }
     }
 }
+

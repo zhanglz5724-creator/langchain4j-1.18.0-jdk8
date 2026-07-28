@@ -1,38 +1,46 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.Internal
+ *  dev.langchain4j.model.chat.request.json.JsonObjectSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchema
+ *  dev.langchain4j.model.chat.request.json.JsonSchemaElement
+ */
 package dev.langchain4j.service.output;
-
-import static dev.langchain4j.service.output.ParsingUtils.parseAsStringOrJson;
-import static dev.langchain4j.service.tool.DefaultToolExecutor.getBoundedLongValue;
 
 import dev.langchain4j.Internal;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
+import dev.langchain4j.service.output.OutputParser;
+import dev.langchain4j.service.output.ParsingUtils;
+import dev.langchain4j.service.tool.DefaultToolExecutor;
 import java.util.Optional;
 
 @Internal
-class ByteOutputParser implements OutputParser<Byte> {
+class ByteOutputParser
+implements OutputParser<Byte> {
+    ByteOutputParser() {
+    }
 
     @Override
     public Byte parse(String text) {
-        return parseAsStringOrJson(text, ByteOutputParser::parseByte, Byte.class);
+        return ParsingUtils.parseAsStringOrJson(text, ByteOutputParser::parseByte, Byte.class);
     }
 
     private static Byte parseByte(String text) {
         try {
             return Byte.parseByte(text);
-        } catch (NumberFormatException nfe) {
-            return (byte) getBoundedLongValue(text, "byte", Byte.class, Byte.MIN_VALUE, Byte.MAX_VALUE);
+        }
+        catch (NumberFormatException nfe) {
+            return (byte)DefaultToolExecutor.getBoundedLongValue(text, "byte", Byte.class, -128L, 127L);
         }
     }
 
     @Override
     public Optional<JsonSchema> jsonSchema() {
-        JsonSchema jsonSchema = JsonSchema.builder()
-                .name("integer")
-                .rootElement(JsonObjectSchema.builder()
-                        .addIntegerProperty("value")
-                        .required("value")
-                        .build())
-                .build();
+        JsonSchema jsonSchema = JsonSchema.builder().name("integer").rootElement((JsonSchemaElement)JsonObjectSchema.builder().addIntegerProperty("value").required(new String[]{"value"}).build()).build();
         return Optional.of(jsonSchema);
     }
 
@@ -41,3 +49,4 @@ class ByteOutputParser implements OutputParser<Byte> {
         return "integer number in range [-128, 127]";
     }
 }
+

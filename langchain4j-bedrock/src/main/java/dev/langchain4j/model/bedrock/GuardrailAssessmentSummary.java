@@ -1,5 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.bedrock;
 
+import dev.langchain4j.model.bedrock.GuardrailAssessment;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,46 +17,40 @@ public class GuardrailAssessmentSummary {
     }
 
     public List<GuardrailAssessment> inputAssessments() {
-        return inputAssessments;
+        return this.inputAssessments;
     }
 
     public List<GuardrailAssessment> outputAssessments() {
-        return outputAssessments;
+        return this.outputAssessments;
     }
 
     @Deprecated
     public List<GuardrailAssessment> ouputAssessments() {
-        return outputAssessments();
+        return this.outputAssessments();
     }
 
     public boolean hasAssessments() {
-        return (inputAssessments != null && !inputAssessments.isEmpty())
-                || (outputAssessments != null && !outputAssessments.isEmpty());
+        return this.inputAssessments != null && !this.inputAssessments.isEmpty() || this.outputAssessments != null && !this.outputAssessments.isEmpty();
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+    public boolean equals(Object o) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        GuardrailAssessmentSummary that = (GuardrailAssessmentSummary) o;
-        return Objects.equals(inputAssessments, that.inputAssessments)
-                && Objects.equals(outputAssessments, that.outputAssessments);
+        GuardrailAssessmentSummary that = (GuardrailAssessmentSummary)o;
+        return Objects.equals(this.inputAssessments, that.inputAssessments) && Objects.equals(this.outputAssessments, that.outputAssessments);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(inputAssessments, outputAssessments);
+        return Objects.hash(this.inputAssessments, this.outputAssessments);
     }
 
-    @Override
     public String toString() {
-        return "GuardrailAssessmentSummary{" + "inputAssessments=" + inputAssessments + ", outputAssessments="
-                + outputAssessments + '}';
+        return "GuardrailAssessmentSummary{inputAssessments=" + this.inputAssessments + ", outputAssessments=" + this.outputAssessments + '}';
     }
 
     public static class Builder {
@@ -71,7 +69,7 @@ public class GuardrailAssessmentSummary {
 
         @Deprecated
         public Builder ouputAssessments(List<GuardrailAssessment> ouputAssessments) {
-            return outputAssessments(ouputAssessments);
+            return this.outputAssessments(ouputAssessments);
         }
 
         public GuardrailAssessmentSummary build() {
@@ -79,3 +77,4 @@ public class GuardrailAssessmentSummary {
         }
     }
 }
+

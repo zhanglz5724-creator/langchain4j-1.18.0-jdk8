@@ -1,17 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.invocation.InvocationContext
+ *  org.jspecify.annotations.Nullable
+ */
 package dev.langchain4j.mcp.client;
 
 import dev.langchain4j.invocation.InvocationContext;
 import dev.langchain4j.mcp.protocol.McpClientMessage;
+import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Context information for any invocation made towards an MCP server.
- *
- * It contains the AI service invocation context when this is during
- * an AI service invocation (in other cases, the invocation context is null).
- */
 public class McpCallContext {
-    private final @Nullable InvocationContext invocationContext;
+    private final InvocationContext invocationContext;
     private final McpClientMessage message;
 
     public McpCallContext(@Nullable InvocationContext invocationContext, McpClientMessage message) {
@@ -19,30 +21,34 @@ public class McpCallContext {
         this.message = message;
     }
 
-    public @Nullable InvocationContext getInvocationContext() {
-        return invocationContext;
+    public @Nullable InvocationContext invocationContext() {
+        return this.invocationContext;
     }
 
-    public McpClientMessage getMessage() {
-        return message;
+    public McpClientMessage message() {
+        return this.message;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        McpCallContext that = (McpCallContext) o;
-        return java.util.Objects.equals(this.invocationContext, that.invocationContext) && java.util.Objects.equals(this.message, that.message);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof McpCallContext)) {
+            return false;
+        }
+        McpCallContext other = (McpCallContext)o;
+        if (!Objects.equals(this.invocationContext, other.invocationContext)) {
+            return false;
+        }
+        return Objects.equals(this.message, other.message);
     }
 
-    @Override
     public int hashCode() {
-        return java.util.Objects.hash(invocationContext, message);
+        return Objects.hash(this.invocationContext, this.message);
     }
 
-    @Override
     public String toString() {
-        return "McpCallContext{"invocationContext=" + invocationContext + , "message=" + message + "}"";
+        return "McpCallContext{invocationContext=" + Objects.toString(this.invocationContext) + ", message=" + Objects.toString(this.message) + "}";
     }
-
 }
+

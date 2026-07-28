@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.store.embedding.mongodb;
 
 import java.util.HashMap;
@@ -5,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public class MongoDbMatchedDocument {
-
     private String id;
     private List<Float> embedding;
     private String text;
@@ -19,12 +21,12 @@ public class MongoDbMatchedDocument {
         this.id = id;
         this.embedding = embedding;
         this.text = text;
-        this.metadata = new HashMap<>(metadata);
+        this.metadata = new HashMap<String, String>(metadata);
         this.score = score;
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -32,7 +34,7 @@ public class MongoDbMatchedDocument {
     }
 
     public List<Float> getEmbedding() {
-        return embedding;
+        return this.embedding;
     }
 
     public void setEmbedding(List<Float> embedding) {
@@ -40,7 +42,7 @@ public class MongoDbMatchedDocument {
     }
 
     public String getText() {
-        return text;
+        return this.text;
     }
 
     public void setText(String text) {
@@ -48,7 +50,7 @@ public class MongoDbMatchedDocument {
     }
 
     public Map<String, Object> getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public void setMetadata(Map<String, Object> metadata) {
@@ -56,10 +58,11 @@ public class MongoDbMatchedDocument {
     }
 
     public Double getScore() {
-        return score;
+        return this.score;
     }
 
     public void setScore(Double score) {
         this.score = score;
     }
 }
+

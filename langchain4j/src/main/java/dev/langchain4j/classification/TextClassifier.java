@@ -1,80 +1,40 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.document.Document
+ *  dev.langchain4j.data.segment.TextSegment
+ */
 package dev.langchain4j.classification;
 
+import dev.langchain4j.classification.ClassificationResult;
+import dev.langchain4j.classification.ScoredLabel;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.segment.TextSegment;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
-/**
- * Classifies a given text based on a set of labels.
- * It can return zero, one, or multiple labels for each classification.
- *
- * @param <L> The type of the label  (e.g., String, Enum, etc.)
- */
 public interface TextClassifier<L> {
-
-    /**
-     * Classifies the given text.
-     *
-     * @param text Text to classify.
-     * @return A list of labels. Can contain zero, one, or multiple labels.
-     */
-    default List<L> classify(String text) {
-        return classifyWithScores(text).scoredLabels().stream()
-                .map(ScoredLabel::label)
-                .collect(toList());
+    default public List<L> classify(String text) {
+        return this.classifyWithScores(text).scoredLabels().stream().map(ScoredLabel::label).collect(Collectors.toList());
     }
 
-    /**
-     * Classifies the given {@link TextSegment}.
-     *
-     * @param textSegment {@link TextSegment} to classify.
-     * @return A list of labels. Can contain zero, one, or multiple labels.
-     */
-    default List<L> classify(TextSegment textSegment) {
-        return classify(textSegment.text());
+    default public List<L> classify(TextSegment textSegment) {
+        return this.classify(textSegment.text());
     }
 
-    /**
-     * Classifies the given {@link Document}.
-     *
-     * @param document {@link Document} to classify.
-     * @return A list of labels. Can contain zero, one, or multiple labels.
-     */
-    default List<L> classify(Document document) {
-        return classify(document.text());
+    default public List<L> classify(Document document) {
+        return this.classify(document.text());
     }
 
-    /**
-     * Classifies the given text and returns labels with scores.
-     *
-     * @param text Text to classify.
-     * @return a result object containing a list of labels with corresponding scores.
-     * Can contain zero, one, or multiple labels.
-     */
-    ClassificationResult<L> classifyWithScores(String text);
+    public ClassificationResult<L> classifyWithScores(String var1);
 
-    /**
-     * Classifies the given {@link TextSegment} and returns labels with scores.
-     *
-     * @param textSegment {@link TextSegment} to classify.
-     * @return a result object containing a list of labels with corresponding scores.
-     * Can contain zero, one, or multiple labels.
-     */
-    default ClassificationResult<L> classifyWithScores(TextSegment textSegment) {
-        return classifyWithScores(textSegment.text());
+    default public ClassificationResult<L> classifyWithScores(TextSegment textSegment) {
+        return this.classifyWithScores(textSegment.text());
     }
 
-    /**
-     * Classifies the given {@link Document} and returns labels with scores.
-     *
-     * @param document {@link Document} to classify.
-     * @return a result object containing a list of labels with corresponding scores.
-     * Can contain zero, one, or multiple labels.
-     */
-    default ClassificationResult<L> classifyWithScores(Document document) {
-        return classifyWithScores(document.text());
+    default public ClassificationResult<L> classifyWithScores(Document document) {
+        return this.classifyWithScores(document.text());
     }
 }
+

@@ -1,9 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.exception.LangChain4jException
+ */
 package dev.langchain4j.store.embedding.milvus;
 
 import dev.langchain4j.exception.LangChain4jException;
 
-class RequestToMilvusFailedException extends LangChain4jException {
-
+class RequestToMilvusFailedException
+extends LangChain4jException {
     public RequestToMilvusFailedException(String message) {
         super(message);
     }
@@ -12,3 +18,4 @@ class RequestToMilvusFailedException extends LangChain4jException {
         super(message, cause);
     }
 }
+

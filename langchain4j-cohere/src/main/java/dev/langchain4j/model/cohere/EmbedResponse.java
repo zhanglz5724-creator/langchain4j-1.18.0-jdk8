@@ -1,11 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package dev.langchain4j.model.cohere;
 
-class EmbedResponse {
+import dev.langchain4j.model.cohere.Meta;
 
+class EmbedResponse {
     private String id;
     private String[] texts;
     private float[][] embeddings;
     private Meta meta;
+
+    EmbedResponse() {
+    }
 
     public String getId() {
         return this.id;
@@ -23,3 +30,4 @@ class EmbedResponse {
         return this.meta;
     }
 }
+

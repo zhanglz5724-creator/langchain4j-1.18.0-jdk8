@@ -1,14 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  dev.langchain4j.data.segment.TextSegment
+ *  dev.langchain4j.http.client.HttpClientBuilder
+ *  dev.langchain4j.internal.RetryUtils
+ *  dev.langchain4j.internal.Utils
+ *  dev.langchain4j.internal.ValidationUtils
+ *  dev.langchain4j.model.output.Response
+ *  dev.langchain4j.model.output.TokenUsage
+ *  dev.langchain4j.model.scoring.ScoringModel
+ *  org.slf4j.Logger
+ */
 package dev.langchain4j.model.jina;
-
-import static dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions;
-import static dev.langchain4j.internal.Utils.getOrDefault;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
-import static java.time.Duration.ofSeconds;
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
 
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.internal.RetryUtils;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.jina.internal.api.JinaRerankingRequest;
 import dev.langchain4j.model.jina.internal.api.JinaRerankingResponse;
 import dev.langchain4j.model.jina.internal.client.JinaClient;
@@ -16,78 +26,41 @@ import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.model.scoring.ScoringModel;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
-/**
- * An implementation of a {@link ScoringModel} that uses
- * <a href="https://jina.ai/reranker">Jina Reranker API</a>.
- */
-public class JinaScoringModel implements ScoringModel {
-
+public class JinaScoringModel
+implements ScoringModel {
     private static final String DEFAULT_BASE_URL = "https://api.jina.ai/v1/";
-
     private final JinaClient client;
     private final String modelName;
     private final Integer maxRetries;
 
-    @Deprecated(forRemoval = true, since = "1.4.0")
-    public JinaScoringModel(
-            String baseUrl,
-            String apiKey,
-            String modelName,
-            Duration timeout,
-            Integer maxRetries,
-            Boolean logRequests,
-            Boolean logResponses) {
-        this.client = JinaClient.builder()
-                .baseUrl(getOrDefault(baseUrl, DEFAULT_BASE_URL))
-                .apiKey(ensureNotBlank(apiKey, "apiKey"))
-                .timeout(getOrDefault(timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(logRequests, false))
-                .logResponses(getOrDefault(logResponses, false))
-                .build();
-        this.modelName = ensureNotBlank(modelName, "modelName");
-        this.maxRetries = getOrDefault(maxRetries, 2);
+    @Deprecated
+    public JinaScoringModel(String baseUrl, String apiKey, String modelName, Duration timeout, Integer maxRetries, Boolean logRequests, Boolean logResponses) {
+        this.client = JinaClient.builder().baseUrl((String)Utils.getOrDefault((Object)baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(ValidationUtils.ensureNotBlank((String)apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)logResponses, (Object)false)).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)maxRetries, (Object)2);
     }
 
     public JinaScoringModel(JinaScoringModelBuilder builder) {
-        this.client = JinaClient.builder()
-                .httpClientBuilder(builder.httpClientBuilder)
-                .baseUrl(getOrDefault(builder.baseUrl, DEFAULT_BASE_URL))
-                .apiKey(ensureNotBlank(builder.apiKey, "apiKey"))
-                .timeout(getOrDefault(builder.timeout, ofSeconds(60)))
-                .logRequests(getOrDefault(builder.logRequests, false))
-                .logResponses(getOrDefault(builder.logResponses, false))
-                .logger(builder.logger)
-                .build();
-        this.modelName = ensureNotBlank(builder.modelName, "modelName");
-        this.maxRetries = getOrDefault(builder.maxRetries, 2);
+        this.client = JinaClient.builder().httpClientBuilder(builder.httpClientBuilder).baseUrl((String)Utils.getOrDefault((Object)builder.baseUrl, (Object)DEFAULT_BASE_URL)).apiKey(ValidationUtils.ensureNotBlank((String)builder.apiKey, (String)"apiKey")).timeout((Duration)Utils.getOrDefault((Object)builder.timeout, (Object)Duration.ofSeconds(60L))).logRequests((Boolean)Utils.getOrDefault((Object)builder.logRequests, (Object)false)).logResponses((Boolean)Utils.getOrDefault((Object)builder.logResponses, (Object)false)).logger(builder.logger).build();
+        this.modelName = ValidationUtils.ensureNotBlank((String)builder.modelName, (String)"modelName");
+        this.maxRetries = (Integer)Utils.getOrDefault((Object)builder.maxRetries, (Object)2);
     }
 
     public static JinaScoringModelBuilder builder() {
         return new JinaScoringModelBuilder();
     }
 
-    @Override
     public Response<List<Double>> scoreAll(List<TextSegment> segments, String query) {
-
-        JinaRerankingRequest request = JinaRerankingRequest.builder()
-                .model(modelName)
-                .query(query)
-                .documents(segments.stream().map(TextSegment::text).collect(toList()))
-                .returnDocuments(false) // decreasing response size, do not include text in response
-                .build();
-
-        JinaRerankingResponse response = withRetryMappingExceptions(() -> client.rerank(request), maxRetries);
-
-        List<Double> scores = response.results.stream()
-                .sorted(comparingInt(result -> result.index))
-                .map(result -> result.relevanceScore)
-                .collect(toList());
-
-        TokenUsage tokenUsage = new TokenUsage(response.usage.promptTokens, 0, response.usage.totalTokens);
-        return Response.from(scores, tokenUsage);
+        JinaRerankingRequest request = JinaRerankingRequest.builder().model(this.modelName).query(query).documents(segments.stream().map(TextSegment::text).collect(Collectors.toList())).returnDocuments(false).build();
+        JinaRerankingResponse response = (JinaRerankingResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.rerank(request), (int)this.maxRetries);
+        List scores = response.results.stream().sorted(Comparator.comparingInt(result -> result.index)).map(result -> result.relevanceScore).collect(Collectors.toList());
+        TokenUsage tokenUsage = new TokenUsage(response.usage.promptTokens, Integer.valueOf(0), response.usage.totalTokens);
+        return Response.from(scores, (TokenUsage)tokenUsage);
     }
 
     public static class JinaScoringModelBuilder {
@@ -101,7 +74,8 @@ public class JinaScoringModel implements ScoringModel {
         private Logger logger;
         private HttpClientBuilder httpClientBuilder;
 
-        JinaScoringModelBuilder() {}
+        JinaScoringModelBuilder() {
+        }
 
         public JinaScoringModelBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -138,22 +112,11 @@ public class JinaScoringModel implements ScoringModel {
             return this;
         }
 
-        /**
-         * @param logger an alternate {@link Logger} to be used instead of the default one provided by Langchain4J for logging requests and responses.
-         * @return {@code this}.
-         */
         public JinaScoringModelBuilder logger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
-        /**
-         * Sets a custom HTTP client builder, allowing fine-grained control over the HTTP client
-         * configuration such as timeouts and proxy settings.
-         *
-         * @param httpClientBuilder the HTTP client builder
-         * @return {@code this}
-         */
         public JinaScoringModelBuilder httpClientBuilder(HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
@@ -164,10 +127,8 @@ public class JinaScoringModel implements ScoringModel {
         }
 
         public String toString() {
-            return "JinaScoringModel.JinaScoringModelBuilder(baseUrl=" + this.baseUrl + ", apiKey="
-                    + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", timeout="
-                    + this.timeout + ", maxRetries=" + this.maxRetries + ", logRequests=" + this.logRequests
-                    + ", logResponses=" + this.logResponses + ")";
+            return "JinaScoringModel.JinaScoringModelBuilder(baseUrl=" + this.baseUrl + ", apiKey=" + (this.apiKey == null ? null : "********") + ", modelName=" + this.modelName + ", timeout=" + this.timeout + ", maxRetries=" + this.maxRetries + ", logRequests=" + this.logRequests + ", logResponses=" + this.logResponses + ")";
         }
     }
 }
+
