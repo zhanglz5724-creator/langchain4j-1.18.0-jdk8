@@ -77,7 +77,7 @@ public class ApacheTikaDocumentParser implements DocumentParser {
      * @param parseContext   Tika parse context. Default: empty {@link ParseContext}
      * @deprecated Use the constructor with suppliers for Tika components if you intend to use this parser for multiple files.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public ApacheTikaDocumentParser(
             Parser parser, ContentHandler contentHandler, Metadata metadata, ParseContext parseContext) {
         this(
@@ -99,7 +99,7 @@ public class ApacheTikaDocumentParser implements DocumentParser {
      * @deprecated Use the constructor with suppliers for Tika components if you intend to use this parser for multiple files
      * and specify whether to include metadata or not.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public ApacheTikaDocumentParser(
             Supplier<Parser> parserSupplier,
             Supplier<ContentHandler> contentHandlerSupplier,
