@@ -11,6 +11,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.service.AiServices;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,7 +28,7 @@ class InputGuardrailChainTests {
     }
 
     static List<AnAiService> aiServices() {
-        return List.of(
+        return Arrays.asList(
                 createAiServiceWithClassNames(),
                 createAiServiceWithInstances(),
                 createMethodLevelAnnotationAiService(),

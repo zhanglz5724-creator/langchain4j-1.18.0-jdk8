@@ -17,6 +17,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.util.Arrays;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
@@ -97,7 +99,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(fileNames).singleElement().isEqualTo("file2.txt");
 
@@ -117,7 +119,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(fileNames)
                 .containsExactlyInAnyOrder(
@@ -148,7 +150,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(fileNames).containsExactlyInAnyOrder("file3.txt", "test-file-5.banana");
 
@@ -181,7 +183,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(fileNames).singleElement().isEqualTo(expectedFile);
 
@@ -201,7 +203,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(fileNames).containsExactlyInAnyOrderElementsOf(expectedFileNames);
 
@@ -239,7 +241,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(fileNames).singleElement().isEqualTo(expectedFileName);
 
@@ -264,7 +266,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
 
         assertThat(fileNames).containsExactlyInAnyOrderElementsOf(expectedFileNames);
 
@@ -302,7 +304,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
         // then
         List<String> fileNames = documents.stream()
                 .map(document -> document.metadata().getString(Document.FILE_NAME))
-                .toList();
+                .collect(Collectors.toList());
         assertThat(fileNames).singleElement().isEqualTo(expectedFileName);
 
         // when-then
@@ -319,7 +321,7 @@ class ClassPathDocumentLoaderTest implements WithAssertions {
 
         java.nio.file.Path tempDir = java.nio.file.Files.createTempDirectory("custom-classloader-test");
         java.nio.file.Path testFile = tempDir.resolve(testResourceName);
-        java.nio.file.Files.writeString(testFile, testResourceContent);
+        java.nio.file.Files.write(testFile, testResourceContent.getBytes(StandardCharsets.UTF_8));
 
         java.net.URLClassLoader customClassLoader = new java.net.URLClassLoader(
                 new java.net.URL[] {tempDir.toUri().toURL()}, null // no parent loader — isolates from context classpath

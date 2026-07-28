@@ -50,19 +50,19 @@ class StringSetOutputParserTest {
         return Stream.of(
 
                 // Plain text
-                Arguments.of("CAT", Set.of("CAT")),
-                Arguments.of("CAT\nDOG\nBIRD\nCAT", Set.of("CAT", "DOG", "BIRD")),
-                Arguments.of("", Set.of()),
-                Arguments.of("    ", Set.of()),
-                Arguments.of("  CAT  ", Set.of("CAT")),
-                Arguments.of(" CAT \n DOG \n  DOG ", Set.of("CAT", "DOG")),
+                Arguments.of("CAT", java.util.Collections.singleton("CAT")),
+                Arguments.of("CAT\nDOG\nBIRD\nCAT", new java.util.HashSet<>(java.util.Arrays.asList("CAT", "DOG", "BIRD"))),
+                Arguments.of("", java.util.Collections.emptySet()),
+                Arguments.of("    ", java.util.Collections.emptySet()),
+                Arguments.of("  CAT  ", java.util.Collections.singleton("CAT")),
+                Arguments.of(" CAT \n DOG \n  DOG ", new java.util.HashSet<>(java.util.Arrays.asList("CAT", "DOG"))),
 
                 // JSON
-                Arguments.of("{\"values\":[\"CAT\"]}", Set.of("CAT")),
-                Arguments.of("{\"values\":[\"CAT\",\"DOG\"]}", Set.of("CAT", "DOG")),
-                Arguments.of("{\"values\":[\"CAT\",\"DOG\",\"CAT\"]}", Set.of("CAT", "DOG")),
-                Arguments.of("{\"values\":[]}", Set.of()),
-                Arguments.of("  {\"values\":[\"CAT\",\"DOG\"]}  ", Set.of("CAT", "DOG")));
+                Arguments.of("{\"values\":[\"CAT\"]}", java.util.Collections.singleton("CAT")),
+                Arguments.of("{\"values\":[\"CAT\",\"DOG\"]}", new java.util.HashSet<>(java.util.Arrays.asList("CAT", "DOG"))),
+                Arguments.of("{\"values\":[\"CAT\",\"DOG\",\"CAT\"]}", new java.util.HashSet<>(java.util.Arrays.asList("CAT", "DOG"))),
+                Arguments.of("{\"values\":[]}", java.util.Collections.emptySet()),
+                Arguments.of("  {\"values\":[\"CAT\",\"DOG\"]}  ", new java.util.HashSet<>(java.util.Arrays.asList("CAT", "DOG"))));
     }
 
     @ParameterizedTest

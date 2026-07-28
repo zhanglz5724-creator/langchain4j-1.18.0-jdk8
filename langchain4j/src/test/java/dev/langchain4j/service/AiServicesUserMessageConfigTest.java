@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -340,7 +341,7 @@ class AiServicesUserMessageConfigTest {
                 AiServices.builder(AiService.class).chatModel(chatModel).build();
 
         // when
-        aiService.chat10(List.of(imageContent));
+        aiService.chat10(Arrays.asList(imageContent));
 
         // then
         verify(chatModel)
@@ -548,7 +549,7 @@ class AiServicesUserMessageConfigTest {
                 AiServices.builder(AiService.class).chatModel(chatModel).build();
 
         String base64Data = "AAECAw==";
-        List<Content> contents = List.of(TextContent.from("Analyze this audio:"), AudioContent.from(base64Data));
+        List<Content> contents = Arrays.asList(TextContent.from("Analyze this audio:"), AudioContent.from(base64Data));
 
         // when
         aiService.chat20_1(contents);
@@ -568,7 +569,7 @@ class AiServicesUserMessageConfigTest {
                 AiServices.builder(AiService.class).chatModel(chatModel).build();
 
         String base64Data = "AAECAw==";
-        List<AudioContent> contents = List.of(AudioContent.from(base64Data));
+        List<AudioContent> contents = Arrays.asList(AudioContent.from(base64Data));
 
         // when
         aiService.chat20_2(contents);
@@ -588,7 +589,7 @@ class AiServicesUserMessageConfigTest {
                 AiServices.builder(AiService.class).chatModel(chatModel).build();
 
         String base64Data = "AAECAw==";
-        List<Content> contents = List.of(TextContent.from("Analyze this audio:"), AudioContent.from(base64Data));
+        List<Content> contents = Arrays.asList(TextContent.from("Analyze this audio:"), AudioContent.from(base64Data));
 
         // when
         aiService.chat21_1(contents);
@@ -608,7 +609,7 @@ class AiServicesUserMessageConfigTest {
                 AiServices.builder(AiService.class).chatModel(chatModel).build();
 
         String base64Data = "AAECAw==";
-        List<AudioContent> contents = List.of(AudioContent.from(base64Data));
+        List<AudioContent> contents = Arrays.asList(AudioContent.from(base64Data));
 
         // when
         aiService.chat21_2(contents);

@@ -1116,7 +1116,7 @@ class AiServicesWithToolsIT {
 
     private static Map<String, Object> toMap(String arguments) {
         try {
-            return new ObjectMapper().readValue(arguments, new TypeReference<>() {});
+            return new ObjectMapper().readValue(arguments, new TypeReference<Map<String, Object>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

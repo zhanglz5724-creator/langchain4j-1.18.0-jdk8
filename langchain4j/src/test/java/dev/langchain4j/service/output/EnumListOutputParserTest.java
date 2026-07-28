@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -44,20 +45,20 @@ class EnumListOutputParserTest {
         return Stream.of(
 
                 // Plain text
-                Arguments.of("CAT", List.of(CAT)),
-                Arguments.of("CAT\nDOG", List.of(CAT, DOG)),
-                Arguments.of("cat", List.of(CAT)),
-                Arguments.of("Cat", List.of(CAT)),
-                Arguments.of("", List.of()),
-                Arguments.of(" ", List.of()),
-                Arguments.of(" CAT ", List.of(CAT)),
-                Arguments.of(" CAT \n DOG ", List.of(CAT, DOG)),
+                Arguments.of("CAT", Arrays.asList(CAT)),
+                Arguments.of("CAT\nDOG", Arrays.asList(CAT, DOG)),
+                Arguments.of("cat", Arrays.asList(CAT)),
+                Arguments.of("Cat", Arrays.asList(CAT)),
+                Arguments.of("", Arrays.asList()),
+                Arguments.of(" ", Arrays.asList()),
+                Arguments.of(" CAT ", Arrays.asList(CAT)),
+                Arguments.of(" CAT \n DOG ", Arrays.asList(CAT, DOG)),
 
                 // JSON
-                Arguments.of("{\"values\":[\"CAT\"]}", List.of(CAT)),
-                Arguments.of("{\"values\":[\"CAT\", \"DOG\"]}", List.of(CAT, DOG)),
-                Arguments.of("{\"values\":[]}", List.of()),
-                Arguments.of("  {\"values\":[\"CAT\"]}  ", List.of(CAT))
+                Arguments.of("{\"values\":[\"CAT\"]}", Arrays.asList(CAT)),
+                Arguments.of("{\"values\":[\"CAT\", \"DOG\"]}", Arrays.asList(CAT, DOG)),
+                Arguments.of("{\"values\":[]}", Arrays.asList()),
+                Arguments.of("  {\"values\":[\"CAT\"]}  ", Arrays.asList(CAT))
         );
     }
 

@@ -7,6 +7,7 @@ import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.image.Image;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -205,13 +206,13 @@ class ToolExecutionResultTest {
         ToolExecutionResult result1 = ToolExecutionResult.builder()
                 .result("obj")
                 .resultText("text")
-                .attributes(Map.of("key", "value1"))
+                .attributes(java.util.Collections.singletonMap("key", "value1"))
                 .build();
 
         ToolExecutionResult result2 = ToolExecutionResult.builder()
                 .result("obj")
                 .resultText("text")
-                .attributes(Map.of("key", "value2"))
+                .attributes(java.util.Collections.singletonMap("key", "value2"))
                 .build();
 
         // when/then
@@ -225,13 +226,13 @@ class ToolExecutionResultTest {
         ToolExecutionResult result1 = ToolExecutionResult.builder()
                 .result("obj")
                 .resultText("text")
-                .attributes(Map.of("key", "value"))
+                .attributes(java.util.Collections.singletonMap("key", "value"))
                 .build();
 
         ToolExecutionResult result2 = ToolExecutionResult.builder()
                 .result("obj")
                 .resultText("text")
-                .attributes(Map.of("key", "value"))
+                .attributes(java.util.Collections.singletonMap("key", "value"))
                 .build();
 
         // when/then
@@ -256,7 +257,7 @@ class ToolExecutionResultTest {
     @Test
     void should_create_with_resultContents() {
         // given
-        List<Content> contents = List.of(
+        List<Content> contents = Arrays.asList(
                 TextContent.from("description"),
                 ImageContent.from(Image.builder().base64Data("abc").mimeType("image/png").build())
         );
@@ -304,7 +305,7 @@ class ToolExecutionResultTest {
         // when
         ToolExecutionResult toolExecutionResult = ToolExecutionResult.builder()
                 .result(new Object())
-                .resultContents(List.of(TextContent.from("hello")))
+                .resultContents(Arrays.asList(TextContent.from("hello")))
                 .build();
 
         // then
@@ -314,7 +315,7 @@ class ToolExecutionResultTest {
     @Test
     void should_fail_resultText_when_resultContents_has_non_text() {
         // given
-        List<Content> contents = List.of(
+        List<Content> contents = Arrays.asList(
                 TextContent.from("first"),
                 ImageContent.from(Image.builder().base64Data("abc").mimeType("image/png").build())
         );
@@ -333,7 +334,7 @@ class ToolExecutionResultTest {
     @Test
     void should_fail_resultText_when_resultContents_has_multiple_text() {
         // given
-        List<Content> contents = List.of(
+        List<Content> contents = Arrays.asList(
                 TextContent.from("first"),
                 TextContent.from("second")
         );
@@ -354,7 +355,7 @@ class ToolExecutionResultTest {
         assertThatThrownBy(() -> ToolExecutionResult.builder()
                 .result(new Object())
                 .resultText("from text")
-                .resultContents(List.of(TextContent.from("from contents")))
+                .resultContents(Arrays.asList(TextContent.from("from contents")))
                 .build())
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mutually exclusive");
@@ -364,7 +365,7 @@ class ToolExecutionResultTest {
     void should_fail_when_resultContents_and_resultText_both_set() {
         assertThatThrownBy(() -> ToolExecutionResult.builder()
                 .result(new Object())
-                .resultContents(List.of(TextContent.from("from contents")))
+                .resultContents(Arrays.asList(TextContent.from("from contents")))
                 .resultText("from text")
                 .build())
                 .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -375,7 +376,7 @@ class ToolExecutionResultTest {
     void should_fail_when_resultContents_and_resultTextSupplier_both_set() {
         assertThatThrownBy(() -> ToolExecutionResult.builder()
                 .result(new Object())
-                .resultContents(List.of(TextContent.from("from contents")))
+                .resultContents(Arrays.asList(TextContent.from("from contents")))
                 .resultTextSupplier(() -> "from supplier")
                 .build())
                 .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -387,7 +388,7 @@ class ToolExecutionResultTest {
         assertThatThrownBy(() -> ToolExecutionResult.builder()
                 .result(new Object())
                 .resultTextSupplier(() -> "from supplier")
-                .resultContents(List.of(TextContent.from("from contents")))
+                .resultContents(Arrays.asList(TextContent.from("from contents")))
                 .build())
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mutually exclusive");

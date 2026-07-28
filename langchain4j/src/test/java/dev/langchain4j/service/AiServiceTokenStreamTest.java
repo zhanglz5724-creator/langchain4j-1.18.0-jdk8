@@ -320,7 +320,7 @@ class AiServiceTokenStreamTest {
                         .chatMemory(null)
                         .augmentationResult(null)
                         .userMessageTemplate("")
-                        .variables(Map.of())
+                        .variables(java.util.Collections.emptyMap())
                         .invocationContext(DEFAULT_INVOCATION_CONTEXT)
                         .build())
                 .toolArgumentsErrorHandler((e, c) -> {

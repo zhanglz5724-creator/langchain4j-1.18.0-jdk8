@@ -9,6 +9,7 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiTokenUsage;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.common.AbstractStreamingAiServiceIT;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -26,7 +27,7 @@ class OpenAiStreamingAiServiceIT extends AbstractStreamingAiServiceIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 defaultStreamingModelBuilder().build()
                 // TODO more configs?
                 );

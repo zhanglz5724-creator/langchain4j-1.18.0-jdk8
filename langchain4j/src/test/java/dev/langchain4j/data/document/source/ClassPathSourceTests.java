@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.Metadata;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -39,7 +41,7 @@ class ClassPathSourceTests {
                 .extracting(ClassPathSource::metadata)
                 .isEqualTo(expectedMetaData);
 
-        assertThat(new String(classPathSource.inputStream().readAllBytes()).trim())
+        assertThat(new String(readAllBytes(classPathSource.inputStream())).trim())
                 .isEqualTo(String.format("This is %s", filename));
     }
 
@@ -61,5 +63,15 @@ class ClassPathSourceTests {
                 .isNotNull()
                 .extracting(ClassPathSource::isInsideArchive)
                 .isEqualTo(shouldBeInsideArchive);
+    }
+
+    private static byte[] readAllBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = inputStream.read(buf)) != -1) {
+            baos.write(buf, 0, n);
+        }
+        return baos.toByteArray();
     }
 }

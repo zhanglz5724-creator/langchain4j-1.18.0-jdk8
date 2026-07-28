@@ -18,6 +18,7 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -199,7 +200,7 @@ class ConversationalChainTest {
     void should_work_with_custom_chat_memory_implementation() {
         ChatMemory customMemory = mock(ChatMemory.class);
         when(customMemory.messages())
-                .thenReturn(List.of(UserMessage.from("Previous message"), AiMessage.from("Previous response")));
+                .thenReturn(Arrays.asList(UserMessage.from("Previous message"), AiMessage.from("Previous response")));
 
         ConversationalChain chain = ConversationalChain.builder()
                 .chatModel(chatModel)

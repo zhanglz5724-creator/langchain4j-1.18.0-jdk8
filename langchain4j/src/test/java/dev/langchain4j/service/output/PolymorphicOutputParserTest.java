@@ -805,31 +805,6 @@ class PolymorphicOutputParserTest {
         public String toString() { return "OwnerWithDescribedPet[name=" + name + ", pet=" + pet + "]"; }
     }
 
-    interface SingleVariant {
-    }
-
-    static final class OnlyOne implements SingleVariant {
-        private final String value;
-
-        public OnlyOne(String value) { this.value = value; }
-
-        public String value() { return value; }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof OnlyOne)) return false;
-            OnlyOne onlyOne = (OnlyOne) o;
-            return java.util.Objects.equals(value, onlyOne.value);
-        }
-
-        @Override
-        public int hashCode() { return java.util.Objects.hash(value); }
-
-        @Override
-        public String toString() { return "OnlyOne[value=" + value + "]"; }
-    }
-
     @Test
     void sealed_with_single_subtype_works() {
 
@@ -844,74 +819,6 @@ class PolymorphicOutputParserTest {
                 .parse("{\"value\":{\"type\":\"OnlyOne\",\"value\":\"hi\"}}");
         assertThat(parsed).isInstanceOf(OnlyOne.class);
         assertThat(((OnlyOne) parsed).value()).isEqualTo("hi");
-    }
-
-    interface Action {
-    }
-
-    static final class Ping implements Action {
-        public Ping() {}
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            return o instanceof Ping;
-        }
-
-        @Override
-        public int hashCode() { return 0; }
-
-        @Override
-        public String toString() { return "Ping[]"; }
-    }
-
-    static final class Print implements Action {
-        private final String message;
-
-        public Print(String message) { this.message = message; }
-
-        public String message() { return message; }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Print)) return false;
-            Print print = (Print) o;
-            return java.util.Objects.equals(message, print.message);
-        }
-
-        @Override
-        public int hashCode() { return java.util.Objects.hash(message); }
-
-        @Override
-        public String toString() { return "Print[message=" + message + "]"; }
-    }
-
-    static final class OwnerWithDescribedPet {
-        private final String name;
-        private final Animal pet;
-
-        public OwnerWithDescribedPet(String name, Animal pet) {
-            this.name = name;
-            this.pet = pet;
-        }
-
-        public String name() { return name; }
-        public Animal pet() { return pet; }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof OwnerWithDescribedPet)) return false;
-            OwnerWithDescribedPet that = (OwnerWithDescribedPet) o;
-            return java.util.Objects.equals(name, that.name) && java.util.Objects.equals(pet, that.pet);
-        }
-
-        @Override
-        public int hashCode() { return java.util.Objects.hash(name, pet); }
-
-        @Override
-        public String toString() { return "OwnerWithDescribedPet[name=" + name + ", pet=" + pet + "]"; }
     }
 
     @Test
@@ -1041,8 +948,8 @@ class PolymorphicOutputParserTest {
 
         Plant plant = new PojoOutputParser<>(Plant.class)
                 .parse("{\"value\":{\"type\":\"Rose\",\"color\":\"red\"}}");
-        assertThat(plant).isInstanceOf(Rose.class);
-        assertThat(((Rose) plant).color).isEqualTo("red");
+        assertThat(plant).isInstanceOf(Plant.Rose.class);
+        assertThat(((Plant.Rose) plant).color).isEqualTo("red");
     }
 
     @Test

@@ -494,7 +494,7 @@ class AiServicesWithToolsWithDescriptionIT {
         assistant.chat(text);
 
         // then
-        verify(tool).process(new HashMap<>() {{
+        verify(tool).process(new HashMap<String, Integer>() {{
             put("Klaus", 42);
             put("Francine", 47);
         }});

@@ -7,7 +7,7 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.invocation.InvocationContext;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -37,7 +37,7 @@ class ToolErrorLoggingTest {
     };
 
     @Test
-    void default_execution_error_handler_logs_exception_at_warn() {
+    void default_execution_error_handler_logs_exception_at_warn() throws UnsupportedEncodingException {
         ToolExecutor executor = (req, ctx) -> {
             throw new IllegalStateException("default-handler-failure");
         };
@@ -56,7 +56,7 @@ class ToolErrorLoggingTest {
     }
 
     @Test
-    void custom_execution_error_handler_does_not_log() {
+    void custom_execution_error_handler_does_not_log() throws UnsupportedEncodingException {
         ToolExecutor executor = (req, ctx) -> {
             throw new IllegalStateException("custom-handler-failure");
         };
@@ -71,15 +71,15 @@ class ToolErrorLoggingTest {
                 .doesNotContain(IllegalStateException.class.getName());
     }
 
-    private static String captureStdErr(Supplier<?> action) {
+    private static String captureStdErr(Supplier<?> action) throws UnsupportedEncodingException {
         PrintStream originalErr = System.err;
         ByteArrayOutputStream captured = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(captured, true, StandardCharsets.UTF_8));
+        System.setErr(new PrintStream(captured, true, "UTF-8"));
         try {
             action.get();
         } finally {
             System.setErr(originalErr);
         }
-        return captured.toString(StandardCharsets.UTF_8);
+        return captured.toString("UTF-8");
     }
 }

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class ClassMetadataProviderTests {
     @Test
     void loadsThingsCorrectly() {
-        ReflectionBasedClassMetadataProviderFactory factory = ClassMetadataProvider.<Method>getClassMetadataProviderFactory();
+        ReflectionBasedClassMetadataProviderFactory factory = (ReflectionBasedClassMetadataProviderFactory) ClassMetadataProvider.<Method>getClassMetadataProviderFactory();
 
         assertThat(factory).isNotNull().isExactlyInstanceOf(ReflectionBasedClassMetadataProviderFactory.class);
 

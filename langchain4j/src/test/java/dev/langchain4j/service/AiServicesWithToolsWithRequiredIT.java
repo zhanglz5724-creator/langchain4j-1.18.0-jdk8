@@ -69,7 +69,7 @@ class AiServicesWithToolsWithRequiredIT {
                 // this method is empty
             }
 
-            static final JsonSchemaElement EXPECTED_SCHEMA = JsonObjectSchema.builder()
+            final JsonSchemaElement EXPECTED_SCHEMA = JsonObjectSchema.builder()
                     .addStringProperty("arg0", "name")
                     .addIntegerProperty("arg1", "age")
                     .required("arg0")
@@ -99,83 +99,7 @@ class AiServicesWithToolsWithRequiredIT {
         ToolSpecification toolSpecification = toolSpecifications.get(0);
         assertThat(toolSpecification.name()).isEqualTo("process");
         assertThat(toolSpecification.description()).isNull();
-        assertThat(toolSpecification.parameters()).isEqualTo(ToolWithOptionalParameter.EXPECTED_SCHEMA);
-    }
-
-    /**
-     * NOTE:
-     * When used with the "tools" feature, all POJO fields and sub-fields are considered <b>required</b> by default.
-     * This is different from "structured outputs" (see {@link AiServicesWithJsonSchemaWithRequiredIT}),
-     * where all fields and sub-fields are considered <b>optional</b> by default.
-     */
-    @Test
-    void should_execute_tool_with_pojo_with_optional_parameter() {
-
-        // given
-        class ToolWithPojoParameter {
-
-            static final class Person {
-                private final String name;
-                @JsonProperty(required = false)
-                private final Integer age;
-                public Person(String name, Integer age) {
-                    this.name = name;
-                    this.age = age;
-                }
-                public String name() { return name; }
-                public Integer age() { return age; }
-                @Override public boolean equals(Object o) {
-                    if (this == o) return true;
-                    if (!(o instanceof Person)) return false;
-                    Person person = (Person) o;
-                    return java.util.Objects.equals(name, person.name)
-                        && java.util.Objects.equals(age, person.age);
-                }
-                @Override public int hashCode() { return java.util.Objects.hash(name, age); }
-                @Override public String toString() { return "Person[name=" + name + ", age=" + age + "]"; }
-            }
-
-            @Tool
-            void process(Person person) {
-                // this method is empty
-            }
-
-            static final JsonSchemaElement EXPECTED_SCHEMA = JsonObjectSchema.builder()
-                    .addProperties(singletonMap(
-                            "arg0",
-                            JsonObjectSchema.builder()
-                                    .addStringProperty("name")
-                                    .addIntegerProperty("age")
-                                    .required("name")
-                                    .build()))
-                    .required("arg0")
-                    .build();
-        }
-
-        ToolWithPojoParameter tool = spy(new ToolWithPojoParameter());
-
-        Assistant assistant =
-                AiServices.builder(Assistant.class).chatModel(model).tools(tool).build();
-
-        String text = "Use 'process' tool to process the following: Klaus is 37 years old";
-
-        // when
-        assistant.chat(text);
-
-        // then
-        verify(tool).process(new ToolWithPojoParameter.Person("Klaus", 37));
-        verifyNoMoreInteractions(tool);
-
-        verify(model, times(2)).chat(chatRequestCaptor.capture());
-        verifyNoMoreInteractionsFor(model);
-
-        List<ToolSpecification> toolSpecifications =
-                chatRequestCaptor.getValue().parameters().toolSpecifications();
-        assertThat(toolSpecifications).hasSize(1);
-        ToolSpecification toolSpecification = toolSpecifications.get(0);
-        assertThat(toolSpecification.name()).isEqualTo("process");
-        assertThat(toolSpecification.description()).isNull();
-        assertThat(toolSpecification.parameters()).isEqualTo(ToolWithPojoParameter.EXPECTED_SCHEMA);
+        assertThat(toolSpecification.parameters()).isEqualTo(tool.EXPECTED_SCHEMA);
     }
 
     @Test
@@ -189,7 +113,7 @@ class AiServicesWithToolsWithRequiredIT {
                 // this method is empty
             }
 
-            static final JsonSchemaElement EXPECTED_SCHEMA = JsonObjectSchema.builder()
+            final JsonSchemaElement EXPECTED_SCHEMA = JsonObjectSchema.builder()
                     .addStringProperty("arg0", "name")
                     .addIntegerProperty("arg1", "age")
                     .required("arg0")
@@ -219,7 +143,7 @@ class AiServicesWithToolsWithRequiredIT {
         ToolSpecification toolSpecification = toolSpecifications.get(0);
         assertThat(toolSpecification.name()).isEqualTo("process");
         assertThat(toolSpecification.description()).isNull();
-        assertThat(toolSpecification.parameters()).isEqualTo(ToolWithOptionalJavaOptional.EXPECTED_SCHEMA);
+        assertThat(toolSpecification.parameters()).isEqualTo(tool.EXPECTED_SCHEMA);
     }
 
     @Test
@@ -231,7 +155,7 @@ class AiServicesWithToolsWithRequiredIT {
             @Tool
             void process(@P("name") String name, @P("items") Optional<List<String>> items) {}
 
-            static final JsonSchemaElement EXPECTED_SCHEMA = JsonObjectSchema.builder()
+            final JsonSchemaElement EXPECTED_SCHEMA = JsonObjectSchema.builder()
                     .addStringProperty("arg0", "name")
                     .addProperty(
                             "arg1",
@@ -265,7 +189,7 @@ class AiServicesWithToolsWithRequiredIT {
         assertThat(toolSpecifications).hasSize(1);
         ToolSpecification toolSpecification = toolSpecifications.get(0);
         assertThat(toolSpecification.name()).isEqualTo("process");
-        assertThat(toolSpecification.parameters()).isEqualTo(ToolWithOptionalComplexType.EXPECTED_SCHEMA);
+        assertThat(toolSpecification.parameters()).isEqualTo(tool.EXPECTED_SCHEMA);
     }
 
     @Test

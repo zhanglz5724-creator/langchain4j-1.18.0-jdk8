@@ -10,6 +10,7 @@ import dev.langchain4j.service.tool.search.ToolSearchRequest;
 import dev.langchain4j.service.tool.search.ToolSearchResult;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -23,11 +24,11 @@ class SimpleToolSearchStrategyTest {
     @Test
     void should_return_empty_result_when_no_tools_match() {
         ToolSearchResult result = search(
-                List.of(
+                Arrays.asList(
                         tool("weather", "Weather forecast"),
                         tool("time", "Current time")
                 ),
-                List.of("database")
+                Arrays.asList("database")
         );
 
         assertThat(result.foundToolNames()).isEmpty();
@@ -37,7 +38,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_be_zero_when_no_terms_match() {
         int score = score(
                 tool("weather", "Weather forecast"),
-                List.of("database")
+                Arrays.asList("database")
         );
 
         assertThat(score).isZero();
@@ -47,7 +48,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_be_1_when_term_matches_description_only() {
         int score = score(
                 tool("weather", "Weather forecast"),
-                List.of("forecast")
+                Arrays.asList("forecast")
         );
 
         assertThat(score).isEqualTo(1);
@@ -57,7 +58,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_be_2_when_term_matches_name_only() {
         int score = score(
                 tool("get_weather", "Returns forecast"),
-                List.of("weather")
+                Arrays.asList("weather")
         );
 
         assertThat(score).isEqualTo(2);
@@ -67,7 +68,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_be_3_when_term_matches_name_and_description() {
         int score = score(
                 tool("weather", "Weather forecast"),
-                List.of("weather")
+                Arrays.asList("weather")
         );
 
         // name (+2) + description (+1)
@@ -78,7 +79,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_add_across_multiple_terms() {
         int score = score(
                 tool("get_weather", "Returns weather forecast"),
-                List.of("weather", "forecast")
+                Arrays.asList("weather", "forecast")
         );
 
         // weather: name (+2) + desc (+1)
@@ -90,7 +91,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_ignore_duplicate_terms() {
         int score = score(
                 tool("weather", "Weather forecast"),
-                List.of("weather", "weather", "weather")
+                Arrays.asList("weather", "weather", "weather")
         );
 
         assertThat(score).isEqualTo(3);
@@ -100,7 +101,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_be_case_insensitive() {
         int score = score(
                 tool("WeatherTool", "Weather Forecast"),
-                List.of("weaTher", "FORECAST")
+                Arrays.asList("weaTher", "FORECAST")
         );
 
         // weather: name (+2) + desc (+1)
@@ -112,7 +113,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_handle_null_description() {
         int score = score(
                 tool("weather", null),
-                List.of("weather")
+                Arrays.asList("weather")
         );
 
         assertThat(score).isEqualTo(2);
@@ -127,11 +128,11 @@ class SimpleToolSearchStrategyTest {
 
         ToolSearchResult result = limited.search(
                 request(
-                        List.of(
+                        Arrays.asList(
                                 tool("weather", "Weather forecast"),
                                 tool("forecast", "Weather forecast")
                         ),
-                        List.of("weather")
+                        Arrays.asList("weather")
                 )
         );
 
@@ -141,7 +142,7 @@ class SimpleToolSearchStrategyTest {
     @Test
     void should_fail_when_terms_argument_is_missing() {
         ToolSearchRequest toolSearchRequest = requestRaw(
-                List.of(tool("weather", "Weather forecast")),
+                Arrays.asList(tool("weather", "Weather forecast")),
                 "{}"
         );
 
@@ -152,7 +153,7 @@ class SimpleToolSearchStrategyTest {
     @Test
     void should_fail_when_terms_is_not_an_array() {
         ToolSearchRequest toolSearchRequest = requestRaw(
-                List.of(tool("weather", "Weather forecast")),
+                Arrays.asList(tool("weather", "Weather forecast")),
                 "{\"terms\":\"weather\"}"
         );
 
@@ -168,7 +169,7 @@ class SimpleToolSearchStrategyTest {
                         .build();
 
         ToolSearchRequest toolSearchRequest = requestRaw(
-                List.of(tool("weather", "Weather forecast")),
+                Arrays.asList(tool("weather", "Weather forecast")),
                 "{}"
         );
 
@@ -180,7 +181,7 @@ class SimpleToolSearchStrategyTest {
     void score_should_split_multi_word_terms_and_match_individual_words() {
         int score = score(
                 tool("get_time", "Returns current time for a given location"),
-                List.of("current time", "time in London")
+                Arrays.asList("current time", "time in London")
         );
 
         // "time": name (+2) + desc (+1)
@@ -191,11 +192,11 @@ class SimpleToolSearchStrategyTest {
     @Test
     void should_find_time_tool_when_terms_are_multi_word_phrases() {
         ToolSearchResult result = search(
-                List.of(
+                Arrays.asList(
                         tool("get_time", "Returns current time for a given location"),
                         tool("weather", "Weather forecast")
                 ),
-                List.of("current time", "time in London")
+                Arrays.asList("current time", "time in London")
         );
 
         assertThat(result.foundToolNames()).contains("get_time");
@@ -206,7 +207,7 @@ class SimpleToolSearchStrategyTest {
     }
 
     private ToolSearchRequest request(List<ToolSpecification> tools, List<String> terms) {
-        return requestRaw(tools, Json.toJson(Map.of("terms", terms)));
+        return requestRaw(tools, Json.toJson(java.util.Collections.singletonMap("terms", terms)));
     }
 
     private ToolSearchRequest requestRaw(List<ToolSpecification> tools, String json) {

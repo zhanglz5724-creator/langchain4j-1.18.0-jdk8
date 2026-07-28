@@ -7,6 +7,7 @@ import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +26,7 @@ class ToolCachingEmbeddingModelTest {
         TextSegment tool1 = TextSegment.from("tool description 1");
         TextSegment tool2 = TextSegment.from("tool description 2");
 
-        List<TextSegment> segments = List.of(query, tool1, tool2);
+        List<TextSegment> segments = Arrays.asList(query, tool1, tool2);
 
         // when – first call
         Response<List<Embedding>> firstResponse = cachingModel.embedAll(segments);
@@ -58,7 +59,7 @@ class ToolCachingEmbeddingModelTest {
         TextSegment query = TextSegment.from("query");
         TextSegment tool = TextSegment.from("tool");
 
-        List<TextSegment> segments = List.of(query, tool);
+        List<TextSegment> segments = Arrays.asList(query, tool);
 
         // warm up cache
         cachingModel.embedAll(segments);
@@ -99,7 +100,7 @@ class ToolCachingEmbeddingModelTest {
         }
 
         List<String> embeddedTexts() {
-            return List.copyOf(embeddedTexts);
+            return new ArrayList<>(embeddedTexts);
         }
 
         void reset() {

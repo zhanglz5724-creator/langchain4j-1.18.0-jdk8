@@ -55,6 +55,7 @@ import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderRequest;
 import dev.langchain4j.service.tool.ToolProviderResult;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -366,7 +367,7 @@ class StreamingAiServicesWithToolsIT {
     }
 
     static List<Executor> executors() {
-        return List.of(Executors.newFixedThreadPool(2));
+        return Arrays.asList(Executors.newFixedThreadPool(2));
     }
 
     @ParameterizedTest
@@ -458,7 +459,7 @@ class StreamingAiServicesWithToolsIT {
                 .name("currentTemperature")
                 .parameters(JsonObjectSchema.builder()
                         .addStringProperty("arg0")
-                        .addEnumProperty("arg1", List.of("CELSIUS", "fahrenheit", "Kelvin"))
+                        .addEnumProperty("arg1", Arrays.asList("CELSIUS", "fahrenheit", "Kelvin"))
                         .required("arg0", "arg1")
                         .build())
                 .build();
@@ -607,7 +608,7 @@ class StreamingAiServicesWithToolsIT {
 
     private static Map<String, Object> toMap(String arguments) {
         try {
-            return new ObjectMapper().readValue(arguments, new TypeReference<>() {});
+            return new ObjectMapper().readValue(arguments, new TypeReference<Map<String, Object>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -1486,7 +1487,7 @@ class StreamingAiServicesWithToolsIT {
             }
         });
 
-        StreamingChatModel streamingModel = new StreamingChatModelMock(List.of(
+        StreamingChatModel streamingModel = new StreamingChatModelMock(Arrays.asList(
                 AiMessage.from(ToolExecutionRequest.builder()
                         .id("1")
                         .name("getWeather")

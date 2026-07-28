@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static dev.langchain4j.MockitoUtils.ignoreInteractions;
@@ -40,7 +41,7 @@ class SimpleToolSearchStrategyIT {
     }
 
     private static List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 baseModelBuilder().build(),
                 baseModelBuilder().strictTools(true).build()
         );

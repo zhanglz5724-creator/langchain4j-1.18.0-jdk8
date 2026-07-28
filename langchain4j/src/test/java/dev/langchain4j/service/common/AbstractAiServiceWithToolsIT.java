@@ -48,6 +48,7 @@ import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.Result;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -614,10 +615,12 @@ public abstract class AbstractAiServiceWithToolsIT {
         assistant.chat(text);
 
         // then
+        Map<String, Integer> expectedMap = new java.util.HashMap<>();
+        expectedMap.put("Klaus", 42);
+        expectedMap.put("Francine", 47);
+
         verify(tool)
-                .process(Map.of(
-                        "Klaus", 42,
-                        "Francine", 47));
+                .process(expectedMap);
         verifyNoMoreInteractions(tool);
 
         if (verifyModelInteractions()) {
@@ -729,7 +732,7 @@ public abstract class AbstractAiServiceWithToolsIT {
         assistant.chat(text);
 
         // then
-        verify(tool).process(Set.of(RED, GREEN));
+        verify(tool).process(new java.util.HashSet<>(java.util.Arrays.asList(RED, GREEN)));
         verifyNoMoreInteractions(tool);
 
         if (verifyModelInteractions()) {
@@ -779,7 +782,7 @@ public abstract class AbstractAiServiceWithToolsIT {
         assistant.chat(text);
 
         // then
-        verify(tool).processNumbers(List.of(37, 73));
+        verify(tool).processNumbers(Arrays.asList(37, 73));
         verifyNoMoreInteractions(tool);
 
         if (verifyModelInteractions()) {
@@ -863,12 +866,12 @@ public abstract class AbstractAiServiceWithToolsIT {
         // then
         try {
             verify(tool)
-                    .process(List.of(
+                    .process(Arrays.asList(
                             new ToolWithListOfPojoParameter.Person("Klaus"),
                             new ToolWithListOfPojoParameter.Person("Franny")));
         } catch (Throwable t) {
-            verify(tool).process(List.of(new ToolWithListOfPojoParameter.Person("Klaus")));
-            verify(tool).process(List.of(new ToolWithListOfPojoParameter.Person("Franny")));
+            verify(tool).process(Arrays.asList(new ToolWithListOfPojoParameter.Person("Klaus")));
+            verify(tool).process(Arrays.asList(new ToolWithListOfPojoParameter.Person("Franny")));
         }
         verifyNoMoreInteractions(tool);
 
@@ -889,9 +892,14 @@ public abstract class AbstractAiServiceWithToolsIT {
 
     static class ToolWithUUIDParameter {
 
-        Map<UUID, String> usernames = Map.of(
-                UUID.fromString("62dbcc27-aaf3-449a-b12d-5a904271a57f"), "Alice",
-                UUID.fromString("d1dbd3c2-25ab-4b10-b4f0-70c34088a248"), "Bob");
+        Map<UUID, String> usernames;
+
+        {
+            java.util.HashMap<UUID, String> map = new java.util.HashMap<>();
+            map.put(UUID.fromString("62dbcc27-aaf3-449a-b12d-5a904271a57f"), "Alice");
+            map.put(UUID.fromString("d1dbd3c2-25ab-4b10-b4f0-70c34088a248"), "Bob");
+            usernames = java.util.Collections.unmodifiableMap(map);
+        }
 
         @Tool
         String getUsernameFromId(UUID id) {
@@ -1312,7 +1320,7 @@ public abstract class AbstractAiServiceWithToolsIT {
                 .chat(argThat((ChatRequest request) -> request.messages().size() == 3
                         && request.messages().get(2) instanceof ToolExecutionResultMessage
                         && ((ToolExecutionResultMessage) request.messages().get(2)).text().isEmpty()
-                        && ((ToolExecutionResultMessage) request.messages().get(2)).contents().equals(List.of(TextContent.from("")))));
+                        && ((ToolExecutionResultMessage) request.messages().get(2)).contents().equals(Arrays.asList(TextContent.from("")))));
     }
 
     @ParameterizedTest
@@ -1348,7 +1356,7 @@ public abstract class AbstractAiServiceWithToolsIT {
                 .chat(argThat((ChatRequest request) -> request.messages().size() > 2
                         && request.messages().get(2) instanceof ToolExecutionResultMessage
                         && ((ToolExecutionResultMessage) request.messages().get(2)).text().equals(" ")
-                        && ((ToolExecutionResultMessage) request.messages().get(2)).contents().equals(List.of(TextContent.from(" ")))));
+                        && ((ToolExecutionResultMessage) request.messages().get(2)).contents().equals(Arrays.asList(TextContent.from(" ")))));
     }
 
     static final String CAT_IMAGE_URL =
@@ -1402,7 +1410,7 @@ public abstract class AbstractAiServiceWithToolsIT {
 
         @Tool("Takes a photo and returns it with a description")
         List<Content> takePhoto() {
-            return List.of(TextContent.from("Its name is Whiskers"), ImageContent.from(image));
+            return Arrays.asList(TextContent.from("Its name is Whiskers"), ImageContent.from(image));
         }
     }
 
@@ -1436,7 +1444,7 @@ public abstract class AbstractAiServiceWithToolsIT {
                 .filter(ToolExecutionResultMessage.class::isInstance)
                 .map(ToolExecutionResultMessage.class::cast)
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Tool result not found"));
 
         assertThat(toolResult.hasSingleText()).isFalse();
         assertThat(toolResult.contents()).hasSize(1);
@@ -1469,7 +1477,7 @@ public abstract class AbstractAiServiceWithToolsIT {
                 .filter(ToolExecutionResultMessage.class::isInstance)
                 .map(ToolExecutionResultMessage.class::cast)
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Tool result not found"));
 
         assertThat(toolResult.hasSingleText()).isFalse();
         assertThat(toolResult.contents()).hasSize(1);
@@ -1504,7 +1512,7 @@ public abstract class AbstractAiServiceWithToolsIT {
                 .filter(ToolExecutionResultMessage.class::isInstance)
                 .map(ToolExecutionResultMessage.class::cast)
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Tool result not found"));
 
         assertThat(toolResult.hasSingleText()).isFalse();
         assertThat(toolResult.contents()).hasSize(2);

@@ -22,9 +22,13 @@ class LazyCalculationIntegrationTest {
         List<String> data = new ArrayList<>();
 
         LargeResultObject() {
-            // Create a large object to make JSON marshalling noticeable
+            StringBuilder x100 = new StringBuilder(100);
+            for (int j = 0; j < 100; j++) {
+                x100.append('x');
+            }
+            String xs = x100.toString();
             for (int i = 0; i < 1000; i++) {
-                data.add("Item " + i + " - " + "x".repeat(100));
+                data.add("Item " + i + " - " + xs);
             }
         }
     }

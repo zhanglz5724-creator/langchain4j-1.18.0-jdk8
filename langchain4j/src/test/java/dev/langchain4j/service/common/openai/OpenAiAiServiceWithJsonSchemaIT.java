@@ -12,6 +12,7 @@ import dev.langchain4j.service.common.AbstractAiServiceWithJsonSchemaIT;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +51,7 @@ class OpenAiAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT 
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 modelWithStrictJsonSchema,
                 modelWithStrictJsonSchemaLegacy,
                 OpenAiChatModel.builder()

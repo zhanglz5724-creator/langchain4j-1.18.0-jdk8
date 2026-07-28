@@ -523,7 +523,7 @@ class AiServicesObservabilityTests {
                 .map(AiServiceEvent::invocationContext)
                 .findFirst();
 
-        InvocationContext ic = assertThat(firstInvocationContext).get().actual();
+        InvocationContext ic = firstInvocationContext.get();
 
         // Verify that all the listeners have the same invocationContext()
         assertThat(listeners)

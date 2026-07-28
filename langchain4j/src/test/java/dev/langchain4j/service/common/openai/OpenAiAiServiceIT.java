@@ -8,6 +8,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiTokenUsage;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.common.AbstractAiServiceIT;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -27,7 +28,7 @@ class OpenAiAiServiceIT extends AbstractAiServiceIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 defaultModelBuilder().build()
                 // TODO more configs?
                 );
@@ -35,7 +36,7 @@ class OpenAiAiServiceIT extends AbstractAiServiceIT {
 
     @Override
     protected List<ChatModel> modelsSupportingToolsAndJsonResponseFormatWithSchema() {
-        return List.of(
+        return Arrays.asList(
                 defaultModelBuilder()
                         .supportedCapabilities(RESPONSE_FORMAT_JSON_SCHEMA)
                         .strictJsonSchema(true)

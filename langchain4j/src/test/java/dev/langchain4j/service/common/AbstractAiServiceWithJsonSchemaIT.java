@@ -21,6 +21,7 @@ import dev.langchain4j.model.chat.request.json.JsonIntegerSchema;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
@@ -29,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -444,7 +446,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                         JsonObjectSchema.builder()
                                                                 .addStringProperty("street")
                                                                 .build())
-                                                .addEnumProperty("maritalStatus", List.of("SINGLE", "MARRIED"))
+                                                .addEnumProperty("maritalStatus", Arrays.asList("SINGLE", "MARRIED"))
                                                 .addProperty(
                                                         "localDate",
                                                         JsonObjectSchema.builder()
@@ -570,7 +572,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                         .name("Person")
                                         .rootElement(JsonObjectSchema.builder()
                                                 .addStringProperty("name")
-                                                .addEnumProperty("maritalStatus", List.of("SINGLE", "MARRIED"))
+                                                .addEnumProperty("maritalStatus", Arrays.asList("SINGLE", "MARRIED"))
                                                 .build())
                                         .build())
                                 .build())
@@ -861,7 +863,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
         PojoSetPerson person = personExtractor.extractPersonFrom(text);
 
         // then
-        assertThat(person).isEqualTo(new PojoSetPerson("Klaus", Set.of(new PojoSetPet("Peanut"), new PojoSetPet("Muffin"))));
+        assertThat(person).isEqualTo(new PojoSetPerson("Klaus", new java.util.HashSet<>(java.util.Arrays.asList(new PojoSetPet("Peanut"), new PojoSetPet("Muffin")))));
 
         verify(model)
                 .chat(ChatRequest.builder()
@@ -929,7 +931,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                 .jsonSchema(JsonSchema.builder()
                                         .name("Person")
                                         .rootElement(JsonObjectSchema.builder()
-                                                .addProperties(new LinkedHashMap<>() {
+                                                .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                     {
                                                         put("name", new JsonStringSchema());
                                                         put(
@@ -991,7 +993,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                 .jsonSchema(JsonSchema.builder()
                                         .name("Person")
                                         .rootElement(JsonObjectSchema.builder()
-                                                .addProperties(new LinkedHashMap<>() {
+                                                .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                     {
                                                         put("name", new JsonStringSchema());
                                                         put(
@@ -1053,7 +1055,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                 .jsonSchema(JsonSchema.builder()
                                         .name("Person")
                                         .rootElement(JsonObjectSchema.builder()
-                                                .addProperties(new LinkedHashMap<>() {
+                                                .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                     {
                                                         put("name", new JsonStringSchema());
                                                         put(
@@ -1116,13 +1118,13 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                 .jsonSchema(JsonSchema.builder()
                                         .name("Person")
                                         .rootElement(JsonObjectSchema.builder()
-                                                .addProperties(new LinkedHashMap<>() {
+                                                .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                     {
                                                         put("name", new JsonStringSchema());
                                                         put(
                                                                 "birthDate",
                                                                 JsonObjectSchema.builder()
-                                                                        .addProperties(new LinkedHashMap<>() {
+                                                                        .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                                             {
                                                                                 put("year", new JsonIntegerSchema());
                                                                                 put("month", new JsonIntegerSchema());
@@ -1133,7 +1135,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                         put(
                                                                 "birthTime",
                                                                 JsonObjectSchema.builder()
-                                                                        .addProperties(new LinkedHashMap<>() {
+                                                                        .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                                             {
                                                                                 put("hour", new JsonIntegerSchema());
                                                                                 put("minute", new JsonIntegerSchema());
@@ -1145,13 +1147,13 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                         put(
                                                                 "birthDateTime",
                                                                 JsonObjectSchema.builder()
-                                                                        .addProperties(new LinkedHashMap<>() {
+                                                                        .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                                             {
                                                                                 put(
                                                                                         "date",
                                                                                         JsonObjectSchema.builder()
                                                                                                 .addProperties(
-                                                                                                        new LinkedHashMap<>() {
+                                                                                                        new LinkedHashMap<String, JsonSchemaElement>() {
                                                                                                             {
                                                                                                                 put(
                                                                                                                         "year",
@@ -1169,7 +1171,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                                                         "time",
                                                                                         JsonObjectSchema.builder()
                                                                                                 .addProperties(
-                                                                                                        new LinkedHashMap<>() {
+                                                                                                        new LinkedHashMap<String, JsonSchemaElement>() {
                                                                                                             {
                                                                                                                 put(
                                                                                                                         "hour",
@@ -1224,7 +1226,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                 .jsonSchema(JsonSchema.builder()
                                         .name("Person")
                                         .rootElement(JsonObjectSchema.builder()
-                                                .addProperties(new LinkedHashMap<>() {
+                                                .addProperties(new LinkedHashMap<String, JsonSchemaElement>() {
                                                     {
                                                         put("name", new JsonStringSchema());
                                                     }
@@ -1254,8 +1256,8 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
 
         // then
         assertThat(person.name()).isEqualTo("Francine");
-        assertThat(person.children()).contains(new RecursionPerson("Steve", List.of()));
-        assertThat(person.children()).contains(new RecursionPerson("Hayley", List.of()));
+        assertThat(person.children()).contains(new RecursionPerson("Steve", Arrays.asList()));
+        assertThat(person.children()).contains(new RecursionPerson("Hayley", Arrays.asList()));
 
         String reference = generateUUIDFrom(RecursionPerson.class.getName());
 
@@ -1275,7 +1277,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                                         .reference(reference)
                                                                         .build())
                                                                 .build())
-                                                .definitions(Map.of(
+                                                .definitions(java.util.Collections.singletonMap(
                                                         reference,
                                                         JsonObjectSchema.builder()
                                                                 .addStringProperty("name")
@@ -1772,7 +1774,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
 
         verify(model)
                 .chat(ChatRequest.builder()
-                        .messages(List.of(userMessage(text)))
+                        .messages(Arrays.asList(userMessage(text)))
                         .responseFormat(ResponseFormat.builder()
                                 .type(JSON)
                                 .jsonSchema(JsonSchema.builder()
@@ -1964,7 +1966,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                 .jsonSchema(JsonSchema.builder()
                                         .name("MaritalStatus")
                                         .rootElement(JsonObjectSchema.builder()
-                                                .addEnumProperty("value", List.of("SINGLE", "MARRIED"))
+                                                .addEnumProperty("value", Arrays.asList("SINGLE", "MARRIED"))
                                                 .required("value")
                                                 .build())
                                         .build())
@@ -2160,7 +2162,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                         "value",
                                                         JsonAnyOfSchema.builder()
                                                                 .description("Animal")
-                                                                .anyOf(List.of(
+                                                                .anyOf(Arrays.asList(
                                                                         JsonObjectSchema.builder()
                                                                                 .description("Dog")
                                                                                 .addProperty(
@@ -2224,7 +2226,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                         JsonArraySchema.builder()
                                                                 .items(JsonAnyOfSchema.builder()
                                                                         .description("Animal")
-                                                                        .anyOf(List.of(
+                                                                        .anyOf(Arrays.asList(
                                                                                 JsonObjectSchema.builder()
                                                                                         .description("Dog")
                                                                                         .addProperty(
@@ -2293,7 +2295,7 @@ public abstract class AbstractAiServiceWithJsonSchemaIT {
                                                         "pet",
                                                         JsonAnyOfSchema.builder()
                                                                 .description("Animal")
-                                                                .anyOf(List.of(
+                                                                .anyOf(Arrays.asList(
                                                                         JsonObjectSchema.builder()
                                                                                 .description("Dog")
                                                                                 .addProperty(

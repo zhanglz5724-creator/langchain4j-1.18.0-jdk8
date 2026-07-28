@@ -16,7 +16,6 @@ import io.kotest.matchers.string.shouldContain
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.nio.file.Path
 import java.nio.file.Paths
 
 internal class AsyncDocumentLoaderTest {
@@ -56,7 +55,7 @@ internal class AsyncDocumentLoaderTest {
                 loadDocuments(
                     recursive = true,
                     documentParser = parser,
-                    directoryPaths = listOf(Path.of("./src/test/resources/asyncDocumentLoaderTest"))
+                    directoryPaths = listOf(Paths.get("./src/test/resources/asyncDocumentLoaderTest"))
                 )
             documents shouldHaveSize 4
 

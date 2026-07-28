@@ -41,20 +41,20 @@ class EnumSetOutputParserTest {
         return Stream.of(
 
                 // Plain text
-                Arguments.of("CAT", Set.of(CAT)),
-                Arguments.of("CAT\nDOG", Set.of(CAT, DOG)),
-                Arguments.of("cat", Set.of(CAT)),
-                Arguments.of("Cat", Set.of(CAT)),
-                Arguments.of("", Set.of()),
-                Arguments.of(" ", Set.of()),
-                Arguments.of(" CAT ", Set.of(CAT)),
-                Arguments.of(" CAT \n DOG ", Set.of(CAT, DOG)),
+                Arguments.of("CAT", java.util.Collections.singleton(CAT)),
+                Arguments.of("CAT\nDOG", new java.util.HashSet<>(java.util.Arrays.asList(CAT, DOG))),
+                Arguments.of("cat", java.util.Collections.singleton(CAT)),
+                Arguments.of("Cat", java.util.Collections.singleton(CAT)),
+                Arguments.of("", java.util.Collections.emptySet()),
+                Arguments.of(" ", java.util.Collections.emptySet()),
+                Arguments.of(" CAT ", java.util.Collections.singleton(CAT)),
+                Arguments.of(" CAT \n DOG ", new java.util.HashSet<>(java.util.Arrays.asList(CAT, DOG))),
 
                 // JSON
-                Arguments.of("{\"values\":[\"CAT\"]}", Set.of(CAT)),
-                Arguments.of("{\"values\":[\"CAT\", \"DOG\"]}", Set.of(CAT, DOG)),
-                Arguments.of("{\"values\":[]}", Set.of()),
-                Arguments.of("  {\"values\":[\"CAT\"]}  ", Set.of(CAT))
+                Arguments.of("{\"values\":[\"CAT\"]}", java.util.Collections.singleton(CAT)),
+                Arguments.of("{\"values\":[\"CAT\", \"DOG\"]}", new java.util.HashSet<>(java.util.Arrays.asList(CAT, DOG))),
+                Arguments.of("{\"values\":[]}", java.util.Collections.emptySet()),
+                Arguments.of("  {\"values\":[\"CAT\"]}  ", java.util.Collections.singleton(CAT))
         );
     }
 

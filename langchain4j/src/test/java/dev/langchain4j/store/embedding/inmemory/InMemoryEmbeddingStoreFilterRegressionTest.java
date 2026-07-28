@@ -10,6 +10,7 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 class InMemoryEmbeddingStoreFilterRegressionTest {
@@ -93,7 +94,7 @@ class InMemoryEmbeddingStoreFilterRegressionTest {
 
         // then: only the matching TextSegment should be removed; others remain
         assertThat(store.entries).hasSize(3);
-        List<String> remainingIds = store.entries.stream().map(e -> e.id).toList();
+        List<String> remainingIds = store.entries.stream().map(e -> e.id).collect(Collectors.toList());
         assertThat(remainingIds).containsExactlyInAnyOrder("2", "3", "4");
     }
 

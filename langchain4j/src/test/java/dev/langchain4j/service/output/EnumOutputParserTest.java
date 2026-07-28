@@ -9,6 +9,7 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.output.structured.Description;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -215,7 +216,7 @@ class EnumOutputParserTest {
         assertThat(jsonSchema).hasValue(JsonSchema.builder()
                 .name("MyEnumWithToString")
                 .rootElement(JsonObjectSchema.builder()
-                        .addEnumProperty("value", List.of("A", "B", "C"))
+                        .addEnumProperty("value", Arrays.asList("A", "B", "C"))
                         .required("value")
                         .build())
                 .build());

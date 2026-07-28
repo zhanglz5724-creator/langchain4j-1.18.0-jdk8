@@ -9,6 +9,7 @@ import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.common.AbstractStreamingAiServiceIT;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Arrays;
 import java.util.List;
 
 // TODO move to langchain4j-open-ai module once dependency cycle is resolved
@@ -17,7 +18,7 @@ class OpenAiResponsesStreamingAiServiceIT extends AbstractStreamingAiServiceIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 OpenAiResponsesStreamingChatModel.builder()
                         .baseUrl(System.getenv("OPENAI_BASE_URL"))
                         .apiKey(System.getenv("OPENAI_API_KEY"))

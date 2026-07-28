@@ -58,12 +58,14 @@ import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -150,7 +152,7 @@ class AiServicesWithRagIT {
                 .retrieve(argThat(q -> q.text().equals(query)
                         && q.metadata().chatMessage().equals(UserMessage.from(query))
                         && q.metadata().chatMemoryId().equals("default")
-                        && q.metadata().chatMemory().equals(List.of(userMessage, aiMessage))));
+                        && q.metadata().chatMemory().equals(Arrays.asList(userMessage, aiMessage))));
         verifyNoMoreInteractions(contentRetriever);
     }
 
@@ -436,7 +438,7 @@ class AiServicesWithRagIT {
                             return 0.1;
                         }
                     })
-                    .toList();
+                    .collect(Collectors.toList());
             return Response.from(scores);
         });
         ContentAggregator contentAggregator = ReRankingContentAggregator.builder()
@@ -590,7 +592,7 @@ class AiServicesWithRagIT {
             public Collection<Query> transform(Query query) {
                 UserMessage userMessage = (UserMessage) query.metadata().chatMessage();
                 userMessage.attributes().put(attributeKey, attributeValue);
-                return List.of(query);
+                return Arrays.asList(query);
             }
         };
 

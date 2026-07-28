@@ -103,16 +103,23 @@ class PojoSetOutputParserTest {
         assertThat(people).isEqualTo(expected);
     }
 
+
     static Stream<Arguments> should_parse_set_of_pojo() {
+        HashSet<Person> people = new HashSet<>();
+        people.add(new Person("Klaus"));
+        HashSet<Person> franny = new HashSet<>();
+        franny.add(new Person("Franny"));
+        HashSet<Person> k = new HashSet<>();
+        k.add(new Person("Klaus"));
         return Stream.of(
-                Arguments.of("{\"values\":[{\"name\":\"Klaus\"}]}", new java.util.HashSet<>(java.util.Arrays.asList(new Person("Klaus"))))),
+                Arguments.of("{\"values\":[{\"name\":\"Klaus\"}]}", k),
                 Arguments.of(
                         "{\"values\":[{\"name\":\"Klaus\"}, {\"name\":\"Franny\"}]}",
-                        new java.util.HashSet<>(java.util.Arrays.asList(new Person("Klaus"), new Person("Franny"))))),
-                Arguments.of("", java.util.Collections.emptySet()),
-                Arguments.of(" ", java.util.Collections.emptySet()),
-                Arguments.of("{\"values\":[]}", java.util.Collections.emptySet()),
-                Arguments.of(" {\"values\":[{\"name\":\"Klaus\"}]} ", new java.util.HashSet<>(java.util.Arrays.asList(new Person("Klaus"))));
+                        people, franny),
+                Arguments.of("", new HashSet<>()),
+                Arguments.of(" ", new HashSet<>()),
+                Arguments.of("{\"values\":[]}", new HashSet<>()),
+                Arguments.of(" {\"values\":[{\"name\":\"Klaus\"}]} ", k));
     }
 
     @ParameterizedTest
