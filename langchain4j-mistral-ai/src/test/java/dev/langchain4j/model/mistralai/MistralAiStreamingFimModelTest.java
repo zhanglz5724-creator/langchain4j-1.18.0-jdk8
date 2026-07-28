@@ -65,13 +65,11 @@ class MistralAiStreamingFimModelTest {
 
     private static ServerSentEvent textEvent(String text) {
         String escaped = text.replace("\"", "\\\"");
-        return event("""
-                {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{"content":[{"type":"text","text":"%s"}]}}]}""".formatted(MODEL, escaped));
+        return event(String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{\"content\":[{\"type\":\"text\",\"text\":\"%s\"}]}}]}", MODEL, escaped));
     }
 
     private static ServerSentEvent finishEvent(String reason) {
-        return event("""
-                {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{},"finish_reason":"%s"}],"usage":{"prompt_tokens":10,"completion_tokens":20,"total_tokens":30}}""".formatted(MODEL, reason));
+        return event(String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"%s\"}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":20,\"total_tokens\":30}}", MODEL, reason));
     }
 
     private static ServerSentEvent doneEvent() {

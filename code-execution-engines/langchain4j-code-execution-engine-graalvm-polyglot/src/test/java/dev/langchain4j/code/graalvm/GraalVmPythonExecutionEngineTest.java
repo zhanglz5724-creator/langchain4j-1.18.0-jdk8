@@ -12,15 +12,13 @@ class GraalVmPythonExecutionEngineTest {
     @Test
     void should_execute_code() {
 
-        String code = """
-                def fibonacci(n):
-                    if n <= 1:
-                        return n
-                    else:
-                        return fibonacci(n-1) + fibonacci(n-2)
-                                
-                fibonacci(10)
-                """;
+        String code = "def fibonacci(n):\n" +
+                "    if n <= 1:\n" +
+                "        return n\n" +
+                "    else:\n" +
+                "        return fibonacci(n-1) + fibonacci(n-2)\n" +
+                "                \n" +
+                "fibonacci(10)\n";
 
         String result = engine.execute(code);
 

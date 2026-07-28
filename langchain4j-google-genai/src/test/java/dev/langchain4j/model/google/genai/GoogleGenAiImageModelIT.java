@@ -88,10 +88,8 @@ class GoogleGenAiImageModelIT {
                 .build();
 
         // when
-        var imageResponse = subject.generate("""
-                A kawaii illustration of the current weather forecast for Paris (France)
-                showing the current temperature (in Celsius)
-                """);
+        var imageResponse = subject.generate("A kawaii illustration of the current weather forecast for Paris (France)\n" +
+                "showing the current temperature (in Celsius)");
         saveImage(imageResponse.content(), "paris_weather_illustration");
 
         // then
@@ -137,10 +135,8 @@ class GoogleGenAiImageModelIT {
                 .build();
 
         // when
-        var response = subject.generate("""
-                Da Vinci style anatomical sketch of a dissected Monarch butterfly.
-                Detailed drawings of the head, wings, and legs on textured parchment with notes in English.
-                """);
+        var response = subject.generate("Da Vinci style anatomical sketch of a dissected Monarch butterfly.\n" +
+                "Detailed drawings of the head, wings, and legs on textured parchment with notes in English.");
 
         // then
         var image = response.content();

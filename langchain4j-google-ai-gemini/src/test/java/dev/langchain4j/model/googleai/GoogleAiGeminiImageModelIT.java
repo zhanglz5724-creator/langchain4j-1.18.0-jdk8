@@ -89,10 +89,7 @@ class GoogleAiGeminiImageModelIT {
 
         // when
         var imageResponse = subject.generate(
-                """
-                A kawaii illustration of the current weather forecast for Paris (France)
-                showing the current temperature (in Celsius)
-                """);
+                "A kawaii illustration of the current weather forecast for Paris (France)\nshowing the current temperature (in Celsius)");
         saveImage(imageResponse.content(), "paris_weather_illustration");
 
         // then

@@ -135,13 +135,12 @@ public class SingleAgentIT {
 
     public interface TextCreativeWriter {
 
-        @UserMessage("""
-            You are a creative fiction writer.
-            Blend the inspiration naturally into the story and output only the final story content.
-            Write a short story draft around the given topic in no more than 3 sentences.
-            Return only the story text, without any explanation, title, or extra prefix/suffix.
-            The topic is: {{topic}}.
-            """)
+        @UserMessage("            You are a creative fiction writer.\n"
++ "            Blend the inspiration naturally into the story and output only the final story content.\n"
++ "            Write a short story draft around the given topic in no more than 3 sentences.\n"
++ "            Return only the story text, without any explanation, title, or extra prefix/suffix.\n"
++ "            The topic is: {{topic}}.\n"
++ "            ")
         @Agent(outputKey = "story", description = "Generates a story based on topic (non-streaming)")
         String generateStoryText(@V("topic") String topic);
     }

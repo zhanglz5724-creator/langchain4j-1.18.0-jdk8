@@ -565,11 +565,7 @@ class GoogleAiGeminiChatModelIT {
                 ResponseFormat.builder().type(JSON).jsonSchema(jsonSchema).build();
 
         UserMessage userMessage = UserMessage.from(
-                """
-                        Extract information from the following text:
-                        1. A circle with a radius of 5
-                        2. A rectangle with a width of 10 and a height of 20
-                        """);
+                "Extract information from the following text:\n1. A circle with a radius of 5\n2. A rectangle with a width of 10 and a height of 20");
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(userMessage)
@@ -597,53 +593,7 @@ class GoogleAiGeminiChatModelIT {
     void should_support_raw_json_schema() throws JsonProcessingException {
         // given
         String rawSchema =
-                """
-        {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "birthDate": {
-              "type": "string",
-              "format": "date"
-            },
-            "preferredContactTime": {
-              "type": "string",
-              "format": "time"
-              },
-            "height": {
-              "type": "number",
-              "minimum": 1.83,
-              "maximum": 1.88
-            },
-            "role": {
-              "type": "string",
-              "enum": ["developer", "maintainer", "researcher"]
-            },
-            "isAvailable": { "type": "boolean" },
-            "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1,
-              "maxItems": 5
-            },
-            "address": {
-              "type": "object",
-              "properties": {
-                "city": { "type": "string" },
-                "streetName": { "type": "string" },
-                "streetNumber": { "type": "string" }
-              },
-              "required": ["city", "streetName", "streetNumber"],
-              "additionalProperties": true
-            }
-          },
-          "required": ["name", "birthDate", "height", "role", "tags", "address"]
-        }
-        """;
+                "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"name\": {\n      \"type\": \"string\"\n    },\n    \"birthDate\": {\n      \"type\": \"string\",\n      \"format\": \"date\"\n    },\n    \"preferredContactTime\": {\n      \"type\": \"string\",\n      \"format\": \"time\"\n      },\n    \"height\": {\n      \"type\": \"number\",\n      \"minimum\": 1.83,\n      \"maximum\": 1.88\n    },\n    \"role\": {\n      \"type\": \"string\",\n      \"enum\": [\"developer\", \"maintainer\", \"researcher\"]\n    },\n    \"isAvailable\": { \"type\": \"boolean\" },\n    \"tags\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"minItems\": 1,\n      \"maxItems\": 5\n    },\n    \"address\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"city\": { \"type\": \"string\" },\n        \"streetName\": { \"type\": \"string\" },\n        \"streetNumber\": { \"type\": \"string\" }\n      },\n      \"required\": [\"city\", \"streetName\", \"streetNumber\"],\n      \"additionalProperties\": true\n    }\n  },\n  \"required\": [\"name\", \"birthDate\", \"height\", \"role\", \"tags\", \"address\"]\n}";
 
         JsonRawSchema jsonRawSchema = JsonRawSchema.builder().schema(rawSchema).build();
         JsonSchema jsonSchema = JsonSchema.builder().rootElement(jsonRawSchema).build();
@@ -664,13 +614,7 @@ class GoogleAiGeminiChatModelIT {
 
         // when
         UserMessage userMessage = UserMessage.from(
-                """
-                   Tell me about a software engineer named Sherlock Holmes,
-                   who was born on November 28 1990 and sees the world over six feet from the ground.
-                   He is an open-source contributor, an active volunteer and lives in London at 221B Baker Street.
-                   He plays the violin and he likes to conduct various physics and chemistry experiments.
-                   He accepts clients or prefers to be contacted at 09:00am.
-                   """);
+                "Tell me about a software engineer named Sherlock Holmes,\nwho was born on November 28 1990 and sees the world over six feet from the ground.\nHe is an open-source contributor, an active volunteer and lives in London at 221B Baker Street.\nHe plays the violin and he likes to conduct various physics and chemistry experiments.\nHe accepts clients or prefers to be contacted at 09:00am.");
 
         ChatResponse response =
                 gemini.chat(ChatRequest.builder().messages(userMessage).build());

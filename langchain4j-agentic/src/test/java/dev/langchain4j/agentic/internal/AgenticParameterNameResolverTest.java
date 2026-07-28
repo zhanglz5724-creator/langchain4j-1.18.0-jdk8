@@ -125,21 +125,20 @@ class AgenticParameterNameResolverTest {
     }
 
     private static String compiledTestAiServiceSource() {
-        return """
-                package dev.langchain4j.agentic.internal.generated;
-
-                import dev.langchain4j.service.SystemMessage;
-                import dev.langchain4j.service.UserMessage;
-                import dev.langchain4j.service.V;
-
-                public interface CompiledTestAiService {
-
-                    @SystemMessage("Use {{xx}}.")
-                    String chat(@UserMessage String message, @V("xx") String yy);
-
-                    String chatWithProvider(@UserMessage String message, @V("xx") String yy);
-                }
-                """;
+        return "                package dev.langchain4j.agentic.internal.generated;\n"
++ "\n"
++ "                import dev.langchain4j.service.SystemMessage;\n"
++ "                import dev.langchain4j.service.UserMessage;\n"
++ "                import dev.langchain4j.service.V;\n"
++ "\n"
++ "                public interface CompiledTestAiService {\n"
++ "\n"
++ "                    @SystemMessage(\"Use {{xx}}.\")\n"
++ "                    String chat(@UserMessage String message, @V(\"xx\") String yy);\n"
++ "\n"
++ "                    String chatWithProvider(@UserMessage String message, @V(\"xx\") String yy);\n"
++ "                }\n"
++ "                ";
     }
 
     private record CompiledAiService(Class<?> type, URLClassLoader classLoader) implements AutoCloseable {

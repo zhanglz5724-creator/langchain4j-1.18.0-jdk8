@@ -408,16 +408,15 @@ public class ConverterTest {
         assertEquals("test", p.jsonSchema().name());
         assertEquals(true, p.jsonSchema().strict());
         JSONAssert.assertEquals(
-                """
-                                {
-                                    "type" : "object",
-                                    "properties" : {
-                                        "test" : {
-                                          "type" : boolean
-                                        }
-                                    },
-                                    required : [ ]
-                                }""",
+                "                                {\n"
++ "                                    \"type\" : \"object\",\n"
++ "                                    \"properties\" : {\n"
++ "                                        \"test\" : {\n"
++ "                                          \"type\" : boolean\n"
++ "                                        }\n"
++ "                                    },\n"
++ "                                    required : [ ]\n"
++ "                                }",
                 Json.toJson(p.jsonSchema().schema()),
                 true);
     }
@@ -837,16 +836,15 @@ public class ConverterTest {
         assertEquals("test", p.jsonSchema().name());
         assertEquals(true, p.jsonSchema().strict());
         JSONAssert.assertEquals(
-                """
-                                {
-                                    "type" : "object",
-                                    "properties" : {
-                                        "test" : {
-                                          "type" : boolean
-                                        }
-                                    },
-                                    required : [ ]
-                                }""",
+                "                                {\n"
++ "                                    \"type\" : \"object\",\n"
++ "                                    \"properties\" : {\n"
++ "                                        \"test\" : {\n"
++ "                                          \"type\" : boolean\n"
++ "                                        }\n"
++ "                                    },\n"
++ "                                    required : [ ]\n"
++ "                                }",
                 Json.toJson(p.jsonSchema().schema()),
                 true);
     }

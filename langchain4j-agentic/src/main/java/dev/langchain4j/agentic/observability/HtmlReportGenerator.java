@@ -713,135 +713,134 @@ public class HtmlReportGenerator {
     // -----------------------------------------------------------------------
 
     private void appendScript(StringBuilder html) {
-        html.append("""
-                <script>
-                function toggle(id) {
-                    var body = document.getElementById(id);
-                    body.classList.toggle('collapsed');
-                    body.previousElementSibling.classList.toggle('collapsed');
-                }
-
-                function toggleTools() {
-                    document.querySelectorAll('.tool-row').forEach(function(row) {
-                        row.classList.toggle('tool-hidden');
-                    });
-                }
-
-                function toggleRow(rowId) {
-                    var trigger = document.querySelector('[data-row-id="' + rowId + '"]');
-                    var arrow = trigger ? trigger.querySelector('.row-toggle') : null;
-                    var collapsing = arrow && !arrow.classList.contains('collapsed');
-                    if (arrow) arrow.classList.toggle('collapsed');
-                    var children = document.querySelectorAll('[data-parent-row="' + rowId + '"]');
-                    children.forEach(function(row) {
-                        if (collapsing) {
-                            row.classList.add('row-hidden');
-                            hideDescendants(row.getAttribute('data-row-id'));
-                        } else {
-                            row.classList.remove('row-hidden');
-                        }
-                    });
-                }
-
-                function hideDescendants(rowId) {
-                    document.querySelectorAll('[data-parent-row="' + rowId + '"]').forEach(function(row) {
-                        row.classList.add('row-hidden');
-                        hideDescendants(row.getAttribute('data-row-id'));
-                    });
-                }
-
-                function toggleDataFlow() {
-                    var svg = document.getElementById('df-svg');
-                    if (!svg) return;
-                    svg.classList.toggle('df-hidden');
-                }
-
-                function drawDataFlow() {
-                    var svg = document.getElementById('df-svg');
-                    var tree = svg ? svg.parentElement : null;
-                    if (!svg || !tree) return;
-
-                    // Size SVG to match tree
-                    svg.style.width = tree.scrollWidth + 'px';
-                    svg.style.height = tree.scrollHeight + 'px';
-
-                    // Remove old paths
-                    svg.querySelectorAll('.df-path').forEach(function(p) { p.remove(); });
-
-                    var treeRect = tree.getBoundingClientRect();
-
-                    // Build producer map: outputKey -> [node, ...]
-                    var prodMap = {};
-                    tree.querySelectorAll('.node-card[data-output-key]').forEach(function(n) {
-                        var k = n.getAttribute('data-output-key');
-                        if (!prodMap[k]) prodMap[k] = [];
-                        prodMap[k].push(n);
-                    });
-
-                    // For each consumer node, draw edges from matching producers
-                    tree.querySelectorAll('.node-card[data-input-keys]').forEach(function(consumer) {
-                        var keys = consumer.getAttribute('data-input-keys').split(',');
-                        var cRect = consumer.getBoundingClientRect();
-                        var cx = cRect.left + cRect.width / 2 - treeRect.left;
-                        var cy = cRect.top - treeRect.top;
-
-                        keys.forEach(function(key) {
-                            var producers = prodMap[key];
-                            if (!producers) return;
-                            producers.forEach(function(producer) {
-                                if (producer === consumer) return;
-                                // Skip if producer is an ancestor or descendant (structural edge)
-                                if (producer.contains(consumer) || consumer.contains(producer)) return;
-
-                                var color = producer.getAttribute('data-output-color') || '#999';
-                                var pRect = producer.getBoundingClientRect();
-                                var px = pRect.left + pRect.width / 2 - treeRect.left;
-                                var py = pRect.bottom - treeRect.top;
-
-                                var markerId = 'ah-' + Math.abs(hashCode(key));
-                                drawEdge(svg, px, py, cx, cy, color, markerId);
-                            });
-                        });
-                    });
-                }
-
-                function drawEdge(svg, x1, y1, x2, y2, color, markerId) {
-                    var dx = x2 - x1;
-                    var dy = y2 - y1;
-                    var dist = Math.sqrt(dx*dx + dy*dy);
-                    // Control point offset perpendicular to the line
-                    var bend = Math.min(60, dist * 0.3);
-                    // Offset to the right of the direction vector
-                    var nx = -dy / (dist || 1) * bend;
-                    var ny =  dx / (dist || 1) * bend;
-                    var cpx = (x1 + x2) / 2 + nx;
-                    var cpy = (y1 + y2) / 2 + ny;
-
-                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    path.setAttribute('d', 'M' + x1 + ',' + y1 + ' Q' + cpx + ',' + cpy + ' ' + x2 + ',' + y2);
-                    path.setAttribute('stroke', color);
-                    path.setAttribute('stroke-width', '1.8');
-                    path.setAttribute('stroke-dasharray', '6,4');
-                    path.setAttribute('fill', 'none');
-                    path.setAttribute('opacity', '0.55');
-                    path.setAttribute('class', 'df-path');
-                    path.setAttribute('marker-end', 'url(#' + markerId + ')');
-                    svg.appendChild(path);
-                }
-
-                function hashCode(s) {
-                    var h = 0;
-                    for (var i = 0; i < s.length; i++) {
-                        h = ((h << 5) - h) + s.charCodeAt(i);
-                        h |= 0;
-                    }
-                    return h;
-                }
-
-                document.addEventListener('DOMContentLoaded', drawDataFlow);
-                window.addEventListener('resize', drawDataFlow);
-                </script>
-                """);
+        html.append("                <script>\n"
++ "                function toggle(id) {\n"
++ "                    var body = document.getElementById(id);\n"
++ "                    body.classList.toggle('collapsed');\n"
++ "                    body.previousElementSibling.classList.toggle('collapsed');\n"
++ "                }\n"
++ "\n"
++ "                function toggleTools() {\n"
++ "                    document.querySelectorAll('.tool-row').forEach(function(row) {\n"
++ "                        row.classList.toggle('tool-hidden');\n"
++ "                    });\n"
++ "                }\n"
++ "\n"
++ "                function toggleRow(rowId) {\n"
++ "                    var trigger = document.querySelector('[data-row-id=\"' + rowId + '\"]');\n"
++ "                    var arrow = trigger ? trigger.querySelector('.row-toggle') : null;\n"
++ "                    var collapsing = arrow && !arrow.classList.contains('collapsed');\n"
++ "                    if (arrow) arrow.classList.toggle('collapsed');\n"
++ "                    var children = document.querySelectorAll('[data-parent-row=\"' + rowId + '\"]');\n"
++ "                    children.forEach(function(row) {\n"
++ "                        if (collapsing) {\n"
++ "                            row.classList.add('row-hidden');\n"
++ "                            hideDescendants(row.getAttribute('data-row-id'));\n"
++ "                        } else {\n"
++ "                            row.classList.remove('row-hidden');\n"
++ "                        }\n"
++ "                    });\n"
++ "                }\n"
++ "\n"
++ "                function hideDescendants(rowId) {\n"
++ "                    document.querySelectorAll('[data-parent-row=\"' + rowId + '\"]').forEach(function(row) {\n"
++ "                        row.classList.add('row-hidden');\n"
++ "                        hideDescendants(row.getAttribute('data-row-id'));\n"
++ "                    });\n"
++ "                }\n"
++ "\n"
++ "                function toggleDataFlow() {\n"
++ "                    var svg = document.getElementById('df-svg');\n"
++ "                    if (!svg) return;\n"
++ "                    svg.classList.toggle('df-hidden');\n"
++ "                }\n"
++ "\n"
++ "                function drawDataFlow() {\n"
++ "                    var svg = document.getElementById('df-svg');\n"
++ "                    var tree = svg ? svg.parentElement : null;\n"
++ "                    if (!svg || !tree) return;\n"
++ "\n"
++ "                    // Size SVG to match tree\n"
++ "                    svg.style.width = tree.scrollWidth + 'px';\n"
++ "                    svg.style.height = tree.scrollHeight + 'px';\n"
++ "\n"
++ "                    // Remove old paths\n"
++ "                    svg.querySelectorAll('.df-path').forEach(function(p) { p.remove(); });\n"
++ "\n"
++ "                    var treeRect = tree.getBoundingClientRect();\n"
++ "\n"
++ "                    // Build producer map: outputKey -> [node, ...]\n"
++ "                    var prodMap = {};\n"
++ "                    tree.querySelectorAll('.node-card[data-output-key]').forEach(function(n) {\n"
++ "                        var k = n.getAttribute('data-output-key');\n"
++ "                        if (!prodMap[k]) prodMap[k] = [];\n"
++ "                        prodMap[k].push(n);\n"
++ "                    });\n"
++ "\n"
++ "                    // For each consumer node, draw edges from matching producers\n"
++ "                    tree.querySelectorAll('.node-card[data-input-keys]').forEach(function(consumer) {\n"
++ "                        var keys = consumer.getAttribute('data-input-keys').split(',');\n"
++ "                        var cRect = consumer.getBoundingClientRect();\n"
++ "                        var cx = cRect.left + cRect.width / 2 - treeRect.left;\n"
++ "                        var cy = cRect.top - treeRect.top;\n"
++ "\n"
++ "                        keys.forEach(function(key) {\n"
++ "                            var producers = prodMap[key];\n"
++ "                            if (!producers) return;\n"
++ "                            producers.forEach(function(producer) {\n"
++ "                                if (producer === consumer) return;\n"
++ "                                // Skip if producer is an ancestor or descendant (structural edge)\n"
++ "                                if (producer.contains(consumer) || consumer.contains(producer)) return;\n"
++ "\n"
++ "                                var color = producer.getAttribute('data-output-color') || '#999';\n"
++ "                                var pRect = producer.getBoundingClientRect();\n"
++ "                                var px = pRect.left + pRect.width / 2 - treeRect.left;\n"
++ "                                var py = pRect.bottom - treeRect.top;\n"
++ "\n"
++ "                                var markerId = 'ah-' + Math.abs(hashCode(key));\n"
++ "                                drawEdge(svg, px, py, cx, cy, color, markerId);\n"
++ "                            });\n"
++ "                        });\n"
++ "                    });\n"
++ "                }\n"
++ "\n"
++ "                function drawEdge(svg, x1, y1, x2, y2, color, markerId) {\n"
++ "                    var dx = x2 - x1;\n"
++ "                    var dy = y2 - y1;\n"
++ "                    var dist = Math.sqrt(dx*dx + dy*dy);\n"
++ "                    // Control point offset perpendicular to the line\n"
++ "                    var bend = Math.min(60, dist * 0.3);\n"
++ "                    // Offset to the right of the direction vector\n"
++ "                    var nx = -dy / (dist || 1) * bend;\n"
++ "                    var ny =  dx / (dist || 1) * bend;\n"
++ "                    var cpx = (x1 + x2) / 2 + nx;\n"
++ "                    var cpy = (y1 + y2) / 2 + ny;\n"
++ "\n"
++ "                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');\n"
++ "                    path.setAttribute('d', 'M' + x1 + ',' + y1 + ' Q' + cpx + ',' + cpy + ' ' + x2 + ',' + y2);\n"
++ "                    path.setAttribute('stroke', color);\n"
++ "                    path.setAttribute('stroke-width', '1.8');\n"
++ "                    path.setAttribute('stroke-dasharray', '6,4');\n"
++ "                    path.setAttribute('fill', 'none');\n"
++ "                    path.setAttribute('opacity', '0.55');\n"
++ "                    path.setAttribute('class', 'df-path');\n"
++ "                    path.setAttribute('marker-end', 'url(#' + markerId + ')');\n"
++ "                    svg.appendChild(path);\n"
++ "                }\n"
++ "\n"
++ "                function hashCode(s) {\n"
++ "                    var h = 0;\n"
++ "                    for (var i = 0; i < s.length; i++) {\n"
++ "                        h = ((h << 5) - h) + s.charCodeAt(i);\n"
++ "                        h |= 0;\n"
++ "                    }\n"
++ "                    return h;\n"
++ "                }\n"
++ "\n"
++ "                document.addEventListener('DOMContentLoaded', drawDataFlow);\n"
++ "                window.addEventListener('resize', drawDataFlow);\n"
++ "                </script>\n"
++ "                ");
     }
 
     // -----------------------------------------------------------------------
@@ -1010,250 +1009,249 @@ public class HtmlReportGenerator {
     // CSS (embedded)
     // -----------------------------------------------------------------------
 
-    private static final String CSS = """
-            :root {
-                --green: #2e8555;
-                --green-dk: #205d3b;
-                --green-lt: #3cad6e;
-                --teal: #25c2a0;
-                --c-ai: #2e8555;
-                --c-nonai: #6b7280;
-                --c-human: #d97706;
-                --c-seq: #0891b2;
-                --c-par: #3b82f6;
-                --c-loop: #7c3aed;
-                --c-rtr: #dc2626;
-                --c-star: #ca8a04;
-                --c-tool: #e74694;
-                --bg: #f8faf9;
-                --bg2: #f0f4f2;
-                --fg: #1a1a2e;
-                --fg2: #4a5568;
-                --fg3: #718096;
-                --brd: #e2e8f0;
-                --conn: #cbd5e1;
-                --rad: 8px;
-            }
-            * { margin:0; padding:0; box-sizing:border-box; }
-            body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-                   background:var(--bg); color:var(--fg); line-height:1.6; }
-
-            /* ---- Navbar ---- */
-            .navbar { background:linear-gradient(135deg,var(--green-dk),var(--green));
-                      color:#fff; padding:14px 32px; display:flex; align-items:center; gap:14px;
-                      box-shadow:0 2px 8px rgba(0,0,0,.15); position:sticky; top:0; z-index:100; }
-            .navbar-logo { display:flex; align-items:center; justify-content:center; }
-            .navbar-title { font-size:20px; font-weight:600; letter-spacing:-.3px; }
-            .navbar-subtitle { font-size:13px; opacity:.75; margin-left:auto; }
-
-            /* ---- Container ---- */
-            .container { width:100%; margin:0 auto; padding:32px; }
-
-            /* ---- Section ---- */
-            .section { margin-bottom:40px; }
-            .section-header { display:flex; align-items:center; gap:12px; margin-bottom:16px;
-                              padding-bottom:10px; border-bottom:2px solid var(--green); }
-            .section-icon { width:30px; height:30px; background:var(--green); border-radius:var(--rad);
-                            display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-            .section-title { font-size:21px; font-weight:600; }
-            .section-count { font-size:12px; color:var(--fg3); background:var(--bg2);
-                             padding:2px 10px; border-radius:12px; }
-
-            /* ---- Legend ---- */
-            .legend { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:18px;
-                      padding:10px 16px; background:#fff; border:1px solid var(--brd); border-radius:var(--rad); }
-            .legend-item { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--fg2); }
-            .legend-dot { width:12px; height:12px; border-radius:3px; }
-
-            /* ---- Org tree (top-down CSS connector chart) ---- */
-            .topology-scroll { overflow-x:auto; padding:16px 0; }
-            .org-tree { text-align:center; }
-            .org-tree ul { display:flex; justify-content:center; padding-top:24px;
-                           position:relative; list-style:none; }
-            .org-tree > ul { padding-top:0; }
-            .org-tree li { display:flex; flex-direction:column; align-items:center;
-                           position:relative; padding:24px 10px 0; }
-            .org-tree > ul > li { padding-top:0; }
-
-            /* vertical line from parent ul down to horizontal bar */
-            .org-tree ul::before { content:''; position:absolute; top:0; left:50%;
-                                   border-left:2px solid var(--conn); height:24px; }
-            .org-tree > ul::before { display:none; }
-
-            /* horizontal bar + vertical drop per child */
-            .org-tree li::before, .org-tree li::after {
-                content:''; position:absolute; top:0; width:50%; height:24px;
-                border-top:2px solid var(--conn); }
-            .org-tree li::before { right:50%; }
-            .org-tree li::after  { left:50%; border-left:2px solid var(--conn); }
-            .org-tree > ul > li::before, .org-tree > ul > li::after { display:none; }
-            .org-tree li:first-child::before { border-top:none; }
-            .org-tree li:last-child::after   { border-top:none; }
-            .org-tree li:only-child::before  { display:none; }
-            .org-tree li:only-child::after   { border-top:none; }
-
-            /* ---- Node card ---- */
-            .node-card { position:relative; background:#fff; border:1px solid var(--brd);
-                         border-radius:var(--rad); padding:10px 14px; min-width:140px; max-width:260px;
-                         box-shadow:0 1px 3px rgba(0,0,0,.06); transition:box-shadow .2s,transform .2s; text-align:left; }
-            .node-card:hover { box-shadow:0 4px 14px rgba(0,0,0,.1); transform:translateY(-2px); }
-            .node-card-header { display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap; }
-            .agent-name { font-size:14px; font-weight:600; }
-
-            .topology-badge { display:inline-block; padding:1px 7px; border-radius:4px;
-                              font-size:10px; font-weight:700; text-transform:uppercase;
-                              letter-spacing:.4px; color:#fff; }
-            .topology-badge.sm { font-size:9px; padding:0 5px; }
-            .topology-badge.ai    { background:var(--c-ai); }
-            .topology-badge.nonai { background:var(--c-nonai); }
-            .topology-badge.human { background:var(--c-human); }
-            .topology-badge.seq   { background:var(--c-seq); }
-            .topology-badge.par   { background:var(--c-par); }
-            .topology-badge.loop  { background:var(--c-loop); }
-            .topology-badge.rtr   { background:var(--c-rtr); }
-            .topology-badge.star  { background:var(--c-star); }
-            .topology-badge.tool  { background:var(--c-tool); }
-
-            .node-border-ai    { border-left:3px solid var(--c-ai); }
-            .node-border-nonai { border-left:3px solid var(--c-nonai); }
-            .node-border-human { border-left:3px solid var(--c-human); }
-            .node-border-seq   { border-left:3px solid var(--c-seq); }
-            .node-border-par   { border-left:3px solid var(--c-par); }
-            .node-border-loop  { border-left:3px solid var(--c-loop); }
-            .node-border-rtr   { border-left:3px solid var(--c-rtr); }
-            .node-border-star  { border-left:3px solid var(--c-star); }
-
-            .async-badge { font-size:9px; background:#fef3c7; color:#92400e; padding:0 5px;
-                           border-radius:3px; border:1px solid #fcd34d; }
-
-            .node-details { font-size:11px; }
-            .node-detail { display:flex; gap:4px; margin-top:1px; }
-            .nd-label { color:var(--fg3); font-weight:500; }
-            .nd-value { color:var(--fg2); }
-
-            .condition-label { font-size:9px; background:#fef3c7; color:#92400e;
-                               padding:1px 8px; border-radius:3px; border:1px solid #fcd34d;
-                               margin-bottom:4px; white-space:nowrap; }
-
-            .loop-info { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
-            .loop-tag { font-size:10px; background:#ede9fe; color:#5b21b6;
-                        padding:0 6px; border-radius:3px; border:1px solid #c4b5fd; }
-
-            /* ---- Data-flow key badges ---- */
-            .key-flow { display:flex; flex-wrap:wrap; gap:3px; margin-top:5px;
-                        padding-top:5px; border-top:1px dashed var(--brd); }
-            .key-pill { font-size:9px; font-weight:600; padding:0 6px; border-radius:3px;
-                        border:1px solid var(--kc);
-                        background:#fff; color:var(--kc); white-space:nowrap;
-                        opacity:.85; }
-
-            /* ---- Tool toggle ---- */
-            .tool-toggle { font-size:11px; padding:3px 12px; border-radius:4px;
-                           border:1px solid var(--brd); background:var(--bg2); color:var(--fg2);
-                           cursor:pointer; transition:background .15s; margin-left:auto; }
-            .tool-toggle:hover { background:var(--brd); }
-            .tool-row.tool-hidden { display:none; }
-            .row-toggle { cursor:pointer; font-size:10px; margin-right:4px; display:inline-block;
-                          transition:transform .2s; color:var(--fg3); user-select:none; }
-            .row-toggle.collapsed { transform:rotate(-90deg); }
-            .row-hidden { display:none; }
-
-            /* ---- Data-flow SVG overlay ---- */
-            .df-svg { position:absolute; top:0; left:0; pointer-events:none; z-index:2; overflow:visible; }
-            .df-svg.df-hidden { display:none; }
-
-            /* ---- Data-flow legend ---- */
-            .df-legend { align-items:center; }
-            .df-legend-title { font-size:12px; font-weight:600; color:var(--fg); margin-right:4px; }
-            .df-toggle { margin-left:auto; font-size:11px; padding:3px 12px; border-radius:4px;
-                         border:1px solid var(--brd); background:var(--bg2); color:var(--fg2);
-                         cursor:pointer; transition:background .15s; }
-            .df-toggle:hover { background:var(--brd); }
-
-            /* ---- Execution groups ---- */
-            .execution-group { margin-bottom:12px; }
-            .execution-header { display:flex; align-items:center; gap:10px; padding:10px 16px;
-                                background:#fff; border:1px solid var(--brd);
-                                border-radius:var(--rad) var(--rad) 0 0;
-                                cursor:pointer; user-select:none; transition:background .15s; }
-            .execution-header:hover { background:var(--bg2); }
-            .execution-header.collapsed { border-radius:var(--rad); }
-            .chevron { transition:transform .2s; color:var(--fg3); font-size:11px; }
-            .execution-header.collapsed .chevron { transform:rotate(-90deg); }
-            .execution-memory-id { font-weight:600; font-size:14px; }
-            .execution-meta { margin-left:auto; display:flex; gap:8px; align-items:center; }
-
-            .status-badge { padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; }
-            .st-ok   { background:#d1fae5; color:#065f46; }
-            .st-fail { background:#fee2e2; color:#991b1b; }
-            .st-run  { background:#dbeafe; color:#1e40af; }
-
-            .execution-body { border:1px solid var(--brd); border-top:none;
-                              border-radius:0 0 var(--rad) var(--rad); background:#fff; overflow:hidden; }
-            .execution-body.collapsed { display:none; }
-
-            /* ---- Single execution ---- */
-            .single-exec { padding:12px 16px; border-bottom:1px solid var(--brd); }
-            .single-exec:last-child { border-bottom:none; }
-            .exec-summary { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
-            .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-            .st-dot-ok   { background:#10b981; }
-            .st-dot-fail { background:#ef4444; }
-            .st-dot-run  { background:#3b82f6; animation:pulse 1.5s infinite; }
-            @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-            .exec-agent { font-weight:600; font-size:14px; }
-            .dur-badge { font-size:12px; color:var(--fg3); font-family:'SF Mono','Fira Code',monospace; }
-            .exec-time { font-size:11px; color:var(--fg3); }
-
-            .error-box { background:#fef2f2; border:1px solid #fecaca; border-radius:var(--rad);
-                         padding:8px 12px; margin-bottom:8px; font-size:12px; color:#991b1b; }
-            .error-box code { font-size:11px; word-break:break-all; }
-
-            /* ---- Waterfall table ---- */
-            .wf-table { width:100%; border-collapse:collapse; font-size:13px; }
-            .wf-table th { text-align:left; padding:6px 10px; background:var(--bg2); color:var(--fg3);
-                           font-size:10px; font-weight:600; text-transform:uppercase;
-                           letter-spacing:.5px; border-bottom:1px solid var(--brd); }
-            .wf-table td { padding:5px 10px; border-bottom:1px solid var(--brd); vertical-align:middle; }
-            .wf-table tr:last-child td { border-bottom:none; }
-            .wf-table tr:hover { background:var(--bg); }
-            .wf-timeline-col { width:35%; }
-
-            .wf-agent { display:flex; align-items:center; gap:4px; white-space:nowrap; }
-            .wf-indent { display:inline-block; width:18px; }
-            .wf-connector { color:var(--conn); font-family:monospace; margin-right:2px; font-size:12px; }
-            .wf-dur { font-family:'SF Mono','Fira Code',monospace; font-size:12px; color:var(--fg2); white-space:nowrap; }
-
-            .wf-bar-track { position:relative; height:18px; background:var(--bg2); border-radius:3px; min-width:120px; }
-            .wf-bar { position:absolute; top:2px; height:14px; border-radius:3px; opacity:.8; min-width:2px;
-                      transition:opacity .15s; }
-            .wf-bar:hover { opacity:1; }
-            .bar-ai    { background:var(--c-ai); }
-            .bar-nonai { background:var(--c-nonai); }
-            .bar-human { background:var(--c-human); }
-            .bar-seq   { background:var(--c-seq); }
-            .bar-par   { background:var(--c-par); }
-            .bar-loop  { background:var(--c-loop); }
-            .bar-rtr   { background:var(--c-rtr); }
-            .bar-star  { background:var(--c-star); }
-            .bar-tool  { background:var(--c-tool); }
-
-            .wf-io { font-size:11px; color:var(--fg3); white-space:nowrap; }
-
-            .iter-tag { font-size:9px; background:#ede9fe; color:#5b21b6;
-                        padding:0 5px; border-radius:3px; border:1px solid #c4b5fd;
-                        font-weight:600; white-space:nowrap; }
-
-            /* ---- Tooltip ---- */
-            .tt-trigger { position:relative; cursor:help; }
-            .tt-trigger .tt-content { display:none; position:absolute; bottom:calc(100% + 4px); left:0;
-                                      background:var(--fg); color:#fff; padding:6px 10px; border-radius:6px;
-                                      font-size:11px; white-space:pre-wrap; max-width:400px; z-index:10;
-                                      box-shadow:0 4px 12px rgba(0,0,0,.2); word-break:break-all; }
-            .tt-trigger:hover .tt-content { display:block; }
-
-            /* ---- Footer ---- */
-            .footer { text-align:center; padding:24px 0 8px; font-size:12px; color:var(--fg3);
-                      border-top:1px solid var(--brd); margin-top:20px; }
-            """;
+    private static final String CSS = "            :root {\n"
++ "                --green: #2e8555;\n"
++ "                --green-dk: #205d3b;\n"
++ "                --green-lt: #3cad6e;\n"
++ "                --teal: #25c2a0;\n"
++ "                --c-ai: #2e8555;\n"
++ "                --c-nonai: #6b7280;\n"
++ "                --c-human: #d97706;\n"
++ "                --c-seq: #0891b2;\n"
++ "                --c-par: #3b82f6;\n"
++ "                --c-loop: #7c3aed;\n"
++ "                --c-rtr: #dc2626;\n"
++ "                --c-star: #ca8a04;\n"
++ "                --c-tool: #e74694;\n"
++ "                --bg: #f8faf9;\n"
++ "                --bg2: #f0f4f2;\n"
++ "                --fg: #1a1a2e;\n"
++ "                --fg2: #4a5568;\n"
++ "                --fg3: #718096;\n"
++ "                --brd: #e2e8f0;\n"
++ "                --conn: #cbd5e1;\n"
++ "                --rad: 8px;\n"
++ "            }\n"
++ "            * { margin:0; padding:0; box-sizing:border-box; }\n"
++ "            body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;\n"
++ "                   background:var(--bg); color:var(--fg); line-height:1.6; }\n"
++ "\n"
++ "            /* ---- Navbar ---- */\n"
++ "            .navbar { background:linear-gradient(135deg,var(--green-dk),var(--green));\n"
++ "                      color:#fff; padding:14px 32px; display:flex; align-items:center; gap:14px;\n"
++ "                      box-shadow:0 2px 8px rgba(0,0,0,.15); position:sticky; top:0; z-index:100; }\n"
++ "            .navbar-logo { display:flex; align-items:center; justify-content:center; }\n"
++ "            .navbar-title { font-size:20px; font-weight:600; letter-spacing:-.3px; }\n"
++ "            .navbar-subtitle { font-size:13px; opacity:.75; margin-left:auto; }\n"
++ "\n"
++ "            /* ---- Container ---- */\n"
++ "            .container { width:100%; margin:0 auto; padding:32px; }\n"
++ "\n"
++ "            /* ---- Section ---- */\n"
++ "            .section { margin-bottom:40px; }\n"
++ "            .section-header { display:flex; align-items:center; gap:12px; margin-bottom:16px;\n"
++ "                              padding-bottom:10px; border-bottom:2px solid var(--green); }\n"
++ "            .section-icon { width:30px; height:30px; background:var(--green); border-radius:var(--rad);\n"
++ "                            display:flex; align-items:center; justify-content:center; flex-shrink:0; }\n"
++ "            .section-title { font-size:21px; font-weight:600; }\n"
++ "            .section-count { font-size:12px; color:var(--fg3); background:var(--bg2);\n"
++ "                             padding:2px 10px; border-radius:12px; }\n"
++ "\n"
++ "            /* ---- Legend ---- */\n"
++ "            .legend { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:18px;\n"
++ "                      padding:10px 16px; background:#fff; border:1px solid var(--brd); border-radius:var(--rad); }\n"
++ "            .legend-item { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--fg2); }\n"
++ "            .legend-dot { width:12px; height:12px; border-radius:3px; }\n"
++ "\n"
++ "            /* ---- Org tree (top-down CSS connector chart) ---- */\n"
++ "            .topology-scroll { overflow-x:auto; padding:16px 0; }\n"
++ "            .org-tree { text-align:center; }\n"
++ "            .org-tree ul { display:flex; justify-content:center; padding-top:24px;\n"
++ "                           position:relative; list-style:none; }\n"
++ "            .org-tree > ul { padding-top:0; }\n"
++ "            .org-tree li { display:flex; flex-direction:column; align-items:center;\n"
++ "                           position:relative; padding:24px 10px 0; }\n"
++ "            .org-tree > ul > li { padding-top:0; }\n"
++ "\n"
++ "            /* vertical line from parent ul down to horizontal bar */\n"
++ "            .org-tree ul::before { content:''; position:absolute; top:0; left:50%;\n"
++ "                                   border-left:2px solid var(--conn); height:24px; }\n"
++ "            .org-tree > ul::before { display:none; }\n"
++ "\n"
++ "            /* horizontal bar + vertical drop per child */\n"
++ "            .org-tree li::before, .org-tree li::after {\n"
++ "                content:''; position:absolute; top:0; width:50%; height:24px;\n"
++ "                border-top:2px solid var(--conn); }\n"
++ "            .org-tree li::before { right:50%; }\n"
++ "            .org-tree li::after  { left:50%; border-left:2px solid var(--conn); }\n"
++ "            .org-tree > ul > li::before, .org-tree > ul > li::after { display:none; }\n"
++ "            .org-tree li:first-child::before { border-top:none; }\n"
++ "            .org-tree li:last-child::after   { border-top:none; }\n"
++ "            .org-tree li:only-child::before  { display:none; }\n"
++ "            .org-tree li:only-child::after   { border-top:none; }\n"
++ "\n"
++ "            /* ---- Node card ---- */\n"
++ "            .node-card { position:relative; background:#fff; border:1px solid var(--brd);\n"
++ "                         border-radius:var(--rad); padding:10px 14px; min-width:140px; max-width:260px;\n"
++ "                         box-shadow:0 1px 3px rgba(0,0,0,.06); transition:box-shadow .2s,transform .2s; text-align:left; }\n"
++ "            .node-card:hover { box-shadow:0 4px 14px rgba(0,0,0,.1); transform:translateY(-2px); }\n"
++ "            .node-card-header { display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap; }\n"
++ "            .agent-name { font-size:14px; font-weight:600; }\n"
++ "\n"
++ "            .topology-badge { display:inline-block; padding:1px 7px; border-radius:4px;\n"
++ "                              font-size:10px; font-weight:700; text-transform:uppercase;\n"
++ "                              letter-spacing:.4px; color:#fff; }\n"
++ "            .topology-badge.sm { font-size:9px; padding:0 5px; }\n"
++ "            .topology-badge.ai    { background:var(--c-ai); }\n"
++ "            .topology-badge.nonai { background:var(--c-nonai); }\n"
++ "            .topology-badge.human { background:var(--c-human); }\n"
++ "            .topology-badge.seq   { background:var(--c-seq); }\n"
++ "            .topology-badge.par   { background:var(--c-par); }\n"
++ "            .topology-badge.loop  { background:var(--c-loop); }\n"
++ "            .topology-badge.rtr   { background:var(--c-rtr); }\n"
++ "            .topology-badge.star  { background:var(--c-star); }\n"
++ "            .topology-badge.tool  { background:var(--c-tool); }\n"
++ "\n"
++ "            .node-border-ai    { border-left:3px solid var(--c-ai); }\n"
++ "            .node-border-nonai { border-left:3px solid var(--c-nonai); }\n"
++ "            .node-border-human { border-left:3px solid var(--c-human); }\n"
++ "            .node-border-seq   { border-left:3px solid var(--c-seq); }\n"
++ "            .node-border-par   { border-left:3px solid var(--c-par); }\n"
++ "            .node-border-loop  { border-left:3px solid var(--c-loop); }\n"
++ "            .node-border-rtr   { border-left:3px solid var(--c-rtr); }\n"
++ "            .node-border-star  { border-left:3px solid var(--c-star); }\n"
++ "\n"
++ "            .async-badge { font-size:9px; background:#fef3c7; color:#92400e; padding:0 5px;\n"
++ "                           border-radius:3px; border:1px solid #fcd34d; }\n"
++ "\n"
++ "            .node-details { font-size:11px; }\n"
++ "            .node-detail { display:flex; gap:4px; margin-top:1px; }\n"
++ "            .nd-label { color:var(--fg3); font-weight:500; }\n"
++ "            .nd-value { color:var(--fg2); }\n"
++ "\n"
++ "            .condition-label { font-size:9px; background:#fef3c7; color:#92400e;\n"
++ "                               padding:1px 8px; border-radius:3px; border:1px solid #fcd34d;\n"
++ "                               margin-bottom:4px; white-space:nowrap; }\n"
++ "\n"
++ "            .loop-info { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }\n"
++ "            .loop-tag { font-size:10px; background:#ede9fe; color:#5b21b6;\n"
++ "                        padding:0 6px; border-radius:3px; border:1px solid #c4b5fd; }\n"
++ "\n"
++ "            /* ---- Data-flow key badges ---- */\n"
++ "            .key-flow { display:flex; flex-wrap:wrap; gap:3px; margin-top:5px;\n"
++ "                        padding-top:5px; border-top:1px dashed var(--brd); }\n"
++ "            .key-pill { font-size:9px; font-weight:600; padding:0 6px; border-radius:3px;\n"
++ "                        border:1px solid var(--kc);\n"
++ "                        background:#fff; color:var(--kc); white-space:nowrap;\n"
++ "                        opacity:.85; }\n"
++ "\n"
++ "            /* ---- Tool toggle ---- */\n"
++ "            .tool-toggle { font-size:11px; padding:3px 12px; border-radius:4px;\n"
++ "                           border:1px solid var(--brd); background:var(--bg2); color:var(--fg2);\n"
++ "                           cursor:pointer; transition:background .15s; margin-left:auto; }\n"
++ "            .tool-toggle:hover { background:var(--brd); }\n"
++ "            .tool-row.tool-hidden { display:none; }\n"
++ "            .row-toggle { cursor:pointer; font-size:10px; margin-right:4px; display:inline-block;\n"
++ "                          transition:transform .2s; color:var(--fg3); user-select:none; }\n"
++ "            .row-toggle.collapsed { transform:rotate(-90deg); }\n"
++ "            .row-hidden { display:none; }\n"
++ "\n"
++ "            /* ---- Data-flow SVG overlay ---- */\n"
++ "            .df-svg { position:absolute; top:0; left:0; pointer-events:none; z-index:2; overflow:visible; }\n"
++ "            .df-svg.df-hidden { display:none; }\n"
++ "\n"
++ "            /* ---- Data-flow legend ---- */\n"
++ "            .df-legend { align-items:center; }\n"
++ "            .df-legend-title { font-size:12px; font-weight:600; color:var(--fg); margin-right:4px; }\n"
++ "            .df-toggle { margin-left:auto; font-size:11px; padding:3px 12px; border-radius:4px;\n"
++ "                         border:1px solid var(--brd); background:var(--bg2); color:var(--fg2);\n"
++ "                         cursor:pointer; transition:background .15s; }\n"
++ "            .df-toggle:hover { background:var(--brd); }\n"
++ "\n"
++ "            /* ---- Execution groups ---- */\n"
++ "            .execution-group { margin-bottom:12px; }\n"
++ "            .execution-header { display:flex; align-items:center; gap:10px; padding:10px 16px;\n"
++ "                                background:#fff; border:1px solid var(--brd);\n"
++ "                                border-radius:var(--rad) var(--rad) 0 0;\n"
++ "                                cursor:pointer; user-select:none; transition:background .15s; }\n"
++ "            .execution-header:hover { background:var(--bg2); }\n"
++ "            .execution-header.collapsed { border-radius:var(--rad); }\n"
++ "            .chevron { transition:transform .2s; color:var(--fg3); font-size:11px; }\n"
++ "            .execution-header.collapsed .chevron { transform:rotate(-90deg); }\n"
++ "            .execution-memory-id { font-weight:600; font-size:14px; }\n"
++ "            .execution-meta { margin-left:auto; display:flex; gap:8px; align-items:center; }\n"
++ "\n"
++ "            .status-badge { padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; }\n"
++ "            .st-ok   { background:#d1fae5; color:#065f46; }\n"
++ "            .st-fail { background:#fee2e2; color:#991b1b; }\n"
++ "            .st-run  { background:#dbeafe; color:#1e40af; }\n"
++ "\n"
++ "            .execution-body { border:1px solid var(--brd); border-top:none;\n"
++ "                              border-radius:0 0 var(--rad) var(--rad); background:#fff; overflow:hidden; }\n"
++ "            .execution-body.collapsed { display:none; }\n"
++ "\n"
++ "            /* ---- Single execution ---- */\n"
++ "            .single-exec { padding:12px 16px; border-bottom:1px solid var(--brd); }\n"
++ "            .single-exec:last-child { border-bottom:none; }\n"
++ "            .exec-summary { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }\n"
++ "            .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }\n"
++ "            .st-dot-ok   { background:#10b981; }\n"
++ "            .st-dot-fail { background:#ef4444; }\n"
++ "            .st-dot-run  { background:#3b82f6; animation:pulse 1.5s infinite; }\n"
++ "            @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }\n"
++ "            .exec-agent { font-weight:600; font-size:14px; }\n"
++ "            .dur-badge { font-size:12px; color:var(--fg3); font-family:'SF Mono','Fira Code',monospace; }\n"
++ "            .exec-time { font-size:11px; color:var(--fg3); }\n"
++ "\n"
++ "            .error-box { background:#fef2f2; border:1px solid #fecaca; border-radius:var(--rad);\n"
++ "                         padding:8px 12px; margin-bottom:8px; font-size:12px; color:#991b1b; }\n"
++ "            .error-box code { font-size:11px; word-break:break-all; }\n"
++ "\n"
++ "            /* ---- Waterfall table ---- */\n"
++ "            .wf-table { width:100%; border-collapse:collapse; font-size:13px; }\n"
++ "            .wf-table th { text-align:left; padding:6px 10px; background:var(--bg2); color:var(--fg3);\n"
++ "                           font-size:10px; font-weight:600; text-transform:uppercase;\n"
++ "                           letter-spacing:.5px; border-bottom:1px solid var(--brd); }\n"
++ "            .wf-table td { padding:5px 10px; border-bottom:1px solid var(--brd); vertical-align:middle; }\n"
++ "            .wf-table tr:last-child td { border-bottom:none; }\n"
++ "            .wf-table tr:hover { background:var(--bg); }\n"
++ "            .wf-timeline-col { width:35%; }\n"
++ "\n"
++ "            .wf-agent { display:flex; align-items:center; gap:4px; white-space:nowrap; }\n"
++ "            .wf-indent { display:inline-block; width:18px; }\n"
++ "            .wf-connector { color:var(--conn); font-family:monospace; margin-right:2px; font-size:12px; }\n"
++ "            .wf-dur { font-family:'SF Mono','Fira Code',monospace; font-size:12px; color:var(--fg2); white-space:nowrap; }\n"
++ "\n"
++ "            .wf-bar-track { position:relative; height:18px; background:var(--bg2); border-radius:3px; min-width:120px; }\n"
++ "            .wf-bar { position:absolute; top:2px; height:14px; border-radius:3px; opacity:.8; min-width:2px;\n"
++ "                      transition:opacity .15s; }\n"
++ "            .wf-bar:hover { opacity:1; }\n"
++ "            .bar-ai    { background:var(--c-ai); }\n"
++ "            .bar-nonai { background:var(--c-nonai); }\n"
++ "            .bar-human { background:var(--c-human); }\n"
++ "            .bar-seq   { background:var(--c-seq); }\n"
++ "            .bar-par   { background:var(--c-par); }\n"
++ "            .bar-loop  { background:var(--c-loop); }\n"
++ "            .bar-rtr   { background:var(--c-rtr); }\n"
++ "            .bar-star  { background:var(--c-star); }\n"
++ "            .bar-tool  { background:var(--c-tool); }\n"
++ "\n"
++ "            .wf-io { font-size:11px; color:var(--fg3); white-space:nowrap; }\n"
++ "\n"
++ "            .iter-tag { font-size:9px; background:#ede9fe; color:#5b21b6;\n"
++ "                        padding:0 5px; border-radius:3px; border:1px solid #c4b5fd;\n"
++ "                        font-weight:600; white-space:nowrap; }\n"
++ "\n"
++ "            /* ---- Tooltip ---- */\n"
++ "            .tt-trigger { position:relative; cursor:help; }\n"
++ "            .tt-trigger .tt-content { display:none; position:absolute; bottom:calc(100% + 4px); left:0;\n"
++ "                                      background:var(--fg); color:#fff; padding:6px 10px; border-radius:6px;\n"
++ "                                      font-size:11px; white-space:pre-wrap; max-width:400px; z-index:10;\n"
++ "                                      box-shadow:0 4px 12px rgba(0,0,0,.2); word-break:break-all; }\n"
++ "            .tt-trigger:hover .tt-content { display:block; }\n"
++ "\n"
++ "            /* ---- Footer ---- */\n"
++ "            .footer { text-align:center; padding:24px 0 8px; font-size:12px; color:var(--fg3);\n"
++ "                      border-top:1px solid var(--brd); margin-top:20px; }\n"
++ "            ";
 }

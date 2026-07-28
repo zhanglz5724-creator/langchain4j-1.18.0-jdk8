@@ -83,20 +83,20 @@ import software.amazon.awssdk.services.bedrockruntime.model.DocumentSource;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailConfiguration;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailStreamConfiguration;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailStreamProcessingMode;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentFilter;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentPolicy;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentFilter;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContentPolicyAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContextualGroundingFilter;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContextualGroundingPolicy;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailContextualGroundingPolicyAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailCustomWord;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailManagedWordList;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailPiiEntity;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailRegex;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailSensitiveInformationPolicy;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailManagedWord;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailPiiEntityFilter;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailRegexFilter;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailSensitiveInformationPolicyAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailTopic;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailTopicPolicy;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailTopicPolicyAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.GuardrailTrace;
-import software.amazon.awssdk.services.bedrockruntime.model.GuardrailWordPolicy;
+import software.amazon.awssdk.services.bedrockruntime.model.GuardrailWordPolicyAssessment;
 import software.amazon.awssdk.services.bedrockruntime.model.ImageBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.ImageSource;
 import software.amazon.awssdk.services.bedrockruntime.model.InferenceConfiguration;
@@ -177,10 +177,12 @@ abstract class AbstractBedrockChatModel {
             commonParameters = DefaultChatRequestParameters.EMPTY;
         }
 
-        BedrockChatRequestParameters bedrockParameters =
-                builder.defaultRequestParameters instanceof BedrockChatRequestParameters
-                        ? (BedrockChatRequestParameters) builder.defaultRequestParameters
-                        : BedrockChatRequestParameters.EMPTY;
+        BedrockChatRequestParameters bedrockParameters;
+        if (builder.defaultRequestParameters instanceof BedrockChatRequestParameters) {
+            bedrockParameters = (BedrockChatRequestParameters) builder.defaultRequestParameters;
+        } else {
+            bedrockParameters = BedrockChatRequestParameters.EMPTY;
+        }
 
         this.defaultRequestParameters = BedrockChatRequestParameters.builder()
                 // common parameters
@@ -224,7 +226,6 @@ abstract class AbstractBedrockChatModel {
             // CRITICAL: Use instanceof, NOT type() check to avoid ClassCastException
             if (message instanceof BedrockSystemMessage) {
                 BedrockSystemMessage bedrockMsg = (BedrockSystemMessage) message;
-                // Handle BedrockSystemMessage with granular cache points
                 for (BedrockSystemContent content : bedrockMsg.contents()) {
                     if (content instanceof BedrockSystemTextContent) {
                         BedrockSystemTextContent textContent = (BedrockSystemTextContent) content;
@@ -641,8 +642,9 @@ abstract class AbstractBedrockChatModel {
             }
 
             if (message instanceof BedrockSystemMessage) {
+                BedrockSystemMessage bedrockMsg = (BedrockSystemMessage) message;
                 // Count granular cache points within BedrockSystemMessage
-                count += ((BedrockSystemMessage) message).cachePointCount();
+                count += bedrockMsg.cachePointCount();
                 lastSystemIsCoreMessage = false;
                 hasAnySystemMessage = true;
             } else if (message instanceof SystemMessage) {
@@ -843,10 +845,11 @@ abstract class AbstractBedrockChatModel {
         Map<String, Object> additionalModelRequestFieldsMap =
                 new HashMap<>(this.defaultRequestParameters.additionalModelRequestFields());
 
-        if ((chatRequestParameters instanceof BedrockChatRequestParameters)
-                && (nonNull(((BedrockChatRequestParameters) chatRequestParameters).additionalModelRequestFields()))) {
-
-            additionalModelRequestFieldsMap.putAll(((BedrockChatRequestParameters) chatRequestParameters).additionalModelRequestFields());
+        if (chatRequestParameters instanceof BedrockChatRequestParameters) {
+            BedrockChatRequestParameters bedrockChatRequestParameters = (BedrockChatRequestParameters) chatRequestParameters;
+            if (nonNull(bedrockChatRequestParameters.additionalModelRequestFields())) {
+                additionalModelRequestFieldsMap.putAll(bedrockChatRequestParameters.additionalModelRequestFields());
+            }
         }
         if (isNullOrEmpty(additionalModelRequestFieldsMap)) {
             return null;
@@ -866,10 +869,10 @@ abstract class AbstractBedrockChatModel {
         if (trace.guardrail().hasInputAssessment()) {
             List<GuardrailAssessment> inputAssessments = new ArrayList<>();
 
-            for (GuardrailAssessment assessment : trace.guardrail().inputAssessment().values()) {
+            for (software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment assessment : trace.guardrail().inputAssessment().values()) {
 
                 // --- Topic Policy ---
-                GuardrailTopicPolicy topicPolicy = assessment.topicPolicy();
+                GuardrailTopicPolicyAssessment topicPolicy = assessment.topicPolicy();
                 if (topicPolicy != null && topicPolicy.topics() != null) {
                     for (GuardrailTopic policy : topicPolicy.topics()) {
                         inputAssessments.add(InputGuardrailAssessment.builder()
@@ -881,7 +884,7 @@ abstract class AbstractBedrockChatModel {
                 }
 
                 // --- Content Policy ---
-                GuardrailContentPolicy contentPolicy = assessment.contentPolicy();
+                GuardrailContentPolicyAssessment contentPolicy = assessment.contentPolicy();
                 if (contentPolicy != null && contentPolicy.filters() != null) {
                     for (GuardrailContentFilter policy : contentPolicy.filters()) {
                         inputAssessments.add(InputGuardrailAssessment.builder()
@@ -893,7 +896,7 @@ abstract class AbstractBedrockChatModel {
                 }
 
                 // --- Word Policy ---
-                GuardrailWordPolicy wordPolicy = assessment.wordPolicy();
+                GuardrailWordPolicyAssessment wordPolicy = assessment.wordPolicy();
                 if (wordPolicy != null) {
                     if (wordPolicy.customWords() != null) {
                         for (GuardrailCustomWord policy : wordPolicy.customWords()) {
@@ -905,7 +908,7 @@ abstract class AbstractBedrockChatModel {
                         }
                     }
                     if (wordPolicy.managedWordLists() != null) {
-                        for (GuardrailManagedWordList policy : wordPolicy.managedWordLists()) {
+                        for (GuardrailManagedWord policy : wordPolicy.managedWordLists()) {
                             inputAssessments.add(InputGuardrailAssessment.builder()
                                     .policy(WORD)
                                     .name(policy.typeAsString())
@@ -916,10 +919,10 @@ abstract class AbstractBedrockChatModel {
                 }
 
                 // --- Sensitive Information Policy ---
-                GuardrailSensitiveInformationPolicy sensitivePolicy = assessment.sensitiveInformationPolicy();
+                GuardrailSensitiveInformationPolicyAssessment sensitivePolicy = assessment.sensitiveInformationPolicy();
                 if (sensitivePolicy != null) {
                     if (sensitivePolicy.piiEntities() != null) {
-                        for (GuardrailPiiEntity policy : sensitivePolicy.piiEntities()) {
+                        for (GuardrailPiiEntityFilter policy : sensitivePolicy.piiEntities()) {
                             inputAssessments.add(InputGuardrailAssessment.builder()
                                     .policy(SENSITIVE)
                                     .name(policy.typeAsString())
@@ -928,7 +931,7 @@ abstract class AbstractBedrockChatModel {
                         }
                     }
                     if (sensitivePolicy.regexes() != null) {
-                        for (GuardrailRegex policy : sensitivePolicy.regexes()) {
+                        for (GuardrailRegexFilter policy : sensitivePolicy.regexes()) {
                             inputAssessments.add(InputGuardrailAssessment.builder()
                                     .policy(SENSITIVE)
                                     .name(policy.name())
@@ -939,7 +942,7 @@ abstract class AbstractBedrockChatModel {
                 }
 
                 // --- Contextual Grounding Policy ---
-                GuardrailContextualGroundingPolicy contextualPolicy = assessment.contextualGroundingPolicy();
+                GuardrailContextualGroundingPolicyAssessment contextualPolicy = assessment.contextualGroundingPolicy();
                 if (contextualPolicy != null && contextualPolicy.filters() != null) {
                     for (GuardrailContextualGroundingFilter policy : contextualPolicy.filters()) {
                         inputAssessments.add(InputGuardrailAssessment.builder()
@@ -957,17 +960,17 @@ abstract class AbstractBedrockChatModel {
         if (trace.guardrail().hasOutputAssessments()) {
 
             List<GuardrailAssessment> outputAssessments = new ArrayList<>();
-            Map<String, List<GuardrailAssessment>> outputAssessmentValues = trace.guardrail().outputAssessments();
+            Map<String, List<software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment>> outputAssessmentValues = trace.guardrail().outputAssessments();
 
             if (outputAssessmentValues != null) {
-                for (List<GuardrailAssessment> assessments : outputAssessmentValues.values()) {
+                for (List<software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment> assessments : outputAssessmentValues.values()) {
                     if (assessments == null) continue;
 
-                    for (GuardrailAssessment assessment : assessments) {
+                    for (software.amazon.awssdk.services.bedrockruntime.model.GuardrailAssessment assessment : assessments) {
                         if (assessment == null) continue;
 
                         // --- Topic Policy ---
-                        GuardrailTopicPolicy topicPolicy = assessment.topicPolicy();
+                        GuardrailTopicPolicyAssessment topicPolicy = assessment.topicPolicy();
                         if (topicPolicy != null && topicPolicy.topics() != null) {
                             for (GuardrailTopic policy : topicPolicy.topics()) {
                                 outputAssessments.add(OutputGuardrailAssessment.builder()
@@ -979,7 +982,7 @@ abstract class AbstractBedrockChatModel {
                         }
 
                         // --- Content Policy ---
-                        GuardrailContentPolicy contentPolicy = assessment.contentPolicy();
+                        GuardrailContentPolicyAssessment contentPolicy = assessment.contentPolicy();
                         if (contentPolicy != null && contentPolicy.filters() != null) {
                             for (GuardrailContentFilter policy : contentPolicy.filters()) {
                                 outputAssessments.add(OutputGuardrailAssessment.builder()
@@ -991,7 +994,7 @@ abstract class AbstractBedrockChatModel {
                         }
 
                         // --- Word Policy ---
-                        GuardrailWordPolicy wordPolicy = assessment.wordPolicy();
+                        GuardrailWordPolicyAssessment wordPolicy = assessment.wordPolicy();
                         if (wordPolicy != null) {
                             if (wordPolicy.customWords() != null) {
                                 for (GuardrailCustomWord policy : wordPolicy.customWords()) {
@@ -1003,7 +1006,7 @@ abstract class AbstractBedrockChatModel {
                                 }
                             }
                             if (wordPolicy.managedWordLists() != null) {
-                                for (GuardrailManagedWordList policy : wordPolicy.managedWordLists()) {
+                                for (GuardrailManagedWord policy : wordPolicy.managedWordLists()) {
                                     outputAssessments.add(OutputGuardrailAssessment.builder()
                                             .policy(WORD)
                                             .name(policy.typeAsString())
@@ -1014,10 +1017,10 @@ abstract class AbstractBedrockChatModel {
                         }
 
                         // --- Sensitive Information Policy ---
-                        GuardrailSensitiveInformationPolicy sensitivePolicy = assessment.sensitiveInformationPolicy();
+                        GuardrailSensitiveInformationPolicyAssessment sensitivePolicy = assessment.sensitiveInformationPolicy();
                         if (sensitivePolicy != null) {
                             if (sensitivePolicy.piiEntities() != null) {
-                                for (GuardrailPiiEntity policy : sensitivePolicy.piiEntities()) {
+                                for (GuardrailPiiEntityFilter policy : sensitivePolicy.piiEntities()) {
                                     outputAssessments.add(OutputGuardrailAssessment.builder()
                                             .policy(SENSITIVE)
                                             .name(policy.typeAsString())
@@ -1026,7 +1029,7 @@ abstract class AbstractBedrockChatModel {
                                 }
                             }
                             if (sensitivePolicy.regexes() != null) {
-                                for (GuardrailRegex policy : sensitivePolicy.regexes()) {
+                                for (GuardrailRegexFilter policy : sensitivePolicy.regexes()) {
                                     outputAssessments.add(OutputGuardrailAssessment.builder()
                                             .policy(SENSITIVE)
                                             .name(policy.name())
@@ -1037,7 +1040,7 @@ abstract class AbstractBedrockChatModel {
                         }
 
                         // --- Contextual Grounding Policy ---
-                        GuardrailContextualGroundingPolicy contextualPolicy = assessment.contextualGroundingPolicy();
+                        GuardrailContextualGroundingPolicyAssessment contextualPolicy = assessment.contextualGroundingPolicy();
                         if (contextualPolicy != null && contextualPolicy.filters() != null) {
                             for (GuardrailContextualGroundingFilter policy : contextualPolicy.filters()) {
                                 outputAssessments.add(OutputGuardrailAssessment.builder()

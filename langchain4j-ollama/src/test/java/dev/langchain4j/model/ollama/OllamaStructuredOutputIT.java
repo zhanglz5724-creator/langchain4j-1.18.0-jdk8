@@ -186,12 +186,11 @@ class OllamaStructuredOutputIT extends AbstractOllamaStructuredOutputLanguageMod
 
         // when
         String prompt =
-                """
-                Tell me a joke.
-                Return ONLY a JSON object with fields "setup" and "punchline".
-                Do not use Markdown formatting.
-                Example: {"setup": "...", "punchline": "..."}
-                """;
+                "                Tell me a joke.\n"
++ "                Return ONLY a JSON object with fields \"setup\" and \"punchline\".\n"
++ "                Do not use Markdown formatting.\n"
++ "                Example: {\"setup\": \"...\", \"punchline\": \"...\"}\n"
++ "                ";
         String response = assertDoesNotThrow(
                 () -> model.chat(prompt),
                 "Model should accept explicitly built JSON (without schema) response format.");
@@ -202,9 +201,8 @@ class OllamaStructuredOutputIT extends AbstractOllamaStructuredOutputLanguageMod
             responseJson = new ObjectMapper().readTree(response);
         } catch (JsonProcessingException e) {
             fail(
-                    """
-                    Model response was expected to be a valid JSON but was not.
-                    Response content:"""
+                    "                    Model response was expected to be a valid JSON but was not.\n"
++ "                    Response content:"
                             + response,
                     e);
             return;
@@ -231,12 +229,10 @@ class OllamaStructuredOutputIT extends AbstractOllamaStructuredOutputLanguageMod
 
         String secretCode = "8842";
         String prompt =
-                """
-            Read this sentence: "The system override code is %s."
-            Extract the 4-digit code.
-            Return ONLY the code.
-            """
-                        .formatted(secretCode);
+                String.format("            Read this sentence: \"The system override code is %s.\"\n"
++ "            Extract the 4-digit code.\n"
++ "            Return ONLY the code.\n"
++ "            ", secretCode);
 
         // when
         String response = assertDoesNotThrow(

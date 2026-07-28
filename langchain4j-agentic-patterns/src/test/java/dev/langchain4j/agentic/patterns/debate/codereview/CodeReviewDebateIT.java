@@ -17,28 +17,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 public class CodeReviewDebateIT {
 
-    private static final String CONTROVERSIAL_CODE = """
-            public class UserService {
-
-                private Map<String, String> cache = new HashMap<>();
-
-                public String getUserRole(HttpServletRequest request) {
-                    String userId = request.getParameter("userId");
-                    if (cache.containsKey(userId)) {
-                        return cache.get(userId);
-                    }
-                    String query = "SELECT role FROM users WHERE id = '" + userId + "'";
-                    String role = db.executeQuery(query).getString("role");
-                    cache.put(userId, role);
-                    return role;
-                }
-
-                public void deleteUser(String userId) {
-                    db.executeUpdate("DELETE FROM users WHERE id = " + userId);
-                    cache.remove(userId);
-                }
-            }
-            """;
+    private static final String CONTROVERSIAL_CODE = "            public class UserService {\n"
++ "\n"
++ "                private Map<String, String> cache = new HashMap<>();\n"
++ "\n"
++ "                public String getUserRole(HttpServletRequest request) {\n"
++ "                    String userId = request.getParameter(\"userId\");\n"
++ "                    if (cache.containsKey(userId)) {\n"
++ "                        return cache.get(userId);\n"
++ "                    }\n"
++ "                    String query = \"SELECT role FROM users WHERE id = '\" + userId + \"'\";\n"
++ "                    String role = db.executeQuery(query).getString(\"role\");\n"
++ "                    cache.put(userId, role);\n"
++ "                    return role;\n"
++ "                }\n"
++ "\n"
++ "                public void deleteUser(String userId) {\n"
++ "                    db.executeUpdate(\"DELETE FROM users WHERE id = \" + userId);\n"
++ "                    cache.remove(userId);\n"
++ "                }\n"
++ "            }\n"
++ "            ";
 
     @Test
     void code_review_debate_on_controversial_snippet() {

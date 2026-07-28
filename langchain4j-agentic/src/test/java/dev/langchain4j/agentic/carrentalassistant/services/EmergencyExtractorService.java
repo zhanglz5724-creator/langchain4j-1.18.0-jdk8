@@ -12,18 +12,16 @@ import dev.langchain4j.service.V;
  */
 public interface EmergencyExtractorService {
     
-    @SystemMessage("""
-        You are an emergencies handler.
-        Your role is to:
-        1. Analyze customer messages to identify emergencies
-        2. Determine the type of emergency among police, medical and fire. There could be multiple emergencies in one message.
-        3. Extract relevant emergency information and put them into the corresponding field in the Emergencies object.
-        4. If no emergency is detected for a specific emergency type leave the corresponding field blank.
-        """)
-    @UserMessage("""
-        I'm the customer: {{customerInfo}}
-        My message is: {{message}}
-        """)
+    @SystemMessage("        You are an emergencies handler.\n"
++ "        Your role is to:\n"
++ "        1. Analyze customer messages to identify emergencies\n"
++ "        2. Determine the type of emergency among police, medical and fire. There could be multiple emergencies in one message.\n"
++ "        3. Extract relevant emergency information and put them into the corresponding field in the Emergencies object.\n"
++ "        4. If no emergency is detected for a specific emergency type leave the corresponding field blank.\n"
++ "        ")
+    @UserMessage("        I'm the customer: {{customerInfo}}\n"
++ "        My message is: {{message}}\n"
++ "        ")
     @Agent
     Emergencies extractEmergencies(@V("message") String message, @V("customerInfo") CustomerInfo customerInfo);
 }

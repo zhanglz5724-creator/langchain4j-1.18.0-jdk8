@@ -156,58 +156,57 @@ class AgentsRegistryIT {
     }
 
     private static String registrySource() {
-        return """
-                package dev.langchain4j.agentic.test;
-
-                import static dev.langchain4j.agentic.Models.baseModel;
-
-                import dev.langchain4j.agentic.AgenticServices;
-                import dev.langchain4j.agentic.Agents;
-                import dev.langchain4j.agentic.planner.AgentInstance;
-                import dev.langchain4j.agentic.planner.AgentsRegistry;
-                import dev.langchain4j.model.openai.OpenAiChatModel;
-                import dev.langchain4j.model.openai.OpenAiChatModelName;
-                import dev.langchain4j.model.chat.ChatModel;
-                import java.util.Map;
-
-                public class WriterAgentsRegistry implements AgentsRegistry {
-
-                    private final Map<String, AgentInstance> agents;
-
-                    public WriterAgentsRegistry() {
-
-                        AgentInstance audienceEditor = (AgentInstance) AgenticServices
-                                .agentBuilder(Agents.AudienceEditor.class)
-                                .chatModel(baseModel())
-                                .outputKey("story")
-                                .build();
-
-                        AgentInstance styleEditor = (AgentInstance) AgenticServices
-                                .agentBuilder(Agents.StyleEditor.class)
-                                .chatModel(baseModel())
-                                .outputKey("story")
-                                .build();
-
-                        this.agents = Map.of(
-                                "audienceEditor", audienceEditor,
-                                "styleEditor", styleEditor);
-                    }
-
-                    @Override
-                    public Map<String, AgentInstance> allAgents() {
-                        return agents;
-                    }
-
-                    @Override
-                    public AgentInstance getAgent(String name) {
-                        AgentInstance agent = agents.get(name);
-                        if (agent == null) {
-                            throw new RuntimeException("No agent found with name: " + name);
-                        }
-                        return agent;
-                    }
-
-                }
-                """;
+        return "                package dev.langchain4j.agentic.test;\n"
++ "\n"
++ "                import static dev.langchain4j.agentic.Models.baseModel;\n"
++ "\n"
++ "                import dev.langchain4j.agentic.AgenticServices;\n"
++ "                import dev.langchain4j.agentic.Agents;\n"
++ "                import dev.langchain4j.agentic.planner.AgentInstance;\n"
++ "                import dev.langchain4j.agentic.planner.AgentsRegistry;\n"
++ "                import dev.langchain4j.model.openai.OpenAiChatModel;\n"
++ "                import dev.langchain4j.model.openai.OpenAiChatModelName;\n"
++ "                import dev.langchain4j.model.chat.ChatModel;\n"
++ "                import java.util.Map;\n"
++ "\n"
++ "                public class WriterAgentsRegistry implements AgentsRegistry {\n"
++ "\n"
++ "                    private final Map<String, AgentInstance> agents;\n"
++ "\n"
++ "                    public WriterAgentsRegistry() {\n"
++ "\n"
++ "                        AgentInstance audienceEditor = (AgentInstance) AgenticServices\n"
++ "                                .agentBuilder(Agents.AudienceEditor.class)\n"
++ "                                .chatModel(baseModel())\n"
++ "                                .outputKey(\"story\")\n"
++ "                                .build();\n"
++ "\n"
++ "                        AgentInstance styleEditor = (AgentInstance) AgenticServices\n"
++ "                                .agentBuilder(Agents.StyleEditor.class)\n"
++ "                                .chatModel(baseModel())\n"
++ "                                .outputKey(\"story\")\n"
++ "                                .build();\n"
++ "\n"
++ "                        this.agents = Map.of(\n"
++ "                                \"audienceEditor\", audienceEditor,\n"
++ "                                \"styleEditor\", styleEditor);\n"
++ "                    }\n"
++ "\n"
++ "                    @Override\n"
++ "                    public Map<String, AgentInstance> allAgents() {\n"
++ "                        return agents;\n"
++ "                    }\n"
++ "\n"
++ "                    @Override\n"
++ "                    public AgentInstance getAgent(String name) {\n"
++ "                        AgentInstance agent = agents.get(name);\n"
++ "                        if (agent == null) {\n"
++ "                            throw new RuntimeException(\"No agent found with name: \" + name);\n"
++ "                        }\n"
++ "                        return agent;\n"
++ "                    }\n"
++ "\n"
++ "                }\n"
++ "                ";
     }
 }

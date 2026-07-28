@@ -8,14 +8,13 @@ import dev.langchain4j.service.V;
 public interface ScorerAgent {
 
     @SystemMessage("Score the provided hypothesis on the given topic based on the critique provided.")
-    @UserMessage("""
-            You are a scoring agent.
-            Your task is to score the hypothesis provided by the user in relation to the specified topic based on the critique provided.
-            Score the provided hypothesis on a scale from 0.0 to 1.0, where 0.0 means the hypothesis is completely invalid and 1.0 means the hypothesis is fully valid.
-            The topic is: {{topic}}
-            The hypothesis is: {{hypothesis}}
-            The critique is: {{critique}}
-            """)
+    @UserMessage("            You are a scoring agent.\n"
++ "            Your task is to score the hypothesis provided by the user in relation to the specified topic based on the critique provided.\n"
++ "            Score the provided hypothesis on a scale from 0.0 to 1.0, where 0.0 means the hypothesis is completely invalid and 1.0 means the hypothesis is fully valid.\n"
++ "            The topic is: {{topic}}\n"
++ "            The hypothesis is: {{hypothesis}}\n"
++ "            The critique is: {{critique}}\n"
++ "            ")
     @Agent("Score a hypothesis based on a given topic and critique")
     double scoreHypothesis(@V("topic") String topic, @V("hypothesis") String hypothesis, @V("critique") String critique);
 }

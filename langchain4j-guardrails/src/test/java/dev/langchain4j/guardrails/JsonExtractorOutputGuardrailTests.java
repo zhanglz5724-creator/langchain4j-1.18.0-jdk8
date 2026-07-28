@@ -19,11 +19,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JsonExtractorOutputGuardrailTests {
     private static final String JSON =
-            """
-            {
-                "name": "MyObject",
-                "description": "Description of MyObject"
-            }""";
+            "{\n" +
+            "    \"name\": \"MyObject\",\n" +
+            "    \"description\": \"Description of MyObject\"\n" +
+            "}";
 
     private static final JsonExtractorOutputGuardrail<MyObject> MY_OBJECT_JSON_OUTPUT_GUARDRAIL =
             new JsonExtractorOutputGuardrail<>(MyObject.class);

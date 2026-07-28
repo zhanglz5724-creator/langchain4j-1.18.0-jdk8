@@ -183,39 +183,29 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     private static ServerSentEvent thinkingEvent(String text) {
         String escaped = text.replace("\"", "\\\"");
         return event(
-                """
-                {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{"content":[{"type":"thinking","thinking":[{"type":"text","text":"%s"}]}]}}]}"""
-                        .formatted(MODEL, escaped));
+                String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{\"content\":[{\"type\":\"thinking\",\"thinking\":[{\"type\":\"text\",\"text\":\"%s\"}]}]}}]}", MODEL, escaped));
     }
 
     private static ServerSentEvent emptyThinkingEvent() {
         return event(
-                """
-                {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{"content":[{"type":"thinking","thinking":[]}]}}]}"""
-                        .formatted(MODEL));
+                String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{\"content\":[{\"type\":\"thinking\",\"thinking\":[]}]}}]}", MODEL));
     }
 
     private static ServerSentEvent textEvent(String text) {
         String escaped = text.replace("\"", "\\\"");
         return event(
-                """
-                {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{"content":[{"type":"text","text":"%s"}]}}]}"""
-                        .formatted(MODEL, escaped));
+                String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{\"content\":[{\"type\":\"text\",\"text\":\"%s\"}]}}]}", MODEL, escaped));
     }
 
     private static ServerSentEvent toolCallEvent(String id, String name, String arguments) {
         String escapedArgs = arguments.replace("\"", "\\\"");
         return event(
-                """
-                {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{"tool_calls":[{"id":"%s","type":"function","function":{"name":"%s","arguments":"%s"}}]}}]}"""
-                        .formatted(MODEL, id, name, escapedArgs));
+                String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"id\":\"%s\",\"type\":\"function\",\"function\":{\"name\":\"%s\",\"arguments\":\"%s\"}}]}}]}", MODEL, id, name, escapedArgs));
     }
 
     private static ServerSentEvent finishEvent(String reason) {
         return event(
-                """
-                {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{},"finish_reason":"%s"}],"usage":{"prompt_tokens":10,"completion_tokens":20,"total_tokens":30,"num_cached_tokens":0}}"""
-                        .formatted(MODEL, reason));
+                String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"%s\"}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":20,\"total_tokens\":30,\"num_cached_tokens\":0}}", MODEL, reason));
     }
 
     private static ServerSentEvent doneEvent() {

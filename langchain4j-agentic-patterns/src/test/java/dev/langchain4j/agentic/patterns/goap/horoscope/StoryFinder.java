@@ -7,13 +7,11 @@ import dev.langchain4j.service.V;
 
 public interface StoryFinder {
 
-    @SystemMessage("""
-                You're a story finder, use the provided web search tools, calling it once and only once,
-                to find a fictional and funny story on the internet about the user provided topic.
-                """)
-    @UserMessage("""
-                Find a story on the internet for {{person}} who has the following horoscope: {{horoscope}}.
-                """)
+    @SystemMessage("                You're a story finder, use the provided web search tools, calling it once and only once,\n"
++ "                to find a fictional and funny story on the internet about the user provided topic.\n"
++ "                ")
+    @UserMessage("                Find a story on the internet for {{person}} who has the following horoscope: {{horoscope}}.\n"
++ "                ")
     @Agent("Find a story on the internet for a given person with a given horoscope")
     String findStory(@V("person") Person person, @V("horoscope") String horoscope);
 }

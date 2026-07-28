@@ -77,10 +77,8 @@ class MistralAiStreamingChatModelStrictJsonSchemaTest {
 
     private static List<ServerSentEvent> responseEvents() {
         return Arrays.asList(
-                new ServerSentEvent(null, """
-                        {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{"content":[{"type":"text","text":"{\\"answer\\":\\"42\\"}"}]}}]}""".formatted(MODEL)),
-                new ServerSentEvent(null, """
-                        {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":20,"total_tokens":30,"num_cached_tokens":0}}""".formatted(MODEL)),
+                new ServerSentEvent(null, String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"answer\\\":\\\"42\\\"}\"}]}}]}", MODEL)),
+                new ServerSentEvent(null, String.format("{\"id\":\"abc123\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":20,\"total_tokens\":30,\"num_cached_tokens\":0}}", MODEL)),
                 new ServerSentEvent(null, "[DONE]"));
     }
 }

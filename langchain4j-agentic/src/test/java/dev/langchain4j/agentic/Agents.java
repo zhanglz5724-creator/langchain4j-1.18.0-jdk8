@@ -35,12 +35,11 @@ public class Agents {
 
     public interface CategoryRouter {
 
-        @UserMessage("""
-            Analyze the following user request and categorize it as 'legal', 'medical' or 'technical'.
-            In case the request doesn't belong to any of those categories categorize it as 'unknown'.
-            Reply with only one of those words and nothing else.
-            The user request is: '{{request}}'.
-            """)
+        @UserMessage("            Analyze the following user request and categorize it as 'legal', 'medical' or 'technical'.\n"
++ "            In case the request doesn't belong to any of those categories categorize it as 'unknown'.\n"
++ "            Reply with only one of those words and nothing else.\n"
++ "            The user request is: '{{request}}'.\n"
++ "            ")
         @Agent(description = "Categorize a user request", outputKey = "category")
         RequestCategory classify(@V("request") String request);
     }
@@ -51,24 +50,22 @@ public class Agents {
 
     public interface RouterAgent {
 
-        @UserMessage("""
-            Analyze the following user request and categorize it as 'legal', 'medical' or 'technical',
-            then forward the request as it is to the corresponding expert provided as a tool.
-            Finally return the answer that you received from the expert without any modification.
-
-            The user request is: '{{it}}'.
-            """)
+        @UserMessage("            Analyze the following user request and categorize it as 'legal', 'medical' or 'technical',\n"
++ "            then forward the request as it is to the corresponding expert provided as a tool.\n"
++ "            Finally return the answer that you received from the expert without any modification.\n"
++ "\n"
++ "            The user request is: '{{it}}'.\n"
++ "            ")
         @Agent
         String askToExpert(String request);
     }
 
     public interface MedicalExpert {
 
-        @UserMessage("""
-            You are a medical expert.
-            Analyze the following user request under a medical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a medical expert.\n"
++ "            Analyze the following user request under a medical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Tool("A medical expert")
         @Agent(description = "A medical expert", outputKey = "response")
         String medical(@V("request") String request);
@@ -76,11 +73,10 @@ public class Agents {
 
     public interface MedicalExpertWithMemory {
 
-        @UserMessage("""
-            You are a medical expert.
-            Analyze the following user request under a medical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a medical expert.\n"
++ "            Analyze the following user request under a medical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Tool("A medical expert")
         @Agent(description = "A medical expert", outputKey = "response")
         String medical(@MemoryId String memoryId, @V("request") String request);
@@ -88,11 +84,10 @@ public class Agents {
 
     public interface LegalExpert {
 
-        @UserMessage("""
-            You are a legal expert.
-            Analyze the following user request under a legal point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a legal expert.\n"
++ "            Analyze the following user request under a legal point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Tool("A legal expert")
         @Agent(description = "A legal expert", outputKey = "response")
         String legal(@V("request") String request);
@@ -100,11 +95,10 @@ public class Agents {
 
     public interface LegalExpertWithMemory {
 
-        @UserMessage("""
-            You are a legal expert.
-            Analyze the following user request under a legal point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a legal expert.\n"
++ "            Analyze the following user request under a legal point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Tool("A legal expert")
         @Agent("A legal expert")
         String legal(@MemoryId String memoryId, @V("request") String request);
@@ -112,11 +106,10 @@ public class Agents {
 
     public interface TechnicalExpert {
 
-        @UserMessage("""
-            You are a technical expert.
-            Analyze the following user request under a technical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a technical expert.\n"
++ "            Analyze the following user request under a technical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Tool("A technical expert")
         @Agent("A technical expert")
         String technical(@V("request") String request);
@@ -124,11 +117,10 @@ public class Agents {
 
     public interface TechnicalExpertWithMemory {
 
-        @UserMessage("""
-            You are a technical expert.
-            Analyze the following user request under a technical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a technical expert.\n"
++ "            Analyze the following user request under a technical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Tool("A technical expert")
         @Agent("A technical expert")
         String technical(@MemoryId String memoryId, @V("request") String request);
@@ -136,12 +128,11 @@ public class Agents {
 
     public interface CreativeWriter {
 
-        @UserMessage("""
-                You are a creative writer.
-                Generate a draft of a story long no more than 3 sentence around the given topic.
-                Return only the story and nothing else.
-                The topic is {{topic}}.
-                """)
+        @UserMessage("                You are a creative writer.\n"
++ "                Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                Return only the story and nothing else.\n"
++ "                The topic is {{topic}}.\n"
++ "                ")
         @Agent(description = "Generate a story based on the given topic", outputKey = "story")
         String generateStory(@V("topic") String topic);
     }
@@ -159,49 +150,45 @@ public class Agents {
 
     public interface AudienceEditor {
 
-        @UserMessage("""
-            You are a professional editor.
-            Analyze and rewrite the following story to better align with the target audience of {{audience}}.
-            Return only the story and nothing else.
-            The story is "{{story}}".
-            """)
+        @UserMessage("            You are a professional editor.\n"
++ "            Analyze and rewrite the following story to better align with the target audience of {{audience}}.\n"
++ "            Return only the story and nothing else.\n"
++ "            The story is \"{{story}}\".\n"
++ "            ")
         @Agent(description = "Edit a story to better fit a given audience", outputKey = "story")
         String editStory(@V("story") String story, @V("audience") String audience);
     }
 
     public interface OptionalAudienceEditor {
 
-        @UserMessage("""
-            You are a professional editor.
-            Analyze and rewrite the following story to better align with the target audience of {{audience}}.
-            Return only the story and nothing else.
-            The story is "{{story}}".
-            """)
+        @UserMessage("            You are a professional editor.\n"
++ "            Analyze and rewrite the following story to better align with the target audience of {{audience}}.\n"
++ "            Return only the story and nothing else.\n"
++ "            The story is \"{{story}}\".\n"
++ "            ")
         @Agent(description = "Edit a story to better fit a given audience", outputKey = "story", optional = true)
         String editStory(@V("story") String story, @V("audience") String audience);
     }
 
     public interface StyleEditor {
 
-        @UserMessage("""
-                You are a professional editor.
-                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.
-                Return only the story and nothing else.
-                The story is "{{story}}".
-                """)
+        @UserMessage("                You are a professional editor.\n"
++ "                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.\n"
++ "                Return only the story and nothing else.\n"
++ "                The story is \"{{story}}\".\n"
++ "                ")
         @Agent(description = "Edit a story to better fit a given style", outputKey = "story")
         String editStory(@V("story") String story, @V("style") String style);
     }
 
     public interface StyleScorer {
 
-        @UserMessage("""
-                You are a critical reviewer.
-                Give a review score between 0.0 and 1.0 for the following story based on how well it aligns with the style '{{style}}'.
-                Return only the score and nothing else.
-                
-                The story is: "{{story}}"
-                """)
+        @UserMessage("                You are a critical reviewer.\n"
++ "                Give a review score between 0.0 and 1.0 for the following story based on how well it aligns with the style '{{style}}'.\n"
++ "                Return only the score and nothing else.\n"
++ "                \n"
++ "                The story is: \"{{story}}\"\n"
++ "                ")
         @Agent(description = "Score a story based on how well it aligns with a given style", outputKey = "score")
         double scoreStyle(@V("story") String story, @V("style") String style);
     }
@@ -228,25 +215,23 @@ public class Agents {
 
     public interface FoodExpert {
 
-        @UserMessage("""
-            You are a great evening planner.
-            Propose a list of 3 meals matching the given mood.
-            The mood is {{mood}}.
-            For each meal, just give the name of the meal.
-            Provide a list with the 3 items and nothing else.
-            """)
+        @UserMessage("            You are a great evening planner.\n"
++ "            Propose a list of 3 meals matching the given mood.\n"
++ "            The mood is {{mood}}.\n"
++ "            For each meal, just give the name of the meal.\n"
++ "            Provide a list with the 3 items and nothing else.\n"
++ "            ")
         @Agent(outputKey = "meals")
         List<String> findMeal(@V("mood") String mood);
     }
 
     public interface MovieExpert {
 
-        @UserMessage("""
-            You are a great evening planner.
-            Propose a list of 3 movies matching the given mood.
-            The mood is {{mood}}.
-            Provide a list with the 3 items and nothing else.
-            """)
+        @UserMessage("            You are a great evening planner.\n"
++ "            Propose a list of 3 movies matching the given mood.\n"
++ "            The mood is {{mood}}.\n"
++ "            Provide a list with the 3 items and nothing else.\n"
++ "            ")
         @Agent(outputKey = "movies")
         List<String> findMovie(@V("mood") String mood);
     }
@@ -273,10 +258,9 @@ public class Agents {
 
     public interface ColorExpert {
 
-        @UserMessage("""
-            What is the color of a {{object}}?
-            Reply with only the name of the color of the object and nothing else.
-            """)
+        @UserMessage("            What is the color of a {{object}}?\n"
++ "            Reply with only the name of the color of the object and nothing else.\n"
++ "            ")
         @Agent("Provide the color of an object")
         String colorOf(@V("object") String object);
     }
@@ -284,10 +268,9 @@ public class Agents {
     public interface ColorMixerExpert {
 
         @SystemMessage("You are a color mixer expert who knows which color result from mixing other colors.")
-        @UserMessage("""
-            What color do you obtain if you mix the following colors: {{colors}}?
-            Reply with only the name of the color resulting from the mix and nothing else.
-            """)
+        @UserMessage("            What color do you obtain if you mix the following colors: {{colors}}?\n"
++ "            Reply with only the name of the color resulting from the mix and nothing else.\n"
++ "            ")
         @Agent("Provide the resulting color from mixing given colors")
         String colorMix(@V("colors") List<String> colors);
     }
@@ -296,21 +279,19 @@ public class Agents {
 
     public interface LoanApplicationExtractor {
 
-        @UserMessage("""
-            Convert user request into a structured LoanApplication.
-            The user request is: '{{request}}'.
-            """)
+        @UserMessage("            Convert user request into a structured LoanApplication.\n"
++ "            The user request is: '{{request}}'.\n"
++ "            ")
         @Agent(description = "Extract a loan application from user request.", outputKey = "loanApplication")
         LoanApplication extract(@V("request") String request);
     }
 
     public interface LoanApplicationEvaluator {
 
-        @UserMessage("""
-            Evaluate a loan application. If the applicant's age is less than 18 or the amount is greater than 50000, reject the application.
-            A response should indicate 'approved' or 'rejected'.
-            The loan application is: '{{loanApplication}}'.
-            """)
+        @UserMessage("            Evaluate a loan application. If the applicant's age is less than 18 or the amount is greater than 50000, reject the application.\n"
++ "            A response should indicate 'approved' or 'rejected'.\n"
++ "            The loan application is: '{{loanApplication}}'.\n"
++ "            ")
         @Agent("Evaluate a loan application.")
         String evaluate(@V("loanApplication") LoanApplication loanApplication);
     }

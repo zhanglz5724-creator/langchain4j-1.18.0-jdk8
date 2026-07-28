@@ -110,17 +110,15 @@ class OpenAiOfficialResponsesStreamingChatModelTest {
 
     @Test
     void should_store_raw_response_in_response_metadata() {
-        Response rawResponse = response("""
-                {
-                  "id": "resp_123",
-                  "created_at": 1745310000,
-                  "model": "gpt-5.4",
-                  "object": "response",
-                  "output": [],
-                  "parallel_tool_calls": true,
-                  "tool_choice": "auto"
-                }
-                """);
+        Response rawResponse = response("{\n" +
+                "  \"id\": \"resp_123\",\n" +
+                "  \"created_at\": 1745310000,\n" +
+                "  \"model\": \"gpt-5.4\",\n" +
+                "  \"object\": \"response\",\n" +
+                "  \"output\": [],\n" +
+                "  \"parallel_tool_calls\": true,\n" +
+                "  \"tool_choice\": \"auto\"\n" +
+                "}");
 
         OpenAiOfficialResponsesChatResponseMetadata metadata = OpenAiOfficialResponsesChatResponseMetadata.builder()
                 .id("resp_123")

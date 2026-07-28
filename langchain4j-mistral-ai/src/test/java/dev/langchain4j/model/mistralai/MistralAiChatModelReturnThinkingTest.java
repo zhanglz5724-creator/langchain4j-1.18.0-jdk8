@@ -16,25 +16,7 @@ class MistralAiChatModelReturnThinkingTest {
     void should_return_thinking_when_returnThinking_is_true() {
         // given
         String jsonResponse =
-                """
-                {
-                    "id": "abc123",
-                    "created": 1769421662,
-                    "model": "magistral-medium-latest",
-                    "choices": [{
-                        "index": 0,
-                        "finish_reason": "stop",
-                        "message": {
-                            "role": "assistant",
-                            "content": [
-                                {"type": "thinking", "thinking": [{"type": "text", "text": "Let me think about this problem..."}]},
-                                {"type": "text", "text": "The answer is 42."}
-                            ]
-                        }
-                    }],
-                    "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30, "num_cached_tokens": 0}
-                }
-                """;
+                "{\n    \"id\": \"abc123\",\n    \"created\": 1769421662,\n    \"model\": \"magistral-medium-latest\",\n    \"choices\": [{\n        \"index\": 0,\n        \"finish_reason\": \"stop\",\n        \"message\": {\n            \"role\": \"assistant\",\n            \"content\": [\n                {\"type\": \"thinking\", \"thinking\": [{\"type\": \"text\", \"text\": \"Let me think about this problem...\"}]},\n                {\"type\": \"text\", \"text\": \"The answer is 42.\"}\n            ]\n        }\n    }],\n    \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 20, \"total_tokens\": 30, \"num_cached_tokens\": 0}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -60,25 +42,7 @@ class MistralAiChatModelReturnThinkingTest {
     void should_NOT_return_thinking_when_returnThinking_is_false() {
         // given
         String jsonResponse =
-                """
-                {
-                    "id": "abc123",
-                    "created": 1769421662,
-                    "model": "magistral-medium-latest",
-                    "choices": [{
-                        "index": 0,
-                        "finish_reason": "stop",
-                        "message": {
-                            "role": "assistant",
-                            "content": [
-                                {"type": "thinking", "thinking": [{"type": "text", "text": "Let me think about this problem..."}]},
-                                {"type": "text", "text": "The answer is 42."}
-                            ]
-                        }
-                    }],
-                    "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30, "num_cached_tokens": 0}
-                }
-                """;
+                "{\n    \"id\": \"abc123\",\n    \"created\": 1769421662,\n    \"model\": \"magistral-medium-latest\",\n    \"choices\": [{\n        \"index\": 0,\n        \"finish_reason\": \"stop\",\n        \"message\": {\n            \"role\": \"assistant\",\n            \"content\": [\n                {\"type\": \"thinking\", \"thinking\": [{\"type\": \"text\", \"text\": \"Let me think about this problem...\"}]},\n                {\"type\": \"text\", \"text\": \"The answer is 42.\"}\n            ]\n        }\n    }],\n    \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 20, \"total_tokens\": 30, \"num_cached_tokens\": 0}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -104,27 +68,7 @@ class MistralAiChatModelReturnThinkingTest {
     void should_handle_empty_thinking_array() {
         // given - real Magistral response: text, empty thinking, text
         String jsonResponse =
-                """
-                {
-                    "id": "966f7ab3efd24195b686603d34aa41a3",
-                    "created": 1769421662,
-                    "model": "magistral-medium-latest",
-                    "choices": [{
-                        "index": 0,
-                        "finish_reason": "stop",
-                        "message": {
-                            "role": "assistant",
-                            "tool_calls": null,
-                            "content": [
-                                {"type": "text", "text": "Let's denote the cost of the ball as x dollars."},
-                                {"type": "thinking", "thinking": []},
-                                {"type": "text", "text": "Therefore, the ball costs $0.05."}
-                            ]
-                        }
-                    }],
-                    "usage": {"prompt_tokens": 89, "completion_tokens": 330, "total_tokens": 419, "num_cached_tokens": 0}
-                }
-                """;
+                "{\n    \"id\": \"966f7ab3efd24195b686603d34aa41a3\",\n    \"created\": 1769421662,\n    \"model\": \"magistral-medium-latest\",\n    \"choices\": [{\n        \"index\": 0,\n        \"finish_reason\": \"stop\",\n        \"message\": {\n            \"role\": \"assistant\",\n            \"tool_calls\": null,\n            \"content\": [\n                {\"type\": \"text\", \"text\": \"Let's denote the cost of the ball as x dollars.\"},\n                {\"type\": \"thinking\", \"thinking\": []},\n                {\"type\": \"text\", \"text\": \"Therefore, the ball costs $0.05.\"}\n            ]\n        }\n    }],\n    \"usage\": {\"prompt_tokens\": 89, \"completion_tokens\": 330, \"total_tokens\": 419, \"num_cached_tokens\": 0}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -151,36 +95,7 @@ class MistralAiChatModelReturnThinkingTest {
     void should_handle_thinking_with_tool_calls() {
         // given - real Magistral response: thinking content with tool calls
         String jsonResponse =
-                """
-                {
-                    "id": "b39b103ae4d14d11ac1ad1a8c4e2f8f5",
-                    "created": 1769417132,
-                    "model": "magistral-medium-latest",
-                    "choices": [{
-                        "index": 0,
-                        "finish_reason": "tool_calls",
-                        "message": {
-                            "role": "assistant",
-                            "tool_calls": [{
-                                "id": "ggLXfzi8o",
-                                "type": "function",
-                                "function": {
-                                    "name": "getWeather",
-                                    "arguments": "{\\"city\\": \\"Munich\\"}"
-                                }
-                            }],
-                            "content": [{
-                                "type": "thinking",
-                                "thinking": [{
-                                    "type": "text",
-                                    "text": "The user wants to know the weather in Munich. I need to call the getWeather function."
-                                }]
-                            }]
-                        }
-                    }],
-                    "usage": {"prompt_tokens": 100, "completion_tokens": 125, "total_tokens": 225, "num_cached_tokens": 0}
-                }
-                """;
+                "{\n    \"id\": \"b39b103ae4d14d11ac1ad1a8c4e2f8f5\",\n    \"created\": 1769417132,\n    \"model\": \"magistral-medium-latest\",\n    \"choices\": [{\n        \"index\": 0,\n        \"finish_reason\": \"tool_calls\",\n        \"message\": {\n            \"role\": \"assistant\",\n            \"tool_calls\": [{\n                \"id\": \"ggLXfzi8o\",\n                \"type\": \"function\",\n                \"function\": {\n                    \"name\": \"getWeather\",\n                    \"arguments\": \"{\\\"city\\\": \\\"Munich\\\"}\"\n                }\n            }],\n            \"content\": [{\n                \"type\": \"thinking\",\n                \"thinking\": [{\n                    \"type\": \"text\",\n                    \"text\": \"The user wants to know the weather in Munich. I need to call the getWeather function.\"\n                }]\n            }]\n        }\n    }],\n    \"usage\": {\"prompt_tokens\": 100, \"completion_tokens\": 125, \"total_tokens\": 225, \"num_cached_tokens\": 0}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -211,24 +126,7 @@ class MistralAiChatModelReturnThinkingTest {
     void should_handle_response_without_thinking() {
         // given - response with only text content, no thinking
         String jsonResponse =
-                """
-                {
-                    "id": "abc123",
-                    "created": 1769421662,
-                    "model": "mistral-large-latest",
-                    "choices": [{
-                        "index": 0,
-                        "finish_reason": "stop",
-                        "message": {
-                            "role": "assistant",
-                            "content": [
-                                {"type": "text", "text": "The answer is 42."}
-                            ]
-                        }
-                    }],
-                    "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30, "num_cached_tokens": 0}
-                }
-                """;
+                "{\n    \"id\": \"abc123\",\n    \"created\": 1769421662,\n    \"model\": \"mistral-large-latest\",\n    \"choices\": [{\n        \"index\": 0,\n        \"finish_reason\": \"stop\",\n        \"message\": {\n            \"role\": \"assistant\",\n            \"content\": [\n                {\"type\": \"text\", \"text\": \"The answer is 42.\"}\n            ]\n        }\n    }],\n    \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 20, \"total_tokens\": 30, \"num_cached_tokens\": 0}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -254,28 +152,7 @@ class MistralAiChatModelReturnThinkingTest {
     void should_concatenate_multiple_thinking_blocks() {
         // given - response with multiple text blocks inside thinking
         String jsonResponse =
-                """
-                {
-                    "id": "abc123",
-                    "created": 1769421662,
-                    "model": "magistral-medium-latest",
-                    "choices": [{
-                        "index": 0,
-                        "finish_reason": "stop",
-                        "message": {
-                            "role": "assistant",
-                            "content": [
-                                {"type": "thinking", "thinking": [
-                                    {"type": "text", "text": "First thought..."},
-                                    {"type": "text", "text": "Second thought..."}
-                                ]},
-                                {"type": "text", "text": "The answer is 42."}
-                            ]
-                        }
-                    }],
-                    "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30, "num_cached_tokens": 0}
-                }
-                """;
+                "{\n    \"id\": \"abc123\",\n    \"created\": 1769421662,\n    \"model\": \"magistral-medium-latest\",\n    \"choices\": [{\n        \"index\": 0,\n        \"finish_reason\": \"stop\",\n        \"message\": {\n            \"role\": \"assistant\",\n            \"content\": [\n                {\"type\": \"thinking\", \"thinking\": [\n                    {\"type\": \"text\", \"text\": \"First thought...\"},\n                    {\"type\": \"text\", \"text\": \"Second thought...\"}\n                ]},\n                {\"type\": \"text\", \"text\": \"The answer is 42.\"}\n            ]\n        }\n    }],\n    \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 20, \"total_tokens\": 30, \"num_cached_tokens\": 0}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -301,36 +178,7 @@ class MistralAiChatModelReturnThinkingTest {
     void should_NOT_return_thinking_with_tool_calls_when_returnThinking_is_false() {
         // given - thinking content with tool calls, but returnThinking is false
         String jsonResponse =
-                """
-                {
-                    "id": "b39b103ae4d14d11ac1ad1a8c4e2f8f5",
-                    "created": 1769417132,
-                    "model": "magistral-medium-latest",
-                    "choices": [{
-                        "index": 0,
-                        "finish_reason": "tool_calls",
-                        "message": {
-                            "role": "assistant",
-                            "tool_calls": [{
-                                "id": "ggLXfzi8o",
-                                "type": "function",
-                                "function": {
-                                    "name": "getWeather",
-                                    "arguments": "{\\"city\\": \\"Munich\\"}"
-                                }
-                            }],
-                            "content": [{
-                                "type": "thinking",
-                                "thinking": [{
-                                    "type": "text",
-                                    "text": "The user wants to know the weather in Munich."
-                                }]
-                            }]
-                        }
-                    }],
-                    "usage": {"prompt_tokens": 100, "completion_tokens": 125, "total_tokens": 225, "num_cached_tokens": 0}
-                }
-                """;
+                "{\n    \"id\": \"b39b103ae4d14d11ac1ad1a8c4e2f8f5\",\n    \"created\": 1769417132,\n    \"model\": \"magistral-medium-latest\",\n    \"choices\": [{\n        \"index\": 0,\n        \"finish_reason\": \"tool_calls\",\n        \"message\": {\n            \"role\": \"assistant\",\n            \"tool_calls\": [{\n                \"id\": \"ggLXfzi8o\",\n                \"type\": \"function\",\n                \"function\": {\n                    \"name\": \"getWeather\",\n                    \"arguments\": \"{\\\"city\\\": \\\"Munich\\\"}\"\n                }\n            }],\n            \"content\": [{\n                \"type\": \"thinking\",\n                \"thinking\": [{\n                    \"type\": \"text\",\n                    \"text\": \"The user wants to know the weather in Munich.\"\n                }]\n            }]\n        }\n    }],\n    \"usage\": {\"prompt_tokens\": 100, \"completion_tokens\": 125, \"total_tokens\": 225, \"num_cached_tokens\": 0}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)

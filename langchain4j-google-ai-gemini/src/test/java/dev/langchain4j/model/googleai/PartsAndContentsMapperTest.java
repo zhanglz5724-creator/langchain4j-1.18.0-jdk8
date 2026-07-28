@@ -114,28 +114,7 @@ class PartsAndContentsMapperTest {
     @Test
     void fromGPartsToAiMessage_preservesFunctionCallId() {
         // Given
-        String json = """
-                {
-                  "candidates": [
-                    {
-                      "content": {
-                        "role": "model",
-                        "parts": [
-                          {
-                            "functionCall": {
-                              "id": "call-1",
-                              "name": "stringLength",
-                              "args": {
-                                "s": "hello"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-                """;
+        String json = "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"role\": \"model\",\n        \"parts\": [\n          {\n            \"functionCall\": {\n              \"id\": \"call-1\",\n              \"name\": \"stringLength\",\n              \"args\": {\n                \"s\": \"hello\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}";
         GeminiGenerateContentResponse response = Json.fromJson(json, GeminiGenerateContentResponse.class);
         List<GeminiContent.GeminiPart> parts =
                 response.candidates().get(0).content().parts();
@@ -155,27 +134,7 @@ class PartsAndContentsMapperTest {
     @Test
     void fromGPartsToAiMessage_doesNotGenerateFunctionCallIdWhenMissing() {
         // Given
-        String json = """
-                {
-                  "candidates": [
-                    {
-                      "content": {
-                        "role": "model",
-                        "parts": [
-                          {
-                            "functionCall": {
-                              "name": "stringLength",
-                              "args": {
-                                "s": "hello"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-                """;
+        String json = "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"role\": \"model\",\n        \"parts\": [\n          {\n            \"functionCall\": {\n              \"name\": \"stringLength\",\n              \"args\": {\n                \"s\": \"hello\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}";
         GeminiGenerateContentResponse response = Json.fromJson(json, GeminiGenerateContentResponse.class);
         List<GeminiContent.GeminiPart> parts =
                 response.candidates().get(0).content().parts();

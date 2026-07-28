@@ -81,14 +81,7 @@ class AwsDocumentConverterTest {
     @Test
     void convert_json_to_primitive_types() {
         // Given
-        String json = """
-                {
-                    "string": "test",
-                    "integer": 42,
-                    "double": 42.5,
-                    "boolean": true
-                }
-                """;
+        String json = "{\n    \"string\": \"test\",\n    \"integer\": 42,\n    \"double\": 42.5,\n    \"boolean\": true\n}";
 
         // When
         Document document = AwsDocumentConverter.documentFromJson(json);
@@ -103,11 +96,7 @@ class AwsDocumentConverterTest {
     @Test
     void convert_json_to_list() {
         // Given
-        String json = """
-                {
-                    "list": ["item1", 2, true]
-                }
-                """;
+        String json = "{\n    \"list\": [\"item1\", 2, true]\n}";
 
         // When
         Document document = AwsDocumentConverter.documentFromJson(json);
@@ -122,13 +111,7 @@ class AwsDocumentConverterTest {
     @Test
     void convert_json_to_nested_object() {
         // Given
-        String json = """
-                {
-                    "nested": {
-                        "inner_key": "inner_value"
-                    }
-                }
-                """;
+        String json = "{\n    \"nested\": {\n        \"inner_key\": \"inner_value\"\n    }\n}";
 
         // When
         Document document = AwsDocumentConverter.documentFromJson(json);

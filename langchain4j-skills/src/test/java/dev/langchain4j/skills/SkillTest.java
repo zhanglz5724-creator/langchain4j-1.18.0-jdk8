@@ -30,13 +30,13 @@ class SkillTest {
                 .content("skill content")
                 .build());
 
-        assertThat(skills.formatAvailableSkills()).isEqualTo("""
-                        <available_skills>
-                        <skill>
-                        <name>docx</name>
-                        <description>Edit Word documents</description>
-                        </skill>
-                        </available_skills>""");
+        assertThat(skills.formatAvailableSkills()).isEqualTo(
+                "<available_skills>\n" +
+                "<skill>\n" +
+                "<name>docx</name>\n" +
+                "<description>Edit Word documents</description>\n" +
+                "</skill>\n" +
+                "</available_skills>");
     }
 
     @Test
@@ -53,17 +53,17 @@ class SkillTest {
                         .content("mcp content")
                         .build());
 
-        assertThat(skills.formatAvailableSkills()).isEqualTo("""
-                        <available_skills>
-                        <skill>
-                        <name>docx</name>
-                        <description>Edit Word documents</description>
-                        </skill>
-                        <skill>
-                        <name>mcp-builder</name>
-                        <description>Build MCP servers</description>
-                        </skill>
-                        </available_skills>""");
+        assertThat(skills.formatAvailableSkills()).isEqualTo(
+                "<available_skills>\n" +
+                "<skill>\n" +
+                "<name>docx</name>\n" +
+                "<description>Edit Word documents</description>\n" +
+                "</skill>\n" +
+                "<skill>\n" +
+                "<name>mcp-builder</name>\n" +
+                "<description>Build MCP servers</description>\n" +
+                "</skill>\n" +
+                "</available_skills>");
     }
 
     @Test
@@ -74,13 +74,13 @@ class SkillTest {
                 .content("content")
                 .build());
 
-        assertThat(skills.formatAvailableSkills()).isEqualTo("""
-                        <available_skills>
-                        <skill>
-                        <name>skill&lt;&gt;&amp;&quot;&apos;</name>
-                        <description>desc&lt;&gt;&amp;&quot;&apos;</description>
-                        </skill>
-                        </available_skills>""");
+        assertThat(skills.formatAvailableSkills()).isEqualTo(
+                "<available_skills>\n" +
+                "<skill>\n" +
+                "<name>skill&lt;&gt;&amp;&quot;&apos;</name>\n" +
+                "<description>desc&lt;&gt;&amp;&quot;&apos;</description>\n" +
+                "</skill>\n" +
+                "</available_skills>");
     }
 
     @Test

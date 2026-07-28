@@ -1137,97 +1137,14 @@ class GoogleAiGeminiBatchEmbeddingModelTest {
     @Nested
     class BatchEmbeddingSerialization {
 
-        private static final String EMBEDDING_PENDING_RESPONSE = """
-                        {
-                          "name": "batches/embed-test-123",
-                          "metadata": {
-                            "@type": "type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatch",
-                            "model": "models/text-embedding-004",
-                            "displayName": "embeddings-batch",
-                            "state": "BATCH_STATE_PENDING",
-                            "name": "batches/embed-test-123"
-                          }
-                        }
-                        """;
+        private static final String EMBEDDING_PENDING_RESPONSE = "{\n  \"name\": \"batches/embed-test-123\",\n  \"metadata\": {\n    \"@type\": \"type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatch\",\n    \"model\": \"models/text-embedding-004\",\n    \"displayName\": \"embeddings-batch\",\n    \"state\": \"BATCH_STATE_PENDING\",\n    \"name\": \"batches/embed-test-123\"\n  }\n}";
 
-        private static final String EMBEDDING_SUCCEEDED_RESPONSE = """
-                        {
-                          "name": "batches/embed-test-123",
-                          "metadata": {
-                            "@type": "type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatch",
-                            "model": "models/text-embedding-004",
-                            "displayName": "embeddings-batch",
-                            "state": "BATCH_STATE_SUCCEEDED",
-                            "name": "batches/embed-test-123"
-                          },
-                          "done": true,
-                          "response": {
-                            "@type": "type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatchOutput",
-                            "inlinedResponses": {
-                              "inlinedResponses": [
-                                {
-                                  "response": {
-                                    "embedding": {
-                                      "values": [0.1, 0.2, 0.3, 0.4, 0.5]
-                                    }
-                                  }
-                                },
-                                {
-                                  "response": {
-                                    "embedding": {
-                                      "values": [0.6, 0.7, 0.8, 0.9, 1.0]
-                                    }
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        }
-                        """;
+        private static final String EMBEDDING_SUCCEEDED_RESPONSE = "{\n  \"name\": \"batches/embed-test-123\",\n  \"metadata\": {\n    \"@type\": \"type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatch\",\n    \"model\": \"models/text-embedding-004\",\n    \"displayName\": \"embeddings-batch\",\n    \"state\": \"BATCH_STATE_SUCCEEDED\",\n    \"name\": \"batches/embed-test-123\"\n  },\n  \"done\": true,\n  \"response\": {\n    \"@type\": \"type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatchOutput\",\n    \"inlinedResponses\": {\n      \"inlinedResponses\": [\n        {\n          \"response\": {\n            \"embedding\": {\n              \"values\": [0.1, 0.2, 0.3, 0.4, 0.5]\n            }\n          }\n        },\n        {\n          \"response\": {\n            \"embedding\": {\n              \"values\": [0.6, 0.7, 0.8, 0.9, 1.0]\n            }\n          }\n        }\n      ]\n    }\n  }\n}";
 
         @Test
         void should_deserialize_embedding_batch_response_with_error() {
             // given
-            String EMBEDDING_ERROR_RESPONSE = """
-                            {
-                              "name": "batches/embed-test-123",
-                              "metadata": {
-                                "@type": "type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatch",
-                                "model": "models/text-embedding-004",
-                                "displayName": "embeddings-batch",
-                                "state": "BATCH_STATE_SUCCEEDED",
-                                "name": "batches/embed-test-123"
-                              },
-                              "done": true,
-                              "response": {
-                                "@type": "type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatchOutput",
-                                "inlinedResponses": {
-                                  "inlinedResponses": [
-                                    {
-                                      "response": {
-                                        "embedding": {
-                                          "values": [0.1, 0.2, 0.3, 0.4, 0.5]
-                                        }
-                                      }
-                                    },
-                                    {
-                                      "error": {
-                                        "code": 4,
-                                        "message": "Deadline expired before operation could complete."
-                                      }
-                                    },
-                                    {
-                                      "response": {
-                                        "embedding": {
-                                          "values": [0.6, 0.7, 0.8, 0.9, 1.0]
-                                        }
-                                      }
-                                    }
-                                  ]
-                                }
-                              }
-                            }
-                            """;
+            String EMBEDDING_ERROR_RESPONSE = "{\n  \"name\": \"batches/embed-test-123\",\n  \"metadata\": {\n    \"@type\": \"type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatch\",\n    \"model\": \"models/text-embedding-004\",\n    \"displayName\": \"embeddings-batch\",\n    \"state\": \"BATCH_STATE_SUCCEEDED\",\n    \"name\": \"batches/embed-test-123\"\n  },\n  \"done\": true,\n  \"response\": {\n    \"@type\": \"type.googleapis.com/google.ai.generativelanguage.v1main.EmbedContentBatchOutput\",\n    \"inlinedResponses\": {\n      \"inlinedResponses\": [\n        {\n          \"response\": {\n            \"embedding\": {\n              \"values\": [0.1, 0.2, 0.3, 0.4, 0.5]\n            }\n          }\n        },\n        {\n          \"error\": {\n            \"code\": 4,\n            \"message\": \"Deadline expired before operation could complete.\"\n          }\n        },\n        {\n          \"response\": {\n            \"embedding\": {\n              \"values\": [0.6, 0.7, 0.8, 0.9, 1.0]\n            }\n          }\n        }\n      ]\n    }\n  }\n}";
 
             var mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                     .statusCode(200)

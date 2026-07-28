@@ -132,11 +132,7 @@ class StreamingJsonLinesWriterTest {
             // Then
             var output = outputStream.toString(StandardCharsets.UTF_8);
             var expected =
-                    """
-                    {"name":"one","value":1}
-                    {"name":"two","value":2}
-                    """
-                            .replace("\n", System.lineSeparator()); // Adjust for platform-specific newline
+                    "{\"name\":\"one\",\"value\":1}\n{\"name\":\"two\",\"value\":2}".replace("\n", System.lineSeparator()); // Adjust for platform-specific newline
 
             assertThat(output).isEqualTo(expected);
         }

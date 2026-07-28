@@ -64,61 +64,60 @@ public class WatsonxModelCatalogTest {
         when(mockHttpResponse.statusCode()).thenReturn(200);
         when(mockHttpResponse.body())
                 .thenReturn(
-                        """
-                    {
-                        "total_count": 28,
-                        "limit": 100,
-                        "first": {
-                            "href": "https://us-south.ml.cloud.ibm.com/ml/v1/foundation_model_specs?version=2025-12-05"
-                        },
-                        "resources": [
-                            {
-                                "model_id": "cross-encoder/ms-marco-minilm-l-12-v2",
-                                "label": "ms-marco-minilm-l-12-v2",
-                                "provider": "cross-encoder",
-                                "source": "cross-encoder",
-                                "indemnity": "NON_IBM",
-                                "functions": [
-                                    {
-                                        "id": "rerank"
-                                    }
-                                ],
-                                "short_description": "Used for Information Retrieval: Encode and sort a query will all possible passages.",
-                                "long_description": "The model can be used for Information Retrieval: Given a query, encode the query will all possible passages (e.g. retrieved with ElasticSearch). Then sort the passages in a decreasing order.",
-                                "input_tier": "class_11",
-                                "output_tier": "class_11",
-                                "number_params": "33.4m",
-                                "model_limits": {
-                                    "max_sequence_length": 512,
-                                    "max_output_tokens": 1024
-                                },
-                                "limits": {
-                                    "19e27818-79cf-4137-ae58-da279f9e9d16": {
-                                        "call_time": "10m0s",
-                                        "max_output_tokens": 1024
-                                    },
-                                    "3f6acf43-ede8-413a-ac69-f8af3bb0cbfe": {
-                                        "call_time": "5m0s",
-                                        "max_output_tokens": 1024
-                                    },
-                                    "a3d2f92f-06f9-48d0-b2e6-a7ba2b4e0577": {
-                                        "call_time": "10m0s",
-                                        "max_output_tokens": 1024
-                                    },
-                                    "d18d88b9-be7a-46ec-be1e-aff14904f1e9": {
-                                        "call_time": "10m0s",
-                                        "max_output_tokens": 1024
-                                    }
-                                },
-                                "lifecycle": [
-                                    {
-                                        "id": "available",
-                                        "start_date": "2024-09-17"
-                                    }
-                                ]
-                            }
-                        ]
-                    }""");
+                        "                    {\n"
++ "                        \"total_count\": 28,\n"
++ "                        \"limit\": 100,\n"
++ "                        \"first\": {\n"
++ "                            \"href\": \"https://us-south.ml.cloud.ibm.com/ml/v1/foundation_model_specs?version=2025-12-05\"\n"
++ "                        },\n"
++ "                        \"resources\": [\n"
++ "                            {\n"
++ "                                \"model_id\": \"cross-encoder/ms-marco-minilm-l-12-v2\",\n"
++ "                                \"label\": \"ms-marco-minilm-l-12-v2\",\n"
++ "                                \"provider\": \"cross-encoder\",\n"
++ "                                \"source\": \"cross-encoder\",\n"
++ "                                \"indemnity\": \"NON_IBM\",\n"
++ "                                \"functions\": [\n"
++ "                                    {\n"
++ "                                        \"id\": \"rerank\"\n"
++ "                                    }\n"
++ "                                ],\n"
++ "                                \"short_description\": \"Used for Information Retrieval: Encode and sort a query will all possible passages.\",\n"
++ "                                \"long_description\": \"The model can be used for Information Retrieval: Given a query, encode the query will all possible passages (e.g. retrieved with ElasticSearch). Then sort the passages in a decreasing order.\",\n"
++ "                                \"input_tier\": \"class_11\",\n"
++ "                                \"output_tier\": \"class_11\",\n"
++ "                                \"number_params\": \"33.4m\",\n"
++ "                                \"model_limits\": {\n"
++ "                                    \"max_sequence_length\": 512,\n"
++ "                                    \"max_output_tokens\": 1024\n"
++ "                                },\n"
++ "                                \"limits\": {\n"
++ "                                    \"19e27818-79cf-4137-ae58-da279f9e9d16\": {\n"
++ "                                        \"call_time\": \"10m0s\",\n"
++ "                                        \"max_output_tokens\": 1024\n"
++ "                                    },\n"
++ "                                    \"3f6acf43-ede8-413a-ac69-f8af3bb0cbfe\": {\n"
++ "                                        \"call_time\": \"5m0s\",\n"
++ "                                        \"max_output_tokens\": 1024\n"
++ "                                    },\n"
++ "                                    \"a3d2f92f-06f9-48d0-b2e6-a7ba2b4e0577\": {\n"
++ "                                        \"call_time\": \"10m0s\",\n"
++ "                                        \"max_output_tokens\": 1024\n"
++ "                                    },\n"
++ "                                    \"d18d88b9-be7a-46ec-be1e-aff14904f1e9\": {\n"
++ "                                        \"call_time\": \"10m0s\",\n"
++ "                                        \"max_output_tokens\": 1024\n"
++ "                                    }\n"
++ "                                },\n"
++ "                                \"lifecycle\": [\n"
++ "                                    {\n"
++ "                                        \"id\": \"available\",\n"
++ "                                        \"start_date\": \"2024-09-17\"\n"
++ "                                    }\n"
++ "                                ]\n"
++ "                            }\n"
++ "                        ]\n"
++ "                    }");
 
         when(mockHttpClient.send(mockHttpRequest.capture(), any(BodyHandler.class)))
                 .thenReturn(mockHttpResponse);

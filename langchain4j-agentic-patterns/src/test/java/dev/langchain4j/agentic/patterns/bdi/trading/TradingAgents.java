@@ -16,23 +16,21 @@ public class TradingAgents {
 
     public interface MarketAnalysisAgent {
 
-        @UserMessage("""
-                You are a market analyst. Analyze the following market data and portfolio state.
-                Provide a concise assessment of the current market conditions, risks, and opportunities.
-                Market data: {{marketData}}
-                Portfolio: {{portfolio}}
-                """)
+        @UserMessage("                You are a market analyst. Analyze the following market data and portfolio state.\n"
++ "                Provide a concise assessment of the current market conditions, risks, and opportunities.\n"
++ "                Market data: {{marketData}}\n"
++ "                Portfolio: {{portfolio}}\n"
++ "                ")
         @Agent(value = "Analyze market conditions and identify risks/opportunities", outputKey = "marketAnalysis")
         String analyzeMarket(@V("marketData") String marketData, @V("portfolio") String portfolio);
     }
 
     public interface MarketRecommendationAgent {
 
-        @UserMessage("""
-                You are a financial advisor. Based on the following market analysis,
-                provide a single trading recommendation.
-                Market analysis: {{marketAnalysis}}
-                """)
+        @UserMessage("                You are a financial advisor. Based on the following market analysis,\n"
++ "                provide a single trading recommendation.\n"
++ "                Market analysis: {{marketAnalysis}}\n"
++ "                ")
         @Agent(value = "Provide a trading recommendation based on market analysis", outputKey = "recommendation")
         MarketRecommendation recommend(@V("marketAnalysis") String marketAnalysis);
     }
@@ -46,14 +44,13 @@ public class TradingAgents {
 
     public interface RebalancingAgent {
 
-        @UserMessage("""
-                You are a portfolio rebalancing specialist.
-                Based on the market analysis, suggest portfolio adjustments to maximize returns.
-                Keep suggestions concise and actionable.
-                Market analysis: {{marketAnalysis}}
-                Hedging strategy in place: {{hedgingStrategy}}
-                Portfolio: {{portfolio}}
-                """)
+        @UserMessage("                You are a portfolio rebalancing specialist.\n"
++ "                Based on the market analysis, suggest portfolio adjustments to maximize returns.\n"
++ "                Keep suggestions concise and actionable.\n"
++ "                Market analysis: {{marketAnalysis}}\n"
++ "                Hedging strategy in place: {{hedgingStrategy}}\n"
++ "                Portfolio: {{portfolio}}\n"
++ "                ")
         @Agent(value = "Suggest portfolio rebalancing to maximize returns", outputKey = "rebalancingPlan")
         String rebalance(@V("marketAnalysis") String marketAnalysis,
                          @V("hedgingStrategy") String hedgingStrategy,
@@ -62,24 +59,22 @@ public class TradingAgents {
 
     public interface HedgingAgent {
 
-        @UserMessage("""
-                You are a risk management specialist.
-                Based on the market analysis, recommend hedging strategies to minimize risk exposure.
-                Focus on protecting against identified threats.
-                Market analysis: {{marketAnalysis}}
-                """)
+        @UserMessage("                You are a risk management specialist.\n"
++ "                Based on the market analysis, recommend hedging strategies to minimize risk exposure.\n"
++ "                Focus on protecting against identified threats.\n"
++ "                Market analysis: {{marketAnalysis}}\n"
++ "                ")
         @Agent(value = "Recommend hedging strategies to minimize risk", outputKey = "hedgingStrategy")
         String hedge(@V("marketAnalysis") String marketAnalysis);
     }
 
     public interface LiquidityAgent {
 
-        @UserMessage("""
-                You are a liquidity management specialist.
-                Based on the portfolio state, assess current liquidity and recommend actions
-                to maintain adequate cash reserves.
-                Portfolio: {{portfolio}}
-                """)
+        @UserMessage("                You are a liquidity management specialist.\n"
++ "                Based on the portfolio state, assess current liquidity and recommend actions\n"
++ "                to maintain adequate cash reserves.\n"
++ "                Portfolio: {{portfolio}}\n"
++ "                ")
         @Agent(value = "Assess and maintain portfolio liquidity", outputKey = "liquidityAssessment")
         String assessLiquidity(@V("portfolio") String portfolio);
     }

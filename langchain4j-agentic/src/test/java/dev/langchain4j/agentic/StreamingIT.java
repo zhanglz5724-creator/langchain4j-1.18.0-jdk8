@@ -359,24 +359,23 @@ public class StreamingIT {
     }
 
     public interface ArticleSearchAgent {
-        @UserMessage("""
-            # Role
-            You are a search execution agent. Your sole task is to execute a search using the provided parameters and
-            format the results.
-            
-            # Workflow
-            1. **Input**: Receive `searchParameters` from the previous step.
-            2. **Action**: **Directly** call the `searchArticle` tool using the provided `searchParameters` exactly as
-               they are. **Do not modify, rewrite, or optimize the parameters.**
-            3. **Output**: Once results are returned, generate a user-friendly response in **Chinese** following these rules:
-                - Format as a numbered Markdown list.
-                - Make titles clickable links: `[Title](https://example.com/article/{id})`.
-                - Include a brief summary below each title.
-                - If no results found, output: "> No articles found matching your query."
-                - Do not include JSON, code blocks, or extra explanations. Only output the formatted Markdown.
-            
-            The search parameters are: {{searchParameters}}
-            """)
+        @UserMessage("            # Role\n"
++ "            You are a search execution agent. Your sole task is to execute a search using the provided parameters and\n"
++ "            format the results.\n"
++ "            \n"
++ "            # Workflow\n"
++ "            1. **Input**: Receive `searchParameters` from the previous step.\n"
++ "            2. **Action**: **Directly** call the `searchArticle` tool using the provided `searchParameters` exactly as\n"
++ "               they are. **Do not modify, rewrite, or optimize the parameters.**\n"
++ "            3. **Output**: Once results are returned, generate a user-friendly response in **Chinese** following these rules:\n"
++ "                - Format as a numbered Markdown list.\n"
++ "                - Make titles clickable links: `[Title](https://example.com/article/{id})`.\n"
++ "                - Include a brief summary below each title.\n"
++ "                - If no results found, output: \"> No articles found matching your query.\"\n"
++ "                - Do not include JSON, code blocks, or extra explanations. Only output the formatted Markdown.\n"
++ "            \n"
++ "            The search parameters are: {{searchParameters}}\n"
++ "            ")
         @Agent(name = "searchArticle", outputKey = "result")
         TokenStream searchArticle(@V("searchParameters") ArticleSearchDto searchParameters);
     }
@@ -389,16 +388,15 @@ public class StreamingIT {
 
     public interface GenerateSearchAgent {
 
-        @SystemMessage("""
-            Based on the user input, generate a structured query parameter object in valid JSON format.
-            
-            Strictly follow these rules:
-            - Only include the fields I have defined; do not add any extra fields.
-            - For optional fields that are uncertain or not mentioned, set their value to null.
-            - Do not include comments, explanations, markdown, or any text outside the JSON.
-            - Output must be valid JSON and nothing else.
-            
-            """)
+        @SystemMessage("            Based on the user input, generate a structured query parameter object in valid JSON format.\n"
++ "            \n"
++ "            Strictly follow these rules:\n"
++ "            - Only include the fields I have defined; do not add any extra fields.\n"
++ "            - For optional fields that are uncertain or not mentioned, set their value to null.\n"
++ "            - Do not include comments, explanations, markdown, or any text outside the JSON.\n"
++ "            - Output must be valid JSON and nothing else.\n"
++ "            \n"
++ "            ")
         @UserMessage("{{message}}")
         @Agent(name = "generateSearchDto", outputKey = "searchParameters")
         ArticleSearchDto generateSearchDto(@V("message") String message);

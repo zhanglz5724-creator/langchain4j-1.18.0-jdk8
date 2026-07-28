@@ -31,11 +31,10 @@ public class InvocationParametersIT {
 
     public interface GreetingAgent {
 
-        @UserMessage("""
-            Greet the user using the greet tool.
-            The user's name is: {{name}}.
-            Return only the greeting, nothing else.
-            """)
+        @UserMessage("            Greet the user using the greet tool.\n"
++ "            The user's name is: {{name}}.\n"
++ "            Return only the greeting, nothing else.\n"
++ "            ")
         @Agent(description = "Greets a user by name", outputKey = "greeting")
         String greet(@V("name") String name, InvocationParameters params);
     }
@@ -82,11 +81,10 @@ public class InvocationParametersIT {
 
     public interface DraftAgent {
 
-        @UserMessage("""
-            Write a one-sentence draft about the topic using the draft tool.
-            The topic is: {{topic}}.
-            Return only the draft text.
-            """)
+        @UserMessage("            Write a one-sentence draft about the topic using the draft tool.\n"
++ "            The topic is: {{topic}}.\n"
++ "            Return only the draft text.\n"
++ "            ")
         @Agent(description = "Writes a draft", outputKey = "draft")
         String writeDraft(@V("topic") String topic, InvocationParameters params);
 
@@ -98,11 +96,10 @@ public class InvocationParametersIT {
 
     public interface ReviewAgent {
 
-        @UserMessage("""
-            Review the following draft using the review tool and return the reviewed text.
-            The draft is: {{draft}}.
-            Return only the reviewed text.
-            """)
+        @UserMessage("            Review the following draft using the review tool and return the reviewed text.\n"
++ "            The draft is: {{draft}}.\n"
++ "            Return only the reviewed text.\n"
++ "            ")
         @Agent(description = "Reviews a draft", outputKey = "reviewed")
         String reviewDraft(@V("draft") String draft, InvocationParameters params);
 
@@ -139,11 +136,10 @@ public class InvocationParametersIT {
 
     public interface DraftAgentNoParams {
 
-        @UserMessage("""
-            Write a one-sentence draft about the topic using the draft tool.
-            The topic is: {{topic}}.
-            Return only the draft text.
-            """)
+        @UserMessage("            Write a one-sentence draft about the topic using the draft tool.\n"
++ "            The topic is: {{topic}}.\n"
++ "            Return only the draft text.\n"
++ "            ")
         @Agent(description = "Writes a draft", outputKey = "draft")
         String writeDraft(@V("topic") String topic);
 

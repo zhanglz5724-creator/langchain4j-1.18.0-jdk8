@@ -16,12 +16,10 @@ public class HoroscopeMain {
 
     public interface AstrologyAgent {
         @SystemMessage(
-                """
-            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.
-            """)
-        @UserMessage("""
-            Generate the horoscope for {{name}} who is a {{sign}}.
-            """)
+                "            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.\n"
++ "            ")
+        @UserMessage("            Generate the horoscope for {{name}} who is a {{sign}}.\n"
++ "            ")
         @Agent("An astrologist that generates horoscopes based on the user's name and zodiac sign.")
         String horoscope(@V("name") String name, @V("sign") String sign);
     }

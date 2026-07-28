@@ -38,24 +38,15 @@ class RunShellCommandToolExecutor implements ToolExecutor {
             if (result.isSuccess()) {
                 String resultText;
                 if (result.stdErr().trim().isEmpty()) {
-                    resultText = """
-                            <working_dir>%s</working_dir>
-                            <stdout>%s</stdout>"String.format("", workingDir, stdOut);
+                    resultText = String.format("<working_dir>%s</working_dir>\n<stdout>%s</stdout>", workingDir, stdOut);
                 } else {
                     String stdErr = formatStdErr(result.stdErr());
-                    resultText = """
-                            <working_dir>%s</working_dir>
-                            <stdout>%s</stdout>
-                            <stderr>%s</stderr>"String.format("", workingDir, stdOut, stdErr);
+                    resultText = String.format("<working_dir>%s</working_dir>\n<stdout>%s</stdout>\n<stderr>%s</stderr>", workingDir, stdOut, stdErr);
                 }
                 return ToolExecutionResult.builder().resultText(resultText).build();
             } else {
                 String stdErr = formatStdErr(result.stdErr());
-                String resultText = """
-                        <working_dir>%s</working_dir>
-                        <exit_code>%s</exit_code>
-                        <stdout>%s</stdout>
-                        <stderr>%s</stderr>"String.format("", workingDir, result.exitCode(), stdOut, stdErr);
+                String resultText = String.format("<working_dir>%s</working_dir>\n<exit_code>%s</exit_code>\n<stdout>%s</stdout>\n<stderr>%s</stderr>", workingDir, result.exitCode(), stdOut, stdErr);
                 return ToolExecutionResult.builder()
                         .isError(true)
                         .resultText(resultText)
@@ -64,11 +55,7 @@ class RunShellCommandToolExecutor implements ToolExecutor {
         } catch (ShellCommandRunner.TimeoutException e) {
             String stdOut = formatStdOut(e.partialStdOut());
             String stdErr = formatStdErr(e.partialStdErr());
-            String resultText = """
-                    <working_dir>%s</working_dir>
-                    <error>%s</error>
-                    <stdout>%s</stdout>
-                    <stderr>%s</stderr>"String.format("", workingDir, e.getMessage(), stdOut, stdErr);
+            String resultText = String.format("<working_dir>%s</working_dir>\n<error>%s</error>\n<stdout>%s</stdout>\n<stderr>%s</stderr>", workingDir, e.getMessage(), stdOut, stdErr);
             return ToolExecutionResult.builder()
                     .isError(true)
                     .resultText(resultText)

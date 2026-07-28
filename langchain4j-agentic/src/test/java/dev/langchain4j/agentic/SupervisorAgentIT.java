@@ -95,12 +95,11 @@ public class SupervisorAgentIT {
     public interface RequestClassifierAgent {
 
         @UserMessage(
-                """
-            Categorize the user request returning only one word among 'legal', 'medical' or 'technical',
-            and nothing else, avoiding any explanation.
-
-            The user request is: '{{request}}'.
-            """)
+                "            Categorize the user request returning only one word among 'legal', 'medical' or 'technical',\n"
++ "            and nothing else, avoiding any explanation.\n"
++ "\n"
++ "            The user request is: '{{request}}'.\n"
++ "            ")
         @Agent("An agent that categorizes the user request")
         String categorizeRequest(@V("request") String request);
     }
@@ -168,37 +167,32 @@ public class SupervisorAgentIT {
     public interface BankerAgent {
 
         @UserMessage(
-                """
-            You are a banker that executes user request crediting or withdrawing US dollars (USD) from an account,
-            using the tools provided and returning the final balance.
-
-            The user request is: '{{it}}'.
-            """)
+                "            You are a banker that executes user request crediting or withdrawing US dollars (USD) from an account,\n"
++ "            using the tools provided and returning the final balance.\n"
++ "\n"
++ "            The user request is: '{{it}}'.\n"
++ "            ")
         String execute(@P("request") String request);
     }
 
     public interface WithdrawAgent {
         @SystemMessage(
-                """
-            You are a banker that can only withdraw US dollars (USD) from a user account.
-            """)
+                "            You are a banker that can only withdraw US dollars (USD) from a user account.\n"
++ "            ")
         @UserMessage(
-                """
-            Withdraw {{amountInUSD}} USD from {{withdrawUser}}'s account and return the new balance.
-            """)
+                "            Withdraw {{amountInUSD}} USD from {{withdrawUser}}'s account and return the new balance.\n"
++ "            ")
         @Agent("A banker that withdraw USD from an account")
         String withdraw(@V("withdrawUser") String withdrawUser, @V("amountInUSD") Double amountInUSD);
     }
 
     public interface CreditAgent {
         @SystemMessage(
-                """
-            You are a banker that can only credit US dollars (USD) to a user account.
-            """)
+                "            You are a banker that can only credit US dollars (USD) to a user account.\n"
++ "            ")
         @UserMessage(
-                """
-            Credit {{amountInUSD}} USD to {{creditUser}}'s account and return the new balance.
-            """)
+                "            Credit {{amountInUSD}} USD to {{creditUser}}'s account and return the new balance.\n"
++ "            ")
         @Agent("A banker that credit USD to an account")
         String credit(@V("creditUser") String creditUser, @V("amountInUSD") Double amountInUSD);
     }
@@ -296,11 +290,10 @@ public class SupervisorAgentIT {
 
     public interface ExchangeAgent {
         @UserMessage(
-                """
-            You are an operator exchanging money in different currencies.
-            Use the tool to exchange {{amount}} {{originalCurrency}} into {{targetCurrency}}
-            returning only the final amount provided by the tool as it is and nothing else.
-            """)
+                "            You are an operator exchanging money in different currencies.\n"
++ "            Use the tool to exchange {{amount}} {{originalCurrency}} into {{targetCurrency}}\n"
++ "            returning only the final amount provided by the tool as it is and nothing else.\n"
++ "            ")
         @Agent(outputKey = "exchange")
         Double exchange(
                 @V("originalCurrency") String originalCurrency,
@@ -623,11 +616,10 @@ public class SupervisorAgentIT {
 
     public interface TypedExchangeAgent {
         @UserMessage(
-                """
-            You are an operator exchanging money in different currencies.
-            Use the tool to calculate the given {{exchangeRequest}}
-            returning only the final amount provided by the tool as it is and nothing else.
-            """)
+                "            You are an operator exchanging money in different currencies.\n"
++ "            Use the tool to calculate the given {{exchangeRequest}}\n"
++ "            returning only the final amount provided by the tool as it is and nothing else.\n"
++ "            ")
         @Agent(outputKey = "exchange")
         Double exchange(@V("exchangeRequest") ExchangeRequest exchangeRequest);
     }
@@ -941,12 +933,11 @@ public class SupervisorAgentIT {
 
         @Override
         public ChatResponse chat(ChatRequest request) {
-            String json = """
-                    {
-                      "agentName": "done",
-                      "arguments": {}
-                    }
-                    """;
+            String json = "                    {\n"
++ "                      \"agentName\": \"done\",\n"
++ "                      \"arguments\": {}\n"
++ "                    }\n"
++ "                    ";
 
             return ChatResponse.builder()
                     .aiMessage(AiMessage.from(json))
@@ -977,14 +968,13 @@ public class SupervisorAgentIT {
 
         @Override
         public ChatResponse chat(ChatRequest request) {
-            String json = """
-                    {
-                      "agentName": "done",
-                      "arguments": {
-                        "response": "Paris"
-                      }
-                    }
-                    """;
+            String json = "                    {\n"
++ "                      \"agentName\": \"done\",\n"
++ "                      \"arguments\": {\n"
++ "                        \"response\": \"Paris\"\n"
++ "                      }\n"
++ "                    }\n"
++ "                    ";
 
             return ChatResponse.builder()
                     .aiMessage(AiMessage.from(json))

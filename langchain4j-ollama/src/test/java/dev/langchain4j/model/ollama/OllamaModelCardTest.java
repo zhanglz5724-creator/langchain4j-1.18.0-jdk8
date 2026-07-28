@@ -14,76 +14,75 @@ class OllamaModelCardTest {
 
     @Test
     void should_deserialize_show_model_information_response() {
-        String json = """
-                {
-                  "license": "Apache-2.0",
-                  "modelfile": "FROM llama3.2",
-                  "parameters": "temperature 0.8",
-                  "template": "{{ .Prompt }}",
-                  "system": "You are helpful",
-                  "details": {
-                    "parent_model": "llama3.2",
-                    "format": "gguf",
-                    "family": "llama",
-                    "families": [
-                      "llama"
-                    ],
-                    "parameter_size": "3.2B",
-                    "quantization_level": "Q4_K_M"
-                  },
-                  "messages": [
-                    {
-                      "role": "SYSTEM",
-                      "content": "Use short answers",
-                      "thinking": "Internal reasoning",
-                      "images": [
-                        "base64-image"
-                      ],
-                      "tool_calls": [
-                        {
-                          "function": {
-                            "index": 0,
-                            "name": "get_weather",
-                            "arguments": {
-                              "city": "Paris"
-                            }
-                          }
-                        },
-                        {
-                          "function": {
-                            "name": "get_time",
-                            "arguments": {
-                              "city": "Paris"
-                            }
-                          }
-                        }
-                      ],
-                      "tool_name": "get_weather"
-                    }
-                  ],
-                  "model_info": {
-                    "general.architecture": "llama"
-                  },
-                  "projector_info": {
-                    "clip.has_text_encoder": true
-                  },
-                  "tensors": [
-                    {
-                      "name": "token_embd.weight",
-                      "type": "F16",
-                      "shape": [
-                        32000,
-                        4096
-                      ]
-                    }
-                  ],
-                  "capabilities": [
-                    "completion",
-                    "tools"
-                  ],
-                  "modified_at": "2025-01-02T03:04:05Z"
-                }
-                """;
+        String json = "                {\n"
++ "                  \"license\": \"Apache-2.0\",\n"
++ "                  \"modelfile\": \"FROM llama3.2\",\n"
++ "                  \"parameters\": \"temperature 0.8\",\n"
++ "                  \"template\": \"{{ .Prompt }}\",\n"
++ "                  \"system\": \"You are helpful\",\n"
++ "                  \"details\": {\n"
++ "                    \"parent_model\": \"llama3.2\",\n"
++ "                    \"format\": \"gguf\",\n"
++ "                    \"family\": \"llama\",\n"
++ "                    \"families\": [\n"
++ "                      \"llama\"\n"
++ "                    ],\n"
++ "                    \"parameter_size\": \"3.2B\",\n"
++ "                    \"quantization_level\": \"Q4_K_M\"\n"
++ "                  },\n"
++ "                  \"messages\": [\n"
++ "                    {\n"
++ "                      \"role\": \"SYSTEM\",\n"
++ "                      \"content\": \"Use short answers\",\n"
++ "                      \"thinking\": \"Internal reasoning\",\n"
++ "                      \"images\": [\n"
++ "                        \"base64-image\"\n"
++ "                      ],\n"
++ "                      \"tool_calls\": [\n"
++ "                        {\n"
++ "                          \"function\": {\n"
++ "                            \"index\": 0,\n"
++ "                            \"name\": \"get_weather\",\n"
++ "                            \"arguments\": {\n"
++ "                              \"city\": \"Paris\"\n"
++ "                            }\n"
++ "                          }\n"
++ "                        },\n"
++ "                        {\n"
++ "                          \"function\": {\n"
++ "                            \"name\": \"get_time\",\n"
++ "                            \"arguments\": {\n"
++ "                              \"city\": \"Paris\"\n"
++ "                            }\n"
++ "                          }\n"
++ "                        }\n"
++ "                      ],\n"
++ "                      \"tool_name\": \"get_weather\"\n"
++ "                    }\n"
++ "                  ],\n"
++ "                  \"model_info\": {\n"
++ "                    \"general.architecture\": \"llama\"\n"
++ "                  },\n"
++ "                  \"projector_info\": {\n"
++ "                    \"clip.has_text_encoder\": true\n"
++ "                  },\n"
++ "                  \"tensors\": [\n"
++ "                    {\n"
++ "                      \"name\": \"token_embd.weight\",\n"
++ "                      \"type\": \"F16\",\n"
++ "                      \"shape\": [\n"
++ "                        32000,\n"
++ "                        4096\n"
++ "                      ]\n"
++ "                    }\n"
++ "                  ],\n"
++ "                  \"capabilities\": [\n"
++ "                    \"completion\",\n"
++ "                    \"tools\"\n"
++ "                  ],\n"
++ "                  \"modified_at\": \"2025-01-02T03:04:05Z\"\n"
++ "                }\n"
++ "                ";
 
         OllamaModelCard modelCard = fromJson(json, OllamaModelCard.class);
 
@@ -129,15 +128,14 @@ class OllamaModelCardTest {
 
     @Test
     void should_deserialize_show_model_information_response_without_optional_fields() {
-        String json = """
-                {
-                  "modelfile": "FROM llama3.2",
-                  "template": "{{ .Prompt }}",
-                  "details": {
-                    "format": "gguf"
-                  }
-                }
-                """;
+        String json = "                {\n"
++ "                  \"modelfile\": \"FROM llama3.2\",\n"
++ "                  \"template\": \"{{ .Prompt }}\",\n"
++ "                  \"details\": {\n"
++ "                    \"format\": \"gguf\"\n"
++ "                  }\n"
++ "                }\n"
++ "                ";
 
         OllamaModelCard modelCard = fromJson(json, OllamaModelCard.class);
 

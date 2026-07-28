@@ -106,46 +106,45 @@ class AgentsRegistryTest {
     }
 
     private static String registrySource(String className, String agentName, String agentDescription) {
-        return """
-                package dev.langchain4j.agentic.test;
-
-                import dev.langchain4j.agentic.planner.AgentArgument;
-                import dev.langchain4j.agentic.planner.AgentInstance;
-                import dev.langchain4j.agentic.planner.AgentsRegistry;
-                import dev.langchain4j.agentic.planner.AgenticSystemTopology;
-                import dev.langchain4j.agentic.planner.Planner;
-                import java.lang.reflect.Type;
-                import java.util.List;
-                import java.util.Map;
-
-                public class %s implements AgentsRegistry {
-
-                    private static final AgentInstance AGENT = new AgentInstance() {
-                        @Override public Class<?> type() { return Object.class; }
-                        @Override public Class<? extends Planner> plannerType() { return null; }
-                        @Override public String name() { return "%s"; }
-                        @Override public String agentId() { return "%s"; }
-                        @Override public String description() { return "%s"; }
-                        @Override public Type outputType() { return String.class; }
-                        @Override public String outputKey() { return "output"; }
-                        @Override public boolean async() { return false; }
-                        @Override public List<AgentArgument> arguments() { return List.of(); }
-                        @Override public AgentInstance parent() { return null; }
-                        @Override public List<AgentInstance> subagents() { return List.of(); }
-                        @Override public AgenticSystemTopology topology() { return AgenticSystemTopology.NON_AI_AGENT; }
-                    };
-
-                    @Override
-                    public Map<String, AgentInstance> allAgents() { return Map.of("%s", AGENT); }
-
-                    @Override
-                    public AgentInstance getAgent(String name) {
-                        if ("%s".equals(name)) return AGENT;
-                        throw new RuntimeException("No agent found with name: " + name);
-                    }
-
-                }
-                """.formatted(className, agentName, agentName, agentDescription, agentName, agentName);
+        return String.format("                package dev.langchain4j.agentic.test;\n"
++ "\n"
++ "                import dev.langchain4j.agentic.planner.AgentArgument;\n"
++ "                import dev.langchain4j.agentic.planner.AgentInstance;\n"
++ "                import dev.langchain4j.agentic.planner.AgentsRegistry;\n"
++ "                import dev.langchain4j.agentic.planner.AgenticSystemTopology;\n"
++ "                import dev.langchain4j.agentic.planner.Planner;\n"
++ "                import java.lang.reflect.Type;\n"
++ "                import java.util.List;\n"
++ "                import java.util.Map;\n"
++ "\n"
++ "                public class %s implements AgentsRegistry {\n"
++ "\n"
++ "                    private static final AgentInstance AGENT = new AgentInstance() {\n"
++ "                        @Override public Class<?> type() { return Object.class; }\n"
++ "                        @Override public Class<? extends Planner> plannerType() { return null; }\n"
++ "                        @Override public String name() { return \"%s\"; }\n"
++ "                        @Override public String agentId() { return \"%s\"; }\n"
++ "                        @Override public String description() { return \"%s\"; }\n"
++ "                        @Override public Type outputType() { return String.class; }\n"
++ "                        @Override public String outputKey() { return \"output\"; }\n"
++ "                        @Override public boolean async() { return false; }\n"
++ "                        @Override public List<AgentArgument> arguments() { return List.of(); }\n"
++ "                        @Override public AgentInstance parent() { return null; }\n"
++ "                        @Override public List<AgentInstance> subagents() { return List.of(); }\n"
++ "                        @Override public AgenticSystemTopology topology() { return AgenticSystemTopology.NON_AI_AGENT; }\n"
++ "                    };\n"
++ "\n"
++ "                    @Override\n"
++ "                    public Map<String, AgentInstance> allAgents() { return Map.of(\"%s\", AGENT); }\n"
++ "\n"
++ "                    @Override\n"
++ "                    public AgentInstance getAgent(String name) {\n"
++ "                        if (\"%s\".equals(name)) return AGENT;\n"
++ "                        throw new RuntimeException(\"No agent found with name: \" + name);\n"
++ "                    }\n"
++ "\n"
++ "                }\n"
++ "                ", className, agentName, agentName, agentDescription, agentName, agentName);
     }
 
     private static CompiledRegistry compileRegistries(String... registrySources) throws Exception {
@@ -229,53 +228,52 @@ class AgentsRegistryTest {
     }
 
     private static String testRegistrySource() {
-        return """
-                package dev.langchain4j.agentic.test;
-
-                import dev.langchain4j.agentic.planner.AgentArgument;
-                import dev.langchain4j.agentic.planner.AgentInstance;
-                import dev.langchain4j.agentic.planner.AgentsRegistry;
-                import dev.langchain4j.agentic.planner.AgenticSystemTopology;
-                import dev.langchain4j.agentic.planner.Planner;
-                import java.lang.reflect.Type;
-                import java.util.List;
-                import java.util.Map;
-
-                public class TestAgentsRegistry implements AgentsRegistry {
-
-                    private static final AgentInstance TEST_AGENT = new AgentInstance() {
-                        @Override public Class<?> type() { return Object.class; }
-                        @Override public Class<? extends Planner> plannerType() { return null; }
-                        @Override public String name() { return "testAgent"; }
-                        @Override public String agentId() { return "testAgent"; }
-                        @Override public String description() { return "A test agent from SPI"; }
-                        @Override public Type outputType() { return String.class; }
-                        @Override public String outputKey() { return "testOutput"; }
-                        @Override public boolean async() { return false; }
-                        @Override public List<AgentArgument> arguments() { return List.of(); }
-                        @Override public AgentInstance parent() { return null; }
-                        @Override public List<AgentInstance> subagents() { return List.of(); }
-                        @Override public AgenticSystemTopology topology() { return AgenticSystemTopology.NON_AI_AGENT; }
-                    };
-
-                    private final Map<String, AgentInstance> agents = Map.of("testAgent", TEST_AGENT);
-
-                    @Override
-                    public Map<String, AgentInstance> allAgents() {
-                        return agents;
-                    }
-
-                    @Override
-                    public AgentInstance getAgent(String name) {
-                        AgentInstance agent = agents.get(name);
-                        if (agent == null) {
-                            throw new RuntimeException("No agent found with name: " + name);
-                        }
-                        return agent;
-                    }
-
-                }
-                """;
+        return "                package dev.langchain4j.agentic.test;\n"
++ "\n"
++ "                import dev.langchain4j.agentic.planner.AgentArgument;\n"
++ "                import dev.langchain4j.agentic.planner.AgentInstance;\n"
++ "                import dev.langchain4j.agentic.planner.AgentsRegistry;\n"
++ "                import dev.langchain4j.agentic.planner.AgenticSystemTopology;\n"
++ "                import dev.langchain4j.agentic.planner.Planner;\n"
++ "                import java.lang.reflect.Type;\n"
++ "                import java.util.List;\n"
++ "                import java.util.Map;\n"
++ "\n"
++ "                public class TestAgentsRegistry implements AgentsRegistry {\n"
++ "\n"
++ "                    private static final AgentInstance TEST_AGENT = new AgentInstance() {\n"
++ "                        @Override public Class<?> type() { return Object.class; }\n"
++ "                        @Override public Class<? extends Planner> plannerType() { return null; }\n"
++ "                        @Override public String name() { return \"testAgent\"; }\n"
++ "                        @Override public String agentId() { return \"testAgent\"; }\n"
++ "                        @Override public String description() { return \"A test agent from SPI\"; }\n"
++ "                        @Override public Type outputType() { return String.class; }\n"
++ "                        @Override public String outputKey() { return \"testOutput\"; }\n"
++ "                        @Override public boolean async() { return false; }\n"
++ "                        @Override public List<AgentArgument> arguments() { return List.of(); }\n"
++ "                        @Override public AgentInstance parent() { return null; }\n"
++ "                        @Override public List<AgentInstance> subagents() { return List.of(); }\n"
++ "                        @Override public AgenticSystemTopology topology() { return AgenticSystemTopology.NON_AI_AGENT; }\n"
++ "                    };\n"
++ "\n"
++ "                    private final Map<String, AgentInstance> agents = Map.of(\"testAgent\", TEST_AGENT);\n"
++ "\n"
++ "                    @Override\n"
++ "                    public Map<String, AgentInstance> allAgents() {\n"
++ "                        return agents;\n"
++ "                    }\n"
++ "\n"
++ "                    @Override\n"
++ "                    public AgentInstance getAgent(String name) {\n"
++ "                        AgentInstance agent = agents.get(name);\n"
++ "                        if (agent == null) {\n"
++ "                            throw new RuntimeException(\"No agent found with name: \" + name);\n"
++ "                        }\n"
++ "                        return agent;\n"
++ "                    }\n"
++ "\n"
++ "                }\n"
++ "                ";
     }
 
     private record CompiledRegistry(URLClassLoader classLoader, Path tempDir) implements AutoCloseable {

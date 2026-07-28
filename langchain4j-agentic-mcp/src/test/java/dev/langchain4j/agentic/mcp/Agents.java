@@ -15,12 +15,11 @@ public class Agents {
 
     public interface CreativeWriter {
 
-        @UserMessage("""
-                You are a creative writer.
-                Generate a draft of a story long no more than 3 sentence around the given topic.
-                Return only the story and nothing else.
-                The topic is {{topic}}.
-                """)
+        @UserMessage("                You are a creative writer.\n"
++ "                Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                Return only the story and nothing else.\n"
++ "                The topic is {{topic}}.\n"
++ "                ")
         @Agent(description = "Generate a story based on the given topic", outputKey = "story")
         String generateStory(@V("topic") String topic);
     }
@@ -28,12 +27,11 @@ public class Agents {
     public interface StyleEditor {
 
         @UserMessage(
-                """
-                You are a professional editor.
-                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.
-                Return only the story and nothing else.
-                The story is "{{story}}".
-                """)
+                "                You are a professional editor.\n"
++ "                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.\n"
++ "                Return only the story and nothing else.\n"
++ "                The story is \"{{story}}\".\n"
++ "                ")
         @Agent(description = "Edit a story to better fit a given style", outputKey = "story")
         String editStory(@V("story") String story, @V("style") String style);
     }
@@ -41,13 +39,12 @@ public class Agents {
     public interface StyleScorer {
 
         @UserMessage(
-                """
-                You are a critical reviewer.
-                Give a review score between 0.0 and 1.0 for the following story based on how well it aligns with the style '{{style}}'.
-                Return only the score and nothing else.
-
-                The story is: "{{story}}"
-                """)
+                "                You are a critical reviewer.\n"
++ "                Give a review score between 0.0 and 1.0 for the following story based on how well it aligns with the style '{{style}}'.\n"
++ "                Return only the score and nothing else.\n"
++ "\n"
++ "                The story is: \"{{story}}\"\n"
++ "                ")
         @Agent(description = "Score a story based on how well it aligns with a given style", outputKey = "score")
         double scoreStyle(@V("story") String story, @V("style") String style);
     }

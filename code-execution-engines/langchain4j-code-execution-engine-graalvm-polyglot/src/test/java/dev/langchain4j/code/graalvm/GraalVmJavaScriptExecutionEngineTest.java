@@ -12,14 +12,12 @@ class GraalVmJavaScriptExecutionEngineTest {
     @Test
     void should_execute_code() {
 
-        String code = """
-                function fibonacci(n) {
-                    if (n <= 1) return n;
-                    return fibonacci(n - 1) + fibonacci(n - 2);
-                }
-                                
-                fibonacci(10)
-                """;
+        String code = "function fibonacci(n) {\n" +
+                "    if (n <= 1) return n;\n" +
+                "    return fibonacci(n - 1) + fibonacci(n - 2);\n" +
+                "}\n" +
+                "                \n" +
+                "fibonacci(10)\n";
 
         String result = engine.execute(code);
 

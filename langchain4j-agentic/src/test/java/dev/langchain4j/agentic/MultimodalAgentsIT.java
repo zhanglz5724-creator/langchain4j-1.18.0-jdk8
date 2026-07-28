@@ -37,10 +37,9 @@ public class MultimodalAgentsIT {
     public interface AnimalsIdentifier {
 
         @SystemMessage("You are an expert in identifying animals from images.")
-        @UserMessage("""
-            Recognize the type of animals present in the given image.
-            Reply with the name of the animal only and nothing else, using the plural if they are more than one.
-            """)
+        @UserMessage("            Recognize the type of animals present in the given image.\n"
++ "            Reply with the name of the animal only and nothing else, using the plural if they are more than one.\n"
++ "            ")
         @Agent("Recognize the type of animals present in an image.")
         String identify(@UserMessage @V("animalsImage") ImageContent animalsImage);
     }
@@ -48,9 +47,8 @@ public class MultimodalAgentsIT {
     public interface AnimalsCounter {
 
         @SystemMessage("You are an expert in counting specific animals from images.")
-        @UserMessage("""
-            How many {{animalType}} are present in the given image?
-            """)
+        @UserMessage("            How many {{animalType}} are present in the given image?\n"
++ "            ")
         @Agent("Count the number of animals of a given type present in an image.")
         int count(@UserMessage @V("animalsImage") ImageContent animalsImage, @V("animalType") String animalType);
     }

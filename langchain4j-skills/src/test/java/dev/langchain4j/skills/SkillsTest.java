@@ -139,16 +139,14 @@ class SkillsTest {
         Skill skill = Skill.builder()
                 .name("using-process-tool")
                 .description("Describes how to correctly use 'process' tool")
-                .content("""
-                        When user asks you to use the 'process' tool, you need to first call the 'generate' tool with
-                        2 arguments: arg0 (surname) and arg1 (name).
-                        
-                        When you have an id, call the 'process' tool with 3 arguments:
-                        arg0 (name), arg1 (id), arg2 (surname).
-                        
-                        If 'process' tool returns code 17, proceed with [this](references/17.md) guide,
-                        if it returns code 25, proceed with [this](references/25.md) guide.
-                        """)
+                .content("When user asks you to use the 'process' tool, you need to first call the 'generate' tool with\n"
+                        + "2 arguments: arg0 (surname) and arg1 (name).\n"
+                        + "\n"
+                        + "When you have an id, call the 'process' tool with 3 arguments:\n"
+                        + "arg0 (name), arg1 (id), arg2 (surname).\n"
+                        + "\n"
+                        + "If 'process' tool returns code 17, proceed with [this](references/17.md) guide,\n"
+                        + "if it returns code 25, proceed with [this](references/25.md) guide.")
                 .resources(List.of(
                         SkillResource.builder()
                                 .relativePath("references/17.md")
@@ -222,10 +220,8 @@ class SkillsTest {
         Skill firstSkill = Skill.builder()
                 .name("using-poll-tool")
                 .description("Describes how to correctly use the 'poll' tool")
-                .content("""
-                        When user asks you to use the 'poll' tool, you need to call it and then call the 'process' tool
-                        with the output of the 'poll' tool.
-                        """)
+                .content("When user asks you to use the 'poll' tool, you need to call it and then call the 'process' tool\n"
+                        + "with the output of the 'poll' tool.")
                 .build();
 
         Skill secondSkill = FileSystemSkillLoader.loadSkill(toPath("skills/using-process-tool"));
@@ -275,12 +271,12 @@ class SkillsTest {
 
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(chatModelMock)
-                .systemMessage("""
-                        You have access to the following skills:
-                        %s
-                        When the user's request relates to one of these skills,
-                        activate it first using the 'activate_skill' tool before proceeding.
-                        """.formatted(skills.formatAvailableSkills()))
+                .systemMessage(String.format(
+                        "You have access to the following skills:\n" +
+                        "%s\n" +
+                        "When the user's request relates to one of these skills,\n" +
+                        "activate it first using the 'activate_skill' tool before proceeding.",
+                        skills.formatAvailableSkills()))
                 .tools(spyTools)
                 .toolProvider(skills.toolProvider())
                 .build();
@@ -386,12 +382,12 @@ class SkillsTest {
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(spyChatModel)
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(100))
-                .systemMessage("""
-                        You have access to the following skills:
-                        %s
-                        When the user's request relates to one of these skills,
-                        activate it first using the 'activate_skill' tool before proceeding.
-                        """.formatted(skills.formatAvailableSkills()))
+                .systemMessage(String.format(
+                        "You have access to the following skills:\n" +
+                        "%s\n" +
+                        "When the user's request relates to one of these skills,\n" +
+                        "activate it first using the 'activate_skill' tool before proceeding.",
+                        skills.formatAvailableSkills()))
                 .toolProvider(skills.toolProvider())
                 .build();
 
@@ -448,12 +444,12 @@ class SkillsTest {
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(spyChatModel)
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(100))
-                .systemMessage("""
-                        You have access to the following skills:
-                        %s
-                        When the user's request relates to one of these skills,
-                        activate it first using the 'activate_skill' tool before proceeding.
-                        """.formatted(skills.formatAvailableSkills()))
+                .systemMessage(String.format(
+                        "You have access to the following skills:\n" +
+                        "%s\n" +
+                        "When the user's request relates to one of these skills,\n" +
+                        "activate it first using the 'activate_skill' tool before proceeding.",
+                        skills.formatAvailableSkills()))
                 .toolProvider(skills.toolProvider())
                 .build();
 
@@ -536,13 +532,13 @@ class SkillsTest {
 
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(spyChatModel)
-                .systemMessage("""
-                        You have access to the following skills:
-                        %s
-                        When the user's request relates to one of these skills,
-                        activate it first using the 'activate_skill' tool before proceeding.
-                        Activate only the relevant skill. Do NOT activate unrelated skills.
-                        """.formatted(skills.formatAvailableSkills()))
+                .systemMessage(String.format(
+                        "You have access to the following skills:\n" +
+                        "%s\n" +
+                        "When the user's request relates to one of these skills,\n" +
+                        "activate it first using the 'activate_skill' tool before proceeding.\n" +
+                        "Activate only the relevant skill. Do NOT activate unrelated skills.",
+                        skills.formatAvailableSkills()))
                 .toolProvider(skills.toolProvider())
                 .build();
 
@@ -608,12 +604,12 @@ class SkillsTest {
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(spyChatModel)
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(100))
-                .systemMessage("""
-                        You have access to the following skills:
-                        %s
-                        When the user's request relates to one of these skills,
-                        activate it first using the 'activate_skill' tool before proceeding.
-                        """.formatted(skills.formatAvailableSkills()))
+                .systemMessage(String.format(
+                        "You have access to the following skills:\n" +
+                        "%s\n" +
+                        "When the user's request relates to one of these skills,\n" +
+                        "activate it first using the 'activate_skill' tool before proceeding.",
+                        skills.formatAvailableSkills()))
                 .tools(spyTools)
                 .toolProvider(skills.toolProvider())
                 .build();
@@ -714,13 +710,13 @@ class SkillsTest {
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(spyChatModel)
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(100))
-                .systemMessage("""
-                        You have access to the following skills:
-                        %s
-                        When the user's request relates to one of these skills,
-                        activate it first using the 'activate_skill' tool before proceeding.
-                        You can activate multiple skills if needed.
-                        """.formatted(skills.formatAvailableSkills()))
+                .systemMessage(String.format(
+                        "You have access to the following skills:\n" +
+                        "%s\n" +
+                        "When the user's request relates to one of these skills,\n" +
+                        "activate it first using the 'activate_skill' tool before proceeding.\n" +
+                        "You can activate multiple skills if needed.",
+                        skills.formatAvailableSkills()))
                 .toolProvider(skills.toolProvider())
                 .build();
 
@@ -801,12 +797,12 @@ class SkillsTest {
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(spyChatModel)
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(100))
-                .systemMessage("""
-                        You have access to the following skills:
-                        %s
-                        When the user's request relates to one of these skills,
-                        activate it first using the 'activate_skill' tool before proceeding.
-                        """.formatted(skills.formatAvailableSkills()))
+                .systemMessage(String.format(
+                        "You have access to the following skills:\n" +
+                        "%s\n" +
+                        "When the user's request relates to one of these skills,\n" +
+                        "activate it first using the 'activate_skill' tool before proceeding.",
+                        skills.formatAvailableSkills()))
                 .toolProvider(skills.toolProvider())
                 .build();
 

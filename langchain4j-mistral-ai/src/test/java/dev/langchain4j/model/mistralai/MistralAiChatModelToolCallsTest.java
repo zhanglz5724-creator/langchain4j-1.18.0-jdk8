@@ -23,31 +23,7 @@ class MistralAiChatModelToolCallsTest {
     @Test
     void should_handle_response_with_only_tool_calls_and_null_content() {
         // given - vLLM-style response: assistant emits only tool_calls, content is null
-        String jsonResponse = """
-                {
-                    "id": "chatcmpl-9ccb8be3370654bc",
-                    "object": "chat.completion",
-                    "created": 1778075620,
-                    "model": "mistralai/Ministral-3-8B-Instruct-2512",
-                    "choices": [{
-                        "index": 0,
-                        "message": {
-                            "role": "assistant",
-                            "content": null,
-                            "tool_calls": [{
-                                "id": "chatcmpl-tool-b51c242ff1eacb66",
-                                "type": "function",
-                                "function": {
-                                    "name": "verifier_date_incident",
-                                    "arguments": "{\\"date\\": \\"2026-05-06\\"}"
-                                }
-                            }]
-                        },
-                        "finish_reason": "tool_calls"
-                    }],
-                    "usage": {"prompt_tokens": 4175, "completion_tokens": 23, "total_tokens": 4198}
-                }
-                """;
+        String jsonResponse = "{\n    \"id\": \"chatcmpl-9ccb8be3370654bc\",\n    \"object\": \"chat.completion\",\n    \"created\": 1778075620,\n    \"model\": \"mistralai/Ministral-3-8B-Instruct-2512\",\n    \"choices\": [{\n        \"index\": 0,\n        \"message\": {\n            \"role\": \"assistant\",\n            \"content\": null,\n            \"tool_calls\": [{\n                \"id\": \"chatcmpl-tool-b51c242ff1eacb66\",\n                \"type\": \"function\",\n                \"function\": {\n                    \"name\": \"verifier_date_incident\",\n                    \"arguments\": \"{\\\"date\\\": \\\"2026-05-06\\\"}\"\n                }\n            }]\n        },\n        \"finish_reason\": \"tool_calls\"\n    }],\n    \"usage\": {\"prompt_tokens\": 4175, \"completion_tokens\": 23, \"total_tokens\": 4198}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -93,30 +69,7 @@ class MistralAiChatModelToolCallsTest {
     @Test
     void should_handle_response_with_both_text_content_and_tool_calls() {
         // given
-        String jsonResponse = """
-                {
-                    "id": "chatcmpl-mixed",
-                    "created": 1778075620,
-                    "model": "mistralai/Ministral-3-8B-Instruct-2512",
-                    "choices": [{
-                        "index": 0,
-                        "message": {
-                            "role": "assistant",
-                            "content": [{"type": "text", "text": "Je vérifie cela tout de suite."}],
-                            "tool_calls": [{
-                                "id": "call_1",
-                                "type": "function",
-                                "function": {
-                                    "name": "verifier_date_incident",
-                                    "arguments": "{\\"date\\": \\"2026-05-06\\"}"
-                                }
-                            }]
-                        },
-                        "finish_reason": "tool_calls"
-                    }],
-                    "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}
-                }
-                """;
+        String jsonResponse = "{\n    \"id\": \"chatcmpl-mixed\",\n    \"created\": 1778075620,\n    \"model\": \"mistralai/Ministral-3-8B-Instruct-2512\",\n    \"choices\": [{\n        \"index\": 0,\n        \"message\": {\n            \"role\": \"assistant\",\n            \"content\": [{\"type\": \"text\", \"text\": \"Je vérifie cela tout de suite.\"}],\n            \"tool_calls\": [{\n                \"id\": \"call_1\",\n                \"type\": \"function\",\n                \"function\": {\n                    \"name\": \"verifier_date_incident\",\n                    \"arguments\": \"{\\\"date\\\": \\\"2026-05-06\\\"}\"\n                }\n            }]\n        },\n        \"finish_reason\": \"tool_calls\"\n    }],\n    \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 20, \"total_tokens\": 30}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)
@@ -155,23 +108,7 @@ class MistralAiChatModelToolCallsTest {
     @Test
     void should_handle_response_with_text_only_and_no_tool_calls() {
         // given
-        String jsonResponse = """
-                {
-                    "id": "chatcmpl-textonly",
-                    "created": 1778075620,
-                    "model": "mistralai/Ministral-3-8B-Instruct-2512",
-                    "choices": [{
-                        "index": 0,
-                        "message": {
-                            "role": "assistant",
-                            "content": [{"type": "text", "text": "Bonjour, comment puis-je vous aider ?"}],
-                            "tool_calls": null
-                        },
-                        "finish_reason": "stop"
-                    }],
-                    "usage": {"prompt_tokens": 5, "completion_tokens": 10, "total_tokens": 15}
-                }
-                """;
+        String jsonResponse = "{\n    \"id\": \"chatcmpl-textonly\",\n    \"created\": 1778075620,\n    \"model\": \"mistralai/Ministral-3-8B-Instruct-2512\",\n    \"choices\": [{\n        \"index\": 0,\n        \"message\": {\n            \"role\": \"assistant\",\n            \"content\": [{\"type\": \"text\", \"text\": \"Bonjour, comment puis-je vous aider ?\"}],\n            \"tool_calls\": null\n        },\n        \"finish_reason\": \"stop\"\n    }],\n    \"usage\": {\"prompt_tokens\": 5, \"completion_tokens\": 10, \"total_tokens\": 15}\n}";
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(SuccessfulHttpResponse.builder()
                 .statusCode(200)

@@ -59,14 +59,8 @@ class MistralAiStreamingFimModelIT {
                 .logRequests(true)
                 .build();
 
-        String codePrompt = """
-                            public static void main(String[] args) {
-                                // Create a function to multiply two numbers
-                          """;
-        String suffix = """
-                          System.out.println(result);
-                        }
-                      """;
+        String codePrompt = "public static void main(String[] args) {\n    // Create a function to multiply two numbers";
+        String suffix = "  System.out.println(result);\n}";
 
         // When
         TestStreamingResponseHandler<String> handler = new TestStreamingResponseHandler<>();
@@ -92,9 +86,7 @@ class MistralAiStreamingFimModelIT {
                 .logRequests(true)
                 .build();
 
-        String codePrompt = """
-                            public static void main
-                          """;
+        String codePrompt = "public static void main";
 
         // When
         TestStreamingResponseHandler<String> handler = new TestStreamingResponseHandler<>();
@@ -119,16 +111,8 @@ class MistralAiStreamingFimModelIT {
                 .logRequests(true)
                 .build();
 
-        String codePrompt = """
-                          public class HelloWorld {
-                            public static void main(String[] args) {
-                                ChatLanguageModel model = MistralAiChatModel.withApiKey(ApiKeys.MISTRALAI_API_KEY);
-                          """;
-        String suffix = """
-                          System.out.println(response);
-                        }
-                      }
-                      """;
+        String codePrompt = "public class HelloWorld {\n  public static void main(String[] args) {\n      ChatLanguageModel model = MistralAiChatModel.withApiKey(ApiKeys.MISTRALAI_API_KEY);";
+        String suffix = "    System.out.println(response);\n  }\n}";
 
         // When
         TestStreamingResponseHandler<String> handler = new TestStreamingResponseHandler<>();

@@ -7,12 +7,10 @@ import dev.langchain4j.service.V;
 
 public interface HoroscopeGenerator {
     @SystemMessage(
-            """
-            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.
-            """)
-    @UserMessage("""
-                Generate the horoscope for {{person}} who is a {{sign}}.
-                """)
+            "            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.\n"
++ "            ")
+    @UserMessage("                Generate the horoscope for {{person}} who is a {{sign}}.\n"
++ "                ")
     @Agent("An astrologist that generates horoscopes based on the user's name and zodiac sign.")
     String horoscope(@V("person") Person person, @V("sign") Sign sign);
 }

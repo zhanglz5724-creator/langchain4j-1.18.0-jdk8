@@ -120,53 +120,52 @@ class ListenerRegistrarFactorySPITest {
     }
 
     private static String testFactorySource() {
-        return """
-                package dev.langchain4j.agentic.internal.generated;
-
-                import dev.langchain4j.observability.api.AiServiceListenerRegistrar;
-                import dev.langchain4j.observability.api.DefaultAiServiceListenerRegistrar;
-                import dev.langchain4j.spi.observability.AiServiceListenerRegistrarFactory;
-
-                public class TestListenerRegistrarFactory implements AiServiceListenerRegistrarFactory {
-
-                    private static final AiServiceListenerRegistrar REGISTRAR = new DelegatingRegistrar();
-
-                    @Override
-                    public AiServiceListenerRegistrar get() {
-                        return REGISTRAR;
-                    }
-
-                    public static class DelegatingRegistrar implements AiServiceListenerRegistrar {
-                        private final DefaultAiServiceListenerRegistrar delegate = new DefaultAiServiceListenerRegistrar();
-
-                        public DelegatingRegistrar() {
-                            delegate.shouldThrowExceptionOnEventError(true);
-                        }
-
-                        @Override
-                        public <T extends dev.langchain4j.observability.api.event.AiServiceEvent> void register(
-                                dev.langchain4j.observability.api.listener.AiServiceListener<T> listener) {
-                            delegate.register(listener);
-                        }
-
-                        @Override
-                        public <T extends dev.langchain4j.observability.api.event.AiServiceEvent> void unregister(
-                                dev.langchain4j.observability.api.listener.AiServiceListener<T> listener) {
-                            delegate.unregister(listener);
-                        }
-
-                        @Override
-                        public <T extends dev.langchain4j.observability.api.event.AiServiceEvent> void fireEvent(T event) {
-                            delegate.fireEvent(event);
-                        }
-
-                        @Override
-                        public void shouldThrowExceptionOnEventError(boolean value) {
-                            // always keep delegate set to true
-                        }
-                    }
-                }
-                """;
+        return "                package dev.langchain4j.agentic.internal.generated;\n"
++ "\n"
++ "                import dev.langchain4j.observability.api.AiServiceListenerRegistrar;\n"
++ "                import dev.langchain4j.observability.api.DefaultAiServiceListenerRegistrar;\n"
++ "                import dev.langchain4j.spi.observability.AiServiceListenerRegistrarFactory;\n"
++ "\n"
++ "                public class TestListenerRegistrarFactory implements AiServiceListenerRegistrarFactory {\n"
++ "\n"
++ "                    private static final AiServiceListenerRegistrar REGISTRAR = new DelegatingRegistrar();\n"
++ "\n"
++ "                    @Override\n"
++ "                    public AiServiceListenerRegistrar get() {\n"
++ "                        return REGISTRAR;\n"
++ "                    }\n"
++ "\n"
++ "                    public static class DelegatingRegistrar implements AiServiceListenerRegistrar {\n"
++ "                        private final DefaultAiServiceListenerRegistrar delegate = new DefaultAiServiceListenerRegistrar();\n"
++ "\n"
++ "                        public DelegatingRegistrar() {\n"
++ "                            delegate.shouldThrowExceptionOnEventError(true);\n"
++ "                        }\n"
++ "\n"
++ "                        @Override\n"
++ "                        public <T extends dev.langchain4j.observability.api.event.AiServiceEvent> void register(\n"
++ "                                dev.langchain4j.observability.api.listener.AiServiceListener<T> listener) {\n"
++ "                            delegate.register(listener);\n"
++ "                        }\n"
++ "\n"
++ "                        @Override\n"
++ "                        public <T extends dev.langchain4j.observability.api.event.AiServiceEvent> void unregister(\n"
++ "                                dev.langchain4j.observability.api.listener.AiServiceListener<T> listener) {\n"
++ "                            delegate.unregister(listener);\n"
++ "                        }\n"
++ "\n"
++ "                        @Override\n"
++ "                        public <T extends dev.langchain4j.observability.api.event.AiServiceEvent> void fireEvent(T event) {\n"
++ "                            delegate.fireEvent(event);\n"
++ "                        }\n"
++ "\n"
++ "                        @Override\n"
++ "                        public void shouldThrowExceptionOnEventError(boolean value) {\n"
++ "                            // always keep delegate set to true\n"
++ "                        }\n"
++ "                    }\n"
++ "                }\n"
++ "                ";
     }
 
     private record CompiledFactory(URLClassLoader classLoader) implements AutoCloseable {
@@ -185,11 +184,9 @@ class ListenerRegistrarFactorySPITest {
         public ChatResponse doChat(ChatRequest chatRequest) {
             callCount++;
             String response = switch (callCount) {
-                case 1 -> """
-                        {"agentName":"answer","arguments":{"request":"test question"}}""";
+                case 1 -> "                        {\"agentName\":\"answer\",\"arguments\":{\"request\":\"test question\"}}\n";
                 case 2 -> "stub expert answer";
-                default -> """
-                        {"agentName":"done","arguments":{"response":"final answer"}}""";
+                default -> "                        {\"agentName\":\"done\",\"arguments\":{\"response\":\"final answer\"}}\n";
             };
             return ChatResponse.builder()
                     .aiMessage(AiMessage.from(response))

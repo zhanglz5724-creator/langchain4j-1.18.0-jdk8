@@ -234,12 +234,11 @@ public class WorkflowAgentsIT {
                 .build();
 
         Map<String, Object> input = Map.of(
-                "userMessage", """
-                               You are a creative writer.
-                               Generate a draft of a story long no more than 3 sentence around the given topic.
-                               Return only the story and nothing else.
-                               The topic is {{topic}}.
-                               """,
+                "userMessage", "                               You are a creative writer.\n"
++ "                               Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                               Return only the story and nothing else.\n"
++ "                               The topic is {{topic}}.\n"
++ "                               ",
                 "topic", "dragons and wizards",
                 "style", "fantasy",
                 "audience", "young adults");
@@ -257,12 +256,11 @@ public class WorkflowAgentsIT {
 
         CreativeWriterWithArgMessage creativeWriter = AgenticServices.agentBuilder(CreativeWriterWithArgMessage.class)
                 .chatModel(baseModel())
-                .defaultKeyValue("userMessage", """
-                               You are a creative writer.
-                               Generate a draft of a story long no more than 3 sentence around the given topic.
-                               Return only the story and nothing else.
-                               The topic is {{topic}}.
-                               """)
+                .defaultKeyValue("userMessage", "                               You are a creative writer.\n"
++ "                               Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                               Return only the story and nothing else.\n"
++ "                               The topic is {{topic}}.\n"
++ "                               ")
                 .outputKey("story")
                 .build();
 
@@ -402,12 +400,11 @@ public class WorkflowAgentsIT {
                 .chatModel(baseModel())
                 .name("generateStory")
                 .description("Generate a story based on the given topic")
-                .userMessage("""
-                    You are a creative writer.
-                    Generate a draft of a story long no more than 3 sentence around the given topic.
-                    Return only the story and nothing else.
-                    The topic is {{topic}}.
-                    """)
+                .userMessage("                    You are a creative writer.\n"
++ "                    Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                    Return only the story and nothing else.\n"
++ "                    The topic is {{topic}}.\n"
++ "                    ")
                 .inputKey(String.class, "topic")
                 .returnType(String.class) // String is the default return type for untyped agents
                 .outputKey("story")
@@ -1308,31 +1305,29 @@ public class WorkflowAgentsIT {
 
     public interface FoodExpertWithNotification {
 
-        @UserMessage("""
-            You are a great evening planner.
-            Propose a list of 3 meals matching the given mood.
-            The mood is {{mood}}.
-            For each meal, just give the name of the meal.
-            Provide a list with the 3 items and nothing else.
-
-            When you are done and immediately before returning also call, once and only once,
-            the provided tool, to notify that you have completed your task.
-            """)
+        @UserMessage("            You are a great evening planner.\n"
++ "            Propose a list of 3 meals matching the given mood.\n"
++ "            The mood is {{mood}}.\n"
++ "            For each meal, just give the name of the meal.\n"
++ "            Provide a list with the 3 items and nothing else.\n"
++ "\n"
++ "            When you are done and immediately before returning also call, once and only once,\n"
++ "            the provided tool, to notify that you have completed your task.\n"
++ "            ")
         @Agent
         List<String> findMeal(@V("mood") String mood);
     }
 
     public interface MovieExpertWithNotification {
 
-        @UserMessage("""
-            You are a great evening planner.
-            Propose a list of 3 movies matching the given mood.
-            The mood is {{mood}}.
-            Provide a list with the 3 items and nothing else.
-
-            When you are done and immediately before returning also call the provided tool,
-            to notify that you have completed your task.
-            """)
+        @UserMessage("            You are a great evening planner.\n"
++ "            Propose a list of 3 movies matching the given mood.\n"
++ "            The mood is {{mood}}.\n"
++ "            Provide a list with the 3 items and nothing else.\n"
++ "\n"
++ "            When you are done and immediately before returning also call the provided tool,\n"
++ "            to notify that you have completed your task.\n"
++ "            ")
         @Agent
         List<String> findMovie(@V("mood") String mood);
     }
@@ -1364,12 +1359,11 @@ public class WorkflowAgentsIT {
 
     public interface CreativeWriterDeclarative {
 
-        @UserMessage("""
-                You are a creative writer.
-                Generate a draft of a story long no more than 3 sentence around the given topic.
-                Return only the story and nothing else.
-                The topic is {{topic}}.
-                """)
+        @UserMessage("                You are a creative writer.\n"
++ "                Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                Return only the story and nothing else.\n"
++ "                The topic is {{topic}}.\n"
++ "                ")
         @Agent(description = "Generate a story based on the given topic", outputKey = "story")
         String generateStory(@V("topic") String topic);
 
@@ -1381,12 +1375,11 @@ public class WorkflowAgentsIT {
 
     public interface AudienceEditorDeclarative {
 
-        @UserMessage("""
-            You are a professional editor.
-            Analyze and rewrite the following story to better align with the target audience of {{audience}}.
-            Return only the story and nothing else.
-            The story is "{{story}}".
-            """)
+        @UserMessage("            You are a professional editor.\n"
++ "            Analyze and rewrite the following story to better align with the target audience of {{audience}}.\n"
++ "            Return only the story and nothing else.\n"
++ "            The story is \"{{story}}\".\n"
++ "            ")
         @Agent(description = "Edit a story to better fit a given audience", outputKey = "story")
         String editStory(@V("story") String story, @V("audience") String audience);
 
@@ -1401,13 +1394,11 @@ public class WorkflowAgentsIT {
     public record Person(String name, String sign) {}
 
     public interface PersonAstrologyAgent {
-        @SystemMessage("""
-            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.
-            """)
-        @UserMessage("""
-            Generate the horoscope for {{person}}.
-            The person has a name and a zodiac sign. Use both to create a personalized horoscope.
-            """)
+        @SystemMessage("            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.\n"
++ "            ")
+        @UserMessage("            Generate the horoscope for {{person}}.\n"
++ "            The person has a name and a zodiac sign. Use both to create a personalized horoscope.\n"
++ "            ")
         @Agent(description = "An astrologist that generates horoscopes for a person", outputKey = "horoscope")
         String horoscope(@V("person") Person person);
     }

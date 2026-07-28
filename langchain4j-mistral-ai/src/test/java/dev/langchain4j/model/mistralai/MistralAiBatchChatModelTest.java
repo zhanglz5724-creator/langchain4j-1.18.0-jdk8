@@ -28,30 +28,19 @@ import java.util.Arrays;
 class MistralAiBatchChatModelTest {
 
     // language=json
-    private static final String QUEUED_RESPONSE = """
-            {"id":"batch_1","object":"batch","status":"QUEUED","total_requests":2}
-            """;
+    private static final String QUEUED_RESPONSE = "{\"id\":\"batch_1\",\"object\":\"batch\",\"status\":\"QUEUED\",\"total_requests\":2}";
 
     // language=json
-    private static final String SUCCESS_RESPONSE = """
-            {"id":"batch_1","object":"batch","status":"SUCCESS","output_file":"file_out_1",
-             "total_requests":2,"succeeded_requests":1,"failed_requests":1}
-            """;
+    private static final String SUCCESS_RESPONSE = "{\"id\":\"batch_1\",\"object\":\"batch\",\"status\":\"SUCCESS\",\"output_file\":\"file_out_1\",\n \"total_requests\":2,\"succeeded_requests\":1,\"failed_requests\":1}";
 
     // language=json
-    private static final String RUNNING_RESPONSE = """
-            {"id":"batch_running","object":"batch","status":"RUNNING","total_requests":2}
-            """;
+    private static final String RUNNING_RESPONSE = "{\"id\":\"batch_running\",\"object\":\"batch\",\"status\":\"RUNNING\",\"total_requests\":2}";
 
     // language=json
-    private static final String CANCEL_RESPONSE = """
-            {"id":"batch_1","object":"batch","status":"CANCELLATION_REQUESTED"}
-            """;
+    private static final String CANCEL_RESPONSE = "{\"id\":\"batch_1\",\"object\":\"batch\",\"status\":\"CANCELLATION_REQUESTED\"}";
 
     // language=json
-    private static final String LIST_RESPONSE = """
-            {"object":"list","data":[{"id":"batch_1","status":"SUCCESS","output_file":"file_out_1"}],"total":25}
-            """;
+    private static final String LIST_RESPONSE = "{\"object\":\"list\",\"data\":[{\"id\":\"batch_1\",\"status\":\"SUCCESS\",\"output_file\":\"file_out_1\"}],\"total\":25}";
 
     private static final String RESULTS_JSONL = "{\"custom_id\":\"request-1\",\"error\":{\"message\":\"boom\"}}\n"
             + "{\"custom_id\":\"request-0\",\"response\":{\"status_code\":200,\"body\":{\"id\":\"cmpl_0\","
@@ -63,9 +52,7 @@ class MistralAiBatchChatModelTest {
             "{\"custom_id\":\"request-0\",\"response\":{\"status_code\":400,\"body\":{}}}\n";
 
     // language=json
-    private static final String SUCCESS_WITH_ERRORS_RESPONSE = """
-            {"id":"batch_witherrors","object":"batch","status":"SUCCESS","output_file":"file_out_1","error_file":"file_err_1"}
-            """;
+    private static final String SUCCESS_WITH_ERRORS_RESPONSE = "{\"id\":\"batch_witherrors\",\"object\":\"batch\",\"status\":\"SUCCESS\",\"output_file\":\"file_out_1\",\"error_file\":\"file_err_1\"}";
 
     private static final String ERROR_FILE_JSONL =
             "{\"custom_id\":\"request-2\",\"error\":{\"message\":\"rate limited\"}}\n";

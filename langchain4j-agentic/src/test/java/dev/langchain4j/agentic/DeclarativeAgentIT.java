@@ -194,12 +194,11 @@ public class DeclarativeAgentIT {
 
     public interface CreativeWriterWithInputGuardrail {
 
-        @UserMessage("""
-                You are a creative writer.
-                Generate a draft of a story long no more than 3 sentence around the given topic.
-                Return only the story and nothing else.
-                The topic is {{topic}}.
-                """)
+        @UserMessage("                You are a creative writer.\n"
++ "                Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                Return only the story and nothing else.\n"
++ "                The topic is {{topic}}.\n"
++ "                ")
         @Agent(description = "Generate a story based on the given topic", outputKey = "story")
         @InputGuardrails(TopicInputGuardrail.class)
         String generateStory(@V("topic") String topic);
@@ -207,12 +206,11 @@ public class DeclarativeAgentIT {
 
     public interface StyleEditorWithOutputGuardrail {
 
-        @UserMessage("""
-                You are a professional editor.
-                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.
-                Return only the story and nothing else.
-                The story is "{{story}}".
-                """)
+        @UserMessage("                You are a professional editor.\n"
++ "                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.\n"
++ "                Return only the story and nothing else.\n"
++ "                The story is \"{{story}}\".\n"
++ "                ")
         @Agent(description = "Edit a story to better fit a given style", outputKey = "story")
         @OutputGuardrails(StoryLengthOutputGuardrail.class)
         String editStory(@V("story") String story, @V("style") String style);
@@ -690,11 +688,10 @@ public class DeclarativeAgentIT {
     public interface MedicalExpertWithMemory {
 
         @UserMessage(
-                """
-            You are a medical expert.
-            Analyze the following user request under a medical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+                "            You are a medical expert.\n"
++ "            Analyze the following user request under a medical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Agent(description = "A medical expert", outputKey = "response")
         String medical(@MemoryId String memoryId, @V("request") String request);
 
@@ -712,11 +709,10 @@ public class DeclarativeAgentIT {
     public interface LegalExpertWithMemory {
 
         @UserMessage(
-                """
-            You are a legal expert.
-            Analyze the following user request under a legal point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+                "            You are a legal expert.\n"
++ "            Analyze the following user request under a legal point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Agent(
                 description = "A legal expert",
                 outputKey = "response",
@@ -737,11 +733,10 @@ public class DeclarativeAgentIT {
     public interface TechnicalExpertWithMemory {
 
         @UserMessage(
-                """
-            You are a technical expert.
-            Analyze the following user request under a technical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+                "            You are a technical expert.\n"
++ "            Analyze the following user request under a technical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Agent(description = "A technical expert", outputKey = "response")
         String technical(@MemoryId String memoryId, @V("request") String request);
 
@@ -851,13 +846,11 @@ public class DeclarativeAgentIT {
 
     public interface WithdrawAgent {
         @SystemMessage(
-                """
-            You are a banker that can only withdraw US dollars (USD) from a user account.
-            """)
+                "            You are a banker that can only withdraw US dollars (USD) from a user account.\n"
++ "            ")
         @UserMessage(
-                """
-            Withdraw {{amountInUSD}} USD from {{user}}'s account and return the new balance.
-            """)
+                "            Withdraw {{amountInUSD}} USD from {{user}}'s account and return the new balance.\n"
++ "            ")
         @Agent("A banker that withdraw USD from an account")
         String withdraw(@V("user") String user, @V("amountInUSD") Double amount);
 
@@ -869,13 +862,11 @@ public class DeclarativeAgentIT {
 
     public interface CreditAgent {
         @SystemMessage(
-                """
-            You are a banker that can only credit US dollars (USD) to a user account.
-            """)
+                "            You are a banker that can only credit US dollars (USD) to a user account.\n"
++ "            ")
         @UserMessage(
-                """
-            Credit {{amountInUSD}} USD to {{user}}'s account and return the new balance.
-            """)
+                "            Credit {{amountInUSD}} USD to {{user}}'s account and return the new balance.\n"
++ "            ")
         @Agent("A banker that credit USD to an account")
         String credit(@V("user") String user, @V("amountInUSD") Double amount);
 
@@ -992,12 +983,10 @@ public class DeclarativeAgentIT {
 
     public interface AstrologyAgent {
         @SystemMessage(
-                """
-            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.
-            """)
-        @UserMessage("""
-            Generate the horoscope for {{name}} who is a {{sign}}.
-            """)
+                "            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.\n"
++ "            ")
+        @UserMessage("            Generate the horoscope for {{name}} who is a {{sign}}.\n"
++ "            ")
         @Agent("An astrologist that generates horoscopes based on the user's name and zodiac sign.")
         String horoscope(@V("name") String name, @V("sign") String sign);
 
@@ -1038,14 +1027,12 @@ public class DeclarativeAgentIT {
 
     public interface PersonAstrologyAgent {
         @SystemMessage(
-                """
-            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.
-            """)
+                "            You are an astrologist that generates horoscopes based on the user's name and zodiac sign.\n"
++ "            ")
         @UserMessage(
-                """
-            Generate the horoscope for {{person}}.
-            The person has a name and a zodiac sign. Use both to create a personalized horoscope.
-            """)
+                "            Generate the horoscope for {{person}}.\n"
++ "            The person has a name and a zodiac sign. Use both to create a personalized horoscope.\n"
++ "            ")
         @Agent(description = "An astrologist that generates horoscopes for a person", outputKey = "horoscope")
         String horoscope(@V("person") Person person);
 
@@ -1162,10 +1149,9 @@ public class DeclarativeAgentIT {
 
     public interface CitySummarizer {
 
-        @UserMessage("""
-                Summarize the following city data in exactly one sentence.
-                City data: {{cityData}}
-                """)
+        @UserMessage("                Summarize the following city data in exactly one sentence.\n"
++ "                City data: {{cityData}}\n"
++ "                ")
         @Agent(description = "Summarize city data into a single sentence", outputKey = "summary")
         String summarize(@V("cityData") String cityData);
 

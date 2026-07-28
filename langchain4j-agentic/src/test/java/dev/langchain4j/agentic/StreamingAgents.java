@@ -14,36 +14,33 @@ public class StreamingAgents {
 
     public interface StreamingCreativeWriter {
 
-        @UserMessage("""
-                You are a creative writer.
-                Generate a draft of a story long no more than 3 sentence around the given topic.
-                Return only the story and nothing else.
-                The topic is {{topic}}.
-                """)
+        @UserMessage("                You are a creative writer.\n"
++ "                Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                Return only the story and nothing else.\n"
++ "                The topic is {{topic}}.\n"
++ "                ")
         @Agent(description = "Generate a story based on the given topic", outputKey = "story")
         TokenStream generateStory(@V("topic") String topic);
     }
 
     public interface StreamingAudienceEditor {
 
-        @UserMessage("""
-            You are a professional editor.
-            Analyze and rewrite the following story to better align with the target audience of {{audience}}.
-            Return only the story and nothing else.
-            The story is "{{story}}".
-            """)
+        @UserMessage("            You are a professional editor.\n"
++ "            Analyze and rewrite the following story to better align with the target audience of {{audience}}.\n"
++ "            Return only the story and nothing else.\n"
++ "            The story is \"{{story}}\".\n"
++ "            ")
         @Agent(description = "Edit a story to better fit a given audience", outputKey = "story")
         TokenStream editStory(@V("story") String story, @V("audience") String audience);
     }
 
     public interface StreamingStyleEditor {
 
-        @UserMessage("""
-                You are a professional editor.
-                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.
-                Return only the story and nothing else.
-                The story is "{{story}}".
-                """)
+        @UserMessage("                You are a professional editor.\n"
++ "                Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.\n"
++ "                Return only the story and nothing else.\n"
++ "                The story is \"{{story}}\".\n"
++ "                ")
         @Agent(description = "Edit a story to better fit a given style", outputKey = "story")
         TokenStream editStory(@V("story") String story, @V("style") String style);
     }
@@ -61,11 +58,10 @@ public class StreamingAgents {
 
     public interface StreamingMedicalExpert {
 
-        @UserMessage("""
-            You are a medical expert.
-            Analyze the following user request under a medical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a medical expert.\n"
++ "            Analyze the following user request under a medical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Tool("A medical expert")
         @Agent(description = "A medical expert", outputKey = "response")
         TokenStream medical(@V("request") String request);
@@ -73,22 +69,20 @@ public class StreamingAgents {
 
     public interface StreamingLegalExpert {
 
-        @UserMessage("""
-            You are a legal expert.
-            Analyze the following user request under a legal point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a legal expert.\n"
++ "            Analyze the following user request under a legal point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Agent(description = "A legal expert", outputKey = "response")
         TokenStream legal(@V("request") String request);
     }
 
     public interface StreamingTechnicalExpert {
 
-        @UserMessage("""
-            You are a technical expert.
-            Analyze the following user request under a technical point of view and provide the best possible answer.
-            The user request is {{request}}.
-            """)
+        @UserMessage("            You are a technical expert.\n"
++ "            Analyze the following user request under a technical point of view and provide the best possible answer.\n"
++ "            The user request is {{request}}.\n"
++ "            ")
         @Agent("A technical expert")
         TokenStream technical(@V("request") String request);
     }

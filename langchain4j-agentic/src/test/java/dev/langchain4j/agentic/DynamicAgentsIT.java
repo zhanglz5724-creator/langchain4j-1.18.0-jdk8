@@ -36,12 +36,11 @@ public class DynamicAgentsIT {
         UntypedAgent creativeWriter = AgenticServices.agentBuilder()
                 .chatModel(baseModel())
                 .description("Generate a story based on the given topic")
-                .userMessage("""
-                        You are a creative writer.
-                        Generate a draft of a story long no more than 3 sentence around the given topic.
-                        Return only the story and nothing else.
-                        The topic is {{topic}}.
-                        """)
+                .userMessage("                        You are a creative writer.\n"
++ "                        Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                        Return only the story and nothing else.\n"
++ "                        The topic is {{topic}}.\n"
++ "                        ")
                 .returnType(String.class) // String is the default return type for untyped agents
                 .outputKey("story")
                 .build();
@@ -54,12 +53,11 @@ public class DynamicAgentsIT {
         UntypedAgent styleEditor = AgenticServices.agentBuilder()
                 .chatModel(baseModel())
                 .description("Edit a story to better fit a given style")
-                .userMessage("""
-                        You are a professional editor.
-                        Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.
-                        Return only the story and nothing else.
-                        The story is "{{story}}".
-                        """)
+                .userMessage("                        You are a professional editor.\n"
++ "                        Analyze and rewrite the following story to better fit and be more coherent with the {{style}} style.\n"
++ "                        Return only the story and nothing else.\n"
++ "                        The story is \"{{story}}\".\n"
++ "                        ")
                 .outputKey("story")
                 .build();
 
@@ -120,11 +118,10 @@ public class DynamicAgentsIT {
         UntypedAgent exchangeAgent = AgenticServices.agentBuilder()
                 .chatModel(baseModel())
                 .description("A money exchanger that converts a given amount of money from the original to the target currency")
-                .userMessage("""
-                        You are an operator exchanging money in different currencies.
-                        Use the tool to exchange {{amount}} {{originalCurrency}} into {{targetCurrency}}
-                        returning only the final amount provided by the tool as it is and nothing else.
-                        """)
+                .userMessage("                        You are an operator exchanging money in different currencies.\n"
++ "                        Use the tool to exchange {{amount}} {{originalCurrency}} into {{targetCurrency}}\n"
++ "                        returning only the final amount provided by the tool as it is and nothing else.\n"
++ "                        ")
                 .tools(new SupervisorAgentIT.ExchangeTool())
                 .inputKeys(String.class, "originalCurrency", Double.class, "amount", String.class, "targetCurrency")
                 .returnType(Double.class)

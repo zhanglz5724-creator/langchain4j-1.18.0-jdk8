@@ -640,22 +640,7 @@ class GeminiFilesTest {
     private HttpResponse<String> createFileUploadResponseWithState(
             String uri, String displayName, String mimeType, Long sizeBytes, String state) {
         var fileJson = String.format(
-                """
-                        {
-                          "file": {
-                            "name": "files/%s",
-                            "displayName": "%s",
-                            "mimeType": "%s",
-                            "sizeBytes": "%d",
-                            "createTime": "2025-01-01T10:00:00Z",
-                            "updateTime": "2025-01-01T10:00:00Z",
-                            "expirationTime": "2025-01-03T10:00:00Z",
-                            "sha256Hash": "abc123def456",
-                            "uri": "%s",
-                            "state": "%s"
-                          }
-                        }
-                        """,
+                "{\n  \"file\": {\n    \"name\": \"files/%s\",\n    \"displayName\": \"%s\",\n    \"mimeType\": \"%s\",\n    \"sizeBytes\": \"%d\",\n    \"createTime\": \"2025-01-01T10:00:00Z\",\n    \"updateTime\": \"2025-01-01T10:00:00Z\",\n    \"expirationTime\": \"2025-01-03T10:00:00Z\",\n    \"sha256Hash\": \"abc123def456\",\n    \"uri\": \"%s\",\n    \"state\": \"%s\"\n  }\n}",
                 displayName, displayName, mimeType, sizeBytes, uri, state);
         HttpResponse<String> response = mock(HttpResponse.class);
         when(response.body()).thenReturn(fileJson);
@@ -664,36 +649,7 @@ class GeminiFilesTest {
 
     private HttpResponse<String> createListFilesResponse() {
         var json =
-                """
-                {
-                  "files": [
-                    {
-                      "name": "files/file1",
-                      "displayName": "File 1",
-                      "mimeType": "text/plain",
-                      "sizeBytes": "100",
-                      "createTime": "2025-01-01T10:00:00Z",
-                      "updateTime": "2025-01-01T10:00:00Z",
-                      "expirationTime": "2025-01-03T10:00:00Z",
-                      "sha256Hash": "hash1",
-                      "uri": "https://example.com/file1",
-                      "state": "ACTIVE"
-                    },
-                    {
-                      "name": "files/file2",
-                      "displayName": "File 2",
-                      "mimeType": "image/jpeg",
-                      "sizeBytes": "200",
-                      "createTime": "2025-01-01T11:00:00Z",
-                      "updateTime": "2025-01-01T11:00:00Z",
-                      "expirationTime": "2025-01-03T11:00:00Z",
-                      "sha256Hash": "hash2",
-                      "uri": "https://example.com/file2",
-                      "state": "PROCESSING"
-                    }
-                  ]
-                }
-                """;
+                "{\n  \"files\": [\n    {\n      \"name\": \"files/file1\",\n      \"displayName\": \"File 1\",\n      \"mimeType\": \"text/plain\",\n      \"sizeBytes\": \"100\",\n      \"createTime\": \"2025-01-01T10:00:00Z\",\n      \"updateTime\": \"2025-01-01T10:00:00Z\",\n      \"expirationTime\": \"2025-01-03T10:00:00Z\",\n      \"sha256Hash\": \"hash1\",\n      \"uri\": \"https://example.com/file1\",\n      \"state\": \"ACTIVE\"\n    },\n    {\n      \"name\": \"files/file2\",\n      \"displayName\": \"File 2\",\n      \"mimeType\": \"image/jpeg\",\n      \"sizeBytes\": \"200\",\n      \"createTime\": \"2025-01-01T11:00:00Z\",\n      \"updateTime\": \"2025-01-01T11:00:00Z\",\n      \"expirationTime\": \"2025-01-03T11:00:00Z\",\n      \"sha256Hash\": \"hash2\",\n      \"uri\": \"https://example.com/file2\",\n      \"state\": \"PROCESSING\"\n    }\n  ]\n}";
         HttpResponse<String> response = mock(HttpResponse.class);
         when(response.body()).thenReturn(json);
         return response;

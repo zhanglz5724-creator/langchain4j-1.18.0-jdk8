@@ -47,45 +47,41 @@ public class TypedAgentsIT {
 
     public interface CategoryRouter {
 
-        @UserMessage("""
-                Analyze the following user request and categorize it as 'legal', 'medical' or 'technical'.
-                In case the request doesn't belong to any of those categories categorize it as 'unknown'.
-                Reply with only one of those words and nothing else.
-                The user request is: '{{UserRequest}}'.
-                """)
+        @UserMessage("                Analyze the following user request and categorize it as 'legal', 'medical' or 'technical'.\n"
++ "                In case the request doesn't belong to any of those categories categorize it as 'unknown'.\n"
++ "                Reply with only one of those words and nothing else.\n"
++ "                The user request is: '{{UserRequest}}'.\n"
++ "                ")
         @Agent(description = "Categorize a user request", typedOutputKey = RequestCategory.class)
         Category classify(@K(UserRequest.class) String request);
     }
 
     public interface MedicalExpert {
 
-        @UserMessage("""
-                You are a medical expert.
-                Analyze the following user request under a medical point of view and provide the best possible answer.
-                The user request is {{UserRequest}}.
-                """)
+        @UserMessage("                You are a medical expert.\n"
++ "                Analyze the following user request under a medical point of view and provide the best possible answer.\n"
++ "                The user request is {{UserRequest}}.\n"
++ "                ")
         @Agent(description = "A medical expert", typedOutputKey = ExpertResponse.class)
         String medical(@K(UserRequest.class) String request);
     }
 
     public interface LegalExpert {
 
-        @UserMessage("""
-                You are a legal expert.
-                Analyze the following user request under a legal point of view and provide the best possible answer.
-                The user request is {{UserRequest}}.
-                """)
+        @UserMessage("                You are a legal expert.\n"
++ "                Analyze the following user request under a legal point of view and provide the best possible answer.\n"
++ "                The user request is {{UserRequest}}.\n"
++ "                ")
         @Agent(description = "A legal expert", typedOutputKey = ExpertResponse.class)
         String legal(@K(UserRequest.class) String request);
     }
 
     public interface TechnicalExpert {
 
-        @UserMessage("""
-                You are a technical expert.
-                Analyze the following user request under a technical point of view and provide the best possible answer.
-                The user request is {{UserRequest}}.
-                """)
+        @UserMessage("                You are a technical expert.\n"
++ "                Analyze the following user request under a technical point of view and provide the best possible answer.\n"
++ "                The user request is {{UserRequest}}.\n"
++ "                ")
         @Agent(description = "A technical expert", typedOutputKey = ExpertResponse.class)
         String technical(@K(UserRequest.class) String request);
     }
@@ -217,12 +213,11 @@ public class TypedAgentsIT {
     public static class UserMessageArg implements TypedKey<String> {
         @Override
         public String defaultValue() {
-            return """
-                You are a creative writer.
-                Generate a draft of a story long no more than 3 sentence around the given topic.
-                Return only the story and nothing else.
-                The topic is {{Topic}}.
-                """;
+            return "                You are a creative writer.\n"
++ "                Generate a draft of a story long no more than 3 sentence around the given topic.\n"
++ "                Return only the story and nothing else.\n"
++ "                The topic is {{Topic}}.\n"
++ "                ";
         }
     }
 
