@@ -29,7 +29,11 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -69,7 +73,7 @@ class AnthropicChatModelIT {
     void should_respect_stop_sequences() {
 
         // given
-        List<String> stopSequences = List.of("World", " World");
+        List<String> stopSequences = Arrays.asList("World", " World");
 
         ChatModel model = AnthropicChatModel.builder()
                 .baseUrl(System.getenv("ANTHROPIC_CACHING_BASE_URL"))
@@ -106,7 +110,7 @@ class AnthropicChatModelIT {
                 .build();
 
         SystemMessage systemMessage =
-                SystemMessage.from("What types of messages are supported in LangChain?".repeat(350) + randomString(2));
+                SystemMessage.from(new String(new char[350]).replace("\0", "What types of messages are supported in LangChain?") + randomString(2));
         UserMessage userMessage =
                 new UserMessage(TextContent.from("What types of messages are supported in LangChain?"));
 
@@ -141,9 +145,9 @@ class AnthropicChatModelIT {
                 .build();
 
         SystemMessage systemMessage =
-                SystemMessage.from("What types of messages are supported in LangChain?".repeat(180) + randomString(2));
+                SystemMessage.from(new String(new char[180]).replace("\0", "What types of messages are supported in LangChain?") + randomString(2));
         SystemMessage systemMessage2 =
-                SystemMessage.from("What types of messages are supported in LangChain?".repeat(180) + randomString(2));
+                SystemMessage.from(new String(new char[180]).replace("\0", "What types of messages are supported in LangChain?") + randomString(2));
         UserMessage userMessage =
                 new UserMessage(TextContent.from("What types of messages are supported in LangChain?"));
 
@@ -307,7 +311,7 @@ class AnthropicChatModelIT {
                         .build())
                 .build();
 
-        List<ToolSpecification> toolSpecifications = List.of(getWeather, getTime);
+        List<ToolSpecification> toolSpecifications = Arrays.asList(getWeather, getTime);
 
         UserMessage userMessage = userMessage("What's the weather in SF and NYC, and what time is it there?");
 
@@ -355,7 +359,7 @@ class AnthropicChatModelIT {
                         .build())
                 .build();
 
-        List<ToolSpecification> toolSpecifications = List.of(getWeather, getTime);
+        List<ToolSpecification> toolSpecifications = Arrays.asList(getWeather, getTime);
 
         UserMessage userMessage = userMessage("What's the weather in SF and NYC, and what time is it there?");
 
@@ -402,7 +406,7 @@ class AnthropicChatModelIT {
                         .build())
                 .build();
 
-        List<ToolSpecification> toolSpecifications = List.of(getWeather, getTime);
+        List<ToolSpecification> toolSpecifications = Arrays.asList(getWeather, getTime);
 
         UserMessage userMessage = userMessage("What's the weather in SF and NYC, and what time is it there?");
 
@@ -432,7 +436,7 @@ class AnthropicChatModelIT {
                 .logResponses(true)
                 .build();
 
-        SystemMessage systemMessage = SystemMessage.from("returns a sum of two numbers".repeat(430) + randomString(2));
+        SystemMessage systemMessage = SystemMessage.from(new String(new char[430]).replace("\0", "returns a sum of two numbers") + randomString(2));
 
         UserMessage userMessage = userMessage("How much is 2+2 and 3+3? Call tools in parallel!");
 
@@ -487,7 +491,7 @@ class AnthropicChatModelIT {
 
         ToolSpecification toolSpecification = ToolSpecification.builder()
                 .name("calculator")
-                .description("returns a sum of two numbers".repeat(500) + randomString(10))
+                .description(new String(new char[500]).replace("\0", "returns a sum of two numbers") + randomString(10))
                 .parameters(JsonObjectSchema.builder()
                         .addIntegerProperty("first")
                         .addIntegerProperty("second")
@@ -551,10 +555,14 @@ class AnthropicChatModelIT {
     void should_set_custom_parameters_and_get_raw_response() {
 
         // given
-        record Edit(String type) {}
-        record ContextManagement(List<Edit> edits) {}
-        Map<String, Object> customParameters =
-                Map.of("context_management", new ContextManagement(List.of(new Edit("clear_tool_uses_20250919"))));
+        Map<String, Object> contextManagement = new HashMap<>();
+        List<Map<String, String>> edits = new ArrayList<>();
+        Map<String, String> edit = new HashMap<>();
+        edit.put("type", "clear_tool_uses_20250919");
+        edits.add(edit);
+        contextManagement.put("edits", edits);
+        Map<String, Object> customParameters = new HashMap<>();
+        customParameters.put("context_management", contextManagement);
 
         SpyingHttpClient spyingHttpClient =
                 new SpyingHttpClient(JdkHttpClient.builder().build());
@@ -671,7 +679,7 @@ class AnthropicChatModelIT {
                 .type("web_search_20250305")
                 .name("web_search")
                 .addAttribute("max_uses", 5)
-                .addAttribute("allowed_domains", List.of("accuweather.com"))
+                .addAttribute("allowed_domains", Arrays.asList("accuweather.com"))
                 .build();
 
         SpyingHttpClient spyingHttpClient =
@@ -710,7 +718,7 @@ class AnthropicChatModelIT {
                 .name("tool_search_tool_regex")
                 .build();
 
-        Map<String, Object> toolMetadata = Map.of("defer_loading", true);
+        Map<String, Object> toolMetadata = Collections.singletonMap("defer_loading", true);
 
         ToolSpecification weatherTool = ToolSpecification.builder()
                 .name("get_weather")

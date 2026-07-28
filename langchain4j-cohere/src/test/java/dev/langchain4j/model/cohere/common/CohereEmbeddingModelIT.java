@@ -6,6 +6,7 @@ import dev.langchain4j.model.embedding.common.AbstractEmbeddingModelIT;
 import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "COHERE_API_KEY", matches = ".+")
 class CohereEmbeddingModelIT extends AbstractEmbeddingModelIT {
@@ -15,7 +16,7 @@ class CohereEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(CohereEmbeddingModel.builder()
+        return Arrays.asList(CohereEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
                 .build());
@@ -26,7 +27,7 @@ class CohereEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return CohereEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -35,7 +36,7 @@ class CohereEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return CohereEmbeddingModel.builder()
                 .apiKey("banana")
                 .modelName(MODEL_NAME)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

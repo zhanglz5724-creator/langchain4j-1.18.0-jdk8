@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @Disabled("Constantly getting 429, see the discussion here: https://github.com/langchain4j/langchain4j/pull/3942")
 @EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
@@ -29,7 +30,7 @@ class GoogleAiGeminiBatchImageModelIT {
 
         var displayName = "Test Image Batch";
         var priority = 1L;
-        var prompts = List.of("A simple red circle on white background", "A simple blue square on white background");
+        var prompts = Arrays.asList("A simple red circle on white background", "A simple blue square on white background");
 
         // when
         var response = subject.submit(GeminiBatchRequest.from(prompts, displayName, priority));
@@ -52,7 +53,7 @@ class GoogleAiGeminiBatchImageModelIT {
                 .logRequestsAndResponses(true)
                 .build();
 
-        var prompts = List.of("A green triangle");
+        var prompts = Arrays.asList("A green triangle");
         var response = subject.submit(GeminiBatchRequest.from(prompts, "Cancel test"));
 
         // when

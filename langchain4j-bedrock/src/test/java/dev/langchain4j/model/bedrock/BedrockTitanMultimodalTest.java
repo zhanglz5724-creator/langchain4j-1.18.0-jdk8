@@ -20,6 +20,7 @@ import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
+import java.util.Arrays;
 
 class BedrockTitanMultimodalTest {
 
@@ -108,7 +109,7 @@ class BedrockTitanMultimodalTest {
         BedrockTitanEmbeddingModel model = BedrockTitanEmbeddingModel.builder()
                 .model("amazon.titan-embed-text-v2:0")
                 .client(capturingClient(new AtomicReference<>()))
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
 
         assertThat(model.modelName()).isEqualTo("amazon.titan-embed-text-v2:0");

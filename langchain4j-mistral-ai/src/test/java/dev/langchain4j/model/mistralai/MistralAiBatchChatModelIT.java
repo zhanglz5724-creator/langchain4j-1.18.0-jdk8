@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiBatchChatModelIT {
@@ -27,7 +28,7 @@ class MistralAiBatchChatModelIT {
 
     @Test
     void should_submit_poll_and_retrieve_batch_results() throws InterruptedException {
-        BatchResponse<ChatResponse> submitted = model.submit(new BatchRequest<>(List.of(
+        BatchResponse<ChatResponse> submitted = model.submit(new BatchRequest<>(Arrays.asList(
                 ChatRequest.builder()
                         .messages(UserMessage.from("What is the capital of France? Answer in one word."))
                         .build(),
@@ -59,7 +60,7 @@ class MistralAiBatchChatModelIT {
 
     @Test
     void should_submit_and_cancel_batch() {
-        BatchResponse<ChatResponse> submitted = model.submit(new BatchRequest<>(List.of(ChatRequest.builder()
+        BatchResponse<ChatResponse> submitted = model.submit(new BatchRequest<>(Arrays.asList(ChatRequest.builder()
                 .messages(UserMessage.from("Write a very long essay about the ocean."))
                 .build())));
 

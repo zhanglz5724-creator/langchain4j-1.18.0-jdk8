@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -49,7 +49,7 @@ class DockerMcpTransportIT {
     }
 
     static boolean dockerSocketExists() {
-        return Files.exists(Path.of("/var/run/docker.sock"));
+        return Files.exists(Paths.get("/var/run/docker.sock"));
     }
 
     @Test

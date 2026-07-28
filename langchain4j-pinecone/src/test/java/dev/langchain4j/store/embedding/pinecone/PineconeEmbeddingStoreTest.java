@@ -8,6 +8,7 @@ import static org.mockito.Mockito.withSettings;
 import dev.langchain4j.data.embedding.Embedding;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class PineconeEmbeddingStoreTest {
 
@@ -20,8 +21,8 @@ class PineconeEmbeddingStoreTest {
         PineconeEmbeddingStore store =
                 mock(PineconeEmbeddingStore.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 
-        List<String> ids = List.of("id-1", "id-2");
-        List<Embedding> embeddings = List.of(embedding(), embedding(), embedding());
+        List<String> ids = Arrays.asList("id-1", "id-2");
+        List<Embedding> embeddings = Arrays.asList(embedding(), embedding(), embedding());
 
         assertThatThrownBy(() -> store.addAll(ids, embeddings, null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -33,10 +34,10 @@ class PineconeEmbeddingStoreTest {
         PineconeEmbeddingStore store =
                 mock(PineconeEmbeddingStore.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 
-        List<String> ids = List.of("id-1", "id-2");
-        List<Embedding> embeddings = List.of(embedding(), embedding());
+        List<String> ids = Arrays.asList("id-1", "id-2");
+        List<Embedding> embeddings = Arrays.asList(embedding(), embedding());
         List<dev.langchain4j.data.segment.TextSegment> textSegments =
-                List.of(dev.langchain4j.data.segment.TextSegment.from("only-one"));
+                Arrays.asList(dev.langchain4j.data.segment.TextSegment.from("only-one"));
 
         assertThatThrownBy(() -> store.addAll(ids, embeddings, textSegments))
                 .isInstanceOf(IllegalArgumentException.class)

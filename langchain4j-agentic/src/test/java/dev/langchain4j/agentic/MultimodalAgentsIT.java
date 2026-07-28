@@ -15,6 +15,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Map;
 
@@ -30,8 +31,8 @@ public class MultimodalAgentsIT {
 
     private static final ChatModel IMAGE_GENERATION_MODEL = imageGenerationModel(Models.MODEL_PROVIDER.GEMINI);
 
-    private static final Path THREE_LLAMAS_IMAGE_PATH = Path.of("src", "test", "resources", "3llamas.png");
-    private static final Path BLACK_HOLES_PAPER_PDF_PATH = Path.of("src", "test", "resources", "Black holes paper.pdf");
+    private static final Path THREE_LLAMAS_IMAGE_PATH = Paths.get("src", "test", "resources", "3llamas.png");
+    private static final Path BLACK_HOLES_PAPER_PDF_PATH = Paths.get("src", "test", "resources", "Black holes paper.pdf");
 
     public interface AnimalsIdentifier {
 
@@ -226,7 +227,7 @@ public class MultimodalAgentsIT {
                 case "image/webp" -> ".webp";
                 default -> "";
             };
-            Path path = Path.of(destination + extension);
+            Path path = Paths.get(destination + extension);
             byte[] imageBytes = Base64.getDecoder().decode(image.base64Data());
             try {
                 Files.write(path, imageBytes);

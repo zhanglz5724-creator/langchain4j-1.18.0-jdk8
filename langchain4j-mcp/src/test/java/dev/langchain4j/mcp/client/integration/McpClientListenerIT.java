@@ -172,7 +172,7 @@ public class McpClientListenerIT {
 
     @Test
     public void promptGet() {
-        McpGetPromptResult result = mcpClient.getPrompt("testPrompt", Collections.<String, String>emptyMap());
+        McpGetPromptResult result = mcpClient.getPrompt("testPrompt", Collections.<String, Object>emptyMap());
         assertThat(result).isNotNull();
 
         // check that the beforePromptGet callback was invoked
@@ -188,7 +188,7 @@ public class McpClientListenerIT {
     @Test
     public void promptGetError() {
         try {
-            mcpClient.getPrompt("testPromptFailing", Collections.<String, String>emptyMap());
+            mcpClient.getPrompt("testPromptFailing", Collections.<String, Object>emptyMap());
             Assertions.fail("Should have thrown an exception");
         } catch (Exception e) {
             // check that the beforePromptGet callback was invoked

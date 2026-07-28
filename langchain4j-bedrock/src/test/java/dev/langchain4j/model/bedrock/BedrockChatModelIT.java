@@ -19,6 +19,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import software.amazon.awssdk.regions.Region;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockChatModelIT {
@@ -50,7 +51,7 @@ class BedrockChatModelIT {
                 TextContent.from("Provide a summary of the document"));
 
         // when
-        ChatResponse response = model.chat(List.of(msg));
+        ChatResponse response = model.chat(Arrays.asList(msg));
 
         // then
         assertThat(response.aiMessage().text()).containsIgnoringCase("Gemini");

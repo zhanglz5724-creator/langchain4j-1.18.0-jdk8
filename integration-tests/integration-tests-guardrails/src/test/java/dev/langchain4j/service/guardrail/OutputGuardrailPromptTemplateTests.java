@@ -15,6 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 
 class OutputGuardrailPromptTemplateTests extends BaseGuardrailTests {
     @BeforeEach
@@ -38,7 +41,7 @@ class OutputGuardrailPromptTemplateTests extends BaseGuardrailTests {
         assertThat(OutputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me another joke");
         assertThat(OutputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of("arg0", "memory-id-001"));
+                .containsExactlyInAnyOrderEntriesOf(Collections.singletonMap("arg0", "memory-id-001"));
     }
 
     @ParameterizedTest
@@ -48,9 +51,10 @@ class OutputGuardrailPromptTemplateTests extends BaseGuardrailTests {
         assertThat(OutputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Say hi to my friend {{it}}!");
         assertThat(OutputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "arg0", "Rambo",
-                        "it", "Rambo"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("arg0", "Rambo");
+            put("it", "Rambo");
+        }});
     }
 
     @ParameterizedTest
@@ -60,9 +64,10 @@ class OutputGuardrailPromptTemplateTests extends BaseGuardrailTests {
         assertThat(OutputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Say hi to my friend {{friend}}!");
         assertThat(OutputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "friend", "Chuck Norris",
-                        "arg0", "1"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("friend", "Chuck Norris");
+            put("arg0", "1");
+        }});
     }
 
     @ParameterizedTest
@@ -72,41 +77,40 @@ class OutputGuardrailPromptTemplateTests extends BaseGuardrailTests {
         assertThat(OutputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me something about {{topic1}}, {{topic2}}, {{topic3}}!");
         assertThat(OutputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "topic1", "Chuck Norris",
-                        "topic2", "Jean-Claude Van Damme",
-                        "topic3", "Silvester Stallone"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("topic1", "Chuck Norris");
+            put("topic2", "Jean-Claude Van Damme");
+            put("topic3", "Silvester Stallone");
+        }});
     }
 
     @ParameterizedTest
     @MethodSource("services")
     void shouldWorkWithNoMemoryIdAndList(String testDescription, MyAiService aiService) {
-        aiService.sayHiToMyFriends(List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+        aiService.sayHiToMyFriends(Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
 
         assertThat(OutputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me something about {{it}}!");
         assertThat(OutputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "arg0",
-                        List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"),
-                        "it",
-                        "[Chuck Norris, Jean-Claude Van Damme, Silvester Stallone]"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("arg0", Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+            put("it", "[Chuck Norris, Jean-Claude Van Damme, Silvester Stallone]");
+        }});
     }
 
     @ParameterizedTest
     @MethodSource("services")
     void shouldWorkWithMemoryIdAndList(String testDescription, MyAiService aiService) {
         aiService.sayHiToMyFriends(
-                "memory-id-007", List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+                "memory-id-007", Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
 
         assertThat(OutputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me something about {{topics}}! This is my memory id: {{memoryId}}");
         assertThat(OutputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "topics",
-                        List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"),
-                        "memoryId",
-                        "memory-id-007"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("topics", Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+            put("memoryId", "memory-id-007");
+        }});
     }
 
     static Stream<Arguments> services() {

@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /*
  * Decompiled with CFR 0.152.
  * 
@@ -122,7 +124,7 @@ implements EmbeddingStore<TextSegment> {
 
     public void add(String id, String text) {
         try {
-            this.bulkIndexText(List.of((Object)id), List.of((Object)TextSegment.from((String)text)));
+            this.bulkIndexText(Arrays.asList((Object)id), Arrays.asList((Object)TextSegment.from((String)text)));
         }
         catch (IOException e) {
             throw new ElasticsearchRequestFailedException(e);

@@ -18,6 +18,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -113,7 +114,7 @@ class ListenerRegistrarFactorySPITest {
     }
 
     private static Path dynamicTestClassesDir() throws Exception {
-        Path dir = Path.of("target", "dynamic-test-classes");
+        Path dir = Paths.get("target", "dynamic-test-classes");
         Files.createDirectories(dir);
         return dir;
     }

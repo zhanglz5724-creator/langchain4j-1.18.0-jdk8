@@ -116,7 +116,7 @@ class AzureOpenAiStreamingResponseBuilder {
             toolExecutionRequests = this.toolCallBuilder.allRequests();
         }
         AiMessage aiMessage = AiMessage.builder().text(content.isEmpty() ? null : content).toolExecutionRequests(toolExecutionRequests).build();
-        return Response.from((Object)aiMessage, (TokenUsage)this.tokenUsage, (FinishReason)InternalAzureOpenAiHelper.finishReasonFrom(this.finishReason));
+        return Response.<AiMessage>from(aiMessage, this.tokenUsage, InternalAzureOpenAiHelper.finishReasonFrom(this.finishReason));
     }
 }
 

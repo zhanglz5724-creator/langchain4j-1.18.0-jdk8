@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import java.util.Arrays;
 
 @Disabled("Run manually before release. Expensive to run very often.")
 class BedrockChatModelThinkingIT {
@@ -150,7 +151,7 @@ class BedrockChatModelThinkingIT {
                 .build();
 
         BedrockChatRequestParameters parameters = BedrockChatRequestParameters.builder()
-                .toolSpecifications(List.of(toolSpecification))
+                .toolSpecifications(Arrays.asList(toolSpecification))
                 .enableReasoning(THINKING_BUDGET_TOKENS)
                 .build();
 
@@ -243,7 +244,7 @@ class BedrockChatModelThinkingIT {
 
         BedrockChatRequestParameters parameters = BedrockChatRequestParameters.builder()
                 .toolSpecifications(toolSpecification)
-                .additionalModelRequestField("anthropic_beta", List.of(beta))
+                .additionalModelRequestField("anthropic_beta", Arrays.asList(beta))
                 .enableReasoning(THINKING_BUDGET_TOKENS)
                 .build();
 

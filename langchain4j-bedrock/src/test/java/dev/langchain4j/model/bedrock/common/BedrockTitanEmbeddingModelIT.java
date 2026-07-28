@@ -7,6 +7,7 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import software.amazon.awssdk.regions.Region;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockTitanEmbeddingModelIT extends AbstractEmbeddingModelIT {
@@ -15,7 +16,7 @@ class BedrockTitanEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(BedrockTitanEmbeddingModel.builder()
+        return Arrays.asList(BedrockTitanEmbeddingModel.builder()
                 .model(MODEL_ID)
                 .region(Region.US_EAST_1)
                 .build());
@@ -26,7 +27,7 @@ class BedrockTitanEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return BedrockTitanEmbeddingModel.builder()
                 .model(MODEL_ID)
                 .region(Region.US_EAST_1)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -36,7 +37,7 @@ class BedrockTitanEmbeddingModelIT extends AbstractEmbeddingModelIT {
                 .model("amazon.titan-embed-image-does-not-exist")
                 .region(Region.US_EAST_1)
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

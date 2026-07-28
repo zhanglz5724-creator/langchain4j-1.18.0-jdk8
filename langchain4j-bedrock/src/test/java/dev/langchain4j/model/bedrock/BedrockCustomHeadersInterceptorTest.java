@@ -16,6 +16,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.http.SdkHttpRequest;
+import java.util.Collections;
 
 class BedrockCustomHeadersInterceptorTest {
 
@@ -57,7 +58,7 @@ class BedrockCustomHeadersInterceptorTest {
     @Test
     void should_add_custom_headers() {
         BedrockCustomHeadersInterceptor interceptor =
-                new BedrockCustomHeadersInterceptor(() -> Map.of("X-Custom-Header", "my-value"));
+                new BedrockCustomHeadersInterceptor(() -> Collections.singletonMap("X-Custom-Header", "my-value"));
 
         SdkHttpRequest result = invoke(interceptor, BASE_REQUEST);
 
@@ -68,7 +69,7 @@ class BedrockCustomHeadersInterceptorTest {
     @Test
     void should_call_supplier_per_request() {
         AtomicInteger counter = new AtomicInteger(0);
-        Supplier<Map<String, String>> supplier = () -> Map.of("X-Count", String.valueOf(counter.incrementAndGet()));
+        Supplier<Map<String, String>> supplier = () -> Collections.singletonMap("X-Count", String.valueOf(counter.incrementAndGet()));
         BedrockCustomHeadersInterceptor interceptor = new BedrockCustomHeadersInterceptor(supplier);
 
         SdkHttpRequest first = invoke(interceptor, BASE_REQUEST);
@@ -89,7 +90,7 @@ class BedrockCustomHeadersInterceptorTest {
 
     @Test
     void should_handle_empty_map() {
-        BedrockCustomHeadersInterceptor interceptor = new BedrockCustomHeadersInterceptor(Map::of);
+        BedrockCustomHeadersInterceptor interceptor = new BedrockCustomHeadersInterceptor(Collections::emptyMap);
 
         SdkHttpRequest result = invoke(interceptor, BASE_REQUEST);
 
@@ -99,7 +100,7 @@ class BedrockCustomHeadersInterceptorTest {
     @Test
     void should_add_multiple_custom_headers() {
         BedrockCustomHeadersInterceptor interceptor =
-                new BedrockCustomHeadersInterceptor(() -> Map.of("X-Header-A", "value-a", "X-Header-B", "value-b"));
+                new BedrockCustomHeadersInterceptor(() -> new java.util.HashMap<String, Object>() {{ put("X-Header-A", "value-a"); put("X-Header-B", "value-b"); }});
 
         SdkHttpRequest result = invoke(interceptor, BASE_REQUEST);
 

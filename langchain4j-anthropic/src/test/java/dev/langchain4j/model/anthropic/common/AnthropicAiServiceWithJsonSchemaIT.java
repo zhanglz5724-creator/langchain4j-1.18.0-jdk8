@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.common.AbstractAiServiceWithJsonSchemaIT;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
@@ -15,7 +16,7 @@ public class AnthropicAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJso
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 AnthropicChatModel.builder()
                         .baseUrl(System.getenv("ANTHROPIC_CACHING_BASE_URL"))
                         .apiKey(System.getenv("ANTHROPIC_API_KEY"))

@@ -6,6 +6,7 @@ import dev.langchain4j.model.anthropic.AnthropicTokenUsage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.common.AbstractAiServiceIT;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -14,7 +15,7 @@ class AnthropicAiServiceIT extends AbstractAiServiceIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(ANTHROPIC_CHAT_MODEL);
+        return Arrays.asList(ANTHROPIC_CHAT_MODEL);
     }
 
     @Override

@@ -17,6 +17,7 @@ import dev.langchain4j.model.anthropic.internal.client.ParsedAndRawResponse;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ class AnthropicUserIdIT {
         StreamingChatModel model = createStreamingChatModelWithMock(mockClient, TEST_USER_ID);
 
         // when
-        model.chat(List.of(UserMessage.from("Hello")), mock(StreamingChatResponseHandler.class));
+        model.chat(Arrays.asList(UserMessage.from("Hello")), mock(StreamingChatResponseHandler.class));
 
         // then
         ArgumentCaptor<AnthropicCreateMessageRequest> requestCaptor =

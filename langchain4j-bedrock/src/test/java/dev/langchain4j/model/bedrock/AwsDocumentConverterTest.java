@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.document.Document;
+import java.util.Collections;
 
 class AwsDocumentConverterTest {
 
@@ -293,7 +294,7 @@ class AwsDocumentConverterTest {
                         .addIntegerProperty("intProp")
                         .addBooleanProperty("boolProp")
                         .addNumberProperty("numberProp")
-                        .addEnumProperty("arrayProp", List.of("enumA", "enumB"))
+                        .addEnumProperty("arrayProp", Arrays.asList("enumA", "enumB"))
                         .required("intProp", "arrayProp") // Only 2 of 5 required
                         .build())
                 .build();
@@ -411,7 +412,7 @@ class AwsDocumentConverterTest {
                 "level1_list",
                 Document.fromList(Arrays.asList(
                         Document.fromString("listItem1"),
-                        Document.fromMap(Map.of("nestedInList", Document.fromBoolean(false))))));
+                        Document.fromMap(Collections.singletonMap("nestedInList", Document.fromBoolean(false))))));
 
         Map<String, Document> rootMap = new HashMap<>();
         rootMap.put("complex", Document.fromMap(level1));
@@ -514,12 +515,12 @@ class AwsDocumentConverterTest {
     @Test
     void handle_deeply_nested_structure() {
         // Given
-        Document deepestLevel = Document.fromMap(Map.of("value", Document.fromString("deep")));
-        Document level4 = Document.fromMap(Map.of("level5", deepestLevel));
-        Document level3 = Document.fromMap(Map.of("level4", level4));
-        Document level2 = Document.fromMap(Map.of("level3", level3));
-        Document level1 = Document.fromMap(Map.of("level2", level2));
-        Document root = Document.fromMap(Map.of("level1", level1));
+        Document deepestLevel = Document.fromMap(Collections.singletonMap("value", Document.fromString("deep")));
+        Document level4 = Document.fromMap(Collections.singletonMap("level5", deepestLevel));
+        Document level3 = Document.fromMap(Collections.singletonMap("level4", level4));
+        Document level2 = Document.fromMap(Collections.singletonMap("level3", level3));
+        Document level1 = Document.fromMap(Collections.singletonMap("level2", level2));
+        Document root = Document.fromMap(Collections.singletonMap("level1", level1));
 
         // When
         String json = AwsDocumentConverter.documentToJson(root);

@@ -1403,7 +1403,7 @@ implements EmbeddingStore<TextSegment> {
             Configuration cfg = new Configuration(new BootstrapServiceRegistryBuilder().applyClassLoaderService((ClassLoaderService)new ClassLoaderServiceImpl(){
 
                 public <S> Collection<S> loadJavaServices(Class<S> serviceContract) {
-                    return serviceContract == AdditionalMappingContributor.class ? List.of((Object)new DynamicEmbeddingStoreAdditionalMappingContributor(dimension)) : super.loadJavaServices(serviceContract);
+                    return serviceContract == AdditionalMappingContributor.class ? Arrays.asList((Object)new DynamicEmbeddingStoreAdditionalMappingContributor(dimension)) : super.loadJavaServices(serviceContract);
                 }
             }).build());
             boolean drop = (Boolean)Utils.getOrDefault((Object)this.dropTableFirst, (Object)false);

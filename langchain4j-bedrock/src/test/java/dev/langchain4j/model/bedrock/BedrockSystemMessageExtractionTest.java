@@ -55,7 +55,7 @@ class BedrockSystemMessageExtractionTest {
                 .addText("Second block")
                 .build();
 
-        List<SystemContentBlock> result = extractor.testExtractSystemMessages(List.of(bedrockMsg), null);
+        List<SystemContentBlock> result = extractor.testExtractSystemMessages(Arrays.asList(bedrockMsg), null);
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).text()).isEqualTo("First block");
@@ -70,7 +70,7 @@ class BedrockSystemMessageExtractionTest {
                 .addText("Third block")
                 .build();
 
-        List<SystemContentBlock> result = extractor.testExtractSystemMessages(List.of(bedrockMsg), null);
+        List<SystemContentBlock> result = extractor.testExtractSystemMessages(Arrays.asList(bedrockMsg), null);
 
         // Should have 4 blocks: text, text, cache_point, text
         assertThat(result).hasSize(4);
@@ -84,7 +84,7 @@ class BedrockSystemMessageExtractionTest {
     void should_extract_core_system_message() {
         SystemMessage coreMsg = SystemMessage.from("Core system message");
 
-        List<SystemContentBlock> result = extractor.testExtractSystemMessages(List.of(coreMsg), null);
+        List<SystemContentBlock> result = extractor.testExtractSystemMessages(Arrays.asList(coreMsg), null);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).text()).isEqualTo("Core system message");
@@ -137,7 +137,7 @@ class BedrockSystemMessageExtractionTest {
     @Test
     void should_not_apply_after_system_when_only_bedrock_system_message() {
         List<ChatMessage> messages =
-                List.of(BedrockSystemMessage.builder().addText("Bedrock only").build());
+                Arrays.asList(BedrockSystemMessage.builder().addText("Bedrock only").build());
 
         List<SystemContentBlock> result =
                 extractor.testExtractSystemMessages(messages, BedrockCachePointPlacement.AFTER_SYSTEM);
@@ -210,14 +210,14 @@ class BedrockSystemMessageExtractionTest {
 
     @Test
     void should_handle_empty_messages_list() {
-        List<SystemContentBlock> result = extractor.testExtractSystemMessages(List.of(), null);
+        List<SystemContentBlock> result = extractor.testExtractSystemMessages(Arrays.asList(), null);
         assertThat(result).isEmpty();
     }
 
     @Test
     void should_handle_empty_messages_list_with_after_system_placement() {
         List<SystemContentBlock> result =
-                extractor.testExtractSystemMessages(List.of(), BedrockCachePointPlacement.AFTER_SYSTEM);
+                extractor.testExtractSystemMessages(Arrays.asList(), BedrockCachePointPlacement.AFTER_SYSTEM);
         assertThat(result).isEmpty();
     }
 
@@ -233,7 +233,7 @@ class BedrockSystemMessageExtractionTest {
                 .addTextWithCachePoint("Cache 4")
                 .build();
 
-        List<ChatMessage> messages = List.of(msg, UserMessage.from("test"));
+        List<ChatMessage> messages = Arrays.asList(msg, UserMessage.from("test"));
 
         // This should not throw
         extractor.testValidateTotalCachePoints(messages, null, false);
@@ -531,7 +531,7 @@ class BedrockSystemMessageExtractionTest {
                 .addTextWithCachePoint("Cache 4")
                 .build();
 
-        List<ChatMessage> messages = List.of(msg);
+        List<ChatMessage> messages = Arrays.asList(msg);
 
         // Should not throw - AFTER_USER_MESSAGE is ignored (no user message)
         extractor.testValidateTotalCachePoints(messages, BedrockCachePointPlacement.AFTER_USER_MESSAGE, false);
@@ -587,7 +587,7 @@ class BedrockSystemMessageExtractionTest {
                 .addTextWithCachePoint("Text with cache point is supported")
                 .build();
 
-        List<SystemContentBlock> extracted = extractor.testExtractSystemMessages(List.of(msg), null);
+        List<SystemContentBlock> extracted = extractor.testExtractSystemMessages(Arrays.asList(msg), null);
 
         // Verify both text blocks were extracted successfully (with cache point between them)
         assertThat(extracted).hasSize(3);

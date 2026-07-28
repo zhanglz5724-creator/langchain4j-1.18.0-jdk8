@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class GeminiServiceTest {
     private static final String TEST_API_KEY = "test-api-key";
@@ -47,8 +48,8 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             GeminiGenerateContentRequest request = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Hi")
                                     .build()),
                             "user")))
@@ -74,8 +75,8 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             GeminiGenerateContentRequest request = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Hi")
                                     .build()),
                             "user")))
@@ -107,8 +108,8 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient, null, null);
 
             GeminiGenerateContentRequest request = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Hi")
                                     .build()),
                             "user")))
@@ -140,8 +141,8 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             GeminiCountTokensRequest request = new GeminiCountTokensRequest(
-                    List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Count these tokens")
                                     .build()),
                             "user")),
@@ -168,8 +169,8 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             GeminiCountTokensRequest request = new GeminiCountTokensRequest(
-                    List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Test")
                                     .build()),
                             "user")),
@@ -192,7 +193,7 @@ class GeminiServiceTest {
         @Test
         void shouldSendEmbedRequest() {
             // Given
-            var embedding = new GeminiEmbeddingResponseValues(List.of(0.1f, 0.2f, 0.3f));
+            var embedding = new GeminiEmbeddingResponseValues(Arrays.asList(0.1f, 0.2f, 0.3f));
             var expectedResponse = new GeminiEmbeddingResponse(embedding);
 
             SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
@@ -204,7 +205,7 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             var request = createEmbeddingRequest(new GeminiContent(
-                    List.of(GeminiContent.GeminiPart.builder()
+                    Arrays.asList(GeminiContent.GeminiPart.builder()
                             .text("Embed this")
                             .build()),
                     null));
@@ -219,7 +220,7 @@ class GeminiServiceTest {
         @Test
         void shouldSendCorrectEmbedHttpRequest() {
             // Given
-            var embedding = new GeminiEmbeddingResponseValues(List.of(0.1f, 0.2f));
+            var embedding = new GeminiEmbeddingResponseValues(Arrays.asList(0.1f, 0.2f));
             var expectedResponse = new GeminiEmbeddingResponse(embedding);
 
             SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
@@ -231,7 +232,7 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             var request = createEmbeddingRequest(new GeminiContent(
-                    List.of(GeminiContent.GeminiPart.builder().text("Test").build()), null));
+                    Arrays.asList(GeminiContent.GeminiPart.builder().text("Test").build()), null));
 
             // When
             subject.embed(TEST_MODEL_NAME, request);
@@ -250,9 +251,9 @@ class GeminiServiceTest {
         @Test
         void shouldSendBatchEmbedRequest() {
             // Given
-            var embedding1 = new GeminiEmbeddingResponseValues(List.of(0.1f, 0.2f));
-            var embedding2 = new GeminiEmbeddingResponseValues(List.of(0.3f, 0.4f));
-            var expectedResponse = new GeminiBatchEmbeddingResponse(List.of(embedding1, embedding2));
+            var embedding1 = new GeminiEmbeddingResponseValues(Arrays.asList(0.1f, 0.2f));
+            var embedding2 = new GeminiEmbeddingResponseValues(Arrays.asList(0.3f, 0.4f));
+            var expectedResponse = new GeminiBatchEmbeddingResponse(Arrays.asList(embedding1, embedding2));
 
             SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
                     .statusCode(200)
@@ -263,12 +264,12 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             var request1 = createEmbeddingRequest(new GeminiContent(
-                    List.of(GeminiContent.GeminiPart.builder().text("First").build()), null));
+                    Arrays.asList(GeminiContent.GeminiPart.builder().text("First").build()), null));
 
             var request2 = createEmbeddingRequest(new GeminiContent(
-                    List.of(GeminiContent.GeminiPart.builder().text("Second").build()), null));
+                    Arrays.asList(GeminiContent.GeminiPart.builder().text("Second").build()), null));
 
-            var batchRequest = new GeminiBatchEmbeddingRequest(List.of(request1, request2));
+            var batchRequest = new GeminiBatchEmbeddingRequest(Arrays.asList(request1, request2));
 
             // When
             var actualResponse = subject.batchEmbed(TEST_MODEL_NAME, batchRequest);
@@ -280,7 +281,7 @@ class GeminiServiceTest {
         @Test
         void shouldSendCorrectBatchEmbedHttpRequest() {
             // Given
-            var expectedResponse = new GeminiBatchEmbeddingResponse(List.of());
+            var expectedResponse = new GeminiBatchEmbeddingResponse(Arrays.asList());
 
             SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
                     .statusCode(200)
@@ -290,7 +291,7 @@ class GeminiServiceTest {
 
             GeminiService subject = createService(mockHttpClient);
 
-            var request = new GeminiBatchEmbeddingRequest(List.of());
+            var request = new GeminiBatchEmbeddingRequest(Arrays.asList());
 
             // When
             subject.batchEmbed(TEST_MODEL_NAME, request);
@@ -310,7 +311,7 @@ class GeminiServiceTest {
         @Test
         void shouldStreamGenerateContentResponse() throws Exception {
             // Given
-            List<ServerSentEvent> events = List.of(
+            List<ServerSentEvent> events = Arrays.asList(
                     new ServerSentEvent("event1", Json.toJson(createGenerateContentResponse("Hello"))),
                     new ServerSentEvent("event2", Json.toJson(createGenerateContentResponse(" world"))),
                     new ServerSentEvent("event3", Json.toJson(createGenerateContentResponse("!"))));
@@ -319,8 +320,8 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             GeminiGenerateContentRequest request = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Hi")
                                     .build()),
                             "user")))
@@ -360,14 +361,14 @@ class GeminiServiceTest {
             // event that carries no text/thinking/tool content (not exposed via any typed callback).
             ServerSentEvent textEvent = new ServerSentEvent("event1", Json.toJson(createGenerateContentResponse("Hi")));
             ServerSentEvent metadataEvent = new ServerSentEvent("event2", Json.toJson(createMetadataOnlyResponse()));
-            List<ServerSentEvent> events = List.of(textEvent, metadataEvent);
+            List<ServerSentEvent> events = Arrays.asList(textEvent, metadataEvent);
             MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
             GeminiService subject = createService(mockHttpClient);
 
             GeminiGenerateContentRequest request = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Hi")
                                     .build()),
                             "user")))
@@ -412,14 +413,14 @@ class GeminiServiceTest {
         void shouldSendCorrectStreamingHttpRequest() throws Exception {
             // Given
             List<ServerSentEvent> events =
-                    List.of(new ServerSentEvent("event1", Json.toJson(createGenerateContentResponse("Test"))));
+                    Arrays.asList(new ServerSentEvent("event1", Json.toJson(createGenerateContentResponse("Test"))));
             MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
             GeminiService subject = createService(mockHttpClient);
 
             GeminiGenerateContentRequest request = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Hi")
                                     .build()),
                             "user")))
@@ -469,8 +470,8 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient, customTimeout);
 
             GeminiGenerateContentRequest request = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Hi")
                                     .build()),
                             "user")))
@@ -499,15 +500,15 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             GeminiGenerateContentRequest contentRequest = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiPart.builder().text("Test").build()), "user")))
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiPart.builder().text("Test").build()), "user")))
                     .build();
 
             BatchCreateRequest<?> request = new BatchCreateRequest<>(new BatchCreateRequest.Batch<>(
                     "test-batch",
                     new BatchRequestResponse.BatchCreateRequest.InputConfig<>(
                             new BatchRequestResponse.BatchCreateRequest.Requests<>(
-                                    List.of(new BatchRequestResponse.BatchCreateRequest.InlinedRequest<>(
+                                    Arrays.asList(new BatchRequestResponse.BatchCreateRequest.InlinedRequest<>(
                                             contentRequest, null)))),
                     1L));
 
@@ -532,15 +533,15 @@ class GeminiServiceTest {
             GeminiService subject = createService(mockHttpClient);
 
             GeminiGenerateContentRequest contentRequest = GeminiGenerateContentRequest.builder()
-                    .contents(List.of(new GeminiContent(
-                            List.of(GeminiPart.builder().text("Test").build()), "user")))
+                    .contents(Arrays.asList(new GeminiContent(
+                            Arrays.asList(GeminiPart.builder().text("Test").build()), "user")))
                     .build();
 
             BatchCreateRequest<Object> request = new BatchCreateRequest<>(new BatchCreateRequest.Batch<>(
                     "test-batch",
                     new BatchRequestResponse.BatchCreateRequest.InputConfig<>(
                             new BatchRequestResponse.BatchCreateRequest.Requests<>(
-                                    List.of(new BatchRequestResponse.BatchCreateRequest.InlinedRequest<>(
+                                    Arrays.asList(new BatchRequestResponse.BatchCreateRequest.InlinedRequest<>(
                                             contentRequest, null)))),
                     1L));
 
@@ -671,16 +672,16 @@ class GeminiServiceTest {
     private static GeminiGenerateContentResponse createGenerateContentResponse(String text) {
         var candidate = new GeminiCandidate(
                 new GeminiContent(
-                        List.of(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
+                        Arrays.asList(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
                 null,
                 null,
                 null);
-        return new GeminiGenerateContentResponse("responseId", "modelName", List.of(candidate), null, null);
+        return new GeminiGenerateContentResponse("responseId", "modelName", Arrays.asList(candidate), null, null);
     }
 
     private static GeminiGenerateContentResponse createMetadataOnlyResponse() {
         // No candidates -> no text/thinking/tool content -> not exposed via any typed callback.
-        return new GeminiGenerateContentResponse("responseId", "modelName", List.of(), null, null);
+        return new GeminiGenerateContentResponse("responseId", "modelName", Arrays.asList(), null, null);
     }
 
     private static GeminiEmbeddingRequest createEmbeddingRequest(GeminiContent content) {

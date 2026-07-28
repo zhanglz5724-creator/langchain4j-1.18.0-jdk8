@@ -22,18 +22,19 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockChatModelWithoutVisionIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(AWS_NOVA_MICRO, COHERE_COMMAND_R_PLUS, MISTRAL_LARGE);
+        return Arrays.asList(AWS_NOVA_MICRO, COHERE_COMMAND_R_PLUS, MISTRAL_LARGE);
     }
 
     @Override
     protected List<ChatModel> modelsSupportingTools() {
-        return List.of(AWS_NOVA_MICRO, MISTRAL_LARGE);
+        return Arrays.asList(AWS_NOVA_MICRO, MISTRAL_LARGE);
     }
 
     @Override
@@ -131,7 +132,7 @@ class BedrockChatModelWithoutVisionIT extends AbstractChatModelIT {
     @MethodSource("modelsSupportingTools")
     @DisabledIf("supportsToolChoiceRequired")
     protected void should_fail_if_tool_choice_REQUIRED_is_not_supported(ChatModel model) {
-        if (List.of(MISTRAL_LARGE, AWS_NOVA_MICRO).contains(model)) {
+        if (Arrays.asList(MISTRAL_LARGE, AWS_NOVA_MICRO).contains(model)) {
             super.should_force_LLM_to_execute_any_tool(model);
         } else {
             super.should_fail_if_tool_choice_REQUIRED_is_not_supported(model);

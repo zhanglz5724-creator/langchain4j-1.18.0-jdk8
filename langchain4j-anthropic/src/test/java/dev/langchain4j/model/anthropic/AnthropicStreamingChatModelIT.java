@@ -27,6 +27,8 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -86,7 +88,7 @@ class AnthropicStreamingChatModelIT {
 
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage), handler);
+        model.chat(Arrays.asList(userMessage), handler);
         ChatResponse response = handler.get();
 
         // then
@@ -102,7 +104,7 @@ class AnthropicStreamingChatModelIT {
                 .apiKey(System.getenv("ANTHROPIC_API_KEY"))
                 .modelName(CLAUDE_SONNET_4_6)
                 .maxTokens(32)
-                .customParameters(Map.of("output_config", Map.of("effort", "low")))
+                .customParameters(new HashMap<String, Object>() {{ put("output_config", new HashMap<String, Object>() {{ put("effort", "low"); }}); }})
                 .logRequests(true)
                 .logResponses(true)
                 .build();
@@ -130,13 +132,13 @@ class AnthropicStreamingChatModelIT {
                 .build();
 
         SystemMessage systemMessage =
-                SystemMessage.from("What types of messages are supported in LangChain?".repeat(350) + randomString(2));
+                SystemMessage.from(new String(new char[350]).replace("\0", "What types of messages are supported in LangChain?") + randomString(2));
         UserMessage userMessage =
                 new UserMessage(TextContent.from("What types of messages are supported in LangChain?"));
 
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage, systemMessage), handler);
+        model.chat(Arrays.asList(userMessage, systemMessage), handler);
         AnthropicTokenUsage responseAnthropicTokenUsage =
                 (AnthropicTokenUsage) handler.get().tokenUsage();
 
@@ -162,7 +164,7 @@ class AnthropicStreamingChatModelIT {
 
         ToolSpecification toolSpecification = ToolSpecification.builder()
                 .name("calculator")
-                .description("returns a sum of two numbers".repeat(430) + randomString(2))
+                .description(new String(new char[430]).replace("\0", "returns a sum of two numbers") + randomString(2))
                 .parameters(JsonObjectSchema.builder()
                         .addIntegerProperty("first")
                         .addIntegerProperty("second")
@@ -264,7 +266,13 @@ class AnthropicStreamingChatModelIT {
 
         // given
         Map<String, Object> customParameters =
-                Map.of("context_management", Map.of("edits", List.of(Map.of("type", "clear_tool_uses_20250919"))));
+                new HashMap<String, Object>() {{
+                    put("context_management", new HashMap<String, Object>() {{
+                        put("edits", Arrays.asList(new HashMap<String, Object>() {{
+                            put("type", "clear_tool_uses_20250919");
+                        }}));
+                    }});
+                }};
 
         SpyingHttpClient spyingHttpClient =
                 new SpyingHttpClient(JdkHttpClient.builder().build());

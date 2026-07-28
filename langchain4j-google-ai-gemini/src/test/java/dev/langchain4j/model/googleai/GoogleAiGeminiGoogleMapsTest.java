@@ -26,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleAiGeminiGoogleMapsTest {
@@ -166,7 +167,7 @@ class GoogleAiGeminiGoogleMapsTest {
                     "Coffee Shop",
                     "A great place for coffee",
                     "PLACE_ID_123",
-                    new Maps.PlaceAnswerSources(List.of(new Maps.ReviewSnippet(
+                    new Maps.PlaceAnswerSources(Arrays.asList(new Maps.ReviewSnippet(
                             "REVIEW_ID_1", "https://maps.google.com/reviews/1", "Great coffee"))));
 
             var groundingChunk = new GroundingChunk(
@@ -175,15 +176,15 @@ class GoogleAiGeminiGoogleMapsTest {
                     maps);
 
             var segment = new Segment(0, 0, 10, "Coffee Shop");
-            var groundingSupport = new GroundingSupport(List.of(0), List.of(0.95), segment);
+            var groundingSupport = new GroundingSupport(Arrays.asList(0), Arrays.asList(0.95), segment);
 
             var searchEntryPoint = new SearchEntryPoint("Rendered Content", "SDK Blob");
             var retrievalMetadata = new RetrievalMetadata(0.85);
 
             var groundingMetadata = GroundingMetadata.builder()
-                    .groundingChunks(List.of(groundingChunk))
-                    .groundingSupports(List.of(groundingSupport))
-                    .webSearchQueries(List.of("best coffee shops"))
+                    .groundingChunks(Arrays.asList(groundingChunk))
+                    .groundingSupports(Arrays.asList(groundingSupport))
+                    .webSearchQueries(Arrays.asList("best coffee shops"))
                     .searchEntryPoint(searchEntryPoint)
                     .retrievalMetadata(retrievalMetadata)
                     .googleMapsWidgetContextToken("WIDGET_TOKEN_XYZ")
@@ -191,7 +192,7 @@ class GoogleAiGeminiGoogleMapsTest {
 
             var candidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Found a nice coffee shop.")
                                     .build()),
                             "model"),
@@ -201,7 +202,7 @@ class GoogleAiGeminiGoogleMapsTest {
 
             var usageMetadata = new GeminiGenerateContentResponse.GeminiUsageMetadata(10, 10, 20, null, null);
             var response = new GeminiGenerateContentResponse(
-                    "id", "model", List.of(candidate), usageMetadata, groundingMetadata);
+                    "id", "model", Arrays.asList(candidate), usageMetadata, groundingMetadata);
 
             when(mockGeminiService.generateContent(any(), any())).thenReturn(response);
 
@@ -243,7 +244,7 @@ class GoogleAiGeminiGoogleMapsTest {
                     "A great place for coffee",
                     "PLACE_ID_123",
                     new GroundingMetadata.GroundingChunk.Maps.PlaceAnswerSources(
-                            List.of(new GroundingMetadata.GroundingChunk.Maps.ReviewSnippet(
+                            Arrays.asList(new GroundingMetadata.GroundingChunk.Maps.ReviewSnippet(
                                     "REVIEW_ID_1", "https://maps.google.com/reviews/1", "Great coffee"))));
 
             var groundingChunk = new GroundingMetadata.GroundingChunk(
@@ -253,15 +254,15 @@ class GoogleAiGeminiGoogleMapsTest {
                     maps);
 
             var segment = new GroundingMetadata.Segment(0, 0, 10, "Coffee Shop");
-            var groundingSupport = new GroundingMetadata.GroundingSupport(List.of(0), List.of(0.95), segment);
+            var groundingSupport = new GroundingMetadata.GroundingSupport(Arrays.asList(0), Arrays.asList(0.95), segment);
 
             var searchEntryPoint = new GroundingMetadata.SearchEntryPoint("Rendered Content", "SDK Blob");
             var retrievalMetadata = new GroundingMetadata.RetrievalMetadata(0.85);
 
             var groundingMetadata = GroundingMetadata.builder()
-                    .groundingChunks(List.of(groundingChunk))
-                    .groundingSupports(List.of(groundingSupport))
-                    .webSearchQueries(List.of("best coffee shops"))
+                    .groundingChunks(Arrays.asList(groundingChunk))
+                    .groundingSupports(Arrays.asList(groundingSupport))
+                    .webSearchQueries(Arrays.asList("best coffee shops"))
                     .searchEntryPoint(searchEntryPoint)
                     .retrievalMetadata(retrievalMetadata)
                     .googleMapsWidgetContextToken("WIDGET_TOKEN_XYZ")
@@ -269,7 +270,7 @@ class GoogleAiGeminiGoogleMapsTest {
 
             var candidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Found a nice coffee shop.")
                                     .build()),
                             "model"),
@@ -279,7 +280,7 @@ class GoogleAiGeminiGoogleMapsTest {
 
             var usageMetadata = new GeminiGenerateContentResponse.GeminiUsageMetadata(10, 10, 20, null, null);
             var response = new GeminiGenerateContentResponse(
-                    "id", "model", List.of(candidate), usageMetadata, null); // Grounding metadata
+                    "id", "model", Arrays.asList(candidate), usageMetadata, null); // Grounding metadata
             // null on response
 
             when(mockGeminiService.generateContent(any(), any())).thenReturn(response);
@@ -310,11 +311,11 @@ class GoogleAiGeminiGoogleMapsTest {
     private GeminiGenerateContentResponse createSimpleResponse(String text) {
         var candidate = new GeminiCandidate(
                 new GeminiContent(
-                        List.of(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
+                        Arrays.asList(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
                 GeminiFinishReason.STOP,
                 null,
                 null);
         var usageMetadata = new GeminiGenerateContentResponse.GeminiUsageMetadata(0, 0, 0, null, null);
-        return new GeminiGenerateContentResponse("id", "model", List.of(candidate), usageMetadata, null);
+        return new GeminiGenerateContentResponse("id", "model", Arrays.asList(candidate), usageMetadata, null);
     }
 }

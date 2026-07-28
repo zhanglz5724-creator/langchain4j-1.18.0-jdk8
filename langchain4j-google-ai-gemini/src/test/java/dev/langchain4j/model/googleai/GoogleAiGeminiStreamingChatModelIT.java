@@ -69,7 +69,7 @@ class GoogleAiGeminiStreamingChatModelIT {
 
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        gemini.chat(List.of(userMessage), handler);
+        gemini.chat(Arrays.asList(userMessage), handler);
         ChatResponse response = handler.get();
 
         // then
@@ -126,7 +126,7 @@ class GoogleAiGeminiStreamingChatModelIT {
 
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        gemini.chat(List.of(userMessage), handler);
+        gemini.chat(Arrays.asList(userMessage), handler);
         ChatResponse response = handler.get();
 
         // then
@@ -154,7 +154,7 @@ class GoogleAiGeminiStreamingChatModelIT {
                 UserMessage.from("Calculate `fibonacci(13)`. Write code in Python and execute it to get the result.");
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        gemini.chat(List.of(userMessage), handler);
+        gemini.chat(Arrays.asList(userMessage), handler);
         ChatResponse response = handler.get();
 
         // then
@@ -218,7 +218,7 @@ class GoogleAiGeminiStreamingChatModelIT {
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         gemini.chat(
-                List.of(
+                Arrays.asList(
                         SystemMessage.from("Your role is to extract information related to a person,"
                                 + "like their name, their address, the city the live in."),
                         UserMessage.from("In the town of Liverpool, lived Tommy Skybridge, a young little boy.")),
@@ -259,7 +259,7 @@ class GoogleAiGeminiStreamingChatModelIT {
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         gemini.chat(
-                List.of(
+                Arrays.asList(
                         SystemMessage.from("Your role is to analyze the sentiment of the text you receive."),
                         UserMessage.from("This is super exciting news, congratulations!")),
                 handler);
@@ -290,7 +290,7 @@ class GoogleAiGeminiStreamingChatModelIT {
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         gemini.chat(
-                List.of(
+                Arrays.asList(
                         SystemMessage.from("Your role is to analyze the sentiment of the text you receive."),
                         UserMessage.from("This is super exciting news, congratulations!")),
                 handler);
@@ -321,7 +321,7 @@ class GoogleAiGeminiStreamingChatModelIT {
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         gemini.chat(
-                List.of(
+                Arrays.asList(
                         SystemMessage.from("Your role is to return a list of 6-faces dice rolls"),
                         UserMessage.from("Give me 3 dice rolls, all at once")),
                 handler);
@@ -373,7 +373,7 @@ class GoogleAiGeminiStreamingChatModelIT {
                 .logResponses(true)
                 .build();
 
-        List<ChatMessage> chatMessages = List.of(UserMessage.from("Call toolOne"));
+        List<ChatMessage> chatMessages = Arrays.asList(UserMessage.from("Call toolOne"));
 
         List<ToolSpecification> listOfTools = Arrays.asList(
                 ToolSpecification.builder().name("toolOne").build(),

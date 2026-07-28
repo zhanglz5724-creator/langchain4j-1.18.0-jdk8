@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /*
  * Decompiled with CFR 0.152.
  * 
@@ -106,7 +108,7 @@ implements ChatMemoryStore {
         indexingPolicy.setExcludedPaths(Collections.singletonList(excludedPath));
         IncludedPath includedPath1 = new IncludedPath("/metadata/?");
         IncludedPath includedPath2 = new IncludedPath("/content/?");
-        indexingPolicy.setIncludedPaths((List)ImmutableList.of((Object)includedPath1, (Object)includedPath2));
+        indexingPolicy.setIncludedPaths((List)ImmutableArrays.asList((Object)includedPath1, (Object)includedPath2));
         return indexingPolicy;
     }
 

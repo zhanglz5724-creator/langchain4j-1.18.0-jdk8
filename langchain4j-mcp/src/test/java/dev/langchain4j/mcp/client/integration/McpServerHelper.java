@@ -82,12 +82,6 @@ public class McpServerHelper {
     }
 
     static void destroyProcessTree(Process process) {
-        if (isWindows()) {
-            ProcessHandle handle = process.toHandle();
-            handle.descendants().forEach(ProcessHandle::destroyForcibly);
-            process.destroyForcibly();
-        } else {
-            process.destroyForcibly();
-        }
+        process.destroyForcibly();
     }
 }

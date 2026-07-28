@@ -12,7 +12,6 @@ import dev.langchain4j.mcp.client.transport.websocket.WebSocketMcpTransport;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.time.Duration;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,10 +48,10 @@ class McpHealthWebSocketTransportIT {
     }
 
     @Test
-    void health() throws ExecutionException, InterruptedException {
+    void health() throws InterruptedException {
         mcpClient.checkHealth();
         destroyProcessTree(process);
-        process.onExit().get();
+        process.waitFor();
         assertThatThrownBy(() -> mcpClient.checkHealth())
                 .rootCause()
                 .isInstanceOfAny(ClosedChannelException.class, IllegalStateException.class);

@@ -11,6 +11,7 @@ import dev.langchain4j.model.chat.common.AbstractStreamingChatModelIT;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +37,7 @@ class AzureOpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(AZURE_OPEN_AI_STREAMING_CHAT_MODEL, AZURE_OPEN_AI_STREAMING_CHAT_MODEL_STRICT_SCHEMA);
+        return Arrays.asList(AZURE_OPEN_AI_STREAMING_CHAT_MODEL, AZURE_OPEN_AI_STREAMING_CHAT_MODEL_STRICT_SCHEMA);
     }
 
     @Override
@@ -100,7 +101,7 @@ class AzureOpenAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 .deploymentName("gpt-4o-mini")
                 .logRequestsAndResponses(false) // images are huge in logs
                 .timeout(ofSeconds(120))
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

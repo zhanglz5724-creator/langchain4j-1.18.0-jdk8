@@ -75,7 +75,7 @@ extends DimensionAwareEmbeddingModel {
 
     protected Response<List<Embedding>> doEmbedAll(List<TextSegment> textSegments) {
         List<Map<String, Object>> requestParameters = this.getRequestParameters(textSegments);
-        List responses = requestParameters.stream().map(Json::toJson).map(body -> (InvokeModelResponse)RetryUtils.withRetryMappingExceptions(() -> this.invoke((String)body), (int)this.maxRetries, (ExceptionMapper)BedrockExceptionMapper.INSTANCE)).map(invokeModelResponse -> invokeModelResponse.body().asUtf8String()).map(response -> (BedrockEmbeddingResponse)Json.fromJson(response, this.getResponseClassType())).collect(Collectors.toList());
+        List<BedrockEmbeddingResponse> responses = requestParameters.stream().map(Json::toJson).map(body -> (InvokeModelResponse)RetryUtils.withRetryMappingExceptions(() -> this.invoke((String)body), (int)this.maxRetries, (ExceptionMapper)BedrockExceptionMapper.INSTANCE)).map(invokeModelResponse -> invokeModelResponse.body().asUtf8String()).map(response -> (BedrockEmbeddingResponse)Json.fromJson(response, this.getResponseClassType())).collect(Collectors.toList());
         int totalInputToken = 0;
         ArrayList<Embedding> embeddings = new ArrayList<Embedding>();
         for (BedrockEmbeddingResponse response2 : responses) {

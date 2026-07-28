@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /*
  * Decompiled with CFR 0.152.
  * 
@@ -83,7 +85,7 @@ implements ElasticsearchConfiguration {
                 return sr.filter(f -> f.excludeVectors(Boolean.valueOf(false)));
             }
             return new SourceConfig.Builder().filter(f -> f);
-        }).index(indexName, new String[0]).retriever(r -> r.rrf(rf -> rf.retrievers(List.of((Object)RRFRetrieverEntry.of(rre -> rre.retriever(rt -> rt.standard(standard))), (Object)RRFRetrieverEntry.of(rre -> rre.retriever(rt -> rt.knn(knn))))))).size(Integer.valueOf(embeddingSearchRequest.maxResults())).minScore(Double.valueOf(embeddingSearchRequest.minScore())), Document.class);
+        }).index(indexName, new String[0]).retriever(r -> r.rrf(rf -> rf.retrievers(Arrays.asList((Object)RRFRetrieverEntry.of(rre -> rre.retriever(rt -> rt.standard(standard))), (Object)RRFRetrieverEntry.of(rre -> rre.retriever(rt -> rt.knn(knn))))))).size(Integer.valueOf(embeddingSearchRequest.maxResults())).minScore(Double.valueOf(embeddingSearchRequest.minScore())), Document.class);
     }
 
     public static class Builder {

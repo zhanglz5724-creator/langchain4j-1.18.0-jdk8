@@ -25,6 +25,7 @@ import dev.langchain4j.http.client.jdk.JdkHttpClient;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.TestStreamingChatResponseHandler;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -69,7 +70,7 @@ class AnthropicStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -93,7 +94,7 @@ class AnthropicStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), spyHandler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -151,7 +152,7 @@ class AnthropicStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -174,7 +175,7 @@ class AnthropicStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), spyHandler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -240,7 +241,7 @@ class AnthropicStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -274,7 +275,7 @@ class AnthropicStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -296,7 +297,7 @@ class AnthropicStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler3 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
 
         // then
         AiMessage aiMessage3 = spyHandler3.get().aiMessage();
@@ -331,7 +332,7 @@ class AnthropicStreamingChatModelThinkingIT {
         // when
         TestStreamingChatResponseHandler spyHandler4 = spy(new TestStreamingChatResponseHandler());
         model.chat(
-                List.of(
+                Arrays.asList(
                         userMessage1,
                         aiMessage1,
                         toolResultMessage1,

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import java.util.Collections;
 
 class VertexAiGeminiStreamingChatModelBuilderTest {
 
@@ -13,7 +14,7 @@ class VertexAiGeminiStreamingChatModelBuilderTest {
                 .project("does-not-matter")
                 .location("does-not-matter")
                 .modelName("does-not-matter")
-                .customHeaders(Map.of("foo", "bar"))
+                .customHeaders(Collections.singletonMap("foo", "bar"))
                 .build();
 
         final String actualFooHeader = model.vertexAI().getHeaders().getOrDefault("foo", "error");
@@ -38,7 +39,7 @@ class VertexAiGeminiStreamingChatModelBuilderTest {
                 .project("does-not-matter")
                 .location("does-not-matter")
                 .modelName("does-not-matter")
-                .customHeaders(Map.of("user-agent", "my-custom-user-agent"))
+                .customHeaders(Collections.singletonMap("user-agent", "my-custom-user-agent"))
                 .build();
 
         final String actualFooHeader = model.vertexAI().getHeaders().getOrDefault("user-agent", "error");
@@ -64,7 +65,7 @@ class VertexAiGeminiStreamingChatModelBuilderTest {
                 .project("does-not-matter")
                 .location("does-not-matter")
                 .modelName("does-not-matter")
-                .labels(Map.of("company_id", "20096", "user_id", "12345"))
+                .labels(new java.util.HashMap<String, Object>() {{ put("company_id", "20096"); put("user_id", "12345"); }})
                 .build();
 
         assertThat(model.labels()).containsEntry("company_id", "20096").containsEntry("user_id", "12345");

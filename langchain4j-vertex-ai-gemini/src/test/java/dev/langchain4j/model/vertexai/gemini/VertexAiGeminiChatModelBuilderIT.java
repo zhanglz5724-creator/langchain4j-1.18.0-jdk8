@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
+import java.util.Collections;
 
 @EnabledIfEnvironmentVariable(named = "GCP_PROJECT_ID", matches = ".+")
 class VertexAiGeminiChatModelBuilderIT {
@@ -21,7 +23,7 @@ class VertexAiGeminiChatModelBuilderIT {
                 .project("does-not-matter")
                 .location("does-not-matter")
                 .modelName("does-not-matter")
-                .customHeaders(Map.of("X-Test", "value"))
+                .customHeaders(Collections.singletonMap("X-Test", "value"))
                 .build();
 
         assertThat(model.vertexAI().getHeaders().get("X-Test")).isEqualTo("value");
@@ -35,7 +37,7 @@ class VertexAiGeminiChatModelBuilderIT {
                 .project("does-not-matter")
                 .location("does-not-matter")
                 .modelName("does-not-matter")
-                .customHeaders(Map.of("user-agent", "my-custom-user-agent"))
+                .customHeaders(Collections.singletonMap("user-agent", "my-custom-user-agent"))
                 .build();
 
         assertThat(model.vertexAI().getHeaders().get("user-agent")).contains("my-custom-user-agent");
@@ -72,7 +74,7 @@ class VertexAiGeminiChatModelBuilderIT {
                 .project("does-not-matter")
                 .location("does-not-matter")
                 .modelName("does-not-matter")
-                .labels(Map.of("company_id", "20096", "user_id", "12345"))
+                .labels(new java.util.HashMap<String, Object>() {{ put("company_id", "20096"); put("user_id", "12345"); }})
                 .build();
 
         assertThat(model.labels()).containsEntry("company_id", "20096").containsEntry("user_id", "12345");
@@ -94,13 +96,13 @@ class VertexAiGeminiChatModelBuilderIT {
         VertexAI vertexAI = newTestVertexAI();
         try {
             GenerativeModel model = new GenerativeModel("gemini-2.5-flash", vertexAI);
-            List<Content> contents = List.of(Content.newBuilder()
+            List<Content> contents = Arrays.asList(Content.newBuilder()
                     .setRole("user")
                     .addParts(Part.newBuilder().setText("hello").build())
                     .build());
 
             GenerateContentRequest request = VertexAiGeminiChatModel.buildGenerateContentRequest(
-                    model, vertexAI, contents, Map.of("company_id", "20096", "user_id", "12345"));
+                    model, vertexAI, contents, new java.util.HashMap<String, Object>() {{ put("company_id", "20096"); put("user_id", "12345"); }});
 
             assertThat(request.getLabelsMap())
                     .containsEntry("company_id", "20096")
@@ -115,13 +117,13 @@ class VertexAiGeminiChatModelBuilderIT {
         VertexAI vertexAI = newTestVertexAI();
         try {
             GenerativeModel model = new GenerativeModel("gemini-2.5-flash", vertexAI);
-            List<Content> contents = List.of(Content.newBuilder()
+            List<Content> contents = Arrays.asList(Content.newBuilder()
                     .setRole("user")
                     .addParts(Part.newBuilder().setText("hello").build())
                     .build());
 
             GenerateContentRequest request =
-                    VertexAiGeminiChatModel.buildGenerateContentRequest(model, vertexAI, contents, Map.of());
+                    VertexAiGeminiChatModel.buildGenerateContentRequest(model, vertexAI, contents, new java.util.HashMap<String, Object>() {{ }});
 
             assertThat(request.getLabelsMap()).isEmpty();
         } finally {

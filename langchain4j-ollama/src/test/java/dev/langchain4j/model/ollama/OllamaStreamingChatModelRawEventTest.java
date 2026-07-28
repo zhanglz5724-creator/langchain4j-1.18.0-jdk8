@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class OllamaStreamingChatModelRawEventTest {
 
@@ -26,7 +27,7 @@ class OllamaStreamingChatModelRawEventTest {
         ServerSentEvent doneEvent = new ServerSentEvent(
                 null,
                 "{\"model\":\"llama3\",\"message\":{\"role\":\"assistant\",\"content\":\"\"},\"done\":true,\"done_reason\":\"stop\",\"prompt_eval_count\":1,\"eval_count\":1}");
-        List<ServerSentEvent> events = List.of(contentEvent, emptyEvent, doneEvent);
+        List<ServerSentEvent> events = Arrays.asList(contentEvent, emptyEvent, doneEvent);
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
         OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()

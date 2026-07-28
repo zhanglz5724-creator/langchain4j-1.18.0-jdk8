@@ -4,6 +4,7 @@ import static dev.langchain4j.model.azure.common.AzureOpenAiStreamingChatModelIT
 
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.common.AbstractStreamingAiServiceIT;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -12,7 +13,7 @@ class AzureOpenAiStreamingAiServiceIT extends AbstractStreamingAiServiceIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 AZURE_OPEN_AI_STREAMING_CHAT_MODEL
                 // TODO add more model configs
                 );

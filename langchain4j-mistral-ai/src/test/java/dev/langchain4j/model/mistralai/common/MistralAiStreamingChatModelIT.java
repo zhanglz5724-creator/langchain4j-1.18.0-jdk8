@@ -14,6 +14,7 @@ import dev.langchain4j.model.mistralai.MistralAiStreamingChatModel;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.mockito.InOrder;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
@@ -28,7 +29,7 @@ class MistralAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(MISTRAL_STREAMING_CHAT_MODEL);
+        return Arrays.asList(MISTRAL_STREAMING_CHAT_MODEL);
     }
 
     @Override
@@ -66,7 +67,7 @@ class MistralAiStreamingChatModelIT extends AbstractStreamingChatModelIT {
         return MistralAiStreamingChatModel.builder()
                 .apiKey(System.getenv("MISTRAL_AI_API_KEY"))
                 .modelName(MISTRAL_SMALL_LATEST)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

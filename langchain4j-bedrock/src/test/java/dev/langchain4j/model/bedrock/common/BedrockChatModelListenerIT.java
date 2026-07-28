@@ -11,6 +11,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import java.util.List;
 
 import static dev.langchain4j.model.bedrock.common.BedrockAiServicesIT.sleepIfNeeded;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockChatModelListenerIT extends AbstractChatModelListenerIT {
@@ -24,7 +25,7 @@ class BedrockChatModelListenerIT extends AbstractChatModelListenerIT {
                         .topP(topP())
                         .maxOutputTokens(maxTokens())
                         .build())
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .logRequests(true)
                 .logResponses(true)
                 .build();
@@ -40,7 +41,7 @@ class BedrockChatModelListenerIT extends AbstractChatModelListenerIT {
         return BedrockChatModel.builder()
                 .modelId("banana")
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

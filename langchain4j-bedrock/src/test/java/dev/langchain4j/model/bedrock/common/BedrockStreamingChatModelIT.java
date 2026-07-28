@@ -48,7 +48,7 @@ class BedrockStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 //                TestedModelsWithConverseAPI.STREAMING_AWS_NOVA_MICRO,
                 TestedModels.STREAMING_AWS_NOVA_LITE, TestedModels.STREAMING_AWS_NOVA_PRO);
         //                TestedModelsWithConverseAPI.STREAMING_AI_JAMBA_1_5_MINI,
@@ -115,7 +115,7 @@ class BedrockStreamingChatModelIT extends AbstractStreamingChatModelIT {
     public StreamingChatModel createModelWith(ChatModelListener listener) {
         return BedrockStreamingChatModel.builder()
                 .modelId("us.amazon.nova-lite-v1:0")
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -148,7 +148,7 @@ class BedrockStreamingChatModelIT extends AbstractStreamingChatModelIT {
     protected void should_respect_stopSequences_in_chat_request(StreamingChatModel model) {
 
         // given
-        List<String> stopSequences = List.of("ipsum", " Ipsum");
+        List<String> stopSequences = Arrays.asList("ipsum", " Ipsum");
         ChatRequestParameters parameters = BedrockChatRequestParameters.builder()
                 .stopSequences(stopSequences)
                 .build();
@@ -177,7 +177,7 @@ class BedrockStreamingChatModelIT extends AbstractStreamingChatModelIT {
     protected void should_respect_stopSequences_in_default_model_parameters() {
 
         // given
-        List<String> stopSequences = List.of("ipsum", " Ipsum");
+        List<String> stopSequences = Arrays.asList("ipsum", " Ipsum");
         ChatRequestParameters parameters = BedrockChatRequestParameters.builder()
                 .stopSequences(stopSequences)
                 .build();
@@ -283,7 +283,7 @@ class BedrockStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 .filter(m -> m.getName().equals("mermaidTimelineDiagram"))
                 .findFirst()
                 .orElseThrow();
-        List<ToolSpecification> toolSpecifications = List.of(toolSpecificationFrom(mermaidTimelineDiagram));
+        List<ToolSpecification> toolSpecifications = Arrays.asList(toolSpecificationFrom(mermaidTimelineDiagram));
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .messages(userMessage)

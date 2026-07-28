@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Collections;
 
 class ChromaEmbeddingStoreHttpClientBuilderTest {
 
@@ -47,9 +49,9 @@ class ChromaEmbeddingStoreHttpClientBuilderTest {
                 .baseUrl("http://localhost:8000")
                 .collectionName("test")
                 .httpClientBuilder(httpClientBuilder)
-                .customHeaders(Map.of("X-Chroma-Token", "test-token"))
+                .customHeaders(Collections.singletonMap("X-Chroma-Token", "test-token"))
                 .build();
-        embeddingStore.add("id", Embedding.from(List.of(1.0f)));
+        embeddingStore.add("id", Embedding.from(Arrays.asList(1.0f)));
         embeddingStore.removeAll();
 
         // then
@@ -76,7 +78,7 @@ class ChromaEmbeddingStoreHttpClientBuilderTest {
                 .databaseName("default")
                 .collectionName("test")
                 .httpClientBuilder(httpClientBuilder)
-                .customHeaders(() -> Map.of("Authorization", "Bearer token-" + headerCalls.incrementAndGet()))
+                .customHeaders(() -> Collections.singletonMap("Authorization", "Bearer token-" + headerCalls.incrementAndGet()))
                 .build();
 
         // then
@@ -85,8 +87,8 @@ class ChromaEmbeddingStoreHttpClientBuilderTest {
 
         for (int i = 0; i < httpClient.requests().size(); i++) {
             assertThat(httpClient.requests().get(i).headers())
-                    .containsEntry("Content-Type", List.of("application/json"))
-                    .containsEntry("Authorization", List.of("Bearer token-" + (i + 1)));
+                    .containsEntry("Content-Type", Arrays.asList("application/json"))
+                    .containsEntry("Authorization", Arrays.asList("Bearer token-" + (i + 1)));
         }
     }
 
@@ -187,7 +189,7 @@ class ChromaEmbeddingStoreHttpClientBuilderTest {
 
     private void assertStaticHeaders(HttpRequest request) {
         assertThat(request.headers())
-                .containsEntry("Content-Type", List.of("application/json"))
-                .containsEntry("X-Chroma-Token", List.of("test-token"));
+                .containsEntry("Content-Type", Arrays.asList("application/json"))
+                .containsEntry("X-Chroma-Token", Arrays.asList("test-token"));
     }
 }

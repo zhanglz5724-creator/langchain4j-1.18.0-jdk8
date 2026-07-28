@@ -11,6 +11,7 @@ import dev.langchain4j.model.chat.TestStreamingChatResponseHandler;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class MistralAiStreamingChatModelReturnThinkingTest {
 
@@ -19,7 +20,7 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     @Test
     void should_return_thinking_when_returnThinking_is_true() {
         // given
-        List<ServerSentEvent> events = List.of(
+        List<ServerSentEvent> events = Arrays.asList(
                 thinkingEvent("Let me think"),
                 thinkingEvent(" about this problem..."),
                 textEvent("The answer"),
@@ -40,7 +41,7 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     @Test
     void should_NOT_return_thinking_when_returnThinking_is_false() {
         // given
-        List<ServerSentEvent> events = List.of(
+        List<ServerSentEvent> events = Arrays.asList(
                 thinkingEvent("Let me think about this problem..."),
                 textEvent("The answer is 42."),
                 finishEvent("stop"),
@@ -59,7 +60,7 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     @Test
     void should_handle_empty_thinking_array() {
         // given - real Magistral response: text, empty thinking, text
-        List<ServerSentEvent> events = List.of(
+        List<ServerSentEvent> events = Arrays.asList(
                 textEvent("Let's denote the cost of the ball as x dollars."),
                 emptyThinkingEvent(),
                 textEvent("Therefore, the ball costs $0.05."),
@@ -80,7 +81,7 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     @Test
     void should_handle_thinking_with_tool_calls() {
         // given - thinking content with tool calls
-        List<ServerSentEvent> events = List.of(
+        List<ServerSentEvent> events = Arrays.asList(
                 thinkingEvent("The user wants to know the weather"),
                 thinkingEvent(" in Munich. I need to call the getWeather function."),
                 toolCallEvent("ggLXfzi8o", "getWeather", "{\"city\": \"Munich\"}"),
@@ -106,7 +107,7 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     void should_handle_response_without_thinking() {
         // given - response with only text content, no thinking
         List<ServerSentEvent> events =
-                List.of(textEvent("The answer"), textEvent(" is"), textEvent(" 42."), finishEvent("stop"), doneEvent());
+                Arrays.asList(textEvent("The answer"), textEvent(" is"), textEvent(" 42."), finishEvent("stop"), doneEvent());
 
         StreamingChatModel model = createModel(events, true);
 
@@ -121,7 +122,7 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     @Test
     void should_concatenate_multiple_thinking_blocks() {
         // given - response with multiple thinking chunks streamed separately
-        List<ServerSentEvent> events = List.of(
+        List<ServerSentEvent> events = Arrays.asList(
                 thinkingEvent("First"),
                 thinkingEvent(" thought..."),
                 thinkingEvent("Second"),
@@ -143,7 +144,7 @@ class MistralAiStreamingChatModelReturnThinkingTest {
     @Test
     void should_NOT_return_thinking_with_tool_calls_when_returnThinking_is_false() {
         // given - thinking content with tool calls, but returnThinking is false
-        List<ServerSentEvent> events = List.of(
+        List<ServerSentEvent> events = Arrays.asList(
                 thinkingEvent("The user wants to know the weather in Munich."),
                 toolCallEvent("ggLXfzi8o", "getWeather", "{\"city\": \"Munich\"}"),
                 finishEvent("tool_calls"),

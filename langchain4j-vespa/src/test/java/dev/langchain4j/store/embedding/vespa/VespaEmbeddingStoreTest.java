@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class VespaEmbeddingStoreTest {
 
@@ -91,11 +92,11 @@ class VespaEmbeddingStoreTest {
         // Given
         VespaEmbeddingStore store =
                 VespaEmbeddingStore.builder().url("https://test.vespa.ai").build();
-        Embedding embedding1 = Embedding.from(List.of(1f, 2f, 3f));
-        Embedding embedding2 = Embedding.from(List.of(4f, 5f, 6f));
+        Embedding embedding1 = Embedding.from(Arrays.asList(1f, 2f, 3f));
+        Embedding embedding2 = Embedding.from(Arrays.asList(4f, 5f, 6f));
 
         // When + Then
-        assertThatThrownBy(() -> store.addAll(List.of("id1"), List.of(embedding1, embedding2), null))
+        assertThatThrownBy(() -> store.addAll(Arrays.asList("id1"), Arrays.asList(embedding1, embedding2), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("same size");
     }
@@ -107,7 +108,7 @@ class VespaEmbeddingStoreTest {
                 VespaEmbeddingStore.builder().url("https://test.vespa.ai").build();
 
         // When + Then - empty input returns before any feeder/server interaction
-        assertThatCode(() -> store.addAll(List.of(), List.of(), null)).doesNotThrowAnyException();
+        assertThatCode(() -> store.addAll(Arrays.asList(), Arrays.asList(), null)).doesNotThrowAnyException();
     }
 
     private Object getFieldValue(Object object, String fieldName) throws Exception {

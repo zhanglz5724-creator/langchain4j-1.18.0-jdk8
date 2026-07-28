@@ -23,6 +23,7 @@ import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -94,11 +95,87 @@ class AzureOpenAiChatModelIT {
     @JsonSubTypes({@JsonSubTypes.Type(Circle.class), @JsonSubTypes.Type(Rectangle.class)})
     interface Shape {}
 
-    record Circle(double radius) implements Shape {}
+    class Circle implements Shape {
+        private final double radius;
 
-    record Rectangle(double width, double height) implements Shape {}
+        public Circle(double radius) {
+            this.radius = radius;
+        }
 
-    record Shapes(List<Shape> shapes) {}
+        public double radius() {
+            return radius;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Circle)) return false;
+            Circle circle = (Circle) o;
+            return Double.compare(circle.radius, radius) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Double.hashCode(radius);
+        }
+    }
+
+    class Rectangle implements Shape {
+        private final double width;
+        private final double height;
+
+        public Rectangle(double width, double height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        public double width() {
+            return width;
+        }
+
+        public double height() {
+            return height;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Rectangle)) return false;
+            Rectangle rectangle = (Rectangle) o;
+            return Double.compare(rectangle.width, width) == 0
+                    && Double.compare(rectangle.height, height) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Double.hashCode(width) + Double.hashCode(height);
+        }
+    }
+
+    class Shapes {
+        private final List<Shape> shapes;
+
+        public Shapes(List<Shape> shapes) {
+            this.shapes = shapes;
+        }
+
+        public List<Shape> shapes() {
+            return shapes;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Shapes)) return false;
+            Shapes shapes1 = (Shapes) o;
+            return shapes != null ? shapes.equals(shapes1.shapes) : shapes1.shapes == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return shapes != null ? shapes.hashCode() : 0;
+        }
+    }
 
     // TODO move to common tests
     @Test
@@ -118,7 +195,7 @@ class AzureOpenAiChatModelIT {
                                                 .anyOf(circleSchema, rectangleSchema)
                                                 .build())
                                         .build())
-                        .required(List.of("shapes"))
+                        .required(Arrays.asList("shapes"))
                         .build())
                 .build();
 
@@ -126,11 +203,9 @@ class AzureOpenAiChatModelIT {
                 ResponseFormat.builder().type(JSON).jsonSchema(jsonSchema).build();
 
         UserMessage userMessage = UserMessage.from(
-                """
-                        Extract information from the following text:
-                        1. A circle with a radius of 5
-                        2. A rectangle with a width of 10 and a height of 20
-                        """);
+                "Extract information from the following text:\n"
+                        + "1. A circle with a radius of 5\n"
+                        + "2. A rectangle with a width of 10 and a height of 20\n");
 
         ChatRequest request = ChatRequest.builder()
                 .messages(userMessage)

@@ -20,6 +20,7 @@ import dev.langchain4j.data.video.Video;
 import dev.langchain4j.model.googleai.GeminiContent.GeminiPart.GeminiBlob;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class PartsAndContentsMapperTest {
 
@@ -43,7 +44,7 @@ class PartsAndContentsMapperTest {
     @Test
     void fromGPartsToAiMessage_handlesEmptyPartsList() {
         // Given
-        List<GeminiContent.GeminiPart> parts = List.of();
+        List<GeminiContent.GeminiPart> parts = Arrays.asList();
 
         // When
         AiMessage result = PartsAndContentsMapper.fromGPartsToAiMessage(parts, false, null);
@@ -60,7 +61,7 @@ class PartsAndContentsMapperTest {
     void fromGPartsToAiMessage_handlesPartWithAllFieldsNull() {
         // Given
         GeminiContent.GeminiPart part = GeminiContent.GeminiPart.builder().build();
-        List<GeminiContent.GeminiPart> parts = List.of(part);
+        List<GeminiContent.GeminiPart> parts = Arrays.asList(part);
 
         // When
         AiMessage result = PartsAndContentsMapper.fromGPartsToAiMessage(parts, false, null);
@@ -78,7 +79,7 @@ class PartsAndContentsMapperTest {
         // Given
         GeminiContent.GeminiPart part =
                 GeminiContent.GeminiPart.builder().text("").build();
-        List<GeminiContent.GeminiPart> parts = List.of(part);
+        List<GeminiContent.GeminiPart> parts = Arrays.asList(part);
 
         // When
         AiMessage result = PartsAndContentsMapper.fromGPartsToAiMessage(parts, false, null);
@@ -97,7 +98,7 @@ class PartsAndContentsMapperTest {
         // Given
         GeminiContent.GeminiPart part =
                 GeminiContent.GeminiPart.builder().text("Hello world").build();
-        List<GeminiContent.GeminiPart> parts = List.of(part);
+        List<GeminiContent.GeminiPart> parts = Arrays.asList(part);
 
         // When
         AiMessage result = PartsAndContentsMapper.fromGPartsToAiMessage(parts, false, null);
@@ -202,7 +203,7 @@ class PartsAndContentsMapperTest {
         AiMessage aiMessage = AiMessage.from(toolExecutionRequest);
 
         // When
-        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(List.of(aiMessage), null, false);
+        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(aiMessage), null, false);
 
         // Then
         assertThat(result).hasSize(1);
@@ -221,7 +222,7 @@ class PartsAndContentsMapperTest {
         AiMessage aiMessage = AiMessage.from(toolExecutionRequest);
 
         // When
-        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(List.of(aiMessage), null, false);
+        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(aiMessage), null, false);
 
         // Then
         assertThat(result).hasSize(1);
@@ -238,7 +239,7 @@ class PartsAndContentsMapperTest {
 
         // When
         List<GeminiContent> result =
-                PartsAndContentsMapper.fromMessageToGContent(List.of(toolExecutionResultMessage), null, false);
+                PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(toolExecutionResultMessage), null, false);
 
         // Then
         assertThat(result).hasSize(1);
@@ -257,7 +258,7 @@ class PartsAndContentsMapperTest {
 
         // When
         List<GeminiContent> result =
-                PartsAndContentsMapper.fromMessageToGContent(List.of(toolExecutionResultMessage), null, false);
+                PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(toolExecutionResultMessage), null, false);
 
         // Then
         assertThat(result).hasSize(1);
@@ -277,7 +278,7 @@ class PartsAndContentsMapperTest {
 
         // When
         List<GeminiContent> result =
-                PartsAndContentsMapper.fromMessageToGContent(List.of(toolExecutionResultMessage), null, false);
+                PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(toolExecutionResultMessage), null, false);
 
         // Then
         assertThat(result).hasSize(1);
@@ -289,7 +290,7 @@ class PartsAndContentsMapperTest {
     @Test
     void fromMessageToGContent_systemMessageWithText() {
         SystemMessage msg = new SystemMessage("system text");
-        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(List.of(msg), null, false);
+        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(msg), null, false);
         assertThat(result).hasSize(1);
         assertThat(result.get(0).role()).isEqualTo("model");
         assertThat(result.get(0).parts().get(0).text()).isEqualTo("system text");
@@ -297,8 +298,8 @@ class PartsAndContentsMapperTest {
 
     @Test
     void fromMessageToGContent_userMessageWithTextContent() {
-        UserMessage msg = new UserMessage(List.of(new dev.langchain4j.data.message.TextContent("user text")));
-        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(List.of(msg), null, false);
+        UserMessage msg = new UserMessage(Arrays.asList(new dev.langchain4j.data.message.TextContent("user text")));
+        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(msg), null, false);
         assertThat(result).hasSize(1);
         assertThat(result.get(0).role()).isEqualTo("user");
         assertThat(result.get(0).parts().get(0).text()).isEqualTo("user text");
@@ -308,11 +309,11 @@ class PartsAndContentsMapperTest {
     void fromMessageToGContent_userMessageWithTextAndImageContent() {
         String base64Image =
                 "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
-        UserMessage msg = new UserMessage(List.of(
+        UserMessage msg = new UserMessage(Arrays.asList(
                 new dev.langchain4j.data.message.TextContent("describe this image"),
                 ImageContent.from(base64Image, "image/png", ImageContent.DetailLevel.AUTO)));
 
-        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(List.of(msg), null, false);
+        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(msg), null, false);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).role()).isEqualTo("user");
@@ -323,7 +324,7 @@ class PartsAndContentsMapperTest {
 
     @Test
     void fromMessageToGContent_emptyMessageListReturnsEmpty() {
-        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(List.of(), null, false);
+        List<GeminiContent> result = PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(), null, false);
         assertThat(result).isEmpty();
     }
 
@@ -339,7 +340,7 @@ class PartsAndContentsMapperTest {
                 .build();
         GeminiContent.GeminiPart imagePart =
                 GeminiContent.GeminiPart.builder().inlineData(imageBlob).build();
-        List<GeminiContent.GeminiPart> parts = List.of(textPart, imagePart);
+        List<GeminiContent.GeminiPart> parts = Arrays.asList(textPart, imagePart);
 
         // When
         AiMessage result = PartsAndContentsMapper.fromGPartsToAiMessage(parts, false, null);
@@ -365,7 +366,7 @@ class PartsAndContentsMapperTest {
         GeminiContent.GeminiPart part = GeminiContent.GeminiPart.builder()
                 .executableCode(executableCode)
                 .build();
-        List<GeminiContent.GeminiPart> parts = List.of(part);
+        List<GeminiContent.GeminiPart> parts = Arrays.asList(part);
 
         // When
         AiMessage result = PartsAndContentsMapper.fromGPartsToAiMessage(parts, true, null);
@@ -381,7 +382,7 @@ class PartsAndContentsMapperTest {
         GeminiBlob audioBlob = new GeminiBlob("audio/mp3", "base64audiodata");
         GeminiContent.GeminiPart audioPart =
                 GeminiContent.GeminiPart.builder().inlineData(audioBlob).build();
-        List<GeminiContent.GeminiPart> parts = List.of(audioPart);
+        List<GeminiContent.GeminiPart> parts = Arrays.asList(audioPart);
 
         // When
         AiMessage result = PartsAndContentsMapper.fromGPartsToAiMessage(parts, false, null);
@@ -771,7 +772,7 @@ class PartsAndContentsMapperTest {
 
         // When
         List<GeminiContent> result =
-                PartsAndContentsMapper.fromMessageToGContent(List.of(userMessage), null, false, true);
+                PartsAndContentsMapper.fromMessageToGContent(Arrays.asList(userMessage), null, false, true);
 
         // Then
         assertThat(result).hasSize(1);

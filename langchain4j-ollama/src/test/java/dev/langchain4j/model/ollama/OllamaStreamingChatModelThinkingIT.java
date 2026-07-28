@@ -22,6 +22,7 @@ import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.TestStreamingChatResponseHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import java.util.Arrays;
 
 class OllamaStreamingChatModelThinkingIT extends AbstractOllamaThinkingModelInfrastructure {
 
@@ -50,7 +51,7 @@ class OllamaStreamingChatModelThinkingIT extends AbstractOllamaThinkingModelInfr
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -76,7 +77,7 @@ class OllamaStreamingChatModelThinkingIT extends AbstractOllamaThinkingModelInfr
 
         // when
         TestStreamingChatResponseHandler handler2 = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), handler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), handler2);
 
         // then
         AiMessage aiMessage2 = handler2.get().aiMessage();

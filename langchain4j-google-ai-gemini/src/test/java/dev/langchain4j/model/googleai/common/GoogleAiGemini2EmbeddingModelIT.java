@@ -6,6 +6,7 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 /**
  * IT for Gemini Embedding 2 ({@code gemini-embedding-2-preview}), Google's natively multimodal embedding model
@@ -19,7 +20,7 @@ class GoogleAiGemini2EmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(GoogleAiEmbeddingModel.builder()
+        return Arrays.asList(GoogleAiEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
                 .build());
@@ -30,7 +31,7 @@ class GoogleAiGemini2EmbeddingModelIT extends AbstractEmbeddingModelIT {
         return GoogleAiEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -40,7 +41,7 @@ class GoogleAiGemini2EmbeddingModelIT extends AbstractEmbeddingModelIT {
                 .apiKey("banana")
                 .modelName(MODEL_NAME)
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

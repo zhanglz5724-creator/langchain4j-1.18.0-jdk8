@@ -15,6 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 
 class InputGuardrailPromptTemplateTests {
     @BeforeEach
@@ -38,7 +41,7 @@ class InputGuardrailPromptTemplateTests {
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me another joke");
         assertThat(InputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of("arg0", "memory-id-001"));
+                .containsExactlyInAnyOrderEntriesOf(Collections.singletonMap("arg0", "memory-id-001"));
     }
 
     @ParameterizedTest
@@ -48,9 +51,10 @@ class InputGuardrailPromptTemplateTests {
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Say hi to my friend {{it}}!");
         assertThat(InputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "arg0", "Rambo",
-                        "it", "Rambo"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("arg0", "Rambo");
+            put("it", "Rambo");
+        }});
     }
 
     @ParameterizedTest
@@ -60,9 +64,10 @@ class InputGuardrailPromptTemplateTests {
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Say hi to my friend {{friend}}!");
         assertThat(InputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "friend", "Chuck Norris",
-                        "arg0", "1"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("friend", "Chuck Norris");
+            put("arg0", "1");
+        }});
     }
 
     @ParameterizedTest
@@ -72,44 +77,43 @@ class InputGuardrailPromptTemplateTests {
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me something about {{topic1}}, {{topic2}}, {{topic3}}!");
         assertThat(InputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "topic1", "Chuck Norris",
-                        "topic2", "Jean-Claude Van Damme",
-                        "topic3", "Silvester Stallone"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("topic1", "Chuck Norris");
+            put("topic2", "Jean-Claude Van Damme");
+            put("topic3", "Silvester Stallone");
+        }});
     }
 
     @ParameterizedTest
     @MethodSource("assistants")
     void shouldWorkWithNoMemoryIdAndList(String testDescription, Assistant aiService) {
-        aiService.sayHiToMyFriends(List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+        aiService.sayHiToMyFriends(Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageText())
                 .isEqualTo("Tell me something about [Chuck Norris, Jean-Claude Van Damme, Silvester Stallone]!");
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me something about {{it}}!");
         assertThat(InputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "arg0",
-                        List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"),
-                        "it",
-                        "[Chuck Norris, Jean-Claude Van Damme, Silvester Stallone]"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("arg0", Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+            put("it", "[Chuck Norris, Jean-Claude Van Damme, Silvester Stallone]");
+        }});
     }
 
     @ParameterizedTest
     @MethodSource("assistants")
     void shouldWorkWithMemoryIdAndList(String testDescription, Assistant aiService) {
         aiService.sayHiToMyFriends(
-                "memory-id-007", List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+                "memory-id-007", Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageText())
                 .isEqualTo(
                         "Tell me something about [Chuck Norris, Jean-Claude Van Damme, Silvester Stallone]! This is my memory id: memory-id-007");
         assertThat(InputGuardrailValidation.getInstance().spyUserMessageTemplate())
                 .isEqualTo("Tell me something about {{topics}}! This is my memory id: {{memoryId}}");
         assertThat(InputGuardrailValidation.getInstance().spyVariables())
-                .containsExactlyInAnyOrderEntriesOf(Map.of(
-                        "topics",
-                        List.of("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"),
-                        "memoryId",
-                        "memory-id-007"));
+                .containsExactlyInAnyOrderEntriesOf(new HashMap<>() {{
+            put("topics", Arrays.asList("Chuck Norris", "Jean-Claude Van Damme", "Silvester Stallone"));
+            put("memoryId", "memory-id-007");
+        }});
     }
 
     static Stream<Arguments> assistants() {
@@ -200,7 +204,7 @@ class InputGuardrailPromptTemplateTests {
             return AiServices.builder(Assistant.class)
                     .chatModel(new MyChatModel())
                     .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
-                    .inputGuardrails(List.of(InputGuardrailValidation.getInstance()))
+                    .inputGuardrails(Arrays.asList(InputGuardrailValidation.getInstance()))
                     .build();
         }
     }

@@ -12,13 +12,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.List;
 
 import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "GCP_PROJECT_ID", matches = ".+")
 class VertexAiGeminiAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 VertexAiGeminiChatModel.builder()
                         .project(System.getenv("GCP_PROJECT_ID"))
                         .location(System.getenv("GCP_LOCATION"))

@@ -13,6 +13,7 @@ import dev.langchain4j.agentic.workflow.ConditionalAgentInstance;
 import dev.langchain4j.agentic.workflow.LoopAgentInstance;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -172,7 +173,7 @@ public class SampleReportGenerator {
 
         // ----- Generate report -----
 
-        Path output = Path.of("langchain4j-agentic", "src", "test", "resources", "sample-report.html");
+        Path output = Paths.get("langchain4j-agentic", "src", "test", "resources", "sample-report.html");
         generateReport(monitor, output);
         System.out.println("Report written to " + output.toAbsolutePath());
     }

@@ -10,6 +10,7 @@ import dev.langchain4j.model.chat.TestStreamingResponseHandler;
 import dev.langchain4j.model.output.Response;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class MistralAiStreamingFimModelTest {
 
@@ -19,7 +20,7 @@ class MistralAiStreamingFimModelTest {
     void should_stream_text_and_complete() {
         // given
         List<ServerSentEvent> events =
-                List.of(textEvent("def add(a, b):"), textEvent(" return a + b"), finishEvent("stop"), doneEvent());
+                Arrays.asList(textEvent("def add(a, b):"), textEvent(" return a + b"), finishEvent("stop"), doneEvent());
 
         MistralAiStreamingFimModel model = createModel(events);
 
@@ -33,7 +34,7 @@ class MistralAiStreamingFimModelTest {
     @Test
     void should_not_fail_on_delta_without_content() {
         // given - a finish_reason-only chunk has an empty delta (no "content" field)
-        List<ServerSentEvent> events = List.of(textEvent("return 42"), finishEvent("stop"), doneEvent());
+        List<ServerSentEvent> events = Arrays.asList(textEvent("return 42"), finishEvent("stop"), doneEvent());
 
         MistralAiStreamingFimModel model = createModel(events);
 

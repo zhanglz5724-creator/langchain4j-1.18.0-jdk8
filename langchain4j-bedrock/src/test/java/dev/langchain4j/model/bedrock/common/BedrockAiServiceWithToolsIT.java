@@ -9,13 +9,14 @@ import java.util.List;
 
 import static dev.langchain4j.model.bedrock.TestedModels.CLAUDE_3_HAIKU;
 import static dev.langchain4j.model.bedrock.common.BedrockAiServicesIT.sleepIfNeeded;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockAiServiceWithToolsIT extends AbstractAiServiceWithToolsIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(CLAUDE_3_HAIKU);
+        return Arrays.asList(CLAUDE_3_HAIKU);
     }
 
     @Override

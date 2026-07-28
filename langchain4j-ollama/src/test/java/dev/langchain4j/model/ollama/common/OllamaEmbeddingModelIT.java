@@ -14,6 +14,7 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.ollama.LC4jOllamaContainer;
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel;
 import java.util.List;
+import java.util.Arrays;
 
 class OllamaEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
@@ -32,7 +33,7 @@ class OllamaEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(OllamaEmbeddingModel.builder()
+        return Arrays.asList(OllamaEmbeddingModel.builder()
                 .baseUrl(ollamaBaseUrl(ollama))
                 .modelName(MODEL_NAME)
                 .build());
@@ -43,7 +44,7 @@ class OllamaEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return OllamaEmbeddingModel.builder()
                 .baseUrl(ollamaBaseUrl(ollama))
                 .modelName(MODEL_NAME)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -53,7 +54,7 @@ class OllamaEmbeddingModelIT extends AbstractEmbeddingModelIT {
                 .baseUrl(ollamaBaseUrl(ollama))
                 .modelName("nonexistent-model") // the model is not present -> the request fails
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

@@ -8,6 +8,7 @@ import dev.langchain4j.model.chat.common.AbstractChatModelListenerIT;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiChatModelListenerIT extends AbstractChatModelListenerIT {
@@ -22,7 +23,7 @@ class MistralAiChatModelListenerIT extends AbstractChatModelListenerIT {
                 .maxTokens(maxTokens())
                 .logRequests(true)
                 .logResponses(true)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -36,7 +37,7 @@ class MistralAiChatModelListenerIT extends AbstractChatModelListenerIT {
         return MistralAiChatModel.builder()
                 .apiKey("banana")
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

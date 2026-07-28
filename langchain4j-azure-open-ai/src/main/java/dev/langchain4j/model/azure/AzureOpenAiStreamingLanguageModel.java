@@ -97,7 +97,7 @@ implements StreamingLanguageModel {
                 AzureOpenAiStreamingLanguageModel.handle(completions, handler);
             });
             Response<AiMessage> response = responseBuilder.build();
-            handler.onComplete(Response.from((Object)((AiMessage)response.content()).text(), (TokenUsage)response.tokenUsage(), (FinishReason)response.finishReason()));
+            handler.onComplete(Response.<String>from(((AiMessage)response.content()).text(), response.tokenUsage(), response.finishReason()));
         }
         catch (Exception exception) {
             handler.onError((Throwable)AzureOpenAiExceptionMapper.INSTANCE.mapException(exception));

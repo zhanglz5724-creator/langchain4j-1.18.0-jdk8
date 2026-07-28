@@ -588,7 +588,7 @@ public class StreamableHttpMcpTransport implements McpTransport {
         /**
          * Enables or disables following HTTP redirects (3xx status codes).
          * When enabled, the transport will automatically follow redirects
-         * using {@link HttpClient.Redirect#NORMAL} policy (always redirect,
+         * using the default HTTP redirect policy (always redirect,
          * except from HTTPS to HTTP).
          * Defaults to {@code false}.
          */

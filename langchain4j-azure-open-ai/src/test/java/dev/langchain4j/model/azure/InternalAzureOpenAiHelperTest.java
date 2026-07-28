@@ -35,6 +35,7 @@ import dev.langchain4j.model.output.FinishReason;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -181,21 +182,19 @@ class InternalAzureOpenAiHelperTest {
 
         String functionName = "current_time";
         String functionArguments = "{}";
-        // language=json
-        String responseJson = """
-                {
-                        "role": "ASSISTANT",
-                        "content": "Hello",
-                        "tool_calls": [
-                          {
-                            "type": "function",
-                            "function": {
-                              "name": "current_time",
-                              "arguments": "{}"
-                            }
-                          }
-                        ]
-                      }""";
+        String responseJson = "{\n"
+                + "        \"role\": \"ASSISTANT\",\n"
+                + "        \"content\": \"Hello\",\n"
+                + "        \"tool_calls\": [\n"
+                + "          {\n"
+                + "            \"type\": \"function\",\n"
+                + "            \"function\": {\n"
+                + "              \"name\": \"current_time\",\n"
+                + "              \"arguments\": \"{}\"\n"
+                + "            }\n"
+                + "          }\n"
+                + "        ]\n"
+                + "      }";
         ChatResponseMessage responseMessage;
         try (JsonReader jsonReader = DefaultJsonReader.fromString(responseJson, new JsonOptions())) {
             responseMessage = ChatResponseMessage.fromJson(jsonReader);
@@ -246,7 +245,7 @@ class InternalAzureOpenAiHelperTest {
         String mimeType = "image/png";
         ImageContent imageContent = ImageContent.from(base64Data, mimeType);
         UserMessage userMessage = UserMessage.from("Describe this image", imageContent);
-        List<ChatMessage> messages = List.of(userMessage);
+        List<ChatMessage> messages = Arrays.asList(userMessage);
 
         // When
         List<ChatRequestMessage> openAiMessages = InternalAzureOpenAiHelper.toOpenAiMessages(messages);
@@ -274,7 +273,7 @@ class InternalAzureOpenAiHelperTest {
         String imageUrl = "https://example.com/image.png";
         ImageContent imageContent = ImageContent.from(imageUrl);
         UserMessage userMessage = UserMessage.from("Describe this image", imageContent);
-        List<ChatMessage> messages = List.of(userMessage);
+        List<ChatMessage> messages = Arrays.asList(userMessage);
 
         // When
         List<ChatRequestMessage> openAiMessages = InternalAzureOpenAiHelper.toOpenAiMessages(messages);

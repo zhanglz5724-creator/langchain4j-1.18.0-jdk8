@@ -38,6 +38,7 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
+import java.util.Arrays;
 
 class OllamaStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
@@ -113,12 +114,12 @@ class OllamaStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(OLLAMA_CHAT_MODEL_WITH_TOOLS, OPEN_AI_CHAT_MODEL_WITH_TOOLS);
+        return Arrays.asList(OLLAMA_CHAT_MODEL_WITH_TOOLS, OPEN_AI_CHAT_MODEL_WITH_TOOLS);
     }
 
     @Override
     protected List<StreamingChatModel> modelsSupportingImageInputs() {
-        return List.of(OLLAMA_CHAT_MODEL_WITH_VISION, OPEN_AI_CHAT_MODEL_WITH_VISION);
+        return Arrays.asList(OLLAMA_CHAT_MODEL_WITH_VISION, OPEN_AI_CHAT_MODEL_WITH_VISION);
     }
 
     @Override
@@ -249,7 +250,7 @@ class OllamaStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 .logRequests(true)
                 .logResponses(true)
                 .timeout(ofSeconds(180))
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

@@ -1,3 +1,6 @@
+import java.util.Arrays;
+import java.util.HashSet;
+
 /*
  * Decompiled with CFR 0.152.
  * 
@@ -264,7 +267,7 @@ extends DefaultChatRequestParameters {
         }
 
         public Builder guidedChoice(String ... guidedChoice) {
-            return this.guidedChoice(Set.of((Object[])guidedChoice));
+            return this.guidedChoice(new HashSet<>(Arrays.asList((Object[])guidedChoice)));
         }
 
         public Builder guidedChoice(Set<String> guidedChoices) {

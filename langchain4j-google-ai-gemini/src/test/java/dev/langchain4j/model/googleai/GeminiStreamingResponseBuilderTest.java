@@ -7,6 +7,7 @@ import dev.langchain4j.model.googleai.GeminiStreamingResponseBuilder.TextAndTool
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class GeminiStreamingResponseBuilderTest {
 
@@ -47,11 +48,11 @@ class GeminiStreamingResponseBuilderTest {
     @Test
     void should_return_text_when_candidate_has_content() {
         GeminiContent content = new GeminiContent(
-                List.of(new GeminiContent.GeminiPart("Hello", null, null, null, null, null, null, null, null, null)),
+                Arrays.asList(new GeminiContent.GeminiPart("Hello", null, null, null, null, null, null, null, null, null)),
                 "model");
         GeminiCandidate candidate = new GeminiCandidate(content, null, null, null);
         GeminiGenerateContentResponse response =
-                new GeminiGenerateContentResponse("id-1", "gemini-pro", List.of(candidate), null, null);
+                new GeminiGenerateContentResponse("id-1", "gemini-pro", Arrays.asList(candidate), null, null);
 
         TextAndTools result = builder.append(response);
 

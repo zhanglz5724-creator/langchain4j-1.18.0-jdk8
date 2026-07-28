@@ -255,7 +255,7 @@ abstract class WatsonxChat {
         }
 
         public T guidedChoice(String ... guidedChoice) {
-            return this.guidedChoice(Set.of((Object[])guidedChoice));
+            return this.guidedChoice(new HashSet<>(Arrays.asList((Object[])guidedChoice)));
         }
 
         public T guidedChoice(Set<String> guidedChoices) {

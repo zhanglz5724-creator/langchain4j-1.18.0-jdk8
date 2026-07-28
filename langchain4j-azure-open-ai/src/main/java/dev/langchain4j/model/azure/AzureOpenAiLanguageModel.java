@@ -81,7 +81,7 @@ implements LanguageModel {
     public Response<String> generate(String prompt) {
         CompletionsOptions options = new CompletionsOptions(Collections.singletonList(prompt)).setModel(this.deploymentName).setMaxTokens(this.maxTokens).setTemperature(this.temperature).setTopP(this.topP).setLogitBias(this.logitBias).setUser(this.user).setLogprobs(this.logprobs).setEcho(this.echo).setStop(this.stop).setPresencePenalty(this.presencePenalty).setFrequencyPenalty(this.frequencyPenalty).setBestOf(this.bestOf);
         Completions completions = (Completions)AzureOpenAiExceptionMapper.INSTANCE.withExceptionMapper(() -> this.client.getCompletions(this.deploymentName, options));
-        return Response.from((Object)((Choice)completions.getChoices().get(0)).getText(), (TokenUsage)InternalAzureOpenAiHelper.tokenUsageFrom(completions.getUsage()), (FinishReason)InternalAzureOpenAiHelper.finishReasonFrom(((Choice)completions.getChoices().get(0)).getFinishReason()));
+        return Response.<String>from(((Choice)completions.getChoices().get(0)).getText(), InternalAzureOpenAiHelper.tokenUsageFrom(completions.getUsage()), InternalAzureOpenAiHelper.finishReasonFrom(((Choice)completions.getChoices().get(0)).getFinishReason()));
     }
 
     public static Builder builder() {

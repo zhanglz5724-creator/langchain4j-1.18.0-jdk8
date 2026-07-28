@@ -20,6 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiStreamingChatModelThinkingIT {
@@ -68,7 +69,7 @@ class MistralAiStreamingChatModelThinkingIT {
         // when - send follow-up with previous AI message that has thinking
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         model.chat(
-                List.of(userMessage("What is 6 times 7?"), previousAiMessage, userMessage("Are you sure?")), handler);
+                Arrays.asList(userMessage("What is 6 times 7?"), previousAiMessage, userMessage("Are you sure?")), handler);
         handler.get();
 
         // then - verify the request body contains the thinking
@@ -102,7 +103,7 @@ class MistralAiStreamingChatModelThinkingIT {
         // when - send follow-up with previous AI message that has thinking
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         model.chat(
-                List.of(userMessage("What is 6 times 7?"), previousAiMessage, userMessage("Are you sure?")), handler);
+                Arrays.asList(userMessage("What is 6 times 7?"), previousAiMessage, userMessage("Are you sure?")), handler);
         handler.get();
 
         // then - verify the request body does NOT contain the thinking, but contains the text
@@ -142,7 +143,7 @@ class MistralAiStreamingChatModelThinkingIT {
 
         // when - send conversation with AI message that has thinking + tool call
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage("What's the weather in Munich?"), aiMessageWithToolCall, toolResult), handler);
+        model.chat(Arrays.asList(userMessage("What's the weather in Munich?"), aiMessageWithToolCall, toolResult), handler);
         handler.get();
 
         // then - verify the request body contains the thinking along with tool call
@@ -169,7 +170,7 @@ class MistralAiStreamingChatModelThinkingIT {
         // when - send multi-turn conversation
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         model.chat(
-                List.of(
+                Arrays.asList(
                         userMessage("What is 6 times 7?"),
                         AiMessage.builder()
                                 .text("6 times 7 equals 42.")

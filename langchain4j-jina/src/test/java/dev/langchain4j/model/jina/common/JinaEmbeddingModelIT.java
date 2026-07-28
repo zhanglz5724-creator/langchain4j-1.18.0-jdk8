@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "JINA_API_KEY", matches = ".+")
 class JinaEmbeddingModelIT extends AbstractEmbeddingModelIT {
@@ -18,7 +19,7 @@ class JinaEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(JinaEmbeddingModel.builder()
+        return Arrays.asList(JinaEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
                 .build());
@@ -29,7 +30,7 @@ class JinaEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return JinaEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -39,7 +40,7 @@ class JinaEmbeddingModelIT extends AbstractEmbeddingModelIT {
                 .apiKey("banana")
                 .modelName(MODEL_NAME)
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

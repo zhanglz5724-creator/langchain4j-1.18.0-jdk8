@@ -6,6 +6,8 @@ import dev.langchain4j.model.azure.AzureModelBuilders;
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.common.AbstractAiServiceWithJsonSchemaIT;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
@@ -15,20 +17,20 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 class AzureOpenAiAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT {
 
     AzureOpenAiChatModel model = AzureModelBuilders.chatModelBuilder()
-            .supportedCapabilities(Set.of(RESPONSE_FORMAT_JSON_SCHEMA))
+            .supportedCapabilities(new HashSet<>(Arrays.asList(RESPONSE_FORMAT_JSON_SCHEMA)))
             .strictJsonSchema(false)
             .temperature(0.0)
             .build();
 
     AzureOpenAiChatModel modelWithStrictJsonSchema = AzureModelBuilders.chatModelBuilder()
-            .supportedCapabilities(Set.of(RESPONSE_FORMAT_JSON_SCHEMA))
+            .supportedCapabilities(new HashSet<>(Arrays.asList(RESPONSE_FORMAT_JSON_SCHEMA)))
             .strictJsonSchema(true)
             .temperature(0.0)
             .build();
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(model, modelWithStrictJsonSchema);
+        return Arrays.asList(model, modelWithStrictJsonSchema);
     }
 
     @Override

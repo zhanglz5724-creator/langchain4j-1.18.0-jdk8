@@ -17,6 +17,7 @@ import dev.langchain4j.model.embedding.request.EmbeddingRequest;
 import dev.langchain4j.model.embedding.request.EmbeddingRequestParameters;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class CohereEmbeddingModelV2Test {
 
@@ -48,7 +49,7 @@ class CohereEmbeddingModelV2Test {
         EmbeddingInput input = EmbeddingInput.from(
                 TextContent.from("a photo of a cat"), ImageContent.from("https://example.com/cat.png"));
 
-        EmbedV2Request request = model.buildV2Request(List.of(input), "search_query");
+        EmbedV2Request request = model.buildV2Request(Arrays.asList(input), "search_query");
         String json = MAPPER.writeValueAsString(request);
 
         assertThat(json).contains("\"model\":\"embed-v4.0\"");
@@ -64,7 +65,7 @@ class CohereEmbeddingModelV2Test {
     void builds_base64_image_as_data_url() throws Exception {
         EmbeddingInput input = EmbeddingInput.from(ImageContent.from("aGVsbG8=", "image/png"));
 
-        EmbedV2Request request = model().buildV2Request(List.of(input), "search_document");
+        EmbedV2Request request = model().buildV2Request(Arrays.asList(input), "search_document");
         String json = MAPPER.writeValueAsString(request);
 
         assertThat(json).contains("\"image_url\":{\"url\":\"data:image/png;base64,aGVsbG8=\"}");

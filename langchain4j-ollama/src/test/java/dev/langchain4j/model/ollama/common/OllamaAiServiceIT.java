@@ -11,12 +11,13 @@ import java.util.List;
 
 import static dev.langchain4j.model.ollama.common.OllamaChatModelIT.OLLAMA_CHAT_MODEL_WITH_TOOLS;
 import static dev.langchain4j.model.ollama.common.OllamaChatModelIT.OPEN_AI_CHAT_MODEL_WITH_TOOLS;
+import java.util.Arrays;
 
 class OllamaAiServiceIT extends AbstractAiServiceIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(OLLAMA_CHAT_MODEL_WITH_TOOLS, OPEN_AI_CHAT_MODEL_WITH_TOOLS);
+        return Arrays.asList(OLLAMA_CHAT_MODEL_WITH_TOOLS, OPEN_AI_CHAT_MODEL_WITH_TOOLS);
     }
 
     @Override

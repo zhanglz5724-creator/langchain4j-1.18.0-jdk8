@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class MistralAiBatchChatModelTest {
 
@@ -138,7 +139,7 @@ class MistralAiBatchChatModelTest {
 
     @Test
     void submit_assigns_ordered_custom_ids_and_returns_pending_state() {
-        BatchResponse<ChatResponse> response = model().submit(new BatchRequest<>(List.of(
+        BatchResponse<ChatResponse> response = model().submit(new BatchRequest<>(Arrays.asList(
                 ChatRequest.builder().messages(UserMessage.from("first")).build(),
                 ChatRequest.builder().messages(UserMessage.from("second")).build())));
 

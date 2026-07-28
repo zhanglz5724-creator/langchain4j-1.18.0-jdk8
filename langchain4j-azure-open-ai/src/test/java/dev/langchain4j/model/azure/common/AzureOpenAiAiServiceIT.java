@@ -5,6 +5,7 @@ import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
 import dev.langchain4j.model.azure.AzureModelBuilders;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.common.AbstractAiServiceIT;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -13,7 +14,7 @@ class AzureOpenAiAiServiceIT extends AbstractAiServiceIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 AzureModelBuilders.chatModelBuilder()
                         .supportedCapabilities(RESPONSE_FORMAT_JSON_SCHEMA)
                         .strictJsonSchema(true)

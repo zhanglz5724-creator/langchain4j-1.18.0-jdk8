@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Collections;
 
 class OllamaCustomHeadersSupplierTest {
 
@@ -19,7 +21,7 @@ class OllamaCustomHeadersSupplierTest {
 
         Supplier<Map<String, String>> headerSupplier = () -> {
             callCount.incrementAndGet();
-            return Map.of("X-Custom-Token", "token-" + callCount.get());
+            return Collections.singletonMap("X-Custom-Token", "token-" + callCount.get());
         };
 
         MockHttpClient mockHttpClient = new MockHttpClient();
@@ -39,7 +41,7 @@ class OllamaCustomHeadersSupplierTest {
         }
 
         // then
-        assertThat(mockHttpClient.request().headers()).containsEntry("X-Custom-Token", List.of("token-1"));
+        assertThat(mockHttpClient.request().headers()).containsEntry("X-Custom-Token", Arrays.asList("token-1"));
     }
 
     @Test
@@ -49,7 +51,7 @@ class OllamaCustomHeadersSupplierTest {
 
         Supplier<Map<String, String>> headerSupplier = () -> {
             callCount.incrementAndGet();
-            return Map.of("X-Custom-Token", "token-" + callCount.get());
+            return Collections.singletonMap("X-Custom-Token", "token-" + callCount.get());
         };
 
         MockHttpClient mockHttpClient = new MockHttpClient();
@@ -74,8 +76,8 @@ class OllamaCustomHeadersSupplierTest {
         }
 
         // then
-        assertThat(mockHttpClient.requests().get(0).headers()).containsEntry("X-Custom-Token", List.of("token-1"));
-        assertThat(mockHttpClient.requests().get(1).headers()).containsEntry("X-Custom-Token", List.of("token-2"));
+        assertThat(mockHttpClient.requests().get(0).headers()).containsEntry("X-Custom-Token", Arrays.asList("token-1"));
+        assertThat(mockHttpClient.requests().get(1).headers()).containsEntry("X-Custom-Token", Arrays.asList("token-2"));
     }
 
     @Test
@@ -106,7 +108,7 @@ class OllamaCustomHeadersSupplierTest {
     @Test
     void should_support_static_map_for_backward_compatibility() {
         // given
-        Map<String, String> staticHeaders = Map.of("X-Static", "value");
+        Map<String, String> staticHeaders = Collections.singletonMap("X-Static", "value");
 
         MockHttpClient mockHttpClient = new MockHttpClient();
 
@@ -125,6 +127,6 @@ class OllamaCustomHeadersSupplierTest {
         }
 
         // then
-        assertThat(mockHttpClient.request().headers()).containsEntry("X-Static", List.of("value"));
+        assertThat(mockHttpClient.request().headers()).containsEntry("X-Static", Arrays.asList("value"));
     }
 }

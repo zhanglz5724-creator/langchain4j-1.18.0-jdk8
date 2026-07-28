@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class OllamaClientThinkingIT extends AbstractOllamaThinkingModelInfrastructure {
 
@@ -26,7 +27,7 @@ class OllamaClientThinkingIT extends AbstractOllamaThinkingModelInfrastructure {
         // when
         OllamaChatResponse ollamaChatResponse = ollamaClient.chat(OllamaChatRequest.builder().think(true).stream(false)
                 .model(MODEL_NAME)
-                .messages(List.of(whySkyIsBlueMessage))
+                .messages(Arrays.asList(whySkyIsBlueMessage))
                 .build());
 
         assertThat(ollamaChatResponse.getMessage().getThinking()).isNotEmpty();
@@ -40,7 +41,7 @@ class OllamaClientThinkingIT extends AbstractOllamaThinkingModelInfrastructure {
         // when
         OllamaChatResponse ollamaChatResponse = ollamaClient.chat(OllamaChatRequest.builder().think(false).stream(false)
                 .model(MODEL_NAME)
-                .messages(List.of(whySkyIsBlueMessage))
+                .messages(Arrays.asList(whySkyIsBlueMessage))
                 .build());
 
         assertThat(ollamaChatResponse.getMessage().getThinking()).isNullOrEmpty();
@@ -54,7 +55,7 @@ class OllamaClientThinkingIT extends AbstractOllamaThinkingModelInfrastructure {
         // when
         OllamaChatResponse ollamaChatResponse = ollamaClient.chat(OllamaChatRequest.builder().stream(false)
                 .model(MODEL_NAME)
-                .messages(List.of(whySkyIsBlueMessage))
+                .messages(Arrays.asList(whySkyIsBlueMessage))
                 .build());
 
         assertThat(ollamaChatResponse.getMessage().getThinking()).isNotEmpty();

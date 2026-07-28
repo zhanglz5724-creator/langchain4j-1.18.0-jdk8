@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class MistralAiStreamingChatModelRawEventTest {
 
@@ -31,7 +32,7 @@ class MistralAiStreamingChatModelRawEventTest {
                 "{\"id\":\"abc\",\"model\":\"%s\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}"
                         .formatted(MODEL));
         ServerSentEvent doneEvent = new ServerSentEvent(null, "[DONE]");
-        List<ServerSentEvent> events = List.of(textEvent, finishEvent, doneEvent);
+        List<ServerSentEvent> events = Arrays.asList(textEvent, finishEvent, doneEvent);
 
         MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
         StreamingChatModel model = MistralAiStreamingChatModel.builder()

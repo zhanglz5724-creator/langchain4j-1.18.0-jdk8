@@ -17,13 +17,14 @@ import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
+import java.util.Arrays;
 
 class BedrockCohereEmbeddingModelTest {
 
     @Test
     void should_return_token_usage_from_bedrock_input_token_count_header() {
         Queue<InvokeModelResponse> responses =
-                new ArrayDeque<>(List.of(invokeModelResponse("[0.1,0.2]", "3"), invokeModelResponse("[0.3,0.4]", "4")));
+                new ArrayDeque<>(Arrays.asList(invokeModelResponse("[0.1,0.2]", "3"), invokeModelResponse("[0.3,0.4]", "4")));
 
         BedrockCohereEmbeddingModel model = BedrockCohereEmbeddingModel.builder()
                 .client(clientReturning(responses))
@@ -33,7 +34,7 @@ class BedrockCohereEmbeddingModelTest {
                 .build();
 
         Response<List<Embedding>> response =
-                model.embedAll(List.of(TextSegment.from("first"), TextSegment.from("second")));
+                model.embedAll(Arrays.asList(TextSegment.from("first"), TextSegment.from("second")));
 
         assertThat(response.content()).hasSize(2);
         assertThat(response.content())
@@ -50,7 +51,7 @@ class BedrockCohereEmbeddingModelTest {
     @Test
     void should_not_return_token_usage_when_bedrock_does_not_provide_token_count() {
         Queue<InvokeModelResponse> responses =
-                new ArrayDeque<>(List.of(invokeModelResponseWithoutTokenCount("[0.1,0.2]")));
+                new ArrayDeque<>(Arrays.asList(invokeModelResponseWithoutTokenCount("[0.1,0.2]")));
 
         BedrockCohereEmbeddingModel model = BedrockCohereEmbeddingModel.builder()
                 .client(clientReturning(responses))
@@ -58,7 +59,7 @@ class BedrockCohereEmbeddingModelTest {
                 .inputType(SEARCH_QUERY)
                 .build();
 
-        Response<List<Embedding>> response = model.embedAll(List.of(TextSegment.from("first")));
+        Response<List<Embedding>> response = model.embedAll(Arrays.asList(TextSegment.from("first")));
 
         assertThat(response.content()).hasSize(1);
         assertThat(response.tokenUsage()).isNull();
@@ -67,7 +68,7 @@ class BedrockCohereEmbeddingModelTest {
     @Test
     void should_fall_back_to_body_token_count_when_header_is_missing() {
         Queue<InvokeModelResponse> responses =
-                new ArrayDeque<>(List.of(invokeModelResponseWithBodyTokenCount("[0.1,0.2]", 5)));
+                new ArrayDeque<>(Arrays.asList(invokeModelResponseWithBodyTokenCount("[0.1,0.2]", 5)));
 
         BedrockCohereEmbeddingModel model = BedrockCohereEmbeddingModel.builder()
                 .client(clientReturning(responses))
@@ -75,7 +76,7 @@ class BedrockCohereEmbeddingModelTest {
                 .inputType(SEARCH_QUERY)
                 .build();
 
-        Response<List<Embedding>> response = model.embedAll(List.of(TextSegment.from("first")));
+        Response<List<Embedding>> response = model.embedAll(Arrays.asList(TextSegment.from("first")));
 
         assertThat(response.content()).hasSize(1);
         assertThat(response.tokenUsage()).isNotNull();

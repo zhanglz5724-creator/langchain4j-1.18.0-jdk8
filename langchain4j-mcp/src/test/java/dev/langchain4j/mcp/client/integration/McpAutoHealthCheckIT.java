@@ -66,7 +66,7 @@ class McpAutoHealthCheckIT {
     void shouldDetectDeadServerByDefault() throws Exception {
         executeAToolAndAssertSuccess();
         destroyProcessTree(process);
-        process.onExit().get();
+        process.waitFor();
         TimeUnit.MILLISECONDS.sleep(500);
         // Reconnect heartbeat detection
         process = startServerHttp("tools_mcp_server.java");

@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /*
  * Decompiled with CFR 0.152.
  * 
@@ -47,7 +49,7 @@ implements EmbeddingModel {
 
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments, EmbeddingParameters parameters) {
         if (Objects.isNull(textSegments) || textSegments.isEmpty()) {
-            return Response.from((Object)List.of());
+            return Response.from((Object)Arrays.asList());
         }
         List inputs = textSegments.stream().map(TextSegment::text).toList();
         EmbeddingResponse response = (EmbeddingResponse)WatsonxExceptionMapper.INSTANCE.withExceptionMapper(() -> this.embeddingService.embedding(inputs, parameters));

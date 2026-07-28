@@ -7,6 +7,7 @@ import dev.langchain4j.model.vertexai.VertexAiChatModel;
 import org.junit.jupiter.api.Disabled;
 
 import java.util.List;
+import java.util.Arrays;
 
 @Disabled("TODO: configure custom model")
 class VertexAiChatModelIT extends AbstractChatModelIT {
@@ -15,7 +16,7 @@ class VertexAiChatModelIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 VertexAiChatModel.builder()
                         .endpoint(System.getenv("GCP_VERTEXAI_ENDPOINT"))
                         .project(System.getenv("GCP_PROJECT_ID"))

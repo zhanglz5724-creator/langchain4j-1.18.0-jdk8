@@ -40,7 +40,7 @@ public class McpRegistryClientIT {
         McpGetServerResponse server = response.getServers().stream()
                 .filter(s -> s.getServer().getName().equals("io.github.bytedance/mcp-server-filesystem"))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Server not found"));
         verifyMetadataOfServer(server);
     }
 

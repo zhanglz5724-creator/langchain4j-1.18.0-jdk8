@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
+import java.util.Arrays;
 
 @Disabled("Run manually before release. Expensive to run very often.")
 class BedrockStreamingChatModelThinkingIT {
@@ -59,7 +60,7 @@ class BedrockStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -82,7 +83,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), spyHandler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -133,7 +134,7 @@ class BedrockStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage), spyHandler1);
+        model.chat(Arrays.asList(userMessage), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -161,7 +162,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage, aiMessage1, userMessage2), spyHandler2);
+        model.chat(Arrays.asList(userMessage, aiMessage1, userMessage2), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -200,7 +201,7 @@ class BedrockStreamingChatModelThinkingIT {
                 .build();
 
         BedrockChatRequestParameters parameters = BedrockChatRequestParameters.builder()
-                .toolSpecifications(List.of(toolSpecification))
+                .toolSpecifications(Arrays.asList(toolSpecification))
                 .enableReasoning(THINKING_BUDGET_TOKENS)
                 .build();
 
@@ -218,7 +219,7 @@ class BedrockStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -245,7 +246,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -268,7 +269,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler3 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
 
         // then
         AiMessage aiMessage3 = spyHandler3.get().aiMessage();
@@ -295,7 +296,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler4 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2, aiMessage3, toolResultMessage2), spyHandler4);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2, aiMessage3, toolResultMessage2), spyHandler4);
 
         // then
         AiMessage aiMessage4 = spyHandler4.get().aiMessage();
@@ -333,7 +334,7 @@ class BedrockStreamingChatModelThinkingIT {
 
         BedrockChatRequestParameters parameters = BedrockChatRequestParameters.builder()
                 .toolSpecifications(toolSpecification)
-                .additionalModelRequestField("anthropic_beta", List.of(beta))
+                .additionalModelRequestField("anthropic_beta", Arrays.asList(beta))
                 .enableReasoning(THINKING_BUDGET_TOKENS)
                 .build();
 
@@ -351,7 +352,7 @@ class BedrockStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -380,7 +381,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -406,7 +407,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler3 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
 
         // then
         AiMessage aiMessage3 = spyHandler3.get().aiMessage();
@@ -435,7 +436,7 @@ class BedrockStreamingChatModelThinkingIT {
         // when
         sleepIfNeeded(SLEEPING_TIME_MULTIPLIER);
         TestStreamingChatResponseHandler spyHandler4 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2, aiMessage3, toolResultMessage2), spyHandler4);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2, aiMessage3, toolResultMessage2), spyHandler4);
 
         // then
         AiMessage aiMessage4 = spyHandler4.get().aiMessage();

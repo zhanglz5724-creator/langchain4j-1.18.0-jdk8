@@ -15,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleAiGeminiEnhancedCivicAnswersTest {
@@ -67,11 +68,11 @@ class GoogleAiGeminiEnhancedCivicAnswersTest {
     private GeminiGenerateContentResponse createSimpleResponse(String text) {
         var candidate = new GeminiGenerateContentResponse.GeminiCandidate(
                 new GeminiContent(
-                        List.of(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
+                        Arrays.asList(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
                 GeminiGenerateContentResponse.GeminiCandidate.GeminiFinishReason.STOP,
                 null,
                 null);
         var usageMetadata = new GeminiGenerateContentResponse.GeminiUsageMetadata(0, 0, 0, null, null);
-        return new GeminiGenerateContentResponse("id", "model", List.of(candidate), usageMetadata, null);
+        return new GeminiGenerateContentResponse("id", "model", Arrays.asList(candidate), usageMetadata, null);
     }
 }

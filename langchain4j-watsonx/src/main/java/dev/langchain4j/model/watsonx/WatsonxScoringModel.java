@@ -42,10 +42,10 @@ implements ScoringModel {
 
     public Response<List<Double>> scoreAll(List<TextSegment> segments, String query, RerankParameters parameters) {
         if (Objects.isNull(segments) || segments.isEmpty()) {
-            return Response.from((Object)List.of());
+            return Response.from((Object)Arrays.asList());
         }
         if (Objects.isNull(query) || query.isBlank()) {
-            return Response.from((Object)List.of());
+            return Response.from((Object)Arrays.asList());
         }
         List inputs = segments.stream().map(TextSegment::text).toList();
         RerankResponse response = (RerankResponse)WatsonxExceptionMapper.INSTANCE.withExceptionMapper(() -> this.rerankService.rerank(query, inputs, parameters));

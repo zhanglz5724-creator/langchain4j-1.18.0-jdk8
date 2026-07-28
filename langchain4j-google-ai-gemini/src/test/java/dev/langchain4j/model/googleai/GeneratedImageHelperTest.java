@@ -8,6 +8,8 @@ import dev.langchain4j.data.message.AiMessage;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Collections;
 
 class GeneratedImageHelperTest {
 
@@ -28,7 +30,7 @@ class GeneratedImageHelperTest {
 
         AiMessage message = AiMessage.builder()
                 .text("Here are the generated images")
-                .attributes(Map.of(GENERATED_IMAGES_KEY, List.of(image1, image2)))
+                .attributes(Collections.singletonMap(GENERATED_IMAGES_KEY, Arrays.asList(image1, image2)))
                 .build();
 
         // when

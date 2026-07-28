@@ -25,6 +25,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
+import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
@@ -143,13 +145,7 @@ class GeminiFilesTest {
 
             assertThat(initialRequest.uri()).hasToString(TEST_BASE_URL + "/upload/v1beta/files");
             assertThat(initialRequest.headers().map())
-                    .containsAllEntriesOf(java.util.Map.of(
-                            "x-goog-api-key", List.of(TEST_API_KEY),
-                            "content-type", List.of("application/json"),
-                            "user-agent", List.of("LangChain4j"),
-                            "x-goog-upload-protocol", List.of("resumable"),
-                            "x-goog-upload-command", List.of("start"),
-                            "x-goog-upload-header-content-length", List.of("16")));
+                    .containsAllEntriesOf(java.util.new java.util.HashMap<String, Object>() {{ put("x-goog-api-key", Arrays.asList(TEST_API_KEY)); put("content-type", Arrays.asList("application/json")); put("user-agent", Arrays.asList("LangChain4j")); put("x-goog-upload-protocol", Arrays.asList("resumable")); put("x-goog-upload-command", Arrays.asList("start")); put("x-goog-upload-header-content-length", Arrays.asList("16")); }});
             assertThat(initialRequest.headers().firstValue("x-goog-upload-header-content-type"))
                     .isPresent();
         }
@@ -626,13 +622,13 @@ class GeminiFilesTest {
         HttpResponse<String> response = mock(HttpResponse.class);
         when(response.headers())
                 .thenReturn(java.net.http.HttpHeaders.of(
-                        java.util.Map.of("x-goog-upload-url", List.of(uploadUrl)), (a, b) -> true));
+                        java.util.Collections.singletonMap("x-goog-upload-url", Arrays.asList(uploadUrl)), (a, b) -> true));
         return response;
     }
 
     private HttpResponse<String> createResponseWithoutUploadUrl() {
         HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.headers()).thenReturn(java.net.http.HttpHeaders.of(java.util.Map.of(), (a, b) -> true));
+        when(response.headers()).thenReturn(java.net.http.HttpHeaders.of(java.util.new java.util.HashMap<String, Object>() {{ }}, (a, b) -> true));
         return response;
     }
 

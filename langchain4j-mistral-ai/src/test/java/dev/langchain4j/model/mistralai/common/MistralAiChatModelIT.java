@@ -11,6 +11,7 @@ import dev.langchain4j.model.mistralai.MistralAiChatResponseMetadata;
 
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiChatModelIT extends AbstractChatModelIT {
@@ -25,7 +26,7 @@ class MistralAiChatModelIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(MISTRAL_CHAT_MODEL);
+        return Arrays.asList(MISTRAL_CHAT_MODEL);
     }
 
     @Override

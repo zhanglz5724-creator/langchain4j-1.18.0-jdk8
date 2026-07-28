@@ -557,7 +557,7 @@ class GoogleAiGeminiChatModelIT {
                                                 .anyOf(circleSchema, rectangleSchema)
                                                 .build())
                                         .build())
-                        .required(List.of("shapes"))
+                        .required(Arrays.asList("shapes"))
                         .build())
                 .build();
 

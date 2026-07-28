@@ -26,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleAiGeminiChatModelTest {
@@ -168,8 +169,8 @@ class GoogleAiGeminiChatModelTest {
                     .isEqualTo(AiMessage.builder()
                             .text(null)
                             .thinking(null)
-                            .toolExecutionRequests(List.of())
-                            .attributes(Map.of())
+                            .toolExecutionRequests(Arrays.asList())
+                            .attributes(new java.util.HashMap<String, Object>() {{ }})
                             .build());
         }
 
@@ -184,7 +185,7 @@ class GoogleAiGeminiChatModelTest {
 
             var candidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Response with tokens")
                                     .build()),
                             "model"),
@@ -193,7 +194,7 @@ class GoogleAiGeminiChatModelTest {
                     null);
 
             var geminiResponse = new GeminiGenerateContentResponse(
-                    "token-response-id", "gemini-pro-v1", List.of(candidate), usageMetadata, null);
+                    "token-response-id", "gemini-pro-v1", Arrays.asList(candidate), usageMetadata, null);
 
             when(mockGeminiService.generateContent(eq(TEST_MODEL_NAME), any(GeminiGenerateContentRequest.class)))
                     .thenReturn(geminiResponse);
@@ -233,7 +234,7 @@ class GoogleAiGeminiChatModelTest {
 
             GeminiCandidate candidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Cached + thinking response")
                                     .build()),
                             "model"),
@@ -242,7 +243,7 @@ class GoogleAiGeminiChatModelTest {
                     null);
 
             GeminiGenerateContentResponse geminiResponse = new GeminiGenerateContentResponse(
-                    "cache-thinking-id", "gemini-2.5-pro", List.of(candidate), usageMetadata, null);
+                    "cache-thinking-id", "gemini-2.5-pro", Arrays.asList(candidate), usageMetadata, null);
 
             when(mockGeminiService.generateContent(eq(TEST_MODEL_NAME), any(GeminiGenerateContentRequest.class)))
                     .thenReturn(geminiResponse);
@@ -272,7 +273,7 @@ class GoogleAiGeminiChatModelTest {
             // Given
             var candidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Partial response")
                                     .build()),
                             "mode"),
@@ -281,7 +282,7 @@ class GoogleAiGeminiChatModelTest {
                     null);
 
             var geminiResponse = new GeminiGenerateContentResponse(
-                    "finish-reason-id", "gemini-pro-v1", List.of(candidate), createUsageMetadata(10, 20, 30), null);
+                    "finish-reason-id", "gemini-pro-v1", Arrays.asList(candidate), createUsageMetadata(10, 20, 30), null);
 
             when(mockGeminiService.generateContent(eq(TEST_MODEL_NAME), any(GeminiGenerateContentRequest.class)))
                     .thenReturn(geminiResponse);
@@ -307,7 +308,7 @@ class GoogleAiGeminiChatModelTest {
             // Given
             var candidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Image response")
                                     .build()),
                             "model"),
@@ -316,7 +317,7 @@ class GoogleAiGeminiChatModelTest {
                     null);
 
             var geminiResponse = new GeminiGenerateContentResponse(
-                    "image-recitation-id", "gemini-pro-v1", List.of(candidate), createUsageMetadata(10, 20, 30), null);
+                    "image-recitation-id", "gemini-pro-v1", Arrays.asList(candidate), createUsageMetadata(10, 20, 30), null);
 
             when(mockGeminiService.generateContent(eq(TEST_MODEL_NAME), any(GeminiGenerateContentRequest.class)))
                     .thenReturn(geminiResponse);
@@ -371,7 +372,7 @@ class GoogleAiGeminiChatModelTest {
                             .maxOutputTokens(2048)
                             .presencePenalty(0.6)
                             .frequencyPenalty(0.4)
-                            .stopSequences(List.of("STOP", "END"))
+                            .stopSequences(Arrays.asList("STOP", "END"))
                             .build())
                     .build();
 
@@ -392,7 +393,7 @@ class GoogleAiGeminiChatModelTest {
                             .maxOutputTokens(2048)
                             .presencePenalty(0.6)
                             .frequencyPenalty(0.4)
-                            .stopSequences(List.of("STOP", "END"))
+                            .stopSequences(Arrays.asList("STOP", "END"))
                             .seed(42)
                             .candidateCount(1)
                             .responseLogprobs(false)
@@ -664,13 +665,13 @@ class GoogleAiGeminiChatModelTest {
     private static GeminiGenerateContentResponse createGeminiResponse(String text) {
         var candidate = new GeminiCandidate(
                 new GeminiContent(
-                        List.of(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
+                        Arrays.asList(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
                 GeminiFinishReason.STOP,
                 null,
                 null);
 
         return new GeminiGenerateContentResponse(
-                "response-id-123", "gemini-pro-v1", List.of(candidate), createUsageMetadata(10, 20, 30), null);
+                "response-id-123", "gemini-pro-v1", Arrays.asList(candidate), createUsageMetadata(10, 20, 30), null);
     }
 
     private static GeminiUsageMetadata createUsageMetadata(int promptTokens, int candidateTokens, int totalTokens) {

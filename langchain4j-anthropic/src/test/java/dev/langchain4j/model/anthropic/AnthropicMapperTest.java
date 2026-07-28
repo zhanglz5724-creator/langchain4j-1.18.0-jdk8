@@ -50,6 +50,10 @@ import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import java.net.URI;
 import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -279,19 +283,18 @@ class AnthropicMapperTest {
         Map<String, Object> map = toAnthropicSchema(jsonSchemaElement);
 
         // then
-        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace("""
-                        {
-                          "type": "object",
-                          "properties": {
-                              "name": {"type": "string"},
-                              "email": {"type": "string"},
-                              "plan_interest": {"type": "string"},
-                              "demo_requested": {"type": "boolean"}
-                          },
-                          "required": ["name", "email", "plan_interest", "demo_requested"],
-                          "additionalProperties": false
-                        }
-                       """);
+        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace(
+                "{\n"
+                + "  \"type\": \"object\",\n"
+                + "  \"properties\": {\n"
+                + "      \"name\": {\"type\": \"string\"},\n"
+                + "      \"email\": {\"type\": \"string\"},\n"
+                + "      \"plan_interest\": {\"type\": \"string\"},\n"
+                + "      \"demo_requested\": {\"type\": \"boolean\"}\n"
+                + "  },\n"
+                + "  \"required\": [\"name\", \"email\", \"plan_interest\", \"demo_requested\"],\n"
+                + "  \"additionalProperties\": false\n"
+                + "}");
     }
 
     @Test
@@ -308,31 +311,30 @@ class AnthropicMapperTest {
                         "person",
                         JsonReferenceSchema.builder().reference(reference).build())
                 .required("person")
-                .definitions(Map.of(reference, personSchema))
+                .definitions(Collections.singletonMap(reference, personSchema))
                 .build();
 
         // when
         Map<String, Object> map = toAnthropicSchema(rootSchema);
 
         // then
-        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace("""
-                        {
-                          "type": "object",
-                          "properties": {
-                              "person": { "$ref": "#/$defs/Person" }
-                          },
-                          "required": ["person"],
-                          "additionalProperties": false,
-                          "$defs": {
-                              "Person": {
-                                  "type": "object",
-                                  "properties": { "name": { "type": "string" } },
-                                  "required": ["name"],
-                                  "additionalProperties": false
-                              }
-                          }
-                        }
-                       """);
+        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace(
+                "{\n"
+                + "  \"type\": \"object\",\n"
+                + "  \"properties\": {\n"
+                + "      \"person\": { \"$ref\": \"#/$defs/Person\" }\n"
+                + "  },\n"
+                + "  \"required\": [\"person\"],\n"
+                + "  \"additionalProperties\": false,\n"
+                + "  \"$defs\": {\n"
+                + "      \"Person\": {\n"
+                + "          \"type\": \"object\",\n"
+                + "          \"properties\": { \"name\": { \"type\": \"string\" } },\n"
+                + "          \"required\": [\"name\"],\n"
+                + "          \"additionalProperties\": false\n"
+                + "      }\n"
+                + "  }\n"
+                + "}");
     }
 
     @Test
@@ -354,12 +356,12 @@ class AnthropicMapperTest {
                                         .reference(reference)
                                         .build())
                         .required("foo")
-                        .definitions(Map.of(reference, fooSchema))
+                        .definitions(Collections.singletonMap(reference, fooSchema))
                         .build())
                 .build();
 
         // when
-        AnthropicTool anthropicTool = toAnthropicTool(toolSpecification, AnthropicCacheType.NO_CACHE, Set.of(), null);
+        AnthropicTool anthropicTool = toAnthropicTool(toolSpecification, AnthropicCacheType.NO_CACHE, Collections.<String>emptySet(), null);
 
         // then
         assertThat(anthropicTool.inputSchema.defs).isNotNull();
@@ -385,7 +387,7 @@ class AnthropicMapperTest {
                 .build();
 
         // when
-        AnthropicTool anthropicTool = toAnthropicTool(toolSpecification, AnthropicCacheType.NO_CACHE, Set.of(), null);
+        AnthropicTool anthropicTool = toAnthropicTool(toolSpecification, AnthropicCacheType.NO_CACHE, Collections.<String>emptySet(), null);
 
         // then
         assertThat(anthropicTool.inputSchema.defs).isNull();
@@ -401,7 +403,7 @@ class AnthropicMapperTest {
         JsonSchemaElement bookRecord = JsonObjectSchema.builder()
                 .addStringProperty("author")
                 .addStringProperty("title")
-                .addEnumProperty("style", List.of("classical", "modern"))
+                .addEnumProperty("style", Arrays.asList("classical", "modern"))
                 .addIntegerProperty("publicationYear")
                 .required("author", "title")
                 .build();
@@ -410,22 +412,21 @@ class AnthropicMapperTest {
         Map<String, Object> map = toAnthropicSchema(bookRecord);
 
         // then
-        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace("""
-                        {
-                          "type": "object",
-                          "properties": {
-                              "author": { "type": "string" },
-                              "title": { "type": "string" },
-                              "style": {
-                                "type": "string",
-                                "enum": ["classical", "modern"]
-                              },
-                              "publicationYear": { "type": "integer" }
-                          },
-                          "required": ["author", "title"],
-                          "additionalProperties": false
-                        }
-                       """);
+        assertThat(new ObjectMapper().writeValueAsString(map)).isEqualToIgnoringWhitespace(
+                "{\n"
+                + "  \"type\": \"object\",\n"
+                + "  \"properties\": {\n"
+                + "      \"author\": { \"type\": \"string\" },\n"
+                + "      \"title\": { \"type\": \"string\" },\n"
+                + "      \"style\": {\n"
+                + "        \"type\": \"string\",\n"
+                + "        \"enum\": [\"classical\", \"modern\"]\n"
+                + "      },\n"
+                + "      \"publicationYear\": { \"type\": \"integer\" }\n"
+                + "  },\n"
+                + "  \"required\": [\"author\", \"title\"],\n"
+                + "  \"additionalProperties\": false\n"
+                + "}");
     }
 
     static Stream<Arguments> test_toAnthropicTool() {
@@ -472,7 +473,7 @@ class AnthropicMapperTest {
                 .build();
 
         // when - model-level strictTools is null
-        AnthropicTool tool = toAnthropicTool(toolSpec, AnthropicCacheType.NO_CACHE, Set.of(), null);
+        AnthropicTool tool = toAnthropicTool(toolSpec, AnthropicCacheType.NO_CACHE, Collections.<String>emptySet(), null);
 
         // then
         assertThat(tool.strict).isTrue();
@@ -493,7 +494,7 @@ class AnthropicMapperTest {
                 .build();
 
         // when - model-level strictTools is true
-        AnthropicTool tool = toAnthropicTool(toolSpec, AnthropicCacheType.NO_CACHE, Set.of(), true);
+        AnthropicTool tool = toAnthropicTool(toolSpec, AnthropicCacheType.NO_CACHE, Collections.<String>emptySet(), true);
 
         // then
         assertThat(tool.strict).isNull();
@@ -513,7 +514,7 @@ class AnthropicMapperTest {
                 .build();
 
         // when - model-level strictTools is true
-        AnthropicTool tool = toAnthropicTool(toolSpec, AnthropicCacheType.NO_CACHE, Set.of(), true);
+        AnthropicTool tool = toAnthropicTool(toolSpec, AnthropicCacheType.NO_CACHE, Collections.<String>emptySet(), true);
 
         // then - falls back to model-level
         assertThat(tool.strict).isTrue();
@@ -522,11 +523,11 @@ class AnthropicMapperTest {
 
     @Test
     void should_retain_keys() {
-        assertThat(retainKeys(Map.of(), Set.of())).isEqualTo(Map.of());
-        assertThat(retainKeys(Map.of("one", "one"), Set.of("one"))).isEqualTo(Map.of("one", "one"));
-        assertThat(retainKeys(Map.of("one", "one"), Set.of("two"))).isEqualTo(Map.of());
-        assertThat(retainKeys(Map.of("one", "one", "two", "two"), Set.of("one")))
-                .isEqualTo(Map.of("one", "one"));
+        assertThat(retainKeys(Collections.emptyMap(), new HashSet<>())).isEqualTo(Collections.emptyMap());
+        assertThat(retainKeys(Collections.singletonMap("one", "one"), new HashSet<>(Collections.singletonList("one")))).isEqualTo(Collections.singletonMap("one", "one"));
+        assertThat(retainKeys(Collections.singletonMap("one", "one"), new HashSet<>(Collections.singletonList("two")))).isEqualTo(Collections.emptyMap());
+        assertThat(retainKeys(new HashMap<String, Object>() {{ put("one", "one"); put("two", "two"); }}, new HashSet<>(Collections.singletonList("one"))))
+                .isEqualTo(Collections.singletonMap("one", "one"));
     }
 
     @Test
@@ -540,13 +541,14 @@ class AnthropicMapperTest {
         AnthropicContent webSearchResult = AnthropicContent.builder()
                 .type("web_search_tool_result")
                 .toolUseId("srvtoolu_123")
-                .content(List.of(Map.of(
-                        "type", "web_search_result",
-                        "url", "https://example.com",
-                        "title", "Example")))
+                .content(Arrays.asList(new HashMap<String, Object>() {{
+                    put("type", "web_search_result");
+                    put("url", "https://example.com");
+                    put("title", "Example");
+                }}))
                 .build();
 
-        List<AnthropicContent> contents = List.of(textContent, webSearchResult);
+        List<AnthropicContent> contents = Arrays.asList(textContent, webSearchResult);
 
         // when
         AiMessage aiMessage = toAiMessage(contents, false, true);
@@ -567,11 +569,11 @@ class AnthropicMapperTest {
         AnthropicContent webSearchResult = AnthropicContent.builder()
                 .type("web_search_tool_result")
                 .toolUseId("srvtoolu_123")
-                .content(List.of(Map.of("url", "https://example.com")))
+                .content(Arrays.asList(Collections.singletonMap("url", "https://example.com")))
                 .build();
 
         // when
-        AiMessage aiMessage = toAiMessage(List.of(webSearchResult), false, false);
+        AiMessage aiMessage = toAiMessage(Arrays.asList(webSearchResult), false, false);
 
         // then
         assertThat(aiMessage.attributes()).doesNotContainKey(SERVER_TOOL_RESULTS_KEY);

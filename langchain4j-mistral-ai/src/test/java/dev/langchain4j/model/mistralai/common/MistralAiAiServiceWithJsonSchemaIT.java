@@ -8,6 +8,7 @@ import dev.langchain4j.model.mistralai.MistralAiChatModel;
 import dev.langchain4j.service.common.AbstractAiServiceWithJsonSchemaIT;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 public class MistralAiAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT {
@@ -33,7 +34,7 @@ public class MistralAiAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJso
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(nonStrictModel, strictModel);
+        return Arrays.asList(nonStrictModel, strictModel);
     }
 
     @Override

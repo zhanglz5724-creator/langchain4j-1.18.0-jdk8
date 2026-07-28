@@ -98,7 +98,7 @@ public class ApacheHttpClient implements HttpClient {
     @Override
     public void execute(HttpRequest request, ServerSentEventParser parser, ServerSentEventListener listener) {
         SimpleHttpRequest apacheRequest = toSimpleApacheRequest(request);
-        asyncClient.execute(apacheRequest, new FutureCallback<>() {
+        asyncClient.execute(apacheRequest, new FutureCallback<SimpleHttpResponse>() {
             @Override
             public void completed(SimpleHttpResponse apacheResponse) {
                 if (!isSuccessful(apacheResponse)) {
@@ -134,7 +134,7 @@ public class ApacheHttpClient implements HttpClient {
 
     private InputStream getInputStream(SimpleHttpResponse apacheResponse) {
         byte[] bodyBytes = apacheResponse.getBody().getBodyBytes();
-        return new ByteArrayInputStream(Objects.requireNonNullElseGet(bodyBytes, () -> new byte[0]));
+        return new ByteArrayInputStream(bodyBytes != null ? bodyBytes : new byte[0]);
     }
 
     private SuccessfulHttpResponse fromApacheResponse(ClassicHttpResponse httpResponse) throws IOException {
@@ -179,12 +179,20 @@ public class ApacheHttpClient implements HttpClient {
     }
 
     private ClassicHttpRequest toApacheRequest(HttpRequest request) {
-        ClassicHttpRequest apacheRequest =
-                switch (request.method()) {
-                    case GET -> new HttpGet(request.url());
-                    case DELETE -> new HttpDelete(request.url());
-                    case POST -> new HttpPost(request.url());
-                };
+        ClassicHttpRequest apacheRequest;
+        switch (request.method()) {
+            case GET:
+                apacheRequest = new HttpGet(request.url());
+                break;
+            case DELETE:
+                apacheRequest = new HttpDelete(request.url());
+                break;
+            case POST:
+                apacheRequest = new HttpPost(request.url());
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported method: " + request.method());
+        }
 
         if (request.formDataFields().isEmpty() && request.formDataFiles().isEmpty()) {
             if (request.body() != null) {
@@ -212,11 +220,19 @@ public class ApacheHttpClient implements HttpClient {
         String uri = request.url();
 
         if (request.formDataFields().isEmpty() && request.formDataFiles().isEmpty()) {
-            builder = switch (request.method()) {
-                case GET -> SimpleRequestBuilder.get(uri);
-                case DELETE -> SimpleRequestBuilder.delete(uri);
-                case POST -> SimpleRequestBuilder.post(uri);
-            };
+            switch (request.method()) {
+                case GET:
+                    builder = SimpleRequestBuilder.get(uri);
+                    break;
+                case DELETE:
+                    builder = SimpleRequestBuilder.delete(uri);
+                    break;
+                case POST:
+                    builder = SimpleRequestBuilder.post(uri);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported method: " + request.method());
+            }
 
             if (request.body() != null) {
                 builder.setBody(request.body(), ContentType.APPLICATION_JSON);

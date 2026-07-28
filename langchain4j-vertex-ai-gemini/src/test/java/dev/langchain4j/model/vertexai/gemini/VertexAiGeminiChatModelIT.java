@@ -530,7 +530,7 @@ class VertexAiGeminiChatModelIT {
         UserMessage userMessage = UserMessage.from("List the capitals of Germany, France, and Italy");
 
         ChatRequest request = ChatRequest.builder()
-                .messages(List.of(userMessage))
+                .messages(Arrays.asList(userMessage))
                 .responseFormat(ResponseFormat.TEXT)
                 .build();
 
@@ -549,7 +549,7 @@ class VertexAiGeminiChatModelIT {
                 "List the capitals of Germany, France, and Italy as JSON with this format: {\"countries\": [{\"country\": \"name\", \"capital\": \"capital\"}]}");
 
         ChatRequest request = ChatRequest.builder()
-                .messages(List.of(userMessage))
+                .messages(Arrays.asList(userMessage))
                 .responseFormat(ResponseFormat.JSON)
                 .build();
 
@@ -572,7 +572,7 @@ class VertexAiGeminiChatModelIT {
         assertThat(capitals.countries())
                 .usingRecursiveComparison()
                 .ignoringCollectionOrder()
-                .isEqualTo(List.of(
+                .isEqualTo(Arrays.asList(
                         new CountryCapital("Germany", "Berlin"),
                         new CountryCapital("France", "Paris"),
                         new CountryCapital("Italy", "Rome")));

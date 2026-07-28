@@ -14,6 +14,7 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class MistralAiStreamingChatModelStrictJsonSchemaTest {
 
@@ -75,7 +76,7 @@ class MistralAiStreamingChatModelStrictJsonSchemaTest {
     }
 
     private static List<ServerSentEvent> responseEvents() {
-        return List.of(
+        return Arrays.asList(
                 new ServerSentEvent(null, """
                         {"id":"abc123","model":"%s","choices":[{"index":0,"delta":{"content":[{"type":"text","text":"{\\"answer\\":\\"42\\"}"}]}}]}""".formatted(MODEL)),
                 new ServerSentEvent(null, """

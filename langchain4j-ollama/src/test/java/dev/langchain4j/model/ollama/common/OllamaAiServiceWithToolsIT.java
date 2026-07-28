@@ -8,6 +8,7 @@ import java.util.List;
 
 import static dev.langchain4j.model.ollama.AbstractOllamaLanguageModelInfrastructure.ollamaBaseUrl;
 import static dev.langchain4j.model.ollama.OllamaImage.LLAMA_3_1;
+import java.util.Arrays;
 
 class OllamaAiServiceWithToolsIT extends AbstractOllamaToolsLanguageModelInfrastructure {
 
@@ -21,7 +22,7 @@ class OllamaAiServiceWithToolsIT extends AbstractOllamaToolsLanguageModelInfrast
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(model);
+        return Arrays.asList(model);
     }
 
     @Override

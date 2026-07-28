@@ -9,6 +9,7 @@ import dev.langchain4j.model.moderation.ModerationResponse;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiModerationModelIT {
@@ -45,7 +46,7 @@ class MistralAiModerationModelIT {
 
         // request overrides with a valid model name
         ModerationRequest request = ModerationRequest.builder()
-                .texts(List.of("I want to hug them."))
+                .texts(Arrays.asList("I want to hug them."))
                 .modelName("mistral-moderation-latest")
                 .build();
 

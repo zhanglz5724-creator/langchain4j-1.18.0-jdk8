@@ -53,7 +53,7 @@ class AnthropicSkillsTest {
 
     @Test
     void skills_shouldAddContainerWithAnthropicManagedSkills() {
-        AnthropicCreateMessageRequest request = requestWithSkills(List.of(AnthropicSkill.XLSX, AnthropicSkill.PPTX));
+        AnthropicCreateMessageRequest request = requestWithSkills(Arrays.asList(AnthropicSkill.XLSX, AnthropicSkill.PPTX));
 
         assertThat(request.container).isNotNull();
         assertThat(request.container.skills)
@@ -64,7 +64,7 @@ class AnthropicSkillsTest {
 
     @Test
     void skills_shouldAutoAddCodeExecutionServerTool() {
-        AnthropicCreateMessageRequest request = requestWithSkills(List.of(AnthropicSkill.DOCX));
+        AnthropicCreateMessageRequest request = requestWithSkills(Arrays.asList(AnthropicSkill.DOCX));
 
         assertThat(request.tools).hasSize(1);
         AnthropicTool tool = request.tools.get(0);
@@ -89,10 +89,10 @@ class AnthropicSkillsTest {
                 false,
                 null,
                 null,
-                List.of(codeExecution),
+                Arrays.asList(codeExecution),
                 null,
                 null,
-                List.of(AnthropicSkill.PDF),
+                Arrays.asList(AnthropicSkill.PDF),
                 null,
                 null,
                 false,
@@ -128,7 +128,7 @@ class AnthropicSkillsTest {
                 null,
                 emptySet(),
                 null,
-                List.of(AnthropicSkill.XLSX),
+                Arrays.asList(AnthropicSkill.XLSX),
                 null,
                 null,
                 false,
@@ -145,7 +145,7 @@ class AnthropicSkillsTest {
     @Test
     void skills_shouldDeduplicate() {
         AnthropicCreateMessageRequest request =
-                requestWithSkills(List.of(AnthropicSkill.PDF, AnthropicSkill.PDF, AnthropicSkill.DOCX));
+                requestWithSkills(Arrays.asList(AnthropicSkill.PDF, AnthropicSkill.PDF, AnthropicSkill.DOCX));
 
         assertThat(request.container.skills)
                 .containsExactly(
@@ -171,7 +171,7 @@ class AnthropicSkillsTest {
 
     @Test
     void skills_shouldSerializeReferenceRequestShape() {
-        String json = Json.toJson(requestWithSkills(List.of(AnthropicSkill.PPTX)));
+        String json = Json.toJson(requestWithSkills(Arrays.asList(AnthropicSkill.PPTX)));
 
         assertThat(json)
                 .contains("\"container\"")

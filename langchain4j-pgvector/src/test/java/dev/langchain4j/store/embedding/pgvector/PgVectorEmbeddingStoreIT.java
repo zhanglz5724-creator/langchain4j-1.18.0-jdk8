@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import java.util.Collections;
 
 @Testcontainers
 class PgVectorEmbeddingStoreIT extends EmbeddingStoreWithFilteringIT {
@@ -68,8 +69,8 @@ class PgVectorEmbeddingStoreIT extends EmbeddingStoreWithFilteringIT {
     @Test
     void test_escape_in() {
         TextSegment[] segments = new TextSegment[] {
-            TextSegment.from("toEscape", Metadata.from(Map.of("text", "This must be escaped '"))),
-            TextSegment.from("notEscape", Metadata.from(Map.of("text", "This does not require to be escaped")))
+            TextSegment.from("toEscape", Metadata.from(Collections.singletonMap("text", "This must be escaped '"))),
+            TextSegment.from("notEscape", Metadata.from(Collections.singletonMap("text", "This does not require to be escaped")))
         };
         List<Embedding> embeddings = new ArrayList<>(segments.length);
         for (TextSegment segment : segments) {

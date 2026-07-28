@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import java.util.HashMap;
 
 class OutputGuardrailChainTests extends BaseGuardrailTests {
     MyAiService aiService = MyAiService.create();
@@ -591,10 +592,10 @@ class OutputGuardrailChainTests extends BaseGuardrailTests {
         String helloWorld(@UserMessage String message);
 
         static UppercaseAiService create() {
-            Map<String, String> responses = Map.of(
-                    "SAY HELLO", "Hello world",
-                    "Please provide the output in uppercase.", "HELLO WORLD"
-            );
+            Map<String, String> responses = new HashMap<>() {{
+            put("SAY HELLO", "Hello world");
+            put("Please provide the output in uppercase.", "HELLO WORLD");
+        }};
             return createAiService(UppercaseAiService.class, builder -> builder.chatModel(new MapChatModel(responses)));
         }
     }

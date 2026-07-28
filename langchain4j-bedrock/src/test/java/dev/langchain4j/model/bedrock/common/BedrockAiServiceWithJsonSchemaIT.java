@@ -8,6 +8,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import java.util.List;
 
 import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT {
@@ -21,7 +22,7 @@ class BedrockAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(model);
+        return Arrays.asList(model);
     }
 
     @Override

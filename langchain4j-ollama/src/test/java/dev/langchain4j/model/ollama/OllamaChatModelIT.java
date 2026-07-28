@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import java.util.Arrays;
 
 class OllamaChatModelIT extends AbstractOllamaLanguageModelInfrastructure {
 
@@ -181,30 +182,30 @@ class OllamaChatModelIT extends AbstractOllamaLanguageModelInfrastructure {
 
     static Stream<List<ContentType>> notSupportedContentTypesProvider() {
         return Stream.of(
-                List.of(ContentType.AUDIO),
-                List.of(ContentType.PDF),
-                List.of(ContentType.VIDEO),
-                List.of(ContentType.TEXT, ContentType.AUDIO),
-                List.of(ContentType.TEXT, ContentType.PDF),
-                List.of(ContentType.TEXT, ContentType.VIDEO),
-                List.of(ContentType.IMAGE, ContentType.AUDIO),
-                List.of(ContentType.IMAGE, ContentType.PDF),
-                List.of(ContentType.IMAGE, ContentType.VIDEO),
-                List.of(ContentType.TEXT, ContentType.AUDIO, ContentType.IMAGE),
-                List.of(ContentType.TEXT, ContentType.PDF, ContentType.IMAGE),
-                List.of(ContentType.TEXT, ContentType.VIDEO, ContentType.IMAGE),
-                List.of(ContentType.AUDIO, ContentType.IMAGE, ContentType.PDF, ContentType.TEXT, ContentType.VIDEO)
+                Arrays.asList(ContentType.AUDIO),
+                Arrays.asList(ContentType.PDF),
+                Arrays.asList(ContentType.VIDEO),
+                Arrays.asList(ContentType.TEXT, ContentType.AUDIO),
+                Arrays.asList(ContentType.TEXT, ContentType.PDF),
+                Arrays.asList(ContentType.TEXT, ContentType.VIDEO),
+                Arrays.asList(ContentType.IMAGE, ContentType.AUDIO),
+                Arrays.asList(ContentType.IMAGE, ContentType.PDF),
+                Arrays.asList(ContentType.IMAGE, ContentType.VIDEO),
+                Arrays.asList(ContentType.TEXT, ContentType.AUDIO, ContentType.IMAGE),
+                Arrays.asList(ContentType.TEXT, ContentType.PDF, ContentType.IMAGE),
+                Arrays.asList(ContentType.TEXT, ContentType.VIDEO, ContentType.IMAGE),
+                Arrays.asList(ContentType.AUDIO, ContentType.IMAGE, ContentType.PDF, ContentType.TEXT, ContentType.VIDEO)
         );
     }
 
     static Stream<List<ContentType>> supportedContentTypesProvider() {
         // note, only 1 of TEXT is allowed, zero or more of IMAGE
         return Stream.of(
-                List.of(ContentType.TEXT),
-                List.of(ContentType.IMAGE, ContentType.TEXT),
-                List.of(ContentType.TEXT, ContentType.IMAGE),
-                List.of(ContentType.IMAGE, ContentType.IMAGE, ContentType.TEXT),
-                List.of(ContentType.IMAGE, ContentType.TEXT, ContentType.IMAGE)
+                Arrays.asList(ContentType.TEXT),
+                Arrays.asList(ContentType.IMAGE, ContentType.TEXT),
+                Arrays.asList(ContentType.TEXT, ContentType.IMAGE),
+                Arrays.asList(ContentType.IMAGE, ContentType.IMAGE, ContentType.TEXT),
+                Arrays.asList(ContentType.IMAGE, ContentType.TEXT, ContentType.IMAGE)
         );
     }
 }

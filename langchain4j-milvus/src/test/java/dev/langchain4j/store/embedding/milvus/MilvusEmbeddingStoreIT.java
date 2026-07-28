@@ -40,8 +40,8 @@ class MilvusEmbeddingStoreIT extends EmbeddingStoreWithFilteringIT {
 
     private static final String COLLECTION_NAME = "test_collection";
 
-    private static final Map<String, Object> HNSW_CONSTRUCTION_PARAMETERS = Map.of("efConstruction", 200, "m", 16);
-    private static final Map<String, Object> IVFPQ_PARAMETERS = Map.of("m", 8, "nlist", 1024);
+    private static final Map<String, Object> HNSW_CONSTRUCTION_PARAMETERS = new HashMap<String, Object>() {{ put("efConstruction", 200); put("m", 16); }};
+    private static final Map<String, Object> IVFPQ_PARAMETERS = new HashMap<String, Object>() {{ put("m", 8); put("nlist", 1024); }};
 
     @Container
     private static final MilvusContainer milvus = new MilvusContainer(MILVUS_DOCKER_IMAGE);

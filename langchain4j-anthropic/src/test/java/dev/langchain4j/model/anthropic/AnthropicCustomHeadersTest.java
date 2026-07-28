@@ -11,6 +11,9 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -23,17 +26,15 @@ import org.junit.jupiter.api.Test;
 class AnthropicCustomHeadersTest {
 
     // language=json
-    private static final String SUCCESS_RESPONSE = """
-            {
-              "id": "msg_123",
-              "type": "message",
-              "role": "assistant",
-              "content": [{"type": "text", "text": "Hello"}],
-              "model": "claude-haiku-4-5-20251001",
-              "stop_reason": "end_turn",
-              "usage": {"input_tokens": 5, "output_tokens": 3}
-            }
-            """;
+    private static final String SUCCESS_RESPONSE = "{\n"
+            + "  \"id\": \"msg_123\",\n"
+            + "  \"type\": \"message\",\n"
+            + "  \"role\": \"assistant\",\n"
+            + "  \"content\": [{\"type\": \"text\", \"text\": \"Hello\"}],\n"
+            + "  \"model\": \"claude-haiku-4-5-20251001\",\n"
+            + "  \"stop_reason\": \"end_turn\",\n"
+            + "  \"usage\": {\"input_tokens\": 5, \"output_tokens\": 3}\n"
+            + "}";
 
     /**
      * Generous on purpose: this only bounds the failure path. CI runs the reactor with a high {@code -T} thread
@@ -80,7 +81,7 @@ class AnthropicCustomHeadersTest {
                 .baseUrl(baseUrl)
                 .modelName(AnthropicChatModelName.CLAUDE_HAIKU_4_5_20251001)
                 .maxTokens(10)
-                .customHeaders(Map.of("x-custom-header", "my-value", "x-tenant-id", "tenant-42"))
+                .customHeaders(new HashMap<String, String>() {{ put("x-custom-header", "my-value"); put("x-tenant-id", "tenant-42"); }})
                 .build();
 
         model.chat(UserMessage.from("Hi"));
@@ -99,7 +100,7 @@ class AnthropicCustomHeadersTest {
                 .baseUrl(baseUrl)
                 .modelName(AnthropicChatModelName.CLAUDE_HAIKU_4_5_20251001)
                 .maxTokens(10)
-                .customHeaders(() -> Map.of("x-auth-token", dynamicValue.get()))
+                .customHeaders(() -> Collections.singletonMap("x-auth-token", dynamicValue.get()))
                 .build();
 
         model.chat(UserMessage.from("Hi"));
@@ -117,7 +118,7 @@ class AnthropicCustomHeadersTest {
                 .baseUrl(baseUrl)
                 .modelName(AnthropicChatModelName.CLAUDE_HAIKU_4_5_20251001)
                 .maxTokens(10)
-                .customHeaders(Map.of("x-custom-header", "custom-value"))
+                .customHeaders(Collections.singletonMap("x-custom-header", "custom-value"))
                 .build();
 
         model.chat(UserMessage.from("Hi"));
@@ -133,26 +134,23 @@ class AnthropicCustomHeadersTest {
         CompletableFuture<ChatResponse> futureResponse = new CompletableFuture<>();
 
         // language=json
-        String sseResponse = """
-                event: message_start
-                data: {"type":"message_start","message":{"id":"msg_1","type":"message","role":"assistant","content":[],"model":"claude-haiku-4-5-20251001","stop_reason":null,"usage":{"input_tokens":5,"output_tokens":0}}}
-
-                event: content_block_start
-                data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
-
-                event: content_block_delta
-                data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hi"}}
-
-                event: content_block_stop
-                data: {"type":"content_block_stop","index":0}
-
-                event: message_delta
-                data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":2}}
-
-                event: message_stop
-                data: {"type":"message_stop"}
-
-                """;
+        String sseResponse = "event: message_start\n"
+                + "data: {\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"claude-haiku-4-5-20251001\",\"stop_reason\":null,\"usage\":{\"input_tokens\":5,\"output_tokens\":0}}}\n"
+                + "\n"
+                + "event: content_block_start\n"
+                + "data: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"\"}}\n"
+                + "\n"
+                + "event: content_block_delta\n"
+                + "data: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"Hi\"}}\n"
+                + "\n"
+                + "event: content_block_stop\n"
+                + "data: {\"type\":\"content_block_stop\",\"index\":0}\n"
+                + "\n"
+                + "event: message_delta\n"
+                + "data: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"},\"usage\":{\"output_tokens\":2}}\n"
+                + "\n"
+                + "event: message_stop\n"
+                + "data: {\"type\":\"message_stop\"}\n";
 
         server.removeContext("/v1/messages");
         server.createContext("/v1/messages", exchange -> {
@@ -172,10 +170,10 @@ class AnthropicCustomHeadersTest {
                 .baseUrl(baseUrl)
                 .modelName(AnthropicChatModelName.CLAUDE_HAIKU_4_5_20251001)
                 .maxTokens(10)
-                .customHeaders(Map.of("x-streaming-header", "streaming-value"))
+                .customHeaders(Collections.singletonMap("x-streaming-header", "streaming-value"))
                 .build();
 
-        model.chat(List.of(UserMessage.from("Hi")), new StreamingChatResponseHandler() {
+        model.chat(Arrays.asList(UserMessage.from("Hi")), new StreamingChatResponseHandler() {
             @Override
             public void onPartialResponse(String partialResponse) {}
 

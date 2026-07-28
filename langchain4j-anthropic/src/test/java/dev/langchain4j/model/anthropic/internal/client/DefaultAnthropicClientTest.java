@@ -31,6 +31,8 @@ import dev.langchain4j.model.chat.response.PartialToolCall;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -49,28 +51,21 @@ class DefaultAnthropicClientTest {
 
         @Test
         void shouldThrowWhenApiKeyIsMissing() {
-            var builder =
-                    DefaultAnthropicClient.builder().baseUrl(TEST_BASE_URL).version(TEST_VERSION);
-
-            assertThatThrownBy(builder::build)
+            assertThatThrownBy(() -> DefaultAnthropicClient.builder().baseUrl(TEST_BASE_URL).version(TEST_VERSION).build())
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("apiKey");
         }
 
         @Test
         void shouldThrowWhenBaseUrlIsMissing() {
-            var builder = DefaultAnthropicClient.builder().apiKey(TEST_API_KEY).version(TEST_VERSION);
-
-            assertThatThrownBy(builder::build)
+            assertThatThrownBy(() -> DefaultAnthropicClient.builder().apiKey(TEST_API_KEY).version(TEST_VERSION).build())
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("baseUrl");
         }
 
         @Test
         void shouldThrowWhenVersionIsMissing() {
-            var builder = DefaultAnthropicClient.builder().apiKey(TEST_API_KEY).baseUrl(TEST_BASE_URL);
-
-            assertThatThrownBy(builder::build)
+            assertThatThrownBy(() -> DefaultAnthropicClient.builder().apiKey(TEST_API_KEY).baseUrl(TEST_BASE_URL).build())
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("version");
         }
@@ -137,7 +132,7 @@ class DefaultAnthropicClientTest {
             DefaultAnthropicClient subject = createClient(mockHttpClient);
 
             AnthropicCreateMessageRequest request = createMessageRequest().toBuilder()
-                    .customParameters(Map.of("output_config", Map.of("effort", "low")))
+                    .customParameters(new HashMap<String, Object>() {{ put("output_config", new HashMap<String, Object>() {{ put("effort", "low"); }}); }})
                     .build();
 
             // When
@@ -280,7 +275,7 @@ class DefaultAnthropicClientTest {
             AnthropicCreateMessageRequest request = createMessageRequest();
 
             // When
-            var result = subject.createMessageWithRawResponse(request);
+            ParsedAndRawResponse result = subject.createMessageWithRawResponse(request);
 
             // Then
             assertThat(result.parsedResponse()).isEqualTo(expectedResponse);
@@ -295,7 +290,7 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldSendCountTokensRequest() {
             // Given
-            var expectedResponse = createMessageTokenCountResponse();
+            MessageTokenCountResponse expectedResponse = createMessageTokenCountResponse();
             SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
                     .statusCode(200)
                     .body(Json.toJson(expectedResponse))
@@ -306,11 +301,11 @@ class DefaultAnthropicClientTest {
 
             AnthropicCountTokensRequest request = AnthropicCountTokensRequest.builder()
                     .model(TEST_MODEL_NAME)
-                    .messages(List.of(new AnthropicMessage(USER, List.of(new AnthropicTextContent("Count these")))))
+                    .messages(Arrays.asList(new AnthropicMessage(USER, Arrays.asList(new AnthropicTextContent("Count these")))))
                     .build();
 
             // When
-            var actualResponse = subject.countTokens(request);
+            MessageTokenCountResponse actualResponse = subject.countTokens(request);
 
             // Then
             assertThat(actualResponse).isEqualTo(expectedResponse);
@@ -319,7 +314,7 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldSendCorrectCountTokensHttpRequest() {
             // Given
-            var expectedResponse = createMessageTokenCountResponse();
+            MessageTokenCountResponse expectedResponse = createMessageTokenCountResponse();
             SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
                     .statusCode(200)
                     .body(Json.toJson(expectedResponse))
@@ -330,7 +325,7 @@ class DefaultAnthropicClientTest {
 
             AnthropicCountTokensRequest request = AnthropicCountTokensRequest.builder()
                     .model(TEST_MODEL_NAME)
-                    .messages(List.of(new AnthropicMessage(USER, List.of(new AnthropicTextContent("Test")))))
+                    .messages(Arrays.asList(new AnthropicMessage(USER, Arrays.asList(new AnthropicTextContent("Test")))))
                     .build();
 
             // When
@@ -351,17 +346,17 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldSendListModelsRequest() {
             // Given
-            var expectedResponse = createEmptyModelsListResponse();
-            var httpResponse = SuccessfulHttpResponse.builder()
+            AnthropicModelsListResponse expectedResponse = createEmptyModelsListResponse();
+            SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
                     .statusCode(200)
                     .body(Json.toJson(expectedResponse))
                     .build();
-            var mockHttpClient = MockHttpClient.thatAlwaysResponds(httpResponse);
+            MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(httpResponse);
 
-            var subject = createClient(mockHttpClient);
+            DefaultAnthropicClient subject = createClient(mockHttpClient);
 
             // When
-            var actualResponse = subject.listModels();
+            AnthropicModelsListResponse actualResponse = subject.listModels();
 
             // Then
             assertThat(actualResponse).isEqualTo(expectedResponse);
@@ -370,7 +365,7 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldSendCorrectListModelsHttpRequest() {
             // Given
-            var expectedResponse = createEmptyModelsListResponse();
+            AnthropicModelsListResponse expectedResponse = createEmptyModelsListResponse();
             SuccessfulHttpResponse httpResponse = SuccessfulHttpResponse.builder()
                     .statusCode(200)
                     .body(Json.toJson(expectedResponse))
@@ -397,7 +392,7 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldStreamCreateMessageResponse() throws Exception {
             // Given
-            List<ServerSentEvent> events = List.of(
+            List<ServerSentEvent> events = Arrays.asList(
                     createMessageStartEvent(),
                     createContentBlockStartEvent(),
                     createContentBlockDeltaEvent(),
@@ -447,7 +442,7 @@ class DefaultAnthropicClientTest {
             ServerSentEvent contentBlockStop = createContentBlockStopEvent(); // text stop -> no typed callback
             ServerSentEvent messageDelta = createMessageDeltaEvent(); // stop reason/usage -> no typed callback
             ServerSentEvent messageStop = createMessageStopEvent(); // -> onCompleteResponse
-            List<ServerSentEvent> events = List.of(
+            List<ServerSentEvent> events = Arrays.asList(
                     messageStart, contentBlockStart, contentBlockDelta, contentBlockStop, messageDelta, messageStop);
             MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
@@ -493,7 +488,7 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldIncludeCacheDiagnosticsFromMessageStartEvent() throws Exception {
             // Given
-            List<ServerSentEvent> events = List.of(createMessageStartEventWithDiagnostics(), createMessageStopEvent());
+            List<ServerSentEvent> events = Arrays.asList(createMessageStartEventWithDiagnostics(), createMessageStopEvent());
             MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
             DefaultAnthropicClient subject = createClient(mockHttpClient);
@@ -523,7 +518,7 @@ class DefaultAnthropicClientTest {
             ChatResponse response = futureResponse.get(5, TimeUnit.SECONDS);
 
             // Then
-            var metadata = (AnthropicChatResponseMetadata) response.metadata();
+            AnthropicChatResponseMetadata metadata = (AnthropicChatResponseMetadata) response.metadata();
             assertThat(metadata.cacheDiagnostics()).isNotNull();
             assertThat(metadata.cacheDiagnostics().cacheMissReasonType()).isEqualTo("system_changed");
             assertThat(metadata.cacheDiagnostics().cacheMissedInputTokens()).isEqualTo(41850);
@@ -532,7 +527,7 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldSendCorrectStreamingHttpRequest() throws Exception {
             // Given
-            List<ServerSentEvent> events = List.of(createMessageStartEvent(), createMessageStopEvent());
+            List<ServerSentEvent> events = Arrays.asList(createMessageStartEvent(), createMessageStopEvent());
             MockHttpClient mockHttpClient = MockHttpClient.thatAlwaysResponds(events);
 
             DefaultAnthropicClient subject = createClient(mockHttpClient);
@@ -568,7 +563,7 @@ class DefaultAnthropicClientTest {
         @Test
         void shouldHandleStreamingError() throws Exception {
             // Given
-            List<ServerSentEvent> events = List.of(
+            List<ServerSentEvent> events = Arrays.asList(
                     new ServerSentEvent(
                             "error",
                             "{\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Rate limit exceeded\"}}"));
@@ -606,7 +601,7 @@ class DefaultAnthropicClientTest {
             // Given: a normal stream followed by a trailing "data: [DONE]" sentinel
             // (emitted by OpenAI-compatible proxies in front of Claude) and a frame
             // with no event name. Both must be skipped without throwing.
-            List<ServerSentEvent> events = List.of(
+            List<ServerSentEvent> events = Arrays.asList(
                     createMessageStartEvent(),
                     createContentBlockStartEvent(),
                     createContentBlockDeltaEvent(),
@@ -654,7 +649,7 @@ class DefaultAnthropicClientTest {
         void shouldHandleInterleavedParallelToolCalls() throws Exception {
             // Given: SSE events where two tool calls are interleaved
             // (content_block_start for index=2 arrives before content_block_stop for index=1)
-            List<ServerSentEvent> events = List.of(
+            List<ServerSentEvent> events = Arrays.asList(
                     createMessageStartEvent(),
                     // Tool call 1 starts (content block index=1)
                     new ServerSentEvent(
@@ -776,26 +771,22 @@ class DefaultAnthropicClientTest {
     }
 
     private static DefaultAnthropicClient createClient(MockHttpClient mockHttpClient, String beta, Duration timeout) {
-        var builder = DefaultAnthropicClient.builder()
+        DefaultAnthropicClient client = DefaultAnthropicClient.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .apiKey(TEST_API_KEY)
                 .baseUrl(TEST_BASE_URL)
-                .version(TEST_VERSION);
+                .version(TEST_VERSION)
+                .beta(beta)
+                .timeout(timeout)
+                .build();
 
-        if (beta != null) {
-            builder.beta(beta);
-        }
-        if (timeout != null) {
-            builder.timeout(timeout);
-        }
-
-        return builder.build();
+        return client;
     }
 
     private static AnthropicCreateMessageRequest createMessageRequest() {
         return AnthropicCreateMessageRequest.builder()
                 .model(TEST_MODEL_NAME)
-                .messages(List.of(new AnthropicMessage(USER, List.of(new AnthropicTextContent("Hi")))))
+                .messages(Arrays.asList(new AnthropicMessage(USER, Arrays.asList(new AnthropicTextContent("Hi")))))
                 .maxTokens(1024)
                 .build();
     }
@@ -805,7 +796,7 @@ class DefaultAnthropicClientTest {
                 .id("msg_123")
                 .type("message")
                 .role("assistant")
-                .content(List.of(createTextContent(text)))
+                .content(Arrays.asList(createTextContent(text)))
                 .model(TEST_MODEL_NAME)
                 .stopReason("end_turn")
                 .stopSequence(null)
@@ -871,7 +862,7 @@ class DefaultAnthropicClientTest {
 
     private static AnthropicModelsListResponse createEmptyModelsListResponse() {
         AnthropicModelsListResponse response = new AnthropicModelsListResponse();
-        response.data = List.of();
+        response.data = Arrays.asList();
         response.firstId = null;
         response.lastId = null;
         response.hasMore = false;

@@ -33,7 +33,7 @@ public abstract class McpProgressTestBase {
                 .resultText();
         assertThat(result).isEqualTo("done");
 
-        List<ProgressEvent> events = progressHandler.waitForMessages(3, Duration.ofSeconds(10));
+        List<TestProgressHandler.ProgressEvent> events = progressHandler.waitForMessages(3, Duration.ofSeconds(10));
         assertThat(events).hasSize(3);
 
         assertThat(events.get(0).progress()).isEqualTo(1);

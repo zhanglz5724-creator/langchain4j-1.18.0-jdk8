@@ -64,7 +64,7 @@ class JsonRpcIoHandlerTest {
         handler.submit("{\"x\":1}");
 
         // then
-        assertThat(out.toString(UTF_8)).isEqualTo("{\"x\":1}" + System.lineSeparator());
+        assertThat(out.toString("UTF-8")).isEqualTo("{\"x\":1}" + System.lineSeparator());
     }
 
     @Test

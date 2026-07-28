@@ -8,6 +8,7 @@ import java.net.URLClassLoader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
@@ -136,7 +137,7 @@ class ClassPathSkillLoaderTest {
      * works properly when skills are packaged inside a JAR.
      */
     private static Path createSkillsJar(Path directory) throws IOException {
-        Path sourceDir = Path.of("src/test/resources/skills");
+        Path sourceDir = Paths.get("src/test/resources/skills");
         Path jarFile = directory.resolve("skills.jar");
         try (JarOutputStream jos = new JarOutputStream(Files.newOutputStream(jarFile))) {
             Files.walkFileTree(sourceDir, new SimpleFileVisitor<>() {

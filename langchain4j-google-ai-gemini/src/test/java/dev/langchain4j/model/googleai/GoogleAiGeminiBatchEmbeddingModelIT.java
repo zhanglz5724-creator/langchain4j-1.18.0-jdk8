@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @Disabled("Constantly getting 429, see the discussion here: https://github.com/langchain4j/langchain4j/pull/3942")
 @EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
@@ -43,7 +44,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - Valid Embedding Requests";
             var priority = 1L;
-            var textSegments = List.of(
+            var textSegments = Arrays.asList(
                     TextSegment.from("The capital of France is Paris."),
                     TextSegment.from("France is a country in Europe."),
                     TextSegment.from("The capital of Germany is Berlin."),
@@ -70,7 +71,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - Single Request";
             var priority = 0L;
-            var textSegments = List.of(TextSegment.from("This is a test document for embedding."));
+            var textSegments = Arrays.asList(TextSegment.from("This is a test document for embedding."));
 
             // when
             var response = subject.submit(GeminiBatchRequest.from(textSegments, displayName, priority));
@@ -92,7 +93,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - Clustering Task";
             var priority = 50L;
-            var textSegments = List.of(
+            var textSegments = Arrays.asList(
                     TextSegment.from("Document about machine learning"),
                     TextSegment.from("Document about artificial intelligence"),
                     TextSegment.from("Document about cooking recipes"),
@@ -119,7 +120,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - Custom Dimensionality";
             var priority = 0L;
-            var textSegments = List.of(TextSegment.from("Query about embeddings with reduced dimensions"));
+            var textSegments = Arrays.asList(TextSegment.from("Query about embeddings with reduced dimensions"));
 
             // when
             var response = subject.submit(GeminiBatchRequest.from(textSegments, displayName, priority));
@@ -151,7 +152,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
             String batchId;
 
             // 1. Write batch requests to local temp file (Integration of writeBatchToFile)
-            var requests = List.of(
+            var requests = Arrays.asList(
                     new BatchFileRequest<>("req-1", TextSegment.from("Integration test segment 1")),
                     new BatchFileRequest<>("req-2", TextSegment.from("Integration test segment 2")));
 
@@ -216,7 +217,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - To Cancel";
             var priority = 1L;
-            var textSegments = List.of(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
+            var textSegments = Arrays.asList(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
             var response = subject.submit(GeminiBatchRequest.from(textSegments, displayName, priority));
 
             // when
@@ -261,7 +262,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - To Delete";
             var priority = 1L;
-            var textSegments = List.of(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
+            var textSegments = Arrays.asList(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
             var response = subject.submit(GeminiBatchRequest.from(textSegments, displayName, priority));
 
             // when
@@ -306,7 +307,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - To List";
             var priority = 1L;
-            var textSegments = List.of(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
+            var textSegments = Arrays.asList(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
             var response = subject.submit(GeminiBatchRequest.from(textSegments, displayName, priority));
 
             // when
@@ -330,7 +331,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - Pagination ";
             var priority = 1L;
-            var textSegments = List.of(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
+            var textSegments = Arrays.asList(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
             subject.submit(GeminiBatchRequest.from(textSegments, displayName + "1", priority));
             subject.submit(GeminiBatchRequest.from(textSegments, displayName + "2", priority));
 
@@ -375,7 +376,7 @@ class GoogleAiGeminiBatchEmbeddingModelIT {
 
             var displayName = "Test Batch - Retrieve Status";
             var priority = 1L;
-            var textSegments = List.of(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
+            var textSegments = Arrays.asList(TextSegment.from("Text to embed 1"), TextSegment.from("Text to embed 2"));
             var response = subject.submit(GeminiBatchRequest.from(textSegments, displayName, priority));
 
             // when

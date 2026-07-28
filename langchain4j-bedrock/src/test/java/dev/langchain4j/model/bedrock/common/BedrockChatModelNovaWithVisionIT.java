@@ -24,13 +24,14 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockChatModelNovaWithVisionIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(AWS_NOVA_LITE, AWS_NOVA_PRO);
+        return Arrays.asList(AWS_NOVA_LITE, AWS_NOVA_PRO);
     }
 
     @Override
@@ -91,7 +92,7 @@ class BedrockChatModelNovaWithVisionIT extends AbstractChatModelIT {
     protected void should_respect_stopSequences_in_chat_request(ChatModel model) {
 
         // given
-        List<String> stopSequences = List.of("Hello", " Hello");
+        List<String> stopSequences = Arrays.asList("Hello", " Hello");
         ChatRequestParameters parameters =
                 ChatRequestParameters.builder().stopSequences(stopSequences).build();
 

@@ -56,6 +56,8 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
+import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleAiGeminiBatchImageModelTest {
@@ -86,7 +88,7 @@ class GoogleAiGeminiBatchImageModelTest {
             // given
             var displayName = "Test Image Batch";
             var priority = 1L;
-            var prompts = List.of("A serene mountain landscape", "A futuristic cityscape", "A cute cartoon cat");
+            var prompts = Arrays.asList("A serene mountain landscape", "A futuristic cityscape", "A cute cartoon cat");
             var expectedOperation = createPendingOperation("batches/test-123", PENDING);
             when(mockGeminiService.<GeminiGenerateContentRequest, GeminiGenerateContentResponse>batchCreate(
                             any(),
@@ -116,7 +118,7 @@ class GoogleAiGeminiBatchImageModelTest {
         void should_submit_with_null_priority_defaulting_to_zero() {
             // given
             var displayName = "Test Batch";
-            var prompts = List.of("A simple red circle");
+            var prompts = Arrays.asList("A simple red circle");
             var expectedOperation = createPendingOperation("batches/test-456", PENDING);
             when(mockGeminiService.<GeminiGenerateContentRequest, GeminiGenerateContentResponse>batchCreate(
                             any(),
@@ -144,7 +146,7 @@ class GoogleAiGeminiBatchImageModelTest {
             // given
             var displayName = "Single Request Batch";
             var priority = 5L;
-            var prompts = List.of("A minimalist logo design");
+            var prompts = Arrays.asList("A minimalist logo design");
             var expectedOperation = createPendingOperation("batches/test-789", PENDING);
             when(mockGeminiService.<GeminiGenerateContentRequest, GeminiGenerateContentResponse>batchCreate(
                             any(),
@@ -173,7 +175,7 @@ class GoogleAiGeminiBatchImageModelTest {
             // given
             var displayName = "Low Priority Batch";
             var priority = -10L;
-            var prompts = List.of("A product mockup");
+            var prompts = Arrays.asList("A product mockup");
             var expectedOperation = createPendingOperation("batches/test-negative", PENDING);
             when(mockGeminiService.<GeminiGenerateContentRequest, GeminiGenerateContentResponse>batchCreate(
                             any(),
@@ -208,7 +210,7 @@ class GoogleAiGeminiBatchImageModelTest {
                     mockGeminiService);
 
             var displayName = "Image Config Test";
-            var prompts = List.of("A landscape image");
+            var prompts = Arrays.asList("A landscape image");
             var expectedOperation = createPendingOperation("batches/test-config", PENDING);
             when(mockGeminiService.<GeminiGenerateContentRequest, GeminiGenerateContentResponse>batchCreate(
                             any(),
@@ -238,7 +240,7 @@ class GoogleAiGeminiBatchImageModelTest {
         void should_set_response_modalities_to_image() {
             // given
             var displayName = "Modalities Test";
-            var prompts = List.of("Test image");
+            var prompts = Arrays.asList("Test image");
             var expectedOperation = createPendingOperation("batches/test-modalities", PENDING);
             when(mockGeminiService.<GeminiGenerateContentRequest, GeminiGenerateContentResponse>batchCreate(
                             any(),
@@ -263,7 +265,7 @@ class GoogleAiGeminiBatchImageModelTest {
         @Test
         void should_submit_using_interface_method() {
             // given
-            var prompts = List.of("Test image prompt");
+            var prompts = Arrays.asList("Test image prompt");
             var expectedOperation = createPendingOperation("batches/test-interface", PENDING);
             when(mockGeminiService.<GeminiGenerateContentRequest, GeminiGenerateContentResponse>batchCreate(
                             any(),
@@ -357,7 +359,7 @@ class GoogleAiGeminiBatchImageModelTest {
         void should_write_single_request_to_file() throws Exception {
             // given
             var request = new BatchFileRequest<>("key-1", "A sunset over mountains");
-            var requests = List.of(request);
+            var requests = Arrays.asList(request);
 
             // when
             try (var writer = JsonLinesWriters.streaming(tempFile)) {
@@ -374,7 +376,7 @@ class GoogleAiGeminiBatchImageModelTest {
         @Test
         void should_write_multiple_requests_to_file() throws Exception {
             // given
-            var requests = List.of(
+            var requests = Arrays.asList(
                     new BatchFileRequest<>("key-1", "First image prompt"),
                     new BatchFileRequest<>("key-2", "Second image prompt"),
                     new BatchFileRequest<>("key-3", "Third image prompt"));
@@ -398,7 +400,7 @@ class GoogleAiGeminiBatchImageModelTest {
         @Test
         void should_handle_empty_requests_list() throws Exception {
             // given
-            List<BatchFileRequest<String>> requests = List.of();
+            List<BatchFileRequest<String>> requests = Arrays.asList();
 
             // when
             try (var writer = JsonLinesWriters.streaming(tempFile)) {
@@ -467,7 +469,7 @@ class GoogleAiGeminiBatchImageModelTest {
         void should_return_success_when_batch_processing_is_completed() {
             // given
             var batchId = "batches/test-success";
-            var imageResponses = List.of(
+            var imageResponses = Arrays.asList(
                     createImageResponse(TEST_IMAGE_BASE64, TEST_MIME_TYPE),
                     createImageResponse("secondImageData", TEST_MIME_TYPE));
             var successOperation = createSuccessOperation("batches/test-success", imageResponses);
@@ -489,7 +491,7 @@ class GoogleAiGeminiBatchImageModelTest {
         void should_return_success_with_errors_when_batch_processing_has_individual_failures() {
             // given
             var batchId = "batches/test-partial-success";
-            var imageResponses = List.of(
+            var imageResponses = Arrays.asList(
                     createImageResponse(TEST_IMAGE_BASE64, TEST_MIME_TYPE),
                     createImageResponse("secondImageData", TEST_MIME_TYPE));
             var error = new BatchRequestResponse.Operation.Status(
@@ -524,7 +526,7 @@ class GoogleAiGeminiBatchImageModelTest {
 
             // then
             assertThat(result.state()).isEqualTo(FAILED);
-            assertThat(result.errors()).containsExactly(new BatchError(13, "Batch was cancelled", List.of()));
+            assertThat(result.errors()).containsExactly(new BatchError(13, "Batch was cancelled", Arrays.asList()));
         }
 
         @Test
@@ -548,7 +550,7 @@ class GoogleAiGeminiBatchImageModelTest {
         void should_return_error_when_batch_processing_fails() {
             // given
             var batchId = "batches/test-error";
-            var errorOperation = createErrorOperation("batches/test-error", 500, "Internal Server Error", List.of());
+            var errorOperation = createErrorOperation("batches/test-error", 500, "Internal Server Error", Arrays.asList());
             when(mockGeminiService.<GeminiGenerateContentResponse>batchRetrieveBatch(batchId))
                     .thenReturn(errorOperation);
 
@@ -666,7 +668,7 @@ class GoogleAiGeminiBatchImageModelTest {
                     .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                     .build();
 
-            var prompts = List.of("A sunset over mountains", "A cat wearing a hat");
+            var prompts = Arrays.asList("A sunset over mountains", "A cat wearing a hat");
 
             // when
             var result = subject.submit(GeminiBatchRequest.from(prompts, "images-batch"));
@@ -891,7 +893,7 @@ class GoogleAiGeminiBatchImageModelTest {
             // given
             var operation1 = createMockOperation("batches/batch-1", SUCCEEDED);
             var operation2 = createMockOperation("batches/batch-2", RUNNING);
-            var listResponse = new ListOperationsResponse<>(List.of(operation1, operation2), null);
+            var listResponse = new ListOperationsResponse<>(Arrays.asList(operation1, operation2), null);
 
             when(mockGeminiService.<GeminiGenerateContentResponse>batchListBatches(null, null))
                     .thenReturn(listResponse);
@@ -910,7 +912,7 @@ class GoogleAiGeminiBatchImageModelTest {
             Integer pageSize = 10;
             String pageToken = "next-token";
             var operation = createMockOperation("batches/batch-1", SUCCEEDED);
-            var listResponse = new ListOperationsResponse<>(List.of(operation), "another-token");
+            var listResponse = new ListOperationsResponse<>(Arrays.asList(operation), "another-token");
 
             when(mockGeminiService.<GeminiGenerateContentResponse>batchListBatches(pageSize, pageToken))
                     .thenReturn(listResponse);
@@ -927,7 +929,7 @@ class GoogleAiGeminiBatchImageModelTest {
         @Test
         void should_return_empty_list_when_no_batch_jobs_exist() {
             // given
-            var listResponse = new ListOperationsResponse<GeminiGenerateContentResponse>(List.of(), null);
+            var listResponse = new ListOperationsResponse<GeminiGenerateContentResponse>(Arrays.asList(), null);
 
             when(mockGeminiService.<GeminiGenerateContentResponse>batchListBatches(null, null))
                     .thenReturn(listResponse);
@@ -940,7 +942,7 @@ class GoogleAiGeminiBatchImageModelTest {
         }
 
         private Operation<GeminiGenerateContentResponse> createMockOperation(String name, BatchState state) {
-            return new Operation<>(name, Map.of("state", state), false, null, null);
+            return new Operation<>(name, Collections.singletonMap("state", state), false, null, null);
         }
     }
 
@@ -979,7 +981,7 @@ class GoogleAiGeminiBatchImageModelTest {
                     "type.googleapis.com/google.ai.generativelanguage.v1main.GenerateContentBatchOutput",
                     new BatchCreateResponse.InlinedResponses<>(inlinedResponses));
 
-            return new Operation<>(operationName, Map.of("state", SUCCEEDED.name()), true, null, response);
+            return new Operation<>(operationName, Collections.singletonMap("state", SUCCEEDED.name()), true, null, response);
         }
     }
 
@@ -990,17 +992,17 @@ class GoogleAiGeminiBatchImageModelTest {
 
     private static Operation<GeminiGenerateContentResponse> createPendingOperation(
             String operationName, BatchState state) {
-        return new Operation<>(operationName, Map.of("state", state.name()), false, null, null);
+        return new Operation<>(operationName, Collections.singletonMap("state", state.name()), false, null, null);
     }
 
     private static GeminiGenerateContentResponse createImageResponse(String base64Data, String mimeType) {
         var part = GeminiPart.builder()
                 .inlineData(new GeminiBlob(mimeType, base64Data))
                 .build();
-        var content = new GeminiContent(List.of(part), "model");
+        var content = new GeminiContent(Arrays.asList(part), "model");
         var candidate = new GeminiCandidate(content, GeminiFinishReason.STOP, null, null);
 
-        return new GeminiGenerateContentResponse("responses-id", MODEL_NAME, List.of(candidate), null, null);
+        return new GeminiGenerateContentResponse("responses-id", MODEL_NAME, Arrays.asList(candidate), null, null);
     }
 
     private static Operation<GeminiGenerateContentResponse> createSuccessOperation(
@@ -1013,18 +1015,18 @@ class GoogleAiGeminiBatchImageModelTest {
                 "type.googleapis.com/google.ai.generativelanguage.v1main.GenerateContentBatchOutput",
                 new BatchCreateResponse.InlinedResponses<>(inlinedResponses));
 
-        return new Operation<>(operationName, Map.of("state", SUCCEEDED.name()), true, null, response);
+        return new Operation<>(operationName, Collections.singletonMap("state", SUCCEEDED.name()), true, null, response);
     }
 
     private static Operation<GeminiGenerateContentResponse> createSuccessOperationWithNullResponse(
             String operationName) {
-        return new Operation<>(operationName, Map.of("state", SUCCEEDED.name()), true, null, null);
+        return new Operation<>(operationName, Collections.singletonMap("state", SUCCEEDED.name()), true, null, null);
     }
 
     private static Operation<GeminiGenerateContentResponse> createErrorOperation(
             String operationName, int errorCode, String errorMessage, List<Map<String, Object>> errorDetails) {
         var errorStatus = new Operation.Status(errorCode, errorMessage, errorDetails);
-        return new Operation<>(operationName, Map.of("state", FAILED.name()), true, errorStatus, null);
+        return new Operation<>(operationName, Collections.singletonMap("state", FAILED.name()), true, errorStatus, null);
     }
 
     private static Operation<GeminiGenerateContentResponse> createSuccessOperationWithError(
@@ -1050,12 +1052,12 @@ class GoogleAiGeminiBatchImageModelTest {
                 "type.googleapis.com/google.ai.generativelanguage.v1main.GenerateContentBatchOutput",
                 new BatchCreateResponse.InlinedResponses<>(inlinedResponses));
 
-        return new Operation<>(operationName, Map.of("state", SUCCEEDED.name()), true, null, response);
+        return new Operation<>(operationName, Collections.singletonMap("state", SUCCEEDED.name()), true, null, response);
     }
 
     private static Operation<GeminiGenerateContentResponse> createCancelledOperation(
             String operationName, String errorMessage) {
-        var errorStatus = new Operation.Status(13, errorMessage, List.of());
-        return new Operation<>(operationName, Map.of("state", CANCELLED.name()), true, errorStatus, null);
+        var errorStatus = new Operation.Status(13, errorMessage, Arrays.asList());
+        return new Operation<>(operationName, Collections.singletonMap("state", CANCELLED.name()), true, errorStatus, null);
     }
 }

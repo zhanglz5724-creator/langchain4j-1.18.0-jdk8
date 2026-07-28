@@ -15,6 +15,7 @@ import dev.langchain4j.model.output.TokenUsage;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
 class GoogleAiGeminiChatModelIT extends AbstractChatModelIT {
@@ -31,7 +32,7 @@ class GoogleAiGeminiChatModelIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 GOOGLE_AI_GEMINI_CHAT_MODEL
                 // TODO add more model configs, see OpenAiChatModelIT
                 );

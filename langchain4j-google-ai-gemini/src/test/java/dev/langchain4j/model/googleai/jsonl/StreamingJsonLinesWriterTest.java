@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class StreamingJsonLinesWriterTest {
@@ -122,7 +123,7 @@ class StreamingJsonLinesWriterTest {
             // Given
             var outputStream = new ByteArrayOutputStream();
             subject = createSubject(outputStream);
-            var list = List.of(new TestData("one", 1), new TestData("two", 2));
+            var list = Arrays.asList(new TestData("one", 1), new TestData("two", 2));
 
             // When
             subject.write(list);

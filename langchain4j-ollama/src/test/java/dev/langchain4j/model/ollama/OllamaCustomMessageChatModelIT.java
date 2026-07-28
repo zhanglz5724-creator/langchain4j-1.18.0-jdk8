@@ -17,6 +17,7 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class OllamaCustomMessageChatModelIT extends AbstractOllamaLanguageModelInfrastructure {
 
@@ -47,10 +48,10 @@ class OllamaCustomMessageChatModelIT extends AbstractOllamaLanguageModelInfrastr
         String retrievedContext =
                 "One significant part of treaty making is that signing a treaty implies recognition that the other side is a sovereign state and that the agreement being considered is enforceable under international law. Hence, nations can be very careful about terming an agreement to be a treaty. For example, within the United States, agreements between states are compacts and agreements between states and the federal government or between agencies of the government are memoranda of understanding.";
 
-        List<ChatMessage> messages = List.of(
+        List<ChatMessage> messages = Arrays.asList(
                 SystemMessage.from("context_relevance"),
                 UserMessage.from("What is the history of treaty making?"),
-                CustomMessage.from(Map.of("role", "context", "content", retrievedContext)));
+                CustomMessage.from(new java.util.HashMap<String, Object>() {{ put("role", "context"); put("content", retrievedContext); }}));
 
         // when
         ChatResponse chatResponse =
@@ -63,9 +64,9 @@ class OllamaCustomMessageChatModelIT extends AbstractOllamaLanguageModelInfrastr
         retrievedContext =
                 "Eat (1964) is a 45-minute underground film created by Andy Warhol and featuring painter Robert Indiana, filmed on Sunday, February 2, 1964, in Indiana's studio. The film was first shown by Jonas Mekas on July 16, 1964, at the Washington Square Gallery at 530 West Broadway.\n"
                         + "Jonas Mekas (December 24, 1922 – January 23, 2019) was a Lithuanian-American filmmaker, poet, and artist who has been called \"the godfather of American avant-garde cinema\". Mekas's work has been exhibited in museums and at festivals worldwide.";
-        messages = List.of(
+        messages = Arrays.asList(
                 SystemMessage.from("groundedness"),
-                CustomMessage.from(Map.of("role", "context", "content", retrievedContext)),
+                CustomMessage.from(new java.util.HashMap<String, Object>() {{ put("role", "context"); put("content", retrievedContext); }}),
                 AiMessage.from(
                         "The film Eat was first shown by Jonas Mekas on December 24, 1922 at the Washington Square Gallery at 530 West Broadway."));
 
@@ -80,7 +81,7 @@ class OllamaCustomMessageChatModelIT extends AbstractOllamaLanguageModelInfrastr
     @Test
     void should_generate_response_without_custom_message() {
         // given
-        List<ChatMessage> messages = List.of(
+        List<ChatMessage> messages = Arrays.asList(
                 SystemMessage.from("answer_relevance"),
                 UserMessage.from("In what month did the AFL season originally begin?"),
                 AiMessage.from("The AFL season now begins in March."));
@@ -93,7 +94,7 @@ class OllamaCustomMessageChatModelIT extends AbstractOllamaLanguageModelInfrastr
         assertThat(chatResponse.aiMessage().text()).isEqualTo("Yes");
 
         // given
-        messages = List.of(
+        messages = Arrays.asList(
                 SystemMessage.from("answer_relevance"),
                 UserMessage.from("In what month did the AFL season originally begin?"),
                 AiMessage.from("The AFL season originally began in January."));

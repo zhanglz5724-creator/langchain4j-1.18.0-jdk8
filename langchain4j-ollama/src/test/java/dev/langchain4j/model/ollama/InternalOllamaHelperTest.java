@@ -10,6 +10,8 @@ import dev.langchain4j.data.message.UserMessage;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Collections;
 
 class InternalOllamaHelperTest {
 
@@ -56,11 +58,11 @@ class InternalOllamaHelperTest {
                 .id("tool-1")
                 .function(FunctionCall.builder()
                         .name("lookupWeather")
-                        .arguments(Map.of("city", "Shanghai"))
+                        .arguments(Collections.singletonMap("city", "Shanghai"))
                         .build())
                 .build();
 
-        List<ToolExecutionRequest> result = InternalOllamaHelper.toToolExecutionRequests(List.of(toolCall));
+        List<ToolExecutionRequest> result = InternalOllamaHelper.toToolExecutionRequests(Arrays.asList(toolCall));
 
         assertThat(result)
                 .containsExactly(ToolExecutionRequest.builder()
@@ -72,7 +74,7 @@ class InternalOllamaHelperTest {
 
     @Test
     void toToolExecutionRequests_handlesEmptyToolCalls() {
-        List<ToolExecutionRequest> result = InternalOllamaHelper.toToolExecutionRequests(List.of());
+        List<ToolExecutionRequest> result = InternalOllamaHelper.toToolExecutionRequests(Arrays.asList());
 
         assertThat(result).isEmpty();
     }

@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /*
  * Decompiled with CFR 0.152.
  * 
@@ -116,7 +118,7 @@ implements ModerationModel {
         }
 
         public Builder detectors(BaseDetector ... detectors) {
-            return this.detectors(List.of((Object[])detectors));
+            return this.detectors(Arrays.asList((Object[])detectors));
         }
 
         public Builder listeners(List<ModerationModelListener> listeners) {

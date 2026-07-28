@@ -12,6 +12,7 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.output.Response;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class OllamaEmbeddingModelTest {
 
@@ -22,7 +23,7 @@ class OllamaEmbeddingModelTest {
         OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
                 .baseUrl("http://localhost:11434")
                 .modelName("all-minilm")
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
 
         assertThat(model.provider()).isEqualTo(ModelProvider.OLLAMA);

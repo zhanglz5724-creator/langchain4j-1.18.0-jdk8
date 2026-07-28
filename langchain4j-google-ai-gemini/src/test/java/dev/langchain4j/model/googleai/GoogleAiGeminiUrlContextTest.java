@@ -23,6 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleAiGeminiUrlContextTest {
@@ -125,11 +126,11 @@ class GoogleAiGeminiUrlContextTest {
 
             var urlMetadata = new GeminiUrlMetadata(
                     "https://example.com/context", GeminiUrlRetrievalStatus.URL_RETRIEVAL_STATUS_SUCCESS);
-            var urlContextMetadata = new GeminiUrlContextMetadata(List.of(urlMetadata));
+            var urlContextMetadata = new GeminiUrlContextMetadata(Arrays.asList(urlMetadata));
 
             GeminiCandidate candidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiContent.GeminiPart.builder()
+                            Arrays.asList(GeminiContent.GeminiPart.builder()
                                     .text("Context found")
                                     .build()),
                             "model"),
@@ -138,7 +139,7 @@ class GoogleAiGeminiUrlContextTest {
                     null);
 
             var usageMetadata = new GeminiGenerateContentResponse.GeminiUsageMetadata(0, 0, 0, null, null);
-            var response = new GeminiGenerateContentResponse("id", "model", List.of(candidate), usageMetadata, null);
+            var response = new GeminiGenerateContentResponse("id", "model", Arrays.asList(candidate), usageMetadata, null);
 
             when(mockGeminiService.generateContent(any(), any())).thenReturn(response);
 
@@ -165,11 +166,11 @@ class GoogleAiGeminiUrlContextTest {
     private GeminiGenerateContentResponse createSimpleResponse(String text) {
         var candidate = new GeminiCandidate(
                 new GeminiContent(
-                        List.of(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
+                        Arrays.asList(GeminiContent.GeminiPart.builder().text(text).build()), "model"),
                 GeminiFinishReason.STOP,
                 null,
                 null);
         var usageMetadata = new GeminiGenerateContentResponse.GeminiUsageMetadata(0, 0, 0, null, null);
-        return new GeminiGenerateContentResponse("id", "model", List.of(candidate), usageMetadata, null);
+        return new GeminiGenerateContentResponse("id", "model", Arrays.asList(candidate), usageMetadata, null);
     }
 }

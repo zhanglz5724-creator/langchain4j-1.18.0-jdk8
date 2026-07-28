@@ -102,7 +102,7 @@ class VertexAiGeminiStreamingChatModelIT {
 
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage), handler);
+        model.chat(Arrays.asList(userMessage), handler);
         ChatResponse response = handler.get();
 
         // then

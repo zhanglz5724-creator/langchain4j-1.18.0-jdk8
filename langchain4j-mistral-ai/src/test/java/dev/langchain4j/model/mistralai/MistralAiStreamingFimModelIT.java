@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.util.List;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiStreamingFimModelIT {
@@ -87,7 +88,7 @@ class MistralAiStreamingFimModelIT {
         MistralAiStreamingFimModel codestral = MistralAiStreamingFimModel.builder()
                 .apiKey(System.getenv("MISTRAL_AI_API_KEY"))
                 .modelName(MistralAiFimModelName.CODESTRAL_LATEST)
-                .stop(List.of("{")) // must stop at the first occurrence of "{"
+                .stop(Arrays.asList("{")) // must stop at the first occurrence of "{"
                 .logRequests(true)
                 .build();
 

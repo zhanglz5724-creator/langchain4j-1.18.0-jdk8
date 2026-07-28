@@ -6,6 +6,7 @@ import dev.langchain4j.guardrail.OutputGuardrail;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ public abstract class BaseGuardrailTests {
     }
 
     static <T> T createAiService(Class<T> clazz, Function<AiServices<T>, AiServices<T>> builderCustomizer) {
-        return createAiService(clazz, List.of(), List.of(), builderCustomizer);
+        return createAiService(clazz, Arrays.asList(), Arrays.asList(), builderCustomizer);
     }
 
     static <T> T createAiService(Class<T> clazz) {

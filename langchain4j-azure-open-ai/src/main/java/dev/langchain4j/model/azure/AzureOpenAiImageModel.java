@@ -72,7 +72,7 @@ implements ImageModel {
         ImageGenerationOptions options = new ImageGenerationOptions(prompt).setModel(this.deploymentName).setQuality(this.quality).setSize(this.size).setUser(this.user).setStyle(this.style).setResponseFormat(this.responseFormat);
         ImageGenerations imageGenerations = (ImageGenerations)AzureOpenAiExceptionMapper.INSTANCE.withExceptionMapper(() -> this.client.getImageGenerations(this.deploymentName, options));
         Image image = InternalAzureOpenAiHelper.imageFrom((ImageGenerationData)imageGenerations.getData().get(0));
-        return Response.from((Object)image);
+        return Response.<Image>from(image);
     }
 
     public static Builder builder() {

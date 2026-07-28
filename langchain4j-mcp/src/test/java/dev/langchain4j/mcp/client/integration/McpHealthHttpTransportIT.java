@@ -12,7 +12,6 @@ import dev.langchain4j.mcp.client.transport.http.HttpMcpTransport;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.time.Duration;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,10 +49,10 @@ class McpHealthHttpTransportIT {
     }
 
     @Test
-    void health() throws ExecutionException, InterruptedException {
+    void health() throws InterruptedException {
         mcpClient.checkHealth();
         destroyProcessTree(process);
-        process.onExit().get();
+        process.waitFor();
         assertThatThrownBy(() -> mcpClient.checkHealth())
                 .rootCause()
                 .isInstanceOf(ConnectException.class)

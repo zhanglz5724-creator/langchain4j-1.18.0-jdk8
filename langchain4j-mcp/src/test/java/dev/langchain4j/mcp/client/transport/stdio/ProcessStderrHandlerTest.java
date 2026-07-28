@@ -25,12 +25,14 @@ class ProcessStderrHandlerTest {
             Process process = mock(Process.class);
             when(process.getErrorStream())
                     .thenReturn(new ByteArrayInputStream(("server log" + System.lineSeparator()).getBytes()));
-            when(process.pid()).thenReturn(123L);
+            when(process.waitFor()).thenReturn(0);
 
             new ProcessStderrHandler(process).run();
 
             verify(logger).debug("[STDERR] {}", "server log");
             verify(logger, never()).debug("[ERROR] {}", "server log");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

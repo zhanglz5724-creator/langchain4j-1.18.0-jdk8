@@ -31,6 +31,7 @@ import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Arrays;
 
 class OllamaChatModelIT extends AbstractChatModelIT {
 
@@ -109,12 +110,12 @@ class OllamaChatModelIT extends AbstractChatModelIT {
     @Override
     protected List<ChatModel> models() {
         // FIXME: to support customModelName(), all models should pull custom model
-        return List.of(OLLAMA_CHAT_MODEL_WITH_TOOLS, OPEN_AI_CHAT_MODEL_WITH_TOOLS);
+        return Arrays.asList(OLLAMA_CHAT_MODEL_WITH_TOOLS, OPEN_AI_CHAT_MODEL_WITH_TOOLS);
     }
 
     @Override
     protected List<ChatModel> modelsSupportingImageInputs() {
-        return List.of(OLLAMA_CHAT_MODEL_WITH_VISION, OPEN_AI_CHAT_MODEL_WITH_VISION);
+        return Arrays.asList(OLLAMA_CHAT_MODEL_WITH_VISION, OPEN_AI_CHAT_MODEL_WITH_VISION);
     }
 
     @Override

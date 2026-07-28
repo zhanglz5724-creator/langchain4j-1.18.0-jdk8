@@ -32,6 +32,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
 class GoogleAiGeminiStreamingChatModelThinkingIT {
@@ -69,7 +70,7 @@ class GoogleAiGeminiStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -95,7 +96,7 @@ class GoogleAiGeminiStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler handler2 = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage1, aiMessage1, userMessage2), handler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, userMessage2), handler2);
 
         // then
         AiMessage aiMessage2 = handler2.get().aiMessage();
@@ -143,7 +144,7 @@ class GoogleAiGeminiStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage), spyHandler);
+        model.chat(Arrays.asList(userMessage), spyHandler);
 
         // then
         AiMessage aiMessage = spyHandler.get().aiMessage();
@@ -208,7 +209,7 @@ class GoogleAiGeminiStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler1 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1), spyHandler1);
+        model.chat(Arrays.asList(userMessage1), spyHandler1);
 
         // then
         AiMessage aiMessage1 = spyHandler1.get().aiMessage();
@@ -236,7 +237,7 @@ class GoogleAiGeminiStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler2 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1), spyHandler2);
 
         // then
         AiMessage aiMessage2 = spyHandler2.get().aiMessage();
@@ -258,7 +259,7 @@ class GoogleAiGeminiStreamingChatModelThinkingIT {
 
         // when
         TestStreamingChatResponseHandler spyHandler3 = spy(new TestStreamingChatResponseHandler());
-        model.chat(List.of(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
+        model.chat(Arrays.asList(userMessage1, aiMessage1, toolResultMessage1, aiMessage2, userMessage2), spyHandler3);
 
         // then
         AiMessage aiMessage3 = spyHandler3.get().aiMessage();
@@ -287,7 +288,7 @@ class GoogleAiGeminiStreamingChatModelThinkingIT {
         // when
         TestStreamingChatResponseHandler spyHandler4 = spy(new TestStreamingChatResponseHandler());
         model.chat(
-                List.of(
+                Arrays.asList(
                         userMessage1,
                         aiMessage1,
                         toolResultMessage1,

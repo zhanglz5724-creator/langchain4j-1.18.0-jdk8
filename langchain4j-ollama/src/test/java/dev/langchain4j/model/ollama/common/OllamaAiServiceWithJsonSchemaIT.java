@@ -17,6 +17,7 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import java.util.Arrays;
 
 class OllamaAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT {
 
@@ -34,7 +35,7 @@ class OllamaAiServiceWithJsonSchemaIT extends AbstractAiServiceWithJsonSchemaIT 
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(OllamaChatModel.builder()
+        return Arrays.asList(OllamaChatModel.builder()
                 .baseUrl(ollamaBaseUrl(ollama))
                 .modelName(LLAMA_3_1)
                 .supportedCapabilities(RESPONSE_FORMAT_JSON_SCHEMA)

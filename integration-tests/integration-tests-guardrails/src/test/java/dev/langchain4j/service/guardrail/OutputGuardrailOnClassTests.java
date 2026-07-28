@@ -8,6 +8,7 @@ import dev.langchain4j.guardrail.OutputGuardrail;
 import dev.langchain4j.guardrail.OutputGuardrailResult;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.UserMessage;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -45,8 +46,8 @@ class OutputGuardrailOnClassTests extends BaseGuardrailTests {
         static MyAiService create() {
             return createAiService(
                     MyAiService.class,
-                    List.of(),
-                    List.of(OKGuardrail.class),
+                    Arrays.asList(),
+                    Arrays.asList(OKGuardrail.class),
                     builder -> builder.chatModel(new MyChatModel()));
         }
     }

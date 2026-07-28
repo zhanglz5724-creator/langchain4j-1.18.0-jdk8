@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import java.util.Arrays;
 
 class OllamaStreamingChatModelIT extends AbstractOllamaLanguageModelInfrastructure {
 
@@ -185,7 +186,7 @@ class OllamaStreamingChatModelIT extends AbstractOllamaLanguageModelInfrastructu
 
         // when-then
 
-        assertThrows(dev.langchain4j.exception.UnsupportedFeatureException.class, () -> model.chat(List.of(userMessage), handler));
+        assertThrows(dev.langchain4j.exception.UnsupportedFeatureException.class, () -> model.chat(Arrays.asList(userMessage), handler));
     }
 
     @ParameterizedTest
@@ -205,7 +206,7 @@ class OllamaStreamingChatModelIT extends AbstractOllamaLanguageModelInfrastructu
 
         // when
 
-        model.chat(List.of(userMessage), handler);
+        model.chat(Arrays.asList(userMessage), handler);
 
         // then
         // check that chat() times out, ergo, did not throw the UnsupportedFeatureException

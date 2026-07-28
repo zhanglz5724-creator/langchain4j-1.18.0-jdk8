@@ -10,6 +10,8 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Collections;
 
 class OllamaStreamingContentTypeTest {
 
@@ -35,7 +37,7 @@ class OllamaStreamingContentTypeTest {
         });
 
         // then
-        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", List.of("application/json"));
+        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", Arrays.asList("application/json"));
     }
 
     @Test
@@ -60,7 +62,7 @@ class OllamaStreamingContentTypeTest {
         });
 
         // then
-        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", List.of("application/json"));
+        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", Arrays.asList("application/json"));
     }
 
     @Test
@@ -72,7 +74,7 @@ class OllamaStreamingContentTypeTest {
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .baseUrl("http://localhost:11434")
                 .modelName("llama3")
-                .customHeaders(Map.of("Content-Type", "application/custom"))
+                .customHeaders(Collections.singletonMap("Content-Type", "application/custom"))
                 .build();
 
         // when
@@ -86,7 +88,7 @@ class OllamaStreamingContentTypeTest {
         });
 
         // then
-        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", List.of("application/custom"));
+        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", Arrays.asList("application/custom"));
     }
 
     @Test
@@ -98,7 +100,7 @@ class OllamaStreamingContentTypeTest {
                 .httpClientBuilder(new MockHttpClientBuilder(mockHttpClient))
                 .baseUrl("http://localhost:11434")
                 .modelName("llama3")
-                .customHeaders(Map.of("Content-Type", "application/custom"))
+                .customHeaders(Collections.singletonMap("Content-Type", "application/custom"))
                 .build();
 
         // when
@@ -112,6 +114,6 @@ class OllamaStreamingContentTypeTest {
         });
 
         // then
-        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", List.of("application/custom"));
+        assertThat(mockHttpClient.request().headers()).containsEntry("Content-Type", Arrays.asList("application/custom"));
     }
 }

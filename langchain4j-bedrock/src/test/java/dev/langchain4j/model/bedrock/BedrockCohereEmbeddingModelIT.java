@@ -16,6 +16,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockCohereEmbeddingModelIT {
@@ -54,7 +55,7 @@ class BedrockCohereEmbeddingModelIT {
 
         assertThat(embeddingModel).isNotNull();
 
-        List<TextSegment> segments = List.of(TextSegment.from("How are you?"), TextSegment.from("What is your name?"));
+        List<TextSegment> segments = Arrays.asList(TextSegment.from("How are you?"), TextSegment.from("What is your name?"));
 
         Response<List<Embedding>> response = embeddingModel.embedAll(segments);
         assertThat(response).isNotNull();

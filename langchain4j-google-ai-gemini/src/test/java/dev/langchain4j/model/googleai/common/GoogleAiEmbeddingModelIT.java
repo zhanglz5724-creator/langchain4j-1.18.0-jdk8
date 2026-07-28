@@ -6,6 +6,7 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
 class GoogleAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
@@ -15,7 +16,7 @@ class GoogleAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(GoogleAiEmbeddingModel.builder()
+        return Arrays.asList(GoogleAiEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
                 .build());
@@ -26,7 +27,7 @@ class GoogleAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return GoogleAiEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -36,7 +37,7 @@ class GoogleAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
                 .apiKey("banana")
                 .modelName(MODEL_NAME)
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

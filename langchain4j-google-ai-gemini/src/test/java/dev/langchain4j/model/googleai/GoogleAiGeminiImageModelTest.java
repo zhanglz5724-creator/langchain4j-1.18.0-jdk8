@@ -22,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleAiGeminiImageModelTest {
@@ -66,7 +67,7 @@ class GoogleAiGeminiImageModelTest {
         void shouldThrowExceptionWhenNoCandidatesInResponse() {
             // Given
             var emptyResponse =
-                    new GeminiGenerateContentResponse("response-id", "gemini-pro-v1", List.of(), null, null);
+                    new GeminiGenerateContentResponse("response-id", "gemini-pro-v1", Arrays.asList(), null, null);
             when(mockGeminiService.generateContent(eq(TEST_MODEL_NAME), any(GeminiGenerateContentRequest.class)))
                     .thenReturn(emptyResponse);
 
@@ -88,7 +89,7 @@ class GoogleAiGeminiImageModelTest {
             // Given
             var candidate = new GeminiCandidate(null, GeminiFinishReason.STOP, null, null);
             var responseWithNullContent =
-                    new GeminiGenerateContentResponse("response-id", "gemini-pro-v1", List.of(candidate), null, null);
+                    new GeminiGenerateContentResponse("response-id", "gemini-pro-v1", Arrays.asList(candidate), null, null);
             when(mockGeminiService.generateContent(eq(TEST_MODEL_NAME), any(GeminiGenerateContentRequest.class)))
                     .thenReturn(responseWithNullContent);
 
@@ -110,7 +111,7 @@ class GoogleAiGeminiImageModelTest {
             // Given
             var textOnlyCandidate = new GeminiCandidate(
                     new GeminiContent(
-                            List.of(GeminiPart.builder()
+                            Arrays.asList(GeminiPart.builder()
                                     .text("Just text, no image")
                                     .build()),
                             "model"),
@@ -118,7 +119,7 @@ class GoogleAiGeminiImageModelTest {
                     null,
                     null);
             var textOnlyResponse = new GeminiGenerateContentResponse(
-                    "response-id", "gemini-pro-v1", List.of(textOnlyCandidate), null, null);
+                    "response-id", "gemini-pro-v1", Arrays.asList(textOnlyCandidate), null, null);
             when(mockGeminiService.generateContent(eq(TEST_MODEL_NAME), any(GeminiGenerateContentRequest.class)))
                     .thenReturn(textOnlyResponse);
 
@@ -469,7 +470,7 @@ class GoogleAiGeminiImageModelTest {
     private static GeminiGenerateContentResponse createImageResponse(String base64Data, String mimeType) {
         var candidate = new GeminiCandidate(
                 new GeminiContent(
-                        List.of(GeminiPart.builder()
+                        Arrays.asList(GeminiPart.builder()
                                 .inlineData(new GeminiBlob(mimeType, base64Data))
                                 .build()),
                         "model"),
@@ -477,7 +478,7 @@ class GoogleAiGeminiImageModelTest {
                 null,
                 null);
 
-        return new GeminiGenerateContentResponse("response-id-123", "gemini-pro", List.of(candidate), null, null);
+        return new GeminiGenerateContentResponse("response-id-123", "gemini-pro", Arrays.asList(candidate), null, null);
     }
 
     /**

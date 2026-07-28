@@ -6,6 +6,7 @@ import dev.langchain4j.model.embedding.listener.EmbeddingModelListener;
 import dev.langchain4j.model.voyageai.VoyageAiEmbeddingModel;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "VOYAGE_API_KEY", matches = ".+")
 class VoyageAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
@@ -16,7 +17,7 @@ class VoyageAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
 
     @Override
     protected List<EmbeddingModel> models() {
-        return List.of(VoyageAiEmbeddingModel.builder()
+        return Arrays.asList(VoyageAiEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
                 .build());
@@ -27,7 +28,7 @@ class VoyageAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
         return VoyageAiEmbeddingModel.builder()
                 .apiKey(API_KEY)
                 .modelName(MODEL_NAME)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -37,7 +38,7 @@ class VoyageAiEmbeddingModelIT extends AbstractEmbeddingModelIT {
                 .apiKey("banana")
                 .modelName(MODEL_NAME)
                 .maxRetries(0)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 

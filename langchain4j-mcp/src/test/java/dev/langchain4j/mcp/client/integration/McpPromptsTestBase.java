@@ -61,7 +61,7 @@ public abstract class McpPromptsTestBase {
 
     @Test
     void getBasicPrompt() {
-        McpGetPromptResult prompt = mcpClient.getPrompt("basic", Collections.<String, String>emptyMap());
+        McpGetPromptResult prompt = mcpClient.getPrompt("basic", Collections.<String, Object>emptyMap());
         assertThat(prompt.description()).isNull();
         assertThat(prompt.messages()).hasSize(1);
         McpPromptMessage message = prompt.messages().get(0);
@@ -71,7 +71,7 @@ public abstract class McpPromptsTestBase {
 
     @Test
     void getMultiPrompt() {
-        McpGetPromptResult prompt = mcpClient.getPrompt("multi", Collections.<String, String>emptyMap());
+        McpGetPromptResult prompt = mcpClient.getPrompt("multi", Collections.<String, Object>emptyMap());
         assertThat(prompt.description()).isNull();
         assertThat(prompt.messages()).hasSize(2);
 
@@ -88,7 +88,7 @@ public abstract class McpPromptsTestBase {
 
     @Test
     void getImagePrompt() {
-        McpGetPromptResult prompt = mcpClient.getPrompt("image", Collections.<String, String>emptyMap());
+        McpGetPromptResult prompt = mcpClient.getPrompt("image", Collections.<String, Object>emptyMap());
         assertThat(prompt.description()).isNull();
         assertThat(prompt.messages()).hasSize(1);
         McpPromptMessage message = prompt.messages().get(0);
@@ -111,13 +111,13 @@ public abstract class McpPromptsTestBase {
 
     @Test
     void getNonExistentPrompt() {
-        assertThatThrownBy(() -> mcpClient.getPrompt("DOES-NOT-EXIST", Collections.<String, String>emptyMap()))
+        assertThatThrownBy(() -> mcpClient.getPrompt("DOES-NOT-EXIST", Collections.<String, Object>emptyMap()))
                 .isInstanceOf(McpException.class);
     }
 
     @Test
     void getPromptWithEmbeddedBinaryResource() {
-        McpGetPromptResult prompt = mcpClient.getPrompt("embeddedBinaryResource", Collections.<String, String>emptyMap());
+        McpGetPromptResult prompt = mcpClient.getPrompt("embeddedBinaryResource", Collections.<String, Object>emptyMap());
         McpPromptMessage message = prompt.messages().get(0);
         assertThat(message.role()).isEqualTo(McpRole.USER);
         assertThat(message.content().type()).isEqualTo(McpPromptContent.Type.RESOURCE);

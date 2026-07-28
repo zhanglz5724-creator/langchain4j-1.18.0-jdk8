@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.util.List;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiFimModelIT {
@@ -74,7 +75,7 @@ class MistralAiFimModelIT {
     void should_generate_code_completion_with_stop_tokens() {
 
         // given
-        List<String> stop = List.of("{"); // must stop at the first occurrence of "{"
+        List<String> stop = Arrays.asList("{"); // must stop at the first occurrence of "{"
 
         MistralAiFimModel codestral = MistralAiFimModel.builder()
                 .apiKey(System.getenv("MISTRAL_AI_API_KEY"))

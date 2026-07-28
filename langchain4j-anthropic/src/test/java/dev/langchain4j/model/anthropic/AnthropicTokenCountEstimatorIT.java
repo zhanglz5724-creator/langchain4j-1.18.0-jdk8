@@ -8,6 +8,7 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.TokenCountEstimator;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -71,7 +72,7 @@ class AnthropicTokenCountEstimatorIT {
         UserMessage userMessage2 = UserMessage.from("And what's the second tallest?");
 
         // when
-        int count = tokenCountEstimator.estimateTokenCountInMessages(List.of(userMessage1, aiMessage, userMessage2));
+        int count = tokenCountEstimator.estimateTokenCountInMessages(Arrays.asList(userMessage1, aiMessage, userMessage2));
 
         // then
         assertThat(count).isGreaterThan(0);
@@ -94,7 +95,7 @@ class AnthropicTokenCountEstimatorIT {
 
         // when
         int count = tokenCountEstimator.estimateTokenCountInMessages(
-                List.of(systemMessage, userMessage1, aiMessage, userMessage2));
+                Arrays.asList(systemMessage, userMessage1, aiMessage, userMessage2));
 
         // then
         assertThat(count).isGreaterThan(0);
@@ -112,7 +113,7 @@ class AnthropicTokenCountEstimatorIT {
 
         SystemMessage systemMessage = SystemMessage.from("You are a useful assistant");
 
-        int count = tokenCountEstimator.estimateTokenCountInMessages(List.of(systemMessage));
+        int count = tokenCountEstimator.estimateTokenCountInMessages(Arrays.asList(systemMessage));
         assertThat(count).isGreaterThan(0);
     }
 
@@ -129,7 +130,7 @@ class AnthropicTokenCountEstimatorIT {
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> tokenCountEstimator.estimateTokenCountInMessages(List.of(systemMessage)));
+                () -> tokenCountEstimator.estimateTokenCountInMessages(Arrays.asList(systemMessage)));
 
         assertThat(ex).hasMessageContaining("at least one non-system message");
     }

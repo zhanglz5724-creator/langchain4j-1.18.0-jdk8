@@ -19,6 +19,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
 class GoogleAiGeminiBatchChatModelIT {
@@ -38,7 +39,7 @@ class GoogleAiGeminiBatchChatModelIT {
 
         var displayName = "Test Batch - Valid Requests";
         var priority = 1L;
-        var requests = List.of(
+        var requests = Arrays.asList(
                 createChatRequest("What is the capital of France?"),
                 createChatRequest("What is the capital of Germany?"));
 
@@ -69,7 +70,7 @@ class GoogleAiGeminiBatchChatModelIT {
 
         try {
             // 1. Write batch requests to local temp file
-            var requests = List.of(
+            var requests = Arrays.asList(
                     new BatchFileRequest<>("req-1", createChatRequest("What is the speed of light?")),
                     new BatchFileRequest<>("req-2", createChatRequest("What is the speed of sound?")));
 
@@ -150,7 +151,7 @@ class GoogleAiGeminiBatchChatModelIT {
 
         var displayName = "Test Batch - Valid Requests";
         var priority = 1L;
-        var requests = List.of(
+        var requests = Arrays.asList(
                 createChatRequest("What is the capital of France?"),
                 createChatRequest("What is the capital of Germany?"));
         var response = subject.submit(GeminiBatchRequest.from(requests, displayName, priority));
@@ -193,7 +194,7 @@ class GoogleAiGeminiBatchChatModelIT {
 
         var displayName = "Test Batch - Valid Requests";
         var priority = 1L;
-        var requests = List.of(
+        var requests = Arrays.asList(
                 createChatRequest("What is the capital of France?"),
                 createChatRequest("What is the capital of Germany?"));
         var response = subject.submit(GeminiBatchRequest.from(requests, displayName, priority));
@@ -236,7 +237,7 @@ class GoogleAiGeminiBatchChatModelIT {
 
         var displayName = "Test Batch - Valid Requests";
         var priority = 1L;
-        var requests = List.of(
+        var requests = Arrays.asList(
                 createChatRequest("What is the capital of France?"),
                 createChatRequest("What is the capital of Germany?"));
         var createResponse = subject.submit(GeminiBatchRequest.from(requests, displayName, priority));
@@ -259,7 +260,7 @@ class GoogleAiGeminiBatchChatModelIT {
                 .build();
         var displayName = "Test Batch - Valid Requests ";
         var priority = 1L;
-        var requests = List.of(
+        var requests = Arrays.asList(
                 createChatRequest("What is the capital of France?"),
                 createChatRequest("What is the capital of Germany?"));
         subject.submit(GeminiBatchRequest.from(requests, displayName + "1", priority));

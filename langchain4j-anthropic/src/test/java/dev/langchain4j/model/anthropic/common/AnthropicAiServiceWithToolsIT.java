@@ -29,6 +29,17 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @EnabledIfEnvironmentVariable(named = "ANTHROPIC_API_KEY", matches = ".+")
 class AnthropicAiServiceWithToolsIT extends AbstractAiServiceWithToolsIT {
 
+    interface Assistant1 {
+
+        @SystemMessage("Use tool search if needed")
+        String chat(String userMessage);
+    }
+
+    interface Assistant2 {
+
+        String chat(String userMessage);
+    }
+
     @Override
     protected List<ChatModel> models() {
         return singletonList(AnthropicChatModel.builder()
@@ -79,15 +90,9 @@ class AnthropicAiServiceWithToolsIT extends AbstractAiServiceWithToolsIT {
                 .logResponses(true)
                 .build();
 
-        interface Assistant {
-
-            @SystemMessage("Use tool search if needed")
-            String chat(String userMessage);
-        }
-
         Tools tools = spy(new Tools());
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        Assistant1 assistant = AiServices.builder(Assistant1.class)
                 .chatModel(chatModel)
                 .tools(tools)
                 .build();
@@ -103,34 +108,32 @@ class AnthropicAiServiceWithToolsIT extends AbstractAiServiceWithToolsIT {
         verify(tools).getWeather("Munich");
         verifyNoMoreInteractions(tools);
     }
-
+    // given
+    enum Unit {
+        CELSIUS, FAHRENHEIT
+    }
     @Test
     void should_support_tool_use_examples() {
 
-        // given
-        enum Unit {
-            CELSIUS, FAHRENHEIT
-        }
+
 
         class Tools {
 
-            public static final String TOOL_METADATA = """
-                    {
-                        "input_examples": [
-                            {
-                                "arg0": "San Francisco, CA",
-                                "arg1": "FAHRENHEIT"
-                            },
-                            {
-                                "arg0": "Tokyo, Japan",
-                                "arg1": "CELSIUS"
-                            },
-                            {
-                                "arg0": "New York, NY"
-                            }
-                        ]
-                    }
-                    """;
+            public static final String TOOL_METADATA = "{\n"
+                    + "    \"input_examples\": [\n"
+                    + "        {\n"
+                    + "            \"arg0\": \"San Francisco, CA\",\n"
+                    + "            \"arg1\": \"FAHRENHEIT\"\n"
+                    + "        },\n"
+                    + "        {\n"
+                    + "            \"arg0\": \"Tokyo, Japan\",\n"
+                    + "            \"arg1\": \"CELSIUS\"\n"
+                    + "        },\n"
+                    + "        {\n"
+                    + "            \"arg0\": \"New York, NY\"\n"
+                    + "        }\n"
+                    + "    ]\n"
+                    + "}";
 
             @Tool(metadata = TOOL_METADATA)
             String getWeather(String location, @P(description = "temperature unit", required = false) Unit unit) {
@@ -151,14 +154,9 @@ class AnthropicAiServiceWithToolsIT extends AbstractAiServiceWithToolsIT {
                 .logResponses(true)
                 .build();
 
-        interface Assistant {
-
-            String chat(String userMessage);
-        }
-
         Tools tools = spy(new Tools());
 
-        Assistant assistant = AiServices.builder(Assistant.class)
+        Assistant2 assistant = AiServices.builder(Assistant2.class)
                 .chatModel(chatModel)
                 .tools(tools)
                 .build();

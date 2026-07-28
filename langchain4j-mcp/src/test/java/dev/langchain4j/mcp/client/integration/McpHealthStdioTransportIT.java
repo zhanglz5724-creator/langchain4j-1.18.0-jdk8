@@ -12,7 +12,6 @@ import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -49,10 +48,10 @@ class McpHealthStdioTransportIT {
     }
 
     @Test
-    void health() throws ExecutionException, InterruptedException {
+    void health() throws InterruptedException {
         mcpClient.checkHealth();
         destroyProcessTree(process);
-        process.onExit().get();
+        process.waitFor();
         assertThatThrownBy(() -> mcpClient.checkHealth())
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Process is not alive");

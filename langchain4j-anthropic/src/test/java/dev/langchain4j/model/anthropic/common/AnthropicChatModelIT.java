@@ -14,6 +14,7 @@ import dev.langchain4j.model.chat.common.AbstractChatModelIT;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.output.TokenUsage;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -45,12 +46,12 @@ class AnthropicChatModelIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(ANTHROPIC_CHAT_MODEL);
+        return Arrays.asList(ANTHROPIC_CHAT_MODEL);
     }
 
     @Override
     protected ChatModel createModelWith(ChatRequestParameters parameters) {
-        var anthropicChatModelBuilder = AnthropicChatModel.builder()
+        AnthropicChatModel.AnthropicChatModelBuilder anthropicChatModelBuilder = AnthropicChatModel.builder()
                 .baseUrl(System.getenv("ANTHROPIC_CACHING_BASE_URL"))
                 .apiKey(System.getenv("ANTHROPIC_API_KEY"))
                 .defaultRequestParameters(parameters)
@@ -86,7 +87,7 @@ class AnthropicChatModelIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> modelsSupportingStructuredOutputs() {
-        return List.of(ANTHROPIC_SCHEMA_MODEL);
+        return Arrays.asList(ANTHROPIC_SCHEMA_MODEL);
     }
 
     @Override

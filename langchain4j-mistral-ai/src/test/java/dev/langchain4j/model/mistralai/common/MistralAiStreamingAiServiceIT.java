@@ -9,13 +9,14 @@ import dev.langchain4j.service.common.AbstractStreamingAiServiceIT;
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
 class MistralAiStreamingAiServiceIT extends AbstractStreamingAiServiceIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(MISTRAL_STREAMING_CHAT_MODEL);
+        return Arrays.asList(MISTRAL_STREAMING_CHAT_MODEL);
     }
 
     @Override

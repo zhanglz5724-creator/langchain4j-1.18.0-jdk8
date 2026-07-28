@@ -7,6 +7,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Collections;
 
 class OllamaModelCardTest {
 
@@ -155,26 +157,26 @@ class OllamaModelCardTest {
                 .parentModel("llama3.2")
                 .format("gguf")
                 .build();
-        List<OllamaModelMessage> messages = List.of(OllamaModelMessage.builder()
+        List<OllamaModelMessage> messages = Arrays.asList(OllamaModelMessage.builder()
                 .role("SYSTEM")
                 .content("Use short answers")
                 .thinking("Internal reasoning")
-                .images(List.of("base64-image"))
-                .toolCalls(List.of(OllamaModelToolCall.builder()
+                .images(Arrays.asList("base64-image"))
+                .toolCalls(Arrays.asList(OllamaModelToolCall.builder()
                         .function(OllamaModelToolCallFunction.builder()
                                 .index(0)
                                 .name("get_weather")
-                                .arguments(Map.of("city", "Paris"))
+                                .arguments(Collections.singletonMap("city", "Paris"))
                                 .build())
                         .build()))
                 .toolName("get_weather")
                 .build());
-        Map<String, Object> modelInfo = Map.of("general.architecture", "llama");
-        Map<String, Object> projectorInfo = Map.of("clip.has_text_encoder", true);
-        List<OllamaModelTensor> tensors = List.of(OllamaModelTensor.builder()
+        Map<String, Object> modelInfo = Collections.singletonMap("general.architecture", "llama");
+        Map<String, Object> projectorInfo = Collections.singletonMap("clip.has_text_encoder", true);
+        List<OllamaModelTensor> tensors = Arrays.asList(OllamaModelTensor.builder()
                 .name("token_embd.weight")
                 .type("F16")
-                .shape(List.of(32000L, 4096L))
+                .shape(Arrays.asList(32000L, 4096L))
                 .build());
 
         OllamaModelCard modelCard = OllamaModelCard.builder()
@@ -188,7 +190,7 @@ class OllamaModelCardTest {
                 .modelInfo(modelInfo)
                 .projectorInfo(projectorInfo)
                 .tensors(tensors)
-                .capabilities(List.of("completion", "tools"))
+                .capabilities(Arrays.asList("completion", "tools"))
                 .modifiedAt(modifiedAt)
                 .build();
 

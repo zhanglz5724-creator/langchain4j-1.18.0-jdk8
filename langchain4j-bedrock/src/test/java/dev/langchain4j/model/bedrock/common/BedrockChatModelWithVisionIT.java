@@ -15,6 +15,7 @@ import java.util.List;
 
 import static dev.langchain4j.model.bedrock.common.BedrockAiServicesIT.sleepIfNeeded;
 import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
+import java.util.Arrays;
 
 @EnabledIfEnvironmentVariable(named = "AWS_SECRET_ACCESS_KEY", matches = ".+")
 class BedrockChatModelWithVisionIT extends AbstractChatModelIT {
@@ -27,7 +28,7 @@ class BedrockChatModelWithVisionIT extends AbstractChatModelIT {
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(model);
+        return Arrays.asList(model);
     }
 
     @Override

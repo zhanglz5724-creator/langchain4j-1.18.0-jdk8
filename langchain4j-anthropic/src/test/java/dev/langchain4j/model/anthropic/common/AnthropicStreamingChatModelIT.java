@@ -19,6 +19,7 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.TokenUsage;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -51,12 +52,12 @@ class AnthropicStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(ANTHROPIC_STREAMING_CHAT_MODEL);
+        return Arrays.asList(ANTHROPIC_STREAMING_CHAT_MODEL);
     }
 
     @Override
     protected StreamingChatModel createModelWith(ChatRequestParameters parameters) {
-        var anthropicChatModelBuilder = AnthropicStreamingChatModel.builder()
+        AnthropicStreamingChatModel.AnthropicStreamingChatModelBuilder anthropicChatModelBuilder = AnthropicStreamingChatModel.builder()
                 .baseUrl(System.getenv("ANTHROPIC_CACHING_BASE_URL"))
                 .apiKey(System.getenv("ANTHROPIC_API_KEY"))
                 .maxTokens(parameters.maxOutputTokens())
@@ -104,7 +105,7 @@ class AnthropicStreamingChatModelIT extends AbstractStreamingChatModelIT {
                 .baseUrl(System.getenv("ANTHROPIC_CACHING_BASE_URL"))
                 .apiKey(System.getenv("ANTHROPIC_API_KEY"))
                 .modelName(CLAUDE_HAIKU_4_5_20251001)
-                .listeners(List.of(listener))
+                .listeners(Arrays.asList(listener))
                 .build();
     }
 
@@ -121,7 +122,7 @@ class AnthropicStreamingChatModelIT extends AbstractStreamingChatModelIT {
                                 toolCall.index() == 0
                                         && toolCall.id().equals(id)
                                         && toolCall.name().equals("getWeather")
-                                        && !toolCall.partialArguments().isBlank()),
+                                        && !toolCall.partialArguments().trim().isEmpty()),
                         any());
         io.verify(handler).onCompleteToolCall(complete(0, id, "getWeather", "{\"city\": \"Munich\"}"));
     }
@@ -138,14 +139,14 @@ class AnthropicStreamingChatModelIT extends AbstractStreamingChatModelIT {
                                 toolCall.index() == 1
                                         && toolCall.id().equals(id2)
                                         && toolCall.name().equals("getTime")
-                                        && !toolCall.partialArguments().isBlank()),
+                                        && !toolCall.partialArguments().trim().isEmpty()),
                         any());
         io.verify(handler).onCompleteToolCall(complete(1, id2, "getTime", "{\"country\": \"France\"}"));
     }
 
     @Override
     protected List<StreamingChatModel> modelsSupportingStructuredOutputs() {
-        return List.of(ANTHROPIC_STREAMING_SCHEMA_MODEL);
+        return Arrays.asList(ANTHROPIC_STREAMING_SCHEMA_MODEL);
     }
 
     @Override
