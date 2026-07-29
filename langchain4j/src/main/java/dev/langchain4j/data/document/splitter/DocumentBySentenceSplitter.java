@@ -66,8 +66,25 @@ extends HierarchicalDocumentSplitter {
 
     @Override
     public String[] split(String text) {
+        if (containsChinese(text)) {
+            String[] sentences = text.split("(?<=[。！？])\\s*");
+            if (sentences.length == 0 || sentences[0].trim().isEmpty()) {
+                return new String[] { text };
+            }
+            return sentences;
+        }
         SentenceDetectorME sentenceDetector = new SentenceDetectorME(this.sentenceModel);
         return sentenceDetector.sentDetect(text);
+    }
+
+    private static boolean containsChinese(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c >= '\u4e00' && c <= '\u9fff') {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
