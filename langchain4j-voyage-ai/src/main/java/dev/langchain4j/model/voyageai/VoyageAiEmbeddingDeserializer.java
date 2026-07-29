@@ -38,7 +38,7 @@ extends StdDeserializer<List<EmbeddingResponse.EmbeddingData>> {
         if (dataNode != null && dataNode.isArray()) {
             ArrayList<EmbeddingResponse.EmbeddingData> embeddings = new ArrayList<EmbeddingResponse.EmbeddingData>();
             for (JsonNode data : dataNode) {
-                List<Object> embedding;
+                List<Float> embedding;
                 JsonNode embeddingNode = data.get("embedding");
                 if (embeddingNode != null && embeddingNode.isArray()) {
                     embedding = new ArrayList();

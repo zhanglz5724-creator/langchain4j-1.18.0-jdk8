@@ -54,7 +54,7 @@ class VoyageAiClient {
             defaultHeaders.put("Authorization", "Bearer " + builder.apiKey);
         }
         this.defaultHeaders = defaultHeaders;
-        this.customHeadersSupplier = (Supplier)Utils.getOrDefault((Object)builder.customHeadersSupplier, () -> Collections::emptyMap);
+        this.customHeadersSupplier = (Supplier)Utils.getOrDefault((Object)builder.customHeadersSupplier, () -> Collections.emptyMap());
     }
 
     private Map<String, String> buildRequestHeaders() {

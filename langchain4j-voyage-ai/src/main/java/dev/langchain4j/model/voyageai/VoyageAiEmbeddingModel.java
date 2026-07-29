@@ -115,18 +115,17 @@ extends DimensionAwareEmbeddingModel {
         String effectiveInputType = (String)Utils.getOrDefault((Object)VoyageAiEmbeddingModel.toVoyageInputType(request.inputType()), (Object)this.inputType);
         ArrayList<Embedding> embeddings = new ArrayList<Embedding>();
         int totalTokens = 0;
-        List inputs = request.inputs();
+        List<EmbeddingInput> inputs = request.inputs();
         String responseModelName = null;
         for (int i = 0; i < inputs.size(); i += this.maxSegmentsPerBatch.intValue()) {
             EmbeddingResponse wireResponse;
-            Object wireRequest;
-            List batch = inputs.subList(i, Math.min(i + this.maxSegmentsPerBatch, inputs.size()));
+            List<EmbeddingInput> batch = inputs.subList(i, Math.min(i + this.maxSegmentsPerBatch, inputs.size()));
             if (this.multimodal) {
-                wireRequest = MultimodalEmbeddingRequest.builder().inputs(batch.stream().map(this::toMultimodalInput).collect(Collectors.toList())).model(this.modelName).inputType(effectiveInputType).truncation(this.truncation).build();
-                wireResponse = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.lambda$doEmbed$1((MultimodalEmbeddingRequest)wireRequest), (int)this.maxRetries);
+                MultimodalEmbeddingRequest wireRequest = MultimodalEmbeddingRequest.builder().inputs(batch.stream().map(this::toMultimodalInput).collect(Collectors.toList())).model(this.modelName).inputType(effectiveInputType).truncation(this.truncation).build();
+                wireResponse = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.multimodalEmbed(wireRequest), (int)this.maxRetries);
             } else {
-                wireRequest = EmbeddingRequest.builder().input(batch.stream().map(EmbeddingInput::text).collect(Collectors.toList())).model(this.modelName).inputType(effectiveInputType).truncation(this.truncation).encodingFormat(this.encodingFormat).build();
-                wireResponse = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.lambda$doEmbed$2((EmbeddingRequest)wireRequest), (int)this.maxRetries);
+                EmbeddingRequest wireRequest = EmbeddingRequest.builder().input(batch.stream().map(EmbeddingInput::text).collect(Collectors.toList())).model(this.modelName).inputType(effectiveInputType).truncation(this.truncation).encodingFormat(this.encodingFormat).build();
+                wireResponse = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.embed(wireRequest), (int)this.maxRetries);
             }
             embeddings.addAll(this.getEmbeddings(wireResponse));
             totalTokens += this.getTokenUsage(wireResponse).intValue();
@@ -208,14 +207,6 @@ extends DimensionAwareEmbeddingModel {
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    private /* synthetic */ EmbeddingResponse lambda$doEmbed$2(EmbeddingRequest wireRequest) throws Exception {
-        return this.client.embed(wireRequest);
-    }
-
-    private /* synthetic */ EmbeddingResponse lambda$doEmbed$1(MultimodalEmbeddingRequest wireRequest) throws Exception {
-        return this.client.multimodalEmbed(wireRequest);
     }
 
     public static class Builder {
