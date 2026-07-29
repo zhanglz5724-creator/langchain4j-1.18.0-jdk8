@@ -54,7 +54,7 @@ extends HierarchicalDocumentSplitter {
      * Enabled aggressive exception aggregation
      */
     private SentenceModel createSentenceModel() {
-        String sentenceModelFilePath = "/opennlp/opennlp-en-ud-ewt-sentence-1.2-2.5.0.bin";
+        String sentenceModelFilePath = "/opennlp/en-sent.bin";
         try (InputStream is = this.getClass().getResourceAsStream(sentenceModelFilePath);){
             SentenceModel sentenceModel = new SentenceModel(is);
             return sentenceModel;
