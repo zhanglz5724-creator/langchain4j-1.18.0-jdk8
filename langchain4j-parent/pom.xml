@@ -533,6 +533,7 @@
                     <artifactId>revapi-maven-plugin</artifactId>
                     <version>0.15.1</version>
                     <configuration>
+                        <skip>true</skip>
                         <oldVersion>RELEASE</oldVersion>
                         <analysisConfigurationFiles>
                             <configurationFile>

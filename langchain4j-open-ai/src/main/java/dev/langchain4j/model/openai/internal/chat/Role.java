@@ -3,6 +3,8 @@
  */
 package dev.langchain4j.model.openai.internal.chat;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Role {
     SYSTEM,
     USER,
@@ -10,5 +12,9 @@ public enum Role {
     TOOL,
     FUNCTION;
 
+    @JsonValue
+    public String value() {
+        return name().toLowerCase();
+    }
 }
 
