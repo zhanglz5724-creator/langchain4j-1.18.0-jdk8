@@ -215,7 +215,13 @@ class OllamaStreamingChatModelIT extends AbstractOllamaLanguageModelInfrastructu
         assertThat(error).isExactlyInstanceOf(dev.langchain4j.exception.TimeoutException.class);
     }
 
-    private record ErrorHandler(CompletableFuture<Throwable> futureError) implements StreamingChatResponseHandler {
+    private static class ErrorHandler implements StreamingChatResponseHandler {
+
+        private final CompletableFuture<Throwable> futureError;
+
+        ErrorHandler(CompletableFuture<Throwable> futureError) {
+            this.futureError = futureError;
+        }
 
         @Override
         public void onPartialResponse(String partialResponse) {

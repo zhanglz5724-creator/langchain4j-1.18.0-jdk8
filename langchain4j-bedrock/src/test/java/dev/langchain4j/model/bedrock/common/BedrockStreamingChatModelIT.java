@@ -264,9 +264,37 @@ class BedrockStreamingChatModelIT extends AbstractStreamingChatModelIT {
         assertThat(aiMessage.text()).hasSizeGreaterThan(0);
     }
 
-    record Dinosaur(String name, String periodOfActivity, String description) {}
+    static class Dinosaur {
+        private final String name;
+        private final String periodOfActivity;
+        private final String description;
 
-    record Milestone(String name, String period, String description) {}
+        Dinosaur(String name, String periodOfActivity, String description) {
+            this.name = name;
+            this.periodOfActivity = periodOfActivity;
+            this.description = description;
+        }
+
+        public String name() { return name; }
+        public String periodOfActivity() { return periodOfActivity; }
+        public String description() { return description; }
+    }
+
+    static class Milestone {
+        private final String name;
+        private final String period;
+        private final String description;
+
+        Milestone(String name, String period, String description) {
+            this.name = name;
+            this.period = period;
+            this.description = description;
+        }
+
+        public String name() { return name; }
+        public String period() { return period; }
+        public String description() { return description; }
+    }
 
     @Tool
     String mermaidTimelineDiagram(List<Milestone> milestons, List<Dinosaur> dinosaurs) {
@@ -282,7 +310,7 @@ class BedrockStreamingChatModelIT extends AbstractStreamingChatModelIT {
         Method mermaidTimelineDiagram = Arrays.stream(BedrockStreamingChatModelIT.class.getDeclaredMethods())
                 .filter(m -> m.getName().equals("mermaidTimelineDiagram"))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new AssertionError("Not found"));
         List<ToolSpecification> toolSpecifications = Arrays.asList(toolSpecificationFrom(mermaidTimelineDiagram));
 
         ChatRequest chatRequest = ChatRequest.builder()

@@ -142,15 +142,15 @@ implements ChatModel {
         Response<AiMessage> response;
         ChatRequestParameters parameters = chatRequest.parameters();
         ChatRequestValidationUtils.validateParameters((ChatRequestParameters)parameters);
-        List toolSpecifications = parameters.toolSpecifications();
+        List<ToolSpecification> toolSpecifications = parameters.toolSpecifications();
         ChatCompletionsResponseFormat responseFormat = (ChatCompletionsResponseFormat)Utils.getOrDefault((Object)InternalGitHubModelHelper.toChatCompletionsResponseFormat(chatRequest.responseFormat(), this.strictJsonSchema), (Object)this.responseFormat);
-        if (Utils.isNullOrEmpty((Collection)toolSpecifications)) {
+        if (Utils.isNullOrEmpty(toolSpecifications)) {
             response = this.generate(chatRequest.messages(), null, null, responseFormat);
         } else if (parameters.toolChoice() == ToolChoice.REQUIRED) {
             if (toolSpecifications.size() != 1) {
                 throw new UnsupportedFeatureException(String.format("%s.%s is currently supported only when there is a single tool", ToolChoice.class.getSimpleName(), ToolChoice.REQUIRED.name()));
             }
-            response = this.generate(chatRequest.messages(), Collections.singletonList(toolSpecifications.get(0)), (ToolSpecification)toolSpecifications.get(0), responseFormat);
+            response = this.generate(chatRequest.messages(), Collections.singletonList(toolSpecifications.get(0)), toolSpecifications.get(0), responseFormat);
         } else {
             response = this.generate(chatRequest.messages(), toolSpecifications, null, responseFormat);
         }
@@ -191,7 +191,7 @@ implements ChatModel {
         });
         try {
             ChatCompletions chatCompletions = this.client.complete(options);
-            Response response = Response.from((Object)InternalGitHubModelHelper.aiMessageFrom(((ChatChoice)chatCompletions.getChoices().get(0)).getMessage()), (TokenUsage)InternalGitHubModelHelper.tokenUsageFrom(chatCompletions.getUsage()), (FinishReason)InternalGitHubModelHelper.finishReasonFrom(((ChatChoice)chatCompletions.getChoices().get(0)).getFinishReason()));
+            Response response = Response.from(InternalGitHubModelHelper.aiMessageFrom(((ChatChoice)chatCompletions.getChoices().get(0)).getMessage()), (TokenUsage)InternalGitHubModelHelper.tokenUsageFrom(chatCompletions.getUsage()), (FinishReason)InternalGitHubModelHelper.finishReasonFrom(((ChatChoice)chatCompletions.getChoices().get(0)).getFinishReason()));
             ChatResponse listenerResponse = InternalGitHubModelHelper.createListenerResponse(chatCompletions.getId(), options.getModel(), (Response<AiMessage>)response);
             ChatModelResponseContext responseContext = new ChatModelResponseContext(listenerResponse, listenerRequest, this.provider(), attributes);
             this.listeners.forEach(listener -> {
@@ -219,7 +219,7 @@ implements ChatModel {
             if (exceptionFinishReason != FinishReason.CONTENT_FILTER) {
                 throw httpResponseException;
             }
-            return Response.from((Object)AiMessage.aiMessage((String)httpResponseException.getMessage()), null, (FinishReason)exceptionFinishReason);
+            return Response.from(AiMessage.aiMessage((String)httpResponseException.getMessage()), null, (FinishReason)exceptionFinishReason);
         }
     }
 

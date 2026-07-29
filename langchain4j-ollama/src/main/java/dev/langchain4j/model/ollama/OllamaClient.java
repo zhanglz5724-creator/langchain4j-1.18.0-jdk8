@@ -146,7 +146,7 @@ class OllamaClient {
                 this.contentBuilder.append(completionResponse.getResponse());
                 handler.onNext(completionResponse.getResponse());
                 if (Boolean.TRUE.equals(completionResponse.getDone())) {
-                    Response response = Response.from((Object)this.contentBuilder.toString(), (TokenUsage)new TokenUsage(completionResponse.getPromptEvalCount(), completionResponse.getEvalCount()));
+                    Response response = Response.from(this.contentBuilder.toString(), (TokenUsage)new TokenUsage(completionResponse.getPromptEvalCount(), completionResponse.getEvalCount()));
                     handler.onComplete(response);
                 }
             }

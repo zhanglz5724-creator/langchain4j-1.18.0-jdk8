@@ -69,7 +69,7 @@ implements LanguageModel {
     public Response<String> generate(String prompt) {
         CompletionRequest request = CompletionRequest.builder().model(this.modelName).prompt(prompt).temperature(this.temperature).topP(this.topP).maxTokens(this.maxTokens).build();
         CompletionResponse response = (CompletionResponse)RetryUtils.withRetryMappingExceptions(() -> (CompletionResponse)this.client.completion(request).execute(), (int)this.maxRetries);
-        return Response.from((Object)response.text(), null, (FinishReason)OpenAiUtils.finishReasonFrom((String)((CompletionChoice)response.choices().get(0)).finishReason()));
+        return Response.from(response.text(), null, (FinishReason)OpenAiUtils.finishReasonFrom((String)((CompletionChoice)response.choices().get(0)).finishReason()));
     }
 
     public static LocalAiLanguageModelBuilder builder() {

@@ -181,7 +181,7 @@ implements BatchEmbeddingModel {
                         for (int i = 0; i < values.size(); ++i) {
                             floatArray[i] = ((Float)values.get(i)).floatValue();
                         }
-                        results.add(BatchItemResult.success((Object)Response.from((Object)Embedding.from((float[])floatArray))));
+                        results.add(BatchItemResult.success((Object)Response.from(Embedding.from((float[])floatArray))));
                         continue;
                     }
                     if (!inlined.error().isPresent()) continue;

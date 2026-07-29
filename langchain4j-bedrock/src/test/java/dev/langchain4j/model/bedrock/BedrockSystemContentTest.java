@@ -56,7 +56,7 @@ class BedrockSystemContentTest {
 
     @Test
     void should_throw_for_text_exceeding_max_length() {
-        String hugeText = "x".repeat(BedrockSystemTextContent.MAX_TEXT_LENGTH + 1);
+        String hugeText = new String(new char[BedrockSystemTextContent.MAX_TEXT_LENGTH + 1]).replace("\0", "x");
 
         assertThatThrownBy(() -> BedrockSystemTextContent.from(hugeText))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -65,7 +65,7 @@ class BedrockSystemContentTest {
 
     @Test
     void should_accept_text_at_max_length() {
-        String maxText = "x".repeat(BedrockSystemTextContent.MAX_TEXT_LENGTH);
+        String maxText = new String(new char[BedrockSystemTextContent.MAX_TEXT_LENGTH]).replace("\0", "x");
         BedrockSystemTextContent content = BedrockSystemTextContent.from(maxText);
 
         assertThat(content.text()).hasSize(BedrockSystemTextContent.MAX_TEXT_LENGTH);
@@ -75,7 +75,7 @@ class BedrockSystemContentTest {
 
     @Test
     void should_truncate_long_text_in_toString() {
-        String longText = "x".repeat(500);
+        String longText = new String(new char[500]).replace("\0", "x");
         BedrockSystemTextContent content = BedrockSystemTextContent.from(longText);
 
         String str = content.toString();

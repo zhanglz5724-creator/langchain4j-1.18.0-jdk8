@@ -70,9 +70,9 @@ class StreamingChatResponseBuilder {
 
     Response<AiMessage> build() {
         if (!this.functionCalls.isEmpty()) {
-            return Response.from((Object)AiMessage.from(FunctionCallHelper.fromFunctionCalls(this.functionCalls)), (TokenUsage)this.tokenUsage, (FinishReason)this.finishReason);
+            return Response.from(AiMessage.from(FunctionCallHelper.fromFunctionCalls(this.functionCalls)), (TokenUsage)this.tokenUsage, (FinishReason)this.finishReason);
         }
-        return Response.from((Object)AiMessage.from((String)this.contentBuilder.toString()), (TokenUsage)this.tokenUsage, (FinishReason)this.finishReason);
+        return Response.from(AiMessage.from((String)this.contentBuilder.toString()), (TokenUsage)this.tokenUsage, (FinishReason)this.finishReason);
     }
 
     static final class TextAndFunctions {

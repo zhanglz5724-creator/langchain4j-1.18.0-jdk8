@@ -166,18 +166,21 @@ class OllamaChatModelIT extends AbstractOllamaLanguageModelInfrastructure {
     }
 
     static Content createContentBasedOnType(ContentType contentType) {
-        return switch (contentType) {
-            case AUDIO -> AudioContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "audio/mpeg");
-            case IMAGE -> ImageContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "image/jpeg");
-            case PDF -> VideoContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "application/pdf");
-            case TEXT -> TextContent.from("Test text content.");
-            case VIDEO -> VideoContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "video/mp4");
-            default -> {
-                // keep defaults case to alert when ContentType gets extended
+        switch (contentType) {
+            case AUDIO:
+                return AudioContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "audio/mpeg");
+            case IMAGE:
+                return ImageContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "image/jpeg");
+            case PDF:
+                return VideoContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "application/pdf");
+            case TEXT:
+                return TextContent.from("Test text content.");
+            case VIDEO:
+                return VideoContent.from("VGhpcyBpcyBhIHRlc3QgY29udGVudHM=", "video/mp4");
+            default:
                 fail("Cannot create user message from content type: " + contentType);
-                yield TextContent.from("Text text content.");
-            }
-        };
+                return TextContent.from("Text text content.");
+        }
     }
 
     static Stream<List<ContentType>> notSupportedContentTypesProvider() {

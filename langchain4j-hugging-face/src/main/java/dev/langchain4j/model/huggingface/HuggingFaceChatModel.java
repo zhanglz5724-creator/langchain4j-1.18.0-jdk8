@@ -115,7 +115,7 @@ implements ChatModel {
     private Response<AiMessage> generate(List<ChatMessage> messages) {
         TextGenerationRequest request = TextGenerationRequest.builder().inputs(messages.stream().map(HuggingFaceChatModel::toText).collect(Collectors.joining("\n"))).parameters(Parameters.builder().temperature(this.temperature).maxNewTokens(this.maxNewTokens).returnFullText(this.returnFullText).build()).options(Options.builder().waitForModel(this.waitForModel).build()).build();
         TextGenerationResponse textGenerationResponse = this.client.chat(request);
-        return Response.from((Object)AiMessage.from((String)textGenerationResponse.getGeneratedText()));
+        return Response.from(AiMessage.from(textGenerationResponse.getGeneratedText()));
     }
 
     private static String toText(ChatMessage chatMessage) {

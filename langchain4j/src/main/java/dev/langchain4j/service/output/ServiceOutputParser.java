@@ -49,7 +49,7 @@ public class ServiceOutputParser {
             returnType = TypeUtils.resolveFirstGenericParameterType(returnType);
         }
         if ((rawClass = TypeUtils.getRawClass(returnType)) == Response.class) {
-            return Response.from((Object)chatResponse.aiMessage(), (TokenUsage)chatResponse.tokenUsage(), (FinishReason)chatResponse.finishReason());
+            return Response.from(chatResponse.aiMessage(), (TokenUsage)chatResponse.tokenUsage(), (FinishReason)chatResponse.finishReason());
         }
         if (rawClass == Void.TYPE || rawClass == Void.class) {
             return null;

@@ -102,11 +102,11 @@ class GitHubModelsStreamingResponseBuilder {
             if (Utils.isNullOrBlank((String)content)) {
                 return null;
             }
-            return Response.from((Object)AiMessage.from((String)content), (TokenUsage)tokenUsage, (FinishReason)finishReason);
+            return Response.from(AiMessage.from((String)content), (TokenUsage)tokenUsage, (FinishReason)finishReason);
         }
         List toolExecutionRequests = this.toolExecutionRequestBuilderHashMap.values().stream().map(it -> ToolExecutionRequest.builder().id(((ToolExecutionRequestBuilder)it).idBuilder.toString()).name(((ToolExecutionRequestBuilder)it).nameBuilder.toString()).arguments(((ToolExecutionRequestBuilder)it).argumentsBuilder.toString()).build()).collect(Collectors.toList());
         AiMessage aiMessage = Utils.isNullOrBlank((String)content) ? AiMessage.from(toolExecutionRequests) : AiMessage.from((String)content, toolExecutionRequests);
-        return Response.from((Object)aiMessage, (TokenUsage)tokenUsage, (FinishReason)finishReason);
+        return Response.from(aiMessage, (TokenUsage)tokenUsage, (FinishReason)finishReason);
     }
 
     private static class ToolExecutionRequestBuilder {

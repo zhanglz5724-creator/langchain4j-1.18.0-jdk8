@@ -49,11 +49,11 @@ implements EmbeddingModel {
 
     public Response<List<Embedding>> embedAll(List<TextSegment> textSegments, EmbeddingParameters parameters) {
         if (Objects.isNull(textSegments) || textSegments.isEmpty()) {
-            return Response.from((Object)Arrays.asList());
+            return Response.from(Arrays.asList());
         }
         List inputs = textSegments.stream().map(TextSegment::text).toList();
         EmbeddingResponse response = (EmbeddingResponse)WatsonxExceptionMapper.INSTANCE.withExceptionMapper(() -> this.embeddingService.embedding(inputs, parameters));
-        return Response.from((Object)response.results().stream().map(EmbeddingResponse.Result::embedding).map(Embedding::from).toList());
+        return Response.from(response.results().stream().map(EmbeddingResponse.Result::embedding).map(Embedding::from).toList());
     }
 
     public static Builder builder() {

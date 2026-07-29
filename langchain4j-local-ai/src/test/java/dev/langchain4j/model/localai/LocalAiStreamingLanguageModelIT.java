@@ -31,7 +31,7 @@ class LocalAiStreamingLanguageModelIT {
         StringBuilder answerBuilder = new StringBuilder();
         CompletableFuture<Response<String>> futureResponse = new CompletableFuture<>();
 
-        model.generate(prompt, new StreamingResponseHandler<>() {
+        model.generate(prompt, new StreamingResponseHandler<String>() {
 
             @Override
             public void onNext(String token) {

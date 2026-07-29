@@ -213,8 +213,8 @@ class BedrockSystemMessageTest {
     @Test
     void should_have_compact_toString() {
         BedrockSystemMessage msg = BedrockSystemMessage.builder()
-                .addText("a".repeat(10000))
-                .addText("b".repeat(10000))
+                .addText(new String(new char[10000]).replace("\0", "a"))
+                .addText(new String(new char[10000]).replace("\0", "b"))
                 .build();
 
         String str = msg.toString();

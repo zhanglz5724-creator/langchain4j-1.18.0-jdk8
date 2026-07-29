@@ -133,7 +133,7 @@ implements ChatModel {
         }
         ChatCompletionRequest request = requestBuilder.build();
         ChatCompletionResponse response = (ChatCompletionResponse)RetryUtils.withRetryMappingExceptions(() -> (ChatCompletionResponse)this.client.chatCompletion(request).execute(), (int)this.maxRetries);
-        return Response.from((Object)OpenAiUtils.aiMessageFrom((ChatCompletionResponse)response), null, (FinishReason)OpenAiUtils.finishReasonFrom((String)((ChatCompletionChoice)response.choices().get(0)).finishReason()));
+        return Response.from(OpenAiUtils.aiMessageFrom((ChatCompletionResponse)response), null, (FinishReason)OpenAiUtils.finishReasonFrom((String)((ChatCompletionChoice)response.choices().get(0)).finishReason()));
     }
 
     public static LocalAiChatModelBuilder builder() {

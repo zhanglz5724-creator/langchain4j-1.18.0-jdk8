@@ -60,7 +60,7 @@ extends DimensionAwareEmbeddingModel {
         List texts = textSegments.stream().map(TextSegment::text).collect(Collectors.toList());
         EmbeddingRequest request = EmbeddingRequest.builder().input(texts).model(this.modelName).build();
         EmbeddingResponse response = (EmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> (EmbeddingResponse)this.client.embedding(request).execute(), (int)this.maxRetries);
-        List embeddings = response.data().stream().map(openAiEmbedding -> Embedding.from((List)openAiEmbedding.embedding())).collect(Collectors.toList());
+        List<Embedding> embeddings = (List<Embedding>)(List) response.data().stream().map(openAiEmbedding -> Embedding.from((List)openAiEmbedding.embedding())).collect(Collectors.toList());
         return Response.from(embeddings);
     }
 

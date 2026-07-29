@@ -408,7 +408,7 @@ Closeable {
         } else {
             aiMessage = AiMessage.from((String)ResponseHandler.getText((GenerateContentResponse)response));
         }
-        Response finalResponse = Response.from((Object)aiMessage, (TokenUsage)TokenUsageMapper.map(response.getUsageMetadata()), (FinishReason)FinishReasonMapper.map(ResponseHandler.getFinishReason((GenerateContentResponse)response)));
+        Response finalResponse = Response.from(aiMessage, (TokenUsage)TokenUsageMapper.map(response.getUsageMetadata()), (FinishReason)FinishReasonMapper.map(ResponseHandler.getFinishReason((GenerateContentResponse)response)));
         ChatResponse listenerResponse = ChatResponse.builder().aiMessage(aiMessage).metadata(ChatResponseMetadata.builder().modelName(modelName).tokenUsage(finalResponse.tokenUsage()).finishReason(finalResponse.finishReason()).build()).build();
         ChatModelResponseContext chatModelResponseContext = new ChatModelResponseContext(listenerResponse, listenerRequest, this.provider(), listenerAttributes);
         this.listeners.forEach(listener -> {

@@ -143,7 +143,7 @@ implements BatchEmbeddingModel {
                 GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse typedResponse = typed.response();
                 if (typedResponse != null) {
                     Embedding embedding = Embedding.from(typedResponse.embedding().values());
-                    results.add((BatchItemResult<Response<Embedding>>)BatchItemResult.success((Object)Response.from((Object)embedding)));
+                    results.add((BatchItemResult<Response<Embedding>>)BatchItemResult.success((Object)Response.from(embedding)));
                 }
                 if ((error = typed.error()) == null) continue;
                 results.add((BatchItemResult<Response<Embedding>>)BatchItemResult.failure((BatchError)error.toGenericStatus()));

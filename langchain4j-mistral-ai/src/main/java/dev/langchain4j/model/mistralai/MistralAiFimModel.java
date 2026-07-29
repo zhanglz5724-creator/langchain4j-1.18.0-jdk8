@@ -73,7 +73,7 @@ implements LanguageModel {
         MistralAiFimCompletionRequest request = MistralAiFimCompletionRequest.builder().model(this.modelName).prompt(prompt).suffix(suffix).temperature(this.temperature).maxTokens(this.maxTokens).minTokens(this.minTokens).topP(this.topP).randomSeed(this.randomSeed).stop(this.stop).stream(false).build();
         MistralAiChatCompletionResponse response = (MistralAiChatCompletionResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.fimCompletion(request), (int)this.maxRetries);
         MistralAiChatCompletionChoice responseChoice = response.getChoices().get(0);
-        return Response.from((Object)responseChoice.getMessage().asText(), (TokenUsage)MistralAiMapper.tokenUsageFrom(response.getUsage()), (FinishReason)MistralAiMapper.finishReasonFrom(responseChoice.getFinishReason()));
+        return Response.from(responseChoice.getMessage().asText(), (TokenUsage)MistralAiMapper.tokenUsageFrom(response.getUsage()), (FinishReason)MistralAiMapper.finishReasonFrom(responseChoice.getFinishReason()));
     }
 
     public static Builder builder() {

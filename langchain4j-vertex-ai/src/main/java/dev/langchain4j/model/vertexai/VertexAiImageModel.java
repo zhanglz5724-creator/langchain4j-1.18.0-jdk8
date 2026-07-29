@@ -248,7 +248,7 @@ implements ImageModel {
 
     public Response<Image> edit(Image image, String prompt) {
         Response<Image> generatedImageResponse = this.edit(image, null, prompt);
-        return Response.from((Object)generatedImageResponse.content(), (TokenUsage)generatedImageResponse.tokenUsage(), (FinishReason)generatedImageResponse.finishReason());
+        return Response.from(generatedImageResponse.content(), (TokenUsage)generatedImageResponse.tokenUsage(), (FinishReason)generatedImageResponse.finishReason());
     }
 
     public Response<Image> edit(Image image, Image mask, String prompt) {

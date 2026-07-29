@@ -100,7 +100,7 @@ class BedrockCustomHeadersInterceptorTest {
     @Test
     void should_add_multiple_custom_headers() {
         BedrockCustomHeadersInterceptor interceptor =
-                new BedrockCustomHeadersInterceptor(() -> new java.util.HashMap<String, Object>() {{ put("X-Header-A", "value-a"); put("X-Header-B", "value-b"); }});
+                new BedrockCustomHeadersInterceptor(() -> new java.util.HashMap<String, String>() {{ put("X-Header-A", "value-a"); put("X-Header-B", "value-b"); }});
 
         SdkHttpRequest result = invoke(interceptor, BASE_REQUEST);
 

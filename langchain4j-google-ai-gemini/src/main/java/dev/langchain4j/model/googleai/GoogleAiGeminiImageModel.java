@@ -121,7 +121,7 @@ implements ImageModel {
             Map<String, Object> groundingMetadataMap = Json.convertValue(groundingMetadata, new TypeReference<Map<String, Object>>(){});
             metadata.put("groundingMetadata", groundingMetadataMap);
         }
-        return Response.from((Object)image, (TokenUsage)tokenUsage, (FinishReason)finishReason, metadata);
+        return Response.from(image, (TokenUsage)tokenUsage, (FinishReason)finishReason, metadata);
     }
 
     private GeminiGenerateContentRequest createGenerateRequest(String prompt) {

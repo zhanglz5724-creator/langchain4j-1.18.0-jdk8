@@ -132,7 +132,7 @@ implements ChatModel {
             JsonFormat.parser().merge(Json.toJson(this.vertexAiParameters), (Message.Builder)parametersBuilder);
             Value parameters = parametersBuilder.build();
             PredictResponse response = (PredictResponse)RetryUtils.withRetryMappingExceptions(() -> client.predict(this.endpointName, instances, parameters), (int)this.maxRetries);
-            Response response2 = Response.from((Object)AiMessage.from((String)VertexAiChatModel.extractContent(response)), (TokenUsage)new TokenUsage(Integer.valueOf(VertexAiChatModel.extractTokenCount(response, "inputTokenCount")), Integer.valueOf(VertexAiChatModel.extractTokenCount(response, "outputTokenCount"))));
+            Response response2 = Response.from(AiMessage.from((String)VertexAiChatModel.extractContent(response)), (TokenUsage)new TokenUsage(Integer.valueOf(VertexAiChatModel.extractTokenCount(response, "inputTokenCount")), Integer.valueOf(VertexAiChatModel.extractTokenCount(response, "outputTokenCount"))));
             return response2;
         }
         catch (IOException e) {

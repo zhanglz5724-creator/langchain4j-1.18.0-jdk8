@@ -170,7 +170,7 @@ implements BatchImageModel {
             for (GeminiContent.GeminiPart part : candidate.content().parts()) {
                 if (part.inlineData() == null) continue;
                 Image image = Image.builder().base64Data(part.inlineData().data()).mimeType(part.inlineData().mimeType()).build();
-                return Response.from((Object)image);
+                return Response.from(image);
             }
             throw new GoogleAiGeminiImageModel.GeminiImageGenerationException("No image data found in responses");
         }

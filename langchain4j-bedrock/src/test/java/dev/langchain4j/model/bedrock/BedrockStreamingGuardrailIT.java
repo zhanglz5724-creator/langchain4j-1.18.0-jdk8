@@ -275,7 +275,7 @@ public class BedrockStreamingGuardrailIT {
 
         CompletableFuture<ChatResponse> futureCompletedEvent = new CompletableFuture<>();
 
-        AiServiceListener<AiServiceCompletedEvent> listener = new AiServiceListener<>() {
+        AiServiceListener<AiServiceCompletedEvent> listener = new AiServiceListener<AiServiceCompletedEvent>() {
             @Override
             public @NonNull Class<AiServiceCompletedEvent> getEventClass() {
                 return AiServiceCompletedEvent.class;

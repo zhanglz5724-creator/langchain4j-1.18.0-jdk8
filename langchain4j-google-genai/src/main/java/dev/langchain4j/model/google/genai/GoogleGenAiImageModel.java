@@ -206,7 +206,7 @@ implements ImageModel {
             String base64Data = Base64.getEncoder().encodeToString(bytes);
             String mimeType = blob.mimeType().orElse("image/png");
             Image image = Image.builder().base64Data(base64Data).mimeType(mimeType).build();
-            return Response.from((Object)image, null, null, metadata);
+            return Response.from(image, null, null, metadata);
         }
         throw new RuntimeException("No image data found in response");
     }

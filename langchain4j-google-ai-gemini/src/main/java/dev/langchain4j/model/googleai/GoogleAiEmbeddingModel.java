@@ -106,7 +106,7 @@ extends DimensionAwareEmbeddingModel {
         return EmbeddingModelListenerUtils.withListeners((EmbeddingModel)this, (TextSegment)textSegment, () -> {
             GeminiEmbeddingRequestResponse.GeminiEmbeddingRequest embeddingRequest = this.getGoogleAiEmbeddingRequest(textSegment);
             GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse geminiResponse = (GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse)RetryUtils.withRetryMappingExceptions(() -> this.geminiService.embed(this.modelName, embeddingRequest), (int)this.maxRetries);
-            return Response.from((Object)Embedding.from(geminiResponse.embedding().values()));
+            return Response.from(Embedding.from(geminiResponse.embedding().values()));
         });
     }
 

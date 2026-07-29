@@ -73,7 +73,7 @@ implements LanguageModel {
         catch (SQLException ex) {
             throw new RuntimeException("cannot get summary", ex);
         }
-        return Response.from((Object)text);
+        return Response.from(text);
     }
 }
 

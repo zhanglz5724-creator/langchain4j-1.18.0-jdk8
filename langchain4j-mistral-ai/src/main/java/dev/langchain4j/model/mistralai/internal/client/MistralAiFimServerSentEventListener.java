@@ -57,7 +57,7 @@ implements ServerSentEventListener {
         String data = event.data();
         if ("[DONE]".equals(data)) {
             String responseContent = this.toResponse.apply(this.contentBuilder.toString(), this.toolExecutionRequests);
-            Response response = Response.from((Object)responseContent, (TokenUsage)this.tokenUsage, (FinishReason)this.finishReason);
+            Response response = Response.from(responseContent, (TokenUsage)this.tokenUsage, (FinishReason)this.finishReason);
             try {
                 this.handler.onComplete(response);
             }

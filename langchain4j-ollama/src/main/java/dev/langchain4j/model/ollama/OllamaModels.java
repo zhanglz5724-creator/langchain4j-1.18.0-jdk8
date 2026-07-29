@@ -48,7 +48,7 @@ public class OllamaModels {
 
     public Response<OllamaModelCard> modelCard(String modelName) {
         OllamaModelCard response = (OllamaModelCard)RetryUtils.withRetryMappingExceptions(() -> this.client.showInformation(ShowModelInformationRequest.builder().name(modelName).build()), (int)this.maxRetries);
-        return Response.from((Object)response);
+        return Response.from(response);
     }
 
     public void deleteModel(OllamaModel ollamaModel) {

@@ -77,7 +77,7 @@ implements dev.langchain4j.model.image.ImageModel {
             throw new IllegalArgumentException("Image generation failed: no image returned");
         }
         String mimeType = response.outputFormat().map(of -> "image/" + of).orElse(null);
-        return Response.from((Object)OpenAiOfficialImageModel.fromOpenAiImage((com.openai.models.images.Image)((List)response.data().get()).get(0), mimeType));
+        return Response.from(OpenAiOfficialImageModel.fromOpenAiImage((com.openai.models.images.Image)((List)response.data().get()).get(0), mimeType));
     }
 
     public Response<List<Image>> generate(String prompt, int n) {

@@ -204,7 +204,7 @@ implements StreamingChatModel {
             logger.info("Error generating response, {}", httpResponseException.getValue());
             FinishReason exceptionFinishReason = InternalGitHubModelHelper.contentFilterManagement(httpResponseException, "content_filter");
             if (exceptionFinishReason == FinishReason.CONTENT_FILTER) {
-                Response response = Response.from((Object)AiMessage.aiMessage((String)httpResponseException.getMessage()), null, (FinishReason)exceptionFinishReason);
+                Response response = Response.from(AiMessage.aiMessage((String)httpResponseException.getMessage()), null, (FinishReason)exceptionFinishReason);
                 handler.onComplete(response);
             } else {
                 handler.onError(throwable);

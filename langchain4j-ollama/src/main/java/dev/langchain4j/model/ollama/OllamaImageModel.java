@@ -72,7 +72,7 @@ implements ImageModel {
     public Response<Image> generate(String prompt) {
         CompletionRequest request = CompletionRequest.builder().model(this.modelName).prompt(ValidationUtils.ensureNotBlank((String)prompt, (String)"prompt")).options(this.options).width(this.width).height(this.height).steps(this.steps).stream(false).build();
         CompletionResponse response = (CompletionResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.completion(request), (int)this.maxRetries);
-        return Response.from((Object)OllamaImageModel.fromResponse(response));
+        return Response.from(OllamaImageModel.fromResponse(response));
     }
 
     private static Image fromResponse(CompletionResponse response) {

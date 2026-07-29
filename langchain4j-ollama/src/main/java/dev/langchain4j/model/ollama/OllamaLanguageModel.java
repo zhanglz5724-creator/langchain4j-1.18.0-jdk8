@@ -63,7 +63,7 @@ implements LanguageModel {
     public Response<String> generate(String prompt) {
         CompletionRequest request = CompletionRequest.builder().model(this.modelName).prompt(prompt).options(this.options).format(InternalOllamaHelper.toOllamaResponseFormat(this.responseFormat)).stream(false).build();
         CompletionResponse response = (CompletionResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.completion(request), (int)this.maxRetries);
-        return Response.from((Object)response.getResponse(), (TokenUsage)new TokenUsage(response.getPromptEvalCount(), response.getEvalCount()));
+        return Response.from(response.getResponse(), (TokenUsage)new TokenUsage(response.getPromptEvalCount(), response.getEvalCount()));
     }
 
     public static class OllamaLanguageModelBuilder {

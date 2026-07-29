@@ -209,7 +209,7 @@ implements BatchImageModel {
                                 String base64Data = Base64.getEncoder().encodeToString(bytes);
                                 String mimeType = blob.mimeType().orElse("image/png");
                                 Image image = Image.builder().base64Data(base64Data).mimeType(mimeType).build();
-                                results.add(BatchItemResult.success((Object)Response.from((Object)image)));
+                                results.add(BatchItemResult.success((Object)Response.from(image)));
                                 imageAdded = true;
                                 break;
                             }

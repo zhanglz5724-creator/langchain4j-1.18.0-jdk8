@@ -80,7 +80,7 @@ implements LanguageModel {
     public Response<String> generate(String prompt) {
         TextGenerationRequest request = TextGenerationRequest.builder().inputs(prompt).parameters(Parameters.builder().temperature(this.temperature).maxNewTokens(this.maxNewTokens).returnFullText(this.returnFullText).build()).options(Options.builder().waitForModel(this.waitForModel).build()).build();
         TextGenerationResponse response = this.client.generate(request);
-        return Response.from((Object)response.getGeneratedText());
+        return Response.from(response.getGeneratedText());
     }
 
     public static Builder builder() {

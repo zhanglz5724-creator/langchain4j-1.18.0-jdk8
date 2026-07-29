@@ -197,10 +197,10 @@ class InternalOllamaHelper {
         List toolCalls = null;
         if (chatMessage instanceof AiMessage) {
             AiMessage aiMessage = (AiMessage)chatMessage;
-            List toolExecutionRequests = aiMessage.toolExecutionRequests();
+            List<ToolExecutionRequest> toolExecutionRequests = aiMessage.toolExecutionRequests();
             toolCalls = Optional.ofNullable(toolExecutionRequests).map(reqs -> reqs.stream().map(toolExecutionRequest -> {
                 TypeReference<HashMap<String, Object>> typeReference = new TypeReference<HashMap<String, Object>>(){};
-                FunctionCall functionCall = FunctionCall.builder().name(toolExecutionRequest.name()).arguments((Map<String, Object>)OllamaJsonUtils.fromJson(toolExecutionRequest.arguments(), typeReference)).build();
+                FunctionCall functionCall = FunctionCall.builder().name(toolExecutionRequest.name()).arguments((Map) OllamaJsonUtils.fromJson(toolExecutionRequest.arguments(), typeReference)).build();
                 return ToolCall.builder().id(toolExecutionRequest.id()).function(functionCall).build();
             }).collect(Collectors.toList())).orElse(null);
         }
