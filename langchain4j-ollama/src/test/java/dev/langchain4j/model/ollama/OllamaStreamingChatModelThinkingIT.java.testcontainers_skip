@@ -17,7 +17,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.MockHttpClientBuilder;
 import dev.langchain4j.http.client.SpyingHttpClient;
-import dev.langchain4j.http.client.jdk.JdkHttpClient;
+import dev.langchain4j.http.client.okhttp.OkHttpClient;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.TestStreamingChatResponseHandler;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class OllamaStreamingChatModelThinkingIT extends AbstractOllamaThinkingModelInfr
         boolean think = true;
         boolean returnThinking = true;
 
-        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
+        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(OkHttpClient.builder().build());
 
         StreamingChatModel model = OllamaStreamingChatModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(spyingHttpClient))
@@ -99,7 +99,7 @@ class OllamaStreamingChatModelThinkingIT extends AbstractOllamaThinkingModelInfr
         boolean think = true;
         boolean returnThinking = false;
 
-        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
+        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(OkHttpClient.builder().build());
 
         StreamingChatModel model = OllamaStreamingChatModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(spyingHttpClient))
@@ -146,7 +146,7 @@ class OllamaStreamingChatModelThinkingIT extends AbstractOllamaThinkingModelInfr
         // given
         boolean think = false;
 
-        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
+        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(OkHttpClient.builder().build());
 
         StreamingChatModel model = OllamaStreamingChatModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(spyingHttpClient))

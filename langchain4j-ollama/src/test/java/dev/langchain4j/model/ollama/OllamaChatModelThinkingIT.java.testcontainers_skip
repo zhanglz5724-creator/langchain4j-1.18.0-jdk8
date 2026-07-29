@@ -11,7 +11,7 @@ import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.MockHttpClientBuilder;
 import dev.langchain4j.http.client.SpyingHttpClient;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
-import dev.langchain4j.http.client.jdk.JdkHttpClient;
+import dev.langchain4j.http.client.okhttp.OkHttpClient;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class OllamaChatModelThinkingIT extends AbstractOllamaThinkingModelInfrastructur
         boolean think = true;
         boolean returnThinking = true;
 
-        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
+        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(OkHttpClient.builder().build());
 
         ChatModel model = OllamaChatModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(spyingHttpClient))
@@ -77,7 +77,7 @@ class OllamaChatModelThinkingIT extends AbstractOllamaThinkingModelInfrastructur
         boolean think = true;
         boolean returnThinking = false;
 
-        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
+        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(OkHttpClient.builder().build());
 
         ChatModel model = OllamaChatModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(spyingHttpClient))
@@ -115,7 +115,7 @@ class OllamaChatModelThinkingIT extends AbstractOllamaThinkingModelInfrastructur
         // given
         boolean think = false;
 
-        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(JdkHttpClient.builder().build());
+        SpyingHttpClient spyingHttpClient = new SpyingHttpClient(OkHttpClient.builder().build());
 
         ChatModel model = OllamaChatModel.builder()
                 .httpClientBuilder(new MockHttpClientBuilder(spyingHttpClient))

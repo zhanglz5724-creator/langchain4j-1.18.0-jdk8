@@ -52,7 +52,7 @@ class OllamaStreamingContentTypeTest {
                 .build();
 
         // when
-        model.generate("test", new StreamingResponseHandler<>() {
+        model.generate("test", new StreamingResponseHandler<String>() {
 
             @Override
             public void onNext(String token) {}
@@ -104,7 +104,7 @@ class OllamaStreamingContentTypeTest {
                 .build();
 
         // when
-        model.generate("test", new StreamingResponseHandler<>() {
+        model.generate("test", new StreamingResponseHandler<String>() {
 
             @Override
             public void onNext(String token) {}

@@ -20,7 +20,7 @@ class InternalOllamaHelperTest {
         UserMessage userMessage =
                 UserMessage.from(TextContent.from("Hello"), TextContent.from("world"), TextContent.from("!"));
 
-        List<Message> messages = InternalOllamaHelper.toOllamaMessages(List.<ChatMessage>of(userMessage));
+        List<Message> messages = InternalOllamaHelper.toOllamaMessages(Collections.<ChatMessage>singletonList(userMessage));
 
         assertThat(messages).hasSize(1);
         assertThat(messages.get(0).getContent()).isEqualTo("Hello\nworld\n!");
@@ -34,7 +34,7 @@ class InternalOllamaHelperTest {
                 TextContent.from("two parts"),
                 ImageContent.from("aW1hZ2U=", "image/png"));
 
-        List<Message> messages = InternalOllamaHelper.toOllamaMessages(List.<ChatMessage>of(userMessage));
+        List<Message> messages = InternalOllamaHelper.toOllamaMessages(Collections.<ChatMessage>singletonList(userMessage));
 
         assertThat(messages).hasSize(1);
         assertThat(messages.get(0).getContent()).isEqualTo("Describe these\ntwo parts");
@@ -45,7 +45,7 @@ class InternalOllamaHelperTest {
     void toOllamaMessages_imageOnlyMessageHasEmptyContent() {
         UserMessage userMessage = UserMessage.from(ImageContent.from("aW1hZ2U=", "image/png"));
 
-        List<Message> messages = InternalOllamaHelper.toOllamaMessages(List.<ChatMessage>of(userMessage));
+        List<Message> messages = InternalOllamaHelper.toOllamaMessages(Collections.<ChatMessage>singletonList(userMessage));
 
         assertThat(messages).hasSize(1);
         assertThat(messages.get(0).getContent()).isEmpty();
