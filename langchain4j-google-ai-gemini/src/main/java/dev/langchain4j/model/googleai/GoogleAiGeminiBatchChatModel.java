@@ -118,7 +118,7 @@ implements BatchChatModel {
         }
 
         @Override
-        public List<BatchItemResult<ChatResponse>> extractResults(@Nullable BatchRequestResponse.BatchCreateResponse<GeminiGenerateContentResponse> response) {
+        public List<BatchItemResult<ChatResponse>> extractResults(BatchRequestResponse.BatchCreateResponse<GeminiGenerateContentResponse> response) {
             if (response == null || response.inlinedResponses() == null) {
                 return Collections.emptyList();
             }
@@ -128,10 +128,10 @@ implements BatchChatModel {
                 BatchRequestResponse.BatchCreateResponse.InlinedResponseWrapper<GeminiGenerateContentResponse> typed = Json.convertValue(wrapper, this.responseWrapperType);
                 GeminiGenerateContentResponse typedResponse = typed.response();
                 if (typedResponse != null) {
-                    results.add((BatchItemResult<ChatResponse>)BatchItemResult.success((Object)GoogleAiGeminiBatchChatModel.this.chatModel.processResponse(typedResponse)));
+                    results.add(BatchItemResult.success(GoogleAiGeminiBatchChatModel.this.chatModel.processResponse(typedResponse)));
                 }
                 if ((error = typed.error()) == null) continue;
-                results.add((BatchItemResult<ChatResponse>)BatchItemResult.failure((BatchError)error.toGenericStatus()));
+                results.add(BatchItemResult.<ChatResponse>failure((BatchError) error.toGenericStatus()));
             }
             return results;
         }

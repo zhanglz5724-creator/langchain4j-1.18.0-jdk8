@@ -129,7 +129,7 @@ class GoogleGenAiConfigBuilder {
     }
 
     private static void buildTools(GenerateContentConfig.Builder configBuilder, ChatRequestParameters parameters, boolean googleSearchEnabled, boolean googleMapsEnabled, boolean urlContextEnabled, List<String> allowedFunctionNames, String vertexSearchDatastore) {
-        List toolSpecs = parameters.toolSpecifications();
+        List<ToolSpecification> toolSpecs = parameters.toolSpecifications();
         ArrayList<Tool> requestTools = new ArrayList<Tool>();
         ArrayList<FunctionDeclaration> functionDeclarations = new ArrayList<FunctionDeclaration>();
         if (toolSpecs != null) {

@@ -43,8 +43,8 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
         this.preparer = preparer;
     }
 
-    BatchResponse<RESPONSE> createBatch(String displayName, @Nullable Long priority, List<REQUEST> requests, String modelName, GeminiService.BatchOperationType operationType) {
-        List inlineRequests = requests.stream().map(this.preparer::prepareRequest).map(this.preparer::createInlinedRequest).map(request -> new BatchRequestResponse.BatchCreateRequest.InlinedRequest<Object>(request, Collections.emptyMap())).collect(Collectors.toList());
+    BatchResponse<RESPONSE> createBatch(String displayName, Long priority, List<REQUEST> requests, String modelName, GeminiService.BatchOperationType operationType) {
+        List<BatchRequestResponse.BatchCreateRequest.InlinedRequest<Object>> inlineRequests = requests.stream().map(this.preparer::prepareRequest).map(this.preparer::createInlinedRequest).map(request -> new BatchRequestResponse.BatchCreateRequest.InlinedRequest<Object>(request, Collections.emptyMap())).collect(Collectors.toList());
         BatchRequestResponse.BatchCreateRequest request2 = new BatchRequestResponse.BatchCreateRequest(new BatchRequestResponse.BatchCreateRequest.Batch(displayName, new BatchRequestResponse.BatchCreateRequest.InputConfig(new BatchRequestResponse.BatchCreateRequest.Requests(inlineRequests)), (Long)Utils.getOrDefault((Object)priority, (Object)0L)));
         return this.processResponse(this.geminiService.batchCreate(modelName, request2, operationType));
     }
@@ -74,11 +74,11 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
         this.geminiService.batchDeleteBatch(batchId);
     }
 
-    BatchPage<RESPONSE> listBatchJobs(@Nullable BatchPagination batchPagination) {
+    BatchPage<RESPONSE> listBatchJobs(BatchPagination batchPagination) {
         Integer pageSize = batchPagination != null ? batchPagination.pageSize() : null;
         String pageToken = batchPagination != null ? batchPagination.pageToken() : null;
         BatchRequestResponse.ListOperationsResponse response = this.geminiService.batchListBatches(pageSize, pageToken);
-        List operations = Utils.getOrDefault(response.operations(), Collections.emptyList());
+        List<BatchRequestResponse.Operation<API_RESPONSE>> operations = Utils.getOrDefault(response.operations(), Collections.emptyList());
         return new BatchPage(operations.stream().map(this::processResponse).collect(Collectors.toList()), response.nextPageToken());
     }
 
@@ -88,13 +88,24 @@ final class GeminiBatchProcessor<REQUEST, RESPONSE, API_REQUEST, API_RESPONSE> {
         if (operation.done()) {
             BatchRequestResponse.Operation.Status error = operation.error();
             if (error != null) {
-                return BatchResponse.builder().batchId(batchId).state(BatchState.FAILED).results(Collections.singletonList(BatchItemResult.failure((BatchError)error.toGenericStatus()))).build();
+                BatchResponse.Builder<RESPONSE> builder = BatchResponse.builder();
+                builder.batchId(batchId);
+                builder.state(BatchState.FAILED);
+                builder.results(Collections.singletonList(BatchItemResult.<RESPONSE>failure((BatchError) error.toGenericStatus())));
+                return builder.build();
             }
             List<BatchItemResult<RESPONSE>> results = this.preparer.extractResults(operation.response());
             BatchState finalState = state.isTerminal() ? state : BatchState.SUCCEEDED;
-            return BatchResponse.builder().batchId(batchId).state(finalState).results(results).build();
+            BatchResponse.Builder<RESPONSE> builder = BatchResponse.builder();
+            builder.batchId(batchId);
+            builder.state(finalState);
+            builder.results(results);
+            return builder.build();
         }
-        return BatchResponse.builder().batchId(batchId).state(state).build();
+        BatchResponse.Builder<RESPONSE> builder = BatchResponse.builder();
+        builder.batchId(batchId);
+        builder.state(state);
+        return builder.build();
     }
 
     private BatchState extractBatchState(@Nullable Map<String, Object> metadata) {

@@ -283,7 +283,7 @@ implements StreamingChatModel {
                 ResponsesEventHandler eventHandler = new ResponsesEventHandler(handler, responseIdRef, parameters.modelName(), streamingHandle);
                 streamingFuture = this.executorService.submit(() -> {
                     try (StreamResponse sr = streamResponse;){
-                        sr.stream().forEach(eventHandler::handleEvent);
+                        sr.stream().forEach(e -> eventHandler.handleEvent((ResponseStreamEvent) e));
                     }
                     catch (CancellationException e) {
                         InternalStreamingChatResponseHandlerUtils.withLoggingExceptions(() -> handler.onError((Throwable)e));
@@ -574,7 +574,7 @@ implements StreamingChatModel {
     }
 
     private static ResponseInputItem createUserMessage(UserMessage userMessage) {
-        List contents = userMessage.contents();
+        List<Content> contents = userMessage.contents();
         ArrayList<ResponseInputContent> contentList = new ArrayList<ResponseInputContent>();
         for (Content content : contents) {
             if (content instanceof TextContent) {
@@ -704,9 +704,9 @@ implements StreamingChatModel {
                 if (!(jsonSchema.rootElement() instanceof JsonObjectSchema) && !(jsonSchema.rootElement() instanceof JsonRawSchema)) {
                     throw new IllegalArgumentException("For OpenAI, the root element of the JSON Schema must be either a JsonObjectSchema or a JsonRawSchema, but it was: " + jsonSchema.rootElement().getClass());
                 }
-                Map schemaMap = JsonSchemaElementUtils.toMap((JsonSchemaElement)jsonSchema.rootElement(), (boolean)strict);
+                Map<String, Object> schemaMap = JsonSchemaElementUtils.toMap((JsonSchemaElement)jsonSchema.rootElement(), (boolean)strict);
                 ResponseFormatTextJsonSchemaConfig.Schema.Builder schemaBuilder = ResponseFormatTextJsonSchemaConfig.Schema.builder();
-                for (Map.Entry entry : schemaMap.entrySet()) {
+                for (Map.Entry<String, Object> entry : schemaMap.entrySet()) {
                     schemaBuilder.putAdditionalProperty((String)entry.getKey(), JsonValue.from(entry.getValue()));
                 }
                 ResponseFormatTextJsonSchemaConfig schemaConfig = ResponseFormatTextJsonSchemaConfig.builder().name(jsonSchema.name()).schema(schemaBuilder.build()).strict(strict).build();

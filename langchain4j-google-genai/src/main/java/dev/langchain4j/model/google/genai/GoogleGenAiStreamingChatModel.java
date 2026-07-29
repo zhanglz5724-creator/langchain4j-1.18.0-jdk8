@@ -138,7 +138,7 @@ implements StreamingChatModel {
         MappingTrackingStreamingChatResponseHandler trackingHandler = new MappingTrackingStreamingChatResponseHandler(handler);
         this.executor.execute(() -> {
             try {
-                ResponseStream stream = this.client.models.generateContentStream(modelName, contents, config);
+                ResponseStream<GenerateContentResponse> stream = this.client.models.generateContentStream(modelName, contents, config);
                 StringBuilder textBuilder = new StringBuilder();
                 ArrayList<ToolExecutionRequest> toolRequests = new ArrayList<ToolExecutionRequest>();
                 HashMap attributes = new HashMap();

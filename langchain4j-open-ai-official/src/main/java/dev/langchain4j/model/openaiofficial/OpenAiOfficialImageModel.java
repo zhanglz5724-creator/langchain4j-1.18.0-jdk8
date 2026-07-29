@@ -87,7 +87,7 @@ implements dev.langchain4j.model.image.ImageModel {
             throw new IllegalArgumentException("Image generation failed: no image returned");
         }
         String mimeType = response.outputFormat().map(of -> "image/" + of).orElse(null);
-        return Response.from(((List)response.data().get()).stream().map(img -> OpenAiOfficialImageModel.fromOpenAiImage(img, mimeType)).collect(Collectors.toList()));
+        return Response.<List<Image>>from(((List<com.openai.models.images.Image>)response.data().get()).stream().map(img -> OpenAiOfficialImageModel.fromOpenAiImage(img, mimeType)).collect(Collectors.toList()));
     }
 
     private ImageGenerateParams.Builder imageGenerateParamsBuilder(String prompt) {

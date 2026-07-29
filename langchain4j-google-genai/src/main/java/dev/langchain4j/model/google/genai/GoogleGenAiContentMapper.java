@@ -74,7 +74,6 @@ import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.google.genai.GoogleGenAiChatResponseMetadata;
-import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 import java.net.URI;
 import java.util.ArrayList;
@@ -117,7 +116,7 @@ class GoogleGenAiContentMapper {
                 catch (IllegalStateException e) {
                     throw new UnsupportedFeatureException("Google Gen AI currently does not support non-text content in tool execution results");
                 }
-                HashMap<String, String> responseMap = new HashMap<String, String>();
+                Map<String, Object> responseMap = new HashMap<>();
                 responseMap.put("result", toolResult);
                 FunctionResponse.Builder funcRespBuilder = FunctionResponse.builder().name(toolMsg.toolName()).response(responseMap);
                 if (toolMsg.id() != null) {
@@ -178,17 +177,22 @@ class GoogleGenAiContentMapper {
     }
 
     static ChatResponse toChatResponse(GenerateContentResponse response, String modelName) {
-        List candidates = response.candidates().orElse(Collections.emptyList());
+        List<Candidate> candidates = response.candidates().orElse(Collections.emptyList());
         if (candidates.isEmpty()) {
-            return ChatResponse.builder().aiMessage(AiMessage.from((String)"Empty response")).metadata((ChatResponseMetadata)((GoogleGenAiChatResponseMetadata.Builder)((GoogleGenAiChatResponseMetadata.Builder)((GoogleGenAiChatResponseMetadata.Builder)GoogleGenAiChatResponseMetadata.builder().modelName(modelName)).tokenUsage(new TokenUsage(Integer.valueOf(0), Integer.valueOf(0)))).finishReason(FinishReason.OTHER)).build()).build();
+            GoogleGenAiChatResponseMetadata emptyMetadata = GoogleGenAiChatResponseMetadata.builder()
+                    .modelName(modelName)
+                    .tokenUsage(new TokenUsage(0, 0))
+                    .finishReason(dev.langchain4j.model.output.FinishReason.OTHER)
+                    .build();
+            return ChatResponse.builder().aiMessage(AiMessage.from("Empty response")).metadata(emptyMetadata).build();
         }
         Candidate candidate = (Candidate)candidates.get(0);
         com.google.genai.types.Content content = candidate.content().orElse(null);
         StringBuilder textBuilder = new StringBuilder();
         ArrayList<ToolExecutionRequest> toolRequests = new ArrayList<ToolExecutionRequest>();
-        HashMap<String, String> attributes = new HashMap<String, String>();
+        Map<String, Object> attributes = new HashMap<>();
         if (content != null) {
-            List parts = content.parts().orElse(Collections.emptyList());
+            List<Part> parts = content.parts().orElse(Collections.emptyList());
             for (Part part : parts) {
                 String jsonArgs;
                 if (part.text().isPresent()) {
@@ -232,8 +236,13 @@ class GoogleGenAiContentMapper {
             int totalTokenCount = meta.totalTokenCount().isPresent() ? (Integer)meta.totalTokenCount().get() : promptTokenCount + candidatesTokenCount;
             return new TokenUsage(Integer.valueOf(promptTokenCount), Integer.valueOf(candidatesTokenCount), Integer.valueOf(totalTokenCount));
         }).orElse(new TokenUsage(Integer.valueOf(0), Integer.valueOf(0)));
-        FinishReason finishReason = candidate.finishReason().map(GoogleGenAiContentMapper::mapFinishReason).orElseGet(() -> !toolRequests.isEmpty() ? FinishReason.TOOL_EXECUTION : FinishReason.STOP);
-        GoogleGenAiChatResponseMetadata metadata = ((GoogleGenAiChatResponseMetadata.Builder)((GoogleGenAiChatResponseMetadata.Builder)((GoogleGenAiChatResponseMetadata.Builder)GoogleGenAiChatResponseMetadata.builder().modelName(modelName)).tokenUsage(usage)).finishReason(finishReason)).rawResponse(response).build();
+        dev.langchain4j.model.output.FinishReason finishReason = candidate.finishReason().map(GoogleGenAiContentMapper::mapFinishReason).orElseGet(() -> !toolRequests.isEmpty() ? dev.langchain4j.model.output.FinishReason.TOOL_EXECUTION : dev.langchain4j.model.output.FinishReason.STOP);
+        GoogleGenAiChatResponseMetadata metadata = GoogleGenAiChatResponseMetadata.builder()
+                .modelName(modelName)
+                .tokenUsage(usage)
+                .finishReason(finishReason)
+                .rawResponse(response)
+                .build();
         return ChatResponse.builder().aiMessage(aiMessage).metadata((ChatResponseMetadata)metadata).build();
     }
 
@@ -325,20 +334,20 @@ class GoogleGenAiContentMapper {
         return Part.fromUri((String)uri.toString(), (String)mimeType);
     }
 
-    static FinishReason mapFinishReason(com.google.genai.types.FinishReason finishReason) {
+    static dev.langchain4j.model.output.FinishReason mapFinishReason(FinishReason finishReason) {
         if (finishReason == null) {
-            return FinishReason.OTHER;
+            return dev.langchain4j.model.output.FinishReason.OTHER;
         }
         FinishReason.Known known = finishReason.knownEnum();
         if (known == null) {
-            return FinishReason.OTHER;
+            return dev.langchain4j.model.output.FinishReason.OTHER;
         }
         switch (known) {
             case STOP: {
-                return FinishReason.STOP;
+                return dev.langchain4j.model.output.FinishReason.STOP;
             }
             case MAX_TOKENS: {
-                return FinishReason.LENGTH;
+                return dev.langchain4j.model.output.FinishReason.LENGTH;
             }
             case SAFETY: 
             case RECITATION: 
@@ -348,10 +357,10 @@ class GoogleGenAiContentMapper {
             case IMAGE_SAFETY: 
             case IMAGE_PROHIBITED_CONTENT: 
             case IMAGE_RECITATION: {
-                return FinishReason.CONTENT_FILTER;
+                return dev.langchain4j.model.output.FinishReason.CONTENT_FILTER;
             }
         }
-        return FinishReason.OTHER;
+        return dev.langchain4j.model.output.FinishReason.OTHER;
     }
 
     private GoogleGenAiContentMapper() {

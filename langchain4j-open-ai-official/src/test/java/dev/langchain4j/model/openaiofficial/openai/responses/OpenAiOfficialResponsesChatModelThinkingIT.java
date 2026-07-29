@@ -20,6 +20,7 @@ import dev.langchain4j.model.openaiofficial.OpenAiOfficialSpyingHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.openai.client.okhttp.OkHttpClient.*;
@@ -108,7 +109,7 @@ class OpenAiOfficialResponsesChatModelThinkingIT {
     void should_return_encrypted_reasoning_and_send_it_back__single_tool_call() {
 
         // given
-        List<String> include = List.of("reasoning.encrypted_content");
+        List<String> include = Collections.singletonList("reasoning.encrypted_content");
 
         OpenAiOfficialSpyingHttpClient spyingHttpClient = new OpenAiOfficialSpyingHttpClient(builder().build());
 
@@ -168,7 +169,7 @@ class OpenAiOfficialResponsesChatModelThinkingIT {
     void should_return_encrypted_reasoning_and_send_it_back__two_parallel_tool_calls() {
 
         // given
-        List<String> include = List.of("reasoning.encrypted_content");
+        List<String> include = Collections.singletonList("reasoning.encrypted_content");
 
         OpenAiOfficialSpyingHttpClient spyingHttpClient = new OpenAiOfficialSpyingHttpClient(builder().build());
 

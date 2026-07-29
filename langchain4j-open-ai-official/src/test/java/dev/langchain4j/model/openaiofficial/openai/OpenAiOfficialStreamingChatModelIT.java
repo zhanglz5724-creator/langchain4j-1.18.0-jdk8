@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -161,7 +162,7 @@ class OpenAiOfficialStreamingChatModelIT extends AbstractStreamingChatModelIT {
 
         // when
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage), handler);
+        model.chat(Collections.singletonList(userMessage), handler);
 
         // then
         assertThat(handler.get().aiMessage().text())

@@ -132,21 +132,21 @@ implements BatchEmbeddingModel {
         }
 
         @Override
-        public List<BatchItemResult<Response<@NonNull Embedding>>> extractResults(@Nullable BatchRequestResponse.BatchCreateResponse<GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse> response) {
+        public List<BatchItemResult<Response<Embedding>>> extractResults(BatchRequestResponse.BatchCreateResponse<GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse> response) {
             if (response == null || response.inlinedResponses() == null) {
                 return Collections.emptyList();
             }
-            ArrayList<BatchItemResult<Response<@NonNull Embedding>>> results = new ArrayList<BatchItemResult<Response<Embedding>>>();
+            ArrayList<BatchItemResult<Response<Embedding>>> results = new ArrayList<BatchItemResult<Response<Embedding>>>();
             for (BatchRequestResponse.BatchCreateResponse.InlinedResponseWrapper<GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse> wrapper : response.inlinedResponses().inlinedResponses()) {
                 BatchRequestResponse.Operation.Status error;
                 BatchRequestResponse.BatchCreateResponse.InlinedResponseWrapper<GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse> typed = Json.convertValue(wrapper, this.responseWrapperType);
                 GeminiEmbeddingRequestResponse.GeminiEmbeddingResponse typedResponse = typed.response();
                 if (typedResponse != null) {
                     Embedding embedding = Embedding.from(typedResponse.embedding().values());
-                    results.add((BatchItemResult<Response<Embedding>>)BatchItemResult.success((Object)Response.from(embedding)));
+                    results.add(BatchItemResult.success(Response.from(embedding)));
                 }
                 if ((error = typed.error()) == null) continue;
-                results.add((BatchItemResult<Response<Embedding>>)BatchItemResult.failure((BatchError)error.toGenericStatus()));
+                results.add(BatchItemResult.<Response<Embedding>>failure((BatchError) error.toGenericStatus()));
             }
             return results;
         }

@@ -29,14 +29,17 @@ import dev.langchain4j.model.openaiofficial.OpenAiOfficialResponsesChatResponseM
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialResponsesStreamingChatModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialTokenUsage;
 import dev.langchain4j.model.output.TokenUsage;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.mockito.InOrder;
 
-import java.util.List;
+import dev.langchain4j.model.chat.response.ChatResponse;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +62,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 .modelName(GPT_5_4_MINI)
                 .build();
 
-        return List.of(model);
+        return Collections.singletonList(model);
     }
 
     @Override
@@ -121,7 +124,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 toolCall.index() == 0
                         && toolCall.id().equals(id)
                         && toolCall.name().equals("getWeather")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -129,7 +132,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                     return toolCall.index() == 0
                             && request.id().equals(id)
                             && request.name().equals("getWeather")
-                            && request.arguments().replace(" ", "").equals("{\"city\":\"Munich\"}");
+                            && request.arguments().replaceAll(" ", "").equals("{\"city\":\"Munich\"}");
                 }
         ));
     }
@@ -140,7 +143,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 toolCall.index() == 0
                         && toolCall.id().equals(id1)
                         && toolCall.name().equals("getWeather")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -148,7 +151,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                     return toolCall.index() == 0
                             && request.id().equals(id1)
                             && request.name().equals("getWeather")
-                            && request.arguments().replace(" ", "").equals("{\"city\":\"Munich\"}");
+                            && request.arguments().replaceAll(" ", "").equals("{\"city\":\"Munich\"}");
                 }
         ));
 
@@ -156,7 +159,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 toolCall.index() == 1
                         && toolCall.id().equals(id2)
                         && toolCall.name().equals("getTime")
-                        && !toolCall.partialArguments().isBlank()
+                        && !toolCall.partialArguments().trim().isEmpty()
         ), any());
         io.verify(handler).onCompleteToolCall(argThat(toolCall ->
                 {
@@ -164,7 +167,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                     return toolCall.index() == 1
                             && request.id().equals(id2)
                             && request.name().equals("getTime")
-                            && request.arguments().replace(" ", "").equals("{\"country\":\"France\"}");
+                            && request.arguments().replaceAll(" ", "").equals("{\"country\":\"France\"}");
                 }
         ));
     }
@@ -183,7 +186,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 .serverTools(Tool.ofWebSearch(WebSearchTool.builder()
                         .type(WebSearchTool.Type.of("web_search"))
                         .filters(WebSearchTool.Filters.builder()
-                                .allowedDomains(List.of("developers.openai.com"))
+                                .allowedDomains(Collections.singletonList("developers.openai.com"))
                                 .build())
                         .build()))
                 .defaultRequestParameters(OpenAiOfficialResponsesChatRequestParameters.builder()
@@ -196,7 +199,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 "Use web search on the OpenAI developer docs and answer with one short sentence about the web search tool.",
                 handler);
 
-        var response = handler.get();
+        ChatResponse response = handler.get();
         assertThat(response.aiMessage().text()).isNotBlank();
         OpenAiOfficialResponsesChatResponseMetadata metadata =
                 (OpenAiOfficialResponsesChatResponseMetadata) response.metadata();
@@ -221,21 +224,13 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                         .type(JsonValue.from("function"))
                         .name("get_customer_profile")
                         .description("Fetch a customer profile by customer ID.")
-                        .parameters(JsonValue.from(Map.of(
-                                "type", "object",
-                                "properties", Map.of("customer_id", Map.of("type", "string")),
-                                "required", List.of("customer_id"),
-                                "additionalProperties", false)))
+                        .parameters(JsonValue.from(toolParameters("customer_id")))
                         .build()))
                 .addTool(NamespaceTool.Tool.ofFunction(NamespaceTool.Tool.Function.builder()
                         .type(JsonValue.from("function"))
                         .name("list_open_orders")
                         .description("List open orders for a customer ID.")
-                        .parameters(JsonValue.from(Map.of(
-                                "type", "object",
-                                "properties", Map.of("customer_id", Map.of("type", "string")),
-                                "required", List.of("customer_id"),
-                                "additionalProperties", false)))
+                        .parameters(JsonValue.from(toolParameters("customer_id")))
                         .putAdditionalProperty("defer_loading", JsonValue.from(true))
                         .build()))
                 .build());
@@ -253,7 +248,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
         model.chat("List open orders for customer CUST-12345. Use tool search to discover available tools", handler);
 
-        var response = handler.get();
+        ChatResponse response = handler.get();
         OpenAiOfficialResponsesChatResponseMetadata metadata =
                 (OpenAiOfficialResponsesChatResponseMetadata) response.metadata();
         Response rawResponse = metadata.rawResponse();
@@ -265,7 +260,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 .map(OpenAiOfficialResponsesStreamingChatModelIT::rawItem)
                 .filter(item -> "tool_search_output".equals(item.get("type")))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new AssertionError("Expected value not present"));
 
         assertThat(toolSearchOutput).containsEntry("type", "tool_search_output");
         assertThat(toolSearchOutput.get("tools")).isInstanceOf(List.class);
@@ -275,7 +270,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                     assertThat(item).isInstanceOf(Map.class);
                     return (Map<String, Object>) item;
                 })
-                .toList();
+                .collect(Collectors.toList());
         assertThat(dynamicallyLoadedTools)
                 .extracting(tool -> String.valueOf(tool.get("name")))
                 .contains("crm");
@@ -283,7 +278,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
         ToolExecutionRequest listOpenOrdersRequest = response.aiMessage().toolExecutionRequests().stream()
                 .filter(request -> "list_open_orders".equals(request.name()))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new AssertionError("Expected value not present"));
         Map<String, Object> arguments;
         try {
             arguments = ObjectMappers.jsonMapper().readValue(listOpenOrdersRequest.arguments(), LinkedHashMap.class);
@@ -291,6 +286,17 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
             throw new RuntimeException(e);
         }
         assertThat(arguments).containsEntry("customer_id", "CUST-12345");
+    }
+
+    private static Map<String, Object> toolParameters(String paramName) {
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("type", "object");
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put(paramName, Collections.singletonMap("type", "string"));
+        params.put("properties", props);
+        params.put("required", Collections.singletonList(paramName));
+        params.put("additionalProperties", false);
+        return params;
     }
 
     private static String itemType(ResponseOutputItem item) {
@@ -333,7 +339,7 @@ class OpenAiOfficialResponsesStreamingChatModelIT extends AbstractStreamingChatM
                 .build();
 
         TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
-        model.chat(List.of(userMessage), handler);
+        model.chat(Collections.singletonList(userMessage), handler);
 
         assertThat(handler.get().aiMessage().text()).containsIgnoringCase("Whitehorse");
     }

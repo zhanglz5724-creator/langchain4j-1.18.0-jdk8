@@ -17,9 +17,12 @@ import dev.langchain4j.model.openaiofficial.OpenAiOfficialResponsesChatModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialResponsesChatResponseMetadata;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialTokenUsage;
 import dev.langchain4j.model.output.TokenUsage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -39,7 +42,7 @@ class OpenAiOfficialResponsesChatModelIT extends AbstractChatModelIT {
                 .modelName(GPT_5_4_MINI)
                 .build();
 
-        return List.of(model);
+        return Collections.singletonList(model);
     }
 
     @Override
@@ -133,7 +136,7 @@ class OpenAiOfficialResponsesChatModelIT extends AbstractChatModelIT {
         byte[] pdfBytes;
         try (InputStream inputStream =
                 URI.create("https://orimi.com/pdf-test.pdf").toURL().openStream()) {
-            pdfBytes = inputStream.readAllBytes();
+            pdfBytes = readAllBytes(inputStream);
         }
         String base64Data = Base64.getEncoder().encodeToString(pdfBytes);
 
@@ -146,5 +149,15 @@ class OpenAiOfficialResponsesChatModelIT extends AbstractChatModelIT {
         ChatResponse response = model.chat(userMessage);
 
         assertThat(response.aiMessage().text()).containsIgnoringCase("Whitehorse");
+    }
+
+    private static byte[] readAllBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[4096];
+        int nRead;
+        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+        return buffer.toByteArray();
     }
 }

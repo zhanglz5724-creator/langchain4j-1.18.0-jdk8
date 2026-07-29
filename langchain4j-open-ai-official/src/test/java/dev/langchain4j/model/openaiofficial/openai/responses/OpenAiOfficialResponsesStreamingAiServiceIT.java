@@ -9,6 +9,7 @@ import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.common.AbstractStreamingAiServiceIT;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Collections;
 import java.util.List;
 
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
@@ -22,7 +23,7 @@ class OpenAiOfficialResponsesStreamingAiServiceIT extends AbstractStreamingAiSer
                 .modelName("gpt-5.4-mini")
                 .build();
 
-        return List.of(model);
+        return Collections.singletonList(model);
     }
 
     @Override

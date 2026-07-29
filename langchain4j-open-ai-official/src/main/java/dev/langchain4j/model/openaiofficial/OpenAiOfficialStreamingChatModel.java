@@ -151,7 +151,7 @@ implements StreamingChatModel {
                 InternalStreamingChatResponseHandlerUtils.onPartialResponse((StreamingChatResponseHandler)handler, (String)partialResponse, (StreamingHandle)streamingHandle);
             }
             if (choice.delta().toolCalls().isPresent()) {
-                for (ChatCompletionChunk.Choice.Delta.ToolCall toolCall : (List)choice.delta().toolCalls().get()) {
+                for (ChatCompletionChunk.Choice.Delta.ToolCall toolCall : (List<ChatCompletionChunk.Choice.Delta.ToolCall>)choice.delta().toolCalls().get()) {
                     if (!toolCall.function().isPresent()) continue;
                     ChatCompletionChunk.Choice.Delta.ToolCall.Function function = (ChatCompletionChunk.Choice.Delta.ToolCall.Function)toolCall.function().get();
                     int index = (int)toolCall.index();

@@ -112,7 +112,7 @@ implements ImageModel {
         if (response.candidates().get(0).finishReason() != null) {
             finishReason = FinishReasonMapper.fromGFinishReasonToFinishReason(response.candidates().get(0).finishReason());
         }
-        HashMap<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
+        Map<String, Object> metadata = new HashMap<>();
         GroundingMetadata groundingMetadata = response.groundingMetadata();
         if (groundingMetadata == null && !response.candidates().isEmpty()) {
             groundingMetadata = response.candidates().get(0).groundingMetadata();

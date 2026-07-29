@@ -188,7 +188,7 @@ implements ImageModel {
         if (response.parts() == null || response.parts().isEmpty()) {
             throw new RuntimeException("No image generated in response");
         }
-        HashMap<String, Map> metadata = new HashMap<String, Map>();
+        Map<String, Object> metadata = new HashMap<>();
         if (response.candidates().isPresent() && !((List)response.candidates().get()).isEmpty() && (candidate = (Candidate)((List)response.candidates().get()).get(0)).groundingMetadata().isPresent()) {
             GroundingMetadata gm = (GroundingMetadata)candidate.groundingMetadata().get();
             try {

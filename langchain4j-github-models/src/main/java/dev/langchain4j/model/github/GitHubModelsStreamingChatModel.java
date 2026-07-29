@@ -215,19 +215,19 @@ implements StreamingChatModel {
     }
 
     private void asyncCall(StreamingResponseHandler<AiMessage> handler, ChatCompletionsOptions options, GitHubModelsStreamingResponseBuilder responseBuilder, ChatModelRequestContext requestContext) {
-        Flux chatCompletionsStream = this.client.completeStream(options);
-        AtomicReference responseId = new AtomicReference();
-        AtomicReference responseModel = new AtomicReference();
+        Flux<StreamingChatCompletionsUpdate> chatCompletionsStream = this.client.completeStream(options);
+        AtomicReference<String> responseId = new AtomicReference<String>();
+        AtomicReference<String> responseModel = new AtomicReference<String>();
         chatCompletionsStream.subscribe(chatCompletion -> {
             responseBuilder.append((StreamingChatCompletionsUpdate)chatCompletion);
             GitHubModelsStreamingChatModel.handle(chatCompletion, handler);
-            if (Utils.isNotNullOrBlank((String)chatCompletion.getId())) {
+            if (Utils.isNotNullOrBlank(chatCompletion.getId())) {
                 responseId.set(chatCompletion.getId());
             }
-            if (!Utils.isNullOrBlank((String)chatCompletion.getModel())) {
+            if (!Utils.isNullOrBlank(chatCompletion.getModel())) {
                 responseModel.set(chatCompletion.getModel());
             }
-        }, throwable -> {
+        }, (Throwable throwable) -> {
             ChatModelErrorContext errorContext = new ChatModelErrorContext(throwable, requestContext.chatRequest(), this.provider(), requestContext.attributes());
             this.listeners.forEach(listener -> {
                 try {

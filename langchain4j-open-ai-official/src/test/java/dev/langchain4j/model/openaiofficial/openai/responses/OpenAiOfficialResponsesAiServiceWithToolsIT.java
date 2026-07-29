@@ -8,6 +8,7 @@ import dev.langchain4j.model.openaiofficial.OpenAiOfficialResponsesStreamingChat
 import dev.langchain4j.service.common.AbstractAiServiceWithToolsIT;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.Arrays;
 import java.util.List;
 
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
@@ -15,7 +16,7 @@ class OpenAiOfficialResponsesAiServiceWithToolsIT extends AbstractAiServiceWithT
 
     @Override
     protected List<ChatModel> models() {
-        return List.of(
+        return Arrays.asList(
                 syncModel(true),
                 syncModel(false),
                 streamingModel(true),

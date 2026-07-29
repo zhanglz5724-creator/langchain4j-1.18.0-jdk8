@@ -86,7 +86,7 @@ extends DimensionAwareEmbeddingModel {
             Response<List<Embedding>> response2 = this.embedTexts(batch);
             responses.add(response2);
         }
-        return Response.from(responses.stream().flatMap(response -> ((List)response.content()).stream()).collect(Collectors.toList()), (TokenUsage)responses.stream().map(Response::tokenUsage).filter(Objects::nonNull).reduce(TokenUsage::add).orElse(null));
+        return Response.from(responses.stream().flatMap(response -> response.content().stream()).collect(Collectors.toList()), responses.stream().map(Response::tokenUsage).filter(Objects::nonNull).reduce(TokenUsage::add).orElse(null));
     }
 
     private Response<List<Embedding>> embedTexts(List<String> texts) {
@@ -101,7 +101,7 @@ extends DimensionAwareEmbeddingModel {
             embeddingCreateParamsBuilder.dimensions((long)this.dimensions.intValue());
         }
         CreateEmbeddingResponse createEmbeddingResponse = this.client.embeddings().create(embeddingCreateParamsBuilder.build());
-        List embeddings = createEmbeddingResponse.data().stream().map(embeddingItem -> Embedding.from((List)embeddingItem.embedding())).collect(Collectors.toList());
+        List<Embedding> embeddings = createEmbeddingResponse.data().stream().map(embeddingItem -> Embedding.from(embeddingItem.embedding())).collect(Collectors.toList());
         return Response.from(embeddings, (TokenUsage)InternalOpenAiOfficialHelper.tokenUsageFrom(createEmbeddingResponse.usage()));
     }
 

@@ -189,21 +189,21 @@ implements BatchChatModel {
         BatchState translatedState = GoogleGenAiBatchUtils.toBatchState(state);
         BatchResponse.Builder builder = BatchResponse.builder().batchId(jobName).state(translatedState);
         if (state == JobState.Known.JOB_STATE_SUCCEEDED) {
-            ArrayList<BatchItemResult> results = new ArrayList<BatchItemResult>();
+            ArrayList<BatchItemResult<ChatResponse>> results = new ArrayList<>();
             if (batchJob.dest().isPresent() && ((BatchJobDestination)batchJob.dest().get()).inlinedResponses().isPresent()) {
-                List inlinedResponses = (List)((BatchJobDestination)batchJob.dest().get()).inlinedResponses().get();
+                List<InlinedResponse> inlinedResponses = ((BatchJobDestination)batchJob.dest().get()).inlinedResponses().get();
                 for (InlinedResponse inlined : inlinedResponses) {
                     if (inlined.response().isPresent()) {
-                        results.add(BatchItemResult.success((Object)GoogleGenAiContentMapper.toChatResponse((GenerateContentResponse)inlined.response().get(), batchJob.model().orElse(this.modelName))));
+                        results.add(BatchItemResult.success(GoogleGenAiContentMapper.toChatResponse((GenerateContentResponse) inlined.response().get(), batchJob.model().orElse(this.modelName))));
                         continue;
                     }
                     if (!inlined.error().isPresent()) continue;
-                    results.add(BatchItemResult.failure((BatchError)GoogleGenAiBatchUtils.toBatchError((JobError)inlined.error().get())));
+                    results.add(BatchItemResult.<ChatResponse>failure(GoogleGenAiBatchUtils.toBatchError(inlined.error().get())));
                 }
             }
             builder.results(results);
         } else if (state == JobState.Known.JOB_STATE_FAILED) {
-            builder.results(Collections.singletonList(BatchItemResult.failure((BatchError)GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
+            builder.results(Collections.singletonList(BatchItemResult.<ChatResponse>failure(GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
         }
         return builder.build();
     }

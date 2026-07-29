@@ -169,28 +169,28 @@ implements BatchEmbeddingModel {
         BatchState translatedState = GoogleGenAiBatchUtils.toBatchState(state);
         BatchResponse.Builder builder = BatchResponse.builder().batchId(jobName).state(translatedState);
         if (state == JobState.Known.JOB_STATE_SUCCEEDED) {
-            ArrayList<BatchItemResult> results = new ArrayList<BatchItemResult>();
+            ArrayList<BatchItemResult<Response<Embedding>>> results = new ArrayList<>();
             if (batchJob.dest().isPresent() && ((BatchJobDestination)batchJob.dest().get()).inlinedEmbedContentResponses().isPresent()) {
-                List inlinedResponses = (List)((BatchJobDestination)batchJob.dest().get()).inlinedEmbedContentResponses().get();
+                List<InlinedEmbedContentResponse> inlinedResponses = ((BatchJobDestination)batchJob.dest().get()).inlinedEmbedContentResponses().get();
                 for (InlinedEmbedContentResponse inlined : inlinedResponses) {
                     if (inlined.response().isPresent()) {
-                        Optional embeddingOpt = ((SingleEmbedContentResponse)inlined.response().get()).embedding();
-                        if (!embeddingOpt.isPresent() || !((ContentEmbedding)embeddingOpt.get()).values().isPresent()) continue;
-                        List values = (List)((ContentEmbedding)embeddingOpt.get()).values().get();
+                        Optional<ContentEmbedding> embeddingOpt = ((SingleEmbedContentResponse)inlined.response().get()).embedding();
+                        if (!embeddingOpt.isPresent() || !embeddingOpt.get().values().isPresent()) continue;
+                        List<Float> values = (List<Float>) embeddingOpt.get().values().get();
                         float[] floatArray = new float[values.size()];
                         for (int i = 0; i < values.size(); ++i) {
-                            floatArray[i] = ((Float)values.get(i)).floatValue();
+                            floatArray[i] = values.get(i).floatValue();
                         }
-                        results.add(BatchItemResult.success((Object)Response.from(Embedding.from((float[])floatArray))));
+                        results.add(BatchItemResult.success(Response.from(Embedding.from(floatArray))));
                         continue;
                     }
                     if (!inlined.error().isPresent()) continue;
-                    results.add(BatchItemResult.failure((BatchError)GoogleGenAiBatchUtils.toBatchError((JobError)inlined.error().get())));
+                    results.add(BatchItemResult.<Response<Embedding>>failure(GoogleGenAiBatchUtils.toBatchError(inlined.error().get())));
                 }
             }
             builder.results(results);
         } else if (state == JobState.Known.JOB_STATE_FAILED) {
-            builder.results(Collections.singletonList(BatchItemResult.failure((BatchError)GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
+            builder.results(Collections.singletonList(BatchItemResult.<Response<Embedding>>failure(GoogleGenAiBatchUtils.toBatchError(batchJob.error().orElse(null)))));
         }
         return builder.build();
     }

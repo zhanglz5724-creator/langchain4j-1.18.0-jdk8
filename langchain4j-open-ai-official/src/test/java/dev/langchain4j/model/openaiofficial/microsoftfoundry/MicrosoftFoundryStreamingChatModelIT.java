@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +29,7 @@ class MicrosoftFoundryStreamingChatModelIT extends AbstractStreamingChatModelIT 
 
     @Override
     protected List<StreamingChatModel> models() {
-        return List.of(
+        return Collections.singletonList(
                 OpenAiOfficialStreamingChatModel.builder()
                         .baseUrl(System.getenv("MICROSOFT_FOUNDRY_ENDPOINT"))
                         .apiKey(System.getenv("MICROSOFT_FOUNDRY_API_KEY"))
@@ -66,7 +67,7 @@ class MicrosoftFoundryStreamingChatModelIT extends AbstractStreamingChatModelIT 
                 .baseUrl(System.getenv("MICROSOFT_FOUNDRY_ENDPOINT"))
                 .apiKey(System.getenv("MICROSOFT_FOUNDRY_API_KEY"))
                 .modelName("gpt-4o-mini")
-                .listeners(List.of(listener))
+                .listeners(Collections.singletonList(listener))
                 .build();
     }
 

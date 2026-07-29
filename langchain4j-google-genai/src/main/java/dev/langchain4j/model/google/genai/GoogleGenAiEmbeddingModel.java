@@ -150,7 +150,7 @@ extends DimensionAwareEmbeddingModel {
         }
         EmbedContentConfig config = configBuilder.build();
         boolean multimodal = request.inputs().stream().flatMap(input -> input.contentTypes().stream()).anyMatch(type -> type != ContentType.TEXT);
-        ArrayList<Object> responses = new ArrayList<Object>();
+        ArrayList<EmbedContentResponse> responses = new ArrayList<>();
         if (multimodal) {
             for (EmbeddingInput input2 : request.inputs()) {
                 com.google.genai.types.Content content = this.toContent(input2, inputType);
@@ -168,9 +168,10 @@ extends DimensionAwareEmbeddingModel {
         boolean tokenCountReported = false;
         for (EmbedContentResponse embedContentResponse : responses) {
             if (!embedContentResponse.embeddings().isPresent()) continue;
-            for (ContentEmbedding embedding : (List)embedContentResponse.embeddings().get()) {
+            List<ContentEmbedding> embeddingList = embedContentResponse.embeddings().get();
+            for (ContentEmbedding embedding : embeddingList) {
                 if (embedding.values().isPresent()) {
-                    embeddings.add(Embedding.from((List)((List)embedding.values().get())));
+                    embeddings.add(Embedding.from(embedding.values().get()));
                 }
                 if (!embedding.statistics().isPresent() || !((ContentEmbeddingStatistics)embedding.statistics().get()).tokenCount().isPresent()) continue;
                 tokenCount += Math.round(((Float)((ContentEmbeddingStatistics)embedding.statistics().get()).tokenCount().get()).floatValue());
@@ -243,7 +244,7 @@ extends DimensionAwareEmbeddingModel {
     }
 
     public Response<Embedding> embed(TextSegment textSegment) {
-        return Response.from(((List)this.embedAll(Collections.singletonList(textSegment)).content()).get(0));
+        return Response.from(this.embedAll(Collections.singletonList(textSegment)).content().get(0));
     }
 
     public Response<Embedding> embed(String text) {
@@ -264,25 +265,24 @@ extends DimensionAwareEmbeddingModel {
         if (this.logRequests) {
             log.info("Request:\n- model: {}\n- texts: {}", (Object)this.modelName, textSegments.stream().map(TextSegment::text).collect(Collectors.toList()));
         }
-        LinkedHashMap<String, List> grouped = new LinkedHashMap<String, List>();
+        LinkedHashMap<String, List<IndexedSegment>> grouped = new LinkedHashMap<>();
         for (int i = 0; i < textSegments.size(); ++i) {
-            void var5_6;
+            String title = null;
             TextSegment segment = textSegments.get(i);
-            Object var5_7 = null;
-            if (TaskTypeEnum.RETRIEVAL_DOCUMENT.equals((Object)this.taskType) && segment.metadata() != null) {
-                String string = segment.metadata().getString(this.titleMetadataKey);
+            if (TaskTypeEnum.RETRIEVAL_DOCUMENT.equals(this.taskType) && segment.metadata() != null) {
+                title = segment.metadata().getString(this.titleMetadataKey);
             }
-            grouped.computeIfAbsent((String)var5_6, k -> new ArrayList()).add(new IndexedSegment(i, segment));
+            grouped.computeIfAbsent(title, k -> new ArrayList()).add(new IndexedSegment(i, segment));
         }
         Embedding[] embeddingsArray = new Embedding[textSegments.size()];
-        for (Map.Entry entry : grouped.entrySet()) {
-            String title = (String)entry.getKey();
-            List indexedSegments = (List)entry.getValue();
+        for (Map.Entry<String, List<IndexedSegment>> entry : grouped.entrySet()) {
+            String title = entry.getKey();
+            List<IndexedSegment> indexedSegments = entry.getValue();
             int size = indexedSegments.size();
             for (int i = 0; i < size; i += this.maxSegmentsPerBatch.intValue()) {
                 EmbedContentResponse response;
-                List batch = indexedSegments.subList(i, Math.min(i + this.maxSegmentsPerBatch, size));
-                List texts = batch.stream().map(is -> is.segment.text()).collect(Collectors.toList());
+                List<IndexedSegment> batch = indexedSegments.subList(i, Math.min(i + this.maxSegmentsPerBatch, size));
+                List<String> texts = batch.stream().map(is -> is.segment.text()).collect(Collectors.toList());
                 EmbedContentConfig.Builder configBuilder = EmbedContentConfig.builder();
                 if (this.taskType != null) {
                     configBuilder.taskType(this.taskType.getSdkTaskType());
@@ -294,7 +294,7 @@ extends DimensionAwareEmbeddingModel {
                     configBuilder.title(title);
                 }
                 if (!(response = (EmbedContentResponse)RetryUtils.withRetryMappingExceptions(() -> this.client.models.embedContent(this.modelName, texts, configBuilder.build()), (int)this.maxRetries, (ExceptionMapper)GoogleGenAiExceptionMapper.INSTANCE)).embeddings().isPresent()) continue;
-                List embeddings = (List)response.embeddings().get();
+                List<ContentEmbedding> embeddings = response.embeddings().get();
                 for (int j = 0; j < batch.size(); ++j) {
                     if (j >= embeddings.size() || !((ContentEmbedding)embeddings.get(j)).values().isPresent()) continue;
                     embeddingsArray[((IndexedSegment)batch.get((int)j)).index] = Embedding.from((List)((List)((ContentEmbedding)embeddings.get(j)).values().get()));

@@ -68,8 +68,8 @@ class SchemaMapper {
             schemaBuilder.description(jsonObjectSchema.description());
             schemaBuilder.type(GeminiType.OBJECT);
             if (jsonObjectSchema.properties() != null) {
-                Map properties = jsonObjectSchema.properties();
-                Map<String, GeminiSchema> mappedProperties = properties.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> SchemaMapper.fromJsonSchemaToGSchema((JsonSchemaElement)entry.getValue())));
+                Map<String, JsonSchemaElement> properties = jsonObjectSchema.properties();
+                Map<String, GeminiSchema> mappedProperties = properties.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> SchemaMapper.fromJsonSchemaToGSchema(entry.getValue())));
                 schemaBuilder.properties(mappedProperties);
             }
             if (jsonObjectSchema.required() != null) {

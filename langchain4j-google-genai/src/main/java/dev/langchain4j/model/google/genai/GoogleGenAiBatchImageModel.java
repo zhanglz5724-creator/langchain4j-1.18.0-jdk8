@@ -194,32 +194,32 @@ implements BatchImageModel {
         BatchState translatedState = GoogleGenAiBatchUtils.toBatchState(state);
         BatchResponse.Builder builder = BatchResponse.builder().batchId(jobName).state(translatedState);
         if (state == JobState.Known.JOB_STATE_SUCCEEDED) {
-            ArrayList<BatchItemResult> results = new ArrayList<BatchItemResult>();
+            ArrayList<BatchItemResult<Response<Image>>> results = new ArrayList<>();
             if (batchJob.dest().isPresent() && ((BatchJobDestination)batchJob.dest().get()).inlinedResponses().isPresent()) {
-                List inlinedResponses = (List)((BatchJobDestination)batchJob.dest().get()).inlinedResponses().get();
+                List<InlinedResponse> inlinedResponses = ((BatchJobDestination)batchJob.dest().get()).inlinedResponses().get();
                 for (InlinedResponse inlined : inlinedResponses) {
                     if (inlined.response().isPresent()) {
-                        GenerateContentResponse response = (GenerateContentResponse)inlined.response().get();
+                        GenerateContentResponse response = (GenerateContentResponse) inlined.response().get();
                         boolean imageAdded = false;
                         if (response.parts() != null && !response.parts().isEmpty()) {
                             for (Part part : response.parts()) {
                                 Blob blob;
-                                if (!part.inlineData().isPresent() || !(blob = (Blob)part.inlineData().get()).data().isPresent()) continue;
-                                byte[] bytes = (byte[])blob.data().get();
+                                if (!part.inlineData().isPresent() || !(blob = (Blob) part.inlineData().get()).data().isPresent()) continue;
+                                byte[] bytes = (byte[]) blob.data().get();
                                 String base64Data = Base64.getEncoder().encodeToString(bytes);
                                 String mimeType = blob.mimeType().orElse("image/png");
                                 Image image = Image.builder().base64Data(base64Data).mimeType(mimeType).build();
-                                results.add(BatchItemResult.success((Object)Response.from(image)));
+                                results.add(BatchItemResult.success(Response.from(image)));
                                 imageAdded = true;
                                 break;
                             }
                         }
                         if (imageAdded) continue;
-                        results.add(BatchItemResult.failure((BatchError)new BatchError(0, "No image data found in response", new ArrayList())));
+                        results.add(BatchItemResult.<Response<Image>>failure(new BatchError(0, "No image data found in response", new ArrayList<>())));
                         continue;
                     }
                     if (!inlined.error().isPresent()) continue;
-                    results.add(BatchItemResult.failure((BatchError)GoogleGenAiBatchUtils.toBatchError((JobError)inlined.error().get())));
+                    results.add(BatchItemResult.<Response<Image>>failure(GoogleGenAiBatchUtils.toBatchError(inlined.error().get())));
                 }
             }
             builder.results(results);

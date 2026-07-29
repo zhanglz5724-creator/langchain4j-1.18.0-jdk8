@@ -289,19 +289,19 @@ class InternalOpenAiOfficialHelper {
 
     static AiMessage aiMessageFrom(ChatCompletion chatCompletion) {
         ChatCompletionMessage assistantMessage = ((ChatCompletion.Choice)chatCompletion.choices().get(0)).message();
-        Optional text = assistantMessage.content();
-        Optional toolCalls = assistantMessage.toolCalls();
+        Optional<String> text = assistantMessage.content();
+        Optional<List<ChatCompletionMessageToolCall>> toolCalls = assistantMessage.toolCalls();
         if (toolCalls.isPresent()) {
-            List toolExecutionRequests = ((List)toolCalls.get()).stream().map(InternalOpenAiOfficialHelper::toToolExecutionRequest).filter(Objects::nonNull).collect(Collectors.toList());
+            List<ToolExecutionRequest> toolExecutionRequests = toolCalls.get().stream().map(InternalOpenAiOfficialHelper::toToolExecutionRequest).filter(Objects::nonNull).collect(Collectors.toList());
             if (!text.isPresent()) {
                 return AiMessage.from(toolExecutionRequests);
             }
             if (toolExecutionRequests.isEmpty()) {
-                return AiMessage.from((String)((String)text.get()));
+                return AiMessage.from(text.get());
             }
-            return AiMessage.from((String)((String)text.get()), toolExecutionRequests);
+            return AiMessage.from(text.get(), toolExecutionRequests);
         }
-        return AiMessage.from((String)text.orElse(""));
+        return AiMessage.from(text.orElse(""));
     }
 
     private static ToolExecutionRequest toToolExecutionRequest(ChatCompletionMessageToolCall toolCall) {

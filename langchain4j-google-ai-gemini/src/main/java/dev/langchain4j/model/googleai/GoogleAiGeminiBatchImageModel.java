@@ -141,25 +141,25 @@ implements BatchImageModel {
         }
 
         @Override
-        public List<BatchItemResult<Response<@NonNull Image>>> extractResults(@Nullable BatchRequestResponse.BatchCreateResponse<GeminiGenerateContentResponse> response) {
+        public List<BatchItemResult<Response<Image>>> extractResults(BatchRequestResponse.BatchCreateResponse<GeminiGenerateContentResponse> response) {
             if (response == null || response.inlinedResponses() == null) {
                 return Collections.emptyList();
             }
-            ArrayList<BatchItemResult<Response<@NonNull Image>>> results = new ArrayList<BatchItemResult<Response<Image>>>();
+            ArrayList<BatchItemResult<Response<Image>>> results = new ArrayList<BatchItemResult<Response<Image>>>();
             for (BatchRequestResponse.BatchCreateResponse.InlinedResponseWrapper<GeminiGenerateContentResponse> wrapper : response.inlinedResponses().inlinedResponses()) {
                 BatchRequestResponse.Operation.Status error;
                 BatchRequestResponse.BatchCreateResponse.InlinedResponseWrapper<GeminiGenerateContentResponse> typed = Json.convertValue(wrapper, this.inlinedResponseWrapperType);
                 if (typed.response() != null) {
                     GeminiGenerateContentResponse geminiResponse = Json.convertValue(typed.response(), this.responseWrapperType);
-                    results.add((BatchItemResult<Response<Image>>)BatchItemResult.success(this.extractImage(geminiResponse)));
+                    results.add(BatchItemResult.success(this.extractImage(geminiResponse)));
                 }
                 if ((error = typed.error()) == null) continue;
-                results.add((BatchItemResult<Response<Image>>)BatchItemResult.failure((BatchError)error.toGenericStatus()));
+                results.add(BatchItemResult.<Response<Image>>failure((BatchError) error.toGenericStatus()));
             }
             return results;
         }
 
-        private Response<@NonNull Image> extractImage(GeminiGenerateContentResponse geminiResponse) {
+        private Response<Image> extractImage(GeminiGenerateContentResponse geminiResponse) {
             if (geminiResponse.candidates() == null || geminiResponse.candidates().isEmpty()) {
                 throw new GoogleAiGeminiImageModel.GeminiImageGenerationException("No image generated in responses");
             }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.openai.core.JsonValue;
 import com.openai.core.ObjectMappers;
 import com.openai.models.responses.Response;
+import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.ResponseStreamEvent;
 import com.openai.models.responses.ResponseWebSearchCallInProgressEvent;
 import com.openai.models.responses.Tool;
@@ -18,6 +19,7 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -63,11 +65,11 @@ class OpenAiOfficialResponsesStreamingChatModelTest {
 
         OpenAiOfficialResponsesChatRequestParameters defaults = OpenAiOfficialResponsesChatRequestParameters.builder()
                 .modelName("gpt-5.4-mini")
-                .serverTools(List.of(webSearch))
+                .serverTools(Collections.singletonList(webSearch))
                 .build();
 
         OpenAiOfficialResponsesChatRequestParameters override = OpenAiOfficialResponsesChatRequestParameters.builder()
-                .serverTools(List.of(toolSearch))
+                .serverTools(Collections.singletonList(toolSearch))
                 .build();
 
         OpenAiOfficialResponsesChatRequestParameters merged = defaults.overrideWith(override);
@@ -89,9 +91,9 @@ class OpenAiOfficialResponsesStreamingChatModelTest {
 
         OpenAiOfficialResponsesChatRequestParameters parameters = OpenAiOfficialResponsesChatRequestParameters.builder()
                 .modelName("gpt-5.4-mini")
-                .toolSpecifications(List.of(functionTool))
+                .toolSpecifications(Collections.singletonList(functionTool))
                 .toolChoice(ToolChoice.REQUIRED)
-                .serverTools(List.of(webSearch))
+                .serverTools(Collections.singletonList(webSearch))
                 .build();
 
         ChatRequest chatRequest = ChatRequest.builder()
@@ -99,7 +101,7 @@ class OpenAiOfficialResponsesStreamingChatModelTest {
                 .parameters(parameters)
                 .build();
 
-        var requestParams = OpenAiOfficialResponsesStreamingChatModel.buildRequestParams(chatRequest, parameters);
+        ResponseCreateParams requestParams = OpenAiOfficialResponsesStreamingChatModel.buildRequestParams(chatRequest, parameters);
 
         assertThat(requestParams.tools()).hasValueSatisfying(tools -> {
             assertThat(tools).hasSize(2);
@@ -133,9 +135,9 @@ class OpenAiOfficialResponsesStreamingChatModelTest {
     @Test
     void should_emit_raw_response_stream_events() {
         RecordingStreamingHandler handler = new RecordingStreamingHandler();
-        var eventHandler = new OpenAiOfficialResponsesStreamingChatModel.ResponsesEventHandler(
+        OpenAiOfficialResponsesStreamingChatModel.ResponsesEventHandler eventHandler = new OpenAiOfficialResponsesStreamingChatModel.ResponsesEventHandler(
                 handler, new AtomicReference<>(), "gpt-5.4-mini", null);
-        var inProgressEvent = webSearchInProgressEvent();
+        ResponseStreamEvent inProgressEvent = webSearchInProgressEvent();
 
         eventHandler.handleEvent(inProgressEvent);
 
@@ -146,7 +148,7 @@ class OpenAiOfficialResponsesStreamingChatModelTest {
         return Tool.ofWebSearch(WebSearchTool.builder()
                 .type(WebSearchTool.Type.of("web_search"))
                 .filters(WebSearchTool.Filters.builder()
-                        .allowedDomains(List.of("developers.openai.com"))
+                        .allowedDomains(Collections.singletonList("developers.openai.com"))
                         .build())
                 .build());
     }

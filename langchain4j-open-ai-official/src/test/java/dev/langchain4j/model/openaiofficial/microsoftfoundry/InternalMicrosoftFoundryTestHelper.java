@@ -11,6 +11,7 @@ import dev.langchain4j.model.openaiofficial.OpenAiOfficialEmbeddingModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialImageModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialStreamingChatModel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -80,7 +81,7 @@ public class InternalMicrosoftFoundryTestHelper {
                     .baseUrl(endpoint)
                     .apiKey(apiKey)
                     .modelName(CHAT_MODEL_NAME)
-                    .supportedCapabilities(Set.of(RESPONSE_FORMAT_JSON_SCHEMA))
+                    .supportedCapabilities(Collections.singleton(RESPONSE_FORMAT_JSON_SCHEMA))
                     .strictJsonSchema(false)
                     .build();
 
@@ -88,7 +89,7 @@ public class InternalMicrosoftFoundryTestHelper {
                     .baseUrl(endpoint)
                     .apiKey(apiKey)
                     .modelName(CHAT_MODEL_NAME)
-                    .supportedCapabilities(Set.of(RESPONSE_FORMAT_JSON_SCHEMA))
+                    .supportedCapabilities(Collections.singleton(RESPONSE_FORMAT_JSON_SCHEMA))
                     .strictJsonSchema(true)
                     .build();
 
@@ -109,7 +110,7 @@ public class InternalMicrosoftFoundryTestHelper {
                     .baseUrl(endpoint)
                     .apiKey(apiKey)
                     .modelName(CHAT_MODEL_NAME)
-                    .supportedCapabilities(Set.of(RESPONSE_FORMAT_JSON_SCHEMA))
+                    .supportedCapabilities(Collections.singleton(RESPONSE_FORMAT_JSON_SCHEMA))
                     .strictJsonSchema(true)
                     .build();
 
