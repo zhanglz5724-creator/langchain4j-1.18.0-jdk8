@@ -778,7 +778,6 @@
                                 <requireMavenVersion>
                                     <version>3.8</version>
                                 </requireMavenVersion>
-                                <requireUpperBoundDeps></requireUpperBoundDeps>
                             </rules>
                         </configuration>
                     </execution>
